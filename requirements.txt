@@ -1,0 +1,2 @@
+oeplatform
+django==1.9
