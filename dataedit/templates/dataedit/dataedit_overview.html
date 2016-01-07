@@ -1,11 +1,14 @@
-
-{% csrf_token %}
-<table border="1">
+{% extends "base/base.html" %}
+{% block content %}
+<div>
+<table class="table table-striped">
+    <thead>
     <tr>
 {% for head in headers %}
         <th> {{ head }} </th>
 {% endfor %}  
     </tr>
+    </thead>
 {% for row in data %}
     <tr>
     {% for cell in row %}
@@ -21,6 +24,7 @@
     </tr>
 {% endfor %}    
 </table>
+</div>
 <div>
     <div>
         <a href="/dataedit/edit"> Extend manually</a> <br>
@@ -29,4 +33,4 @@
         <a href="/dataedit/upload"> Extend via csv</a>
     </div>
 </div>
-
+{% endblock %}

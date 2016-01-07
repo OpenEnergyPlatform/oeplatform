@@ -1,7 +1,11 @@
+{% extends "base/base.html" %}
+{% block content %}
+{% load bootstrap3 %}
 <form action="/dataedit/map" method="post" enctype="multipart/form-data">
     {% csrf_token %}    
     <table>
-    {{ form.as_table }}
+    {% bootstrap_form form %}
     </table>
     <input type="submit" value="Submit" />
 </form>
+{% endblock %}
