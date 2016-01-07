@@ -14,9 +14,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 
 try:
-    from securitysettings import *
+    from .securitysettings import *
 except:
-    print("No securitysettings found")
+    raise Exception("No securitysettings found")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,6 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sessions.backends.signed_cookies',
+    'dataedit'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -84,6 +86,12 @@ USE_L10N = True
 
 USE_TZ = True
 
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': 'http://{0}:8983/solr'.format(URL)
+    },
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
