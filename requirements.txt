@@ -1,2 +1,2 @@
-oeplatform
 django==1.9
+django-bootstrap3

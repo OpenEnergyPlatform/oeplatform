@@ -38,7 +38,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sessions.backends.signed_cookies',
-    'dataedit'
+    'bootstrap3',
+    'base',
+	'dataedit'
 )
 
 MIDDLEWARE_CLASSES = (
