@@ -1,0 +1,14 @@
+.container {
+    position: relative;
+    width: 500px;
+}
+
+.column-left{ float: left; width: 10%; }
+
+.column-right{ float: right; width: 10%; }
+
+.column-center{ 
+    display: inline-block; 
+    width: 80%; 
+    overflow:scroll;
+}
