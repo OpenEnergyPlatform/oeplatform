@@ -1,0 +1,32 @@
+
+{% csrf_token %}
+<table border="1">
+    <tr>
+{% for head in headers %}
+        <th> {{ head }} </th>
+{% endfor %}  
+    </tr>
+{% for row in data %}
+    <tr>
+    {% for cell in row %}
+        <td> {{ cell }} </td> 
+    {% endfor %}
+    <td> 
+        <form action="/dataedit/view" method="post"> 
+            {% csrf_token %}
+            <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>
+            <input type="submit" value="Edit"/>
+        </form>
+    </td>
+    </tr>
+{% endfor %}    
+</table>
+<div>
+    <div>
+        <a href="/dataedit/edit"> Extend manually</a> <br>
+    </div>
+    <div>
+        <a href="/dataedit/upload"> Extend via csv</a>
+    </div>
+</div>
+

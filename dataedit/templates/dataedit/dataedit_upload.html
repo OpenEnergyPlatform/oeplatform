@@ -1,0 +1,7 @@
+<form action="/dataedit/map" method="post" enctype="multipart/form-data">
+    {% csrf_token %}    
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit" />
+</form>
