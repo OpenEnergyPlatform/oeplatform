@@ -145,11 +145,6 @@ def connect(request, schema, table):
     request.session['floatingRows'] = []
 
 def _renderTable(request):
-    print(request.POST)
-    print(request.session['floatingRows'])
-    print(request.session['schema'])
-    print(request.session['table'])
-    print(id(request.session))
     L = request.session['floatingRows']
     del request.session['floatingRows']
     request.session['floatingRows'] = L
