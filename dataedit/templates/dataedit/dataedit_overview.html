@@ -1,5 +1,6 @@
 {% extends "base/base.html" %}
 {% block content %}
+{% load bootstrap3 %}
 <div>
 <table class="table table-striped">
     <thead>
@@ -15,10 +16,20 @@
         <td> {{ cell }} </td> 
     {% endfor %}
     <td> 
-        <form action="/dataedit/view" method="post"> 
+        <form action="/dataedit/edit" method="get"> 
+            <label for="editSubmit{{ forloop.counter0 }}" class="btn">
+               {% bootstrap_icon "pencil" %}   
+                <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>        
+            </label>
+            <input id="editSubmit{{ forloop.counter0 }}" type="submit" class="hidden">
+        </form>
+        <form action="/dataedit/delete" method="post"> 
             {% csrf_token %}
             <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>
-            <input type="submit" value="Edit"/>
+            <label for="delSubmit{{ forloop.counter0 }}" class="btn">
+               <span class="glyphicon glyphicon-trash" style="color:red"></span>          
+            </label>
+            <input type="submit" id="delSubmit{{ forloop.counter0 }}" class="hidden"/>
         </form>
     </td>
     </tr>

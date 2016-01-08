@@ -1,6 +1,21 @@
 {% extends "base/base.html" %}
 {% block content %}
 {% load bootstrap3 %}
+<script src="jquery.are-you-sure.js"></script>
+
+<script>
+  $(function() {
+    if Session["controlID"]{
+        $('#myForm').areYouSure(
+          {
+            message: 'It looks like you have been editing something. '
+                   + 'If you leave before saving, your changes will be lost.'
+          }
+        );
+    }
+  }
+
+</script>
 <form action="/dataedit/map" method="post" enctype="multipart/form-data">
     {% csrf_token %}    
     <table>

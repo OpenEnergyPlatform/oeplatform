@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 import sqlalchemy as sqla
 from .forms import InputForm, UploadFileForm, UploadMapForm
@@ -8,95 +8,64 @@ import csv
 import os
 import oeplatform.securitysettings as sec
 session = None
-
-
-class DBView(View):
+    
+""" This is the initial view that initialises the database connection """
+class DataView(View):
     def __init__(self, *args, **kwargs):
-        print("New DBView")
-        super(View,self).__init__(*args,*kwargs)
-        engine = sqla.create_engine(
-                    'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
-                    sec.dbuser,
-                    sec.dbpasswd,
-                    sec.dbhost,
-                    sec.dbport,
-                    sec.db))
-        insp = sqla.inspect(engine)
-        #users_table = meta.tables['app_renpassgis.scenario']
-        self.fields = [(c["name"],str(c["type"])) 
-            for c in insp.get_columns('scenario',schema='app_renpassgis')]
+        super().__init__(*args,*kwargs)
 
-class DataInputView(DBView):
+    
+    def get(self, request, schema, table):
+        print(id(request.session))
+        if any((x not in request.session for x in ["table","schema","fields","headers","floatingRows"])) or (request.session['table'] != table or request.session['schema'] != schema):
+            connect(request,schema,table)   
+        print(request.session['floatingRows'])   
+        return render(request,'dataedit/dataedit_overview.html',
+        {'data':request.session['floatingRows'], 'headers':request.session['headers']}) 
+
+
+"""
+This View handles new data input and edit
+"""
+class DataInputView(View):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args,*kwargs)       
-        self.form = InputForm(fields=self.fields)
         self.id = None
 
     def get(self, request):    
-        if 'floatingRows' not in request.session:
-            request.session['floatingRows'] = []
+        self.form = InputForm(fields=request.session['fields'])
 
-        if 'headers' not in request.session or not request.session['headers']:
-            request.session['headers'] = list(map(lambda x:x[0],self.fields))
+        did = None
+        if "id" in request.GET:
+            did = int(request.GET["id"])
+            for field,entry in zip(request.session['headers'],request.session['floatingRows'][did]):
+                self.form.fields[field].initial = entry       
 
-        if "id" in request.POST:
-            self.id = request.POST["id"]
-            for field,entry in zip(request.session['headers'],request.session['floatingRows'][self.id]):
-                self.form.fields[field] = entry        
-
-        return render(request, 'dataedit/dataedit.html', {'form': self.form})
+        return render(request, 'dataedit/dataedit.html', {'form': self.form, 'internal_oe_id':did})
 
     def post(self, request):
-        if 'headers' not in request.session:
-            request.session['headers'] = list(map(lambda x:x[0],self.fields))
-        # if this is a POST request we need to process the form data
         request.session.set_test_cookie()
         newRow = [request.POST[head] for head in request.session['headers']]
-        print(self.id)
-        if self.id:
-            request.session['floatingRows'].insert(self.id,newRow) 
+        did = request.POST["internal_oe_id"]
+        if did not in [None, 'None']:
+            did = int(did)
+            request.session['floatingRows'][did] = newRow
         else:
             request.session['floatingRows'].append(newRow)
-        context = []
         
-        return render(request,'dataedit/dataedit_overview.html',
-            {'form': self.form, 'data':request.session['floatingRows'], 'headers':request.session['headers']})
+        return _renderTable(request)
 
-class DataView(DBView):
+"""
+This View yields an upload functionality for CSV-files
+"""
+class DataUploadView(View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,*kwargs)
-
-    
-    def get(self, request):
-        if 'floatingRows' not in request.session:
-            request.session['floatingRows'] = []
-
-        if 'headers' not in request.session or not request.session['headers']:
-            request.session['headers'] = list(map(lambda x:x[0],self.fields))
-      
-        return render(request, 'dataedit/dataedit_overview.html', {'data':request.session['floatingRows'], 'headers':request.session['headers']})
-    
-    def post(self, request):
-        view = DataInputView()
-
-        if "id" in request.POST:
-            view.id = int(request.POST["id"])
-            for field,entry in zip(request.session['headers'],request.session['floatingRows'][view.id]):
-                view.form.fields[field].initial = entry
-
-        return render(request, 'dataedit/dataedit.html', {'form':view.form})        
-
-class DataUploadView(DBView):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args,*kwargs)
-        self.form = InputForm(fields=self.fields)
 
     def post(self,request):
         form = UploadFileForm(request.POST, request.FILES)
-        print(form)
         if form.is_valid():
-            #handle_uploaded_file(request.FILES['file'])
             return render(request, 'dataedit/dataedit_map.html', {'form':form})
         else:
             return render(request, 'dataedit/dataedit_upload.html', {'form':form})
@@ -105,10 +74,13 @@ class DataUploadView(DBView):
         form = UploadFileForm()
         return render(request,'dataedit/dataedit_upload.html', {'form': form})
 
-class DataMapView(DBView):
+"""
+This View allows the user to specifies how each the table columns relate to the 
+csv columns
+"""
+class DataMapView(View):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,*kwargs)
-        self.form = InputForm(fields=self.fields)
 
     def post(self,request):
         def store(f):
@@ -121,34 +93,66 @@ class DataMapView(DBView):
         with open(datafile,'r') as outf:
             reader = csv.reader(outf, delimiter='\t', quotechar='"')
             headers = next(reader)
-            form = UploadMapForm(fields=self.fields,headers=headers)
+            request.session['data'] = (headers,[next(reader) for _ in range(10)])         
+            form = UploadMapForm(fields=request.session['fields'],headers=headers)
         os.remove(datafile) #TODO: Unsicher!
         return render(request,'dataedit/dataedit_map.html', {'form': form})
 
-    def get(self,request):
-        def store(f):
-            dname = 'tmp/'+f.name
-            with open(dname, 'wb+') as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
-            return dname
-        datafile = store(request.FILES['file'])
-        with open(datafile,'r') as outf:
-            reader = csv.reader(outf, delimiter='\t', quotechar='"')
-            headers = next(reader)
-            form = UploadMapForm(fields=self.fields,headers=headers)
-        os.remove(datafile) #TODO: Unsicher!
-        return render(request,'dataedit/dataedit_map.html', {'form': form})
 
+"""
+Deletes the request.POST["id"]-th entry
+"""
+def delete(request):
+    if request.POST["id"] != None:
+        did = int(request.POST["id"])
+        request.session['floatingRows'] = request.session['floatingRows'][:did]+request.session['floatingRows'][did+1:]
+    return redirect('view/{0}/{1}'.format(request.session['schema'],request.session['table']),
+            {'data':request.session['floatingRows'], 'headers':request.session['headers']})
+
+"""
+Constructs the new rows for @table using the mapping specified in dataedit_map.html
+"""
+def confirm(request):
+    (csv_headers, rows) = request.session["data"]
+    for row in rows:            
+        newRow = []
+        for head in request.session['headers']:
+            if request.POST[head] == "---":
+                newRow.append(None)
+            else:
+                newRow.append(row[csv_headers.index(request.POST[head])])
+        request.session['floatingRows'].append(newRow)
+    return _renderTable(request)
     
+    
+""" Connects to the specified table using the security infomation stored in 
+securitysettings.py"""
+def connect(request, schema, table):
+    engine = sqla.create_engine(
+                'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
+                sec.dbuser,
+                sec.dbpasswd,
+                sec.dbhost,
+                sec.dbport,
+                sec.db))
+    insp = sqla.inspect(engine)
+    #users_table = meta.tables['app_renpassgis.scenario']
+    request.session['table'] = table
+    request.session['schema'] = schema
+    request.session['fields'] = [(c["name"],str(c["type"])) 
+        for c in insp.get_columns(table,schema=schema)]
+    request.session['headers'] = list(map(lambda x:x[0],request.session['fields']))
+    request.session['floatingRows'] = []
 
-def preserveform():
-    def decorate(func):
-        def call(*args, **kwargs):
-            request = kwargs.pop('request')
-            request.session['form'] = self.form
-            func(*args, **kwargs)
-            self.form = request.session['form']
-
-
+def _renderTable(request):
+    print(request.POST)
+    print(request.session['floatingRows'])
+    print(request.session['schema'])
+    print(request.session['table'])
+    print(id(request.session))
+    L = request.session['floatingRows']
+    del request.session['floatingRows']
+    request.session['floatingRows'] = L
+    return redirect('/dataedit/view/{0}/{1}'.format(request.session['schema'],request.session['table']),
+            {})
 

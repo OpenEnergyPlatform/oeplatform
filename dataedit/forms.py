@@ -56,10 +56,29 @@ class UploadFileForm(forms.Form):
     file = forms.FileField()
 
 class UploadMapForm(forms.Form):
+    """calculates the largest common subsequence of two strings"""
+    def _lcs(self, s1, s2):
+        m = [[0] * (1 + len(s2)) for i in range(1 + len(s1))]
+        longest, x_longest = 0, 0
+        for x in range(1, 1 + len(s1)):
+            for y in range(1, 1 + len(s2)):
+                if s1[x - 1] == s2[y - 1]:
+                    m[x][y] = m[x - 1][y - 1] + 1
+                    if m[x][y] > longest:
+                        longest = m[x][y]
+                        x_longest = x
+                else:
+                    m[x][y] = 0
+        return longest
+
+
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop("fields")
         headers = kwargs.pop("headers")
         super(forms.Form, self).__init__(*args, **kwargs)
-        print(headers)
         for (name, typename) in fields:
-            self.fields[name] = forms.ChoiceField(label=name, choices=((x,x) for x in headers))
+            self.fields[name] = forms.ChoiceField(label=name, choices=((x,x) for x in ["---"]+headers))
+            if any(self._lcs(name,x)/min(len(name),len(x))>0.7 for x in headers):
+                self.fields[name].initial = max(headers, key = lambda x : self._lcs(name,x))                
+            else:                
+                self.fields[name].initial = "---"
