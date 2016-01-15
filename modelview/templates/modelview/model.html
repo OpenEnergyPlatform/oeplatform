@@ -1,0 +1,190 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% bootstrap_javascript_url %}
+{% block content %}
+{% load staticfiles %}
+{% load modelview_extras %}
+
+<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
+<h1> {{ model.full_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
+          </h4>
+        </div>
+        <div id="BasicInformation" class="panel-collapse collapse in profilebox">
+            
+            <div class="container" style="padding:0">            
+                <div class="mv-column-left">
+                    
+                    <table class="profiletable">
+                    <!-- <tr><td class="rowlabel"> id_name</td><td> {{ model.id_name }}</td></tr> -->
+                    <tr><td class="rowlabel"> Short Description</td><td> {{ model.short_description }}</td></tr>
+                    <tr><td class="rowlabel"> Support</td><td> {% if model.support %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                    {% autoescape off %}
+                    {% checktable model "Documentation" "documentation" "user;code;cooperation"%}
+                    {% checktable model "Documentation Quality" "documentation_quality" "user;code;cooperation"%}
+                    {% endautoescape %}
+                    
+                    <tr><td class="rowlabel"> source_of_funding</td><td> {{ model.source_of_funding }}</td></tr>
+                    </table>
+                </div>
+                <div class="mv-column-right">
+                    <img src={{ model.logo.url }} style="width:200"/>
+                    <table>
+                        
+                        <tr><td class="rowlabel"> Author Institution</td><td> <table> {% for author_inst in model.author_intitution %} <tr> {{ author_inst }} </tr> {% endfor %} </table></td></tr>
+                        <tr><td class="rowlabel"> Authors</td><td> <table> {% for author in model.authors %} <tr> {{ author }} </tr> {% endfor %} </table> </td></tr>
+                        <tr><td class="rowlabel"> Current Contact Persons</td><td> <table> {% for contact in model.current_contact_persons %} <tr> {{ contact }} </tr> {% endfor %} </table> </td></tr>
+                        <tr><td class="rowlabel"> Contact Email Address</td><td> {{ model.contact_email_address }}</td></tr>
+                        <tr><td class="rowlabel"> Website</td><td> {{ model.website }}</td></tr>
+                        <tr><td class="rowlabel"> Link to source</td><td> {{ model.link_to_source }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" style="padding:0;">            
+    <div class="mv-column-left">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#Openness">Openness</a>
+                  </h4>
+                </div>
+                <div id="Openness" class="panel-collapse collapse in profilebox">
+                    <table class="profiletable">
+                        <tr><td class="rowlabel"> Open Source</td><td> {% if model.open_source %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> Source Downloadable</td><td> {% if model.source_downloadable %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> GitHub</td><td> {% if model.github %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>              
+                        <tr><td class="rowlabel"> Open Up</td><td> {% if model.open_up %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> Cooperative Programming</td><td> {% if model.cooperative_programming %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> Technical Data</td><td> {{ model.technical_data }}</td></tr>
+                                                
+                    </table>
+                    {% if model.github %}
+                        <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div>
+                        <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> 
+                        <table class="profiletable">
+                         <tr><td class="rowlabel">GitHub Contributions Graph</td><td> 
+                        <img src="/models/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
+                        </td></tr>
+                                                
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mv-column-right">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#Software">Software</a>
+                  </h4>
+                </div>
+                <div id="Software" class="panel-collapse collapse in profilebox">
+                    <table class="profiletable">
+                        <tr><td class="rowlabel"> Modelling Software</td><td> {{ model.modelling_software }}</td></tr>
+                        <tr><td class="rowlabel"> Internal Data</td><td> {% if model.internal_data %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> External Optimizer</td><td> {% if model.external_optimizer %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                        <tr><td class="rowlabel"> Additional Software</td><td> {{ model.additional_software }}</td></tr>
+                        <tr><td class="rowlabel"> Post Processing Facility</td><td> {{ model.post_processing_facility }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" href="#References">References</a>
+                  </h4>
+                </div>
+                <div id="References" class="panel-collapse collapse  profilebox">
+                    <div>
+                        <table class="profiletable">
+                            <tr><td class="rowlabel"> Citation Reference</td><td> {{ model.citation_reference }}</td></tr>
+                            <tr><td class="rowlabel"> Citation DOI</td><td> {{ model.citation_doi }}</td></tr>
+                            <tr><td class="rowlabel"> References to Reports</td><td> {{ model.references_to_reports }}</td></tr>
+                            <tr><td class="rowlabel"> Example Research Questions</td><td> {{ model.example_research_questions }}</td></tr>
+                            <tr><td class="rowlabel"> Who Uses This</td><td> {{ model.who_uses_this }}</td></tr>
+                            <tr><td class="rowlabel"> Where Used</td><td> {{ model.where_used }}</td></tr>
+                            <tr><td class="rowlabel"> How Validated</td><td> {{ model.how_validated }}</td></tr>
+                            <tr><td class="rowlabel"> Model Specific Properties</td><td> {{ model.model_specific_properties }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#Coverage">Coverage</a>
+          </h4>
+        </div>
+        <div id="Coverage" class="panel-collapse collapse  profilebox">
+            <table class="profiletable">
+                {% autoescape off %}
+                {% checktable model "Modeled Energy Sectors" "modeled_energy_sectors" "mobility;electricy;heat" separator=""%}
+                {% checktable model "Modeled Energy Carrier" "modelled_energy_carrier" "gas;oil;electricy" %}
+                {% checktable model "Components Transfer" "components_transfer" "heat;electric;gas" %}
+                {% checktable model "Components Generation" "components_generation" "renewable;conventional;CHP;dispatch" %}                
+                {% endautoescape %}
+                <tr><td class="rowlabel"> User Behaviour</td><td> {% if model.user_behaviour %} {% bootstrap_icon "ok" %} {{ model.user_behaviour_text }} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                <tr><td class="rowlabel"> Modeled Efficiency</td><td> {{ model.modeled_efficiency }}</td></tr>
+                <tr><td class="rowlabel"> Market Models </td><td>  {% if model.market_models %} {% bootstrap_icon "ok" %} {{ model.market_models_text }} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                {% autoescape off %}
+                {% checktable model "Network Coverage" "network_coverage" "AC_load_flow;DC_load_flow;net_transfer_capacities" %}
+                {% checktable model "Typical Geographic Regions Covered" "typical_geographic_regions_covered" "global;continental;national;regions;municipalities;districts;households" %}
+                {% checktable model "Typical Geographic Resolution" "typical_geographic_resolution"  "global;continental;national;regions;municipalities;districts;households" %}                
+                {% checktable model "Typical Time Resolution" "typical_time_resolution" "anual;hour;15_min;1_min;other" %}                
+                {% endautoescape %}
+                {% if typical_time_resolution_other %}
+                <tr><td class="rowlabel"> Other Typical Time Resolution</td><td> {{ model.typical_time_resolution_text }}</td></tr>
+                {% endif %}
+                {% autoescape off %}
+                {% checktable model "Additional Dimensions" "Additional_dimensions" "ecological;economic;social;miscellaneous" %}                
+                {% endautoescape %}
+                {% if model.Additional_dimensions_miscellaneous %}
+                    <tr><td class="rowlabel">Misc Dimensions</td><td> {{ model.additional_dimensions_text }}</td></tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
+          </h4>
+        </div>
+        <div id="MathematicalProperties" class="panel-collapse collapse  profilebox">
+            <table class="profiletable">
+                {% autoescape off %}
+                {% checktable model "Model Type" "model_type" "LP;MLP;non_linear;Optimisation;Simulation;Agent_based;Other" %}                
+                {% endautoescape %}
+                <tr><td class="rowlabel"> Other Model Types </td><td> {{ model.model_type_text }}</td></tr>
+                <tr><td class="rowlabel"> Short Description </td><td> {{ model.short_description_mathematical_model }}</td></tr>
+                <tr><td class="rowlabel"> Mathematical Objective </td><td> {{ model.math_objective }}</td></tr>
+                <tr><td class="rowlabel"> Approach to Uncertainity </td><td> {{ model.approach_to_uncertainity }}</td></tr>
+                <tr><td class="rowlabel"> Many Scenarios </td><td> {% if model.many_scenarios %} {% bootstrap_icon "ok" %} {% else %} {% bootstrap_icon "remove" %} {% endif %}</td></tr>
+                <tr><td class="rowlabel"> Number Variables </td><td> {{ model.number_variables }}</td></tr>
+                <tr><td class="rowlabel"> Typical Computation Time (Minutes)</td><td> {{ model.typical_computation_time_minutes }}</td></tr>
+                <tr><td class="rowlabel"> Typical Computation Time (Hardware)</td><td> {{ model.typical_computation_time_hardware }}</td></tr>
+                <tr><td class="rowlabel"> New Equations </td><td> {{ model.new_equations }}</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

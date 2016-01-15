@@ -1,14 +1,15 @@
 .container {
     position: relative;
-    width: 500px;
+    width: 100%;
 }
 
 .column-left{ float: left; width: 10%; }
 
 .column-right{ float: right; width: 10%; }
 
+
 .column-center{ 
     display: inline-block; 
     width: 80%; 
-    overflow:scroll;
+    overflow-x:scroll;
 }
