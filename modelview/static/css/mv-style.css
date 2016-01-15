@@ -1,9 +1,31 @@
-.mv-column-left{ float: left; width: 49.5%; }
+.mv-column-left{ float: left; width: 49.5%;overflow:auto;}
 
-.mv-column-right{ float: right; width: 49.5%; }
+.mv-column-right{ float: right; width: 49.5%; overflow:auto;}
 
-.rowlabel{font-weight:bold;width:30%;}
+.mv-container{position: relative; width: 100%;}
 
-.profiletable{width:80%;}
+.rowlabel{font-weight:bold;width:30%;vertical-align:top;}
+
+.profilebox{padding:15;overflow:auto; }
+
+.profiletable{width:100%;}
 
 .profiletable-label{width:30%}
+.profiletable td { 
+        padding-bottom: 5px;
+    }
+.profiletable-checktable{
+    table-layout: fixed; 
+    border-collapse: collapse;
+    }
+
+.profiletable-checktable td { 
+        padding-right: 10px;
+        padding-bottom: 2px;
+    }
+
+.panel-heading a{
+    display: block;
+    width: 100%;
+    text-decoration: none;
+}

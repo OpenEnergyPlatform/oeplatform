@@ -7,8 +7,8 @@
 
 .column-right{ float: right; width: 10%; }
 
+
 .column-center{ 
     display: inline-block; 
     width: 80%; 
-    overflow:scroll;
 }

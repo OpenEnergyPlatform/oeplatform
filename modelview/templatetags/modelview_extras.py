@@ -1,37 +1,36 @@
 from django import template
+import matplotlib.pyplot as plt
+import urllib3
+import json
+import datetime
+from scipy import stats
+import numpy 
+
 register = template.Library()
 
 @register.simple_tag
-def checktable(model, label, prefixes ,suffixes, rowlabels=""):
-    rls = rowlabels.split(";") 
+def checktable(model, label, prefix ,suffixes, separator="_"):
+ 
        
-    header = "<td></td>" if rls != [""] else ""
+    header = ""
     data = ""
-    print(model.__dict__)
-    for s in suffixes.split(";"):    
-        header += '<td>{0}</td>'.format(s)  
-    i = 0
-    
-    for prefix in prefixes.split(";"):
-        if rls != [""]:
-            data += "<tr> <td> {0} </td>".format(rls[i])
-            i+=1
+    for s in suffixes.split(";"):
+        if model.__dict__["{0}{2}{1}".format(prefix,s,separator)]:
+            data =  '<span class="glyphicon glyphicon-ok"></span>'
         else:
-            data += "<tr>"
-        for s in suffixes.split(";"):    
-            if model.__dict__["{0}_{1}".format(prefix,s)]:
-                data +=  '<td align="center"> <span class="glyphicon glyphicon-ok"></span> </td>'
-            else:
-                data +=  '<td align="center"> <span class="glyphicon glyphicon-remove"></span> </td>'
-        data += "</tr>"
+            data =  '<span class="glyphicon glyphicon-remove"></span>'    
+        header += '<td>{1} {0} </td>'.format(s,data)  
+    i = 0
     return"""<tr>
                 <td valign="top"  class="rowlabel"> {0}</td>
                 <td> 
-                    <table  class="table table-bordered" style="table-layout: fixed;">
+                    <table class="profiletable-checktable">
                         <tr>
                             {1}
                         </tr>
                         {2}
                     </table>
                 </td>
-            </tr>""".format(label,header,data)
+            </tr>""".format(label,header,"")
+
+

@@ -52,7 +52,7 @@ class Energymodel(models.Model):
     user_behaviour = BooleanField()
     user_behaviour_text = CharField(max_length=200)
     modeled_efficiency = CharField(max_length=200)
-    market_models = BooleanField
+    market_models = BooleanField()
     market_models_text = CharField(max_length=200)
     for tech in ["AC_load_flow", "DC_load_flow", "net_transfer_capacities"]:
         exec("network_coverage_{0} = BooleanField()".format(tech))
