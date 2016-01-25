@@ -1,6 +1,6 @@
 .container {
     position: relative;
-    width: 500px;
+    width: 100%;
 }
 
 .column-left{ float: left; width: 10%; }

@@ -1,10 +1,16 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
+{% load widget_tweaks %}
 {% block content %}
-<form action="/dataedit/edit" method="post">
+<form action="/dataedit/edit" method="post" role="form">
     {% csrf_token %}
     <table class ="table-striped">
-    {% bootstrap_form form %}
+        {% for field in form %}
+            
+                <div class="form-group">{{ field.label_tag }} {{ field|add_class:'form-control'}}</div>  
+            <!--{% if not field.label in pks %} -->          
+            <!-- {% endif %} -->
+        {% endfor %}
     </table>
     <input type="hidden" name="internal_oe_id" value="{{ internal_oe_id }}" />
     <input type="submit" value="Submit" />

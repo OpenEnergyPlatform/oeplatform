@@ -10,5 +10,5 @@
 .column-center{ 
     display: inline-block; 
     width: 80%; 
-    overflow:scroll;
+    overflow:auto;
 }

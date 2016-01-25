@@ -5,7 +5,7 @@
         {% bootstrap_css %}
         {% load staticfiles %}
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
-        <script src="{% static "/js/jquery.js" %}"></script>
+        <script src="{% static 'js/jquery.js' %}"></script>
     </head>
     {% block nav %}
         <nav class="navbar navbar-default">
@@ -15,16 +15,17 @@
             </div>
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
+                <li class="active"><a href="/dataedit/">Input</a></li>
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
         </nav>
     {% endblock %}
     <div class="container">
-    <div class="column-left">left</div>
+    <div class="column-left">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
     <div class="column-center">
     {% block content %}{% endblock %}
     </div>
-    <div class="column-right">right</div>
+    <div class="column-right">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</div>
 </div>
 </html>
