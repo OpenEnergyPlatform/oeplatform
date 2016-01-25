@@ -16,3 +16,9 @@ DATABASES = {
 	'HOST': 'localhost'                      
 	}
 }
+
+dbuser = ""
+dbpasswd = ""
+dbport = 5432
+dbhost = ""
+db = ""

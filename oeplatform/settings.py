@@ -41,7 +41,8 @@ INSTALLED_APPS = (
     'bootstrap3',
     'modelview',
     'modelview.templatetags.modelview_extras',
-    'base'
+    'base',
+	'dataedit'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -51,7 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    #'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
 
@@ -101,6 +102,3 @@ HAYSTACK_CONNECTIONS = {
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media') #"/media/" #os.path.join(BASE_DIR, 'media')
-MEDIA_URL = "/static/media/"

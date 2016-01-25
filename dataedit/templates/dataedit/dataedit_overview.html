@@ -1,0 +1,77 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<script language="JavaScript">
+var formSubmitting = false;
+var setFormSubmitting = function() { formSubmitting = true; };
+var isDirty = function() { return false; }
+
+window.onload = function() {
+    window.addEventListener("beforeunload", function (e) {
+        if (formSubmitting || !isDirty) {
+            return undefined;
+        }
+
+        var confirmationMessage = 'It looks like you have been editing something. '
+                                + 'If you leave before saving, your changes will be lost.';
+
+        (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+        return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+    });
+    window.addEventListener("unload", function (e) {
+     if (formSubmitting || !isDirty) {
+            return undefined;
+        }
+     $.post('/dataedit/drop/', function(data) {});
+     });
+    
+};
+</script>
+{% load bootstrap3 %}
+
+<div>
+<table class="table table-striped">
+    <thead>
+    <tr>
+{% for head in headers %}
+        <th> {{ head }} </th>
+{% endfor %}  
+    </tr>
+    </thead>
+{% for row in data %}
+    <tr>
+    {% for cell in row %}
+        <td> {{ cell }} </td> 
+    {% endfor %}
+    <td>
+        <form action="/dataedit/edit" method="get" onsubmit="setFormSubmitting()"> 
+            <label for="editSubmit{{ forloop.counter0 }}" class="btn">
+               {% bootstrap_icon "pencil" %}   
+                <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>        
+            </label>
+            <input id="editSubmit{{ forloop.counter0 }}" type="submit" class="hidden">
+        </form>
+        </td>
+        <td>     
+        <form action="/dataedit/delete" method="post" onsubmit="setFormSubmitting()"> 
+            {% csrf_token %}
+            <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>
+            <label for="delSubmit{{ forloop.counter0 }}" class="btn">
+               <span class="glyphicon glyphicon-trash" style="color:red"></span>          
+            </label>
+            <input type="submit" id="delSubmit{{ forloop.counter0 }}" class="hidden"/>
+        </form>
+    </td>
+    </tr>
+{% endfor %}    
+</table>
+</div>
+<div>
+    <div>
+        <a href="/dataedit/edit" onclick="setFormSubmitting()"> Extend manually</a> <br>
+    </div>
+    <div>
+        <a href="/dataedit/upload" onclick="setFormSubmitting()"> Extend via csv</a>
+    </div>
+</div>
+{% endblock %}
