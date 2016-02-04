@@ -253,7 +253,6 @@ def loadSessionData(request, insp, db, schema, table):
 
 @csrf_exempt
 def dropSessionData(request):
-    print("DELETE")
     if not request.is_ajax() or not request.method=='POST':
         return HttpResponseNotAllowed(['POST'])
     request.session['floatingRows'] = []
