@@ -65,6 +65,10 @@ window.onload = function() {
     </tr>
 {% endfor %}    
 </table>
+<form action="/dataedit/commit" method="post" onsubmit="setFormSubmitting()"> 
+            {% csrf_token %}
+            <input type="submit" id="submit_data" class="hidden"/>
+        </form>
 </div>
 <div>
     <div>
