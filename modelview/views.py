@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 from .models import Energymodel
 from django.db.models import fields
@@ -18,18 +18,30 @@ from matplotlib.lines import Line2D
 import matplotlib
 import time
 import re
+from .forms import EnergymodelForm
 
-class ModelView(View):
-    def get(self, request, model_name):
-        model = get_object_or_404(Energymodel, pk=model_name)
-        user_agent = {'user-agent': 'oeplatform'}
-        http = urllib3.PoolManager(headers=user_agent)
-        match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source)
-        org = match.group('org')
-        repo = match.group('repo')
-        gh_url = _handle_github_contributions(org,repo)
-        return render(request,"modelview/model.html",{'model':model,'gh_org':org,'gh_repo':repo})
-    
+def show(request, model_name):
+    model = get_object_or_404(Energymodel, pk=model_name)
+    user_agent = {'user-agent': 'oeplatform'}
+    http = urllib3.PoolManager(headers=user_agent)
+    match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source)
+    org = match.group('org')
+    repo = match.group('repo')
+    gh_url = _handle_github_contributions(org,repo)
+    return render(request,"modelview/model.html",{'model':model,'gh_org':org,'gh_repo':repo})
+
+def editModel(request,model_name):
+    model = get_object_or_404(Energymodel, pk=model_name)
+    form = EnergymodelForm(instance=model)
+    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name}) 
+
+def updateModel(request,model_name):
+    model = get_object_or_404(Energymodel, pk=model_name)
+    form = EnergymodelForm(request.POST or None, instance=model)
+    if form.is_valid():
+        form.save()
+        return redirect("/models/{model}".format(model=model_name))
+    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name})
 
 """
     This function returns the url of an image of recent GitHub contributions
