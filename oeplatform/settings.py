@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'modelview',
     'modelview.templatetags.modelview_extras',
     'base',
+    'widget_tweaks',
 	'dataedit'
 )
 

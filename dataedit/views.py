@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden, HttpResponseNotAllowed
 import sqlalchemy as sqla
 from .forms import InputForm, UploadFileForm, UploadMapForm
 from django.views.generic import View
@@ -34,9 +34,6 @@ def listtables(request, db, schema):
     
 
 class DataView(View):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, *kwargs)
 
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -87,7 +84,22 @@ class DataInputView(View):
 
     def post(self, request):
         request.session.set_test_cookie()
+        print(request.POST)
         newRow = [request.POST[head] for head in request.session['headers']]
+        pkvals = {pk:request.POST[pk] for pk in request.session["primaryKeys"]}
+        
+        if not validatePks(request.session["db"],
+            request.session["schema"],
+            request.session["table"],    
+            pkvals):
+            form = InputForm(fields=request.session['fields'],values=request.POST)
+            return render(request, 'dataedit/dataedit.html',
+                      {'form': form, 
+                      'internal_oe_id':request.POST["internal_oe_id"],
+                      'pks':request.session['primaryKeys'],
+                      'errors':["Primary Key is already present"]})
+            
+            
         did = request.POST["internal_oe_id"]
         if did not in [None, 'None']:
             did = int(did)
@@ -160,8 +172,9 @@ def delete(request):
         did = int(request.POST["id"])
         request.session['floatingRows'] = request.session['floatingRows'][
             :did] + request.session['floatingRows'][did + 1:]
-    return redirect('view/{0}/{1}'.format(request.session['schema'],
-                                          request.session['table']),
+    return redirect('/dataedit/view/{db}/{schema}/{table}'.format(db=request.session['db'],
+                schema=request.session['schema'],
+                table=request.session['table']),
                     {'data': request.session['floatingRows'],
                         'headers': request.session['headers']})
 
@@ -169,7 +182,7 @@ def commit(request):
     db = request.session["db"]
     if db in ["test"]:
         engine = _get_engine(db)
-
+    
     # load schema name and check for sanity    
     schema = request.session.pop("schema", None)
     if not is_pg_qual(schema):
@@ -182,17 +195,18 @@ def commit(request):
         raise p.toolkit.ValidationError("Invalid table name") 
 
     fields = request.session.pop("fields",[])
-    if not fields == ["*"] and not all(map(is_pg_qual,fields)):
+    fieldnames = [f[0] for f in fields]
+    if not fields == ["*"] and not all(map(is_pg_qual,fieldnames)):
         raise p.toolkit.ValidationError("Invalid field name")    
 
-    data = data_dict.pop("data",[])
+    data = request.session.pop("floatingRows",[])
     meta = sqla.MetaData()
     tab = sqla.Table(table,meta,schema=schema,autoload=True,autoload_with=engine)
     connection = engine.connect()
     
     connection.execute(
         tab.insert(),
-        *[dict(zip(fields,row)) for row in data]
+        *[dict(zip(fieldnames,row)) for row in data]
     )
 
 """
@@ -216,23 +230,7 @@ def confirm(request):
 securitysettings.py"""
 
 
-def connect(db):
-    if not all(map(is_pg_qual,[db])):
-        raise PermissionDenied()
-    engine = sqla.create_engine(
-        'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
-            sec.dbuser,
-            sec.dbpasswd,
-            sec.dbhost,
-            sec.dbport,
-            db))
-    insp = sqla.inspect(engine)
-    return insp
-    #users_table = meta.tables['app_renpassgis.scenario']
 
-def is_pg_qual(x):
-    pgsql_qualifier = re.compile(r"^[\w\d_]+$")
-    return pgsql_qualifier.search(x)
 
 def loadSessionData(request, insp, db, schema, table):
     print(db,schema,table)
@@ -253,8 +251,10 @@ def loadSessionData(request, insp, db, schema, table):
 
 @csrf_exempt
 def dropSessionData(request):
-    if not request.is_ajax() or not request.method=='POST':
+    print(request.method)
+    if not (request.is_ajax() or request.method=='POST'):
         return HttpResponseNotAllowed(['POST'])
+    del request.session['floatingRows']
     request.session['floatingRows'] = []
     return HttpResponse('ok')
 
@@ -262,6 +262,44 @@ def _renderTable(request):
     L = request.session['floatingRows']
     del request.session['floatingRows']
     request.session['floatingRows'] = L
-    return redirect('/dataedit/view/{0}/{1}'.format(request.session['schema'], request.session['table']),
+    return redirect('/dataedit/view/{db}/{schema}/{table}'.format(
+                db=request.session['schema'],
+                schema=request.session['schema'], 
+                table=request.session['table']),
                     {})
+                    
+                    
+# DB Utils
+
+def validatePks(db, schema, table, pkValues):
+    engine = _get_engine(db)
+    connection = engine.connect()
+    meta = sqla.MetaData()
+    tab = sqla.Table(table,meta,schema=schema,autoload=True,autoload_with=engine)
+    where = " and ".join(["{k}={v}".format(k=k,v=v) for (k,v) in pkValues.items()])
+    print(pkValues)
+    result = connection.execute(tab.select(whereclause=where))
+    f = result.first()
+    print(f)
+    return f == None
+    
+def connect(db):
+    engine = _get_engine(db)
+    insp = sqla.inspect(engine)
+    return insp
+
+def _get_engine(db):
+    if not all(map(is_pg_qual,[db])):
+        raise PermissionDenied()
+    engine = sqla.create_engine(
+        'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
+            sec.dbuser,
+            sec.dbpasswd,
+            sec.dbhost,
+            sec.dbport,
+            db))
+    return engine
+def is_pg_qual(x):
+    pgsql_qualifier = re.compile(r"^[\w\d_]+$")
+    return pgsql_qualifier.search(x)
 

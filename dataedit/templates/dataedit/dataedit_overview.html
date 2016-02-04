@@ -65,10 +65,7 @@ window.onload = function() {
     </tr>
 {% endfor %}    
 </table>
-<form action="/dataedit/commit" method="post" onsubmit="setFormSubmitting()"> 
-            {% csrf_token %}
-            <input type="submit" id="submit_data" class="hidden"/>
-        </form>
+
 </div>
 <div>
     <div>
@@ -78,4 +75,12 @@ window.onload = function() {
         <a href="/dataedit/upload" onclick="setFormSubmitting()"> Extend via csv</a>
     </div>
 </div>
+<form action="/dataedit/commit" method="post" onsubmit="setFormSubmitting()"> 
+            {% csrf_token %}
+            <input type="submit" id="submit_data" class="btn"/>
+        </form>
+        <form action="/dataedit/drop" method="post" onsubmit="setFormSubmitting()"> 
+            {% csrf_token %}
+            <input type="submit" id="submit_data" class="btn" value="DROP"/>
+        </form>
 {% endblock %}
