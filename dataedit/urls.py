@@ -5,7 +5,7 @@ from . import views
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
-    url(r'^$', views.listtables, name='index'),
+    url(r'^$', views.listdbs, name='index'),
     url(r'^edit', views.DataInputView.as_view(), name='input'),
     url(r'^delete', views.delete, name='input'),
     url(r'^drop', views.dropSessionData, name='input'),

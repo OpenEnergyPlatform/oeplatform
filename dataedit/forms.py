@@ -45,10 +45,13 @@ translate to a django field".format(typename))
     
 class InputForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        fields = kwargs.pop("fields")
+        fields = kwargs.pop("fields", [])
+        values = kwargs.pop("values", [])
         super(forms.Form, self).__init__(*args, **kwargs)
         for (name, typename) in fields:
             self.fields[name] = type2field(typename)(label=name)
+            if name in values:
+                self.fields[name].initial = values[name]
 
 
 class UploadFileForm(forms.Form):
