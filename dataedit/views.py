@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden
 import sqlalchemy as sqla
 from .forms import InputForm, UploadFileForm, UploadMapForm
 from django.views.generic import View
@@ -8,14 +8,29 @@ import csv
 import os
 import oeplatform.securitysettings as sec
 from django.views.decorators.csrf import csrf_exempt
+import urllib.request as request
+from django.core.exceptions import PermissionDenied
+
+import re
 session = None
 
 """ This is the initial view that initialises the database connection """
 
-def listtables(request):
-    insp = connect()
-    tables =  {schema:[table for table in insp.get_table_names(schema=schema)] for schema in  insp.get_schema_names()}
-    return render(request, 'dataedit/dataedit_tablelist.html',{'tables':tables})
+def listdbs(request):
+    return render(request, 'dataedit/dataedit_dblist.html',{})
+
+def listschemas(request, db):
+    print(db)
+    insp = connect(db)
+    schemas = {schema for schema in  insp.get_schema_names()}
+    return render(request, 'dataedit/dataedit_schemalist.html',{'db':db, 'schemas':schemas})
+
+def listtables(request, db, schema):
+    print(db,schema)    
+    insp = connect(db)
+    
+    tables =  {table for table in insp.get_table_names(schema=schema)}
+    return render(request, 'dataedit/dataedit_tablelist.html',{'db':db, 'schema':schema, 'tables':tables})
     
 
 class DataView(View):
@@ -27,10 +42,12 @@ class DataView(View):
         Initialises the session data (if necessary)
     """
 
-    def get(self, request, schema, table):
+    def get(self, request, db, schema, table):
         if any((x not in request.session for x in ["table", "schema", "fields", "headers", "floatingRows"])) or (
                 request.session['table'] != table or request.session['schema'] != schema):
-            loadSessionData(request, connect(), schema, table)
+            error = loadSessionData(request, connect(db), db, schema, table)
+            if error:
+                return error
         return render(request, 'dataedit/dataedit_overview.html',
                       {'data': request.session['floatingRows'], 'headers': request.session['headers']})
 
@@ -148,8 +165,38 @@ def delete(request):
                     {'data': request.session['floatingRows'],
                         'headers': request.session['headers']})
 
+def commit(request):
+    db = request.session["db"]
+    if db in ["test"]:
+        engine = _get_engine(db)
+
+    # load schema name and check for sanity    
+    schema = request.session.pop("schema", None)
+    if not is_pg_qual(schema):
+        raise p.toolkit.ValidationError("Invalid schema name")    
+    # Check whether schema exists
+    
+    # load table name and check for sanity
+    table = request.session.pop("table", None)
+    if not is_pg_qual(table):
+        raise p.toolkit.ValidationError("Invalid table name") 
+
+    fields = request.session.pop("fields",[])
+    if not fields == ["*"] and not all(map(is_pg_qual,fields)):
+        raise p.toolkit.ValidationError("Invalid field name")    
+
+    data = data_dict.pop("data",[])
+    meta = sqla.MetaData()
+    tab = sqla.Table(table,meta,schema=schema,autoload=True,autoload_with=engine)
+    connection = engine.connect()
+    
+    connection.execute(
+        tab.insert(),
+        *[dict(zip(fields,row)) for row in data]
+    )
+
 """
-Constructs the new rows for @table using the mapping specified in dataedit_map.html
+    Constructs the new rows for @table using the mapping specified in dataedit_map.html
 """
 
 def confirm(request):
@@ -169,23 +216,37 @@ def confirm(request):
 securitysettings.py"""
 
 
-def connect():
+def connect(db):
+    if not all(map(is_pg_qual,[db])):
+        raise PermissionDenied()
     engine = sqla.create_engine(
         'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
             sec.dbuser,
             sec.dbpasswd,
             sec.dbhost,
             sec.dbport,
-            sec.db))
+            db))
     insp = sqla.inspect(engine)
     return insp
     #users_table = meta.tables['app_renpassgis.scenario']
 
-def loadSessionData(request, insp, schema, table):
+def is_pg_qual(x):
+    pgsql_qualifier = re.compile(r"^[\w\d_]+$")
+    return pgsql_qualifier.search(x)
+
+def loadSessionData(request, insp, db, schema, table):
+    print(db,schema,table)
+    if not all(map(is_pg_qual,[db,schema,table])):
+        return HttpResponseForbidden()
+    request.session['db'] = db    
     request.session['table'] = table
     request.session['schema'] = schema
-    request.session['fields'] = [(c["name"], str(c["type"]))
+    
+    fields = [(c["name"], str(c["type"]))
                                  for c in insp.get_columns(table, schema=schema)]
+    if not all(map(is_pg_qual,[f[0] for f in fields])):
+        return HttpResponseForbidden()
+    request.session['fields'] = fields
     request.session['headers'] = [x[0] for x in request.session['fields']]
     request.session['primaryKeys'] = insp.get_primary_keys(table, schema=schema)
     request.session['floatingRows'] = []
@@ -203,3 +264,4 @@ def _renderTable(request):
     request.session['floatingRows'] = L
     return redirect('/dataedit/view/{0}/{1}'.format(request.session['schema'], request.session['table']),
                     {})
+

@@ -2,9 +2,8 @@
 
 {% block content %}
 <ul>
-
-{% for table in tables %}
-    <li><a href="{{schema}}/{{table}}"> {{table}} </a></li>
+{% for schema in schemas %}
+    <li><a href="{{db}}/{{schema}}"> {{schema}} </a></li>
 {% endfor %}
 </ul>
 {% endblock %}
