@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'bootstrap3',
     'modelview',
     'modelview.templatetags.modelview_extras',
+    'login',
     'base',
     'widget_tweaks',
 	'dataedit'

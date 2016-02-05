@@ -11,12 +11,11 @@
     </style>
     {% block nav %}
         <nav class="navbar navbar-default">
-          <div class="container-fluid">
+          <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
-              <a class="navbar-brand" href="#">OEP</a>
+              <a class="navbar-brand" href="/">OEP</a>
             </div>
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
 				<li class="active"><a href="http://localhost:5000">CKAN</a></li>
                 <li class="active"><a href="/dataedit/">Input</a></li>
                 <li class="dropdown">
@@ -29,15 +28,24 @@
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
+          {% if user.is_authenticated %} 
+            <div style="float: right;background:inherit">
+            <a class="btn" href="#" >{% bootstrap_icon "user" %} {{ user }}</a>
+            <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+            <div>
+          {% else %}
+          <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+          {% endif %}
         </nav>
+        
     {% endblock %}
     <body>
-    <div class="container">
-    <div class="column-left">left</div>
-    <div class="column-center">
-    {% block content %}{% endblock %}
-    </div>
-    <div class="column-right">right</div>
+        <div class="container">
+            <div class="column-left">left</div>
+            <div class="column-center">
+                {% block content %}{% endblock %}
+            </div>
+            <div class="column-right">right</div>
+        </div>
     </body>
-</div>
 </html>
