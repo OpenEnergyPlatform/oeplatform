@@ -1,7 +1,11 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
-<form action="/models/{{ name }}/update/" method="post" role="form">
+{% if name == "update"%}
+    <form action="/models/{{ name }}/update/" method="post" role="form">
+{% else %}
+    <form action="/models/add/" method="post" role="form">
+{% endif %}
 {% csrf_token %}
 {% bootstrap_form form %}
 <input type="submit" value="Submit" />

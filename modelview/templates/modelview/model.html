@@ -40,7 +40,9 @@
                     </table>
                 </div>
                 <div class="mv-column-right">
-                    <img src={{ model.logo.url }} style="width:200"/>
+                    {% if model.logo %}
+                        <img src={{ model.logo.url }} style="width:200"/>
+                    {% endif %}
                     <table>
                         
                         <tr><td class="rowlabel"> Author Institution</td><td> <table> {% for author_inst in model.author_intitution %} <tr> {{ author_inst }} </tr> {% endfor %} </table></td></tr>
@@ -55,7 +57,7 @@
         </div>
     </div>
 </div>
-<div class="container" style="padding:0;">            
+<div class="container" style="padding:0;flex-wrap: wrap;">            
     <div class="mv-column-left">
         <div class="panel-group">
             <div class="panel panel-default">
