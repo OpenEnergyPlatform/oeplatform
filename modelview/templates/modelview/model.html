@@ -1,12 +1,20 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% bootstrap_javascript_url %}
-{% block content %}
 {% load staticfiles %}
 {% load modelview_extras %}
 
+
+{% block content %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<h1> {{ model.full_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+<div class="container">
+    <div style="float: left;">
+        <h1> {{ model.full_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+    </div>
+    <div>
+        <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit">Edit</a>
+    </div>
+</div>
 <div class="panel-group">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -32,7 +40,9 @@
                     </table>
                 </div>
                 <div class="mv-column-right">
-                    <img src={{ model.logo.url }} style="width:200"/>
+                    {% if model.logo %}
+                        <img src={{ model.logo.url }} style="width:200"/>
+                    {% endif %}
                     <table>
                         
                         <tr><td class="rowlabel"> Author Institution</td><td> <table> {% for author_inst in model.author_intitution %} <tr> {{ author_inst }} </tr> {% endfor %} </table></td></tr>
@@ -47,7 +57,7 @@
         </div>
     </div>
 </div>
-<div class="container" style="padding:0;">            
+<div class="container" style="padding:0;flex-wrap: wrap;">            
     <div class="mv-column-left">
         <div class="panel-group">
             <div class="panel panel-default">
@@ -85,7 +95,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                   <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#Software">Software</a>
+                    <a href="#Software" data-toggle="collapse">Software</a>
                   </h4>
                 </div>
                 <div id="Software" class="panel-collapse collapse in profilebox">

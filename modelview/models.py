@@ -6,14 +6,14 @@ from django.db.models import BooleanField, CharField, IntegerField
 
 class Energymodel(models.Model):
     id_name = models.CharField(max_length=20, primary_key=True)
-    full_name = models.CharField(max_length=200)
-    acronym = models.CharField(max_length=200)
+    full_name = models.CharField(max_length=200, unique=True)
+    acronym = models.CharField(max_length=200, null=True, blank=True)
     author_intitution = fields.ArrayField(models.CharField(max_length=200))
     authors = fields.ArrayField(models.CharField(max_length=200))
     current_contact_persons = fields.ArrayField(models.CharField(max_length=200))
     contact_email_address = models.EmailField(max_length=200)
-    website = models.CharField(max_length=200)
-    logo = models.ImageField()
+    website = models.CharField(max_length=200, null=True, blank=True)
+    logo = models.ImageField(null=True, blank=True)
     short_description = models.CharField(max_length=200)
     support = BooleanField()
     documentation_user = BooleanField()
@@ -22,24 +22,24 @@ class Energymodel(models.Model):
     documentation_quality_user = BooleanField()
     documentation_quality_code = BooleanField()
     documentation_quality_cooperation = BooleanField()
-    source_of_funding = models.CharField(max_length=200)
+    source_of_funding = models.CharField(max_length=200, null=True, blank=True)
 
     open_source = BooleanField()
     license = forms.ChoiceField(choices=("Apache","GPL"))
     source_downloadable = BooleanField()
     github = BooleanField()
-    link_to_source = models.CharField(max_length=200)
+    link_to_source = models.CharField(max_length=200, null=True, blank=True)
     data_provided = forms.ChoiceField(choices=("None","Some","All"))
     open_up = BooleanField()
     cooperative_programming = BooleanField()
-    technical_data = CharField(max_length=200)
+    technical_data = CharField(max_length=200, null=True, blank=True)
     
-    modelling_software = CharField(max_length=200)
+    modelling_software = CharField(max_length=200, null=True, blank=True)
     internal_data = BooleanField()
     external_optimizer = BooleanField()
-    additional_software  = CharField(max_length=200)
-    gui = BooleanField
-    post_processing_facility = CharField(max_length=200)
+    additional_software  = CharField(max_length=200, null=True, blank=True)
+    gui = BooleanField()
+    post_processing_facility = CharField(max_length=200, null=True, blank=True)
     
     for sector in ["mobility","electricy","heat"]:
         exec("modeled_energy_sectors{0} = BooleanField()".format(sector))
@@ -50,10 +50,10 @@ class Energymodel(models.Model):
     for tech in ["heat","electric","gas"]:
         exec("components_transfer_{0} = BooleanField()".format(tech))
     user_behaviour = BooleanField()
-    user_behaviour_text = CharField(max_length=200)
-    modeled_efficiency = CharField(max_length=200)
+    user_behaviour_text = CharField(max_length=200, null=True, blank=True)
+    modeled_efficiency = CharField(max_length=200, null=True, blank=True)
     market_models = BooleanField()
-    market_models_text = CharField(max_length=200)
+    market_models_text = CharField(max_length=200, null=True, blank=True)
     for tech in ["AC_load_flow", "DC_load_flow", "net_transfer_capacities"]:
         exec("network_coverage_{0} = BooleanField()".format(tech))
     for tech in ["global","continental","national","regions","municipalities","districts","households"]:
@@ -62,32 +62,32 @@ class Energymodel(models.Model):
         exec("typical_geographic_resolution_{0} = BooleanField()".format(tech))
     for tech in ["anual","hour","15_min", "1_min", "other"]:
         exec("typical_time_resolution_{0} = BooleanField()".format(tech))
-    typical_time_resolution_text = CharField(max_length=200)
+    typical_time_resolution_text = CharField(max_length=200, null=True, blank=True)
     for tech in ["ecological","economic","social","miscellaneous"]:
         exec("Additional_dimensions_{0} = BooleanField()".format(tech))
-    additional_dimensions_text = CharField(max_length=200)
+    additional_dimensions_text = CharField(max_length=200, null=True, blank=True)
     for tech in ["LP","MLP","non_linear","Optimisation", "Simulation", "Agent_based", "Other"]:
         exec("model_type_{0} = BooleanField()".format(tech))
 
-    model_type_text = CharField(max_length=200)
-    short_description_mathematical_model = CharField(max_length=200)
-    math_objective = CharField(max_length=200)
-    approach_to_uncertainity = CharField(max_length=200)
+    model_type_text = CharField(max_length=200, null=True, blank=True)
+    short_description_mathematical_model = CharField(max_length=200, null=True, blank=True)
+    math_objective = CharField(max_length=200, null=True, blank=True)
+    approach_to_uncertainity = CharField(max_length=200, null=True, blank=True)
     many_scenarios = BooleanField()
-    number_variables = IntegerField()
-    typical_computation_time_minutes = IntegerField()
-    typical_computation_time_hardware = CharField(max_length=200)
-    new_equations = CharField(max_length=200)
+    number_variables = IntegerField(null=True, blank=True)
+    typical_computation_time_minutes = IntegerField(null=True, blank=True)
+    typical_computation_time_hardware = CharField(max_length=200, null=True, blank=True)
+    new_equations = CharField(max_length=200, null=True, blank=True)
     
-    citation_reference = CharField(max_length=200)
-    citation_doi = CharField(max_length=200)
-    references_to_reports = CharField(max_length=200)
-    example_research_questions = CharField(max_length=200)
-    who_uses_this = CharField(max_length=200)
-    where_used = CharField(max_length=200)
-    how_validated = CharField(max_length=200)
+    citation_reference = CharField(max_length=200, null=True, blank=True)
+    citation_doi = CharField(max_length=200, null=True, blank=True)
+    references_to_reports = CharField(max_length=200, null=True, blank=True)
+    example_research_questions = CharField(max_length=200, null=True, blank=True)
+    who_uses_this = CharField(max_length=200, null=True, blank=True)
+    where_used = CharField(max_length=200, null=True, blank=True)
+    how_validated = CharField(max_length=200, null=True, blank=True)
     
-    model_specific_properties = CharField(max_length=200)
+    model_specific_properties = CharField(max_length=200, null=True, blank=True)
     
 
     
