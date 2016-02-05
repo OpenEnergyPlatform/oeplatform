@@ -1,0 +1,10 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<ul>
+
+{% for table in tables %}
+    <li><a href="{{schema}}/{{table}}"> {{table}} </a></li>
+{% endfor %}
+</ul>
+{% endblock %}

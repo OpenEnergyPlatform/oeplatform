@@ -1,0 +1,43 @@
+<html>
+    
+    <head>
+        {% load bootstrap3 %}
+        {% bootstrap_css %}
+        {% bootstrap_javascript jquery=1%}
+        {% load staticfiles %}
+        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+    </head>
+    <style>
+    </style>
+    {% block nav %}
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">OEP</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+				<li class="active"><a href="http://localhost:5000">CKAN</a></li>
+                <li class="active"><a href="/dataedit/">Input</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li> <a href="/models/">Models</a> </li>
+                    </ul>
+                </li>
+                {%block nav-additional %}{% endblock %}
+            </ul>
+          </div>
+        </nav>
+    {% endblock %}
+    <body>
+    <div class="container">
+    <div class="column-left">left</div>
+    <div class="column-center">
+    {% block content %}{% endblock %}
+    </div>
+    <div class="column-right">right</div>
+    </body>
+</div>
+</html>

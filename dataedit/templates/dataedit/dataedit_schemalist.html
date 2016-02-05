@@ -1,0 +1,9 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<ul>
+{% for schema in schemas %}
+    <li><a href="{{db}}/{{schema}}"> {{schema}} </a></li>
+{% endfor %}
+</ul>
+{% endblock %}
