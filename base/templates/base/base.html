@@ -30,7 +30,7 @@
           </div>
           {% if user.is_authenticated %} 
             <div style="float: right;background:inherit">
-            <a class="btn" href="#" >{% bootstrap_icon "user" %} {{ user }}</a>
+            <a class="btn" href="/user/profile/{{ user }}" >{% bootstrap_icon "user" %} {{ user }}</a>
             <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             <div>
           {% else %}

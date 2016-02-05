@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('base.urls')),
+    url(r'^user/', include('login.urls')),
     url(r'^models/', include('modelview.urls')),
 	url(r'^dataedit/', include('dataedit.urls')),
 ]

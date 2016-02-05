@@ -1,0 +1,9 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+<form action="/user/create/" method="post" role="form">
+{% csrf_token %}
+{% bootstrap_form form %}
+<input type="submit" value="Submit" />
+</form>
+{% endblock %}
