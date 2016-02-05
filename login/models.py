@@ -21,7 +21,7 @@ class usermanager(BaseUserManager):
 		return user
 		
 
-	def create_superuser(self, name, mail_address, affiliation)
+	def create_superuser(self, name, mail_address, affiliation):
 
 		user=self.create_user(mail_address, name=name, affiliation=affiliation)
 		user.is_admin=True
@@ -33,7 +33,7 @@ class myuser(AbstractBaseUser):
 
 	name=models.CharField(max_length=50)
 	affiliation=models.CharField(max_length=50)
-	mail_address=models.EmailField(verbose_name='email address', max_length=50, unique=True,)
+	mail_address=models.EmailField(verbose_name='email address', max_length=255, unique=True,)
 	is_active=models.BooleanField(default=True)
 	is_admin=models.BooleanField(default=False)
 
