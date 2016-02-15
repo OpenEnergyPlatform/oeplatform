@@ -4,7 +4,6 @@
 {% load staticfiles %}
 {% load modelview_extras %}
 
-
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
 <div class="container">
@@ -12,7 +11,7 @@
         <h1> {{ model.full_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
     </div>
     <div>
-        <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit">Edit</a>
+        <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
     </div>
 </div>
 <div class="panel-group">
@@ -22,7 +21,7 @@
             <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
           </h4>
         </div>
-        <div id="BasicInformation" class="panel-collapse collapse in profilebox">
+        <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
             
             <div class="container" style="padding:0">            
                 <div class="mv-column-left">
@@ -179,7 +178,7 @@
             <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
           </h4>
         </div>
-        <div id="MathematicalProperties" class="panel-collapse collapse  profilebox">
+        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
             <table class="profiletable">
                 {% autoescape off %}
                 {% checktable model "Model Type" "model_type" "LP;MLP;non_linear;Optimisation;Simulation;Agent_based;Other" %}                

@@ -9,6 +9,7 @@
     </head>
     <style>
     </style>
+    {% if user.is_authenticated %}
     {% block nav %}
         <nav class="navbar navbar-default">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -34,7 +35,7 @@
             <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             <div>
           {% else %}
-          <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+            <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
         </nav>
         
@@ -48,4 +49,26 @@
             <div class="column-right">right</div>
         </div>
     </body>
+    {% else %}
+        {% if form.errors %}
+            <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
+        <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <table>
+        <tr>
+            <td>Username</td>
+            <td><input name="username" type="text"/></td>
+        </tr>
+        <tr>
+            <td>Password</td>
+            <td><input name="password" type="password"/></td>
+        </tr>
+        </table>
+
+        <input type="submit" value="login" />
+        <input type="hidden" name="next" value="/" />
+        </form>
+    {% endif %}
+    
 </html>

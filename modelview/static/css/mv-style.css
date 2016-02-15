@@ -24,8 +24,24 @@
         padding-bottom: 2px;
     }
 
+/* Icon when the collapsible content is shown */
+.panel-heading a:before {
+    font-family: "Glyphicons Halflings";
+    content: "\e114";
+}
+
 .panel-heading a{
     display: block;
     width: 100%;
     text-decoration: none;
+}
+
+.panel-heading in a{
+     width: 0%;
+     content: "\e080";
+}
+
+/* Icon when the collapsible content is hidden */
+.panel-heading a.collapsed:before {
+    content: "\e080";
 }
