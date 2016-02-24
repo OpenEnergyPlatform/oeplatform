@@ -31,16 +31,38 @@ class usermanager(BaseUserManager):
 
 
 class myuser(AbstractBaseUser):
-
 	name=models.CharField(max_length=50, unique=True)
 	affiliation=models.CharField(max_length=50)
 	mail_address=models.EmailField(verbose_name='email address', max_length=255, unique=True,)
 	is_active=models.BooleanField(default=True)
 	is_admin=models.BooleanField(default=False)
-	is_staff=models.BooleanField(default=False)
+	
 	objects=usermanager()
 	
 	USERNAME_FIELD='name'
 
 	REQUIRED_FIELDS = [name, mail_address]
+	
+	def get_full_name(self):
+		return self.name
+
+	def get_short_name(self):
+		return self.name
+
+	def __str__(self):			  # __unicode__ on Python 2
+		return self.name
+	
+	def has_perm(self, perm, obj=None):
+		"Does the user have a specific permission?"
+		# Simplest possible answer: Yes, always
+		return True
+
+	def has_module_perms(self, app_label):
+		"Does the user have permissions to view the app `app_label`?"
+		# Simplest possible answer: Yes, always
+		return True
+	
+	@property
+	def is_staff(self):
+		return self.is_admin
 
