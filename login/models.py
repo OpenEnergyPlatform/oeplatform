@@ -37,11 +37,10 @@ class myuser(AbstractBaseUser):
 	mail_address=models.EmailField(verbose_name='email address', max_length=255, unique=True,)
 	is_active=models.BooleanField(default=True)
 	is_admin=models.BooleanField(default=False)
-
-
+	is_staff=models.BooleanField(default=False)
 	objects=usermanager()
 	
 	USERNAME_FIELD='name'
 
 	REQUIRED_FIELDS = [name, mail_address]
-	
+
