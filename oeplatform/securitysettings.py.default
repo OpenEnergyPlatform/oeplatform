@@ -17,6 +17,8 @@ DATABASES = {
 	}
 }
 
+ALLOWED_HOSTS = []
+
 dbuser = ""
 dbpasswd = ""
 dbport = 5432

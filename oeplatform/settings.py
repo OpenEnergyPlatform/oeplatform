@@ -24,10 +24,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
-
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -91,13 +87,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
-        'URL': 'http://{0}:8983/solr'.format(URL)
-    },
-}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
