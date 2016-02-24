@@ -30,10 +30,12 @@
             </ul>
           </div>
           {% if user.is_authenticated %} 
+            {% if user.username != "guest" %}
             <div style="float: right;background:inherit">
             <a class="btn" href="/user/profile/{{ user }}" >{% bootstrap_icon "user" %} {{ user }}</a>
             <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             <div>
+            {% endif %}
           {% else %}
             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
@@ -44,7 +46,9 @@
         <div class="container">
             <div class="column-left">left</div>
             <div class="column-center">
+                {% if user.username != "guest" %}
                 {% block content %}{% endblock %}
+                {% endif %}
             </div>
             <div class="column-right">right</div>
         </div>
