@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from . import views
+from dataedit import views
 
 pgsql_qualifier = r"[\w\d_]+"
 

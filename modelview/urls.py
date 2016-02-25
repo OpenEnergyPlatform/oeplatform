@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from . import views
+from modelview import views
 from oeplatform import settings
 from django.conf.urls.static import static
 

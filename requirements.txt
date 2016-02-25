@@ -1,2 +1,7 @@
-django==1.9
+django
 django-bootstrap3
+matplotlib
+urllib3
+scipy
+django-widget_tweaks
+psycopg2
