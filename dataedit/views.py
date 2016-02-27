@@ -56,10 +56,6 @@ This View handles new data input and edit
 
 class DataInputView(View):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, *kwargs)
-        self.id = None
-
     """
     Handles the GET-request for the data edit and entry page. Requests
     may contain an id, if pending data shall be edited.
@@ -115,9 +111,6 @@ This View yields an upload functionality for CSV-files
 
 class DataUploadView(View):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, *kwargs)
-
     def post(self, request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -138,9 +131,6 @@ csv columns
 
 
 class DataMapView(View):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, *kwargs)
 
     def post(self, request):
         def store(f):
