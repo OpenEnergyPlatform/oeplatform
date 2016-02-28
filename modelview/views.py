@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
-from .models import Energymodel
 from django.db.models import fields
 from django.db import models
 from oeplatform import settings
@@ -18,24 +17,33 @@ from matplotlib.lines import Line2D
 import matplotlib
 import time
 import re
-from .forms import EnergymodelForm
+from .models import Energymodel, Energyframework
+from .forms import EnergymodelForm, EnergyframeworkForm
 
-def listmodels(request):
-    models = [(m.pk, m.full_name) for m in Energymodel.objects.all()]
+def listsheets(request,sheettype):
+    if sheettype == "model":
+        models = [(m.pk, m.model_name) for m in Energymodel.objects.all()]
+    elif sheettype == "framework":
+        models = [(m.pk, m.model_name) for m in Energyframework.objects.all()]
     return render(request, "modelview/modellist.html", {'models':models})
 
-def show(request, model_name):
-    model = get_object_or_404(Energymodel, pk=model_name)
+def show(request, sheettype, model_name):
+    if sheettype == "model":
+        model = get_object_or_404(Energymodel, pk=model_name)
+    elif sheettype == "framework":
+        model = get_object_or_404(Energyframework, pk=model_name)
+    else:
+        raise Exception("Sheettype not found")
     user_agent = {'user-agent': 'oeplatform'}
     http = urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-    if model.github and model.link_to_source:
-        match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source)
+    if model.gitHub and model.link_to_source_code:
+        match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
         org = match.group('org')
         repo = match.group('repo')
         gh_url = _handle_github_contributions(org,repo)
-    return render(request,"modelview/model.html",{'model':model,'gh_org':org,'gh_repo':repo})
+    return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
 
 def editModel(request,model_name):
     model = get_object_or_404(Energymodel, pk=model_name)
@@ -50,9 +58,21 @@ class ModelAdd(View):
         form = EnergymodelForm(request.POST or None)
         if form.is_valid():
             form.save()
-            model_name = request.POST["id_name"]
-            return redirect("/models/{model}".format(model=model_name))
+            model_name = Energymodel(request.POST).parent.pk
+            return redirect("/factsheets/models/{model}".format(model=model_name))
         return render(request,"modelview/editmodel.html",{'form':form, 'method':'add'})
+        
+class FrameworkAdd(View):    
+    def get(self,request):
+        form = EnergyframeworkForm()
+        return render(request,"modelview/editframework.html",{'form':form, 'method':'add'})
+    def post(self,request):
+        form = EnergyframeworkForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+            model_name = Energyframework(request.POST).basicfactsheet_ptr.pk
+            return redirect("/factsheets/frameworks/{model}".format(model=model_name))
+        return render(request,"modelview/editframework.html",{'form':form, 'method':'add'})
 
 def updateModel(request,model_name):
     model = get_object_or_404(Energymodel, pk=model_name)
