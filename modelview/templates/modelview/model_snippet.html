@@ -1,0 +1,4 @@
+{% load modelview_extras %}
+{% assign_field_attr model field 'help_text' as vname %}   
+{% get_field_attr model field 'verbose_name'%} {% if vname %}<a href='#' data-toggle='tooltip' title='{{ vname }}'><span class='glyphicon glyphicon-question-sign'></span></a>{% endif %} :  {% get_field model field %} </br>
+

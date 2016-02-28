@@ -1,0 +1,62 @@
+{% extends "base/base.html" %}
+{% load modelview_extras %}
+{% block content %}
+{% if method == "update"%}
+    <form action="/factsheets/frameworks/{{ name }}/update/" method="post" role="form">
+{% else %}
+    <form action="/factsheets/frameworks/add/" method="post" role="form">
+{% endif %}
+{% csrf_token %}
+
+{{ form.id }}
+{% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
+{% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
+{% include 'modelview/editmodel_snippet.html' with field=form.institutions %}
+{% include 'modelview/editmodel_snippet.html' with field=form.authors %}
+{% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
+{% include 'modelview/editmodel_snippet.html' with field=form.contact_email %}
+{% include 'modelview/editmodel_snippet.html' with field=form.website %}
+{% include 'modelview/editmodel_snippet.html' with field=form.logo %}
+{% include 'modelview/editmodel_snippet.html' with field=form.primary_purpose %}
+{% include 'modelview/editmodel_snippet.html' with field=form.primary_outputs %}
+{% include 'modelview/editmodel_snippet.html' with field=form.support %}
+{% include 'modelview/editmodel_snippet.html' with field=form.framework %}
+{% include 'modelview/editmodel_snippet.html' with field=form.framework_yes_text %}
+{% include 'modelview/editmodel_snippet.html' with field=form.user_documentation %}
+{% include 'modelview/editmodel_snippet.html' with field=form.code_documentation %}
+{% include 'modelview/editmodel_snippet.html' with field=form.documentation_quality %}
+{% include 'modelview/editmodel_snippet.html' with field=form.source_of_funding %}
+{% include 'modelview/editmodel_snippet.html' with field=form.open_source %}
+{% include 'modelview/editmodel_snippet.html' with field=form.open_up %}
+{% include 'modelview/editmodel_snippet.html' with field=form.costs %}
+{% include 'modelview/editmodel_snippet.html' with field=form.license %}
+{% include 'modelview/editmodel_snippet.html' with field=form.license_other_text %}
+{% include 'modelview/editmodel_snippet.html' with field=form.source_code_available %}
+{% include 'modelview/editmodel_snippet.html' with field=form.gitHub %}
+{% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code %}
+{% include 'modelview/editmodel_snippet.html' with field=form.data_provided %}
+{% include 'modelview/editmodel_snippet.html' with field=form.cooperative_programming %}
+{% include 'modelview/editmodel_snippet.html' with field=form.number_of_devolopers %}
+{% include 'modelview/editmodel_snippet.html' with field=form.number_of_users %}
+{% include 'modelview/editmodel_snippet.html' with field=form.modelling_software %}
+{% include 'modelview/editmodel_snippet.html' with field=form.interal_data_processing_software %}
+{% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer %}
+{% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer_yes_text %}
+{% include 'modelview/editmodel_snippet.html' with field=form.additional_software %}
+{% include 'modelview/editmodel_snippet.html' with field=form.gui %}
+
+{% include 'modelview/editmodel_snippet.html' with field=form.model_types %}
+{% include 'modelview/editmodel_snippet.html' with field=form.model_types_other_text %}
+{% include 'modelview/editmodel_snippet.html' with field=form.api_doc %}
+{% include 'modelview/editmodel_snippet.html' with field=form.data_api %}
+{% include 'modelview/editmodel_snippet.html' with field=form.abstraction %}
+{% include 'modelview/editmodel_snippet.html' with field=form.used %}
+
+{% include 'modelview/editmodel_snippet.html' with field=form.technical_data_anchored_in_the_model %}
+{% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
+{% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
+{% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
+{% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
+<input type="submit" value="Submit" />
+</form>
+{% endblock %}
