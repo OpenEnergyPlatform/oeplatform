@@ -8,8 +8,8 @@
         {% load staticfiles %}
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
-
-    {% if user.is_authenticated or "/factsheets/" in request.path %}
+    
+    {% if user.is_authenticated or "/factsheets/" in request.path or "/" == request.path %}
     {% block nav %}
         <nav class="navbar navbar-default">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -29,6 +29,7 @@
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                 </ul>
+                <li class="active"> <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank">Discussion</a></li>
                 </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
