@@ -68,7 +68,6 @@ class ModelAdd(View):
             form.save()
             model_name = Energymodel(request.POST).pk
             return redirect("/factsheets/models/{model}".format(model=model_name))
-        print(form.errors)
         return render(request,"modelview/editmodel.html",{'form':form, 'method':'add'})
 
 def updateModel(request,model_name, sheettype):
