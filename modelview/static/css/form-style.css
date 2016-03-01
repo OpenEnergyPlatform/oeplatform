@@ -1,0 +1,32 @@
+.formtable{
+    border-collapse:separate; 
+    border-spacing:0.5em;
+    padding-bottom: 5em;
+}
+
+.formtable tr{
+    padding-bottom: 2em;
+}
+
+.formlabel{
+    font-weight: bold;
+    padding-right: 2em;
+    width:20%;
+    vertical-align:top;
+}
+
+.checktable{
+    
+    float:left;
+    padding:0;
+}
+
+.checktable th{
+}
+
+.checktable td{
+}
+
+.right {
+    right: 0px;
+}
