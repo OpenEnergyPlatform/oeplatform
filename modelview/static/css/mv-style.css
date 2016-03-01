@@ -45,3 +45,12 @@
 .panel-heading a.collapsed:before {
     content: "\e080";
 }
+
+.sheetlabel{
+    font-weight: bold;
+    padding-right: 2em;
+    vertical-align:top;
+}
+
+
+

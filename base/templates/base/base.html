@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
 
-    {% if user.is_authenticated or "/factsheets/" in request.path and "edit" not in request.path %}
+    {% if user.is_authenticated or "/factsheets/" in request.path %}
     {% block nav %}
         <nav class="navbar navbar-default">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -27,6 +27,7 @@
                     <ul class="dropdown-menu">
                         <li> <a href="/factsheets/models/">Models</a> </li>
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
+                        <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                 </ul>
                 </li>
                 {%block nav-additional %}{% endblock %}

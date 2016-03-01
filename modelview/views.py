@@ -17,38 +17,46 @@ from matplotlib.lines import Line2D
 import matplotlib
 import time
 import re
-from .models import Energymodel, Energyframework
-from .forms import EnergymodelForm, EnergyframeworkForm
+from .models import Energymodel, Energyframework, Energyscenario
+from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm
+
+def getClasses(sheettype):
+    if sheettype == "model":
+        c = Energymodel
+        f = EnergymodelForm
+    elif sheettype == "framework":
+        c = Energyframework
+        f = EnergyframeworkForm
+    elif sheettype == "scenario":
+        c = Energyscenario
+        f = EnergyscenarioForm
+    return c,f
 
 def listsheets(request,sheettype):
-    if sheettype == "model":
-        models = [(m.pk, m.model_name) for m in Energymodel.objects.all()]
-    elif sheettype == "framework":
-        models = [(m.pk, m.model_name) for m in Energyframework.objects.all()]
+    c,_ = getClasses(sheettype)
+    if sheettype == "scenario":
+        models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
+    else:
+        models = [(m.pk, m.model_name) for m in c.objects.all()]
     return render(request, "modelview/modellist.html", {'models':models})
 
 def show(request, sheettype, model_name):
-    if sheettype == "model":
-        model = get_object_or_404(Energymodel, pk=model_name)
-    elif sheettype == "framework":
-        model = get_object_or_404(Energyframework, pk=model_name)
-    else:
-        raise Exception("Sheettype not found")
+    c,_ = getClasses(sheettype)
+    model = get_object_or_404(c, pk=model_name)
     user_agent = {'user-agent': 'oeplatform'}
     http = urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-    if model.gitHub and model.link_to_source_code:
-        match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
-        org = match.group('org')
-        repo = match.group('repo')
-        gh_url = _handle_github_contributions(org,repo)
+    if sheettype != "scenario":
+        if model.gitHub and model.link_to_source_code:
+            match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
+            org = match.group('org')
+            repo = match.group('repo')
+            gh_url = _handle_github_contributions(org,repo)
+        
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
-
-def editModel(request,model_name):
-    model = get_object_or_404(Energymodel, pk=model_name)
-    form = EnergymodelForm(instance=model)
-    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name, 'method':'update'}) 
+    
+    
     
 class ModelAdd(View):    
     def get(self,request):
@@ -58,10 +66,30 @@ class ModelAdd(View):
         form = EnergymodelForm(request.POST or None)
         if form.is_valid():
             form.save()
-            model_name = Energymodel(request.POST).parent.pk
+            model_name = Energymodel(request.POST).pk
             return redirect("/factsheets/models/{model}".format(model=model_name))
+        print(form.errors)
         return render(request,"modelview/editmodel.html",{'form':form, 'method':'add'})
+
+def updateModel(request,model_name, sheettype):
+    c,f = getClasses(sheettype)        
+    model = get_object_or_404(c, pk=model_name)
+    form = f(request.POST or None, instance=model)
+    if form.is_valid():
+        form.save()
+        return redirect("/factsheets/{sheet}s/{model}".format(model=model_name, sheet=sheettype))
+    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name})
+    
+def editModel(request,model_name, sheettype):
+    c,f = getClasses(sheettype) 
         
+    model = get_object_or_404(c, pk=model_name)
+    form = f(instance=model)
+    
+    return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
+
+
+       
 class FrameworkAdd(View):    
     def get(self,request):
         form = EnergyframeworkForm()
@@ -73,14 +101,20 @@ class FrameworkAdd(View):
             model_name = Energyframework(request.POST).basicfactsheet_ptr.pk
             return redirect("/factsheets/frameworks/{model}".format(model=model_name))
         return render(request,"modelview/editframework.html",{'form':form, 'method':'add'})
+    
+class ScenarioAdd(View):    
+    def get(self,request):
+        form = EnergyscenarioForm()
+        return render(request,"modelview/editscenario.html",{'form':form, 'method':'add'})
+    def post(self,request):
+        form = EnergyscenarioForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+            model_name = Energyframework(request.POST).pk
+            return redirect("/factsheets/scenarios/{model}".format(model=model_name))
+        return render(request,"modelview/editscenario.html",{'form':form, 'method':'add'})
 
-def updateModel(request,model_name):
-    model = get_object_or_404(Energymodel, pk=model_name)
-    form = EnergymodelForm(request.POST or None, instance=model)
-    if form.is_valid():
-        form.save()
-        return redirect("/models/{model}".format(model=model_name))
-    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name})
+
 
 """
     This function returns the url of an image of recent GitHub contributions
@@ -112,11 +146,11 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         if not reply:
             return None
 
-        print(reply)
+        #print(reply)
         # If there are more weeks than nessecary, truncate
         if weeks_back < len(reply):
             reply = reply[-weeks_back:]
-        print(reply)    
+        #print(reply)    
         # GitHub API returns a JSON dict with w: weeks, c: contributions
         (times, commits)=zip(*[(datetime.datetime.fromtimestamp(
                 int(week['week'])
@@ -125,7 +159,7 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         
         # generate a distribution wrt. to the commit numbers
         commits_ids = [i  for i in range(len(commits)) for _ in range(commits[i])]
-        print(commits_ids)
+        #print(commits_ids)
         # transform the contribution distribution into a density function
         # using a gaussian kernel estimator
         if commits_ids:        

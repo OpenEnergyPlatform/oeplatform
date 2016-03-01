@@ -1,0 +1,8 @@
+<script>
+        function {{ field }}_click(cb) {
+            var itm = document.getElementById('{{ add }}_container');
+            if (cb.checked == false) {
+                itm.style.display = 'none';
+            } else { itm.style.display = 'inline'; }
+        }
+</script>

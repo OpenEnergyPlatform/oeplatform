@@ -1,0 +1,367 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% bootstrap_javascript_url %}
+{% load staticfiles %}
+{% load modelview_extras %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
+<div class="container">
+    <div style="float: left;">
+        <h1> {{ model.name_of_scenario }} </h1>
+    </div>
+    <div>
+        <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
+          </h4>
+        </div>
+        <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
+            
+            <div class="container" style="padding:0">            
+                <div class="mv-column-left">
+                    
+                    <table class="profiletable">
+                        {% include 'modelview/model_snippet.html' with model=model field='name_of_the_study' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='author_Institution' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='client' %}
+                        <tr>
+                            <td class="sheetlabel">
+                                Source of funding
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='funding_private' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='funding_public' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='funding_no_funding' %}
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='citation_doi' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='aim' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='new_aspects' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='spatial_Geographical_coverage' %}
+                        <tr>
+                            <td class="sheetlabel">
+                                Time frame
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2020' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2030' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2050' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_other' add=model.time_frame_other_text %}
+                                </table>
+                            </td>
+                        </tr>
+                        {% include 'modelview/model_snippet.html' with model=model field='time_frame_2_target_year' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='time_frame_2_transformation_path' %}
+                        <tr>
+                            <td class="sheetlabel">
+                                Modeled energy sectors
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_electricity' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_heat' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_liquid_fuels' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_gas' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_oil' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_others' add=model.modeled_energy_sectors_others_text %}
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="sheetlabel">
+                                Modeled demand sectors
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_households' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_industry' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_commercial_sector' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_transport' %}
+                                </table>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="sheetlabel">
+                                Economic (behavioural) rationale
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_perfect' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_myopic' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_qualitative' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_agentbased' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_other' add=model.economic_behavioral_other_text %}
+                                </table>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="sheetlabel">
+                                Technologies included
+                            </td>
+                            <td>
+                                <table>
+                                     {% include 'modelview/model_snippet.html' with model=model field='renewables_PV' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_wind' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_hydro' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_biomass' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_biogas' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_solar' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_others' add=model.renewables_others_text%}
+                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_gas' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_coal' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_oil' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_liquid' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_nuclear' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='CHP' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='storages_battery' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='storages_kinetic' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='storages_CAES' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='storages_PHS' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='storages_chemical' %}
+                                </table>
+                            </td>
+                        </tr>                        
+                       
+                        {% include 'modelview/model_snippet.html' with model=model field='economic_focuses_included' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='social_focuses_included' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='endogenous_variables' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='sensitivities' %}
+                        <tr>
+                            <td class="sheetlabel">
+                                Technologies included
+                            </td>
+                            <td>
+                                <table>
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_anual' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_hour' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_15_min' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_1_min' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_sec' %}
+                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_other' add=model.time_steps_other_text %}
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#Coverage">Assumptions</a>
+          </h4>
+        </div>
+        <div id="Coverage" class="panel-collapse collapse  profilebox">
+            <table class="profiletable">
+                {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
+                {% include 'modelview/model_snippet.html' with model=model field='name_of_the_study' %}
+                
+
+                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_year' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_amount' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_kind' %}
+                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_year' %}
+                
+                <tr>
+                    <td class="sheetlabel">
+                        Cost development
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_capex' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_opex' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_learning_curves' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_constant' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_rediscount' %}
+                        </table>
+                    </td>
+                </tr>
+                {% include 'modelview/model_snippet.html' with model=model field='technological_innovations' %}
+                <tr>
+                    <td class="sheetlabel">
+                        Potential wind
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_other' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_other_text' %}
+                        </table>
+                    </td>
+                </tr>
+                
+                
+                <tr>
+                    <td class="sheetlabel">
+                        Potential solar electric
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_other' add=model.potential_solar_electric_other_text %}
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="sheetlabel">
+                        Potential solar thermal
+                    </td>
+                    <td>
+                        <table>
+                           {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_other' add=model.potential_solar_thermal_other_text %}
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="sheetlabel">
+                        Potential biomass
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_other' add=model.potential_biomass_other_text%}
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="sheetlabel">
+                        Potential geothermal
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_other' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_othertext' %}
+                        </table>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td class="sheetlabel">
+                        Potential hydro power
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_whole' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_technical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_economical' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_ecological' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_other' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_other_text' %}
+                        </table>
+                    </td>
+                </tr>
+                
+                {% include 'modelview/model_snippet.html' with model=model field='social_developement' %}
+                {% include 'modelview/model_snippet.html' with model=model field='economic_development' %}
+                {% include 'modelview/model_snippet.html' with model=model field='development_of_environmental_aspects' %}
+                {% include 'modelview/model_snippet.html' with model=model field='postprocessing' %}
+                {% include 'modelview/model_snippet.html' with model=model field='further_assumptions_for_postprocessing' %}
+            </table>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#Results">Results</a>
+          </h4>
+        </div>
+        <div id="Results" class="panel-collapse collapse profilebox">
+            <table class="profiletable">
+                {% include 'modelview/model_snippet.html' with model=model field='uncertainty_assessment' %}
+                {% include 'modelview/model_snippet.html' with model=model field='robustness' %}
+                {% include 'modelview/model_snippet.html' with model=model field='comparability_Validation' %}
+                {% include 'modelview/model_snippet.html' with model=model field='conclusions' %}
+            </table>
+        </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
+          </h4>
+        </div>
+        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
+            <table class="profiletable">
+                <tr>
+                    <td class="sheetlabel">
+                        Exogenous time series used
+                    </td>
+                    <td>
+                        <table>
+                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_climate' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_feedin' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_loadcurves' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_others' add=model.exogenous_time_series_used_others_text %}
+                        </table>
+                    </td>
+                </tr>
+                
+                {% include 'modelview/model_snippet.html' with model=model field='technical_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='social_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

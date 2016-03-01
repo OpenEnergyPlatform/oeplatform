@@ -5,6 +5,7 @@ import json
 import datetime
 from scipy import stats
 import numpy 
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -45,6 +46,14 @@ def get_field(instance, field_name):
     """
     return instance.__dict__[field_name]
 
+@register.assignment_tag
+def assign_field(instance, field_name):
+    """
+    Returns verbose_name for a field.
+    """
+    return instance.__dict__[field_name]
+
+
 @register.simple_tag
 def get_field_attr(instance, field_name, attr):
     """
@@ -63,3 +72,10 @@ def assign_field_attr(instance, field_name, attr):
 def fieldtype(field):
     return field.field.widget.__class__.__name__
 
+    
+@register.simple_tag
+def year_field(instance, field_name):
+    field_amount=instance.fields[field_name+'_amount']
+    field_kind=instance.fields[field_name+'_kind']
+    field_year=instance.fields[field_name+'_year']
+    return mark_safe("{{{{ {field}.label }}}}: {{{{ {field}_amount }}}} {{{{ {field}_kind }}}} {{{{ {field}_year }}}} <br>".format(field=field_name))

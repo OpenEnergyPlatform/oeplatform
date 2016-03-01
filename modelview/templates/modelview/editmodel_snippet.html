@@ -1,2 +1,11 @@
 {% load modelview_extras %}
-{{ field.label }}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:  {{ field }} {% if field.help_text != "" %}<a href='#' data-toggle='tooltip' title='{{ field.help_text }}'><span class='glyphicon glyphicon-question-sign'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %}  </br>
+{% if field|fieldtype == "CheckboxInput" and add %}
+{% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name%}
+{% endif %}
+<tr><td class="formlabel">{{ field.label }}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:</td>
+<td>{% if not field|fieldtype == 'CheckboxInput' or not add%}
+            {{ field }} 
+    {% else %}
+        <input id="id_{{field.name}}" type="checkbox" name="{{field.name}}" {% if field.value %} checked {% endif %} onclick='{{field.name}}_click(this)' >
+    {% endif %} {% if field.help_text != "" %}<a href='#' data-toggle='tooltip' title='{{ field.help_text }}' ><span class='glyphicon glyphicon-question-sign'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %} {% if add %} 
+     <div id="{{add.name}}_container" {% if field|fieldtype == "CheckboxInput" and not field.value %}style="display:none"{% else %}style="display:inline"{% endif %}> {{add}} </div> {% endif %} </td></tr>

@@ -39,7 +39,7 @@
                     {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
                     {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
                     {% include 'modelview/model_snippet.html' with model=model field='support' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='framework' %}
+                    {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
                     {% include 'modelview/model_snippet.html' with model=model field='framework_yes_text' %}
                     {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
                     {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
@@ -81,7 +81,7 @@
                         <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> 
                         <table class="profiletable">
                          <tr><td class="rowlabel">GitHub Contributions Graph</td><td> 
-                        <img src="/models/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
+                        <img src="/factsheets/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
                         </td></tr>
                                                 
                     </table>
@@ -268,11 +268,7 @@
                 {% include 'modelview/model_snippet.html' with model=model field='uncertainty_Stochastic'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='uncertainty_Other'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='montecarlo'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time_less_than_a_second'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time_less_than_a_minute'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time_less_than_an_hour'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time_less_than_a_day'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time_more_than_a_day'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='typical_computation_hardware'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='technical_data_anchored_in_the_model'  %}
             </table>
