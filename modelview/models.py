@@ -57,7 +57,6 @@ class Energymodel(BasicFactsheet):
     energy_sectors_heat = BooleanField(default=False,verbose_name='heat') 
     energy_sectors_liquid_fuels = BooleanField(default=False,verbose_name='liquid fuels') 
     energy_sectors_gas = BooleanField(default=False,verbose_name='gas') 
-    energy_sectors_oil = BooleanField(default=False,verbose_name='oil') 
     energy_sectors_others = BooleanField(default=False,verbose_name='others')
     energy_sectors_others_text = CharField(max_length=200,null=True)
      
@@ -245,8 +244,7 @@ class Energyscenario(models.Model):
     modeled_energy_sectors_electricity = BooleanField(verbose_name='electricity') 
     modeled_energy_sectors_heat = BooleanField(verbose_name='heat') 
     modeled_energy_sectors_liquid_fuels = BooleanField(verbose_name='liquid fuels') 
-    modeled_energy_sectors_gas = BooleanField(verbose_name='gas') 
-    modeled_energy_sectors_oil = BooleanField(verbose_name='oil') 
+    modeled_energy_sectors_gas = BooleanField(verbose_name='gas')  
     modeled_energy_sectors_others = BooleanField(verbose_name='others') 
     modeled_energy_sectors_others_text = CharField(max_length=1000, null=True)
     

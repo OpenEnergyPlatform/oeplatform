@@ -139,18 +139,17 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         try:
             reply = http.request("GET","https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(org,repo)).data.decode('utf8')
         except:
-            print("Could not load GitHub statistics")
+            pass
         
         reply = json.loads(reply)
         
         if not reply:
             return None
 
-        #print(reply)
         # If there are more weeks than nessecary, truncate
         if weeks_back < len(reply):
             reply = reply[-weeks_back:]
-        #print(reply)    
+ 
         # GitHub API returns a JSON dict with w: weeks, c: contributions
         (times, commits)=zip(*[(datetime.datetime.fromtimestamp(
                 int(week['week'])
@@ -159,7 +158,7 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         
         # generate a distribution wrt. to the commit numbers
         commits_ids = [i  for i in range(len(commits)) for _ in range(commits[i])]
-        #print(commits_ids)
+
         # transform the contribution distribution into a density function
         # using a gaussian kernel estimator
         if commits_ids:        
