@@ -11,7 +11,7 @@
     
     {% if user.is_authenticated or "/factsheets/" in request.path or "/" == request.path %}
     {% block nav %}
-        <nav class="navbar navbar-default">
+        <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
               <a class="navbar-brand" href="/">OEP</a>
@@ -48,12 +48,15 @@
         
     {% endblock %}
     <body>
-        <div class="container">
-            <div class="column-left">left</div>
+        <div class="container" style="margin-top:70px">
+            {# <div class="column-left">left</div> #}
             <div class="column-center">
                 {% block content %}{% endblock %}                
             </div>
-            <div class="column-right">right</div>
+            <div class="column-right">Feel free to create a fact sheet for your model/framework and the scenarios you want to talk about! <br>
+If you have ideas to improve the fact sheets, you are welcome to add your comments on the discussion site of the <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios">openmod-wiki page</a>.<br>
+<br>
+<b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b></div>
         </div>
     </body>
     {% else %}

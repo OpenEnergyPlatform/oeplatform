@@ -14,8 +14,10 @@
 }
 
 .column-right{ 
-    float: right; 
-    width: 10%;
+    top:70px; 
+    right:10px;
+    width: 15%;
+    position:fixed;
     padding:20px;
     border-radius: 10px;
     background:#FCFCFD;
@@ -24,8 +26,10 @@
 }
 
 .column-center{ 
-    display: inline-block; 
+    display: inline-block;
+     
     overflow:auto;
+    margin-left:5%;
     width: 78%;
     padding:20px;
     border-radius: 10px;
