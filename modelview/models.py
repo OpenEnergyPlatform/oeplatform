@@ -290,7 +290,7 @@ class Energyscenario(models.Model):
 
     economic_focuses_included = CharField(verbose_name='Economic focuses included', help_text='Have there been economic focusses/sectors included?', max_length=1000, null=True) 
     social_focuses_included = CharField(verbose_name='Social focuses included', help_text='Have there been social focusses/sectors included? ', max_length=1000, null=True) 
-    endogenous_variables = CharField(verbose_name='Endogenous variables', help_text='Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)', max_length=1000, null=True) 
+    endogenous_variables = CharField(verbose_name='Endogenous variables', help_text='Which time series and variables are generated inside the model?', max_length=1000, null=True) 
     sensitivities = BooleanField(verbose_name='Sensitivities', help_text='Have there been sensitivities?') 
     time_steps_anual = BooleanField(verbose_name='anual') 
     time_steps_hour = BooleanField(verbose_name='hour') 
