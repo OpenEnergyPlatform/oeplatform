@@ -28,22 +28,24 @@
                     
                     <table class="profiletable">
                     <!-- <tr><td class="rowlabel"> id_name</td><td> {{ model.id_name }}</td></tr> -->
-                    {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='authors' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='website' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='logo' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='support' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
-                    {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='authors' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='website' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='logo' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='support' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
+                        {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
+                        {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
+                        {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}                    
                     </table>
                 </div>
             </div>
@@ -70,8 +72,7 @@
                         {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}
+
                                                 
                     </table>
                     {% if model.gitHub %}

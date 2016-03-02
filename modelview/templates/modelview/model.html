@@ -45,6 +45,8 @@
                     {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
                     {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
                     {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
+                    {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}
                     </table>
                 </div>
             </div>
@@ -72,8 +74,6 @@
                         {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}
                                                 
                     </table>
                     {% if model.gitHub %}
@@ -169,7 +169,7 @@
                 </tr>
                 <tr>
                     <td class="sheetlabel">
-                        Modelled energy carrier (primary energy carrier)
+                        Modelled energy carriers (primary energy carrier)
                     </td>
                     <td>
                         <table>

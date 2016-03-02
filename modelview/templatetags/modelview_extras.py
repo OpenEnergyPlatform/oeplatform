@@ -75,7 +75,10 @@ def get_field(instance, field_name):
     """
     Returns verbose_name for a field.
     """
-    return instance.__dict__[field_name]
+    field = instance.__dict__[field_name]
+    if type(field)==list:
+        field = ", ".join(field)
+    return field
 
 @register.assignment_tag
 def assign_field(instance, field_name):
