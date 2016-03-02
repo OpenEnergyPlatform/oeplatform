@@ -6,7 +6,7 @@ import datetime
 from scipy import stats
 import numpy 
 from django.utils.safestring import mark_safe
-
+from django.utils.html import format_html
 register = template.Library()
 
 @register.simple_tag
@@ -31,6 +31,37 @@ def checktable(model, label, prefix ,suffixes, separator="_"):
                     </table>
                 </td>
             </tr>""".format(label,header,"")
+            
+@register.simple_tag
+def checklist(model,labels):
+    s = ""
+    first = True
+    for name in labels.split(","):
+        decider = name
+        text = name 
+        if "=" in name:
+            decider,text = name.split("=")
+        
+        if model.__dict__[decider]:
+            if first:
+                first=False
+            else:
+                s+=", "
+            s+= model.__dict__[text]
+    if s == "":
+        s = "-"
+    return s
+
+@register.simple_tag
+def develop_year(model,label):
+    kind = model.__dict__[label+"_kind"]
+    if kind == "not estimated":
+        s = kind
+    else:
+        s = "{amount}% {kind} {year}".format(amount=model.__dict__[label+"_amount"],
+            kind=kind,
+            year=model.__dict__[label+"_year"])
+    return format_html("<tr><td class='sheetlabel'>{label}</td><td>{s}</td></tr>".format(label=model._meta.get_field(label+"_kind").verbose_name, s=s))
 
 @register.simple_tag
 def get_verbose_field_name(instance, field_name):

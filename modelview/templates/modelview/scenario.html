@@ -36,9 +36,8 @@
                             </td>
                             <td>
                                 <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='funding_private' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='funding_public' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='funding_no_funding' %}
+{% checklist model "funding_private,funding_public,funding_no_funding" %}
+
                                 </table>
                             </td>
                         </tr>
@@ -53,12 +52,8 @@
                                 Time frame
                             </td>
                             <td>
-                                <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2020' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2030' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_2050' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_frame_other' add=model.time_frame_other_text %}
-                                </table>
+                                {% checklist model "time_frame_2020,time_frame_2030,time_frame_2050,time_frame_other=time_frame_other_text" %}
+
                             </td>
                         </tr>
                         {% include 'modelview/model_snippet.html' with model=model field='time_frame_2_target_year' %}
@@ -68,13 +63,8 @@
                                 Modeled energy sectors
                             </td>
                             <td>
-                                <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_electricity' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_heat' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_liquid_fuels' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_gas' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_energy_sectors_others' add=model.modeled_energy_sectors_others_text %}
-                                </table>
+{% checklist model "modeled_energy_sectors_electricity,modeled_energy_sectors_heat,modeled_energy_sectors_liquid_fuels,modeled_energy_sectors_gas,modeled_energy_sectors_others=modeled_energy_sectors_others_text" %}
+
                             </td>
                         </tr>
                         <tr>
@@ -82,12 +72,8 @@
                                 Modeled demand sectors
                             </td>
                             <td>
-                                <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_households' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_industry' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_commercial_sector' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='modeled_demand_sectors_transport' %}
-                                </table>
+                                {% checklist model "modeled_demand_sectors_households,modeled_demand_sectors_industry,modeled_demand_sectors_commercial_sector,modeled_demand_sectors_transport" %}
+
                             </td>
                         </tr>
 
@@ -96,13 +82,8 @@
                                 Economic (behavioural) rationale
                             </td>
                             <td>
-                                <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_perfect' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_myopic' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_qualitative' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_agentbased' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='economic_behavioral_other' add=model.economic_behavioral_other_text %}
-                                </table>
+                                {% checklist model "economic_behavioral_perfect,economic_behavioral_myopic,economic_behavioral_qualitative,economic_behavioral_agentbased,economic_behavioral_other=economic_behavioral_other_text" %}
+
                             </td>
                         </tr>
                         
@@ -111,29 +92,8 @@
                                 Technologies included
                             </td>
                             <td>
-                                <table>
-                                     {% include 'modelview/model_snippet.html' with model=model field='renewables_PV' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_wind' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_hydro' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_biomass' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_biogas' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_solar' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='renewables_others' add=model.renewables_others_text%}
-                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_gas' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_coal' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_oil' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_liquid' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='conventional_generation_nuclear' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='CHP' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='networks_electricity_gas_heat' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='storages_battery' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='storages_kinetic' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='storages_CAES' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='storages_PHS' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='storages_chemical' %}
-                                </table>
+{% checklist model "renewables_PV,renewables_wind,renewables_hydro,renewables_biomass,renewables_biogas,renewables_solar,renewables_others=renewables_others_text,conventional_generation_gas,conventional_generation_coal,conventional_generation_oil,conventional_generation_liquid,conventional_generation_nuclear,CHP,networks_electricity_gas_heat,networks_electricity_gas_heat,networks_electricity_gas_heat,storages_battery,storages_kinetic,storages_CAES,storages_PHS,storages_chemical" %}
+
                             </td>
                         </tr>                        
                        
@@ -147,12 +107,8 @@
                             </td>
                             <td>
                                 <table>
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_anual' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_hour' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_15_min' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_1_min' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_sec' %}
-                                    {% include 'modelview/model_snippet.html' with model=model field='time_steps_other' add=model.time_steps_other_text %}
+{% checklist model "time_steps_anual,time_steps_hour,time_steps_15_min,time_steps_1_min,time_steps_sec,time_steps_other=time_steps_other_text" %}
+
                                 </table>
                             </td>
                         </tr>
@@ -174,40 +130,21 @@
                 {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
                 {% include 'modelview/model_snippet.html' with model=model field='name_of_the_study' %}
                 
-
-                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='energy_saving_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='potential_energy_savings_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='emission_reductions_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_power_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_heat_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_mobility_year' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_amount' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_kind' %}
-                {% include 'modelview/model_snippet.html' with model=model field='share_RE_total_year' %}
-                
+                {% develop_year model 'energy_saving' %}
+                {% develop_year model 'potential_energy_savings' %}
+                {% develop_year model 'emission_reductions' %}
+                {% develop_year model 'share_RE_heat' %}
+                {% develop_year model 'share_RE_mobility' %}
+                {% develop_year model 'share_RE_power' %}
+                {% develop_year model 'share_RE_total' %}                
                 <tr>
                     <td class="sheetlabel">
                         Cost development
                     </td>
                     <td>
                         <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_capex' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_opex' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_learning_curves' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_constant' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='cost_development_rediscount' %}
+                            {% checklist model "cost_development_capex,cost_development_opex,cost_development_learning_curves,cost_development_constant,cost_development_rediscount" %}
+
                         </table>
                     </td>
                 </tr>
@@ -217,14 +154,7 @@
                         Potential wind
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_other' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_wind_other_text' %}
-                        </table>
+                        {% checklist model "potential_wind_whole,potential_wind_technical,potential_wind_economical,potential_wind_ecological,potential_wind_other,potential_wind_other_text" %}
                     </td>
                 </tr>
                 
@@ -234,13 +164,7 @@
                         Potential solar electric
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_electric_other' add=model.potential_solar_electric_other_text %}
-                        </table>
+                        {% checklist model "potential_solar_electric_whole,potential_solar_electric_technical,potential_solar_electric_economical,potential_solar_electric_ecological,potential_solar_electric_other=potential_solar_electric_other_text" %}
                     </td>
                 </tr>
                 <tr>
@@ -248,13 +172,7 @@
                         Potential solar thermal
                     </td>
                     <td>
-                        <table>
-                           {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_solar_thermal_other' add=model.potential_solar_thermal_other_text %}
-                        </table>
+                        {% checklist model "potential_solar_thermal_whole,potential_solar_thermal_technical,potential_solar_thermal_economical,potential_solar_thermal_ecological,potential_solar_thermal_other=potential_solar_thermal_other_text" %}
                     </td>
                 </tr>
                 
@@ -263,13 +181,7 @@
                         Potential biomass
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_biomass_other' add=model.potential_biomass_other_text%}
-                        </table>
+                        {% checklist model "potential_biomass_whole,potential_biomass_technical,potential_biomass_economical,potential_biomass_ecological,potential_biomass_other=potential_biomass_other_text" %}
                     </td>
                 </tr>
                 
@@ -278,14 +190,7 @@
                         Potential geothermal
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_other' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_geothermal_othertext' %}
-                        </table>
+                        {% checklist model "potential_geothermal_whole,potential_geothermal_technical,potential_geothermal_economical,potential_geothermal_ecological,potential_geothermal_other,potential_geothermal_othertext" %}
                     </td>
                 </tr>
                 
@@ -294,14 +199,7 @@
                         Potential hydro power
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_whole' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_technical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_economical' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_ecological' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_other' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='potential_hydro_power_other_text' %}
-                        </table>
+                        {% checklist model "potential_hydro_power_whole,potential_hydro_power_technical,potential_hydro_power_economical,potential_hydro_power_ecological,potential_hydro_power_other,potential_hydro_power_other_text" %}
                     </td>
                 </tr>
                 
@@ -345,12 +243,7 @@
                         Exogenous time series used
                     </td>
                     <td>
-                        <table>
-                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_climate' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_feedin' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_loadcurves' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='exogenous_time_series_used_others' add=model.exogenous_time_series_used_others_text %}
-                        </table>
+                        {% checklist model "exogenous_time_series_used_climate,exogenous_time_series_used_feedin,exogenous_time_series_used_loadcurves,exogenous_time_series_used_others=exogenous_time_series_used_others_text" %}
                     </td>
                 </tr>
                 

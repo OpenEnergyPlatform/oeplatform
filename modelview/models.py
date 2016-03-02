@@ -117,8 +117,8 @@ class Energymodel(BasicFactsheet):
 
     storage_electricity_battery = BooleanField(default=False,verbose_name='battery') 
     storage_electricity_kinetic = BooleanField(default=False,verbose_name='kinetic') 
-    storage_electricity_CAES = BooleanField(default=False,verbose_name='CAES') 
-    storage_electricity_PHS = BooleanField(default=False,verbose_name='PHS') 
+    storage_electricity_CAES = BooleanField(default=False,verbose_name='compressed air') 
+    storage_electricity_PHS = BooleanField(default=False,verbose_name='pump hydro') 
     storage_electricity_chemical = BooleanField(default=False,verbose_name='chemical') 
 
     storage_heat = BooleanField(default=False,verbose_name='heat') 
