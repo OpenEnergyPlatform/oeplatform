@@ -86,11 +86,14 @@ def assign_field(instance, field_name):
 
 
 @register.simple_tag
-def get_field_attr(instance, field_name, attr):
+def get_field_attr(instance, field_name, attr, cut=None):
     """
     Returns verbose_name for a field.
     """
-    return instance._meta.get_field(field_name).__dict__[attr]
+    val = instance._meta.get_field(field_name).__dict__[attr]
+    if cut:
+        val = val.replace(cut,"")
+    return val
     
 @register.assignment_tag
 def assign_field_attr(instance, field_name, attr):
