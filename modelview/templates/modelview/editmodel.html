@@ -19,6 +19,7 @@
   <li><a data-toggle="tab" href="#Coverage">Coverage</a></li>
     <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
+  <li><a data-toggle="tab" href="#Integration">Model Integration</a></li>
 </ul>
 
 <div class="tab-content">
@@ -296,6 +297,15 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
             {% include 'modelview/editmodel_snippet.html' with field=form.validation %}
             {% include 'modelview/editmodel_snippet.html' with field=form.model_specific_properties %}
+        </table>
+    </div>
+    <div id="Integration" class="tab-pane fade">
+        <table class="formtable">
+            {% include 'modelview/editmodel_snippet.html' with field=form.interfaces %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.model_file_format %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.model_input %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.integrating_models %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.integrated_models %}
         </table>
     </div>
 </div>

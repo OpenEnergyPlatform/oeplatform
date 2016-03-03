@@ -6,7 +6,7 @@ from django.db.models import CharField, ImageField, BooleanField, IntegerField, 
 # Create your models here.
 
 class BasicFactsheet(models.Model):
-    model_name = CharField(max_length=1000,verbose_name='Model name', help_text='What is the full model name?', null=False, unique=True) 
+    model_name = CharField(max_length=1000,verbose_name='Name', help_text='What is the full model name?', null=False, unique=True) 
     acronym = CharField(max_length=20,verbose_name='Acronym', help_text='What is the abbreviation?', null=False) 
     institutions = ArrayField(CharField(max_length=1000, help_text='Which institutions develop(ed) the model?') ,default=list, null=True, verbose_name='Institution(s) (comma-separated)')
     authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period) (comma-separated)') 
@@ -208,6 +208,12 @@ class Energymodel(BasicFactsheet):
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
     
 
+    interfaces = TextField(verbose_name="Interfaces", help_text="Which APIs does the model have?", null=True)
+    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','other')), verbose_name='Model file format', help_text='In which format is the model saved?', null=True)
+    model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', null=True)
+    integrating_models = ArrayField(CharField(max_length=1000), verbose_name="Integration with other models",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)", null=True)
+    integrated_models = ArrayField(CharField(max_length=1000), verbose_name="Integration of other models",help_text="Which models are integrated in the model? Where are these models available? (comma-separated)", null=True)
+
     
 class Energyframework(BasicFactsheet):
     def __init__(self, *args, **kwargs):
@@ -291,8 +297,8 @@ class Energyscenario(models.Model):
 
     storages_battery = BooleanField(verbose_name='battery')
     storages_kinetic = BooleanField(verbose_name='kinetic')
-    storages_CAES = BooleanField(verbose_name='CAES')
-    storages_PHS = BooleanField(verbose_name='PHS') 
+    storages_CAES = BooleanField(verbose_name='compressed air')
+    storages_PHS = BooleanField(verbose_name='pump hydro') 
     storages_chemical = BooleanField(verbose_name='chemical')
 
     economic_focuses_included = CharField(verbose_name='Economic focuses included', help_text='Have there been economic focusses/sectors included?', max_length=1000, null=True) 

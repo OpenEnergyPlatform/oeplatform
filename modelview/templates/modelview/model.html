@@ -341,4 +341,22 @@
         </div>
     </div>
 </div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a class="fill-div" data-toggle="collapse" href="#Integration">Model Integration</a>
+          </h4>
+        </div>
+        <div id="Integration" class="panel-collapse collapse in profilebox in">
+            <table class="profiletable">
+                {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
+                {% include 'modelview/model_snippet.html' with model=model field='model_file_format' %}
+                {% include 'modelview/model_snippet.html' with model=model field='model_input' %}
+                {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
+                {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
