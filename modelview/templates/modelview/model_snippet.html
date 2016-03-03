@@ -11,7 +11,7 @@
         {% endif %} :
     </td>
     <td> 
-        {% if not add  %} 
+        {% if not add %} 
             {% if val != None %}
                 {% if val = False %}
                     <span class='glyphicon glyphicon-remove'></span> 
@@ -24,7 +24,7 @@
                 -
             {% endif %} 
         {% endif %} 
-        {% if val %} 
+        {% if val and add%} 
             {{ add }} 
         {% endif %}
     </td>
