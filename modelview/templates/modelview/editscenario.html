@@ -4,7 +4,7 @@
 
 {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
-
+<h1> Scenario </h1>
 {% if method == "update"%}
     <form action="/factsheets/scenarios/{{ name }}/update/" method="post" role="form">
 {% else %}

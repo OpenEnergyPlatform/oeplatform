@@ -3,6 +3,7 @@
 {% block content %}
 {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
+<h1> Framework </h1>
 {% if method == "update"%}
     <form action="/factsheets/frameworks/{{ name }}/update/" method="post" role="form">
 {% else %}

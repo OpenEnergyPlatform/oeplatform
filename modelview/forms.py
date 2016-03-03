@@ -22,6 +22,8 @@ class EnergyframeworkForm(ModelForm):
         for key in self.fields:
             f = [not f.null for f in Energyframework._meta.fields if f.name==key][0]
             self.fields[key].required = f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
+            if "help_text" in self.fields[key].__dict__:
+                self.fields[key].help_text = self.fields[key].help_text.replace("model","framework")
         
     class Meta:
         model = Energyframework
