@@ -49,11 +49,14 @@ def show(request, sheettype, model_name):
     repo = None
     if sheettype != "scenario":
         if model.gitHub and model.link_to_source_code:
-            match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
-            org = match.group('org')
-            repo = match.group('repo')
-            gh_url = _handle_github_contributions(org,repo)
-        
+            try:
+                match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
+                org = match.group('org')
+                repo = match.group('repo')
+                gh_url = _handle_github_contributions(org,repo)
+            except:
+                org = None
+                repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
     
