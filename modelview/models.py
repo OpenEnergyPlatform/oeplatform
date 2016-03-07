@@ -221,9 +221,7 @@ class Energyframework(BasicFactsheet):
     def __init__(self, *args, **kwargs):
         super(BasicFactsheet, self).__init__(*args, **kwargs)
         for o in self._meta.fields:
-            print(o)
             if "help_text" in o.__dict__:
-                print(o)
                 o.help_text = o.help_text.replace("model", "framework")
     model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "other"]], verbose_name="API to openmod database" , null=True)
     model_types_other_text = CharField(max_length=1000, null=True)
