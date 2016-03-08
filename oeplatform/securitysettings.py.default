@@ -2,10 +2,12 @@
 SECRET_KEY = '0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
+
+# Runs on localhost only
 URL = '127.0.0.1'
 
-# Database
+# Database to your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
@@ -17,8 +19,10 @@ DATABASES = {
 	}
 }
 
+# This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = []
 
+# This database connection is used for the actual data interfaces (App: dataedit)
 dbuser = ""
 dbpasswd = ""
 dbport = 5432
