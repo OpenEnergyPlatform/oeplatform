@@ -14,8 +14,8 @@ class BasicFactsheet(models.Model):
     contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
     website = URLField(verbose_name='Website', null=True) 
     logo = ImageField(verbose_name='Logo', null=True) 
-    primary_purpose = CharField(max_length=1000,verbose_name='Primary Purpose', help_text='What is the primary purpose the model?', null=True) 
-    primary_outputs = CharField(max_length=1000,verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
+    primary_purpose = TextField(verbose_name='Primary Purpose', help_text='What is the primary purpose the model?', null=True) 
+    primary_outputs = TextField(verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
     support = BooleanField(default=False,verbose_name='Support / Community / Forum') 
 
     framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?') 
@@ -35,8 +35,8 @@ class BasicFactsheet(models.Model):
     link_to_source_code = URLField(verbose_name='Link to source code', null=True) 
     data_provided = CharField(max_length=1000,verbose_name='Data provided', help_text='Is the necessary data to run a scenario available?', choices=(('none', 'none'), ('some', 'some'), ('all', 'all')), default='none') 
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
-    number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), default='less than 10') 
-    number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), default='less than 10') 
+    number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
+    number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
     modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software  (comma-separated)", default=list, null=True)
     interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name="Internal data processing software (comma-separated)",default=list, null=True)
 
@@ -223,7 +223,7 @@ class Energyframework(BasicFactsheet):
         for o in self._meta.fields:
             if "help_text" in o.__dict__:
                 o.help_text = o.help_text.replace("model", "framework")
-    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "other"]], verbose_name="API to openmod database" , null=True)
+    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "other"]], verbose_name="Mathematical model" , null=True)
     model_types_other_text = CharField(max_length=1000, null=True)
     api_doc = URLField(verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")

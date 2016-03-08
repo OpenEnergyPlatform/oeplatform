@@ -1,7 +1,7 @@
 <script>
         function {{ field }}_click(cb) {
             var itm = document.getElementById('{{ add }}_container');
-            if (cb.checked == false) {
+            if (cb.{%if condition%}{{condition}}{% else %}checked == false{% endif %}) {
                 itm.style.display = 'none';
             } else { itm.style.display = 'inline'; }
         }

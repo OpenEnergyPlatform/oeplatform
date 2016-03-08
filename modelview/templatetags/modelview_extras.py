@@ -116,3 +116,7 @@ def year_field(instance, field_name):
     field_kind=instance.fields[field_name+'_kind']
     field_year=instance.fields[field_name+'_year']
     return mark_safe("{{{{ {field}.label }}}}: {{{{ {field}_amount }}}} {{{{ {field}_kind }}}} {{{{ {field}_year }}}} <br>".format(field=field_name))
+    
+@register.filter
+def addEvent(value, arg):
+    return value.as_widget(attrs={arg: value.name+"_click(this)"})

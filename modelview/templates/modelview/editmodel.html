@@ -51,8 +51,7 @@
 {% include 'modelview/editmodel_snippet.html' with field=form.open_source %}
 {% include 'modelview/editmodel_snippet.html' with field=form.open_up %}
 {% include 'modelview/editmodel_snippet.html' with field=form.costs %}
-{% include 'modelview/editmodel_snippet.html' with field=form.license %}
-{% include 'modelview/editmodel_snippet.html' with field=form.license_other_text %}
+{% include 'modelview/editmodel_snippet.html' with field=form.license add=form.license_other_text %}
 {% include 'modelview/editmodel_snippet.html' with field=form.source_code_available %}
 {% include 'modelview/editmodel_snippet.html' with field=form.gitHub %}
 {% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code %}
