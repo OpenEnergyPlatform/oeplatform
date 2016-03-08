@@ -18,8 +18,8 @@
             </div>
             <ul class="nav navbar-nav">
                 {% if user.is_admin %}
-				<li class="active"><a href="http://localhost:5000">CKAN</a></li>
-                <li class="active"><a href="/dataedit/">Input</a></li>
+				<li class="inactive"><a href="http://localhost:5000">CKAN</a></li>
+                <li class="inactive"><a href="/dataedit/">Input</a></li>
                 {% endif %}
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
@@ -29,7 +29,7 @@
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                 </ul>
-                <li class="active"> <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank">Discussion</a></li>
+                <li class="inactive"> <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank"> Discussion {% bootstrap_icon "new-window" %}</a></li>
                 </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
