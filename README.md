@@ -37,3 +37,5 @@ Next step is to migrate the database shema from django to your django database:
 Finally, you can run your local copy of this platform:
 
     python manage.py runserver
+    
+Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser 
