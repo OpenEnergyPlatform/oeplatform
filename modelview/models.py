@@ -209,9 +209,9 @@ class Energymodel(BasicFactsheet):
     
 
     interfaces = TextField(verbose_name="Interfaces", help_text="Which APIs does the model have?", null=True)
-    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
+    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
     model_file_format_other_text = CharField(max_length=1000,null=True)
-    model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
+    model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
     model_input_other_text = CharField(max_length=1000,null=True)
     integrating_models = ArrayField(CharField(max_length=1000), verbose_name="Integration with other models",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)", null=True)
     integrated_models = ArrayField(CharField(max_length=1000), verbose_name="Integration of other models",help_text="Which models are integrated in the model? Where are these models available? (comma-separated)", null=True)
@@ -223,7 +223,7 @@ class Energyframework(BasicFactsheet):
         for o in self._meta.fields:
             if "help_text" in o.__dict__:
                 o.help_text = o.help_text.replace("model", "framework")
-    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "other"]], verbose_name="Mathematical model" , null=True)
+    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "Other"]], verbose_name="Mathematical model" , null=True)
     model_types_other_text = CharField(max_length=1000, null=True)
     api_doc = URLField(verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")
