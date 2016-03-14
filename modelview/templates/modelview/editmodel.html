@@ -198,7 +198,7 @@
         </tr>            
             {% include 'modelview/editmodel_snippet.html' with field=form.comment_on_geo_resolution %}
         <tr>
-            <td class="formlabel"> Network coverage / representation (electrical grid) </td>
+            <td class="formlabel"> Time resolution </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_anual %}
@@ -241,7 +241,7 @@
         <table class="formtable">
         
         <tr>
-            <td class="formlabel"> Network coverage / representation (electrical grid) </td>
+            <td class="formlabel"> Model class </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_optimization_LP %}
@@ -261,7 +261,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.short_description_of_mathematical_model_class %}
             
         <tr>
-            <td class="formlabel"> Network coverage / representation (electrical grid) </td>
+            <td class="formlabel"> Mathematical objective </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.mathematical_objective_cO2 %}
@@ -272,7 +272,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Network coverage / representation (electrical grid) </td>
+            <td class="formlabel"> Approach to uncertainty </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.uncertainty_deterministic %}
