@@ -30,3 +30,11 @@
 .right {
     right: 0px;
 }
+
+.hidden{
+    display:none;
+}
+
+.visible{
+    display:inline;
+}

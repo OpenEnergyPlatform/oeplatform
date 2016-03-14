@@ -21,14 +21,14 @@ class BasicFactsheet(models.Model):
     framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?') 
     framework_yes_text = CharField(max_length=1000,null=True) 
 
-    user_documentation = URLField(verbose_name='User Documentation', help_text='Where is the user documentation publicly available?', null=False) 
-    code_documentation = URLField(verbose_name='Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=False)
+    user_documentation = URLField(verbose_name='Link to User Documentation', help_text='Where is the user documentation publicly available?', null=True) 
+    code_documentation = URLField(verbose_name='Link to Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=True)
     documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How is the quality of the documentations?', choices=(('expandable', 'expandable'), ('good', 'good'), ('excellent', 'excellent')), default='expandable') 
     source_of_funding = CharField(max_length=200,verbose_name='Source of funding', help_text="What's the main source of funding?", null=True) 
     open_source = BooleanField(default=False,verbose_name='Open Source') 
     open_up = BooleanField(default=False,verbose_name='Planned to open up in the future', help_text='Will the source code be available in future?') 
     costs = CharField(max_length=1000,verbose_name='Costs', null=True) 
-    license = CharField(max_length=1000,verbose_name='License', choices=(('Apache', 'Apache'), ('Other', 'Other')), default='Apache') 
+    license = CharField(max_length=20,verbose_name='License', choices=((x,x) for x in ["MIT Licence", "Apache Licence", "GNU GPL Licence", "Other"]), default='Apache Licence') 
     license_other_text = CharField(max_length=1000,null=True)
     source_code_available = BooleanField(default=False,verbose_name='Source code available', help_text='Is the source code directly downloadable?') 
     gitHub = BooleanField(default=False,verbose_name='GitHub', help_text='Is the model available on GitHub?') 
@@ -125,7 +125,7 @@ class Energymodel(BasicFactsheet):
     storage_gas = BooleanField(default=False,verbose_name='gas') 
 
     user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
-    user_behaviour_yes_text = CharField(max_length=200,null=True) 
+    user_behaviour_yes_text = TextField(null=True) 
 
     market_models = BooleanField(default=False,verbose_name='Market models', help_text='Which / Is a market models are included?') 
 
@@ -145,7 +145,7 @@ class Energymodel(BasicFactsheet):
     geo_resolution_others = BooleanField(default=False,verbose_name='others') 
     geo_resolution_others_text = CharField(max_length=200,null=True)
 
-    comment_on_geo_resolution = CharField(max_length=200,verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
+    comment_on_geo_resolution = TextField(verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
 
     time_resolution_anual = BooleanField(default=False,verbose_name='anual') 
     time_resolution_hour = BooleanField(default=False,verbose_name='hour') 
@@ -183,7 +183,7 @@ class Energymodel(BasicFactsheet):
     model_class_other = BooleanField(default=False,verbose_name='Other') 
     model_class_other_text = CharField(max_length=1000,null=True) 
 
-    short_description_of_mathematical_model_class = CharField(max_length=1000,verbose_name='Short description of mathematical model class', null=True) 
+    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', null=True) 
 
     mathematical_objective_cO2 = BooleanField(default=False,verbose_name='CO2') 
     mathematical_objective_costs = BooleanField(default=False,verbose_name='costs') 
@@ -209,9 +209,9 @@ class Energymodel(BasicFactsheet):
     
 
     interfaces = TextField(verbose_name="Interfaces", help_text="Which APIs does the model have?", null=True)
-    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
+    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
     model_file_format_other_text = CharField(max_length=1000,null=True)
-    model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
+    model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
     model_input_other_text = CharField(max_length=1000,null=True)
     integrating_models = ArrayField(CharField(max_length=1000), verbose_name="Integration with other models",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)", null=True)
     integrated_models = ArrayField(CharField(max_length=1000), verbose_name="Integration of other models",help_text="Which models are integrated in the model? Where are these models available? (comma-separated)", null=True)
@@ -223,7 +223,7 @@ class Energyframework(BasicFactsheet):
         for o in self._meta.fields:
             if "help_text" in o.__dict__:
                 o.help_text = o.help_text.replace("model", "framework")
-    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "other"]], verbose_name="Mathematical model" , null=True)
+    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "Other"]], verbose_name="Mathematical model" , null=True)
     model_types_other_text = CharField(max_length=1000, null=True)
     api_doc = URLField(verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")
