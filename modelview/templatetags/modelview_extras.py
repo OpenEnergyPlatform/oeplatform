@@ -47,7 +47,7 @@ def checklist(model,labels):
                 first=False
             else:
                 s+=", "
-            s+= model.__dict__[text]
+            s+= str(model.__dict__[text])
     if s == "":
         s = "-"
     return s
@@ -99,6 +99,13 @@ def get_field_attr(instance, field_name, attr, cut=None):
     return val
     
 @register.assignment_tag
+def set_val(val):
+    """
+    Returns verbose_name for a field.
+    """
+    return val    
+    
+@register.assignment_tag
 def assign_field_attr(instance, field_name, attr):
     """
     Returns verbose_name for a field.
@@ -120,3 +127,14 @@ def year_field(instance, field_name):
 @register.filter
 def addEvent(value, arg):
     return value.as_widget(attrs={arg: value.name+"_click(this)"})
+
+@register.assignment_tag
+def assignClass(field, css):
+    class_old = field.field.widget.attrs.get('class', None)
+    class_new = class_old + ' ' + css if class_old else css
+    field.field.widget.attrs['class'] = class_new
+    return field
+   
+@register.filter
+def addClass(value, arg):
+    return value.as_widget(attrs={'class': arg})

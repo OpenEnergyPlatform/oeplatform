@@ -65,16 +65,16 @@
 
         {% include 'modelview/editmodel_snippet.html' with field=form.open_source event='onclick'%}
         <div id="open_source_no">
-            {% include 'modelview/editmodel_snippet.html' with field=form.open_up class="open_source_no"%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.costs class="open_source_no"%}
+            {% include 'modelview/editmodel_snippet.html' with field=form.open_up class="open_source_no" visible=form.open_source.value|yesno:",none"%}
+            {% include 'modelview/editmodel_snippet.html' with field=form.costs class="open_source_no" visible=form.open_source.value|yesno:",none"%}
         </div>
         <div id="open_source_yes">
-            {% include 'modelview/editmodel_snippet.html' with field=form.license add=form.license_other_text class="open_source_yes" %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.source_code_available class="open_source_yes"%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.gitHub class="open_source_yes"%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code class="open_source_yes"%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.data_provided class="open_source_yes"%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.cooperative_programming class="open_source_yes"%}
+            {% include 'modelview/editmodel_snippet.html' with field=form.license add=form.license_other_text class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.source_code_available class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.gitHub class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.data_provided class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.cooperative_programming class="open_source_yes" visible=form.open_source.value|yesno:"none," %}
         </div>
         </table>
     </div>

@@ -4,19 +4,40 @@
 {% elif field|fieldtype == "Select" and add %}
     {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name condition='value != "Other"'%}
 {% endif %}
-<tr {% if class %} class="{{class}}" {% endif %} ><td class="formlabel">{{ field.label }}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:</td>
-<td>{% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add%}
-            {% if event %}
-                {{ field|addEvent:event}} 
-            {% else %}
-                {{ field }} 
-            {% endif %}
-    {% else %}
-        {% if field|fieldtype == "CheckboxInput" %}
-            {{ field|addEvent:'onclick' }}
-        {% elif field|fieldtype == "Select" %}
-            {{ field|addEvent:'onchange' }}
-        {% endif %}
-        
-    {% endif %} {% if field.help_text != "" %}<a href='#' data-toggle='tooltip' title='{{ field.help_text }}' ><span class='glyphicon glyphicon-question-sign'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %} {% if add %} 
-     <div id="{{add.name}}_container" {% if field|fieldtype == "CheckboxInput" and not field.value or field|fieldtype == "Select" and field.value == "Other" %}style="display:none"{% else %}style="display:inline"{% endif %}> {{add}} </div> {% endif %} </td></tr>
+<tr {% if class %} class="{{class}}" {% endif %} {% if visible %}style="display:{{visible}}"{% endif %} >
+    <td class="formlabel">{{ field.label }}
+        {% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:</td>
+    <td>{% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add%}
+                {% if event %}
+                    {{ field|addEvent:event }} 
+                {% else %}
+                    {{ field }} 
+                {% endif %}
+        {% else %}
+                {% if field|fieldtype == "CheckboxInput" %}
+                    {{ field|addEvent:'onclick' }}
+                {% elif field|fieldtype == "Select" %}
+                    {{ field|addEvent:'onchange' }}
+                {% endif %}
+        {% endif %} 
+        {% if field.help_text != "" %}
+            <a href='#' data-toggle='tooltip' title='{{ field.help_text }}' >
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a>
+        {% endif %} 
+        {% if field.errors %} 
+            {{ field.errors }} 
+        {% endif %} 
+        {% if add %} 
+            <div id="{{add.name}}_container" 
+                {% if field|fieldtype == "CheckboxInput" and not field.value or field|fieldtype == "Select" and not field.value == "Other" %}
+                    style="display:none"
+                {% else %}
+                    style="display:inline"
+                {% endif %}
+            > 
+                {{add}} 
+            </div> 
+        {% endif %} 
+    </td>
+</tr>
