@@ -125,7 +125,7 @@ class Energymodel(BasicFactsheet):
     storage_gas = BooleanField(default=False,verbose_name='gas') 
 
     user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
-    user_behaviour_yes_text = CharField(max_length=200,null=True) 
+    user_behaviour_yes_text = TextField(null=True) 
 
     market_models = BooleanField(default=False,verbose_name='Market models', help_text='Which / Is a market models are included?') 
 
@@ -145,7 +145,7 @@ class Energymodel(BasicFactsheet):
     geo_resolution_others = BooleanField(default=False,verbose_name='others') 
     geo_resolution_others_text = CharField(max_length=200,null=True)
 
-    comment_on_geo_resolution = CharField(max_length=200,verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
+    comment_on_geo_resolution = TextField(verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
 
     time_resolution_anual = BooleanField(default=False,verbose_name='anual') 
     time_resolution_hour = BooleanField(default=False,verbose_name='hour') 
@@ -183,7 +183,7 @@ class Energymodel(BasicFactsheet):
     model_class_other = BooleanField(default=False,verbose_name='Other') 
     model_class_other_text = CharField(max_length=1000,null=True) 
 
-    short_description_of_mathematical_model_class = CharField(max_length=1000,verbose_name='Short description of mathematical model class', null=True) 
+    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', null=True) 
 
     mathematical_objective_cO2 = BooleanField(default=False,verbose_name='CO2') 
     mathematical_objective_costs = BooleanField(default=False,verbose_name='costs') 
