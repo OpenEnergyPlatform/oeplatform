@@ -11,39 +11,49 @@
     <form action="/factsheets/models/add/" method="post" role="form">
 {% endif %}
 {% csrf_token %}
+<div style="width:100%">
 
-<ul class="nav nav-tabs">
+<ul class="nav nav-tabs" style="width:100%">
   <li class="active"><a data-toggle="tab" href="#Basic">General Information</a></li>
   <li><a data-toggle="tab" href="#Openness">Openness</a></li>
   <li><a data-toggle="tab" href="#Software">Software</a></li>
   <li><a data-toggle="tab" href="#Coverage">Coverage</a></li>
-    <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>
-  <li><a data-toggle="tab" href="#References">References</a></li>
+  <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>  
   <li><a data-toggle="tab" href="#Integration">Model Integration</a></li>
+  <li><a data-toggle="tab" href="#References">References</a></li>
+  <input class="btn btn-info right" type="submit" value="Submit all" />
 </ul>
 
+</div>
+    {% if errors %}
+        <ul class="list-group">
+            {% for label, message in errors %}
+                <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 <div class="tab-content">
     <div id="Basic" class="tab-pane fade in active">
         <table class="formtable">
-{% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
-{% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
-{% include 'modelview/editmodel_snippet.html' with field=form.institutions %}
-{% include 'modelview/editmodel_snippet.html' with field=form.authors %}
-{% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
-{% include 'modelview/editmodel_snippet.html' with field=form.contact_email %}
-{% include 'modelview/editmodel_snippet.html' with field=form.website %}
-{% include 'modelview/editmodel_snippet.html' with field=form.logo %}
-{% include 'modelview/editmodel_snippet.html' with field=form.primary_purpose %}
-{% include 'modelview/editmodel_snippet.html' with field=form.primary_outputs %}
-{% include 'modelview/editmodel_snippet.html' with field=form.support %}
-{% include 'modelview/editmodel_snippet.html' with field=form.framework add=form.framework_yes_text%}
+            {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.institutions %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.authors %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.contact_email %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.website %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.logo %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.primary_purpose %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.primary_outputs %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.support %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.framework add=form.framework_yes_text%}
 
-{% include 'modelview/editmodel_snippet.html' with field=form.user_documentation %}
-{% include 'modelview/editmodel_snippet.html' with field=form.code_documentation %}
-{% include 'modelview/editmodel_snippet.html' with field=form.documentation_quality %}
-{% include 'modelview/editmodel_snippet.html' with field=form.source_of_funding %}
-{% include 'modelview/editmodel_snippet.html' with field=form.number_of_devolopers %}
-{% include 'modelview/editmodel_snippet.html' with field=form.number_of_users %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.user_documentation %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.code_documentation %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.documentation_quality %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.source_of_funding %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.number_of_devolopers %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.number_of_users %}
         </table>
     </div>
     <script>
@@ -328,6 +338,5 @@
         </table>
     </div>
 </div>
-<input class="btn btn-info right" type="submit" value="Submit" />
 </form>
 {% endblock %}
