@@ -17,8 +17,15 @@
   <li><a data-toggle="tab" href="#Software">Software</a></li>
   <li><a data-toggle="tab" href="#Design">Design and Interfaces</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
+  <input class="btn btn-info right" type="submit" value="Submit all" />
 </ul>
-
+    {% if errors %}
+        <ul class="list-group">
+            {% for label, message in errors %}
+                <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 <div class="tab-content">
     <div id="Basic" class="tab-pane fade in active">
         <table class="formtable">
@@ -107,6 +114,5 @@
     </div>
 </div>
 
-<input type="submit" value="Submit" />
 </form>
 {% endblock %}

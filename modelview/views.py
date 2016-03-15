@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 from django.db.models import fields
 from django.db import models
+import django.forms as forms
 from oeplatform import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 # Create your views here.
@@ -31,6 +32,7 @@ def getClasses(sheettype):
         c = Energyscenario
         f = EnergyscenarioForm
     return c,f
+     
 
 def listsheets(request,sheettype):
     c,_ = getClasses(sheettype)
@@ -59,19 +61,6 @@ def show(request, sheettype, model_name):
                 repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
-    
-    
-class ModelAdd(View):    
-    def get(self,request):
-        form = EnergymodelForm()
-        return render(request,"modelview/editmodel.html",{'form':form, 'method':'add'})
-    def post(self,request):
-        form = EnergymodelForm(request.POST or None)
-        if form.is_valid():
-            form.save()
-            model_name = Energymodel(request.POST).pk
-            return redirect("/factsheets/models/{model}".format(model=model_name))
-        return render(request,"modelview/editmodel.html",{'form':form, 'method':'add'})
 
 def updateModel(request,model_name, sheettype):
     c,f = getClasses(sheettype)        
@@ -90,34 +79,23 @@ def editModel(request,model_name, sheettype):
     
     return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
 
+class FSAdd(View):    
+    def get(self,request, sheettype):
+        _,f = getClasses(sheettype)
+        form = f()
+        return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add'})
+    def post(self,request, sheettype):
+        c,f = getClasses(sheettype)
+        form = f(request.POST or None)
 
+        if form.is_valid():
+            form.save()
+            model_name = c(request.POST).pk
+            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
+        else:
+            errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add', 'errors':errors})
        
-class FrameworkAdd(View):    
-    def get(self,request):
-        form = EnergyframeworkForm()
-        return render(request,"modelview/editframework.html",{'form':form, 'method':'add'})
-    def post(self,request):
-        form = EnergyframeworkForm(request.POST or None)
-        if form.is_valid():
-            form.save()
-            model_name = Energyframework(request.POST).basicfactsheet_ptr.pk
-            return redirect("/factsheets/frameworks/{model}".format(model=model_name))
-        return render(request,"modelview/editframework.html",{'form':form, 'method':'add'})
-    
-class ScenarioAdd(View):    
-    def get(self,request):
-        form = EnergyscenarioForm()
-        return render(request,"modelview/editscenario.html",{'form':form, 'method':'add'})
-    def post(self,request):
-        form = EnergyscenarioForm(request.POST or None)
-        if form.is_valid():
-            form.save()
-            model_name = Energyframework(request.POST).pk
-            return redirect("/factsheets/scenarios/{model}".format(model=model_name))
-        return render(request,"modelview/editscenario.html",{'form':form, 'method':'add'})
-
-
-
 """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed

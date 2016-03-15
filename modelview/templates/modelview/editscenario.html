@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load modelview_extras %}
 {% block content %}
-
+{% load bootstrap3 %}
 {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Scenario </h1>
@@ -16,8 +16,16 @@
   <li><a data-toggle="tab" href="#Empirical">Openness</a></li>
   <li><a data-toggle="tab" href="#Assumtions">Assumtions</a></li>
   <li><a data-toggle="tab" href="#Results">References</a></li>
+  <input class="btn btn-info right" type="submit" value="Submit all" />
 </ul>
-
+    {% if errors %}
+        <ul class="list-group">
+            {% for label, message in errors %}
+                <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% bootstrap_form_errors form %}
 <div class="tab-content">
     <div id="Basic" class="tab-pane fade in active">
         <table class="formtable">
@@ -26,7 +34,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.client %}
             <tr>
                 <td class="formlabel"> 
-                    Funding 
+                    Funding:
                 </td>
                 <td>
                     <table class="checktable">
@@ -43,7 +51,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.spatial_Geographical_coverage %}
             <tr>
                 <td class="formlabel"> 
-                    Time frame 
+                    Time frame:
                 </td>
                 <td>
                     <table class="checktable">
@@ -56,7 +64,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Time frame 
+                    Time frame:
                 </td>
                 <td>
                     <table class="checktable">
@@ -69,7 +77,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.tools_other %}
             <tr>
                 <td class="formlabel"> 
-                    Modeled energy sectors 
+                    Modeled energy sectors:
                 </td>
                 <td>
                     <table class="checktable">
@@ -83,7 +91,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Modeled demand sectors
+                    Modeled demand sectors:
                 </td>
                 <td>
                     <table class="checktable">
@@ -96,7 +104,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Economic (behavioural) rationale
+                    Economic (behavioural) rationale:
                 </td>
                 <td>
                     <table class="checktable">
@@ -110,7 +118,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Technologies included
+                    Technologies included:
                 </td>
                 <td>
                     <table class="checktable">
@@ -147,7 +155,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.sensitivities %}
             <tr>
                 <td class="formlabel"> 
-                    Time steps
+                    Time steps:
                 </td>
                 <td>
                     <table class="checktable">
@@ -167,7 +175,7 @@
         <table class="formtable">
             <tr>
                 <td class="formlabel"> 
-                    Exogenous time series used
+                    Exogenous time series used:
                 </td>
                 <td>
                     <table class="checktable">
@@ -199,7 +207,7 @@
 
             <tr>
                 <td class="formlabel"> 
-                    Cost development
+                    Cost development:
                 </td>
                 <td>
                     <table class="checktable">
@@ -216,7 +224,7 @@
             
             <tr>
                 <td class="formlabel"> 
-                    Potential wind
+                    Potential wind:
                 </td>
                 <td>
                     <table class="checktable">
@@ -231,7 +239,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Potential solar electric
+                    Potential solar electric:
                 </td>
                 <td>
                     <table class="checktable">
@@ -247,7 +255,7 @@
             
             <tr>
                 <td class="formlabel"> 
-                    Potential solar thermal
+                    Potential solar thermal:
                 </td>
                 <td>
                     <table class="checktable">
@@ -261,7 +269,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Potential biomass
+                    Potential biomass:
                 </td>
                 <td>
                     <table class="checktable">
@@ -275,7 +283,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Potential geothermal
+                    Potential geothermal:
                 </td>
                 <td>
                     <table class="checktable">
@@ -289,7 +297,7 @@
             </tr>
             <tr>
                 <td class="formlabel"> 
-                    Potential hydro power
+                    Potential hydro power:
                 </td>
                 <td>
                     <table class="checktable">
@@ -318,6 +326,5 @@
         </table>
     </div>
 </div>   
-<input type="submit" value="Submit" />
 </form>
 {% endblock %}

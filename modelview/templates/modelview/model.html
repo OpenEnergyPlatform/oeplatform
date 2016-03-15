@@ -39,7 +39,6 @@
                     {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
                     {% include 'modelview/model_snippet.html' with model=model field='support' %}
                     {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
-                    {% include 'modelview/model_snippet.html' with model=model field='framework_yes_text' %}
                     {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
                     {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
                     {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
@@ -63,15 +62,17 @@
                 <div id="Openness" class="panel-collapse collapse in profilebox">
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='costs' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='license' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='license_other_text' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+                        {% if not model.open_source %}
+                            {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='costs' %}
+                        {% else %}
+                            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
+                            {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+                        {% endif %}
                                                 
                     </table>
                     {% if model.gitHub %}
@@ -100,8 +101,7 @@
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='modelling_software'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='external_optimizer'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='external_optimizer_yes_text'  %}
+                        {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' add=model.external_optimizer_yes_text %}
                         {% include 'modelview/model_snippet.html' with model=model field='additional_software'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='gui'  %}
                     </table>
@@ -224,7 +224,7 @@
                     </td>
                     <td>
                         <table>
-{% checklist model "network_coverage_AC,network_coverage_DC" %}
+{% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_NT" %}
                         </table>
                     </td>
                 </tr>              
@@ -241,6 +241,7 @@
                 </tr>
                 
                 {% include 'modelview/model_snippet.html' with model=model field='user_behaviour' add=model.user_behaviour_yes_text %}
+                {% include 'modelview/model_snippet.html' with model=model field='changes_in_efficiency'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='market_models'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage'  %}
                 <tr>
@@ -329,7 +330,7 @@
                         Approach to uncertainty
                     </td>
                     <td>
-                        {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other" %}
+                        {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
                     </td>
                 </tr>
 
