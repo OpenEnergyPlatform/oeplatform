@@ -114,6 +114,7 @@ class Energymodel(BasicFactsheet):
 
     network_coverage_AC = BooleanField(default=False,verbose_name='AC load flow') 
     network_coverage_DC = BooleanField(default=False,verbose_name='DC load flow') 
+    network_coverage_NT = BooleanField(default=False,verbose_name='net transfer capacities') 
 
     storage_electricity_battery = BooleanField(default=False,verbose_name='battery') 
     storage_electricity_kinetic = BooleanField(default=False,verbose_name='kinetic') 
@@ -126,10 +127,11 @@ class Energymodel(BasicFactsheet):
 
     user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
     user_behaviour_yes_text = TextField(null=True) 
+    changes_in_efficiency = TextField(blank=True)
+    
+    market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ["fundamental model", "stochastic model"]), null=True, help_text='Which / Is a market models are included?') 
 
-    market_models = BooleanField(default=False,verbose_name='Market models', help_text='Which / Is a market models are included?') 
-
-    geographical_coverage = ArrayField(models.CharField(max_length=1000,help_text='What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico'),verbose_name="Geographical coverage (comma-separated)", default=list, null=True)
+    geographical_coverage = ArrayField(models.CharField(max_length=1000), help_text='What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico' ,verbose_name="Geographical coverage (comma-separated)", default=list, null=True)
 
     geo_resolution_global = BooleanField(default=False,verbose_name='global') 
     geo_resolution_continents = BooleanField(default=False,verbose_name='continents') 

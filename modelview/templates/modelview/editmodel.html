@@ -188,6 +188,7 @@
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_DC %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_NT %}
                 </table>
             </td>
         </tr>
@@ -206,6 +207,7 @@
             </td>
         </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.user_behaviour add=form.user_behaviour_yes_text %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.changes_in_efficiency %}
             {% include 'modelview/editmodel_snippet.html' with field=form.market_models %}
             {% include 'modelview/editmodel_snippet.html' with field=form.geographical_coverage %}
             <tr>
@@ -252,15 +254,12 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Additional dimensions (sector): </td>
+            <td class="formlabel"> Additional dimensions: </td>
             <td>
                 <table class="checktable" align="center"> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_ecological %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_ecological_text %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_economic %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_economic_text %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_social %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_social_text %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_ecological add=form.additional_dimensions_sector_ecological_text %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_economic add=form.additional_dimensions_sector_economic_text%}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_social add=form.additional_dimensions_sector_social_text%}
                     {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_others add=form.additional_dimensions_sector_others_text%}
                 </table>
             </td>
