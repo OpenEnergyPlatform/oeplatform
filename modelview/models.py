@@ -194,6 +194,7 @@ class Energymodel(BasicFactsheet):
     uncertainty_deterministic = BooleanField(default=False,verbose_name='Deterministic') 
     uncertainty_Stochastic = BooleanField(default=False,verbose_name='Stochastic')
     uncertainty_Other = BooleanField(default=False,verbose_name='Other')
+    uncertainty_Other_text = BooleanField(default=False,verbose_name='Other')
 
     montecarlo = BooleanField(default=False,verbose_name='Suited for many scenarios / monte-carlo') 
 
