@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.postgres import fields
 from django import forms
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import CharField, ImageField, BooleanField, IntegerField, URLField, CharField, EmailField, TextField, ForeignKey, SmallIntegerField
+from django.db.models import CharField, ImageField, BooleanField, IntegerField, CharField, EmailField, TextField, ForeignKey, SmallIntegerField
 # Create your models here.
 
 class BasicFactsheet(models.Model):
@@ -12,7 +12,7 @@ class BasicFactsheet(models.Model):
     authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period) (comma-separated)') 
     current_contact_person = CharField(max_length=1000, verbose_name='Current contact person', help_text='Who is the main contact person?', null=True) 
     contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
-    website = URLField(verbose_name='Website', null=True) 
+    website = CharField(max_length=200,verbose_name='Website', null=True) 
     logo = ImageField(verbose_name='Logo', null=True) 
     primary_purpose = TextField(verbose_name='Primary Purpose', help_text='What is the primary purpose the model?', null=True) 
     primary_outputs = TextField(verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
@@ -21,8 +21,8 @@ class BasicFactsheet(models.Model):
     framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?') 
     framework_yes_text = CharField(max_length=1000,null=True) 
 
-    user_documentation = URLField(verbose_name='Link to User Documentation', help_text='Where is the user documentation publicly available?', null=True) 
-    code_documentation = URLField(verbose_name='Link to Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=True)
+    user_documentation = CharField(max_length=200,verbose_name='Link to User Documentation', help_text='Where is the user documentation publicly available?', null=True) 
+    code_documentation = CharField(max_length=200,verbose_name='Link to Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=True)
     documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How is the quality of the documentations?', choices=(('expandable', 'expandable'), ('good', 'good'), ('excellent', 'excellent')), default='expandable') 
     source_of_funding = CharField(max_length=200,verbose_name='Source of funding', help_text="What's the main source of funding?", null=True) 
     open_source = BooleanField(default=False,verbose_name='Open Source') 
@@ -32,7 +32,7 @@ class BasicFactsheet(models.Model):
     license_other_text = CharField(max_length=1000,null=True)
     source_code_available = BooleanField(default=False,verbose_name='Source code available', help_text='Is the source code directly downloadable?') 
     gitHub = BooleanField(default=False,verbose_name='GitHub', help_text='Is the model available on GitHub?') 
-    link_to_source_code = URLField(verbose_name='Link to source code', null=True) 
+    link_to_source_code = CharField(max_length=200,verbose_name='Link to source code', null=True) 
     data_provided = CharField(max_length=1000,verbose_name='Data provided', help_text='Is the necessary data to run a scenario available?', choices=(('none', 'none'), ('some', 'some'), ('all', 'all')), default='none') 
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
@@ -228,7 +228,7 @@ class Energyframework(BasicFactsheet):
                 o.help_text = o.help_text.replace("model", "framework")
     model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "Other"]], verbose_name="Mathematical model" , null=True)
     model_types_other_text = CharField(max_length=1000, null=True)
-    api_doc = URLField(verbose_name="Link to API documentation", null=True)
+    api_doc = CharField(max_length=200,verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")
     abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
     used = ArrayField(CharField(max_length=1000),verbose_name="Models using this framework (comma-separated)", default = list, null=True)

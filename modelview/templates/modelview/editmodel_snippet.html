@@ -14,24 +14,20 @@
         {% endif %}</td>
     <td>{% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add%}
                 {% if event %}
-                    {% bootstrap_field field|addEvent:event show_label=False show_help=False %} 
+                    {% bootstrap_field field|addEvent:event show_label=False show_help=False set_required=False %} 
                 {% else %}
                     {% if field|fieldtype == "CheckboxInput" %}
                         {{ field }}
                     {% else %}
-                        {% bootstrap_field field show_label=False show_help=False %} 
+                        {% bootstrap_field field show_label=False show_help=False set_required=False %} 
                     {% endif %}
                 {% endif %}
         {% else %}
                 {% if field|fieldtype == "CheckboxInput" %}
                     {{ field|addEvent:'onclick' }}
                 {% elif field|fieldtype == "Select" %}
-                    {% bootstrap_field field|addEvent:'onchange' show_label=False show_help=False %}
+                    {% bootstrap_field field|addEvent:'onchange' show_label=False show_help=False set_required=False %}
                 {% endif %}
-        {% endif %} 
-         
-        {% if field.errors %} 
-            {{ field.errors }} 
         {% endif %} 
         {% if add %} 
             <div id="{{add.name}}_container" 
