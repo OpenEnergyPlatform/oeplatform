@@ -64,14 +64,17 @@
                 <div id="Openness" class="panel-collapse collapse in profilebox">
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='costs' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-                        {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+                        {% if not model.open_source %}
+                            {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='costs' %}
+                        {% else %}
+                            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
+                            {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
+                            {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+                        {% endif %}
 
                                                 
                     </table>

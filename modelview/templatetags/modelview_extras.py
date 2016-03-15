@@ -47,7 +47,7 @@ def checklist(model,labels):
                 first=False
             else:
                 s+=", "
-            s+= str(model.__dict__[text])
+            s+= str(model._meta.get_field(text).verbose_name)
     if s == "":
         s = "-"
     return s
