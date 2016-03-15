@@ -102,7 +102,7 @@
     </div>
     <div id="Coverage" class="tab-pane fade">
         <table class="formtable">
-        <tr><td class="formlabel"> Modeled energy sectors (final energy) </td><td>
+        <tr><td class="formlabel"> Modeled energy sectors (final energy): </td><td>
         <table class="checktable">
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_electricity %}
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_heat %}
@@ -113,7 +113,7 @@
         
         
         <tr>
-            <td class="formlabel"> Modeled demand sectors </td>
+            <td class="formlabel"> Modeled demand sectors: </td>
             <td>
                 <table class="checktable"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_households %}
@@ -125,7 +125,7 @@
         </tr>
         
         <tr>
-            <td class="formlabel"> Modeled energy carriers (primary energy carriers) </td>
+            <td class="formlabel"> Modeled energy carriers (primary energy carriers): </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_natural_gas %}
@@ -146,7 +146,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Modeled technologies: components for generation or conversion </td>
+            <td class="formlabel"> Modeled technologies: components for generation or conversion: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV %}
@@ -167,7 +167,7 @@
         </tr>   
 
         <tr>
-            <td class="formlabel"> Modeled technologies: components for transfer, infrastructure or grid </td>
+            <td class="formlabel"> Modeled technologies: components for transfer, infrastructure or grid: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity %}
@@ -183,7 +183,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Network coverage / representation (electrical grid) </td>
+            <td class="formlabel"> Network coverage / representation (electrical grid): </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
@@ -192,7 +192,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Modeled technologies: components for storage </td>
+            <td class="formlabel"> Modeled technologies: components for storage: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_battery %}
@@ -209,7 +209,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.market_models %}
             {% include 'modelview/editmodel_snippet.html' with field=form.geographical_coverage %}
             <tr>
-            <td class="formlabel"> Geographic (spatial) resolution </td>
+            <td class="formlabel"> Geographic (spatial) resolution: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.geo_resolution_global %}
@@ -229,7 +229,7 @@
         </tr>            
             {% include 'modelview/editmodel_snippet.html' with field=form.comment_on_geo_resolution %}
         <tr>
-            <td class="formlabel"> Time resolution </td>
+            <td class="formlabel"> Time resolution: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_anual %}
@@ -241,7 +241,7 @@
             </td>
         </tr>            
         <tr>
-            <td class="formlabel"> Observation period </td>
+            <td class="formlabel"> Observation period: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.observation_period_less_1_year %}
@@ -252,7 +252,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Additional dimensions (sector) </td>
+            <td class="formlabel"> Additional dimensions (sector): </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_ecological %}
@@ -272,7 +272,7 @@
         <table class="formtable">
         
         <tr>
-            <td class="formlabel"> Model class </td>
+            <td class="formlabel"> Model class: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_optimization_LP %}
@@ -292,7 +292,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.short_description_of_mathematical_model_class %}
             
         <tr>
-            <td class="formlabel"> Mathematical objective </td>
+            <td class="formlabel"> Mathematical objective: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.mathematical_objective_cO2 %}
@@ -303,7 +303,7 @@
             </td>
         </tr>
         <tr>
-            <td class="formlabel"> Approach to uncertainty </td>
+            <td class="formlabel"> Approach to uncertainty: </td>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.uncertainty_deterministic %}

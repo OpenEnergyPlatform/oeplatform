@@ -126,7 +126,8 @@ def year_field(instance, field_name):
     
 @register.filter
 def addEvent(value, arg):
-    return value.as_widget(attrs={arg: value.name+"_click(this)"})
+    value.field.widget.attrs[arg] = value.name+"_click(this)"
+    return value #value.as_widget(attrs={arg: value.name+"_click(this)"})
 
 @register.assignment_tag
 def assignClass(field, css):
