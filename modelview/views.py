@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 from django.db.models import fields
 from django.db import models
+import django.forms as forms
 from oeplatform import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 # Create your views here.
@@ -86,6 +87,7 @@ class FSAdd(View):
     def post(self,request, sheettype):
         c,f = getClasses(sheettype)
         form = f(request.POST or None)
+
         if form.is_valid():
             form.save()
             model_name = c(request.POST).pk

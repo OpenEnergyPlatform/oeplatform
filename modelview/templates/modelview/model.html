@@ -224,7 +224,7 @@
                     </td>
                     <td>
                         <table>
-{% checklist model "network_coverage_AC,network_coverage_DC" %}
+{% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_NT" %}
                         </table>
                     </td>
                 </tr>              
@@ -241,6 +241,7 @@
                 </tr>
                 
                 {% include 'modelview/model_snippet.html' with model=model field='user_behaviour' add=model.user_behaviour_yes_text %}
+                {% include 'modelview/model_snippet.html' with model=model field='changes_in_efficiency'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='market_models'  %}
                 {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage'  %}
                 <tr>
@@ -329,7 +330,7 @@
                         Approach to uncertainty
                     </td>
                     <td>
-                        {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other" %}
+                        {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
                     </td>
                 </tr>
 
