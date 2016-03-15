@@ -127,7 +127,7 @@ class Energymodel(BasicFactsheet):
 
     user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
     user_behaviour_yes_text = TextField(null=True) 
-    changes_in_efficiency = TextField(blank=True)
+    changes_in_efficiency = TextField(null=True)
     
     market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ["fundamental model", "stochastic model"]), null=True, help_text='Which / Is a market models are included?') 
 
@@ -216,8 +216,8 @@ class Energymodel(BasicFactsheet):
     model_file_format_other_text = CharField(max_length=1000,null=True)
     model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
     model_input_other_text = CharField(max_length=1000,null=True)
-    integrating_models = ArrayField(CharField(max_length=1000), verbose_name="Integration with other models",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)", null=True)
-    integrated_models = ArrayField(CharField(max_length=1000), verbose_name="Integration of other models",help_text="Which models are integrated in the model? Where are these models available? (comma-separated)", null=True)
+    integrating_models = ArrayField(TextField(), verbose_name="Integration with other models (comma-separated)",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?", null=True)
+    integrated_models = ArrayField(TextField(), verbose_name="Integration of other models (comma-separated)",help_text="Which models are integrated in the model? Where are these models available?", null=True)
 
     
 class Energyframework(BasicFactsheet):
