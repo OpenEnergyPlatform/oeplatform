@@ -189,7 +189,7 @@ class Energymodel(BasicFactsheet):
     mathematical_objective_costs = BooleanField(default=False,verbose_name='costs') 
     mathematical_objective_rEshare = BooleanField(default=False,verbose_name='RE-share') 
     mathematical_objective_other = BooleanField(default=False,verbose_name='other') 
-    mathematical_objective_other_text = BooleanField(default=False,)
+    mathematical_objective_other_text = CharField(max_length=200, blank=True)
 
     uncertainty_deterministic = BooleanField(default=False,verbose_name='Deterministic') 
     uncertainty_Stochastic = BooleanField(default=False,verbose_name='Stochastic')
