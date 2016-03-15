@@ -92,7 +92,6 @@ class FSAdd(View):
             return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
-            print(errors)
             return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add', 'errors':errors})
        
 """
