@@ -39,7 +39,7 @@ def listsheets(request,sheettype):
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
     else:
-        models = [(m.basicfactsheet_ptr.pk, m.model_name) for m in c.objects.all()]
+        models = [(m.pk, m.model_name) for m in c.objects.all()]
     return render(request, "modelview/modellist.html", {'models':models})
 
 def show(request, sheettype, model_name):
@@ -91,7 +91,7 @@ class FSAdd(View):
         if form.is_valid():
             form.save()
             if c in [Energymodel,Energyframework]:
-                model_name = c(request.POST).basicfactsheet_ptr.id
+                model_name = c(request.POST).pk
             else:
                 model_name = c(request.POST).pk
             return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
