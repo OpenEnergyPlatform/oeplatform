@@ -127,7 +127,7 @@ class Energymodel(BasicFactsheet):
 
     user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
     user_behaviour_yes_text = TextField(null=True) 
-    changes_in_efficiency = TextField(null=True)
+    changes_in_efficiency = TextField(null=True, verbose_name="Changes in efficiency")
     
     market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ["fundamental model", "stochastic model"]), null=True, help_text='Which / Is a market models are included?') 
 
@@ -225,9 +225,13 @@ class Energyframework(BasicFactsheet):
         super(BasicFactsheet, self).__init__(*args, **kwargs)
         for o in self._meta.fields:
             if "help_text" in o.__dict__:
-                o.help_text = o.help_text.replace("model", "framework")
-    model_types = CharField(max_length=20, choices=[(x,x) for x in ["Grid optimisation", "demand simulation", "feed-in simulation", "Other"]], verbose_name="Mathematical model" , null=True)
+                o.help_text = o.help_text.replace("model", "framework")       
+    model_types_grid = BooleanField(default=False, verbose_name="Grid optimisation")
+    model_types_demand_simulation = BooleanField(default=False, verbose_name="demand simulation")
+    model_types_feed_in_simulation = BooleanField(default=False, verbose_name="feed-in simulation")
+    model_types_other = BooleanField(default=False, verbose_name="Other")    
     model_types_other_text = CharField(max_length=1000, null=True)
+    
     api_doc = CharField(max_length=200,verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")
     abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
