@@ -10,6 +10,10 @@ from django.utils.html import format_html
 register = template.Library()
 
 @register.simple_tag
+def prnt(x):
+    print(x)
+
+@register.simple_tag
 def checktable(model, label, prefix ,suffixes, separator="_"):      
     header = ""
     data = ""

@@ -90,7 +90,10 @@ class FSAdd(View):
 
         if form.is_valid():
             form.save()
-            model_name = c(request.POST).pk
+            if c in [Energymodel,Energyframework]:
+                model_name = c(request.POST).basicfactsheet_ptr.id
+            else:
+                model_name = c(request.POST).pk
             return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
