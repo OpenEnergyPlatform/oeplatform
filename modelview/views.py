@@ -39,7 +39,7 @@ def listsheets(request,sheettype):
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
     else:
-        models = [(m.pk, m.model_name) for m in c.objects.all()]
+        models = [(m.basicfactsheet_ptr.pk, m.model_name) for m in c.objects.all()]
     return render(request, "modelview/modellist.html", {'models':models})
 
 def show(request, sheettype, model_name):
