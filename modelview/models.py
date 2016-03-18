@@ -23,7 +23,7 @@ class BasicFactsheet(models.Model):
 
     user_documentation = CharField(max_length=200,verbose_name='Link to User Documentation', help_text='Where is the user documentation publicly available?', null=True) 
     code_documentation = CharField(max_length=200,verbose_name='Link to Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=True)
-    documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How is the quality of the documentations?', choices=(('expandable', 'expandable'), ('good', 'good'), ('excellent', 'excellent')), default='expandable') 
+    documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How is the quality of the documentations?', choices=((x,x) for x in ['not available', 'expandable', 'good', 'excellent']), default='expandable') 
     source_of_funding = CharField(max_length=200,verbose_name='Source of funding', help_text="What's the main source of funding?", null=True) 
     open_source = BooleanField(default=False,verbose_name='Open Source') 
     open_up = BooleanField(default=False,verbose_name='Planned to open up in the future', help_text='Will the source code be available in future?') 
@@ -43,7 +43,7 @@ class BasicFactsheet(models.Model):
     external_optimizer = BooleanField(default=False,verbose_name='External optimizer (comma-separated)', help_text='Which external optimizer can the model apply?', null=False) 
     external_optimizer_yes_text = ArrayField(models.CharField(max_length=1000),default=list, null=True)
 
-    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name="Additional software (comma-separated)",default=list)
+    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name="Additional software (comma-separated)",default=list,null=True)
     gui = BooleanField(default=False,verbose_name='GUI', help_text='Is a graphical user interface available?', null=False) 
 
     citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='publications about the model', null=True)

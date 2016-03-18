@@ -91,6 +91,7 @@ class FSAdd(View):
         if form.is_valid():
             form.save()
             if c in [Energymodel,Energyframework]:
+                
                 model_name = c(request.POST).pk
             else:
                 model_name = c(request.POST).pk
