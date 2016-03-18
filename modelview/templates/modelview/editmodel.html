@@ -127,40 +127,94 @@
         <tr>
             <td class="formlabel"> Modeled energy carriers (primary energy carriers): </td>
             <td>
-                <table class="checktable" align="center"> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_natural_gas %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_biogas %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_hydrogen %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_petrol %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_diesel %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_ethanol %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_coal %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_lignite %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_uranium %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_biomass %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_sun %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_wind %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_hydro %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_geothermal_heat %}
+                <table class="formtable" align="center"> 
+                    <tr>
+                        <td  class="formlabel">
+                            Gas
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_natural_gas %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_biogas %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_hydrogen %}
+                            </table>
+                        </td>
+                    </tr>    
+                    <tr>
+                        <td  class="formlabel">
+                            Liquids
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_petrol %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_diesel %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_ethanol %}
+                            </table>
+                        </td>
+                    </tr>    
+                    <tr>
+                        <td  class="formlabel">
+                            Solid
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_coal %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_lignite %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_uranium %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_biomass %}
+                            </table>
+                        </td>
+                    </tr>    
+                    <tr>
+                        <td  class="formlabel">
+                            Renewables
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_sun %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_wind %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_hydro %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_geothermal_heat %}
+                            </table>
+                        </td>
+                    </tr>    
                 </table>
             </td>
         </tr>
         <tr>
             <td class="formlabel"> Modeled technologies: components for generation or conversion: </td>
             <td>
-                <table class="checktable" align="center"> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biomass %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biogas %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_solar_thermal %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_others add=form.generation_renewables_others_text%}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_coal %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear %}
+                <table class="formtable"> 
+                    <tr>
+                        <td  class="formlabel">
+                            Renewables
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">            
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biomass %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biogas %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_solar_thermal %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_others add=form.generation_renewables_others_text%}
+                            </table>
+                        </td>
+                    </tr>    
+                    <tr>
+                        <td class="formlabel">
+                            Conventional
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">            
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_coal %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear %}
+                            </table>
+                        </td>
+                    </tr> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_CHP %}
                 </table>
             </td>
@@ -169,16 +223,40 @@
         <tr>
             <td class="formlabel"> Modeled technologies: components for transfer, infrastructure or grid: </td>
             <td>
-                <table class="checktable" align="center"> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity_distribution %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity_transition %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas_distribution %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas_transition %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_distribution %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_transition %}      
+                <table class="formtable" align="center"> 
+                    <tr>
+                        <td class="formlabel">
+                            Electricity
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity_distribution %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity_transition %}
+                            </table>
+                        </td>
+                    </tr> 
+                    <tr>
+                        <td class="formlabel">
+                            Gas
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas_distribution %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas_transition %}
+                            </table>
+                        </td>
+                    </tr> 
+                    <tr>
+                        <td class="formlabel">
+                            Heat
+                        </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_distribution %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_transition %}  
+                            </table>
+                        </td>
+                    </tr>     
                 </table>
             </td>
         </tr>
@@ -195,14 +273,29 @@
         <tr>
             <td class="formlabel"> Modeled technologies: components for storage: </td>
             <td>
-                <table class="checktable" align="center"> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_battery %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_kinetic %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_CAES %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_PHS %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_chemical %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_heat %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.storage_gas %}
+                <table class="formtable" align="center"> 
+                    <tr>
+                        <td class="formlabel"> Storage (electricity) </td>
+                        <td>
+                            <table class="checktable" align="center">
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_battery %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_kinetic %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_CAES %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_PHS %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_chemical %}
+                             </table>
+                        </td>
+                    </tr> 
+                    <tr>
+                        <td class="formlabel"> Storage (other) </td>
+                        <td>
+                            <table class="checktable" align="center">
+
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_heat %}
+                                {% include 'modelview/editmodel_snippet.html' with field=form.storage_gas %}
+                            </table>
+                        </td>
+                    </tr> 
                 </table>
             </td>
         </tr>

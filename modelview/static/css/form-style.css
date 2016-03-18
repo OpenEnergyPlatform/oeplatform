@@ -2,6 +2,7 @@
     border-collapse:separate; 
     border-spacing:0.5em;
     padding-bottom: 5em;
+        width:100%;
 }
 
 .formtable tr{

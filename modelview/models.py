@@ -101,16 +101,16 @@ class Energymodel(BasicFactsheet):
     generation_CHP = BooleanField(default=False,verbose_name='CHP') 
 
     transfer_electricity = BooleanField(default=False,verbose_name="electricity") 
-    transfer_electricity_distribution = BooleanField(default=False,)
-    transfer_electricity_transition = BooleanField(default=False,)
+    transfer_electricity_distribution = BooleanField(default=False,verbose_name="distribution")
+    transfer_electricity_transition = BooleanField(default=False,verbose_name="transition")
 
     transfer_gas = BooleanField(default=False,verbose_name="gas") 
-    transfer_gas_distribution = BooleanField(default=False,)
-    transfer_gas_transition = BooleanField(default=False,)
+    transfer_gas_distribution = BooleanField(default=False,verbose_name="distribution")
+    transfer_gas_transition = BooleanField(default=False,verbose_name="transition")
 
     transfer_heat = BooleanField(default=False,verbose_name="heat") 
-    transfer_heat_distribution = BooleanField(default=False,)
-    transfer_heat_transition = BooleanField(default=False,)
+    transfer_heat_distribution = BooleanField(default=False,verbose_name="distribution")
+    transfer_heat_transition = BooleanField(default=False,verbose_name="transition")
 
     network_coverage_AC = BooleanField(default=False,verbose_name='AC load flow') 
     network_coverage_DC = BooleanField(default=False,verbose_name='DC load flow') 
