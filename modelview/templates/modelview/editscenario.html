@@ -33,9 +33,9 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.author_Institution %}
             {% include 'modelview/editmodel_snippet.html' with field=form.client %}
             <tr>
-                <td class="formlabel"> 
-                    Funding:
-                </td>
+                <th> 
+                    Funding
+                </th>
                 <td>
                     <table class="checktable">
                             {% include 'modelview/editmodel_snippet.html' with field=form.funding_private %}
@@ -50,9 +50,9 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.new_aspects %}
             {% include 'modelview/editmodel_snippet.html' with field=form.spatial_Geographical_coverage %}
             <tr>
-                <td class="formlabel"> 
-                    Time frame:
-                </td>
+                <th> 
+                    Time frame
+                </th>
                 <td>
                     <table class="checktable">
                             {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2020 %}
@@ -63,9 +63,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Time frame:
-                </td>
+                <th> 
+                    Time frame
+                </th>
                 <td>
                     <table class="checktable">
                             {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2_target_year %}
@@ -76,9 +76,9 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.tools_models %}
             {% include 'modelview/editmodel_snippet.html' with field=form.tools_other %}
             <tr>
-                <td class="formlabel"> 
-                    Modeled energy sectors:
-                </td>
+                <th> 
+                    Modeled energy sectors
+                </th>
                 <td>
                     <table class="checktable">
                             {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_electricity %}
@@ -90,9 +90,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Modeled demand sectors:
-                </td>
+                <th> 
+                    Modeled demand sectors
+                </th>
                 <td>
                     <table class="checktable">
                             {% include 'modelview/editmodel_snippet.html' with field=form.modeled_demand_sectors_households %}
@@ -103,9 +103,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Economic (behavioural) rationale:
-                </td>
+                <th> 
+                    Economic (behavioural) rationale
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_perfect %}
@@ -117,9 +117,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Technologies included:
-                </td>
+                <th> 
+                    Technologies included
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.renewables_PV %}
@@ -154,9 +154,9 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.endogenous_variables %}
             {% include 'modelview/editmodel_snippet.html' with field=form.sensitivities %}
             <tr>
-                <td class="formlabel"> 
-                    Time steps:
-                </td>
+                <th> 
+                    Time steps
+                </th>
                 <td>
                     <table class="checktable">
                          {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_anual %}
@@ -174,9 +174,9 @@
     <div id="Empirical" class="tab-pane fade">
         <table class="formtable">
             <tr>
-                <td class="formlabel"> 
-                    Exogenous time series used:
-                </td>
+                <th> 
+                    Exogenous time series used
+                </th>
                 <td>
                     <table class="checktable">
                        {% include 'modelview/editmodel_snippet.html' with field=form.exogenous_time_series_used_climate %}
@@ -206,9 +206,9 @@
             {% include 'modelview/editscenario_snippet_year.html' with name='share_RE_total' amount=form.share_RE_total_amount kind=form.share_RE_total_kind year=form.share_RE_total_year %}
 
             <tr>
-                <td class="formlabel"> 
-                    Cost development:
-                </td>
+                <th> 
+                    Cost development
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.cost_development_capex %}
@@ -223,9 +223,9 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.technological_innovations %}
             
             <tr>
-                <td class="formlabel"> 
-                    Potential wind:
-                </td>
+                <th> 
+                    Potential wind
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_wind_whole %}
@@ -238,9 +238,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Potential solar electric:
-                </td>
+                <th> 
+                    Potential solar electric
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_electric_whole %}
@@ -254,9 +254,9 @@
             </tr>
             
             <tr>
-                <td class="formlabel"> 
-                    Potential solar thermal:
-                </td>
+                <th> 
+                    Potential solar thermal
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_whole %}
@@ -268,9 +268,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Potential biomass:
-                </td>
+                <th> 
+                    Potential biomass
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_whole %}
@@ -282,9 +282,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Potential geothermal:
-                </td>
+                <th> 
+                    Potential geothermal
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_geothermal_whole %}
@@ -296,9 +296,9 @@
                 </td>
             </tr>
             <tr>
-                <td class="formlabel"> 
-                    Potential hydro power:
-                </td>
+                <th> 
+                    Potential hydro power
+                </th>
                 <td>
                     <table class="checktable">
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_hydro_power_whole %}

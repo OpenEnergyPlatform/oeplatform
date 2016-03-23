@@ -19,7 +19,9 @@
 
 .profiletable{
     border-collapse: separate;
-    border:1px;}
+    border:1px;
+    width:100%;
+    }
 
 .profiletable td { 
         padding-bottom: 5px;
@@ -51,7 +53,7 @@
     font-weight: bold;
     padding-right: 2em;
     vertical-align:top;
-    width:40%;
+    width:30%;
 }
 
 

@@ -7,11 +7,24 @@ from scipy import stats
 import numpy 
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.contrib.postgres.forms.array import SimpleArrayField
+
 register = template.Library()
 
 @register.simple_tag
 def prnt(x):
     print(x)
+
+@register.filter
+def isArray(field):
+    return isinstance(field.field,SimpleArrayField)
+
+@register.filter
+def splitarray(field):
+    if field.value():
+        return field.value().split(",")
+    else:
+        return None
 
 @register.simple_tag
 def checktable(model, label, prefix ,suffixes, separator="_"):      

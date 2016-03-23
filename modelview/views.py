@@ -20,6 +20,7 @@ import time
 import re
 from .models import Energymodel, Energyframework, Energyscenario
 from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm
+from django.contrib.postgres.fields import ArrayField
 
 def getClasses(sheettype):
     if sheettype == "model":
@@ -63,14 +64,39 @@ def show(request, sheettype, model_name):
     
 
 def updateModel(request,model_name, sheettype):
-    c,f = getClasses(sheettype)        
-    model = get_object_or_404(c, pk=model_name)
-    form = f(request.POST or None, instance=model)
+    c,f = getClasses(sheettype)
+    assert model_name
+    form = processPost(request.POST, c, f, pk=model_name)
     if form.is_valid():
         form.save()
         return redirect("/factsheets/{sheet}s/{model}".format(model=model_name, sheet=sheettype))
-    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name})
+    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name, 'method':'update'})
+
+def processPost(post, c, f, pk=None):
+    fields = {k:post[k] for k in post}
+    for field in c._meta.get_fields():
+        if type(field) == ArrayField:
+            print(field.name)
+            parts = []
+            for fi in fields.keys():
+                if re.match("^{}_\d$".format(field.name),str(fi)) and fields[fi]:
+                    parts.append(fi)
+            parts.sort()
+            print(parts)
+            fields[field.name]= ",".join(fields[k].replace(",",";") for k in parts)
+            for fi in parts:
+                del(fields[fi])
+        else:
+            if field.name in fields:
+                fields[field.name] = fields[field.name]
+    if pk:
+        model = get_object_or_404(c, pk=pk)
+        return f(fields,instance=model)
+    else: 
+        return f(fields)     
     
+    
+
 def editModel(request,model_name, sheettype):
     c,f = getClasses(sheettype) 
         
@@ -84,20 +110,17 @@ class FSAdd(View):
         _,f = getClasses(sheettype)
         form = f()
         return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add'})
-    def post(self,request, sheettype):
+    def post(self,request, sheettype, method='add'):
+        print(request)
         c,f = getClasses(sheettype)
-        form = f(request.POST or None)
-
+        form = processPost(request.POST, c, f)
         if form.is_valid():
-            form.save()
-            if c in [Energymodel,Energyframework]:
-                model_name = c(request.POST).pk
-            else:
-                model_name = c(request.POST).pk
+            m = form.save()
+            model_name = m.pk
             return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
-            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add', 'errors':errors})
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method, 'errors':errors})
        
 """
     This function returns the url of an image of recent GitHub contributions

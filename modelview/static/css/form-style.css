@@ -2,13 +2,14 @@
     border-collapse:separate; 
     border-spacing:0.5em;
     padding-bottom: 5em;
+        width:100%;
 }
 
 .formtable tr{
     padding-bottom: 2em;
 }
 
-.formlabel{
+.formtable th{
     font-weight: bold;
     padding-right: 2em;
     width:20%;
@@ -39,4 +40,20 @@
 
 .visible{
     display:inline;
+}
+.arraywrapper{
+width: 100%;
+margin-bottom:2px;
+required:0;
+}
+.removeicon{
+    position: absolute;
+    right: 5px;
+    top: 0;
+    bottom: 0;
+    height: 14px;
+    margin: auto;
+    font-size: 14px;
+    cursor: pointer;
+    color: red;
 }

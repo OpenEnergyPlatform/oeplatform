@@ -50,8 +50,6 @@
         </div>
     </div>
 </div>
-<div class="container" style="padding:0;flex-wrap: wrap;">            
-    <div class="mv-column-left">
         <div class="panel-group">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -76,10 +74,11 @@
                                                 
                     </table>
                     {% if model.gitHub %}
-                        <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div>
-                        <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> 
+                        
+                        
                         <table class="profiletable">
-                         <tr><td class="rowlabel">GitHub Contributions Graph</td><td> 
+                        <tr><td class="sheetlabel">GitHub Organisation</td><td><div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div><script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> <td></tr> 
+                         <tr><td class="sheetlabel">GitHub Contributions Graph</td><td> 
                         <img src="/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
                         </td></tr>
                                                 
@@ -88,8 +87,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="mv-column-right">
         <div class="panel-group">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -131,8 +128,6 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 <div class="panel-group">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -170,8 +165,51 @@
                         Modelled energy carriers (primary energy carrier)
                     </td>
                     <td>
-                        <table>
-                            {% checklist model "energy_carrier_gas_natural_gas,energy_carrier_gas_biogas,energy_carrier_gas_hydrogen,energy_carrier_liquids_petrol,energy_carrier_liquids_diesel,energy_carrier_liquids_ethanol,energy_carrier_solid_hard_coal,energy_carrier_solid_hard_lignite,energy_carrier_solid_hard_uranium,energy_carrier_solid_hard_biomass,energy_carrier_renewables_sun,energy_carrier_renewables_wind,energy_carrier_renewables_hydro,energy_carrier_renewables_geothermal_heat" %}
+                        <table class="profiletable">
+                           <tr>
+                                <td class="sheetlabel">
+                                    Gas
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "energy_carrier_gas_natural_gas,energy_carrier_gas_biogas,energy_carrier_gas_hydrogen" %}
+
+
+                                    </table>
+                                </td>
+                            </tr>
+                           <tr>
+                                <td class="sheetlabel">
+                                    Liquids
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "energy_carrier_liquids_petrol,energy_carrier_liquids_diesel,energy_carrier_liquids_ethanol" %}
+
+
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sheetlabel">
+                                    Solid
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "energy_carrier_solid_hard_coal,energy_carrier_solid_hard_lignite,energy_carrier_solid_hard_uranium,energy_carrier_solid_hard_biomass,energy_carrier_renewables_sun,energy_carrier_renewables_wind,energy_carrier_renewables_hydro,energy_carrier_renewables_geothermal_heat" %}
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sheetlabel">
+                                    Renewables
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "energy_carrier_renewables_sun,energy_carrier_renewables_wind,energy_carrier_renewables_hydro,energy_carrier_renewables_geothermal_heat" %}
+                                    </table>
+                                </td>
+                            </tr>
 
 
                         </table>
@@ -182,19 +220,27 @@
                         Modeled technologies: components for generation or conversion
                     </td>
                     <td>
-                        <table>
+                        <table class="profiletable">
+                            <tr>
+                                <td class="sheetlabel">
+                                    Renewables
+                                </td>
+                                <td>
+                                    <table>
 {% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_biomass,generation_renewables_biogas,generation_renewables_solar_thermal,generation_renewables_others=generation_renewables_others_text" %}
-
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for generation or conversion
-                    </td>
-                    <td>
-                        <table>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sheetlabel">
+                                    Conventional
+                                </td>
+                                <td>
+                                    <table>
 {% checklist model "generation_conventional_gas,generation_conventional_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
+                                    </table>
+                                </td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -203,18 +249,37 @@
                         Modeled technologies: components for transfer, infrastructure or grid
                     </td>
                     <td>
-                        <table>
-{% checklist model "transfer_electricity,transfer_electricity_distribution,transfer_electricity_transition" %}
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for transfer, infrastructure or grid
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "transfer_gas,transfer_gas_distribution,transfer_gas_transition,transfer_heat,transfer_heat_distribution,transfer_heat_transition" %}
+                        <table class="profiletable">
+                            <tr>
+                                <td class="sheetlabel">
+                                    Electricity
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "transfer_electricity_distribution,transfer_electricity_transition" %}
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sheetlabel">
+                                    Gas
+                                </td>
+                                <td>
+                                    <table>
+                                        {% checklist model "transfer_gas_distribution,transfer_gas_transition" %}
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sheetlabel">
+                                    Heat
+                                </td>
+                                <td>
+                                    <table>
+                                         {% checklist model "transfer_heat_distribution,transfer_heat_transition" %}
+                                    </table>
+                                </td>
+                            </tr>
                         </table>
                     </td>
                 </tr>
@@ -354,6 +419,7 @@
                 {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
                 {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text%}
                 {% include 'modelview/model_snippet.html' with model=model field='model_input' add=model.model_input_other_text%}
+                {% include 'modelview/model_snippet.html' with model=model field='model_output' add=model.model_output_other_text%}
                 {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
                 {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
             </table>
