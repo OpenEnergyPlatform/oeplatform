@@ -8,8 +8,8 @@ from django.db.models import CharField, ImageField, BooleanField, IntegerField, 
 class BasicFactsheet(models.Model):
     model_name = CharField(max_length=1000,verbose_name='Name', help_text='What is the full model name?', null=False, unique=True) 
     acronym = CharField(max_length=20,verbose_name='Acronym', help_text='What is the abbreviation?', null=False) 
-    institutions = ArrayField(CharField(max_length=1000, help_text='Which institutions develop(ed) the model?') ,default=list, null=True, verbose_name='Institution(s) (comma-separated)')
-    authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period) (comma-separated)') 
+    institutions = ArrayField(CharField(max_length=1000, help_text='Which institutions develop(ed) the model?') ,default=list, null=True, verbose_name='Institution(s)')
+    authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period)') 
     current_contact_person = CharField(max_length=1000, verbose_name='Current contact person', help_text='Who is the main contact person?', null=True) 
     contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
     website = CharField(max_length=200,verbose_name='Website', null=True) 
@@ -37,13 +37,13 @@ class BasicFactsheet(models.Model):
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
-    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software  (comma-separated)", default=list, null=True)
-    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name="Internal data processing software (comma-separated)",default=list, null=True)
+    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software ", default=list, null=True)
+    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name="Internal data processing software",default=list, null=True)
 
-    external_optimizer = BooleanField(default=False,verbose_name='External optimizer (comma-separated)', help_text='Which external optimizer can the model apply?', null=False) 
+    external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
     external_optimizer_yes_text = ArrayField(models.CharField(max_length=1000),default=list, null=True)
 
-    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name="Additional software (comma-separated)",default=list,null=True)
+    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name="Additional software",default=list,null=True)
     gui = BooleanField(default=False,verbose_name='GUI', help_text='Is a graphical user interface available?', null=False) 
 
     citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='publications about the model', null=True)
@@ -131,7 +131,7 @@ class Energymodel(BasicFactsheet):
     
     market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ["fundamental model", "stochastic model"]), null=True, help_text='Which / Is a market models are included?') 
 
-    geographical_coverage = ArrayField(models.CharField(max_length=1000), help_text='What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico' ,verbose_name="Geographical coverage (comma-separated)", default=list, null=True)
+    geographical_coverage = ArrayField(models.CharField(max_length=1000), help_text='What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico' ,verbose_name="Geographical coverage", default=list, null=True)
 
     geo_resolution_global = BooleanField(default=False,verbose_name='global') 
     geo_resolution_continents = BooleanField(default=False,verbose_name='continents') 
@@ -216,8 +216,8 @@ class Energymodel(BasicFactsheet):
     model_file_format_other_text = CharField(max_length=1000,null=True)
     model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input/output data file format', help_text='Of which file format are the input and output data?', default="other")
     model_input_other_text = CharField(max_length=1000,null=True)
-    integrating_models = ArrayField(TextField(), verbose_name="Integration with other models (comma-separated)",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?", null=True)
-    integrated_models = ArrayField(TextField(), verbose_name="Integration of other models (comma-separated)",help_text="Which models are integrated in the model? Where are these models available?", null=True)
+    integrating_models = ArrayField(TextField(), verbose_name="Integration with other models",help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?", null=True)
+    integrated_models = ArrayField(TextField(), verbose_name="Integration of other models",help_text="Which models are integrated in the model? Where are these models available?", null=True)
 
     
 class Energyframework(BasicFactsheet):
@@ -235,7 +235,7 @@ class Energyframework(BasicFactsheet):
     api_doc = CharField(max_length=200,verbose_name="Link to API documentation", null=True)
     data_api = BooleanField(verbose_name="API to openmod database")
     abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
-    used = ArrayField(CharField(max_length=1000),verbose_name="Models using this framework (comma-separated)", default = list, null=True)
+    used = ArrayField(CharField(max_length=1000),verbose_name="Models using this framework", default = list, null=True)
     
     
     
@@ -246,8 +246,8 @@ class Energyscenario(models.Model):
     funding_private = BooleanField(verbose_name='private') 
     funding_public = BooleanField(verbose_name='public') 
     funding_no_funding = BooleanField(verbose_name='no funding') 
-    citation_reference = ArrayField(CharField(max_length=1000),verbose_name='Citation reference (comma-separated)',  null=True)
-    citation_doi = ArrayField(CharField(max_length=1000), verbose_name='Citation doi (comma-separated)', null=True)
+    citation_reference = ArrayField(CharField(max_length=1000),verbose_name='Citation reference',  null=True)
+    citation_doi = ArrayField(CharField(max_length=1000), verbose_name='Citation doi', null=True)
     aim = CharField(verbose_name='Aim', help_text='What is the purpose (hypothesis) and research question of the study?', max_length=1000, null=True) 
     new_aspects = CharField(verbose_name='New aspects', help_text='What is new? (beyond state of research)', max_length=1000, null=True) 
     spatial_Geographical_coverage = CharField(verbose_name='Spatial / Geographical coverage', help_text='Which geographical region is adressed in the study?', max_length=1000, null=True) 

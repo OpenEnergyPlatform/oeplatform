@@ -3,7 +3,7 @@
     <td class="sheetlabel"> 
         {% assign_field_attr model field 'help_text' as vname %} 
         {% assign_field model field as val %} 
-        {% get_field_attr model field 'verbose_name' cut="(comma-separated)"%} 
+        {% get_field_attr model field 'verbose_name'%} 
         {% if vname %}
             <a href='#' data-toggle='tooltip' title='{{ vname }}'>
                 <span class='glyphicon glyphicon-question-sign'></span>
