@@ -419,6 +419,7 @@
                 {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
                 {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text%}
                 {% include 'modelview/model_snippet.html' with model=model field='model_input' add=model.model_input_other_text%}
+                {% include 'modelview/model_snippet.html' with model=model field='model_output' add=model.model_output_other_text%}
                 {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
                 {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
             </table>
