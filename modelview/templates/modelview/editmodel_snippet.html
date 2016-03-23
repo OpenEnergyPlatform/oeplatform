@@ -6,7 +6,7 @@
     {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name condition='value != "Other"'%}
 {% endif %}
 <tr {% if class %} class="{{class}}" {% endif %} {% if visible %}style="display:{{visible}}"{% endif %} >
-    <th class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:
+    <th class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}
         {% if field.help_text != "" %}
             <a href='#' data-toggle='tooltip' title='{{ field.help_text }}' >
                 <span class='glyphicon glyphicon-question-sign'></span>
