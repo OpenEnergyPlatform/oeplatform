@@ -5,21 +5,10 @@ from oeplatform import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    url(r'^models/$', views.listsheets, {'sheettype':'model'}, name='modellist'),
-    url(r'^models/add/$', views.FSAdd.as_view(), {'sheettype':'model'}, name='modellist'),
-    url(r'^models/(?P<model_name>[\w\d_]+)/$', views.show, {'sheettype':'model'},  name='index'),
-    url(r'^models/(?P<model_name>[\w\d_]+)/edit/$', views.editModel, {'sheettype':'model'}, name='index'),
-    url(r'^models/(?P<model_name>[\w\d_]+)/update/$', views.updateModel, {'sheettype':'model'}, name='index'),
-    
-    url(r'^frameworks/$', views.listsheets, {'sheettype':'framework'}, name='modellist'),
-    url(r'^frameworks/add/$', views.FSAdd.as_view(), {'sheettype':'framework'}, name='modellist'),
-    url(r'^frameworks/(?P<model_name>[\w\d_]+)/$',  views.show, {'sheettype':'framework'}, name='index'),
-    url(r'^frameworks/(?P<model_name>[\w\d_]+)/edit/$', views.editModel, {'sheettype':'framework'}, name='index'),
-    url(r'^frameworks/(?P<model_name>[\w\d_]+)/update/$', views.updateModel, {'sheettype':'framework'}, name='index'),
-    
-    url(r'^scenarios/$', views.listsheets, {'sheettype':'scenario'}, name='modellist'),
-    url(r'^scenarios/add/$', views.FSAdd.as_view(), {'sheettype':'scenario'},name='modellist'),
-    url(r'^scenarios/(?P<model_name>[\w\d_]+)/$',  views.show, {'sheettype':'scenario'}, name='index'),
-    url(r'^scenarios/(?P<model_name>[\w\d_]+)/edit/$', views.editModel, {'sheettype':'scenario'}, name='index'),
-    url(r'^scenarios/(?P<model_name>[\w\d_]+)/update/$', views.updateModel, {'sheettype':'scenario'}, name='index'),
+    url(r'^(?P<sheettype>[\w\d_]+)s/$', views.listsheets, {}, name='modellist'),
+    url(r'^(?P<sheettype>[\w\d_]+)s/add/$', views.FSAdd.as_view(), {'method':'add'}, name='modellist'),
+    url(r'^(?P<sheettype>[\w\d_]+)s/(?P<model_name>[\w\d_]+)/$', views.show, {},  name='index'),
+    url(r'^(?P<sheettype>[\w\d_]+)s/(?P<model_name>[\w\d_]+)/edit/$', views.editModel, {}, name='index'),
+    url(r'^(?P<sheettype>[\w\d_]+)s/(?P<pk>[\w\d_]+)/update/$', views.FSAdd.as_view(), {'method':'update'}, name='index'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

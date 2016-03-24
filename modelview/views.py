@@ -23,6 +23,9 @@ from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm
 from django.contrib.postgres.fields import ArrayField
 
 def getClasses(sheettype):
+    """
+    Returns the model and form class w.r.t sheettype.
+    """
     if sheettype == "model":
         c = Energymodel
         f = EnergymodelForm
@@ -36,6 +39,9 @@ def getClasses(sheettype):
      
 
 def listsheets(request,sheettype):
+    """
+    Lists all available model, framework or scenario factsheet objects.
+    """
     c,_ = getClasses(sheettype)
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
@@ -44,6 +50,9 @@ def listsheets(request,sheettype):
     return render(request, "modelview/modellist.html", {'models':models})
 
 def show(request, sheettype, model_name):
+    """
+    Loads the requested factsheet
+    """
     c,_ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
     user_agent = {'user-agent': 'oeplatform'}
@@ -63,26 +72,18 @@ def show(request, sheettype, model_name):
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
 
-def updateModel(request,model_name, sheettype):
-    c,f = getClasses(sheettype)
-    assert model_name
-    form = processPost(request.POST, c, f, pk=model_name)
-    if form.is_valid():
-        form.save()
-        return redirect("/factsheets/{sheet}s/{model}".format(model=model_name, sheet=sheettype))
-    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name, 'method':'update'})
-
 def processPost(post, c, f, pk=None):
+    """
+    Returns the form according to a post request
+    """
     fields = {k:post[k] for k in post}
     for field in c._meta.get_fields():
         if type(field) == ArrayField:
-            print(field.name)
             parts = []
             for fi in fields.keys():
                 if re.match("^{}_\d$".format(field.name),str(fi)) and fields[fi]:
                     parts.append(fi)
             parts.sort()
-            print(parts)
             fields[field.name]= ",".join(fields[k].replace(",",";") for k in parts)
             for fi in parts:
                 del(fields[fi])
@@ -98,6 +99,9 @@ def processPost(post, c, f, pk=None):
     
 
 def editModel(request,model_name, sheettype):
+    """
+    Constructs a form accoring to existing model
+    """
     c,f = getClasses(sheettype) 
         
     model = get_object_or_404(c, pk=model_name)
@@ -106,27 +110,32 @@ def editModel(request,model_name, sheettype):
     return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
 
 class FSAdd(View):    
-    def get(self,request, sheettype):
-        _,f = getClasses(sheettype)
-        form = f()
-        return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add'})
-    def post(self,request, sheettype, method='add'):
-        print(request)
+    def get(self,request, sheettype, method='add'):
         c,f = getClasses(sheettype)
-        form = processPost(request.POST, c, f)
+        if method == 'add':
+            form = f()
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method})
+        else:
+            model = get_object_or_404(c, pk=model_name)
+            form = f(instance=model)
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model.pk, 'method':method})
+    
+    def post(self,request, sheettype, method='add', pk=None):
+        c,f = getClasses(sheettype)
+        form = processPost(request.POST, c, f, pk=pk)
         if form.is_valid():
             m = form.save()
-            model_name = m.pk
-            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
+            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
             return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method, 'errors':errors})
        
-"""
+
+def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
+    """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed
-"""
-def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
+    """
     path = "GitHub_{0}_{1}_Contribution.png".format(org,repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT,path)
 
