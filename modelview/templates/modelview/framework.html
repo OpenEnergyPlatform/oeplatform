@@ -34,7 +34,16 @@
                         {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
                         {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
                         {% include 'modelview/model_snippet.html' with model=model field='website' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='logo' %}
+                        <tr>
+                            <th> 
+                                Logo 
+                            </th>
+                            <td>
+                                {% if model.logo %}
+                                    <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}"> {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
                         {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
                         {% include 'modelview/model_snippet.html' with model=model field='support' %}

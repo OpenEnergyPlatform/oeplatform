@@ -13,7 +13,7 @@ class BasicFactsheet(models.Model):
     current_contact_person = CharField(max_length=1000, verbose_name='Current contact person', help_text='Who is the main contact person?', null=True) 
     contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
     website = CharField(max_length=200,verbose_name='Website', null=True) 
-    logo = ImageField(verbose_name='Logo', null=True) 
+    logo = ImageField(upload_to="logos",verbose_name='Logo', null=True) 
     primary_purpose = TextField(verbose_name='Primary Purpose', help_text='What is the primary purpose the model?', null=True) 
     primary_outputs = TextField(verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
     support = BooleanField(default=False,verbose_name='Support / Community / Forum') 
