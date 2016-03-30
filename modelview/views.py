@@ -60,6 +60,7 @@ def show(request, sheettype, model_name):
     org = None
     repo = None
     if sheettype != "scenario":
+        print("Logo",model.logo)
         if model.gitHub and model.link_to_source_code:
             try:
                 match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
@@ -72,7 +73,7 @@ def show(request, sheettype, model_name):
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
 
-def processPost(post, c, f, pk=None):
+def processPost(post, c, f, files=None, pk=None):
     """
     Returns the form according to a post request
     """
@@ -92,7 +93,7 @@ def processPost(post, c, f, pk=None):
                 fields[field.name] = fields[field.name]
     if pk:
         model = get_object_or_404(c, pk=pk)
-        return f(fields,instance=model)
+        return f(fields,files,instance=model)
     else: 
         return f(fields)     
     
@@ -122,13 +123,13 @@ class FSAdd(View):
     
     def post(self,request, sheettype, method='add', pk=None):
         c,f = getClasses(sheettype)
-        form = processPost(request.POST, c, f, pk=pk)
+        form = processPost(request.POST,  c, f, files=request.FILES, pk=pk)
         if form.is_valid():
             m = form.save()
             return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
-            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method, 'errors':errors})
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':pk, 'method':method, 'errors':errors})
        
 
 def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):

@@ -6,9 +6,9 @@
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Model </h1>
 {% if method == "update"%}
-    <form action="/factsheets/models/{{ name }}/update/" method="post" role="form">
+    <form action="/factsheets/models/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
 {% else %}
-    <form action="/factsheets/models/add/" method="post" role="form">
+    <form action="/factsheets/models/add/" method="post" role="form" enctype="multipart/form-data">
 {% endif %}
 {% csrf_token %}
 <div style="width:100%">

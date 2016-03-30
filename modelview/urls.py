@@ -11,4 +11,4 @@ urlpatterns = [
     url(r'^(?P<sheettype>[\w\d_]+)s/(?P<model_name>[\w\d_]+)/edit/$', views.editModel, {}, name='index'),
     url(r'^(?P<sheettype>[\w\d_]+)s/(?P<pk>[\w\d_]+)/update/$', views.FSAdd.as_view(), {'method':'update'}, name='index'),
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
