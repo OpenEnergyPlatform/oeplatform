@@ -5,6 +5,8 @@ The open energy platform of open_eGo
 
 The open energy platform is built atop an PostgreSQL database. Create a new database to avoid clashes.
 
+This project is developed in Python 3.4 and therefore all later uses of pip and python should call the corresponding versions.  
+
 Once this is done, you can proceed with the installation of the actual platform by cloning the repository. Install the required python libraries:
 
     pip install -r requirements.txt
@@ -38,4 +40,4 @@ Finally, you can run your local copy of this platform:
 
     python manage.py runserver
     
-Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser 
+Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser
