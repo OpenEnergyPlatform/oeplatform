@@ -3,6 +3,27 @@
 {% block content %}
 
 {% load staticfiles %}
+
+<script type="text/javascript">
+ 
+      var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+ 
+confirmOnLeave();
+
+</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Model </h1>
 {% if method == "update"%}
@@ -21,7 +42,10 @@
   <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>  
   <li><a data-toggle="tab" href="#Integration">Model Integration</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
+  
+  <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
+  </span>
 </ul>
 
 </div>
