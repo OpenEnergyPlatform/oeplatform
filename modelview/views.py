@@ -95,7 +95,7 @@ def processPost(post, c, f, files=None, pk=None):
         model = get_object_or_404(c, pk=pk)
         return f(fields,files,instance=model)
     else: 
-        return f(fields)     
+        return f(fields,files)     
     
     
 
