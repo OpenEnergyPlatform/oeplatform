@@ -40,7 +40,7 @@
                             </th>
                             <td>
                                 {% if model.logo %}
-                                    <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}"> {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
+                                    <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}" style="max-width:30%;max-height:500px;"> {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
                                 {% endif %}
                             </td>
                         </tr>
