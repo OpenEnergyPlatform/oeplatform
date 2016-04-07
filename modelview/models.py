@@ -300,8 +300,8 @@ class Energyscenario(models.Model):
      
     CHP = BooleanField(verbose_name='CHP')
 
-    networks_electricity_gas_heat = BooleanField(verbose_name='electricity') 
-    networks_electricity_gas_heat = BooleanField(verbose_name='gas')
+    networks_electricity_gas_electricity = BooleanField(verbose_name='electricity') 
+    networks_electricity_gas_gas = BooleanField(verbose_name='gas')
     networks_electricity_gas_heat = BooleanField(verbose_name='heat')
 
     storages_battery = BooleanField(verbose_name='battery')
