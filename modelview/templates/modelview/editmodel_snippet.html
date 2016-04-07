@@ -6,27 +6,32 @@
     {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name condition='value != "Other"'%}
 {% endif %}
 <tr {% if class %} class="{{class}}" {% endif %} {% if visible %}style="display:{{visible}}"{% endif %} >
-    <td class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}:
+    <th class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}
         {% if field.help_text != "" %}
             <a href='#' data-toggle='tooltip' title='{{ field.help_text }}' >
                 <span class='glyphicon glyphicon-question-sign'></span>
             </a>
-        {% endif %}</td>
-    <td>{% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add%}
-                {% if event %}
-                    {% bootstrap_field field|addEvent:event show_label=False show_help=False set_required=False %} 
-                {% else %}
-                    {% if field|fieldtype == "CheckboxInput" %}
-                        {{ field }}
-                    {% else %}
-                        {% bootstrap_field field show_label=False show_help=False set_required=False %} 
-                    {% endif %}
-                {% endif %}
+        {% endif %}</th>
+    <td>
+        {% if field|isArray %}
+            {% include 'modelview/array_snippet.html' with form=form %}
         {% else %}
-                {% if field|fieldtype == "CheckboxInput" %}
-                    {{ field|addEvent:'onclick' }}
-                {% elif field|fieldtype == "Select" %}
-                    {% bootstrap_field field|addEvent:'onchange' show_label=False show_help=False set_required=False %}
+            {% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add%}
+                    {% if event %}
+                        {% bootstrap_field field|addEvent:event show_label=False show_help=False set_required=False %} 
+                    {% else %}
+                        {% if field|fieldtype == "CheckboxInput" %}
+                            {{ field }}
+                        {% else %}
+                            {% bootstrap_field field show_label=False show_help=False set_required=False %} 
+                        {% endif %}
+                    {% endif %}
+            {% else %}
+                    {% if field|fieldtype == "CheckboxInput" %}
+                        {{ field|addEvent:'onclick' }}
+                    {% elif field|fieldtype == "Select" %}
+                        {% bootstrap_field field|addEvent:'onchange' show_label=False show_help=False set_required=False %}
+                    {% endif %}
                 {% endif %}
         {% endif %} 
         {% if add %} 
@@ -37,8 +42,9 @@
                     style="display:inline"
                 {% endif %}
             > 
-                {{add}} 
+                {% bootstrap_field add show_label=False show_help=False set_required=False %}
             </div> 
         {% endif %} 
     </td>
 </tr>
+

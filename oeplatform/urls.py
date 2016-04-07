@@ -16,6 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from oeplatform import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include('django.contrib.auth.urls')),
@@ -23,4 +26,6 @@ urlpatterns = [
     url(r'^user/', include('login.urls')),
     url(r'^factsheets/', include('modelview.urls')),
 	url(r'^dataedit/', include('dataedit.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+print(urlpatterns)
+print(settings.MEDIA_URL, settings.MEDIA_ROOT)

@@ -22,9 +22,6 @@
           </h4>
         </div>
         <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
-            
-            <div class="container" style="padding:0">            
-                <div class="mv-column-left">
                     
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='name_of_the_study' %}
@@ -114,7 +111,32 @@
                         </tr>
                     </table>
                 </div>
-            </div>
+    </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
+          </h4>
+        </div>
+        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
+            <table class="profiletable">
+                <tr>
+                    <td class="sheetlabel">
+                        Exogenous time series used
+                    </td>
+                    <td>
+                        {% checklist model "exogenous_time_series_used_climate,exogenous_time_series_used_feedin,exogenous_time_series_used_loadcurves,exogenous_time_series_used_others=exogenous_time_series_used_others_text" %}
+                    </td>
+                </tr>
+                
+                {% include 'modelview/model_snippet.html' with model=model field='technical_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='social_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
+                {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
+            </table>
         </div>
     </div>
 </div>
@@ -229,31 +251,5 @@
         </div>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
-          </h4>
-        </div>
-        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
-            <table class="profiletable">
-                <tr>
-                    <td class="sheetlabel">
-                        Exogenous time series used
-                    </td>
-                    <td>
-                        {% checklist model "exogenous_time_series_used_climate,exogenous_time_series_used_feedin,exogenous_time_series_used_loadcurves,exogenous_time_series_used_others=exogenous_time_series_used_others_text" %}
-                    </td>
-                </tr>
-                
-                {% include 'modelview/model_snippet.html' with model=model field='technical_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='social_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
-            </table>
-        </div>
-    </div>
-</div>
+
 {% endblock %}
