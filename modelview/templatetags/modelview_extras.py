@@ -7,7 +7,24 @@ from scipy import stats
 import numpy 
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.contrib.postgres.forms.array import SimpleArrayField
+
 register = template.Library()
+
+@register.simple_tag
+def prnt(x):
+    print(x)
+
+@register.filter
+def isArray(field):
+    return isinstance(field.field,SimpleArrayField)
+
+@register.filter
+def splitarray(field):
+    if field.value():
+        return field.value().split(",")
+    else:
+        return None
 
 @register.simple_tag
 def checktable(model, label, prefix ,suffixes, separator="_"):      
@@ -72,9 +89,6 @@ def get_verbose_field_name(instance, field_name):
 
 @register.simple_tag
 def get_field(instance, field_name):
-    """
-    Returns verbose_name for a field.
-    """
     field = instance.__dict__[field_name]
     if type(field)==list:
         field = ", ".join(field)
@@ -82,17 +96,11 @@ def get_field(instance, field_name):
 
 @register.assignment_tag
 def assign_field(instance, field_name):
-    """
-    Returns verbose_name for a field.
-    """
     return instance.__dict__[field_name]
 
 
 @register.simple_tag
 def get_field_attr(instance, field_name, attr, cut=None):
-    """
-    Returns verbose_name for a field.
-    """
     val = instance._meta.get_field(field_name).__dict__[attr]
     if cut:
         val = val.replace(cut,"")
@@ -100,16 +108,10 @@ def get_field_attr(instance, field_name, attr, cut=None):
     
 @register.assignment_tag
 def set_val(val):
-    """
-    Returns verbose_name for a field.
-    """
     return val    
     
 @register.assignment_tag
 def assign_field_attr(instance, field_name, attr):
-    """
-    Returns verbose_name for a field.
-    """
     return instance._meta.get_field(field_name).__dict__[attr]
 
 @register.filter('fieldtype')

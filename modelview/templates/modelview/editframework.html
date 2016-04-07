@@ -122,7 +122,15 @@ confirmOnLeave();
     </div>
     <div id="Design" class="tab-pane fade in">
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.model_types add=form.model_types_other_text%}
+        <th> Observation period </th>
+            <td>
+                <table class="checktable" align="center"> 
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_grid %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_demand_simulation %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_feed_in_simulation %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_other add=form.model_types_other_text%}
+                </table>
+            </td>
         {% include 'modelview/editmodel_snippet.html' with field=form.api_doc %}
         {% include 'modelview/editmodel_snippet.html' with field=form.data_api %}
         {% include 'modelview/editmodel_snippet.html' with field=form.abstraction %}
