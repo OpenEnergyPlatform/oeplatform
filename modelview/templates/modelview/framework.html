@@ -24,7 +24,6 @@
         <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
             
             <div class="container" style="padding:0">            
-                <div class="mv-column-left">
                     
                     <table class="profiletable">
                     <!-- <tr><td class="rowlabel"> id_name</td><td> {{ model.id_name }}</td></tr> -->
@@ -35,7 +34,16 @@
                         {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
                         {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
                         {% include 'modelview/model_snippet.html' with model=model field='website' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='logo' %}
+                        <tr>
+                            <th> 
+                                Logo 
+                            </th>
+                            <td>
+                                {% if model.logo %}
+                                    <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}" style="max-width:30%;max-height:500px;"> {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
                         {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
                         {% include 'modelview/model_snippet.html' with model=model field='support' %}
@@ -47,85 +55,81 @@
                         {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}                    
                     </table>
-                </div>
             </div>
         </div>
     </div>
 </div>
-<div class="container" style="padding:0;flex-wrap: wrap;">            
-    <div class="mv-column-left">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#Openness">Openness</a>
-                  </h4>
-                </div>
-                <div id="Openness" class="panel-collapse collapse in profilebox">
-                    <table class="profiletable">
-                        {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='costs' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-                        {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#Openness">Openness</a>
+          </h4>
+        </div>
+        <div id="Openness" class="panel-collapse collapse in profilebox">
+            <table class="profiletable">
+                {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
+                {% if not model.open_source %}
+                    {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
+                    {% include 'modelview/model_snippet.html' with model=model field='costs' %}
+                {% else %}
+                    {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
+                    {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
+                    {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
+                    {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
+                {% endif %}
 
-                                                
-                    </table>
-                    {% if model.gitHub %}
-                        <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div>
-                        <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> 
-                        <table class="profiletable">
-                         <tr><td class="rowlabel">GitHub Contributions Graph</td><td> 
-                        <img src="/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
-                        </td></tr>
-                                                
-                    </table>
-                    {% endif %}
-                </div>
-            </div>
+                                        
+            </table>
+            {% if model.gitHub %}
+                <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div>
+                <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> 
+                <table class="profiletable">
+                 <tr><td class="rowlabel">GitHub Contributions Graph</td><td> 
+                <img src="/static/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
+                </td></tr>
+                                        
+            </table>
+            {% endif %}
         </div>
     </div>
-    <div class="mv-column-right">
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
-                    <a href="#Software" data-toggle="collapse">Software</a>
-                  </h4>
-                </div>
-                <div id="Software" class="panel-collapse collapse in profilebox">
-                    <table class="profiletable">
-                        {% include 'modelview/model_snippet.html' with model=model field='modelling_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='external_optimizer'  add=model.external_optimizer_yes_text%}
-                        {% include 'modelview/model_snippet.html' with model=model field='additional_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='gui'  %}
-                    </table>
-                </div>
-            </div>
+</div>
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a href="#Software" data-toggle="collapse">Software</a>
+          </h4>
         </div>
-    
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#References">References</a>
-                  </h4>
-                </div>
-                <div id="References" class="panel-collapse collapse  profilebox">
-                    <div>
-                        <table class="profiletable">
-                            {% include 'modelview/model_snippet.html' with model=model field='citation_reference'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage'  %}
-                        </table>
-                    </div>
-                </div>
+        <div id="Software" class="panel-collapse collapse in profilebox">
+            <table class="profiletable">
+                {% include 'modelview/model_snippet.html' with model=model field='modelling_software'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='external_optimizer'  add=model.external_optimizer_yes_text%}
+                {% include 'modelview/model_snippet.html' with model=model field='additional_software'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='gui'  %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" href="#References">References</a>
+          </h4>
+        </div>
+        <div id="References" class="panel-collapse collapse  profilebox">
+            <div>
+                <table class="profiletable">
+                    {% include 'modelview/model_snippet.html' with model=model field='citation_reference'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='citation_DOI'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model'  %}
+                    {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage'  %}
+                </table>
             </div>
         </div>
     </div>
@@ -139,11 +143,20 @@
         </div>
         <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
             <table class="profiletable">
-                                        {% include 'modelview/model_snippet.html' with model=model field='support'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='api_doc'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='data_api'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='abstraction'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='used'  %}
+                <tr>
+                    <td class="sheetlabel">
+                        Modeled demand sectors
+                    </td>
+                    <td>
+                        <table>
+                            {% checklist model "model_types_grid,model_types_demand_simulation,model_types_feed_in_simulation,model_types_other=model_types_other_text" %}
+                        </table>
+                    </td>
+                </tr>
+                {% include 'modelview/model_snippet.html' with model=model field='api_doc'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='data_api'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='abstraction'  %}
+                {% include 'modelview/model_snippet.html' with model=model field='used'  %}
             </table>
         </div>
     </div>

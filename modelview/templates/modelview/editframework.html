@@ -2,6 +2,27 @@
 {% load modelview_extras %}
 {% block content %}
 {% load staticfiles %}
+
+<script type="text/javascript">
+ 
+      var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+ 
+confirmOnLeave();
+
+</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Framework </h1>
 {% if method == "update"%}
@@ -17,7 +38,11 @@
   <li><a data-toggle="tab" href="#Software">Software</a></li>
   <li><a data-toggle="tab" href="#Design">Design and Interfaces</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
+  
+  <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
+  </span>
+
 </ul>
     {% if errors %}
         <ul class="list-group">
@@ -97,7 +122,15 @@
     </div>
     <div id="Design" class="tab-pane fade in">
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.model_types add=form.model_types_other_text%}
+        <th> Observation period </th>
+            <td>
+                <table class="checktable" align="center"> 
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_grid %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_demand_simulation %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_feed_in_simulation %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_types_other add=form.model_types_other_text%}
+                </table>
+            </td>
         {% include 'modelview/editmodel_snippet.html' with field=form.api_doc %}
         {% include 'modelview/editmodel_snippet.html' with field=form.data_api %}
         {% include 'modelview/editmodel_snippet.html' with field=form.abstraction %}
@@ -114,6 +147,5 @@
     </div>
 </div>
 
-<input type="submit" value="Submit" />
 </form>
 {% endblock %}

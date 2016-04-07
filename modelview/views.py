@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 from django.db.models import fields
 from django.db import models
+import django.forms as forms
 from oeplatform import settings
 from django.contrib.staticfiles.templatetags.staticfiles import static
 # Create your views here.
@@ -19,8 +20,12 @@ import time
 import re
 from .models import Energymodel, Energyframework, Energyscenario
 from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm
+from django.contrib.postgres.fields import ArrayField
 
 def getClasses(sheettype):
+    """
+    Returns the model and form class w.r.t sheettype.
+    """
     if sheettype == "model":
         c = Energymodel
         f = EnergymodelForm
@@ -34,6 +39,9 @@ def getClasses(sheettype):
      
 
 def listsheets(request,sheettype):
+    """
+    Lists all available model, framework or scenario factsheet objects.
+    """
     c,_ = getClasses(sheettype)
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
@@ -42,6 +50,9 @@ def listsheets(request,sheettype):
     return render(request, "modelview/modellist.html", {'models':models})
 
 def show(request, sheettype, model_name):
+    """
+    Loads the requested factsheet
+    """
     c,_ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
     user_agent = {'user-agent': 'oeplatform'}
@@ -49,6 +60,7 @@ def show(request, sheettype, model_name):
     org = None
     repo = None
     if sheettype != "scenario":
+        print("Logo",model.logo)
         if model.gitHub and model.link_to_source_code:
             try:
                 match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
@@ -61,16 +73,36 @@ def show(request, sheettype, model_name):
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
 
-def updateModel(request,model_name, sheettype):
-    c,f = getClasses(sheettype)        
-    model = get_object_or_404(c, pk=model_name)
-    form = f(request.POST or None, instance=model)
-    if form.is_valid():
-        form.save()
-        return redirect("/factsheets/{sheet}s/{model}".format(model=model_name, sheet=sheettype))
-    return render(request,"modelview/editmodel.html",{'form':form, 'name':model_name})
+def processPost(post, c, f, files=None, pk=None):
+    """
+    Returns the form according to a post request
+    """
+    fields = {k:post[k] for k in post}
+    for field in c._meta.get_fields():
+        if type(field) == ArrayField:
+            parts = []
+            for fi in fields.keys():
+                if re.match("^{}_\d$".format(field.name),str(fi)) and fields[fi]:
+                    parts.append(fi)
+            parts.sort()
+            fields[field.name]= ",".join(fields[k].replace(",",";") for k in parts)
+            for fi in parts:
+                del(fields[fi])
+        else:
+            if field.name in fields:
+                fields[field.name] = fields[field.name]
+    if pk:
+        model = get_object_or_404(c, pk=pk)
+        return f(fields,files,instance=model)
+    else: 
+        return f(fields)     
     
+    
+
 def editModel(request,model_name, sheettype):
+    """
+    Constructs a form accoring to existing model
+    """
     c,f = getClasses(sheettype) 
         
     model = get_object_or_404(c, pk=model_name)
@@ -79,27 +111,32 @@ def editModel(request,model_name, sheettype):
     return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
 
 class FSAdd(View):    
-    def get(self,request, sheettype):
-        _,f = getClasses(sheettype)
-        form = f()
-        return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add'})
-    def post(self,request, sheettype):
+    def get(self,request, sheettype, method='add'):
         c,f = getClasses(sheettype)
-        form = f(request.POST or None)
+        if method == 'add':
+            form = f()
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method})
+        else:
+            model = get_object_or_404(c, pk=model_name)
+            form = f(instance=model)
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model.pk, 'method':method})
+    
+    def post(self,request, sheettype, method='add', pk=None):
+        c,f = getClasses(sheettype)
+        form = processPost(request.POST,  c, f, files=request.FILES, pk=pk)
         if form.is_valid():
-            form.save()
-            model_name = c(request.POST).pk
-            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model_name))
+            m = form.save()
+            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
         else:
             errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
-            print(errors)
-            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':'add', 'errors':errors})
+            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':pk, 'method':method, 'errors':errors})
        
-"""
+
+def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
+    """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed
-"""
-def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
+    """
     path = "GitHub_{0}_{1}_Contribution.png".format(org,repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT,path)
 
