@@ -60,7 +60,6 @@ def show(request, sheettype, model_name):
     org = None
     repo = None
     if sheettype != "scenario":
-        print("Logo",model.logo)
         if model.gitHub and model.link_to_source_code:
             try:
                 match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
@@ -95,7 +94,7 @@ def processPost(post, c, f, files=None, pk=None):
         model = get_object_or_404(c, pk=pk)
         return f(fields,files,instance=model)
     else: 
-        return f(fields)     
+        return f(fields,files)     
     
     
 

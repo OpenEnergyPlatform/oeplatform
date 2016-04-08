@@ -5,3 +5,5 @@ urllib3
 scipy
 django-widget_tweaks
 psycopg2
+sqlalchemy
+Pillow
