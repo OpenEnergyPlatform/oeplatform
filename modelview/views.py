@@ -60,7 +60,6 @@ def show(request, sheettype, model_name):
     org = None
     repo = None
     if sheettype != "scenario":
-        print("Logo",model.logo)
         if model.gitHub and model.link_to_source_code:
             try:
                 match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
