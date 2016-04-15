@@ -42,4 +42,18 @@ class EnergyscenarioForm(ModelForm):
         model = Energyscenario
         exclude = []
 
+    def clean(self):
+        cleaned_data = super(EnergyscenarioForm, self).clean()
+        for name in ['energy_saving','potential_energy_savings','emission_reductions','share_RE_power','share_RE_heat','share_RE_mobility','share_RE_total']:
+            name_kind = cleaned_data[name+'_kind']
+            name_amount = cleaned_data[name+'_amount']
+            if (name_kind != 'not estimated' and name_amount == None):
+                self.add_error(name+'_amount', 'This field is required')
+            name_year = cleaned_data[name+'_year']
+            if (name_kind != 'not estimated' and name_year == None):
+                self.add_error(name+'_year', 'This field is required')
+        	
+        return cleaned_data
+
+
 
