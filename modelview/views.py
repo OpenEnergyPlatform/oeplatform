@@ -139,11 +139,13 @@ class FSAdd(View):
             c_study,f_study = getClasses('studie')
             formstudy = processPost(request.POST,  c_study, f_study, files=request.FILES, pk=pk)
             errorsStudy=[]
-            if request.POST['new'] == 'True' and formstudy.is_valid():
-                n=formstudy.save()
-                form = processPost(request.POST,  c, f, files=request.FILES, pk=pk, key=n.pk)
-            else:
-                errorsStudy = [(field.label, str(field.errors.data[0].message)) for field in formstudy if field.errors]
+            print(request.POST['new'])
+            if request.POST['new'] == 'True':
+                if formstudy.is_valid():
+                    n=formstudy.save()
+                    form = processPost(request.POST,  c, f, files=request.FILES, pk=pk, key=n.pk)
+                else:
+                    errorsStudy = [(field.label, str(field.errors.data[0].message)) for field in formstudy if field.errors]
             if form.is_valid() and errorsStudy==[]:
                 m = form.save()
                 return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
