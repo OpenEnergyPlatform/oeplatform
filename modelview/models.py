@@ -37,7 +37,7 @@ class BasicFactsheet(models.Model):
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
-    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software ", default=list, null=True)
+    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software ", default=list, null=False)
     interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name="Internal data processing software",default=list, null=True)
 
     external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
@@ -207,12 +207,16 @@ class Energymodel(BasicFactsheet):
     
     example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be a good research question that could be answered with the model?', null=True) 
 
-    validation = CharField(max_length=10000,verbose_name='Validation', help_text='How is the model validated?', null=True) 
+    validation_models = BooleanField(verbose_name='cross-checked with other models') 
+    validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)')  
+    validation_others = BooleanField(verbose_name='others') 
+    validation_others_text = CharField(max_length=1000, null=True)
+    
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
     
 
     interfaces = TextField(verbose_name="Interfaces", help_text="Which APIs does the model have?", null=True)
-    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
+    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other", null=True)
     model_file_format_other_text = CharField(max_length=1000,null=True)
     model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input data file format', help_text='Of which file format are the input data?', default="other",null=True)
     model_input_other_text = CharField(max_length=1000,null=True)
@@ -345,7 +349,7 @@ class Energyscenario(models.Model):
     preProcessing = CharField(verbose_name='Pre-Processing', help_text='Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.', max_length=1000, null=True) 
     name_of_scenario = CharField(verbose_name='Name of the Scenario', help_text='What is the name of the scenario?', max_length=1000, unique=True) 
 
-    energy_saving_amount = SmallIntegerField(verbose_name='Energy saving', help_text='development of energy savings or efficiency', null=True) 
+    energy_saving_amount = SmallIntegerField(verbose_name='Energy savings', help_text='development of energy savings or efficiency', null=True) 
     energy_saving_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     energy_saving_year = SmallIntegerField(null=True) 
 

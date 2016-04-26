@@ -130,7 +130,19 @@
                             {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model'  %}
                             {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
                             {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='validation'  %}
+                            
+                            <tr>
+			      <td class="sheetlabel">
+				  Modeled energy sectors (final energy)
+			      </td>
+			      <td>
+				  <table>
+				      {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
+
+				  </table>
+			      </td>
+			    </tr>
+                            
                             {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties'  %}
                         </table>
                     </div>
@@ -294,7 +306,7 @@
                 </tr>
                 <tr>
                     <td class="sheetlabel">
-                        Network coverage / representation (electrical grid)
+                        Properties electrical grid
                     </td>
                     <td>
                         <table>

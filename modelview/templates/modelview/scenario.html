@@ -60,6 +60,8 @@
                 {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
                 {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
                 {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
+                {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
+                
             </table>
         </div>
     </div>
@@ -73,9 +75,6 @@
         </div>
         <div id="Coverage" class="panel-collapse collapse  profilebox">
             <table class="profiletable">
-                {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
-
-                
                 {% develop_year model 'energy_saving' %}
                 {% develop_year model 'potential_energy_savings' %}
                 {% develop_year model 'emission_reductions' %}
