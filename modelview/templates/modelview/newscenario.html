@@ -6,6 +6,45 @@
 
 <script type="text/javascript">
     <!--
+    
+    function existing_or_new_study()
+    {
+	HiddenNew = document.getElementById('id_new');
+	if (HiddenNew.value == 'True')
+	{
+	    divInfoExisting.style.display = 'none';
+	    divInfoNew.style.display = 'inline';
+	}
+	else
+	{
+	    divInfoExisting.style.display = 'inline';
+	    divInfoNew.style.display = 'none';
+	}
+    }
+    
+    function existing_study()
+    {
+	divInfoExisting = document.getElementById('existing_study');
+	divInfoNew = document.getElementById('new_study');
+	HiddenNew = document.getElementById('id_new');
+	
+	HiddenNew.value = 'False';
+	divInfoExisting.style.display = 'inline';
+	divInfoNew.style.display = 'none';
+    }
+    
+    function new_study()
+    {
+	divInfoExisting = document.getElementById('existing_study');
+	divInfoNew = document.getElementById('new_study');
+	HiddenNew = document.getElementById('id_new');
+	
+	HiddenNew.value = 'True';
+	divInfoExisting.style.display = 'none';
+	divInfoNew.style.display = 'inline';
+    }
+    
+    
     function Hide_Display(name)
     {
 	x = document.getElementById('id_'+name).value;
@@ -44,6 +83,7 @@
 };
  
 confirmOnLeave();
+existing_or_new_study();
 
 
 
@@ -63,9 +103,12 @@ confirmOnLeave();
   <li><a data-toggle="tab" href="#Assumtions">Assumtions</a></li>
   <li><a data-toggle="tab" href="#Results">References</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
-  <input class="btn btn-info right" type="submit" value="Submit all" />
+  <input class="btn btn-info right" onclick="javascript:link()" type="submit" value="Submit all" />
   </span>
   
+
+<input type="hidden" name="new" id="id_new" value="False">
+
 </ul>
     {% if errors %}
         <ul class="list-group">
@@ -77,9 +120,161 @@ confirmOnLeave();
     {% bootstrap_form_errors form %}
 <div class="tab-content">
     <div id="Basic" class="tab-pane fade in active">
+	<br />
+        <span id="new_study" style="display:none">
+	<input class="btn btn-success"  type="button" value="Select existing study" onClick="javascript:existing_study()"/>
         <table class="formtable">
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.name_of_the_study %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.author_Institution %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.client %}
+            <tr>
+                <th> 
+                    Funding
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.funding_private %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.funding_public %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.funding_no_funding %}
+                    </table>
+                </td>
+            </tr>
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.citation_reference %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.citation_doi %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.aim %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.new_aspects %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.spatial_Geographical_coverage %}
+            <tr>
+                <th> 
+                    Time frame
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_2020 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_2030 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_2050 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_other add=formstudy.time_frame_other_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Time frame
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_2_target_year %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_frame_2_transformation_path %}
+                    </table>
+                </td>
+            </tr>           
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.tools_models %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.tools_other %}
+            <tr>
+                <th> 
+                    Modeled energy sectors
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_energy_sectors_electricity %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_energy_sectors_heat %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_energy_sectors_liquid_fuels %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_energy_sectors_gas %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_energy_sectors_others add=formstudy.modeled_energy_sectors_others_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Modeled demand sectors
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_demand_sectors_households %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_demand_sectors_industry %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_demand_sectors_commercial_sector %}
+                            {% include 'modelview/editmodel_snippet.html' with field=formstudy.modeled_demand_sectors_transport %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Economic (behavioural) rationale
+                </th>
+                <td>
+                    <table class="checktable">
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_behavioral_perfect %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_behavioral_myopic %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_behavioral_qualitative %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_behavioral_agentbased %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_behavioral_other add=formstudy.economic_behavioral_other_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Technologies included
+                </th>
+                <td>
+                    <table class="checktable">
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_PV %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_wind %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_hydro %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_biomass %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_biogas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_solar %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.renewables_others add=formstudy.renewables_others_text %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.conventional_generation_gas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.conventional_generation_coal %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.conventional_generation_oil %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.conventional_generation_liquid %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.conventional_generation_nuclear %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.CHP %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.networks_electricity_gas_electricity %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.networks_electricity_gas_gas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.networks_electricity_gas_heat %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.storages_battery %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.storages_kinetic %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.storages_CAES %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.storages_PHS %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.storages_chemical %}
+                    </table>
+                </td>
+            </tr>
+            
+           
+            
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.economic_focuses_included %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.social_focuses_included %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.endogenous_variables %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.sensitivities %}
+            <tr>
+                <th> 
+                    Time steps
+                </th>
+                <td>
+                    <table class="checktable">
+                         {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_anual %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_hour %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_15_min %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_1_min %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_sec %}
+                        {% include 'modelview/editmodel_snippet.html' with field=formstudy.time_steps_other add=formstudy.time_steps_other_text%}
+                    </table>
+                </td>
+            </tr>
+           
+        </table>
+        </span>
+        
+        
+        
+        <span id="existing_study" style="display=inline">
+        <table class="formtable">
+	  <input class="btn btn-success" type="button" value="Create new study" onClick="javascript:new_study()"/>
 	  {% include 'modelview/editmodel_snippet.html' with field=form.study %}
         </table>
+        </span>
     </div>
     <div id="Empirical" class="tab-pane fade">
         <table class="formtable">

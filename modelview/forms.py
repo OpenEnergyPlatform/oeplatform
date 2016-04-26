@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from modelview.models import Energymodel, Energyframework, Energyscenario
+from modelview.models import Energymodel, Energyframework, Energyscenario, Energystudy
 
 # Create the form class.
 class EnergymodelForm(ModelForm):
@@ -27,6 +27,18 @@ class EnergyframeworkForm(ModelForm):
         
     class Meta:
         model = Energyframework
+        exclude = []
+
+class EnergystudyForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(EnergystudyForm, self).__init__(*args, **kwargs)
+        for key in self.fields:
+            f = [not f.null for f in Energystudy._meta.fields if f.name==key][0]
+            self.fields[key].required = f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
+        
+    class Meta:
+        model = Energystudy
         exclude = []
 
 

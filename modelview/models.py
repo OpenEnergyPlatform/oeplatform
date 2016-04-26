@@ -238,10 +238,14 @@ class Energyframework(BasicFactsheet):
     data_api = BooleanField(verbose_name="API to openmod database")
     abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
     used = ArrayField(CharField(max_length=1000),verbose_name="Models using this framework", default = list, null=True)
+
+
+class Energystudy(models.Model):
+  
+
+    def __str__(self):
+      return self.name_of_the_study
     
-    
-    
-class Energyscenario(models.Model):
     name_of_the_study = CharField(verbose_name='Name of the study', help_text='What is the name of the study?', max_length=1000) 
     author_Institution = CharField(verbose_name='Author, Institution', help_text='Who are the authors of the study and for which institution do they work?', max_length=1000) 
     client = CharField(verbose_name='Client', help_text='Who are the customers requesting the study?', max_length=1000, null=True) 
@@ -321,13 +325,19 @@ class Energyscenario(models.Model):
     time_steps_sec = BooleanField(verbose_name='sec') 
     time_steps_other = BooleanField(verbose_name='other') 
     time_steps_other_text = CharField(max_length=1000, null=True)
+    
 
+    
+class Energyscenario(models.Model):
+ 
+    study = ForeignKey("Energystudy", db_column='name_of_the_study_id', null=True, blank=True)
+ 
     exogenous_time_series_used_climate = BooleanField(verbose_name='climate') 
     exogenous_time_series_used_feedin = BooleanField(verbose_name='feed-in') 
     exogenous_time_series_used_loadcurves = BooleanField(verbose_name='load-curves') 
-    exogenous_time_series_used_others = BooleanField(verbose_name='others') 
+    exogenous_time_series_used_others = BooleanField(verbose_name='others')
     exogenous_time_series_used_others_text = CharField(max_length=1000, null=True) 
-    
+
     technical_data = CharField(verbose_name='Technical data + usage', help_text='What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
     social_data = CharField(verbose_name='Social data', help_text='What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
     economical_data = CharField(verbose_name='Economical data', help_text='What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
@@ -336,31 +346,31 @@ class Energyscenario(models.Model):
     name_of_scenario = CharField(verbose_name='Name of the Scenario', help_text='What is the name of the scenario?', max_length=1000, unique=True) 
 
     energy_saving_amount = SmallIntegerField(verbose_name='Energy saving', help_text='development of energy savings or efficiency', null=True) 
-    energy_saving_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    energy_saving_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     energy_saving_year = SmallIntegerField(null=True) 
 
     potential_energy_savings_amount = SmallIntegerField(verbose_name='Potential energy saving', help_text='How was the potential of energy savings determined?', null=True) 
-    potential_energy_savings_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    potential_energy_savings_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     potential_energy_savings_year = SmallIntegerField(null=True)  
 
-    emission_reductions_amount = SmallIntegerField(verbose_name='Potential energy saving', help_text='Development of emissions', null=True) 
-    emission_reductions_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    emission_reductions_amount = SmallIntegerField(verbose_name='Emission reductions', help_text='Development of emissions', null=True) 
+    emission_reductions_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     emission_reductions_year = SmallIntegerField(null=True) 
 
     share_RE_power_amount = SmallIntegerField(verbose_name='Share RE (power sector)', help_text='Development of renewable energy in the power sector', null=True) 
-    share_RE_power_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_power_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_power_year = SmallIntegerField(null=True) 
 
     share_RE_heat_amount = SmallIntegerField(verbose_name='Share RE (heat sector)', help_text='development of renewable energy in the heat sector', null=True) 
-    share_RE_heat_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_heat_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_heat_year = SmallIntegerField(null=True) 
 
     share_RE_mobility_amount = SmallIntegerField(verbose_name='Share RE (mobility sector)', help_text='development of renewable energy in the mobility sector', null=True) 
-    share_RE_mobility_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_mobility_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_mobility_year = SmallIntegerField(null=True) 
     
     share_RE_total_amount = SmallIntegerField(verbose_name='Share RE (total energy supply)', help_text='development of total renewable energy supply', null=True) 
-    share_RE_total_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_total_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_total_year = SmallIntegerField(null=True) 
 
     cost_development_capex = BooleanField(verbose_name='capex') 

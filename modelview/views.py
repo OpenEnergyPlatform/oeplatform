@@ -18,8 +18,8 @@ from matplotlib.lines import Line2D
 import matplotlib
 import time
 import re
-from .models import Energymodel, Energyframework, Energyscenario
-from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm
+from .models import Energymodel, Energyframework, Energyscenario, Energystudy
+from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm, EnergystudyForm
 from django.contrib.postgres.fields import ArrayField
 
 def getClasses(sheettype):
@@ -35,6 +35,9 @@ def getClasses(sheettype):
     elif sheettype == "scenario":
         c = Energyscenario
         f = EnergyscenarioForm
+    elif sheettype == "studie":
+        c = Energystudy
+        f = EnergystudyForm
     return c,f
      
 
@@ -45,6 +48,8 @@ def listsheets(request,sheettype):
     c,_ = getClasses(sheettype)
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
+    elif sheettype == "studie":
+        models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
         models = [(m.pk, m.model_name) for m in c.objects.all()]
     return render(request, "modelview/modellist.html", {'models':models})
@@ -59,7 +64,7 @@ def show(request, sheettype, model_name):
     http = urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-    if sheettype != "scenario":
+    if sheettype != "scenario" and sheettype !="studie":
         if model.gitHub and model.link_to_source_code:
             try:
                 match = re.match(r'.*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*',model.link_to_source_code)
@@ -72,11 +77,13 @@ def show(request, sheettype, model_name):
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
     
 
-def processPost(post, c, f, files=None, pk=None):
+def processPost(post, c, f, files=None, pk=None, key=None):
     """
     Returns the form according to a post request
     """
     fields = {k:post[k] for k in post}
+    if 'new' in fields and fields['new']=='True':
+        fields['study']=key
     for field in c._meta.get_fields():
         if type(field) == ArrayField:
             parts = []
@@ -111,10 +118,15 @@ def editModel(request,model_name, sheettype):
 
 class FSAdd(View):    
     def get(self,request, sheettype, method='add'):
-        c,f = getClasses(sheettype)
+        c,f = getClasses(sheettype) 
         if method == 'add':
             form = f()
-            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method})
+            if sheettype =='scenario':
+                c_study,f_study = getClasses('studie')
+                formstudy = f_study()
+                return render(request,"modelview/new{}.html".format(sheettype),{'form':form, 'formstudy':formstudy, 'method':method})
+            else:
+                return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'method':method})
         else:
             model = get_object_or_404(c, pk=model_name)
             form = f(instance=model)
@@ -123,13 +135,30 @@ class FSAdd(View):
     def post(self,request, sheettype, method='add', pk=None):
         c,f = getClasses(sheettype)
         form = processPost(request.POST,  c, f, files=request.FILES, pk=pk)
-        if form.is_valid():
-            m = form.save()
-            return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
+        if sheettype =='scenario' and method=='add':
+            c_study,f_study = getClasses('studie')
+            formstudy = processPost(request.POST,  c_study, f_study, files=request.FILES, pk=pk)
+            errorsStudy=[]
+            if request.POST['new'] == 'True' and formstudy.is_valid():
+                n=formstudy.save()
+                form = processPost(request.POST,  c, f, files=request.FILES, pk=pk, key=n.pk)
+            else:
+                errorsStudy = [(field.label, str(field.errors.data[0].message)) for field in formstudy if field.errors]
+            if form.is_valid() and errorsStudy==[]:
+                m = form.save()
+                return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
+            else:
+                errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors]+errorsStudy
+                return render(request,"modelview/new{}.html".format(sheettype),{'form':form, 'formstudy':formstudy, 'name':pk, 'method':method, 'errors':errors})
         else:
-            errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors] 
-            return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':pk, 'method':method, 'errors':errors})
-       
+            if form.is_valid():
+                m = form.save()
+                return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
+            else:
+                errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors]
+                return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':pk, 'method':method, 'errors':errors})
+
+
 
 def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
     """
