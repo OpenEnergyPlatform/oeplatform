@@ -1,0 +1,210 @@
+{% extends "base/base.html" %}
+{% load modelview_extras %}
+{% block content %}
+{% load bootstrap3 %}
+{% load staticfiles %}
+
+<script type="text/javascript">
+    <!--
+    function Hide_Display(name)
+    {
+	x = document.getElementById('id_'+name).value;
+	divInfo1 = document.getElementById('hide1'+name);
+	divInfo2 = document.getElementById('hide2'+name);
+	divInfo3 = document.getElementById('hide3'+name);
+
+
+	if ( x == 'not estimated')
+	{
+	    divInfo1.style.display = 'none';
+	    divInfo2.style.display = 'none';
+	    divInfo3.style.display = 'inline';
+	}
+	else
+	{
+	    divInfo1.style.display = 'inline';
+	    divInfo2.style.display = 'inline';
+	    divInfo3.style.display = 'none';
+	} 
+    }
+
+      var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+ 
+confirmOnLeave();
+
+
+
+//-->
+</script>
+<link rel="stylesheet" href="{% static 'css/form-style.css' %}">
+<h1> Study </h1>
+{% if method == "update"%}
+    <form action="/factsheets/studies/{{ name }}/update/" method="post" role="form">
+{% else %}
+    <form action="/factsheets/studies/add/" method="post" role="form">
+{% endif %}
+{% csrf_token %}
+<ul class="nav nav-tabs">
+  <span onclick="window.onbeforeunload = function (e) {};">
+  <input class="btn btn-info right" type="submit" value="Submit all" />
+  </span>
+  
+</ul>
+  
+  <table class="formtable">
+            {% include 'modelview/editmodel_snippet.html' with field=form.name_of_the_study %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.author_Institution %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.client %}
+            <tr>
+                <th> 
+                    Funding
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=form.funding_private %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.funding_public %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.funding_no_funding %}
+                    </table>
+                </td>
+            </tr>
+            {% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.citation_doi %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.aim %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.new_aspects %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.spatial_Geographical_coverage %}
+            <tr>
+                <th> 
+                    Time frame
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2020 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2030 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2050 %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_other add=form.time_frame_other_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Time frame
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2_target_year %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2_transformation_path %}
+                    </table>
+                </td>
+            </tr>           
+            {% include 'modelview/editmodel_snippet.html' with field=form.tools_models %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.tools_other %}
+            <tr>
+                <th> 
+                    Modeled energy sectors
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_electricity %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_heat %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_liquid_fuels %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_gas %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_energy_sectors_others add=form.modeled_energy_sectors_others_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Modeled demand sectors
+                </th>
+                <td>
+                    <table class="checktable">
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_demand_sectors_households %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_demand_sectors_industry %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_demand_sectors_commercial_sector %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.modeled_demand_sectors_transport %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Economic (behavioural) rationale
+                </th>
+                <td>
+                    <table class="checktable">
+                        {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_perfect %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_myopic %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_qualitative %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_agentbased %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.economic_behavioral_other add=form.economic_behavioral_other_text %}
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th> 
+                    Technologies included
+                </th>
+                <td>
+                    <table class="checktable">
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_PV %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_wind %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_hydro %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_biomass %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_biogas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_solar %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.renewables_others add=form.renewables_others_text %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.conventional_generation_gas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.conventional_generation_coal %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.conventional_generation_oil %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.conventional_generation_liquid %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.conventional_generation_nuclear %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.CHP %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.networks_electricity_gas_electricity %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.networks_electricity_gas_gas %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.networks_electricity_gas_heat %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.storages_battery %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.storages_kinetic %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.storages_CAES %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.storages_PHS %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.storages_chemical %}
+                    </table>
+                </td>
+            </tr>
+            
+           
+            
+            {% include 'modelview/editmodel_snippet.html' with field=form.economic_focuses_included %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.social_focuses_included %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.endogenous_variables %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.sensitivities %}
+            <tr>
+                <th> 
+                    Time steps
+                </th>
+                <td>
+                    <table class="checktable">
+                         {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_anual %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_hour %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_15_min %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_1_min %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_sec %}
+                        {% include 'modelview/editmodel_snippet.html' with field=form.time_steps_other add=form.time_steps_other_text%}
+                    </table>
+                </td>
+            </tr>
+           
+        </table>
+  
+{% endblock %}
