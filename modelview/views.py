@@ -60,6 +60,10 @@ def show(request, sheettype, model_name):
     """
     c,_ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
+    model_study=[]
+    if sheettype == "scenario":
+        c_study,_ = getClasses("studie")
+        model_study = get_object_or_404(c_study, pk=model.study.pk)
     user_agent = {'user-agent': 'oeplatform'}
     http = urllib3.PoolManager(headers=user_agent)
     org = None
@@ -74,7 +78,7 @@ def show(request, sheettype, model_name):
             except:
                 org = None
                 repo = None
-    return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'gh_org':org,'gh_repo':repo})
+    return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'model_study':model_study,'gh_org':org,'gh_repo':repo})
     
 
 def processPost(post, c, f, files=None, pk=None, key=None):
