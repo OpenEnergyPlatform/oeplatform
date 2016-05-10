@@ -6,6 +6,25 @@
 
 <script type="text/javascript">
     <!--
+    $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    });
+
+      var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+    
     function Hide_Display(name)
     {
 	x = document.getElementById('id_'+name).value;
