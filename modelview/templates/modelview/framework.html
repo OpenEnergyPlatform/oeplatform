@@ -5,6 +5,14 @@
 {% load modelview_extras %}
 
 {% block content %}
+<script type="text/javascript">
+    <!--
+    $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    });
+    //-->
+</script>
+
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
 <div class="container">
     <div style="float: left;">
@@ -45,7 +53,6 @@
                             </td>
                         </tr>
                         {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
-                        {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
                         {% include 'modelview/model_snippet.html' with model=model field='support' %}
                         {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
                         {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}

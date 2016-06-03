@@ -78,7 +78,7 @@ def develop_year(model,label):
         s = "{amount}% {kind} {year}".format(amount=model.__dict__[label+"_amount"],
             kind=kind,
             year=model.__dict__[label+"_year"])
-    return format_html("<tr><td class='sheetlabel'>{label}</td><td>{s}</td></tr>".format(label=model._meta.get_field(label+"_kind").verbose_name, s=s))
+    return format_html("<tr><td class='sheetlabel'>{label}</td><td>{s}</td></tr>".format(label=model._meta.get_field(label+"_amount").verbose_name, s=s))
 
 @register.simple_tag
 def get_verbose_field_name(instance, field_name):

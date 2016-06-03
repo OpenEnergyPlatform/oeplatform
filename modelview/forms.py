@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from modelview.models import Energymodel, Energyframework, Energyscenario
+from modelview.models import Energymodel, Energyframework, Energyscenario, Energystudy
 
 # Create the form class.
 class EnergymodelForm(ModelForm):
@@ -29,6 +29,18 @@ class EnergyframeworkForm(ModelForm):
         model = Energyframework
         exclude = []
 
+class EnergystudyForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(EnergystudyForm, self).__init__(*args, **kwargs)
+        for key in self.fields:
+            f = [not f.null for f in Energystudy._meta.fields if f.name==key][0]
+            self.fields[key].required = f and self.fields[key].widget.__class__.__name__ != "CheckboxInput"
+        
+    class Meta:
+        model = Energystudy
+        exclude = []
+
 
 class EnergyscenarioForm(ModelForm):
 
@@ -41,5 +53,19 @@ class EnergyscenarioForm(ModelForm):
     class Meta:
         model = Energyscenario
         exclude = []
+
+    def clean(self):
+        cleaned_data = super(EnergyscenarioForm, self).clean()
+        for name in ['energy_saving','potential_energy_savings','emission_reductions','share_RE_power','share_RE_heat','share_RE_mobility','share_RE_total']:
+            name_kind = cleaned_data[name+'_kind']
+            name_amount = cleaned_data[name+'_amount']
+            if (name_kind != 'not estimated' and name_amount == None):
+                self.add_error(name+'_amount', 'This field is required')
+            name_year = cleaned_data[name+'_year']
+            if (name_kind != 'not estimated' and name_year == None):
+                self.add_error(name+'_year', 'This field is required')
+        	
+        return cleaned_data
+
 
 

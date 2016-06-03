@@ -37,7 +37,7 @@ class BasicFactsheet(models.Model):
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
-    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software ", default=list, null=True)
+    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name="Modelling software ", default=list, null=False)
     interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name="Internal data processing software",default=list, null=True)
 
     external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
@@ -102,15 +102,15 @@ class Energymodel(BasicFactsheet):
 
     transfer_electricity = BooleanField(default=False,verbose_name="electricity") 
     transfer_electricity_distribution = BooleanField(default=False,verbose_name="distribution")
-    transfer_electricity_transition = BooleanField(default=False,verbose_name="transition")
+    transfer_electricity_transition = BooleanField(default=False,verbose_name="transmission")
 
     transfer_gas = BooleanField(default=False,verbose_name="gas") 
     transfer_gas_distribution = BooleanField(default=False,verbose_name="distribution")
-    transfer_gas_transition = BooleanField(default=False,verbose_name="transition")
+    transfer_gas_transition = BooleanField(default=False,verbose_name="transmission")
 
     transfer_heat = BooleanField(default=False,verbose_name="heat") 
     transfer_heat_distribution = BooleanField(default=False,verbose_name="distribution")
-    transfer_heat_transition = BooleanField(default=False,verbose_name="transition")
+    transfer_heat_transition = BooleanField(default=False,verbose_name="transmission")
 
     network_coverage_AC = BooleanField(default=False,verbose_name='AC load flow') 
     network_coverage_DC = BooleanField(default=False,verbose_name='DC load flow') 
@@ -207,12 +207,16 @@ class Energymodel(BasicFactsheet):
     
     example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be a good research question that could be answered with the model?', null=True) 
 
-    validation = CharField(max_length=10000,verbose_name='Validation', help_text='How is the model validated?', null=True) 
+    validation_models = BooleanField(verbose_name='cross-checked with other models') 
+    validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)')  
+    validation_others = BooleanField(verbose_name='others') 
+    validation_others_text = CharField(max_length=1000, null=True)
+    
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
     
 
     interfaces = TextField(verbose_name="Interfaces", help_text="Which APIs does the model have?", null=True)
-    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other")
+    model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default="other", null=True)
     model_file_format_other_text = CharField(max_length=1000,null=True)
     model_input = CharField(max_length=5, choices=map(lambda x:(x,x),('.csv','.py','text','.xls','Other')), verbose_name='Input data file format', help_text='Of which file format are the input data?', default="other",null=True)
     model_input_other_text = CharField(max_length=1000,null=True)
@@ -238,10 +242,14 @@ class Energyframework(BasicFactsheet):
     data_api = BooleanField(verbose_name="API to openmod database")
     abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
     used = ArrayField(CharField(max_length=1000),verbose_name="Models using this framework", default = list, null=True)
+
+
+class Energystudy(models.Model):
+  
+
+    def __str__(self):
+      return self.name_of_the_study
     
-    
-    
-class Energyscenario(models.Model):
     name_of_the_study = CharField(verbose_name='Name of the study', help_text='What is the name of the study?', max_length=1000) 
     author_Institution = CharField(verbose_name='Author, Institution', help_text='Who are the authors of the study and for which institution do they work?', max_length=1000) 
     client = CharField(verbose_name='Client', help_text='Who are the customers requesting the study?', max_length=1000, null=True) 
@@ -300,8 +308,8 @@ class Energyscenario(models.Model):
      
     CHP = BooleanField(verbose_name='CHP')
 
-    networks_electricity_gas_heat = BooleanField(verbose_name='electricity') 
-    networks_electricity_gas_heat = BooleanField(verbose_name='gas')
+    networks_electricity_gas_electricity = BooleanField(verbose_name='electricity') 
+    networks_electricity_gas_gas = BooleanField(verbose_name='gas')
     networks_electricity_gas_heat = BooleanField(verbose_name='heat')
 
     storages_battery = BooleanField(verbose_name='battery')
@@ -321,13 +329,19 @@ class Energyscenario(models.Model):
     time_steps_sec = BooleanField(verbose_name='sec') 
     time_steps_other = BooleanField(verbose_name='other') 
     time_steps_other_text = CharField(max_length=1000, null=True)
+    
 
+    
+class Energyscenario(models.Model):
+ 
+    study = ForeignKey("Energystudy", db_column='name_of_the_study_id', null=True, blank=True)
+ 
     exogenous_time_series_used_climate = BooleanField(verbose_name='climate') 
     exogenous_time_series_used_feedin = BooleanField(verbose_name='feed-in') 
     exogenous_time_series_used_loadcurves = BooleanField(verbose_name='load-curves') 
-    exogenous_time_series_used_others = BooleanField(verbose_name='others') 
+    exogenous_time_series_used_others = BooleanField(verbose_name='others')
     exogenous_time_series_used_others_text = CharField(max_length=1000, null=True) 
-    
+
     technical_data = CharField(verbose_name='Technical data + usage', help_text='What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
     social_data = CharField(verbose_name='Social data', help_text='What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
     economical_data = CharField(verbose_name='Economical data', help_text='What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True) 
@@ -335,32 +349,32 @@ class Energyscenario(models.Model):
     preProcessing = CharField(verbose_name='Pre-Processing', help_text='Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.', max_length=1000, null=True) 
     name_of_scenario = CharField(verbose_name='Name of the Scenario', help_text='What is the name of the scenario?', max_length=1000, unique=True) 
 
-    energy_saving_amount = SmallIntegerField(verbose_name='Energy saving', help_text='development of energy savings or efficiency', null=True) 
-    energy_saving_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    energy_saving_amount = SmallIntegerField(verbose_name='Energy savings', help_text='development of energy savings or efficiency', null=True) 
+    energy_saving_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     energy_saving_year = SmallIntegerField(null=True) 
 
     potential_energy_savings_amount = SmallIntegerField(verbose_name='Potential energy saving', help_text='How was the potential of energy savings determined?', null=True) 
-    potential_energy_savings_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    potential_energy_savings_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     potential_energy_savings_year = SmallIntegerField(null=True)  
 
-    emission_reductions_amount = SmallIntegerField(verbose_name='Potential energy saving', help_text='Development of emissions', null=True) 
-    emission_reductions_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    emission_reductions_amount = SmallIntegerField(verbose_name='Emission reductions', help_text='Development of emissions', null=True) 
+    emission_reductions_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     emission_reductions_year = SmallIntegerField(null=True) 
 
     share_RE_power_amount = SmallIntegerField(verbose_name='Share RE (power sector)', help_text='Development of renewable energy in the power sector', null=True) 
-    share_RE_power_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_power_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_power_year = SmallIntegerField(null=True) 
 
     share_RE_heat_amount = SmallIntegerField(verbose_name='Share RE (heat sector)', help_text='development of renewable energy in the heat sector', null=True) 
-    share_RE_heat_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_heat_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_heat_year = SmallIntegerField(null=True) 
 
     share_RE_mobility_amount = SmallIntegerField(verbose_name='Share RE (mobility sector)', help_text='development of renewable energy in the mobility sector', null=True) 
-    share_RE_mobility_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_mobility_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_mobility_year = SmallIntegerField(null=True) 
     
     share_RE_total_amount = SmallIntegerField(verbose_name='Share RE (total energy supply)', help_text='development of total renewable energy supply', null=True) 
-    share_RE_total_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='until', null=True) 
+    share_RE_total_kind = CharField(max_length=15, choices=(('until','until'),('per','per'),('not estimated','not estimated')), default='not estimated', null=True) 
     share_RE_total_year = SmallIntegerField(null=True) 
 
     cost_development_capex = BooleanField(verbose_name='capex') 

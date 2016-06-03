@@ -27,5 +27,3 @@ urlpatterns = [
     url(r'^factsheets/', include('modelview.urls')),
 	url(r'^dataedit/', include('dataedit.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-print(urlpatterns)
-print(settings.MEDIA_URL, settings.MEDIA_ROOT)
