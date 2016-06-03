@@ -4,6 +4,9 @@
 {% load staticfiles %}
 
 <script type="text/javascript">
+    $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    });
  
       var confirmOnLeave = function(msg) {
  
@@ -63,7 +66,6 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.website %}
         {% include 'modelview/editmodel_snippet.html' with field=form.logo %}
         {% include 'modelview/editmodel_snippet.html' with field=form.primary_purpose %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.primary_outputs %}
         {% include 'modelview/editmodel_snippet.html' with field=form.support %}
         {% include 'modelview/editmodel_snippet.html' with field=form.framework add=form.framework_yes_text %}
         {% include 'modelview/editmodel_snippet.html' with field=form.user_documentation %}

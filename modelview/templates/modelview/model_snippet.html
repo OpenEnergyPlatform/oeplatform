@@ -5,7 +5,7 @@
         {% assign_field model field as val %} 
         {% get_field_attr model field 'verbose_name'%} 
         {% if vname %}
-            <a href='#' data-toggle='tooltip' title='{{ vname }}'>
+            <a href='javascript://' data-toggle='popover' data-trigger="focus" title="" data-content="{{ vname }}">
                 <span class='glyphicon glyphicon-question-sign'></span>
             </a>
         {% endif %}

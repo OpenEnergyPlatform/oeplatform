@@ -5,6 +5,9 @@
 {% load staticfiles %}
 
 <script type="text/javascript">
+    $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    });
  
       var confirmOnLeave = function(msg) {
  
@@ -285,7 +288,7 @@ confirmOnLeave();
             </td>
         </tr>
         <tr>
-            <th> Network coverage / representation (electrical grid) </th>
+            <th> Properties electrical grid </th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
@@ -441,7 +444,14 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
             {% include 'modelview/editmodel_snippet.html' with field=form.example_research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.validation %}
+            
+            <tr><th> Model Validation </th><td>
+		<table class="checktable">
+		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_models %}
+		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_measurements %}
+		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_others add=form.validation_others_text%}
+		</table></td></tr>
+            
             {% include 'modelview/editmodel_snippet.html' with field=form.model_specific_properties %}
         </table>
     </div>
