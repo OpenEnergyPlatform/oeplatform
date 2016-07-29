@@ -67,8 +67,7 @@ def table_create(context, data_dict):
     # TODO: column constrains: Unique,
     # load schema name and check for sanity 
     db = data_dict["db"]
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     connection = engine.connect()
 
     schema = read_pgid(data_dict["schema"])
@@ -180,8 +179,7 @@ def data_delete(context, data_dict):
 
 def table_drop(context, data_dict):
     db = data_dict["db"]
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     connection = engine.connect()
 
     # load schema name and check for sanity    
@@ -229,8 +227,7 @@ def table_drop(context, data_dict):
 
 def data_search(context, data_dict):
     db = data_dict["db"]
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     connection = engine.connect()
     query = parser.parse_select(data_dict)
     result = connection.execute(query)
@@ -257,8 +254,7 @@ def search(db, schema, table, fields=None, pk = None, limit = 100):
         fields = '*'
     else:
         fields = ', '.join(fields)
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     connection = engine.connect()
     refs = connection.execute(references.Entry.__table__.select())
 
@@ -280,8 +276,7 @@ def clear_dict(d):
 
 
 def get_comment_table(db, schema, table):
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     connection = engine.connect()
 
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
@@ -298,8 +293,7 @@ def get_comment_table(db, schema, table):
 
 def data_insert(context, data_dict):
     db = data_dict["db"]
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(db)
     # load schema name and check for sanity    
     schema = data_dict["schema"]
 
