@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
     
-    {% if user.is_authenticated or "/factsheets/" in request.path or "/" == request.path %}
+
     {% block nav %}
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -17,10 +17,7 @@
               <a class="navbar-brand" href="/">OEP</a>
             </div>
             <ul class="nav navbar-nav">
-                {% if user.is_admin %}
-				<li class="inactive"><a href="http://localhost:5000">CKAN</a></li>
-                <li class="inactive"><a href="/dataedit/">Input</a></li>
-                {% endif %}
+                <li class="inactive"><a href="/dataedit/">Data</a></li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
                     <span class="caret"></span></a>
@@ -59,26 +56,5 @@ If you have ideas to improve the fact sheets, you are welcome to add your commen
 <b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b></div>
         </div>
     </body>
-    {% else %}
-        {% if form.errors %}
-            <p>Your username and password didn't match. Please try again.</p>
-        {% endif %}
-        <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        <table>
-        <tr>
-            <td>Username</td>
-            <td><input name="username" type="text"/></td>
-        </tr>
-        <tr>
-            <td>Password</td>
-            <td><input name="password" type="password"/></td>
-        </tr>
-        </table>
-
-        <input type="submit" value="login" />
-        <input type="hidden" name="next" value="/" />
-        </form>
-    {% endif %}
     
 </html>
