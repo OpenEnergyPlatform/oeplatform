@@ -137,7 +137,7 @@ class DataView(View):
         #    if error:
         #        return error
         # db = url.split("/")[1]
-        db = 'test'
+        db = sec.dbname
         (result, references) = actions.search(db, schema, table)
 
         header = actions._get_header(result)
