@@ -351,7 +351,7 @@ def _get_engine(db):
         engine = sqla.create_engine(
             "postgresql://{user}:{passw}@{host}:{port}/{db}".format(
                 user=dbuser, passw=dbpasswd, host=dbhost,
-                port=dbport, db='test'))
+                port=dbport, db=db))
         _ENGINES[db] = engine
     return engine
 
