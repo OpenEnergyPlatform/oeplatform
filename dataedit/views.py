@@ -33,12 +33,12 @@ excluded_schemas = [
     "reference",
 ]
 def listschemas(request):
-    insp = connect(sec.dbname)
+    insp = connect()
     schemas = {schema for schema in  insp.get_schema_names() if schema not in excluded_schemas}
     return render(request, 'dataedit/dataedit_schemalist.html',{'schemas':schemas})
 
 def listtables(request, schema):
-    insp = connect(sec.dbname)
+    insp = connect()
     
     tables =  {table for table in insp.get_table_names(schema=schema) if not table.startswith('_')}
     return render(request, 'dataedit/dataedit_tablelist.html',{'schema':schema, 'tables':tables})
