@@ -312,9 +312,7 @@ def delete(request):
                         'headers': request.session['headers']})
 
 def commit(request):
-    db = request.session["db"]
-    if db in ["test"]:
-        engine = _get_engine(db)
+    engine = _get_engine(sec.db)
     
     # load schema name and check for sanity    
     schema = request.session.pop("schema", None)
@@ -365,11 +363,10 @@ securitysettings.py"""
 
 
 
-def loadSessionData(request, insp, db, schema, table):
-    print(db,schema,table)
+def loadSessionData(request, insp,  schema, table):
+    print(schema,table)
     if not all(map(is_pg_qual,[db,schema,table])):
         return HttpResponseForbidden()
-    request.session['db'] = db    
     request.session['table'] = table
     request.session['schema'] = schema
     
@@ -404,8 +401,8 @@ def _renderTable(request):
                     
 # DB Utils
 
-def validatePks(db, schema, table, pkValues):
-    engine = _get_engine(db)
+def validatePks(schema, table, pkValues):
+    engine = _get_engine()
     connection = engine.connect()
     meta = sqla.MetaData()
     tab = sqla.Table(table,meta,schema=schema,autoload=True,autoload_with=engine)
@@ -416,21 +413,19 @@ def validatePks(db, schema, table, pkValues):
     print(f)
     return f == None
     
-def connect(db):
-    engine = _get_engine(db)
+def connect():
+    engine = _get_engine()
     insp = sqla.inspect(engine)
     return insp
 
-def _get_engine(db):
-    if not all(map(is_pg_qual,[db])):
-        raise PermissionDenied()
+def _get_engine():
     engine = sqla.create_engine(
         'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
             sec.dbuser,
             sec.dbpasswd,
             sec.dbhost,
             sec.dbport,
-            db))
+            sec.dbname))
     return engine
 def is_pg_qual(x):
     pgsql_qualifier = re.compile(r"^[\w\d_]+$")
