@@ -70,7 +70,16 @@
     {% endif %}
 
     </script>
-
+<div>
+    <a href="?page=1"> first </a>
+{% for p in pages %}
+    {% if p == page %}
+        {{p }}
+    {% else %}
+        <a href="?page={{p}}">{{p}}</a>
+    {% endif %}
+{% endfor %} <a href="?page={{ page_num }}"> last </a>
+</div>
 
 <div id="downloadables">
         <div id="revisions" style="width:460px">
