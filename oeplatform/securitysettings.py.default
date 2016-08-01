@@ -29,7 +29,7 @@ dbuser = ""
 dbpasswd = ""
 dbport = 5432
 dbhost = ""
-db = ""
+dbname = ""
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
