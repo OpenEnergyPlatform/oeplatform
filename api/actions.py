@@ -16,10 +16,16 @@ from oeplatform.securitysettings import *
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 from api import references
+from sqlalchemy import func, MetaData, Table
 from sqlalchemy.sql.ddl import CreateTable
 
 Base = declarative_base()
 
+def _get_table(db, schema, table):
+    engine = _get_engine(db)
+    metadata = MetaData()
+
+    return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 class DataStore(Base):
     __tablename__ = 'ckan_datastore'
@@ -239,6 +245,18 @@ def data_search(context, data_dict):
                              col.null_ok] for col in description]}
 
 
+def _get_count(q):
+    count_q = q.statement.with_only_columns([func.count()]).order_by(None)
+    count = q.session.execute(count_q).scalar()
+    return count
+
+
+def count_all(db, schema, table):
+    engine = _get_engine(db)
+    session = sessionmaker(bind=engine)()
+    t = _get_table(db, schema, table)
+    return session.query(t).count()#_get_count(session.query(t))
+
 def _get_header(results):
     header = []
     for field in results.cursor.description:
@@ -249,7 +267,7 @@ def _get_header(results):
     return header
 
 
-def search(db, schema, table, fields=None, pk = None, limit = 100):
+def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
     if not fields:
         fields = '*'
     else:
@@ -265,6 +283,7 @@ def search(db, schema, table, fields=None, pk = None, limit = 100):
          sql_string += " where {} = {}".format(pk[0],pk[1])
 
     sql_string += " limit {}".format(limit)
+    sql_string += " offset {}".format(offset)
 
     return connection.execute(sql_string, ), [dict(refs.first()).items()]
 

@@ -21,7 +21,7 @@ from subprocess import call
 from django.utils.encoding import smart_str
 from wsgiref.util import FileWrapper
 from django.utils import timezone
-
+import math
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -137,8 +137,16 @@ class DataView(View):
         #    if error:
         #        return error
         # db = url.split("/")[1]
+        page = int(request.GET.get('page', 1))
+        limit = request.GET.get('limit', 100)
         db = sec.dbname
-        (result, references) = actions.search(db, schema, table)
+        count = actions.count_all(db, schema, table)
+
+        page_num = max(math.ceil(count/limit), 1)
+        last_page = min(page_num, page + 3)
+
+        pages = range(max(1,page-3), last_page)
+        (result, references) = actions.search(db, schema, table, offset=min((page-1)*limit, (page_num-1)*limit), limit=limit)
 
         header = actions._get_header(result)
         comment = actions.get_comment_table(db, schema, table)
@@ -185,8 +193,12 @@ class DataView(View):
                 'comment_table': comment,
                 'comment_columns': comment_columns,
                 'revisions': revisions,
-                'kind':'table',
-                                                                  'table':table})
+                'kind': 'table',
+                'table': table,
+                'pages': pages,
+                'page': page,
+                'page_num':page_num,
+                'last_page':last_page})
         print(list(map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])))
         return render(request, 'dataedit/dataedit_overview.html',
                       {'data': map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])})

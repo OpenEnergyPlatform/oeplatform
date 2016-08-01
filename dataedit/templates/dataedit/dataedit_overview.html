@@ -7,8 +7,12 @@
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 
-
+<div>
 <div id="mygrid" style="font-size: initial; height: 100%"></div>
+</div>
+
+
+<link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
 
 <script type="text/javascript" src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js'%}"></script>
 <script type="text/javascript" src="{% static 'dataedit/recline/vendor/underscore/1.4.4/underscore.js'%}"></script>
@@ -29,7 +33,37 @@
 <script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.editors.js'%}"></script>
 <script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/plugins/slick.rowselectionmodel.js'%}"></script>
 <script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/plugins/slick.rowmovemanager.js'%}"></script>
+<script type="text/javascript" src=http://code.interactjs.io/v1.2.6/interact.min.js></script>
+<script>
+    interact('.resize-drag')
+  .draggable({
+    onmove: window.dragMoveListener
+  })
+  .resizable({
 
+    edges: {right: true, bottom: true}
+  })
+  .on('resizemove', function (event) {
+    var target = event.target,
+        x = (parseFloat(target.getAttribute('data-x')) || 0),
+        y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+    // update the element's style
+    target.style.width  = event.rect.width + 'px';
+    target.style.height = event.rect.height + 'px';
+
+    // translate when resizing from top or left edges
+    x += event.deltaRect.left;
+    y += event.deltaRect.top;
+
+    target.style.webkitTransform = target.style.transform =
+        'translate(' + x + 'px,' + y + 'px)';
+
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+  });
+
+</script>
 
 <script type="text/javascript">
     var data = [
@@ -70,7 +104,16 @@
     {% endif %}
 
     </script>
-
+<div>
+    <a href="?page=1"> first </a>
+{% for p in pages %}
+    {% if p == page %}
+        {{p }}
+    {% else %}
+        <a href="?page={{p}}">{{p}}</a>
+    {% endif %}
+{% endfor %} <a href="?page={{ page_num }}"> last </a>
+</div>
 
 <div id="downloadables">
         <div id="revisions" style="width:460px">
