@@ -22,6 +22,7 @@ from django.utils.encoding import smart_str
 from wsgiref.util import FileWrapper
 from django.utils import timezone
 import math
+
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -39,7 +40,7 @@ def listschemas(request):
 
 def listtables(request, schema):
     insp = connect()
-    
+
     tables =  {table for table in insp.get_table_names(schema=schema) if not table.startswith('_')}
     return render(request, 'dataedit/dataedit_tablelist.html',{'schema':schema, 'tables':tables})
 
@@ -74,7 +75,11 @@ pending_dumps = {}
 
 def create_dump(schema, table, rev_id, name):
     print(table)
-    L =['svn', 'export', "file://"+sec.datarepo+schema+'.'+table+'.csv', '--force', '--revision='+rev_id, '-q',  'media/dumps/'+name]
+    if not os.path.exists('media/dumps/{rev}'.format(rev=rev_id)):
+        os.mkdir('media/dumps/{rev}'.format(rev=rev_id))
+    if not os.path.exists('media/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema)):
+        os.mkdir('media/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema))
+    L =['svn', 'export', "file://"+sec.datarepo+name, '--force', '--revision='+rev_id, '-q',  'media/dumps/'+rev_id+'/'+name]
     print(" ".join(L))
     return call(L, shell=False)
     """return call(["pg_dump",
@@ -89,27 +94,27 @@ def create_dump(schema, table, rev_id, name):
                  "--file=media/dumps/%s"%name,
                  "-w"], shell=False)"""
 
-def send_dump(fname):
-    f = open('media/dumps/%s'%fname,'r')
-    response = HttpResponse(FileWrapper(f),
-        content_type='application/force-download')  # mimetype is replaced by content_type for django 1.7
-    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        fname)
-    response['X-Sendfile'] = smart_str('media/dumps/%s'%fname)
+def send_dump(rev_id, schema, table):
+    path = 'media/dumps/{rev}/{schema}/{table}.tar.gz'.format(rev=rev_id,schema=schema,table=table)
+    f = FileWrapper(open(path, "rb"))
+    response = HttpResponse(f,content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
+
+    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str('{table}.tar.gz'.format(table=table))
+
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
+    print(response)
     return response
 
 def show_revision(request, schema, table, rev_id):
     global pending_dumps
-    fname = "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table,
-                                               rev_id=rev_id)
+    fname = "{schema}/{table}.tar.gz".format(schema=schema, table=table)#"{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
     try:
         rev = TableRevision.objects.get(schema=schema, table=table,
                                                revision=rev_id)
         rev.last_accessed = timezone.now()
         rev.save()
-        return send_dump(fname)
+        return send_dump(rev_id, schema, table)
     except TableRevision.DoesNotExist:
 
         if (schema,table,rev_id) in pending_dumps:
@@ -117,7 +122,7 @@ def show_revision(request, schema, table, rev_id):
                 pending_dumps.pop((schema,table,rev_id))
                 rev = TableRevision(revision=rev_id, schema=schema, table=table)
                 rev.save()
-                return send_dump(fname)
+                return send_dump(rev_id, schema, table)
         else:
             t = threading.Thread(target=create_dump, args=(schema,table,rev_id,fname))
             t.start()
