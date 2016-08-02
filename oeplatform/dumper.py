@@ -1,7 +1,8 @@
-import oeplatform.securitysettings as sec
+import securitysettings as sec
 import sqlalchemy as sqla
 from subprocess import call
 import os
+import tarfile
 
 excluded_schemas = [
 
@@ -27,6 +28,9 @@ def _get_engine():
             sec.dbname))
     return engine
 
+def make_tarfile(output_filename, source_dir):
+    with tarfile.open(output_filename, "w:gz") as tar:
+        tar.add(source_dir, arcname=os.path.basename(source_dir))
 
 insp = connect()
 for schema in insp.get_schema_names():
@@ -43,8 +47,11 @@ for schema in insp.get_schema_names():
                      schema + '.' + table, '-w', ]
                 print(L)
                 call(L)
-                call(['tar', '-zcf',
-                      sec.datarepowc + schema + '/' + table + '.tar.gz',
-                      sec.datarepowc + schema + '/' + table])
-                call(['rm', '-r',
-                      sec.datarepowc + schema + '/' + table])
+                L=['tar', '-zcf',
+                   sec.datarepowc + schema + '/' +table + '.tar.gz',  '-C', sec.datarepowc + schema + '/',
+                      table+'/']
+                print(L)
+                call(L)
+                L= ['rm', '-r', sec.datarepowc + schema + '/' + table]
+
+                call(L)
