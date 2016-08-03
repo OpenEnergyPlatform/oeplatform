@@ -7,3 +7,5 @@ django-widget_tweaks
 psycopg2
 sqlalchemy
 Pillow
+bibtexparser
+svn
