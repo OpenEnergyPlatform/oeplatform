@@ -1,11 +1,32 @@
-{% extends "base/base.html" %}
+{% extends "dataedit/base.html" %}
 
-{% block content %}
+{% block data_content %}
 
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% bootstrap_javascript jquery=1 %}
+<div class="tagcontainer">
+    {% load dataedit.taghandler %}
+    {% get_tags as all_tags %}
+
+    {% for tag in tags %}
+        <a href="" class="btn tag" style="background:{{tag.color}}">{{ tag.label }}</a>
+    {% endfor %}
+
+    {% load dataedit.taghandler %}
+    {% get_tags as all_tags %}
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="add_tag_select" data-toggle="dropdown"> -- Add a label --
+        <span class="caret"></span></button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="add_tag_select">
+        {% for tag in all_tags %}
+             <li role="presentation" style="background:{{tag.color}}"><a href='/dataedit/view/{{schema}}/{{table}}/tags/add/{{tag.pk}}?from={{ request.path|urlencode }}' role="menuitem">{{ tag.label }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
 
 <div>
 <div id="mygrid" style="font-size: initial; height: 100%"></div>

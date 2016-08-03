@@ -9,3 +9,5 @@ sqlalchemy
 Pillow
 bibtexparser
 svn
+django-colorfield
+djangoajax

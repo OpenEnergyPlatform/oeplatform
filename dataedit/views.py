@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden, HttpResponseNotAllowed
 import sqlalchemy as sqla
 from .forms import InputForm, UploadFileForm, UploadMapForm
-from django.views.generic import View
+from django.views.generic import View, FormView, CreateView, UpdateView
 from django.template import RequestContext
 import csv
 import os
@@ -22,6 +22,9 @@ from django.utils.encoding import smart_str
 from wsgiref.util import FileWrapper
 from django.utils import timezone
 import math
+from dataedit import models
+from dataedit import forms
+from django_ajax.decorators import ajax
 
 session = None
 
@@ -158,6 +161,15 @@ class DataView(View):
         comment_columns = {d["name"]: d for d in comment[
             "Table fields"]} if "Table fields" in comment else {}
 
+        tags = []
+
+        if models.Table.objects.filter(name=table, schema__name=schema).exists():
+            tobj = models.Table.objects.get(name=table, schema__name=schema)
+            tags = tobj.tags.all()
+
+        print('tags', tags)
+
+
         comment = OrderedDict(
             [(label, comment[key]) for key, label in
              COMMENT_KEYS
@@ -200,10 +212,12 @@ class DataView(View):
                 'revisions': revisions,
                 'kind': 'table',
                 'table': table,
+                'schema': schema,
                 'pages': pages,
                 'page': page,
                 'page_num':page_num,
-                'last_page':last_page})
+                'last_page':last_page,
+                'tags':tags})
         print(list(map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])))
         return render(request, 'dataedit/dataedit_overview.html',
                       {'data': map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])})
@@ -448,3 +462,21 @@ def is_pg_qual(x):
     pgsql_qualifier = re.compile(r"^[\w\d_]+$")
     return pgsql_qualifier.search(x)
 
+
+class TagUpdate(UpdateView):
+    model = models.Tag
+    fields = '__all__'
+    template_name_suffix = '_form'
+
+
+def add_table_tag(request,schema,table,tag_id):
+    sch, _ = models.Schema.objects.get_or_create(name=schema)
+    tab,_ = models.Table.objects.get_or_create(name=table, schema=sch)
+    tag = get_object_or_404(models.Tag, pk=tag_id)
+    tab.tags.add(tag)
+    tab.save()
+    return redirect(request.GET.get('from', '/'))
+
+class TagCreate(CreateView):
+    model = models.Tag
+    fields = '__all__'
