@@ -75,7 +75,7 @@ pending_dumps = {}
 
 def create_dump(schema, table, rev_id, name):
     print(table)
-    if not os.path.exists('dumps/{rev}'.format(rev=rev_id)):
+    if not os.path.exists(sec.MEDIA_ROOT+'/dumps/{rev}'.format(rev=rev_id)):
         os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}'.format(rev=rev_id))
     if not os.path.exists(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema)):
         os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema))
