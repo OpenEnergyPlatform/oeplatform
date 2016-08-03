@@ -1,0 +1,153 @@
+<script type="text/javascript"
+        src="/recline/vendor/bootstrap/3.3.6/js/bootstrap.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/underscore/1.1.6/underscore.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/backbone/0.5.1/backbone.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/mustache/0.5.0-dev/mustache.js"></script>
+
+<script type="text/javascript" src="/recline/dist/recline.js"></script>
+
+<link rel="stylesheet" href="/css/grid.css"/>
+<link rel="stylesheet" href="/css/references.css"/>
+<link rel="stylesheet" href="/css/slickgrid.css">
+<link rel="stylesheet" href="/vendor/slickgrid/2.0.1/slick.grid.css">
+<link rel="stylesheet" href="/dataview/dataview.css">
+
+<!-- vendor -->
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/jquery-ui-1.8.16.custom.min.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/jquery.event.drag-2.0.min.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/slick.core.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/slick.grid.min.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/slick.formatters.js"></script>
+{#<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/slick.editors.js"></script>#}
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/plugins/slick.rowselectionmodel.js"></script>
+<script type="text/javascript"
+        src="/recline/vendor/slickgrid/2.0.1/plugins/slick.rowmovemanager.js"></script>
+<script type="text/javascript"
+        src="/dataview/metadata.js"></script>
+
+<!-- css -->
+
+<link rel="stylesheet" href="/recline/vendor/leaflet.markercluster/MarkerCluster.css">
+<link rel="stylesheet" href="/recline/vendor/leaflet.markercluster/MarkerCluster.Default.css">
+<link rel="stylesheet" href="/recline/vendor/css/map.css">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+
+
+<script type="text/javascript" src="/recline/vendor/leaflet.markercluster/leaflet.markercluster.js"></script>
+
+<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-map.js?key=xvRgt8ML83GsTAHMEchHcZ9Q27UGzQTX"></script>
+<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-geocoding.js?key=xvRgt8ML83GsTAHMEchHcZ9Q27UGzQTX"></script>
+
+
+
+<div id="dataframe">
+
+    <div id="comment_table" class="comment_table">
+        {%snippet 'render_dict.html', type='dict', json=comment_table %}
+    </div>
+
+    <div id="mygrid" style='width:1100px; height:530px;'></div>
+
+
+    <script type="text/javascript">
+    var data = [
+        {% for row in dataset %}
+            { {% for head,cell in row.items() %}
+            {{head}}:
+            {% if head == '_comment' and cell%}
+                {origin: '{{ cell.origin }}', method: '{{ cell.method }}', assumptions: [{% for assu in cell.assumptions %} assu {%endfor%}]}
+            {%else%}
+                '{{cell}}'
+            {%endif%}
+            {% if not loop.last %}, {% endif %}{% endfor %} }{% if not loop.last %}, {% endif %}
+        {% endfor %}];
+
+      var dataset = new recline.Model.Dataset({
+        records: data
+      });
+
+    {% if '_comment' in header %}
+        handle_comment_field(dataset, recline, {{ header.index('_comment') }});
+    {% endif %}
+
+
+      var $el = $('#mygrid');
+
+    {% if kind == 'table' %}
+      var grid = new recline.View.Grid({
+        model: dataset,
+        el: $el
+      });
+      grid.render();
+    {% elif kind == 'map' %}
+
+    var map = new recline.View.Map({
+      model: dataset
+    });
+    $el.append(map.el);
+    //map.render();
+    {% endif %}
+
+    </script>
+    <script type="text/javascript">
+
+      {% for col, comment in comment_columns.items() %}
+        var elem=document.querySelector("th[title='{{col}}']");
+        if(elem)
+        {
+            elem.className += " tooltipcontainer";
+            com_div = document.createElement('span');
+            com_div.className += "tooltiptext";
+            com_div.innerHTML = "{{comment.description}}{% if comment.unit %}(Unit: {{comment.unit}}){% endif %}";
+            elem.appendChild(com_div);
+        }
+      {% endfor %}
+    </script>
+    <div id="reference_box">
+        {% for id, ref in references %}
+        <div id="div_ref_{{id}}" class="reference">
+            <table>
+
+                {% for val,key in ref %}
+                {% if key %}
+                <tr>
+                    <th> {{val}}:</th>
+                    <td> {{key}}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="downloadables">
+        <div id="revisions">
+            <select >
+                {% for entry in revisions %}
+                 <option> Revision {{ entry.revision }} ({{entry.date}}) </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</div>

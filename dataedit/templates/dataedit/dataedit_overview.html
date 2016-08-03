@@ -1,86 +1,158 @@
 {% extends "base/base.html" %}
 
 {% block content %}
-<script language="JavaScript">
-var formSubmitting = false;
-var setFormSubmitting = function() { formSubmitting = true; };
-var isDirty = function() { return false; }
 
-window.onload = function() {
-    window.addEventListener("beforeunload", function (e) {
-        if (formSubmitting || !isDirty) {
-            return undefined;
-        }
-
-        var confirmationMessage = 'It looks like you have been editing something. '
-                                + 'If you leave before saving, your changes will be lost.';
-
-        (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-        return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
-    });
-    window.addEventListener("unload", function (e) {
-     if (formSubmitting || !isDirty) {
-            return undefined;
-        }
-     $.post('/dataedit/drop/', function(data) {});
-     });
-    
-};
-</script>
+{% load staticfiles %}
 {% load bootstrap3 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 
 <div>
-<table class="table table-striped">
-    <thead>
-    <tr>
-{% for head in headers %}
-        <th> {{ head }} </th>
-{% endfor %}  
-    </tr>
-    </thead>
-{% for row in data %}
-    <tr>
-    {% for cell in row %}
-        <td> {{ cell }} </td> 
-    {% endfor %}
-    <td>
-        <form action="/dataedit/edit" method="get" onsubmit="setFormSubmitting()"> 
-            <label for="editSubmit{{ forloop.counter0 }}" class="btn">
-               {% bootstrap_icon "pencil" %}   
-                <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>        
-            </label>
-            <input id="editSubmit{{ forloop.counter0 }}" type="submit" class="hidden">
-        </form>
-        </td>
-        <td>     
-        <form action="/dataedit/delete" method="post" onsubmit="setFormSubmitting()"> 
-            {% csrf_token %}
-            <input type="hidden" name="id" value="{{ forloop.counter0 }}"/>
-            <label for="delSubmit{{ forloop.counter0 }}" class="btn">
-               <span class="glyphicon glyphicon-trash" style="color:red"></span>          
-            </label>
-            <input type="submit" id="delSubmit{{ forloop.counter0 }}" class="hidden"/>
-        </form>
-    </td>
-    </tr>
-{% endfor %}    
-</table>
+<div id="mygrid" style="font-size: initial; height: 100%"></div>
+</div>
 
-</div>
+
+<link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
+
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/underscore/1.4.4/underscore.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/backbone/1.0.0/backbone.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/mustache/0.5.0-dev/mustache.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/dist/recline.js'%}"></script>
+
+<link rel="stylesheet" href="{% static 'dataedit/recline/css/grid.css'%}" />
+<link rel="stylesheet" href="{% static 'dataedit/recline/css/slickgrid.css'%}">
+<link rel="stylesheet" href="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.grid.css'%}">
+
+<!-- vendor -->
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/jquery-ui-1.8.16.custom.min.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/jquery.event.drag-2.2.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.core.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.grid.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.formatters.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/slick.editors.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/plugins/slick.rowselectionmodel.js'%}"></script>
+<script type="text/javascript" src="{% static 'dataedit/recline/vendor/slickgrid/2.2/plugins/slick.rowmovemanager.js'%}"></script>
+<script type="text/javascript" src=http://code.interactjs.io/v1.2.6/interact.min.js></script>
+<script>
+    interact('.resize-drag')
+  .draggable({
+    onmove: window.dragMoveListener
+  })
+  .resizable({
+
+    edges: {right: true, bottom: true}
+  })
+  .on('resizemove', function (event) {
+    var target = event.target,
+        x = (parseFloat(target.getAttribute('data-x')) || 0),
+        y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+    // update the element's style
+    target.style.width  = event.rect.width + 'px';
+    target.style.height = event.rect.height + 'px';
+
+    // translate when resizing from top or left edges
+    x += event.deltaRect.left;
+    y += event.deltaRect.top;
+
+    target.style.webkitTransform = target.style.transform =
+        'translate(' + x + 'px,' + y + 'px)';
+
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+  });
+
+</script>
+
+<script type="text/javascript">
+    var data = [
+        {% for row in dataset %}
+            { {% for head,cell in row %}
+            {{head}}:
+            {% if head == '_comment' and cell%}
+                {origin: '{{ cell.origin }}', method: '{{ cell.method }}', assumptions: [{% for assu in cell.assumptions %} assu {%endfor%}]}
+            {%else%}
+                '{{cell}}'
+            {%endif%}
+            {% if not loop.last %}, {% endif %}{% endfor %} }{% if not loop.last %}, {% endif %}
+        {% endfor %}];
+
+      var dataset = new recline.Model.Dataset({
+        records: data
+      });
+
+    {# {% if '_comment' in header %} handle_comment_field(dataset, recline, {{ header.index('_comment') }}); {% endif %} #}
+
+
+      var $el = $('#mygrid');
+
+    {% if kind == 'table' %}
+      var grid = new recline.View.SlickGrid({
+        model: dataset,
+        el: $el
+      });
+      grid.visible = true;
+      grid.render();
+    {% elif kind == 'map' %}
+
+    var map = new recline.View.Map({
+      model: dataset
+    });
+    $el.append(map.el);
+    //map.render();
+    {% endif %}
+
+    </script>
 <div>
-    <div>
-        <a href="/dataedit/edit" onclick="setFormSubmitting()"> Extend manually</a> <br>
-    </div>
-    <div>
-        <a href="/dataedit/upload" onclick="setFormSubmitting()"> Extend via csv</a>
-    </div>
+    <a href="?page=1"> first </a>
+{% for p in pages %}
+    {% if p == page %}
+        {{p }}
+    {% else %}
+        <a href="?page={{p}}">{{p}}</a>
+    {% endif %}
+{% endfor %} <a href="?page={{ page_num }}"> last </a>
 </div>
-<form action="/dataedit/commit" method="post" onsubmit="setFormSubmitting()"> 
-            {% csrf_token %}
-            <input type="submit" id="submit_data" class="btn"/>
-        </form>
-        <form action="/dataedit/drop" method="post" onsubmit="setFormSubmitting()"> 
-            {% csrf_token %}
-            <input type="submit" id="submit_data" class="btn" value="DROP"/>
-        </form>
+
+<div id="downloadables">
+        <div id="revisions" style="width:460px">
+            <table class="table table-hover">
+                <tr>
+                    <th> Revision </th>
+                    <th> Created </th>
+                    <th> Last Access </th>
+                    <th> Available </th>
+                </tr>
+                {% for entry, av in revisions %}
+
+                <tr>
+                    <td> {{ entry.revision }} </td>
+                     <td>
+                    {% if av %}
+                        {{ av.created }}
+                    {% else %}
+                        -
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if av %}
+                        {{ av.last_accessed }}
+                    {% else %}
+                        -
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if av %}
+                        <a href="{{table}}/{{ entry.revision}}"style="color:green;" class='glyphicon glyphicon-ok'></a>
+                    {% else %}
+                        <a href="{{table}}/{{entry.revision}}"style="color:red;" class='glyphicon glyphicon-remove'></a>
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
 {% endblock %}
