@@ -1,0 +1,19 @@
+.resize-drag {
+  /*background-color: #fcfcfd;
+  font-size: 20px;
+  font-family: sans-serif;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 30px 20px;
+  /* This makes things *much* easier */
+  height: auto;
+  box-sizing: border-box;
+}
+
+.tag {
+    padding: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 25px;
+
+}
