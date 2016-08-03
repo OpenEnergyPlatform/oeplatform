@@ -75,11 +75,11 @@ pending_dumps = {}
 
 def create_dump(schema, table, rev_id, name):
     print(table)
-    if not os.path.exists('media/dumps/{rev}'.format(rev=rev_id)):
-        os.mkdir('media/dumps/{rev}'.format(rev=rev_id))
-    if not os.path.exists('media/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema)):
-        os.mkdir('media/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema))
-    L =['svn', 'export', "file://"+sec.datarepo+name, '--force', '--revision='+rev_id, '-q',  'media/dumps/'+rev_id+'/'+name]
+    if not os.path.exists('dumps/{rev}'.format(rev=rev_id)):
+        os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}'.format(rev=rev_id))
+    if not os.path.exists(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema)):
+        os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema))
+    L =['svn', 'export', "file://"+sec.datarepo+name, '--force', '--revision='+rev_id, '-q',  sec.MEDIA_ROOT+'/dumps/'+rev_id+'/'+name]
     print(" ".join(L))
     return call(L, shell=False)
     """return call(["pg_dump",
@@ -95,7 +95,7 @@ def create_dump(schema, table, rev_id, name):
                  "-w"], shell=False)"""
 
 def send_dump(rev_id, schema, table):
-    path = 'media/dumps/{rev}/{schema}/{table}.tar.gz'.format(rev=rev_id,schema=schema,table=table)
+    path = sec.MEDIA_ROOT+'/dumps/{rev}/{schema}/{table}.tar.gz'.format(rev=rev_id,schema=schema,table=table)
     f = FileWrapper(open(path, "rb"))
     response = HttpResponse(f,content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
 
