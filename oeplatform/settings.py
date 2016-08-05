@@ -38,9 +38,9 @@ INSTALLED_APPS = (
     'login',
     'base',
     'widget_tweaks',
-	'dataedit',
+    'dataedit',
     'colorfield',
-    'django_ajax'
+    'django_ajax',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -13,5 +13,6 @@ url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/tags/add/(?P<tag_id>\d+)$'.form
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/(?P<rev_id>\d+)$'.format(qual=pgsql_qualifier), views.show_revision, name='input'),
     url(r'^upload', views.DataUploadView.as_view(), name='input'),
     url(r'^tag/create', views.TagCreate.as_view()),
+    url(r'^search', views.SearchView.as_view()),
     #url(r'^tag/create', views.TagCreate.as_view(), name='input'),
 ]

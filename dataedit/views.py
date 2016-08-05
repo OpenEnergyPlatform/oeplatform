@@ -23,8 +23,7 @@ from wsgiref.util import FileWrapper
 from django.utils import timezone
 import math
 from dataedit import models
-from dataedit import forms
-from django_ajax.decorators import ajax
+import requests
 
 session = None
 
@@ -480,3 +479,31 @@ def add_table_tag(request,schema,table,tag_id):
 class TagCreate(CreateView):
     model = models.Tag
     fields = '__all__'
+
+class SearchView(View):
+
+    def get(self, request):
+        return render(request, 'dataedit/search.html', {'results':[]})
+
+    def post(self, request):
+        results = []
+        print(request.POST)
+        if request.POST['string']:
+            search_string = '*+OR+*'.join(('*'+request.POST['string']+'*').split(' '))
+            post = 'http://localhost:8983/solr/oedb_meta/select?q=comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}&wt=json'.format(s=search_string)
+            print("solr:", search_string, post)
+            response = requests.get(post)
+            print(response.text)
+            response = json.loads(response.text)
+
+            for result in response['response']['docs']:
+                table = result['table']
+                schema = result['schema']
+                tags = []
+                if models.Table.objects.filter(name=table,
+                                               schema__name=schema).exists():
+                    tobj = models.Table.objects.get(name=table,
+                                                    schema__name=schema)
+                    tags = tobj.tags.all()
+                results.append((schema, table, tags))
+        return render(request, 'dataedit/search.html', {'results':results})

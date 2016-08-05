@@ -11,3 +11,4 @@ bibtexparser
 svn
 django-colorfield
 djangoajax
+requests
