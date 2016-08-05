@@ -9,3 +9,4 @@ sqlalchemy
 Pillow
 bibtexparser
 svn
+mwclient
