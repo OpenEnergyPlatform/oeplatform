@@ -51,6 +51,7 @@ COMMENT_KEYS = [('Name', 'Name'),
                 ('Spatial resolution', 'Spatial_resolution'),
                 ('Description', 'Description'),
                 ('Licence', 'Licence'),
+                ('Column', 'Column'),
                 ('Instructions for proper use', 'Proper_use'),
                 ('Source', 'Source'),
                 ('Reference date', 'Reference_date'),
@@ -159,7 +160,7 @@ class DataView(View):
         fields = actions.analyze_columns(db, schema, table)
 
         # Types are currently overwritten. This should be done more thoroughly
-        fields = [{'id': entry['id'], 'type':'string'} for entry in fields]
+
 
         comment_on_table = actions.get_comment_table(db, schema, table)
         comment_columns = {d["name"]: d for d in comment_on_table[
@@ -170,7 +171,10 @@ class DataView(View):
              COMMENT_KEYS
              if key in comment_on_table])
 
-        #_, comment_on_table = _type_json(comment_on_table)
+        print(fields)
+        fields = [{'id': entry['id'],
+                   'type': 'string',
+                   'comment':comment_columns[entry['id']] if entry['id'] in comment_columns else ""} for entry in fields]
 
         references = [(dict(ref)['entries_id'], ref) for ref in references]
         rows = []

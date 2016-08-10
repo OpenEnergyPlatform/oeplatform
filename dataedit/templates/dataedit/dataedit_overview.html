@@ -128,7 +128,7 @@
 {% endfor %} <a href="?page={{ page_num }}"> last </a>
 </div>
 <div>
-    <table class="table table-hover">
+    <table class="table table-hover" style="width:460px">
         <tr>
             <th>Name</th>
             <td>{{comment_on_table.Name}}</td>
@@ -148,7 +148,7 @@
             <th>Reference date</th>
             <td>
             {% for ref in comment_on_table.Reference_date %}
-                {{ref}} {% if not loop.last %}, {% endif %}
+                {{ref}}{% if not forloop.last %}, {% endif %}
             {% endfor %}</td>
         </tr>
         {% endif %}
@@ -158,7 +158,7 @@
             <th>Date of Collection</th>
             <td>
             {% for ref in comment_on_table.Date_of_collection %}
-                {{ref}} {% if not loop.last %}, {% endif %}
+                {{ref}}{% if not forloop.last %}, {% endif %}
             {% endfor %}</td>
         </tr>
         {% endif %}
@@ -167,7 +167,7 @@
             <th>Spatial resolution</th>
             <td>
             {% for ref in comment_on_table.Spatial_resolution %}
-                {{ref}} {% if not loop.last %}, {% endif %}
+                {{ref}}{% if not forloop.last %}, {% endif %}
             {% endfor %}</td>
         </tr>
         {% endif %}
@@ -175,9 +175,10 @@
         <tr>
             <th>Description</th>
             <td>
+                <ul>
             {% for ref in comment_on_table.Description %}
-                {{ref}} {% if not loop.last %}, {% endif %}
-            {% endfor %}</td>
+               <li> {{ref}}</li>
+            {% endfor %}</ul></td>
         </tr>
         {% endif %}
         {% if comment_on_table.Licence %}
