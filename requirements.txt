@@ -9,3 +9,4 @@ sqlalchemy
 Pillow
 bibtexparser
 svn
+-e git+https://github.com/openego/ego.io.git

@@ -38,7 +38,8 @@ INSTALLED_APPS = (
     'login',
     'base',
     'widget_tweaks',
-	'dataedit'
+    'dataedit',
+    'literature'
 )
 
 MIDDLEWARE_CLASSES = (
