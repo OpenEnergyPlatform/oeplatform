@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'dataedit',
     'colorfield',
     'django_ajax',
+	'literature'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -92,5 +93,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-AUTHENTICATION_BACKENDS = ['login.models.UserBackend']
-#AUTH_USER_MODEL = 'login.myuser'
+
+AUTH_USER_MODEL = 'login.myuser'

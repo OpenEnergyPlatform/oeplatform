@@ -18,6 +18,7 @@ _ENGINES = {}
 from api import references
 from sqlalchemy import func, MetaData, Table
 from sqlalchemy.sql.ddl import CreateTable
+import oeplatform.securitysettings as sec
 
 Base = declarative_base()
 
@@ -371,16 +372,19 @@ def data_info(context, data_dict):
     return data_dict
 
 
-def _get_engine(db):
-    '''Get either read or write engine.'''
-    engine = _ENGINES.get(db)
+def connect():
+    engine = _get_engine()
+    insp = sqla.inspect(engine)
+    return insp
 
-    if not engine:
-        engine = sqla.create_engine(
-            "postgresql://{user}:{passw}@{host}:{port}/{db}".format(
-                user=dbuser, passw=dbpasswd, host=dbhost,
-                port=dbport, db=db))
-        _ENGINES[db] = engine
+def _get_engine(db=None):
+    engine = sqla.create_engine(
+        'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
+            sec.dbuser,
+            sec.dbpasswd,
+            sec.dbhost,
+            sec.dbport,
+            sec.dbname))
     return engine
 
 

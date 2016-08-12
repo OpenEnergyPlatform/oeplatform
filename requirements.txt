@@ -14,3 +14,4 @@ djangoajax
 requests
 mwclient
 geoalchemy2
+-e git+https://github.com/openego/ego.io.git
