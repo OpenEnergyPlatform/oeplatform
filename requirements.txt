@@ -13,3 +13,4 @@ django-colorfield
 djangoajax
 requests
 mwclient
+geoalchemy2

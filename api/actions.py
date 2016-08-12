@@ -267,6 +267,14 @@ def _get_header(results):
     return header
 
 
+def analyze_columns(db, schema, table):
+    engine = _get_engine(db)
+    connection = engine.connect()
+    result = connection.execute(
+        "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(
+            schema=schema, table=table))
+    return [{'id':r['id'],'type':r['type']} for r in result]
+
 def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
     if not fields:
         fields = '*'
@@ -284,7 +292,6 @@ def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
     sql_string += " limit {}".format(limit)
     sql_string += " offset {}".format(offset)
-
     return connection.execute(sql_string, ), [dict(refs.first()).items()]
 
 
@@ -302,10 +309,12 @@ def get_comment_table(db, schema, table):
         schema=schema, table=table)
 
     res = connection.execute(sql_string)
-    return {}
     if res:
-        jsn = res.first().obj_description
-        return json.loads(jsn)
+        jsn = res.first().obj_description.replace('\n','')
+        try:
+            return json.loads(jsn)
+        except ValueError:
+            return{'error': 'No json format', 'content': jsn}
     else:
         return {}
 

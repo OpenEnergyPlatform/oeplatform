@@ -24,6 +24,7 @@ from django.utils import timezone
 import math
 from dataedit import models
 import requests
+import geoalchemy2
 
 session = None
 
@@ -48,15 +49,16 @@ def listtables(request, schema):
 
 
 COMMENT_KEYS = [('Name', 'Name'),
-                ('Date of collection', 'Date of collection'),
-                ('Spatial resolution', 'Spatial resolution'),
+                ('Date of collection', 'Date_of_collection'),
+                ('Spatial resolution', 'Spatial_resolution'),
                 ('Description', 'Description'),
                 ('Licence', 'Licence'),
-                ('Instructions for proper use', 'Proper use'),
+                ('Column', 'Column'),
+                ('Instructions for proper use', 'Proper_use'),
                 ('Source', 'Source'),
-                ('Reference date', 'Reference date'),
-                ('Original file', 'Date of Collection'),
-                ('Spatial resolution', ''),
+                ('Reference date', 'Reference_date'),
+                ('Original file', 'Original_file'),
+                ('Spatial resolution', 'Spatial_resolution'),
                 ('', ''), ]
 
 
@@ -131,11 +133,14 @@ def show_revision(request, schema, table, rev_id):
             pending_dumps[(schema, table, rev_id)] = t
         return render(request, 'dataedit/dataedit_revision_pending.html', {})
 
+
 class DataView(View):
 
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
     """
+
+
 
     def get(self, request, schema, table):
         #if any((x not in request.session for x in ["table", "schema", "fields", "headers", "floatingRows"])) or (
@@ -154,11 +159,9 @@ class DataView(View):
 
         pages = range(max(1,page-3), last_page)
         (result, references) = actions.search(db, schema, table, offset=min((page-1)*limit, (page_num-1)*limit), limit=limit)
+        fields = actions.analyze_columns(db, schema, table)
 
-        header = actions._get_header(result)
-        comment = actions.get_comment_table(db, schema, table)
-        comment_columns = {d["name"]: d for d in comment[
-            "Table fields"]} if "Table fields" in comment else {}
+        # Types are currently overwritten. This should be done more thoroughly
 
         tags = []
 
@@ -169,24 +172,32 @@ class DataView(View):
         print('tags', tags)
 
 
-        comment = OrderedDict(
-            [(label, comment[key]) for key, label in
+
+        comment_on_table = actions.get_comment_table(db, schema, table)
+        comment_columns = {d["name"]: d for d in comment_on_table[
+            "Table fields"]} if "Table fields" in comment_on_table else {}
+        print(comment_on_table.keys())
+        comment_on_table = OrderedDict(
+            [(label, comment_on_table[key]) for key, label in
              COMMENT_KEYS
-             if key in comment])
-        _, comment = _type_json(comment)
+             if key in comment_on_table])
+
+        print(fields)
+        fields = [{'id': entry['id'],
+                   'type': 'string',
+                   'comment':comment_columns[entry['id']] if entry['id'] in comment_columns else ""} for entry in fields]
+
         references = [(dict(ref)['entries_id'], ref) for ref in references]
         rows = []
-        header = [h["id"] for h in header]
+        header = [h["id"] for h in fields]
         for row in result:
-            """if '_comment' in row and row['_comment']:
-    row['_comment'] = {'method': com.method, 'assumption': list(
-                    com.assumption) if com.assumption != "null" else {},
-                                    'origin': com.origin} for com in
-                                   actions.search(db, schema,
+            #TODO: Cache comments to increase performance
+            row = dict(row)
+            if '_comment' in row and row['_comment']:
+                row['_comment'] = [{'method': com.method, 'assumption': list(com.assumption) if com.assumption not in ["null", None] else {}, 'origin': com.origin} for com in actions.search(db, schema,
                                                   '_' + table + '_cor',
-                                                  pk=('id', row['_comment']))[0]
-                                   if com.id == row['_comment']][0]"""
-            rows.append(list(zip(header,row)))
+                                                  pk=('id', int(row['_comment'])))[0]][0]
+            rows.append(row.items())
         # res = [[row[h["id"]] for h in header] for row in result]
 
         repo = svn.local.LocalClient(sec.datarepowc)
@@ -201,12 +212,13 @@ class DataView(View):
                 rev_obj = None
             print(rev_obj)
             revisions.append((rev, rev_obj))
-
+        print(comment_on_table)
         return render(request, 'dataedit/dataedit_overview.html',{"dataset": rows,
                 "header": header,
                 #'resource_view_json': json.dumps(data_dict['resource_view']),
+                'fields':fields,
                 'references': references,
-                'comment_table': comment,
+                'comment_on_table': dict(comment_on_table),
                 'comment_columns': comment_columns,
                 'revisions': revisions,
                 'kind': 'table',
@@ -217,9 +229,6 @@ class DataView(View):
                 'page_num':page_num,
                 'last_page':last_page,
                 'tags':tags})
-        print(list(map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])))
-        return render(request, 'dataedit/dataedit_overview.html',
-                      {'data': map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])})
 
 
 """
