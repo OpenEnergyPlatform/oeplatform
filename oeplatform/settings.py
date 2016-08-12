@@ -94,4 +94,6 @@ USE_TZ = True
 
 
 
-AUTH_USER_MODEL = 'login.myuser'
+
+AUTHENTICATION_BACKENDS = ['login.models.UserBackend']
+#AUTH_USER_MODEL = 'login.myuser'
