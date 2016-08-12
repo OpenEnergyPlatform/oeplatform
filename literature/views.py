@@ -7,7 +7,7 @@ from api.actions import _get_engine
 from django.views.generic import View
 import datetime
 from literature import forms
-
+import io
 
 # Create your views here.
 
@@ -88,24 +88,37 @@ class LiteratureView(View):
         return redirect('/literature')
 
 
+def upload(request):
+    file = request.FILES['bibtex']
+    print(file.file)
+    read_bibtexfile(io.TextIOWrapper(file.file))
+
 def get_bibtype_id(bibtype):
     engine = _get_engine()
     sess = Session(bind=engine)
-    return sess.query(ref.EntryType).filter(
+    et = sess.query(ref.EntryType).filter(
         ref.EntryType.label == bibtype).first()
+    sess.close()
+    return et
 
 
-def read_bibtexfile(file_name):
+
+def read_bibtexfile(bibtex_file):
     engine = _get_engine()
     metadata = MetaData()
     metadata.create_all(bind=engine)
     sess = Session(bind=engine)
 
-    with open(file_name) as bibtex_file:
-        bibtex_database = btp.load(bibtex_file)
+
+    bibtex_database = btp.load(bibtex_file)
     for ent in bibtex_database.entries:
         props = {k.name: ent[k.name.replace('entries.', '')] for k in
                  ref.Entry.__table__.c if k.name.replace('entries.', '') in ent}
+        props['entry_types_id'] = get_bibtype_id(ent['ENTRYTYPE'])
+
         en = ref.Entry(**props)
+        print(en.entry_types_id.label)
         sess.add(en)
     sess.commit()
+    sess.close()
+    return redirect('/literature')
