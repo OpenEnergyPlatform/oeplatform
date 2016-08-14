@@ -8,16 +8,22 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 def is_pg_qual(x):
     return pgsql_qualifier.search(x)
 
+
+class ValidationError(Exception):
+    def __init__(self, message, value):
+        self.message = message
+        self.value = value
+
 def read_bool(s):
     if  s.lower() in ["true","false"]:
         return s.lower() == "true"
     else:
-        raise p.toolkit.ValidationError("Invalid value in binary field: %s" % s)
+        raise ValidationError("Invalid value in binary field", s)
 
 def read_pgid(s):
      if is_pg_qual(s):
         return s
-     raise p.toolkit.ValidationError("Invalid identifier: %s" % s) 
+     raise ValidationError("Invalid identifier", s)
 
 def parse_select(d):
     """
@@ -232,7 +238,7 @@ def parse_create_table(d):
             fs += parse_table_constraint(field)
         elif field['type'] == 'like':
             fs += 'LIKE '
-            
+
 
 def parse_column_constraint(d):
     raise NotImplementedError
