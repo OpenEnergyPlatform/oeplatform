@@ -6,7 +6,7 @@ import api.references
 # debug
 import sys
 import traceback
-import parser
+from api import parser
 from api.parser import is_pg_qual, read_bool, read_pgid
 from sqlalchemy.engine import reflection
 from sqlalchemy.orm import sessionmaker
@@ -21,6 +21,8 @@ from sqlalchemy.sql.ddl import CreateTable
 import oeplatform.securitysettings as sec
 
 Base = declarative_base()
+
+
 
 def _get_table(db, schema, table):
     engine = _get_engine(db)
@@ -37,18 +39,6 @@ class DataStore(Base):
     resource = sqlalchemy.Column(sqlalchemy.String(40))
     dataset = sqlalchemy.Column(sqlalchemy.String(30))
 
-def get_packages(context):
-    return p.toolkit.get_action('package_list')(context, data_dict={})
-
-def schema_create(context, data):
-    schema = data['schema']
-    resource_dict = p.toolkit.get_action('package_create')(context,
-                                                            data_dict={
-                                                                "name": schema,
-                                                                "type": "data",
-                                                                "owner_org": "oedb",
-                                                            })
-    return resource_dict
 
 
 def get_table_resource(schema, table):
@@ -69,28 +59,23 @@ def comment_table_drop(session, schema, table):
     session.execute("drop table {schema}{table}_cor".format(schema=schema + "." if schema else "", table="_"+table))
 
 
-def table_create(context, data_dict):
+def table_create(request):
     # TODO: Authentication
     # TODO: column constrains: Unique,
-    # load schema name and check for sanity 
-    db = data_dict["db"]
-    engine = _get_engine(db)
+    # load schema name and check for sanity
+    engine = _get_engine()
     connection = engine.connect()
 
-    schema = read_pgid(data_dict["schema"])
-    create_schema = not has_schema(context, data_dict)
+    schema = read_pgid(request.POST["schema"])
+    create_schema = not has_schema(request)
     # Check whether schema exists
 
     # load table name and check for sanity
-    table = read_pgid(data_dict.pop("table"))
-    if len(table) > 100:
-        # This is a constraint on CKAN resources
-        raise p.toolkit.ValidationError(
-            "Length of table name not between 2 and 100")
+    table = read_pgid(request.POST.pop("table"))
 
     # Process fields
     fieldstrings = []
-    fields = data_dict.pop("fields", [])
+    fields = request.POST.pop("fields", [])
     foreign_keys = []
     primary_keys = []
     for field in fields:
@@ -106,16 +91,16 @@ def table_create(context, data_dict):
                 primary_keys.append([field["name"]])
 
     table_constraints = {"unique": [], "pk": primary_keys, "fk": foreign_keys}
-    for (name, cons) in data_dict.pop('constraints', []):
-        if name.lower() == "fk":
-            for fk in cons:
+    for con in request.POST.pop('constraints', []):
+        if con['name'].lower() == "fk":
+            for fk in con['constraint']:
                 if not all(map(is_pg_qual,
                                [fk["schema"], fk["table"], fk["field"]])):
-                    raise p.toolkit.ValidationError("Invalid identifier")
+                    raise parser.ValidationError("Invalid identifier")
                 if fk["on delete"].lower() not in ["cascade", "no action",
                                                    "restrict", "set null",
                                                    "set default"]:
-                    raise p.toolkit.ValidationError("Invalid action")
+                    raise parser.ValidationError("Invalid action")
                 foreign_keys.append(([field["name"]],
                                      fk["schema"],
                                      fk["table"],
@@ -143,7 +128,7 @@ def table_create(context, data_dict):
 
     create_dict = {'name': table}
     # resource_dict = p.toolkit.get_action('resource_create')(
-    # context, data_dict['resource'])
+    # context, request.POST['resource'])
 
     # TODO: Add author/maintainer, tags, license
 
@@ -155,23 +140,6 @@ def table_create(context, data_dict):
         comment_table_create(session, schema, table)
         session.execute(sql_string.replace('%', '%%'))
 
-        resource_dict = p.toolkit.get_action('resource_create')(context,
-                                                                data_dict={
-                                                                    "package_id": schema.replace(
-                                                                        "_",
-                                                                        "-"),
-                                                                    "url": "/data/{db}/{schema}/{table}".format(
-                                                                        schema=schema,
-                                                                        table=table,
-                                                                        db=db),
-                                                                    "name": table,
-                                                                    "owner_org": "oedb",
-                                                                    })
-
-        ds = DataStore(schema=schema, table=table, dataset=schema,
-                       resource=resource_dict['id'])
-        session.add(ds)
-
     except Exception as e:
         traceback.print_exc()
         session.rollback()
@@ -180,34 +148,36 @@ def table_create(context, data_dict):
         session.commit()
     return {'success': True}
 
-def data_delete(context, data_dict):
+def data_delete(request):
     raise NotImplementedError()
 
 
-def table_drop(context, data_dict):
-    db = data_dict["db"]
+def table_drop(request):
+    db = request.POST["db"]
     engine = _get_engine(db)
     connection = engine.connect()
 
     # load schema name and check for sanity    
-    schema = data_dict.pop("schema", None)
+    schema = request.POST.pop("schema", "public")
     if not is_pg_qual(schema):
-        raise p.toolkit.ValidationError("Invalid schema name")
+        return {'success':False, 'reason':'Invalid schema name: %s'%schema}
         # Check whether schema exists
 
     # load table name and check for sanity
-    table = data_dict.pop("table", None)
+    table = request.POST.pop("table", None)
 
     if not is_pg_qual(table):
-        raise p.toolkit.ValidationError("Invalid table name")
+        return {'success': False, 'reason': 'Invalid table name: %s' % table}
 
     try:
-        exists = bool(data_dict.pop("exists", False))
+        exists = bool(request.POST.pop("exists", False))
     except:
-        raise p.toolkit.ValidationError("Invalid value in field 'exists'")
-    option = data_dict.pop("option", None)
+        return {'success': False,
+                'reason': 'Invalid exists clause: %s' % exists}
+
+    option = request.POST.pop("option", None)
     if option and option.lower() not in ["cascade", "restrict"]:
-        raise p.toolkit.ValidationError("Invalid value in field 'option'")
+        return {'success': False, 'reason': 'Invalid option clause name: %s' % option}
 
     sql_string = "drop table {exists} {schema}.{table} {option} ".format(
         schema=schema,
@@ -217,10 +187,6 @@ def table_drop(context, data_dict):
 
     session = sessionmaker(bind=engine)()
     try:
-        resources = session.query(DataStore).filter(DataStore.schema == schema, DataStore.table == table).all()
-        for res_item in resources:
-            p.toolkit.get_action('resource_delete')(context, data_dict={"package_id": res_item.dataset, "id": res_item.resource})
-            session.delete(res_item)
         session.execute(sql_string.replace('%', '%%'))
         comment_table_drop(session, schema, table)
     except Exception as e:
@@ -232,11 +198,10 @@ def table_drop(context, data_dict):
 
     return {}
 
-def data_search(context, data_dict):
-    db = data_dict["db"]
-    engine = _get_engine(db)
+def data_search(context, request):
+    engine = _get_engine()
     connection = engine.connect()
-    query = parser.parse_select(data_dict)
+    query = parser.parse_select(request.POST)
     result = connection.execute(query)
     description = result.context.cursor.description
     data = [list(r) for r in result]
@@ -309,9 +274,13 @@ def get_comment_table(db, schema, table):
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table)
 
-    res = connection.execute(sql_string).first()
-    if res and res.obj_description:
-        jsn = res.obj_description.replace('\n','')
+    res = connection.execute(sql_string)
+    if res:
+        jsn = res.first().obj_description
+        if jsn:
+            jsn = jsn.replace('\n','')
+        else:
+            return {}
         try:
             return json.loads(jsn)
         except ValueError:
@@ -320,32 +289,31 @@ def get_comment_table(db, schema, table):
         return {}
 
 
-def data_insert(context, data_dict):
-    db = data_dict["db"]
-    engine = _get_engine(db)
+def data_insert(request):
+    engine = _get_engine()
     # load schema name and check for sanity    
-    schema = data_dict["schema"]
+    schema = request.POST["schema"]
 
     if not is_pg_qual(schema):
-        raise p.toolkit.ValidationError("Invalid schema name")
+        raise parser.ValidationError("Invalid schema name")
         # Check whether schema exists
 
     # load table name and check for sanity
-    table = data_dict.pop("table", None)
+    table = request.POST.pop("table", None)
     if not is_pg_qual(table):
-        raise p.toolkit.ValidationError("Invalid table name")
+        raise parser.ValidationError("Invalid table name")
 
-    fields = data_dict.pop("fields", "*")
+    fields = request.POST.pop("fields", "*")
     if fields != "*" and not all(map(is_pg_qual, fields)):
-        raise p.toolkit.ValidationError("Invalid field name")
+        raise parser.ValidationError("Invalid field name")
     fieldsstring = "(" + (", ".join(fields)) + ")" if fields != "*" else ""
 
-    if bool(data_dict.pop("default", False)):
+    if bool(request.POST.pop("default", False)):
         data = " DEFAULT VALUES"
     else:
-        data = data_dict.pop("values", [])
+        data = request.POST.pop("values", [])
 
-    returning = data_dict.pop("returning", '')
+    returning = request.POST.pop("returning", '')
     if returning:
         returning = 'returning ' + ', '.join(map(parser.parse_expression, returning))
 
@@ -365,11 +333,11 @@ def data_insert(context, data_dict):
                                  col.internal_size, col.precision, col.scale,
                                  col.null_ok] for col in description]}
     else:
-        return data_dict
+        return request.POST
 
 
-def data_info(context, data_dict):
-    return data_dict
+def data_info(context, request):
+    return request.POST
 
 
 def connect():
@@ -377,7 +345,7 @@ def connect():
     insp = sqla.inspect(engine)
     return insp
 
-def _get_engine(db=None):
+def _get_engine():
     engine = sqla.create_engine(
         'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
             sec.dbuser,
@@ -388,135 +356,135 @@ def _get_engine(db=None):
     return engine
 
 
-def has_schema(context, data_dict):
-    engine = _get_engine(data_dict['db'])
-    result = engine.dialect.has_schema(engine.connect(), data_dict['schema'])
+def has_schema(context, request):
+    engine = _get_engine(request.POST['db'])
+    result = engine.dialect.has_schema(engine.connect(), request.POST['schema'])
     return result
 
 
-def has_table(context, data_dict):
-    engine = _get_engine(data_dict['db'])
-    schema= data_dict.pop('schema', None)
-    table = data_dict['table_name']
+def has_table(context, request):
+    engine = _get_engine(request.POST['db'])
+    schema= request.POST.pop('schema', None)
+    table = request.POST['table_name']
     result = engine.dialect.has_table(engine.connect(), table,
                                       schema=schema)
     return result
 
 
-def has_sequence(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def has_sequence(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.has_sequence(engine.connect(),
-                                         data_dict['sequence_name'],
-                                         schema=data_dict.pop('schema', None))
+                                         request.POST['sequence_name'],
+                                         schema=request.POST.pop('schema', None))
     return result
 
 
-def has_type(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def has_type(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.has_schema(engine.connect(),
-                                       data_dict['sequence_name'],
-                                       schema=data_dict.pop('schema', None))
+                                       request.POST['sequence_name'],
+                                       schema=request.POST.pop('schema', None))
     return result
 
 
 @reflection.cache
-def get_table_oid(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_table_oid(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_table_oid(engine.connect(),
-                                          data_dict['table_name'],
-                                          schema=data_dict['schema'],
-                                          **data_dict)
+                                          request.POST['table_name'],
+                                          schema=request.POST['schema'],
+                                          **request.POST)
     return result
 
 
 @reflection.cache
-def get_schema_names(context, data_dict):
-    engine = _get_engine(data_dict['db'])
-    result = engine.dialect.get_schema_names(engine.connect(), **data_dict)
+def get_schema_names(context, request):
+    engine = _get_engine(request.POST['db'])
+    result = engine.dialect.get_schema_names(engine.connect(), **request.POST)
     return result
 
 
 @reflection.cache
-def get_table_names(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_table_names(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_table_names(engine.connect(),
-                                            schema=data_dict.pop('schema',
+                                            schema=request.POST.pop('schema',
                                                                  None),
-                                            **data_dict)
+                                            **request.POST)
     return result
 
 
 @reflection.cache
-def get_view_names(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_view_names(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_view_names(engine.connect(),
-                                           schema=data_dict.pop('schema', None),
-                                           **data_dict)
+                                           schema=request.POST.pop('schema', None),
+                                           **request.POST)
     return result
 
 
 @reflection.cache
-def get_view_definition(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_view_definition(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_schema_names(engine.connect(),
-                                             data_dict['view_name'],
-                                             schema=data_dict.pop('schema',
+                                             request.POST['view_name'],
+                                             schema=request.POST.pop('schema',
                                                                   None),
-                                             **data_dict)
+                                             **request.POST)
     return result
 
 
 @reflection.cache
-def get_columns(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_columns(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_columns(engine.connect(),
-                                        data_dict['table_name'],
-                                        schema=data_dict.pop('schema', None),
-                                        **data_dict)
+                                        request.POST['table_name'],
+                                        schema=request.POST.pop('schema', None),
+                                        **request.POST)
     return result
 
 
 @reflection.cache
-def get_pk_constraint(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_pk_constraint(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_pk_constraint(engine.connect(),
-                                              data_dict['table_name'],
-                                              schema=data_dict.pop('schema',
+                                              request.POST['table_name'],
+                                              schema=request.POST.pop('schema',
                                                                    None),
-                                              **data_dict)
+                                              **request.POST)
     return result
 
 
 @reflection.cache
-def get_foreign_keys(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_foreign_keys(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_foreign_keys(engine.connect(),
-                                             data_dict['table_name'],
-                                             schema=data_dict.pop('schema',
+                                             request.POST['table_name'],
+                                             schema=request.POST.pop('schema',
                                                                   None),
-                                             postgresql_ignore_search_path=data_dict.pop(
+                                             postgresql_ignore_search_path=request.POST.pop(
                                                  'postgresql_ignore_search_path',
                                                  False),
-                                             **data_dict)
+                                             **request.POST)
     return result
 
 
 @reflection.cache
-def get_indexes(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_indexes(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_indexes(engine.connect(),
-                                        data_dict['table_name'],
-                                        data_dict['schema'],
-                                        **data_dict)
+                                        request.POST['table_name'],
+                                        request.POST['schema'],
+                                        **request.POST)
     return result
 
 
 @reflection.cache
-def get_unique_constraints(context, data_dict):
-    engine = _get_engine(data_dict['db'])
+def get_unique_constraints(context, request):
+    engine = _get_engine(request.POST['db'])
     result = engine.dialect.get_foreign_keys(engine.connect(),
-                                             data_dict['table_name'],
-                                             schema=data_dict.pop('schema',
+                                             request.POST['table_name'],
+                                             schema=request.POST.pop('schema',
                                                                   None),
-                                             **data_dict)
+                                             **request.POST)
     return result
