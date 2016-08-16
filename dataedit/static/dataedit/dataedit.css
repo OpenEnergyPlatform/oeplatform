@@ -59,3 +59,17 @@
 .left-addon input  { padding-left:  30px; }
 .right-addon input { padding-right: 30px; }
 
+.selecttable{
+    width:100%
+
+}
+
+.selecttable th{
+
+
+}
+
+.selecter{
+    height:100%;
+    width:25%;
+    }

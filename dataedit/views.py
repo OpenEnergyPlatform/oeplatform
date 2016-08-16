@@ -25,6 +25,7 @@ import math
 from dataedit import models
 import requests
 import geoalchemy2
+import time
 
 session = None
 
@@ -143,6 +144,7 @@ class DataView(View):
 
 
     def get(self, request, schema, table):
+        t = time.time()
         #if any((x not in request.session for x in ["table", "schema", "fields", "headers", "floatingRows"])) or (
         #        request.session['table'] != table or request.session['schema'] != schema):
         #    error = loadSessionData(request, connect(db), db, schema, table)
@@ -150,7 +152,7 @@ class DataView(View):
         #        return error
         # db = url.split("/")[1]
         page = int(request.GET.get('page', 1))
-        limit = request.GET.get('limit', 100)
+        limit = request.GET.get('limit', 1000000)
         db = sec.dbname
         count = actions.count_all(db, schema, table)
 
@@ -169,24 +171,20 @@ class DataView(View):
             tobj = models.Table.objects.get(name=table, schema__name=schema)
             tags = tobj.tags.all()
 
-        print('tags', tags)
-
 
 
         comment_on_table = actions.get_comment_table(db, schema, table)
         comment_columns = {d["name"]: d for d in comment_on_table[
             "Table fields"]} if "Table fields" in comment_on_table else {}
-        print(comment_on_table.keys())
+
         comment_on_table = OrderedDict(
             [(label, comment_on_table[key]) for key, label in
              COMMENT_KEYS
              if key in comment_on_table])
 
-        print(fields)
         fields = [{'id': entry['id'],
-                   'type': 'string',
+                   'type': 'string', # if entry['id'] != 'geom' else "Point",
                    'comment':comment_columns[entry['id']] if entry['id'] in comment_columns else ""} for entry in fields]
-
         references = [(dict(ref)['entries_id'], ref) for ref in references]
         rows = []
         header = [h["id"] for h in fields]
@@ -204,7 +202,6 @@ class DataView(View):
         available_revisions = TableRevision.objects.filter(table=table, schema=schema)
         revisions = []
         revision_ids = [rev.revision for rev in available_revisions]
-        print(available_revisions)
         for rev in repo.log_default():
             try:
                 rev_obj = available_revisions.get(revision=rev.revision)
@@ -212,7 +209,7 @@ class DataView(View):
                 rev_obj = None
             print(rev_obj)
             revisions.append((rev, rev_obj))
-        print(comment_on_table)
+        print("Time elapsed", time.time() - t)
         return render(request, 'dataedit/dataedit_overview.html',{"dataset": rows,
                 "header": header,
                 #'resource_view_json': json.dumps(data_dict['resource_view']),
@@ -221,7 +218,7 @@ class DataView(View):
                 'comment_on_table': dict(comment_on_table),
                 'comment_columns': comment_columns,
                 'revisions': revisions,
-                'kind': 'table',
+                'kinds': ['table', 'map', 'graph'],
                 'table': table,
                 'schema': schema,
                 'pages': pages,
