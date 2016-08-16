@@ -41,17 +41,6 @@ class DataStore(Base):
 
 
 
-def schema_create(context, data):
-    schema = data['schema']
-    resource_dict = p.toolkit.get_action('package_create')(context,
-                                                            request.POST={
-                                                                "name": schema,
-                                                                "type": "data",
-                                                                "owner_org": "oedb",
-                                                            })
-    return resource_dict
-
-
 def get_table_resource(schema, table):
     result = sqlalchemy.select(DataStore.c.resource, DataStore.c.dataset).where(
         DataStore.c.table == table, DataStore.c.schema == schema)
@@ -107,11 +96,11 @@ def table_create(request):
             for fk in con['constraint']:
                 if not all(map(is_pg_qual,
                                [fk["schema"], fk["table"], fk["field"]])):
-                    raise p.toolkit.ValidationError("Invalid identifier")
+                    raise parser.ValidationError("Invalid identifier")
                 if fk["on delete"].lower() not in ["cascade", "no action",
                                                    "restrict", "set null",
                                                    "set default"]:
-                    raise p.toolkit.ValidationError("Invalid action")
+                    raise parser.ValidationError("Invalid action")
                 foreign_keys.append(([field["name"]],
                                      fk["schema"],
                                      fk["table"],
@@ -306,17 +295,17 @@ def data_insert(request):
     schema = request.POST["schema"]
 
     if not is_pg_qual(schema):
-        raise p.toolkit.ValidationError("Invalid schema name")
+        raise parser.ValidationError("Invalid schema name")
         # Check whether schema exists
 
     # load table name and check for sanity
     table = request.POST.pop("table", None)
     if not is_pg_qual(table):
-        raise p.toolkit.ValidationError("Invalid table name")
+        raise parser.ValidationError("Invalid table name")
 
     fields = request.POST.pop("fields", "*")
     if fields != "*" and not all(map(is_pg_qual, fields)):
-        raise p.toolkit.ValidationError("Invalid field name")
+        raise parser.ValidationError("Invalid field name")
     fieldsstring = "(" + (", ".join(fields)) + ")" if fields != "*" else ""
 
     if bool(request.POST.pop("default", False)):

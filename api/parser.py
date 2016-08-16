@@ -61,8 +61,8 @@ def parse_select(d):
     if 'where' in d:
         s+= ' WHERE ' + parse_condition(d['where'])
         
-    if 'group by' in d:
-        s += ' GROUP BY ' + ', '.join(parse_expression(f) for f in d['group by'])
+    if 'group_by' in d:
+        s += ' GROUP BY ' + ', '.join(parse_expression(f) for f in d['group_by'])
         
     if 'having' in d:
         s += ' HAVING ' + ', '.join(parse_condition(f) for f in d['having'])
@@ -79,9 +79,9 @@ def parse_select(d):
             s += ' DISTINCT ' 
         s += parse_select(sel['select'])   
         
-    if 'order by' in d:
+    if 'order_by' in d:
         L = []
-        for ob in d['order by']:
+        for ob in d['order_by']:
             ss = ''
             ss += ' ORDER BY ' + parse_expression(ob['expression']) 
             if 'ordering' in ob:
