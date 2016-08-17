@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% load staticfiles %}
+{% block content-right %}
+    <hr>
+    <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
+    {% load dataedit.taghandler %}
+    {% get_tags as all_tags %}
+    <h3>Popular Labels</h3>
+    {% for tag in all_tags %}
+    <button type="button" class="btn tag" style="background:{{ tag.color }}">{{ tag.label }}</button>
+    {% endfor %}
+    <a href="/dataedit/tag/create">Add label</a>
+{% endblock %}
+{% block content %}
+{% block data_search %}
+<div class="searchbox_container small">
+    <form action="/dataedit/search" method="post">{% csrf_token %}
+        <div class="inner-addon right-addon">
+            <a href="" type="submit" class="glyphicon glyphicon-search"></a>
+            <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
+        </div>
+    </form>
+    <a href="/dataedit/search/">Advanced Search</a>
+</div>
+{% endblock %}
+{% block data_content %}
+
+{% endblock %}
+{% endblock %}

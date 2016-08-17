@@ -38,7 +38,10 @@ INSTALLED_APPS = (
     'login',
     'base',
     'widget_tweaks',
-	'dataedit'
+    'dataedit',
+    'colorfield',
+    'django_ajax',
+	'literature'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -91,4 +94,6 @@ USE_TZ = True
 
 
 
-AUTH_USER_MODEL = 'login.myuser'
+
+AUTHENTICATION_BACKENDS = ['login.models.UserBackend']
+#AUTH_USER_MODEL = 'login.myuser'

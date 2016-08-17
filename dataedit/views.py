@@ -1,8 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden, HttpResponseNotAllowed
 import sqlalchemy as sqla
 from .forms import InputForm, UploadFileForm, UploadMapForm
-from django.views.generic import View
+from django.views.generic import View, FormView, CreateView, UpdateView
 from django.template import RequestContext
 import csv
 import os
@@ -22,6 +22,10 @@ from django.utils.encoding import smart_str
 from wsgiref.util import FileWrapper
 from django.utils import timezone
 import math
+from dataedit import models
+import requests
+import geoalchemy2
+import time
 
 session = None
 
@@ -35,7 +39,7 @@ excluded_schemas = [
 ]
 def listschemas(request):
     insp = connect()
-    schemas = {schema for schema in  insp.get_schema_names() if schema not in excluded_schemas}
+    schemas = {(schema, len({table for table in insp.get_table_names(schema=schema) if not table.startswith('_')})) for schema in  insp.get_schema_names() if schema not in excluded_schemas}
     return render(request, 'dataedit/dataedit_schemalist.html',{'schemas':schemas})
 
 def listtables(request, schema):
@@ -46,15 +50,16 @@ def listtables(request, schema):
 
 
 COMMENT_KEYS = [('Name', 'Name'),
-                ('Date of collection', 'Date of collection'),
-                ('Spatial resolution', 'Spatial resolution'),
+                ('Date of collection', 'Date_of_collection'),
+                ('Spatial resolution', 'Spatial_resolution'),
                 ('Description', 'Description'),
                 ('Licence', 'Licence'),
-                ('Instructions for proper use', 'Proper use'),
+                ('Column', 'Column'),
+                ('Instructions for proper use', 'Proper_use'),
                 ('Source', 'Source'),
-                ('Reference date', 'Reference date'),
-                ('Original file', 'Date of Collection'),
-                ('Spatial resolution', ''),
+                ('Reference date', 'Reference_date'),
+                ('Original file', 'Original_file'),
+                ('Spatial resolution', 'Spatial_resolution'),
                 ('', ''), ]
 
 
@@ -129,60 +134,51 @@ def show_revision(request, schema, table, rev_id):
             pending_dumps[(schema, table, rev_id)] = t
         return render(request, 'dataedit/dataedit_revision_pending.html', {})
 
+
 class DataView(View):
 
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
     """
 
+
+
     def get(self, request, schema, table):
+        t = time.time()
         #if any((x not in request.session for x in ["table", "schema", "fields", "headers", "floatingRows"])) or (
         #        request.session['table'] != table or request.session['schema'] != schema):
         #    error = loadSessionData(request, connect(db), db, schema, table)
         #    if error:
         #        return error
         # db = url.split("/")[1]
-        page = int(request.GET.get('page', 1))
-        limit = request.GET.get('limit', 100)
+
         db = sec.dbname
-        count = actions.count_all(db, schema, table)
+        # Types are currently overwritten. This should be done more thoroughly
 
-        page_num = max(math.ceil(count/limit), 1)
-        last_page = min(page_num, page + 3)
+        tags = []
 
-        pages = range(max(1,page-3), last_page)
-        (result, references) = actions.search(db, schema, table, offset=min((page-1)*limit, (page_num-1)*limit), limit=limit)
+        if models.Table.objects.filter(name=table, schema__name=schema).exists():
+            tobj = models.Table.objects.get(name=table, schema__name=schema)
+            tags = tobj.tags.all()
 
-        header = actions._get_header(result)
-        comment = actions.get_comment_table(db, schema, table)
-        comment_columns = {d["name"]: d for d in comment[
-            "Table fields"]} if "Table fields" in comment else {}
 
-        comment = OrderedDict(
-            [(label, comment[key]) for key, label in
+
+        comment_on_table = actions.get_comment_table(db, schema, table)
+        comment_columns = {d["name"]: d for d in comment_on_table[
+            "Table fields"]} if "Table fields" in comment_on_table else {}
+
+        comment_on_table = OrderedDict(
+            [(label, comment_on_table[key]) for key, label in
              COMMENT_KEYS
-             if key in comment])
-        _, comment = _type_json(comment)
-        references = [(dict(ref)['entries_id'], ref) for ref in references]
-        rows = []
-        header = [h["id"] for h in header]
-        for row in result:
-            """if '_comment' in row and row['_comment']:
-    row['_comment'] = {'method': com.method, 'assumption': list(
-                    com.assumption) if com.assumption != "null" else {},
-                                    'origin': com.origin} for com in
-                                   actions.search(db, schema,
-                                                  '_' + table + '_cor',
-                                                  pk=('id', row['_comment']))[0]
-                                   if com.id == row['_comment']][0]"""
-            rows.append(list(zip(header,row)))
-        # res = [[row[h["id"]] for h in header] for row in result]
+             if key in comment_on_table])
+
+
+
 
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table, schema=schema)
         revisions = []
         revision_ids = [rev.revision for rev in available_revisions]
-        print(available_revisions)
         for rev in repo.log_default():
             try:
                 rev_obj = available_revisions.get(revision=rev.revision)
@@ -190,23 +186,18 @@ class DataView(View):
                 rev_obj = None
             print(rev_obj)
             revisions.append((rev, rev_obj))
-
-        return render(request, 'dataedit/dataedit_overview.html',{"dataset": rows,
-                "header": header,
-                #'resource_view_json': json.dumps(data_dict['resource_view']),
-                'references': references,
-                'comment_table': comment,
-                'comment_columns': comment_columns,
-                'revisions': revisions,
-                'kind': 'table',
-                'table': table,
-                'pages': pages,
-                'page': page,
-                'page_num':page_num,
-                'last_page':last_page})
-        print(list(map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])))
-        return render(request, 'dataedit/dataedit_overview.html',
-                      {'data': map(lambda x:zip(request.session['headers'],x),request.session['floatingRows'])})
+        print("Time elapsed", time.time() - t)
+        return render(request,
+                      'dataedit/dataedit_overview.html',
+                      {
+                        'comment_on_table': dict(comment_on_table),
+                        'comment_columns': comment_columns,
+                        'revisions': revisions,
+                        'kinds': ['table', 'map', 'graph'],
+                        'table': table,
+                        'schema': schema,
+                        'tags':tags
+                      })
 
 
 """
@@ -448,3 +439,49 @@ def is_pg_qual(x):
     pgsql_qualifier = re.compile(r"^[\w\d_]+$")
     return pgsql_qualifier.search(x)
 
+
+class TagUpdate(UpdateView):
+    model = models.Tag
+    fields = '__all__'
+    template_name_suffix = '_form'
+
+
+def add_table_tag(request,schema,table,tag_id):
+    sch, _ = models.Schema.objects.get_or_create(name=schema)
+    tab,_ = models.Table.objects.get_or_create(name=table, schema=sch)
+    tag = get_object_or_404(models.Tag, pk=tag_id)
+    tab.tags.add(tag)
+    tab.save()
+    return redirect(request.GET.get('from', '/'))
+
+class TagCreate(CreateView):
+    model = models.Tag
+    fields = '__all__'
+
+class SearchView(View):
+
+    def get(self, request):
+        return render(request, 'dataedit/search.html', {'results':[]})
+
+    def post(self, request):
+        results = []
+        print(request.POST)
+        if request.POST['string']:
+            search_string = '*+OR+*'.join(('*'+request.POST['string']+'*').split(' '))
+            post = 'http://localhost:8983/solr/oedb_meta/select?q=comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}&wt=json'.format(s=search_string)
+            print("solr:", search_string, post)
+            response = requests.get(post)
+            print(response.text)
+            response = json.loads(response.text)
+
+            for result in response['response']['docs']:
+                table = result['table']
+                schema = result['schema']
+                tags = []
+                if models.Table.objects.filter(name=table,
+                                               schema__name=schema).exists():
+                    tobj = models.Table.objects.get(name=table,
+                                                    schema__name=schema)
+                    tags = tobj.tags.all()
+                results.append((schema, table, tags))
+        return render(request, 'dataedit/search.html', {'results':results})

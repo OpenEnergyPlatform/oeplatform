@@ -1,0 +1,12 @@
+{% extends "dataedit/base.html" %}
+
+{% block data_content %}
+{% load staticfiles %}
+<script type="text/javascript" src="{% static 'colorfield/jscolor/jscolor.js'%}"></script>
+
+<form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+
+{% endblock %}

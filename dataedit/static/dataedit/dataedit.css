@@ -1,0 +1,75 @@
+.resize-drag {
+  /*background-color: #fcfcfd;
+  font-size: 20px;
+  font-family: sans-serif;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 30px 20px;
+  /* This makes things *much* easier */
+  height: auto;
+  box-sizing: border-box;
+}
+
+.tag {
+    padding: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 25px;
+
+}
+
+/* enable absolute positioning */
+.inner-addon {
+    position: relative;
+}
+
+.searchbox_container{
+
+}
+
+.searchbox_container .small{
+    width: 300px;
+    float:right;
+}
+
+
+/* style icon */
+.inner-addon .glyphicon {
+  position: absolute;
+  padding: 10px;
+  pointer-events: none;
+}
+
+/* align icon */
+.left-addon .glyphicon  { left:  0px;}
+.right-addon .glyphicon { right: 0px;}
+
+.inner-addon .tag {
+  position: absolute;
+  pointer-events: none;
+  margin-right:10px;
+}
+
+/* align icon */
+.left-addon .tag  { left:  0px;}
+.right-addon .tag { right: 0px;}
+
+
+/* add padding  */
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+.selecttable{
+    width:100%
+
+}
+
+.selecttable th{
+
+
+}
+
+.selecter{
+    height:100%;
+    width:25%;
+    }

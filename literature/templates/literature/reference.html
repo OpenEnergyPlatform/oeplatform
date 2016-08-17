@@ -1,0 +1,55 @@
+
+{% extends "literature/base.html" %}
+
+{% block content %}
+<h1>{{entry.title}} (#{{entry.entries_id}})</h1> <a class="btn" href="edit">Edit</a>
+<table class="table table-hover">
+{% include 'literature/reference_item.html' with key='abstract' value=entry.abstract %}
+{% include 'literature/reference_item.html' with key='address' value=entry.address %}
+{% include 'literature/reference_item.html' with key='annote' value=entry.annote %}
+{% include 'literature/reference_item.html' with key='author' value=entry.author %}
+{% include 'literature/reference_item.html' with key='booktitle' value=entry.booktitle %}
+{% include 'literature/reference_item.html' with key='chapter' value=entry.chapter %}
+{% include 'literature/reference_item.html' with key='cite_key' value=entry.cite_key %}
+{% include 'literature/reference_item.html' with key='comment' value=entry.comment %}
+{% include 'literature/reference_item.html' with key='crossref' value=entry.crossref %}
+{% include 'literature/reference_item.html' with key='database_id' value=entry.database_id %}
+{% include 'literature/reference_item.html' with key='doi' value=entry.doi %}
+{% include 'literature/reference_item.html' with key='edition' value=entry.edition %}
+{% include 'literature/reference_item.html' with key='editor' value=entry.editor %}
+{% include 'literature/reference_item.html' with key='eid' value=entry.eid %}
+
+{% include 'literature/reference_item.html' with key='entry_types_id' value=entry.entry_types_id %}
+{% include 'literature/reference_item.html' with key='file' value=entry.file %}
+{% include 'literature/reference_item.html' with key='howpublished' value=entry.howpublished %}
+{% include 'literature/reference_item.html' with key='institution' value=entry.institution %}
+{% include 'literature/reference_item.html' with key='jabref_eid' value=entry.jabref_eid %}
+{% include 'literature/reference_item.html' with key='journal' value=entry.journal %}
+{% include 'literature/reference_item.html' with key='key_' value=entry.key_ %}
+{% include 'literature/reference_item.html' with key='keywords' value=entry.keywords %}
+{% include 'literature/reference_item.html' with key='language' value=entry.language %}
+{% include 'literature/reference_item.html' with key='location' value=entry.location %}
+{% include 'literature/reference_item.html' with key='month' value=entry.month %}
+{% include 'literature/reference_item.html' with key='note' value=entry.note %}
+{% include 'literature/reference_item.html' with key='number' value=entry.number %}
+{% include 'literature/reference_item.html' with key='organization' value=entry.organization %}
+{% include 'literature/reference_item.html' with key='pages' value=entry.pages %}
+{% include 'literature/reference_item.html' with key='pdf' value=entry.pdf %}
+{% include 'literature/reference_item.html' with key='pmid' value=entry.pmid %}
+{% include 'literature/reference_item.html' with key='priority' value=entry.priority %}
+{% include 'literature/reference_item.html' with key='ps' value=entry.ps %}
+{% include 'literature/reference_item.html' with key='publisher' value=entry.publisher %}
+{% include 'literature/reference_item.html' with key='qualityassured' value=entry.qualityassured %}
+{% include 'literature/reference_item.html' with key='ranking' value=entry.ranking %}
+{% include 'literature/reference_item.html' with key='relevance' value=entry.relevance %}
+{% include 'literature/reference_item.html' with key='school' value=entry.school %}
+{% include 'literature/reference_item.html' with key='search' value=entry.search %}
+{% include 'literature/reference_item.html' with key='series' value=entry.series %}
+
+{% include 'literature/reference_item.html' with key='type' value=entry.type %}
+{% include 'literature/reference_item.html' with key='url' value=entry.url %}
+{% include 'literature/reference_item.html' with key='volume' value=entry.volume %}
+{% include 'literature/reference_item.html' with key='year' value=entry.year %}
+</table>
+
+{% endblock %}

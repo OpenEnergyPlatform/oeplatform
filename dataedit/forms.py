@@ -1,6 +1,9 @@
 from django import forms
 from django.db import models
 
+from django.forms import ModelForm
+from dataedit.models import Tag
+
 # This structure maps postgresql data types to django forms
 typemap = [
     (["smallint"], models.SmallIntegerField),
@@ -85,3 +88,11 @@ class UploadMapForm(forms.Form):
                 self.fields[name].initial = max(headers, key = lambda x : self._lcs(name,x))                
             else:                
                 self.fields[name].initial = "---"
+
+
+
+
+class TagForm(ModelForm):
+    class Meta:
+        model = Tag
+        fields = ['label']
