@@ -81,7 +81,7 @@ def parse_select(d):
         if sel['type'].lower() in ['union','intersect','except']:
             s += ' ' + sel['type']
         else:
-            raise p.toolkit.ValidationError('UNION/INTERSECT/EXCEPT expected')
+            raise ValidationError('UNION/INTERSECT/EXCEPT expected')
         if 'all' in sel and read_bool(sel['all']):
             s += ' ALL '
         elif 'distinct' in sel and read_bool(sel['distinct']):
@@ -103,7 +103,7 @@ def parse_select(d):
                 if ob['nulls'].lower() in ['first','last']:
                     ss += ob['nulls']
                 else:
-                    raise p.toolkit.ValidationError('Invalid NULLS option')  
+                    raise ValidationError('Invalid NULLS option')  
             L.append(ss)
         s += ', '.join(L)
     
@@ -114,7 +114,7 @@ def parse_select(d):
         elif isinstance(d['limit'], int) or d['limit'].is_digit():
             s += ' ' + str(d['limit'])
         else:
-            raise p.toolkit.ValidationError('Invalid LIMIT (expected ALL or a digit)')
+            raise ValidationError('Invalid LIMIT (expected ALL or a digit)')
             
     if 'offset' in d and (isinstance(d['offset'], int) or d['offset'].is_digit()):
         s += ' OFFSET {} ROWS'.format(d['offset'])
@@ -166,20 +166,23 @@ def parse_from_item(d):
         s = parse_from_item(d['left'])
         if 'natural' in d and read_bool(d['natural']):
             s += ' NATURAL'
-        if d['join_type'].lower() in [  'join', 'inner join', 'left join', 
-                                        'left outer join', 'right join', 
-                                        'right outer join', 'full join', 
-                                        'full inner join', 'cross join']:
-           s +=  ' ' + d['join_type']
+        if 'join_type' in d:
+            if d['join_type'].lower() in [  'join', 'inner join', 'left join',
+                                            'left outer join', 'right join',
+                                            'right outer join', 'full join',
+                                            'full inner join', 'cross join']:
+               s +=  ' ' + d['join_type']
+            else:
+                raise ValidationError('Invalid join type')
         else:
-            raise p.toolkit.ValidationError('Invalid join type')                            
+            s += ' JOIN '
         
-        s += ' ' + parse_from_item(['right'])
+        s += ' ' + parse_from_item(d['right'])
         
         if 'on' in d:
-            s += ' ON ' + parse_condition(s['on'])
+            s += ' ON ' + parse_condition(d['on'])
         elif 'using' in d:
-            s += ' (' + ', '.join(map(read_pgid,d['using'])) + ')'
+            s += ' USING (' + ', '.join(map(read_pgid,d['using'])) + ')'
     return s
            
 
@@ -202,7 +205,7 @@ def parse_condition(dl):
     for d in dl:
         print("DICT",d)
         if d['type'] == 'operator_binary':
-            conditionlist.append("%s %s %s" % (parse_expression(d['left']), d['operator'], d['right']))
+            conditionlist.append("%s %s %s" % (parse_expression(d['left']), d['operator'], parse_expression(d['right'])))
     
     return " " + " AND ".join(conditionlist)
     

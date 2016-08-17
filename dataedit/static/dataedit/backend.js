@@ -5,6 +5,32 @@ var recline = recline || {};
 recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
+function plot_comment(row)
+{
+    var el = document.createElement('div');
+    el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
+          + '<div class="modal-dialog">'
+            + '<div class="modal-content">'
+              + '<div class="modal-header">'
+                + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
+                + '<h4 class="modal-title">Comment</h4>'
+              + '</div>'
+              + '<div class="modal-body">'
+                + '<p> Method: '+ row.method +'</p>'
+                + '<p> Origin: '+ row.origin +'</p>'
+                + '<p> Assumption: '+ row.assumption +'</p>'
+              + '</div>'
+              + '<div class="modal-footer">'
+                + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
+              + '</div>'
+            + '</div>'
+
+          + '</div>'
+        + '</div>)');
+    document.body.appendChild(el);
+    return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+}
+
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
     my.max_rows = 1000;
@@ -39,9 +65,29 @@ recline.Backend.OEP = OEP;
             limit: queryObj.size,
             offset: queryObj.from,
             from: [{
-                type:'table',
-                schema: dataset.schema,
-                table: dataset.table
+                type: 'join',
+                left:{
+                    type:'table',
+                    schema: dataset.schema,
+                    table: dataset.table
+                },
+                right:{
+                    type:'table',
+                    schema: dataset.schema,
+                    table: "_" + dataset.table +"_cor"
+                },
+                on: {
+                    type: 'operator_binary',
+                    left: {
+                        type: 'column',
+                        column: '_comment'
+                    },
+                    operator: '=',
+                    right: {
+                        type: 'column',
+                        column: 'id'
+                    }
+                }
             }],
         };
         if(query.limit > my.max_rows){
@@ -81,6 +127,7 @@ recline.Backend.OEP = OEP;
                         {
                             row[results.content.description[i][0]] = raw_row[i];
                         }
+                        row['_comment'] = plot_comment(row);
                         return row;
                     }),
                     total: counts.content[0][0],
