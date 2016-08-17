@@ -2182,7 +2182,6 @@ my.Map = Backbone.View.extend({
   // Private: Return a GeoJSON geomtry extracted from the record fields
   //
   _getGeometryFromRecord: function(doc){
-  debugger;
     if (this.state.get('geomField')){
       var value = doc.get(this.state.get('geomField'));
       if (typeof(value) === 'string'){

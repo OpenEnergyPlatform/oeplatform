@@ -46,12 +46,21 @@ def parse_select(d):
     
 
     L = []
-    for field in d['fields']:       
-        ss = parse_expression(field['expression'])
-        if 'as' in field:
-            ss += ' AS ' + read_pgid(field['as'])
-        L.append(ss)
-    s += ' ' + ', '.join(L)
+    if '_count' in d:
+        s += ' count('
+    if 'fields' in d:
+        for field in d['fields']:
+            ss = parse_expression(field['expression'])
+            if 'as' in field:
+                ss += ' AS ' + read_pgid(field['as'])
+            L.append(ss)
+        s += ' ' + ', '.join(L)
+    else:
+        s += ' * '
+
+
+    if '_count' in d:
+        s += ')'
 
     # [ FROM from_item [, ...] ]
     if 'from' in d:
@@ -100,19 +109,20 @@ def parse_select(d):
     
     if 'limit' in d:
         s += ' LIMIT'
-        if d['limit'].lower() == 'all':
+        if isinstance(d['limit'], str) and d['limit'].lower() == 'all':
             s += ' ALL'
-        elif d['limit'].is_digit():
-            s += ' ' + d['limit']
+        elif isinstance(d['limit'], int) or d['limit'].is_digit():
+            s += ' ' + str(d['limit'])
         else:
             raise p.toolkit.ValidationError('Invalid LIMIT (expected ALL or a digit)')
             
-    if 'offset' in d and d['offset'].is_digit():
+    if 'offset' in d and (isinstance(d['offset'], int) or d['offset'].is_digit()):
         s += ' OFFSET {} ROWS'.format(d['offset'])
         
     if 'fetch' in d and d['fetch'].is_digit():
         s += ' FETCH NEXT {} ROWS ONLY'.format(d['fetch'])
-        
+
+    print(s)
     return s                      
         
         
@@ -128,6 +138,7 @@ def parse_from_item(d):
             [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ] alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
             [ LATERAL ] function_name ( [ argument [, ...] ] ) AS ( column_definition [, ...] )
     """
+    # TODO: If 'type' is not set assume just a table name is present
     if d['type'] == 'table':
         s = 'only ' if d.pop('only', False) else ''
         schema = read_pgid(d.pop('schema',''))

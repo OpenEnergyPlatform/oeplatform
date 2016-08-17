@@ -151,18 +151,8 @@ class DataView(View):
         #    if error:
         #        return error
         # db = url.split("/")[1]
-        page = int(request.GET.get('page', 1))
-        limit = request.GET.get('limit', 1000000)
+
         db = sec.dbname
-        count = actions.count_all(db, schema, table)
-
-        page_num = max(math.ceil(count/limit), 1)
-        last_page = min(page_num, page + 3)
-
-        pages = range(max(1,page-3), last_page)
-        (result, references) = actions.search(db, schema, table, offset=min((page-1)*limit, (page_num-1)*limit), limit=limit)
-        fields = actions.analyze_columns(db, schema, table)
-
         # Types are currently overwritten. This should be done more thoroughly
 
         tags = []
@@ -182,21 +172,8 @@ class DataView(View):
              COMMENT_KEYS
              if key in comment_on_table])
 
-        fields = [{'id': entry['id'],
-                   'type': 'string', # if entry['id'] != 'geom' else "Point",
-                   'comment':comment_columns[entry['id']] if entry['id'] in comment_columns else ""} for entry in fields]
-        references = [(dict(ref)['entries_id'], ref) for ref in references]
-        rows = []
-        header = [h["id"] for h in fields]
-        for row in result:
-            #TODO: Cache comments to increase performance
-            row = dict(row)
-            if '_comment' in row and row['_comment']:
-                row['_comment'] = [{'method': com.method, 'assumption': list(com.assumption) if com.assumption not in ["null", None] else {}, 'origin': com.origin} for com in actions.search(db, schema,
-                                                  '_' + table + '_cor',
-                                                  pk=('id', int(row['_comment'])))[0]][0]
-            rows.append(row.items())
-        # res = [[row[h["id"]] for h in header] for row in result]
+
+
 
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table, schema=schema)
@@ -210,22 +187,17 @@ class DataView(View):
             print(rev_obj)
             revisions.append((rev, rev_obj))
         print("Time elapsed", time.time() - t)
-        return render(request, 'dataedit/dataedit_overview.html',{"dataset": rows,
-                "header": header,
-                #'resource_view_json': json.dumps(data_dict['resource_view']),
-                'fields':fields,
-                'references': references,
-                'comment_on_table': dict(comment_on_table),
-                'comment_columns': comment_columns,
-                'revisions': revisions,
-                'kinds': ['table', 'map', 'graph'],
-                'table': table,
-                'schema': schema,
-                'pages': pages,
-                'page': page,
-                'page_num':page_num,
-                'last_page':last_page,
-                'tags':tags})
+        return render(request,
+                      'dataedit/dataedit_overview.html',
+                      {
+                        'comment_on_table': dict(comment_on_table),
+                        'comment_columns': comment_columns,
+                        'revisions': revisions,
+                        'kinds': ['table', 'map', 'graph'],
+                        'table': table,
+                        'schema': schema,
+                        'tags':tags
+                      })
 
 
 """
