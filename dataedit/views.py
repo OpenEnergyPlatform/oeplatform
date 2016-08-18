@@ -210,6 +210,20 @@ def add_table_tag(request, schema, table, tag_id):
     tab.save()
     return redirect(request.GET.get('from', '/'))
 
+def add_table_tags(request, schema, table):
+    sch, _ = models.Schema.objects.get_or_create(name=schema)
+    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
+    tags = models.Tag.objects.all()
+    tab_tags = tab.tags.all()
+    ids = {pk for pk in request.POST if pk != 'csrfmiddlewaretoken'}
+    for tag in models.Tag.objects.filter(pk__in=ids):
+        if tag not in tab_tags:
+            tab.tags.add(tag)
+    for tag in tab_tags:
+        if str(tag.pk) not in request.POST:
+            tab.tags.remove(tag)
+    tab.save()
+    return redirect(request.META['HTTP_REFERER'])
 
 class TagCreate(CreateView):
     model = models.Tag

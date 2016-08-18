@@ -15,18 +15,26 @@
 
     {% load dataedit.taghandler %}
     {% get_tags as all_tags %}
-    <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="add_tag_select" data-toggle="dropdown"> -- Add a tag --
-        <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu" aria-labelledby="add_tag_select">
-        {% for tag in all_tags %}
-             <li role="presentation" style="background:{{tag.color}}"><a href='/dataedit/view/{{schema}}/{{table}}/tags/add/{{tag.pk}}?from={{ request.path|urlencode }}' role="menuitem">{{ tag.label }}</a></li>
-        {% endfor %}
-        </ul>
+
+    <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
+    </button>
+    <div id="tag_handler" class="collapse">
+        <form action="{{table}}/tags/add/" method="post">
+            {% csrf_token %}
+            <h4>Choose tags for this table:</h4>
+
+            {% for tag in all_tags %}
+                <span  >
+                    <input type="checkbox" class="hidden" name="{{tag.pk}}" id="select_{{tag.pk}}" {% if tag in tags %} checked {% endif %}>
+                    <label style="background:{{tag.color}}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
+                </span>
+            {% endfor %}
+            <input type="submit" class="btn btn-success">
+        </form>
     </div>
 </div>
 
-
+<hr>
 
 
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
