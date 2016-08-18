@@ -2,11 +2,19 @@
 
 {% block content %}
 {% load staticfiles %}
+<h3>
+    Literature
+</h3>
+<div class="well">
+    This is an overview of resources that are available on this platform. If you are
+    log in you can add new references to our database using a BibTeX file or
+    manually. Every entry has a unique id that can be referenced inside the <a href="/dataedit/">OEDB</a>.
+</div>
 <script src="{% static 'jsMath/easy/load.js' %}"></script>
      <div class="dropdown">
       {% if user.is_authenticated %}
-      <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Add
-      <span class="caret"></span></button>
+         <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Add
+         <span class="caret"></span></button>
       {% endif %}
       <ul class="dropdown-menu">
         <li><a href="entry/add">Manually</a></li>
