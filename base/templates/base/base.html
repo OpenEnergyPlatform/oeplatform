@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     
     <head>
@@ -8,7 +9,7 @@
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
     
-
+<body>
     {% block nav %}
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -27,7 +28,10 @@
                 </ul>
                 <li class="inactive"><a href="/literature/">References</a></li>
 
-                <li class="inactive"> <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank"> Discussion {% bootstrap_icon "new-window" %}</a></li>
+                <li class="inactive">
+                    <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank">
+                        Discussion {% bootstrap_icon "new-window" %}
+                    </a>
                 </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
@@ -45,7 +49,7 @@
         </nav>
         
     {% endblock %}
-    <body>
+
         <div class="column-container" style="margin-top:70px">
             {# <div class="column-left">left</div> #}
             <div class="column-center">

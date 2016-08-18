@@ -26,6 +26,7 @@ excluded_schemas = [
     "information_schema",
     "public",
     "topology",
+    "pg_catalog"
 ]
 
 
@@ -209,6 +210,20 @@ def add_table_tag(request, schema, table, tag_id):
     tab.save()
     return redirect(request.GET.get('from', '/'))
 
+def add_table_tags(request, schema, table):
+    sch, _ = models.Schema.objects.get_or_create(name=schema)
+    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
+    tags = models.Tag.objects.all()
+    tab_tags = tab.tags.all()
+    ids = {pk for pk in request.POST if pk != 'csrfmiddlewaretoken'}
+    for tag in models.Tag.objects.filter(pk__in=ids):
+        if tag not in tab_tags:
+            tab.tags.add(tag)
+    for tag in tab_tags:
+        if str(tag.pk) not in request.POST:
+            tab.tags.remove(tag)
+    tab.save()
+    return redirect(request.META['HTTP_REFERER'])
 
 class TagCreate(CreateView):
     model = models.Tag
@@ -217,29 +232,47 @@ class TagCreate(CreateView):
 
 class SearchView(View):
     def get(self, request):
-        return render(request, 'dataedit/search.html', {'results': []})
+        return render(request, 'dataedit/search.html', {'results': [], 'tags':models.Tag.objects.all()})
 
     def post(self, request):
         results = []
         print(request.POST)
+        filter_tags = set([])
+        if 'tags' in request.POST:
+            filter_tags = request.POST.getlist('tags')
+        if isinstance(filter_tags, str):
+            filter_tags = {filter_tags}
+        else:
+            filter_tags = set(filter_tags)
+
+        print(filter_tags)
         if request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
-            post = 'http://localhost:8983/solr/oedb_meta/select?q=comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}&wt=json'.format(
+            query = 'comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}'.format(
                 s=search_string)
-            print("solr:", search_string, post)
-            response = requests.get(post)
-            print(response.text)
-            response = json.loads(response.text)
-
-            for result in response['response']['docs']:
-                table = result['table']
-                schema = result['schema']
-                tags = []
-                if models.Table.objects.filter(name=table,
-                                               schema__name=schema).exists():
-                    tobj = models.Table.objects.get(name=table,
-                                                    schema__name=schema)
-                    tags = tobj.tags.all()
+        else:
+            query = '*:*'
+        fq = '-table:_*'
+        post = 'http://localhost:8983/solr/oedb_meta/select?q=' + query \
+            + '&wt=json&rows=1000' \
+            + '&fq=-(table:_*)'
+        for schema in excluded_schemas:
+            post += '&fq=-(schema:%s)'%schema
+        response = requests.get(post)
+        response = json.loads(response.text)
+        print(response)
+        for result in response['response']['docs']:
+            table = result['table']
+            schema = result['schema']
+            tags = []
+            if models.Table.objects.filter(name=table,
+                                           schema__name=schema).exists():
+                tobj = models.Table.objects.get(name=table,
+                                                schema__name=schema)
+                tags = tobj.tags.all()
+            if filter_tags.issubset({tag.label for tag in tags}) and schema not in excluded_schemas:
                 results.append((schema, table, tags))
-        return render(request, 'dataedit/search.html', {'results': results})
+            else:
+                print((schema, table, tags))
+        return render(request, 'dataedit/search.html', {'results': results, 'tags':models.Tag.objects.all()})
