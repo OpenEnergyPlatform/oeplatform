@@ -19,6 +19,7 @@ from api import references
 from sqlalchemy import func, MetaData, Table
 from sqlalchemy.sql.ddl import CreateTable
 import oeplatform.securitysettings as sec
+import geoalchemy2
 
 Base = declarative_base()
 

@@ -9,10 +9,8 @@ urlpatterns = [
     url(r'^view/$', views.listschemas, name='index'),
     url(r'^view/(?P<schema>{qual})$'.format(qual=pgsql_qualifier), views.listtables, name='input'),
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})$'.format(qual=pgsql_qualifier), views.DataView.as_view(), name='input'),
-url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/tags/add/(?P<tag_id>\d+)$'.format(qual=pgsql_qualifier), views.add_table_tag, name='input'),
+    url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/tags/add/(?P<tag_id>\d+)$'.format(qual=pgsql_qualifier), views.add_table_tag, name='input'),
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/(?P<rev_id>\d+)$'.format(qual=pgsql_qualifier), views.show_revision, name='input'),
-    url(r'^upload', views.DataUploadView.as_view(), name='input'),
     url(r'^tag/create', views.TagCreate.as_view()),
     url(r'^search', views.SearchView.as_view()),
-    #url(r'^tag/create', views.TagCreate.as_view(), name='input'),
 ]
