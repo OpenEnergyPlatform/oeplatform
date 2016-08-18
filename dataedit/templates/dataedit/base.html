@@ -5,11 +5,11 @@
     <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
     {% load dataedit.taghandler %}
     {% get_tags as all_tags %}
-    <h3>Popular Labels</h3>
+    <h3>Popular tags</h3>
     {% for tag in all_tags %}
     <button type="button" class="btn tag" style="background:{{ tag.color }}">{{ tag.label }}</button>
     {% endfor %}
-    <a href="/dataedit/tag/create">Add label</a>
+    <a href="/dataedit/tag/create">Add tag</a>
 {% endblock %}
 {% block content %}
 {% block data_search %}
