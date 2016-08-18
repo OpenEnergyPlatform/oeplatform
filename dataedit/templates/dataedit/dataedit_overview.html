@@ -82,6 +82,7 @@
             table: '{{table}}',
             schema: '{{schema}}',
             backend: 'OEP',
+            has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
         dataset.fetch().done(function(dataset) {
