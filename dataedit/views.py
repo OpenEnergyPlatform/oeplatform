@@ -1,31 +1,23 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponse,  HttpResponseForbidden, HttpResponseNotAllowed, Http404
-import sqlalchemy as sqla
-from .forms import InputForm, UploadFileForm, UploadMapForm
-from django.views.generic import View, FormView, CreateView, UpdateView
-from django.template import RequestContext
-import csv
-import os
-import oeplatform.securitysettings as sec
-from django.views.decorators.csrf import csrf_exempt
-import urllib.request as request
-from django.core.exceptions import PermissionDenied
-from api import actions
-from collections import OrderedDict
-import re
-import svn.local
-from .models import TableRevision
 import json
+import os
 import threading
+from collections import OrderedDict
 from subprocess import call
-from django.utils.encoding import smart_str
 from wsgiref.util import FileWrapper
-from django.utils import timezone
-import math
-from dataedit import models
+
 import requests
-import geoalchemy2
-import time
+import svn.local
+from django.http import HttpResponse, \
+    Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
+from django.utils.encoding import smart_str
+from django.views.generic import View, CreateView, UpdateView
+
+import oeplatform.securitysettings as sec
+from api import actions
+from dataedit import models
+from .models import TableRevision
 
 session = None
 
@@ -35,17 +27,26 @@ excluded_schemas = [
     "public",
     "topology",
 ]
+
+
 def listschemas(request):
     insp = actions.connect()
-    schemas = sorted([(schema, len({table for table in insp.get_table_names(schema=schema) if not table.startswith('_')})) for schema in  insp.get_schema_names() if schema not in excluded_schemas])
-    return render(request, 'dataedit/dataedit_schemalist.html',{'schemas':schemas})
+    schemas = sorted([(schema, len(
+        {table for table in insp.get_table_names(schema=schema) if
+         not table.startswith('_')})) for schema in insp.get_schema_names() if
+                      schema not in excluded_schemas])
+    return render(request, 'dataedit/dataedit_schemalist.html',
+                  {'schemas': schemas})
+
 
 def listtables(request, schema):
     insp = actions.connect()
     if schema in excluded_schemas:
         raise Http404("Schema not accessible")
-    tables = sorted([table for table in insp.get_table_names(schema=schema) if not table.startswith('_')])
-    return render(request, 'dataedit/dataedit_tablelist.html',{'schema':schema, 'tables':tables})
+    tables = sorted([table for table in insp.get_table_names(schema=schema) if
+                     not table.startswith('_')])
+    return render(request, 'dataedit/dataedit_tablelist.html',
+                  {'schema': schema, 'tables': tables})
 
 
 COMMENT_KEYS = [('Name', 'Name'),
@@ -75,72 +76,72 @@ def _type_json(json_obj):
     else:
         return str(type(json_obj)), json_obj
 
+
 pending_dumps = {}
+
 
 def create_dump(schema, table, rev_id, name):
     print(table)
-    if not os.path.exists(sec.MEDIA_ROOT+'/dumps/{rev}'.format(rev=rev_id)):
-        os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}'.format(rev=rev_id))
-    if not os.path.exists(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema)):
-        os.mkdir(sec.MEDIA_ROOT+'/dumps/{rev}/{schema}'.format(rev=rev_id,schema=schema))
-    L =['svn', 'export', "file://"+sec.datarepo+name, '--force', '--revision='+rev_id, '-q',  sec.MEDIA_ROOT+'/dumps/'+rev_id+'/'+name]
+    if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
+        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
+    if not os.path.exists(
+                    sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
+                                                                    schema=schema)):
+        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
+                                                                 schema=schema))
+    L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
+         '--revision=' + rev_id, '-q',
+         sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
     print(" ".join(L))
     return call(L, shell=False)
-    """return call(["pg_dump",
-                 "--port=%s"%sec.dbport,
-                 "test",
-                 "--schema=%s"%schema,
-                 "--table=%s.%s"%(schema,table),
-                 "--username={user}".format(
-        user=sec.dbuser,
-        pw=sec.dbpasswd),
-                 "--host=%s"%sec.dbhost,
-                 "--file=media/dumps/%s"%name,
-                 "-w"], shell=False)"""
+
 
 def send_dump(rev_id, schema, table):
-    path = sec.MEDIA_ROOT+'/dumps/{rev}/{schema}/{table}.tar.gz'.format(rev=rev_id,schema=schema,table=table)
+    path = sec.MEDIA_ROOT + '/dumps/{rev}/{schema}/{table}.tar.gz'.format(
+        rev=rev_id, schema=schema, table=table)
     f = FileWrapper(open(path, "rb"))
-    response = HttpResponse(f,content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
+    response = HttpResponse(f,
+                            content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
 
-    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str('{table}.tar.gz'.format(table=table))
+    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
+        '{table}.tar.gz'.format(table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
     print(response)
     return response
 
+
 def show_revision(request, schema, table, rev_id):
     global pending_dumps
-    fname = "{schema}/{table}.tar.gz".format(schema=schema, table=table)#"{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
+    fname = "{schema}/{table}.tar.gz".format(schema=schema,
+                                             table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
     try:
         rev = TableRevision.objects.get(schema=schema, table=table,
-                                               revision=rev_id)
+                                        revision=rev_id)
         rev.last_accessed = timezone.now()
         rev.save()
         return send_dump(rev_id, schema, table)
     except TableRevision.DoesNotExist:
 
-        if (schema,table,rev_id) in pending_dumps:
-            if not pending_dumps[(schema,table,rev_id)].is_alive():
-                pending_dumps.pop((schema,table,rev_id))
+        if (schema, table, rev_id) in pending_dumps:
+            if not pending_dumps[(schema, table, rev_id)].is_alive():
+                pending_dumps.pop((schema, table, rev_id))
                 rev = TableRevision(revision=rev_id, schema=schema, table=table)
                 rev.save()
                 return send_dump(rev_id, schema, table)
         else:
-            t = threading.Thread(target=create_dump, args=(schema,table,rev_id,fname))
+            t = threading.Thread(target=create_dump,
+                                 args=(schema, table, rev_id, fname))
             t.start()
             pending_dumps[(schema, table, rev_id)] = t
         return render(request, 'dataedit/dataedit_revision_pending.html', {})
 
 
 class DataView(View):
-
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
     """
-
-
 
     def get(self, request, schema, table):
         if schema in excluded_schemas:
@@ -148,7 +149,8 @@ class DataView(View):
         db = sec.dbname
         tags = []
 
-        if models.Table.objects.filter(name=table, schema__name=schema).exists():
+        if models.Table.objects.filter(name=table,
+                                       schema__name=schema).exists():
             tobj = models.Table.objects.get(name=table, schema__name=schema)
             tags = tobj.tags.all()
 
@@ -162,13 +164,16 @@ class DataView(View):
              if key in comment_on_table])
 
         columns = actions.get_columns({'schema': schema, 'table': table})
-        has_row_comments = '_comment' in {col['name'] for col in columns if 'name' in col}
-        print(actions.has_table({'schema': schema, 'table': '_'+table+'_cor'}))
-        has_row_comments = has_row_comments and actions.has_table({'schema': schema, 'table': '_'+table+'_cor'})
+        has_row_comments = '_comment' in {col['name'] for col in columns if
+                                          'name' in col}
+        print(actions.has_table(
+            {'schema': schema, 'table': '_' + table + '_cor'}))
+        has_row_comments = has_row_comments and actions.has_table(
+            {'schema': schema, 'table': '_' + table + '_cor'})
         repo = svn.local.LocalClient(sec.datarepowc)
-        available_revisions = TableRevision.objects.filter(table=table, schema=schema)
+        available_revisions = TableRevision.objects.filter(table=table,
+                                                           schema=schema)
         revisions = []
-        revision_ids = [rev.revision for rev in available_revisions]
 
         for rev in repo.log_default():
             try:
@@ -179,14 +184,14 @@ class DataView(View):
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
-                        'has_row_comments': has_row_comments,
-                        'comment_on_table': dict(comment_on_table),
-                        'comment_columns': comment_columns,
-                        'revisions': revisions,
-                        'kinds': ['table', 'map', 'graph'],
-                        'table': table,
-                        'schema': schema,
-                        'tags':tags
+                          'has_row_comments': has_row_comments,
+                          'comment_on_table': dict(comment_on_table),
+                          'comment_columns': comment_columns,
+                          'revisions': revisions,
+                          'kinds': ['table', 'map', 'graph'],
+                          'table': table,
+                          'schema': schema,
+                          'tags': tags
                       })
 
 
@@ -196,29 +201,32 @@ class TagUpdate(UpdateView):
     template_name_suffix = '_form'
 
 
-def add_table_tag(request,schema,table,tag_id):
+def add_table_tag(request, schema, table, tag_id):
     sch, _ = models.Schema.objects.get_or_create(name=schema)
-    tab,_ = models.Table.objects.get_or_create(name=table, schema=sch)
+    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
     tag = get_object_or_404(models.Tag, pk=tag_id)
     tab.tags.add(tag)
     tab.save()
     return redirect(request.GET.get('from', '/'))
 
+
 class TagCreate(CreateView):
     model = models.Tag
     fields = '__all__'
 
-class SearchView(View):
 
+class SearchView(View):
     def get(self, request):
-        return render(request, 'dataedit/search.html', {'results':[]})
+        return render(request, 'dataedit/search.html', {'results': []})
 
     def post(self, request):
         results = []
         print(request.POST)
         if request.POST['string']:
-            search_string = '*+OR+*'.join(('*'+request.POST['string']+'*').split(' '))
-            post = 'http://localhost:8983/solr/oedb_meta/select?q=comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}&wt=json'.format(s=search_string)
+            search_string = '*+OR+*'.join(
+                ('*' + request.POST['string'] + '*').split(' '))
+            post = 'http://localhost:8983/solr/oedb_meta/select?q=comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}&wt=json'.format(
+                s=search_string)
             print("solr:", search_string, post)
             response = requests.get(post)
             print(response.text)
@@ -234,4 +242,4 @@ class SearchView(View):
                                                     schema__name=schema)
                     tags = tobj.tags.all()
                 results.append((schema, table, tags))
-        return render(request, 'dataedit/search.html', {'results':results})
+        return render(request, 'dataedit/search.html', {'results': results})
