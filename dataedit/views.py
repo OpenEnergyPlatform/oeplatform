@@ -144,24 +144,12 @@ class DataView(View):
 
 
     def get(self, request, schema, table):
-        t = time.time()
-        #if any((x not in request.session for x in ["table", "schema", "fields", "headers", "floatingRows"])) or (
-        #        request.session['table'] != table or request.session['schema'] != schema):
-        #    error = loadSessionData(request, connect(db), db, schema, table)
-        #    if error:
-        #        return error
-        # db = url.split("/")[1]
-
         db = sec.dbname
-        # Types are currently overwritten. This should be done more thoroughly
-
         tags = []
 
         if models.Table.objects.filter(name=table, schema__name=schema).exists():
             tobj = models.Table.objects.get(name=table, schema__name=schema)
             tags = tobj.tags.all()
-
-
 
         comment_on_table = actions.get_comment_table(db, schema, table)
         comment_columns = {d["name"]: d for d in comment_on_table[
@@ -172,24 +160,25 @@ class DataView(View):
              COMMENT_KEYS
              if key in comment_on_table])
 
-
-
-
+        columns = actions.get_columns({'schema': schema, 'table': table})
+        has_row_comments = '_comment' in {col['name'] for col in columns if 'name' in col}
+        print(actions.has_table({'schema': schema, 'table': '_'+table+'_cor'}))
+        has_row_comments = has_row_comments and actions.has_table({'schema': schema, 'table': '_'+table+'_cor'})
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table, schema=schema)
         revisions = []
         revision_ids = [rev.revision for rev in available_revisions]
+
         for rev in repo.log_default():
             try:
                 rev_obj = available_revisions.get(revision=rev.revision)
             except TableRevision.DoesNotExist:
                 rev_obj = None
-            print(rev_obj)
             revisions.append((rev, rev_obj))
-        print("Time elapsed", time.time() - t)
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
+                        'has_row_comments': has_row_comments,
                         'comment_on_table': dict(comment_on_table),
                         'comment_columns': comment_columns,
                         'revisions': revisions,

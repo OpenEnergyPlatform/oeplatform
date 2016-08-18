@@ -7,6 +7,8 @@ recline.Backend.OEP = OEP;
 
 function plot_comment(row)
 {
+    if(row['_comment']==null)
+        return "";
     var el = document.createElement('div');
     el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
           + '<div class="modal-dialog">'
@@ -64,18 +66,22 @@ function plot_comment(row)
         var query = {
             limit: queryObj.size,
             offset: queryObj.from,
-            from: [{
-                type: 'join',
-                left:{
+        };
+        var table_query = {
                     type:'table',
                     schema: dataset.schema,
                     table: dataset.table
-                },
+        };
+        if(dataset.has_row_comments){
+            query.from = [{
+                type: 'join',
+                left: table_query,
                 right:{
                     type:'table',
                     schema: dataset.schema,
                     table: "_" + dataset.table +"_cor"
                 },
+                join_type: 'left join',
                 on: {
                     type: 'operator_binary',
                     left: {
@@ -85,11 +91,15 @@ function plot_comment(row)
                     operator: '=',
                     right: {
                         type: 'column',
-                        column: 'id'
+                        column: '_id'
                     }
                 }
-            }],
-        };
+            }];
+        }
+        else
+        {
+            query.from = [table_query];
+        }
         if(query.limit > my.max_rows){
             query.limit = my.max_rows
             alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
@@ -122,12 +132,13 @@ function plot_comment(row)
             {
                 response = {
                     hits: results.content.data.map(function(raw_row){
-                        row = {};
+                        var row = {};
                         for(i=0; i<raw_row.length; ++i)
                         {
                             row[results.content.description[i][0]] = raw_row[i];
                         }
-                        row['_comment'] = plot_comment(row);
+                        if(row.hasOwnProperty('_comment'))
+                            row['_comment'] = plot_comment(row);
                         return row;
                     }),
                     total: counts.content[0][0],
