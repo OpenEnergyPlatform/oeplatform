@@ -1,9 +1,10 @@
-{% extends "base/base.html" %}
+{% extends "dataedit/base.html" %}
 
-{% block content %}
-<ul>
-{% for schema in schemas %}
-    <li><a href="view/{{schema}}"> {{schema}} </a></li>
+{% block data_content %}
+<h3>Schemas</h3>
+<div class="list-group">
+{% for schema, tables in schemas %}
+    <a href="view/{{schema}}" class="list-group-item"> {{schema}}  <span class="badge"> {{tables}} </span></a>
 {% endfor %}
-</ul>
+</div>
 {% endblock %}

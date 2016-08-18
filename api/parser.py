@@ -8,16 +8,22 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 def is_pg_qual(x):
     return pgsql_qualifier.search(x)
 
+
+class ValidationError(Exception):
+    def __init__(self, message, value):
+        self.message = message
+        self.value = value
+
 def read_bool(s):
     if  s.lower() in ["true","false"]:
         return s.lower() == "true"
     else:
-        raise p.toolkit.ValidationError("Invalid value in binary field: %s" % s)
+        raise ValidationError("Invalid value in binary field", s)
 
 def read_pgid(s):
      if is_pg_qual(s):
         return s
-     raise p.toolkit.ValidationError("Invalid identifier: %s" % s) 
+     raise ValidationError("Invalid identifier", s)
 
 def parse_select(d):
     """
@@ -40,12 +46,21 @@ def parse_select(d):
     
 
     L = []
-    for field in d['fields']:       
-        ss = parse_expression(field['expression'])
-        if 'as' in field:
-            ss += ' AS ' + read_pgid(field['as'])
-        L.append(ss)
-    s += ' ' + ', '.join(L)
+    if '_count' in d:
+        s += ' count('
+    if 'fields' in d:
+        for field in d['fields']:
+            ss = parse_expression(field['expression'])
+            if 'as' in field:
+                ss += ' AS ' + read_pgid(field['as'])
+            L.append(ss)
+        s += ' ' + ', '.join(L)
+    else:
+        s += ' * '
+
+
+    if '_count' in d:
+        s += ')'
 
     # [ FROM from_item [, ...] ]
     if 'from' in d:
@@ -55,8 +70,8 @@ def parse_select(d):
     if 'where' in d:
         s+= ' WHERE ' + parse_condition(d['where'])
         
-    if 'group by' in d:
-        s += ' GROUP BY ' + ', '.join(parse_expression(f) for f in d['group by'])
+    if 'group_by' in d:
+        s += ' GROUP BY ' + ', '.join(parse_expression(f) for f in d['group_by'])
         
     if 'having' in d:
         s += ' HAVING ' + ', '.join(parse_condition(f) for f in d['having'])
@@ -66,16 +81,16 @@ def parse_select(d):
         if sel['type'].lower() in ['union','intersect','except']:
             s += ' ' + sel['type']
         else:
-            raise p.toolkit.ValidationError('UNION/INTERSECT/EXCEPT expected')
+            raise ValidationError('UNION/INTERSECT/EXCEPT expected')
         if 'all' in sel and read_bool(sel['all']):
             s += ' ALL '
         elif 'distinct' in sel and read_bool(sel['distinct']):
             s += ' DISTINCT ' 
         s += parse_select(sel['select'])   
         
-    if 'order by' in d:
+    if 'order_by' in d:
         L = []
-        for ob in d['order by']:
+        for ob in d['order_by']:
             ss = ''
             ss += ' ORDER BY ' + parse_expression(ob['expression']) 
             if 'ordering' in ob:
@@ -88,25 +103,26 @@ def parse_select(d):
                 if ob['nulls'].lower() in ['first','last']:
                     ss += ob['nulls']
                 else:
-                    raise p.toolkit.ValidationError('Invalid NULLS option')  
+                    raise ValidationError('Invalid NULLS option')  
             L.append(ss)
         s += ', '.join(L)
     
     if 'limit' in d:
         s += ' LIMIT'
-        if d['limit'].lower() == 'all':
+        if isinstance(d['limit'], str) and d['limit'].lower() == 'all':
             s += ' ALL'
-        elif d['limit'].is_digit():
-            s += ' ' + d['limit']
+        elif isinstance(d['limit'], int) or d['limit'].is_digit():
+            s += ' ' + str(d['limit'])
         else:
-            raise p.toolkit.ValidationError('Invalid LIMIT (expected ALL or a digit)')
+            raise ValidationError('Invalid LIMIT (expected ALL or a digit)')
             
-    if 'offset' in d and d['offset'].is_digit():
+    if 'offset' in d and (isinstance(d['offset'], int) or d['offset'].is_digit()):
         s += ' OFFSET {} ROWS'.format(d['offset'])
         
     if 'fetch' in d and d['fetch'].is_digit():
         s += ' FETCH NEXT {} ROWS ONLY'.format(d['fetch'])
-        
+
+    print(s)
     return s                      
         
         
@@ -122,6 +138,7 @@ def parse_from_item(d):
             [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ] alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
             [ LATERAL ] function_name ( [ argument [, ...] ] ) AS ( column_definition [, ...] )
     """
+    # TODO: If 'type' is not set assume just a table name is present
     if d['type'] == 'table':
         s = 'only ' if d.pop('only', False) else ''
         schema = read_pgid(d.pop('schema',''))
@@ -149,20 +166,23 @@ def parse_from_item(d):
         s = parse_from_item(d['left'])
         if 'natural' in d and read_bool(d['natural']):
             s += ' NATURAL'
-        if d['join_type'].lower() in [  'join', 'inner join', 'left join', 
-                                        'left outer join', 'right join', 
-                                        'right outer join', 'full join', 
-                                        'full inner join', 'cross join']:
-           s +=  ' ' + d['join_type']
+        if 'join_type' in d:
+            if d['join_type'].lower() in [  'join', 'inner join', 'left join',
+                                            'left outer join', 'right join',
+                                            'right outer join', 'full join',
+                                            'full inner join', 'cross join']:
+               s +=  ' ' + d['join_type']
+            else:
+                raise ValidationError('Invalid join type')
         else:
-            raise p.toolkit.ValidationError('Invalid join type')                            
+            s += ' JOIN '
         
-        s += ' ' + parse_from_item(['right'])
+        s += ' ' + parse_from_item(d['right'])
         
         if 'on' in d:
-            s += ' ON ' + parse_condition(s['on'])
+            s += ' ON ' + parse_condition(d['on'])
         elif 'using' in d:
-            s += ' (' + ', '.join(map(read_pgid,d['using'])) + ')'
+            s += ' USING (' + ', '.join(map(read_pgid,d['using'])) + ')'
     return s
            
 
@@ -185,7 +205,7 @@ def parse_condition(dl):
     for d in dl:
         print("DICT",d)
         if d['type'] == 'operator_binary':
-            conditionlist.append("%s %s %s" % (parse_expression(d['left']), d['operator'], d['right']))
+            conditionlist.append("%s %s %s" % (parse_expression(d['left']), d['operator'], parse_expression(d['right'])))
     
     return " " + " AND ".join(conditionlist)
     
@@ -232,7 +252,7 @@ def parse_create_table(d):
             fs += parse_table_constraint(field)
         elif field['type'] == 'like':
             fs += 'LIKE '
-            
+
 
 def parse_column_constraint(d):
     raise NotImplementedError
