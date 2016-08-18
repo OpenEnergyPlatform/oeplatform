@@ -4,8 +4,10 @@
 {% load staticfiles %}
 <script src="{% static 'jsMath/easy/load.js' %}"></script>
      <div class="dropdown">
+      {% if user.is_authenticated %}
       <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Add
       <span class="caret"></span></button>
+      {% endif %}
       <ul class="dropdown-menu">
         <li><a href="entry/add">Manually</a></li>
          <li><a data-toggle="modal" data-target="#uploadModal">Upload BibTeX</a></li>
