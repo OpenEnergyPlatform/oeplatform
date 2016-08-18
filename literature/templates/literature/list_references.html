@@ -1,0 +1,63 @@
+{% extends "literature/base.html" %}
+
+{% block content %}
+{% load staticfiles %}
+<h3>
+    Literature
+</h3>
+<div class="well">
+    This is an overview of resources that are available on this platform. If you are
+    log in you can add new references to our database using a BibTeX file or
+    manually. Every entry has a unique id that can be referenced inside the <a href="/dataedit/">OEDB</a>.
+</div>
+<script src="{% static 'jsMath/easy/load.js' %}"></script>
+     <div class="dropdown">
+      {% if user.is_authenticated %}
+         <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Add
+         <span class="caret"></span></button>
+      {% endif %}
+      <ul class="dropdown-menu">
+        <li><a href="entry/add">Manually</a></li>
+         <li><a data-toggle="modal" data-target="#uploadModal">Upload BibTeX</a></li>
+        <li><a href="entry/upload">Upload BibTeX</a></li>
+      </ul>
+    </div>
+
+    <div class="list-group">
+    {% for ref in refs %}
+        <a id="has_math" class="list-group-item" href="entry/{{ref.entries_id}}">{{ref.title}} </a>
+    {% endfor %}
+    </div>
+
+<SCRIPT>
+  jsMath.ConvertTeX('has_math');
+  jsMath.ProcessBeforeShowing('has_math');
+</SCRIPT>
+
+
+    <div STYLE="color:#CC0000; text-align:center">
+      <b>Warning: <a HREF="http://www.math.union.edu/locate/jsMath">jsMath</a>
+      requires JavaScript to process the mathematics on this page.<br>
+      If your browser supports JavaScript, be sure it is enabled.</b>
+    </div>
+
+<div id="uploadModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Select BibTeX file</h4>
+      </div>
+      <div class="modal-body">
+        <form role="form" action="entry/upload/" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <input name="bibtex" type="file" size="50" accept="text/*">
+            <button type="submit" class="btn">Send</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

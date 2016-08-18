@@ -1,23 +1,18 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
-from .models import myuser
-from .forms import UserCreationForm
+from django.views.generic.edit import UpdateView
+from .models import OepUser
 
 class ProfileView(View):
     def get(self, request, user_id):
-        user = get_object_or_404(myuser, name=user_id)
+        user = get_object_or_404(OepUser, pk=user_id)
         return render(request, "login/profile.html", {'user':user})
-        
-class CreateProfileView(View):
-    def get(self, request):
-        form = UserCreationForm()
-        return render(request, "registration/createuser.html", {'form':form})
-        
-    def post(self, request):
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            id = request.POST["name"]
-            return redirect("login/profile/{name}.html".format(name=name))
-        else:
-            return render(request, "registration/createuser.html", {'form':form})
+
+class ProfileUpdateView(UpdateView):
+    model = OepUser
+    fields = ['name','affiliation','mail_address']
+    template_name_suffix = '_update_form'
+
+def create_user(request):
+    return redirect(request, "http://wiki.openmod-initiative.org/wiki/Special:RequestAccount")
+

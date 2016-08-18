@@ -21,9 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^api/', include('api.urls')),
     url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('base.urls')),
     url(r'^user/', include('login.urls')),
     url(r'^factsheets/', include('modelview.urls')),
-	url(r'^dataedit/', include('dataedit.urls')),
+    url(r'^dataedit/', include('dataedit.urls')),
+    url(r'^literature/', include('literature.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,291 @@
+{% extends "literature/base.html" %}
+
+{% block content %}
+<ul class="nav nav-tabs">
+    {% if not id or btype == "article" %}<li><a data-toggle="tab" href="#tab_article">article</a></li>{%endif%}
+    {% if not id or btype == "book" %}<li><a data-toggle="tab" href="#tab_book">book</a></li>{%endif%}
+    {% if not id or btype == "booklet" %}<li><a data-toggle="tab" href="#tab_booklet">booklet</a></li>{%endif%}
+    {% if not id or btype == "conference" %}<li><a data-toggle="tab" href="#tab_conference">conference</a></li>{%endif%}
+    {% if not id or btype == "inbook" %}<li><a data-toggle="tab" href="#tab_inbook">inbook</a></li>{%endif%}
+    {% if not id or btype == "incollection" %}<li><a data-toggle="tab" href="#tab_incollection">incollection</a></li>{%endif%}
+    {% if not id or btype == "inproceedings" %}<li><a data-toggle="tab" href="#tab_inproceedings">inproceedings</a></li>{%endif%}
+    {% if not id or btype == "manual" %}<li><a data-toggle="tab" href="#tab_manual">manual</a></li>{%endif%}
+    {% if not id or btype == "mastersthesis" %}<li><a data-toggle="tab" href="#tab_mastersthesis">mastersthesis</a></li>{%endif%}
+    {% if not id or btype == "misc" %}<li><a data-toggle="tab" href="#tab_misc">misc</a></li>{%endif%}
+    {% if not id or btype == "phdthesis" %}<li><a data-toggle="tab" href="#tab_phdthesis">phdthesis</a></li>{%endif%}
+    {% if not id or btype == "proceedings" %}<li><a data-toggle="tab" href="#tab_proceedings">proceedings</a></li>{%endif%}
+    {% if not id or btype == "techreport" %}<li><a data-toggle="tab" href="#tab_techreport">techreport</a></li>{%endif%}
+    {% if not id or btype == "unpublished" %}<li><a data-toggle="tab" href="#tab_unpublished">unpublished</a></li>{%endif%}
+</ul>
+
+<div class="tab-content">
+    {% if not id or btype == "article" %}
+    <div name="tab_article" id="tab_article" class="tab-pane fade">
+        <form role="form" action=""  method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="article">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='journal' value=entry.journal optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='pages' value=entry.pages optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "book" %}
+    <div name="tab_book" id="tab_book" class="tab-pane fade">
+        <form role="form"  action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="book">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='edition' value=entry.edition optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            {% include 'literature/reference_field.html' with key='isbn' value=entry.isbn optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "booklet" %}
+    <div name="tab_booklet" id="tab_booklet" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="booklet">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=True%}
+            {% include 'literature/reference_field.html' with key='howpublished' value=entry.howpublished optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "conference" %}
+    <div name="tab_conference" id="tab_conference" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="conference">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='booktitle' value=entry.booktitle optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='pages' value=entry.pages optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='organization' value=entry.organization optional=True%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "inbook" %}
+    <div name="tab_inbook" id="tab_inbook" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="inbook">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='chapter' value=entry.chapter optional=True%}
+            {% include 'literature/reference_field.html' with key='pages' value=entry.pages optional=True%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='type' value=entry.type optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='edition' value=entry.edition optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "incollection" %}
+    <div name="tab_incollection" id="tab_incollection" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="incollection">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='booktitle' value=entry.booktitle optional=False%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='type' value=entry.type optional=True%}
+            {% include 'literature/reference_field.html' with key='chapter' value=entry.chapter optional=True%}
+            {% include 'literature/reference_field.html' with key='pages' value=entry.pages optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='edition' value=entry.edition optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "inproceedings" %}
+    <div name="tab_inproceedings" id="tab_inproceedings" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="inproceedings">
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='booktitle' value=entry.booktitle optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='pages' value=entry.pages optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='organization' value=entry.organization optional=True%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "manual" %}
+    <div name="tab_manual" id="tab_manual" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="manual">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=True%}
+            {% include 'literature/reference_field.html' with key='organization' value=entry.organization optional=True%}
+            {% include 'literature/reference_field.html' with key='edition' value=entry.edition optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "mastersthesis" %}
+    <div name="tab_mastersthesis" id="tab_mastersthesis" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="mastersthesis">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='school' value=entry.school optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='type' value=entry.type optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "misc" %}
+    <div name="tab_misc" id="tab_misc" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="misc">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=True%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=True%}
+            {% include 'literature/reference_field.html' with key='howpublished' value=entry.howpublished optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "phdthesis" %}
+    <div name="tab_phdthesis" id="tab_phdthesis" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="phdthesis">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='school' value=entry.school optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='type' value=entry.type optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "proceedings" %}
+    <div name="tab_proceedings" id="tab_proceedings" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="proceedings">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='volume' value=entry.volume optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='editor' value=entry.editor optional=True%}
+            {% include 'literature/reference_field.html' with key='series' value=entry.series optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='organization' value=entry.organization optional=True%}
+            {% include 'literature/reference_field.html' with key='publisher' value=entry.publisher optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "techreport" %}
+    <div name="tab_techreport" id="tab_techreport" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="techreport">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='institution' value=entry.institution optional=False%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=False%}
+            {% include 'literature/reference_field.html' with key='type' value=entry.type optional=True%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=True%}
+            {% include 'literature/reference_field.html' with key='number' value=entry.number optional=True%}
+            {% include 'literature/reference_field.html' with key='address' value=entry.address optional=True%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            <input type="submit" class="btn btn-success">
+        </form>
+    </div>
+    {%endif%}
+    {% if not id or btype == "unpublished" %}
+    <div name="tab_unpublished" id="tab_unpublished" class="tab-pane fade">
+        <form role="form" action="" method="post">{% csrf_token %}
+            <input type="hidden" name="bibtype" value="unpublished">
+            {% if id %}<input type="hidden" name="edit" value="{{id}}">{% endif %}
+            {% include 'literature/reference_field.html' with key='author' value=entry.author optional=False%}
+            {% include 'literature/reference_field.html' with key='title' value=entry.title optional=False%}
+            {% include 'literature/reference_field.html' with key='note' value=entry.note optional=False%}
+            {% include 'literature/reference_field.html' with key='month' value=entry.month optional=True%}
+            {% include 'literature/reference_field.html' with key='year' value=entry.year optional=True%}
+            <input type="submit" class="btn btn-success">
+
+        </form>
+    </div>
+    {%endif%}
+</div>
+{% endblock %}

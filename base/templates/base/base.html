@@ -1,15 +1,15 @@
+<!DOCTYPE html>
 <html>
     
     <head>
         {% load bootstrap3 %}
         {% bootstrap_css %}
-        {% bootstrap_javascript %}
         {% bootstrap_javascript jquery=1%}
         {% load staticfiles %}
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
     
-
+<body>
     {% block nav %}
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
@@ -26,34 +26,40 @@
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                 </ul>
-                <li class="inactive"> <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank"> Discussion {% bootstrap_icon "new-window" %}</a></li>
+                <li class="inactive"><a href="/literature/">References</a></li>
+
+                <li class="inactive">
+                    <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank">
+                        Discussion {% bootstrap_icon "new-window" %}
+                    </a>
                 </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
           {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-            {% if user.is_admin %}
+
             <div style="float: right;background:inherit">
-                <a class="btn" href="/user/profile/{{ user }}" >{% bootstrap_icon "user" %} {{ user }}</a>
+                <a class="btn" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
                 <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
-            {% endif %}
+
           {% else %}
-            {# <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a> #}
+             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
         </nav>
         
     {% endblock %}
-    <body>
+
         <div class="column-container" style="margin-top:70px">
             {# <div class="column-left">left</div> #}
             <div class="column-center">
                 {% block content %}{% endblock %}                
             </div>
-            <div class="column-right">Feel free to create a fact sheet for your model/framework and the scenarios you want to talk about! <br>
+            <div class="column-right"><div>Feel free to create a fact sheet for your model/framework and the scenarios you want to talk about! <br>
 If you have ideas to improve the fact sheets, you are welcome to add your comments on the discussion site of the <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios">openmod-wiki page</a>.<br>
 <br>
-<b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b></div>
+<b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b></div><div>{% block content-right %}{% endblock %}</div></div>
+
         </div>
     </body>
     
