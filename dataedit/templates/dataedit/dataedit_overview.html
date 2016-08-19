@@ -175,14 +175,6 @@ jQuery(function($) {
 
 });
 </script>
-    <a href="?page=1"> first </a>
-{% for p in pages %}
-    {% if p == page %}
-        {{p }}
-    {% else %}
-        <a href="?page={{p}}">{{p}}</a>
-    {% endif %}
-{% endfor %} <a href="?page={{ page_num }}"> last </a>
 <div>
     <table class="table table-hover" style="width:460px">
         <tr>
