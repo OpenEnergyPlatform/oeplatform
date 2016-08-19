@@ -1,10 +1,12 @@
 {% extends "dataedit/base.html" %}
 
 {% block data_content %}
-<h3>Schema: {{schema}}</h3>
+<h3>Schema: {{schema.name}}</h3>
 <div class="list-group">
 {% for table in tables %}
-    <a class="list-group-item" href="{{schema}}/{{table}}"> {{table}} </a>
+    <a class="list-group-item" href="{{schema.name}}/{{table.name}}" >
+        {% include 'dataedit/tagged_field.html' with label=table.name tags=table.tags.all %}
+    </a>
 {% endfor %}
 </div>
 {% endblock %}

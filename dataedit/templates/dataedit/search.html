@@ -10,13 +10,16 @@
             <a href="" type="submit" class="glyphicon glyphicon-search"></a>
             <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
         </div>
-        <div class="form-group">
-            <label for="tags">Select tag filter:</label>
-            <select multiple class="form-control" name="tags" id="tags">
+        <div class="well">
+<h4>Select tag filter:</h4>
+            <div>
                 {% for tag in tags %}
-                <option class="btn tag" style="background:{{tag.color}}">{{tag.label}}</option>
+                <span>
+                    <input type="checkbox" class="hidden" name="select_{{tag.pk}}" id="select_{{tag.pk}}">
+                    <label style="background:{{tag.color}}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
+                </span>
                 {% endfor %}
-            </select>
+            </div>
         </div>
     </form>
 </div>
@@ -24,10 +27,11 @@
 No matches found
 {% endif %}
 <div class="list-group">
-{% for schema, table in results %}
+{% for table in results %}
     <div class="inner-addon right-addon">
-
-        <a class="list-group-item" href="/dataedit/view/{{schema}}/{{table}}">{{schema}}.{{table}}</a>
+        <a class="list-group-item" href="/dataedit/view/{{table.schema.name}}/{{table.name}}">
+            {% include 'dataedit/tagged_field.html' with label=table.name tags=table.tags.all %}
+        </a>
     </div>
 
 {% endfor %}

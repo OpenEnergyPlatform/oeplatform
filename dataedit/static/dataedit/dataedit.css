@@ -44,16 +44,6 @@
 .left-addon .glyphicon  { left:  0px;}
 .right-addon .glyphicon { right: 0px;}
 
-.inner-addon .tag {
-  position: absolute;
-  pointer-events: none;
-  margin-right:10px;
-}
-
-/* align icon */
-.left-addon .tag  { left:  0px;}
-.right-addon .tag { right: 0px;}
-
 
 /* add padding  */
 .left-addon input  { padding-left:  30px; }

@@ -18,6 +18,9 @@ import oeplatform.securitysettings as sec
 from api import actions
 from dataedit import models
 from .models import TableRevision
+from django.db.models import Q
+from functools import reduce
+import operator
 
 session = None
 
@@ -40,12 +43,18 @@ def listschemas(request):
                   {'schemas': schemas})
 
 
-def listtables(request, schema):
+def listtables(request, schema_name):
     insp = actions.connect()
-    if schema in excluded_schemas:
+    if schema_name in excluded_schemas:
         raise Http404("Schema not accessible")
-    tables = sorted([table for table in insp.get_table_names(schema=schema) if
-                     not table.startswith('_')])
+    schema,_ = models.Schema.objects.get_or_create(name=schema_name)
+    tables = []
+    for table in insp.get_table_names(schema=schema_name):
+        if not table.startswith('_'):
+            t,_ = models.Table.objects.get_or_create(name=table, schema=schema)
+            tables.append(t)
+    tables = sorted(tables, key=lambda x: x.name)
+    print([t.name for t in tables])
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema, 'tables': tables})
 
@@ -237,14 +246,8 @@ class SearchView(View):
     def post(self, request):
         results = []
 
-        filter_tags = set([])
-        if 'tags' in request.POST:
-            filter_tags = request.POST.getlist('tags')
-        if isinstance(filter_tags, str):
-            filter_tags = {filter_tags}
-        else:
-            filter_tags = set(filter_tags)
-
+        filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
+        print(filter_tags)
         if request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
@@ -259,18 +262,34 @@ class SearchView(View):
             post += '&fq=-(schema:%s)'%schema
         response = requests.get(post)
         response = json.loads(response.text)
+        print(len(response['response']['docs']))
 
-        for result in response['response']['docs']:
-            table = result['table']
-            schema = result['schema']
-            tags = []
-            if models.Table.objects.filter(name=table,
-                                           schema__name=schema).exists():
-                tobj = models.Table.objects.get(name=table,
-                                                schema__name=schema)
-                tags = tobj.tags.all()
-            if filter_tags.issubset({tag.label for tag in tags}) and schema not in excluded_schemas:
-                results.append((schema, table, tags))
-            else:
-                print((schema, table, tags))
-        return render(request, 'dataedit/search.html', {'results': results, 'tags':models.Tag.objects.all()})
+        # The following is basicly a big "get_or_create" for possibly a lot of
+        # schemas and tables that were returned by solr.
+        # But it should be much faster this way.
+
+        tables = {(result['schema'], result['table']) for result in
+                  response['response']['docs']}
+        query_set = reduce(operator.or_ ,{Q(schema__name=schema, name=table) for schema, table  in tables})
+
+        results = models.Table.objects.filter(query_set)
+        tables_found = {(res.schema.name, res.name) for res in results}
+        schemas = {schema for schema,_ in tables}
+        schema_mapper = {schema.name: schema for
+                         schema in models.Schema.objects.filter(name__in=schemas)}
+        new_schemas = []
+        for schema_name in (schemas - schema_mapper.keys()):
+            schema = models.Schema(name=schema_name)
+            schema_mapper[schema_name] = schema
+            new_schemas.append(schema)
+        models.Schema.objects.bulk_create(new_schemas)
+
+        new_tables = []
+        for (schema,table) in tables - tables_found:
+            table = models.Table(name=table,schema=schema_mapper[schema])
+            new_tables.append(table)
+        models.Table.objects.bulk_create(new_tables)
+
+        print(results)
+        return render(request, 'dataedit/search.html', {'results': list(results)+new_tables, 'tags':models.Tag.objects.all()})
+

@@ -4,11 +4,13 @@
 
 {% load staticfiles %}
 {% load bootstrap3 %}
-
+<h3>{{schema}}.{{table}}</h3>
 <div class="tagcontainer">
     {% load dataedit.taghandler %}
     {% get_tags as all_tags %}
-
+    {% if not tags %}
+        No tags were added, yet.
+    {% endif %}
     {% for tag in tags %}
         <a href="" class="btn tag" style="background:{{tag.color}}">{{ tag.label }}</a>
     {% endfor %}
@@ -241,7 +243,7 @@ jQuery(function($) {
         {% endif %}
     </table>
 </div>
-<div id="downloadables">
+    <div id="downloadables">
         <div id="revisions" style="width:460px">
             <table class="table table-hover">
                 <tr>
@@ -270,9 +272,9 @@ jQuery(function($) {
                     </td>
                     <td>
                     {% if av %}
-                        <a href="{{table}}/{{ entry.revision}}"style="color:green;" class='glyphicon glyphicon-ok'></a>
+                        <a href="{{table}}/{{ entry.revision}}" style="color:green;" class='glyphicon glyphicon-ok'></a>
                     {% else %}
-                        <a href="{{table}}/{{entry.revision}}"style="color:red;" class='glyphicon glyphicon-remove'></a>
+                        <a href="{{table}}/{{entry.revision}}" style="color:red;" class='glyphicon glyphicon-remove'></a>
                     {% endif %}
                     </td>
                 </tr>
