@@ -5,32 +5,42 @@ var recline = recline || {};
 recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
-function plot_comment(row)
+function plot_field(row, key, value)
 {
-    if(row['_comment']==null)
-        return "";
-    var el = document.createElement('div');
-    el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
-          + '<div class="modal-dialog">'
-            + '<div class="modal-content">'
-              + '<div class="modal-header">'
-                + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
-                + '<h4 class="modal-title">Comment</h4>'
-              + '</div>'
-              + '<div class="modal-body">'
-                + '<p> Method: '+ row.method +'</p>'
-                + '<p> Origin: '+ row.origin +'</p>'
-                + '<p> Assumption: '+ row.assumption +'</p>'
-              + '</div>'
-              + '<div class="modal-footer">'
-                + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
-              + '</div>'
-            + '</div>'
 
-          + '</div>'
-        + '</div>)');
-    document.body.appendChild(el);
-    return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+    if(value==null)
+        return "";
+    if(key=='_comment')
+    {
+        var el = document.createElement('div');
+        el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
+              + '<div class="modal-dialog">'
+                + '<div class="modal-content">'
+                  + '<div class="modal-header">'
+                    + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
+                    + '<h4 class="modal-title">Comment</h4>'
+                  + '</div>'
+                  + '<div class="modal-body">'
+                    + '<p> Method: '+ row.method +'</p>'
+                    + '<p> Origin: '+ row.origin +'</p>'
+                    + '<p> Assumption: '+ row.assumption +'</p>'
+                  + '</div>'
+                  + '<div class="modal-footer">'
+                    + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
+                  + '</div>'
+                + '</div>'
+
+              + '</div>'
+            + '</div>)');
+        document.body.appendChild(el);
+        return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+    }
+    if(key=='ref_id')
+    {
+        var ret = '<a href="/literature/entry/' + value + '">' + value + '</a>';
+        return ret
+    }
+    return value;
 }
 
 (function($, my) {
@@ -135,10 +145,9 @@ function plot_comment(row)
                         var row = {};
                         for(i=0; i<raw_row.length; ++i)
                         {
-                            row[results.content.description[i][0]] = raw_row[i];
+                            var key = results.content.description[i][0];
+                            row[key] = plot_field(raw_row, key, raw_row[i]);
                         }
-                        if(row.hasOwnProperty('_comment'))
-                            row['_comment'] = plot_comment(row);
                         return row;
                     }),
                     total: counts.content[0][0],
