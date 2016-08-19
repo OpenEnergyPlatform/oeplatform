@@ -236,7 +236,7 @@ class SearchView(View):
 
     def post(self, request):
         results = []
-        print(request.POST)
+
         filter_tags = set([])
         if 'tags' in request.POST:
             filter_tags = request.POST.getlist('tags')
@@ -245,7 +245,6 @@ class SearchView(View):
         else:
             filter_tags = set(filter_tags)
 
-        print(filter_tags)
         if request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
@@ -253,15 +252,14 @@ class SearchView(View):
                 s=search_string)
         else:
             query = '*:*'
-        fq = '-table:_*'
-        post = 'http://localhost:8983/solr/oedb_meta/select?q=' + query \
+        post = sec.SOLR_URL + 'select?q=' + query \
             + '&wt=json&rows=1000' \
             + '&fq=-(table:_*)'
         for schema in excluded_schemas:
             post += '&fq=-(schema:%s)'%schema
         response = requests.get(post)
         response = json.loads(response.text)
-        print(response)
+
         for result in response['response']['docs']:
             table = result['table']
             schema = result['schema']
