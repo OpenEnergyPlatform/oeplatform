@@ -1,0 +1,32 @@
+<div class="tagcontainer">
+    {% load dataedit.taghandler %}
+    {% get_tags as all_tags %}
+    {% if not selected %}
+        No tags were added, yet.
+    {% endif %}
+    {% for tag in selected %}
+        <a href="" class="btn tag" style="background:{{tag.color}}">{{ tag.label }}</a>
+    {% endfor %}
+    {% if user.is_authenticated %}
+    <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
+    </button>
+    <div id="tag_handler" class="collapse">
+        <form action="/dataedit/tags/add/" method="post">
+            {% csrf_token %}
+            <h4>Choose tags to attach:</h4>
+
+            {% for tag in all_tags %}
+                <span  >
+                    <input type="checkbox" class="hidden" name="tag_{{tag.pk}}" id="select_{{tag.pk}}" {% if tag in selected %} checked {% endif %}>
+                    <label style="background:{{tag.color}}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
+                </span>
+            {% endfor %}
+            <input type="hidden" name="schema" value="{{schema}}"/>
+            {% if table %}
+                <input type="hidden" name="table" value="{{table}}"/>
+            {% endif %}
+            <input type="submit" class="btn btn-success" value="Tag object">
+        </form>
+    </div>
+    {% endif %}
+</div>

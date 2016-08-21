@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
+from django.contrib.auth.decorators import login_required
 
 import oeplatform.securitysettings as sec
 from api import actions
@@ -35,10 +36,10 @@ excluded_schemas = [
 
 def listschemas(request):
     insp = actions.connect()
-    schemas = sorted([(schema, len(
+    schemas = sorted([(models.Schema.objects.get_or_create(name=schema)[0], len(
         {table for table in insp.get_table_names(schema=schema) if
          not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema not in excluded_schemas])
+                      schema not in excluded_schemas], key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
 
@@ -176,15 +177,12 @@ class DataView(View):
         columns = actions.get_columns({'schema': schema, 'table': table})
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
-        print(actions.has_table(
-            {'schema': schema, 'table': '_' + table + '_cor'}))
         has_row_comments = has_row_comments and actions.has_table(
             {'schema': schema, 'table': '_' + table + '_cor'})
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table,
                                                            schema=schema)
         revisions = []
-
         for rev in repo.log_default():
             try:
                 rev_obj = available_revisions.get(revision=rev.revision)
@@ -210,29 +208,25 @@ class TagUpdate(UpdateView):
     fields = '__all__'
     template_name_suffix = '_form'
 
-
-def add_table_tag(request, schema, table, tag_id):
-    sch, _ = models.Schema.objects.get_or_create(name=schema)
-    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
-    tag = get_object_or_404(models.Tag, pk=tag_id)
-    tab.tags.add(tag)
-    tab.save()
-    return redirect(request.GET.get('from', '/'))
-
-def add_table_tags(request, schema, table):
-    sch, _ = models.Schema.objects.get_or_create(name=schema)
-    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
-    tags = models.Tag.objects.all()
-    tab_tags = tab.tags.all()
-    ids = {pk for pk in request.POST if pk != 'csrfmiddlewaretoken'}
+@login_required(login_url='/accounts/login/')
+def add_table_tags(request):
+    schema = request.POST['schema']
+    table = request.POST.get('table',None)
+    obj, _ = models.Schema.objects.get_or_create(name=schema)
+    if table:
+        obj, _ = models.Table.objects.get_or_create(name=table, schema=obj)
+    tab_tags = obj.tags.all()
+    ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     for tag in models.Tag.objects.filter(pk__in=ids):
+        print(tag)
         if tag not in tab_tags:
-            tab.tags.add(tag)
+            obj.tags.add(tag)
     for tag in tab_tags:
         if str(tag.pk) not in request.POST:
-            tab.tags.remove(tag)
-    tab.save()
+            obj.tags.remove(tag)
+    obj.save()
     return redirect(request.META['HTTP_REFERER'])
+
 
 class TagCreate(CreateView):
     model = models.Tag

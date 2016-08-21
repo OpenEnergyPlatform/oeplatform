@@ -5,37 +5,8 @@
 {% load staticfiles %}
 {% load bootstrap3 %}
 <h3>{{schema}}.{{table}}</h3>
-<div class="tagcontainer">
-    {% load dataedit.taghandler %}
-    {% get_tags as all_tags %}
-    {% if not tags %}
-        No tags were added, yet.
-    {% endif %}
-    {% for tag in tags %}
-        <a href="" class="btn tag" style="background:{{tag.color}}">{{ tag.label }}</a>
-    {% endfor %}
 
-    {% load dataedit.taghandler %}
-    {% get_tags as all_tags %}
-
-    <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
-    </button>
-    <div id="tag_handler" class="collapse">
-        <form action="{{table}}/tags/add/" method="post">
-            {% csrf_token %}
-            <h4>Choose tags for this table:</h4>
-
-            {% for tag in all_tags %}
-                <span  >
-                    <input type="checkbox" class="hidden" name="{{tag.pk}}" id="select_{{tag.pk}}" {% if tag in tags %} checked {% endif %}>
-                    <label style="background:{{tag.color}}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
-                </span>
-            {% endfor %}
-            <input type="submit" class="btn btn-success">
-        </form>
-    </div>
-</div>
-
+{% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=tags %}
 <hr>
 
 
