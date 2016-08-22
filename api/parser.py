@@ -46,21 +46,17 @@ def parse_select(d):
     
 
     L = []
-    if '_count' in d:
-        s += ' count('
+
     if 'fields' in d:
         for field in d['fields']:
-            ss = parse_expression(field['expression'])
-            if 'as' in field:
+            ss = parse_expression(field)
+            if 'as' in field and '_count' not in d:
                 ss += ' AS ' + read_pgid(field['as'])
             L.append(ss)
         s += ' ' + ', '.join(L)
     else:
         s += ' * '
 
-
-    if '_count' in d:
-        s += ')'
 
     # [ FROM from_item [, ...] ]
     if 'from' in d:
@@ -92,7 +88,7 @@ def parse_select(d):
         L = []
         for ob in d['order_by']:
             ss = ''
-            ss += ' ORDER BY ' + parse_expression(ob['expression']) 
+            ss += ' ORDER BY ' + parse_expression(ob)
             if 'ordering' in ob:
                 if ob['ordering'] in ['ASC','DESC']:
                     ss += ' ' + ob['ordering']
@@ -191,10 +187,12 @@ def parse_expression(d):
     print(d)
     if d['type'] == 'column':
         return d['column']
-    if 'star' in d and read_bool(d['star']):
+    if d['type'] == 'star':
         return ' * '
     if d['type'] == 'operator':
         return parse_operator(d)
+    if d['type'] == 'function':
+        return parse_function(d)
 
     raise NotImplementedError()
 
@@ -217,6 +215,10 @@ def parse_operator(d):
         assert(read_pgid(d['function']))
         return '{f}({ops})'.format(f=d['function'], ops=', '.join(map(parse_expression,d['operands'])))
     return d
+
+def parse_function(d):
+    assert(read_pgid(d['function']))
+    return '{f}({ops})'.format(f=d['function'], ops=', '.join(map(parse_expression,d['operands'])))
     
 def cadd(d, key, string=None):
     if not string: 

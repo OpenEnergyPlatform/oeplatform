@@ -60,13 +60,13 @@ function get_field_query(field){
 
     if(field.attributes.type.startsWith('geometry')){
         column_query = {
-            type: 'operator',
-            operator: 'function',
+            type: 'function',
             function: 'ST_AsGeoJSON',
-            operands: [column_query]
+            operands: [column_query],
+            as:field.id
         };
     }
-    return {expression: column_query, as:field.id};
+    return column_query;
 }
 
 table_fields = [];
@@ -101,10 +101,7 @@ table_fields = [];
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
         console.log(queryObj.from + " - " + queryObj.size)
-        var query = {
-            limit: queryObj.size,
-            offset: queryObj.from,
-        };
+        var query = {};
         var table_query = {
                     type:'table',
                     schema: dataset.schema,
@@ -146,15 +143,13 @@ table_fields = [];
             alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
         }
 
-        var count_query=query;
+
 
         if(queryObj.fields){
             query.fields = fields.map(function (el){
                         return {
-                            expression:{
                                 type: 'column',
                                 column: el
-                            }
                         }
                 ;})
         }
@@ -162,10 +157,23 @@ table_fields = [];
             query.fields = field_query;
         }
 
+        var count_query= $.extend(true, {}, query);
+        count_query.fields = [{
+            type:'function',
+            function:'count',
+            operands: [{type:'star'}]
+            }]
+
+
+        query.limit = queryObj.size;
+        query.offset = queryObj.from;
+        query.order_by = [{
+            type:'column',
+            column:'id'}]
 
         var request = $.when(
             $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
-            $.ajax({type: 'POST', url:'/api/count', dataType:'json', data: {query: JSON.stringify(count_query)}})
+            $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
         )
         var dfd = new $.Deferred();
         request.done(function(results, counts) {
@@ -186,7 +194,7 @@ table_fields = [];
                         }
                         return row;
                     }),
-                    total: counts.content[0][0],
+                    total: counts.content.data[0][0],
                 }
                 dfd.resolve(response);
             }
