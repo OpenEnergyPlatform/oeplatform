@@ -5,12 +5,11 @@ var recline = recline || {};
 recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
-function plot_field(row, key, value)
-{
 
+function grid_formatter(value, field, row){
     if(value==null)
         return "";
-    if(key=='_comment')
+    if(field.id=='_comment')
     {
         var el = document.createElement('div');
         el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
@@ -35,13 +34,42 @@ function plot_field(row, key, value)
         document.body.appendChild(el);
         return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
     }
-    if(key=='ref_id')
+    if(field.id=='ref_id')
     {
         var ret = '<a href="/literature/entry/' + value + '">' + value + '</a>';
         return ret
     }
     return value;
 }
+
+function construct_field(el){
+    var field = new recline.Model.Field({
+        id: el.name,
+        format: grid_formatter,
+        type: el.type,
+      });
+      field.renderer = grid_formatter;
+      return field;
+}
+
+function get_field_query(field){
+    column_query = {
+        type: 'column',
+        column: field.id
+    };
+
+    if(field.attributes.type.startsWith('geometry')){
+        column_query = {
+            type: 'operator',
+            operator: 'function',
+            function: 'ST_AsGeoJSON',
+            operands: [column_query]
+        };
+    }
+    return {expression: column_query, as:field.id};
+}
+
+table_fields = [];
 
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
@@ -55,9 +83,9 @@ function plot_field(row, key, value)
             if (results.error) {
                 dfd.reject(results.error);
             }
-
+            table_fields = results.content.map(construct_field);
             dfd.resolve({
-                fields: results.content.map(function(el){return el.name;}),
+                fields: table_fields,
                 useMemoryStore: false
             });
         });
@@ -82,6 +110,7 @@ function plot_field(row, key, value)
                     schema: dataset.schema,
                     table: dataset.table
         };
+        var field_query = table_fields.map(get_field_query);
         if(dataset.has_row_comments){
             query.from = [{
                 type: 'join',
@@ -110,10 +139,14 @@ function plot_field(row, key, value)
         {
             query.from = [table_query];
         }
+
+
         if(query.limit > my.max_rows){
             query.limit = my.max_rows
             alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
         }
+
+        var count_query=query;
 
         if(queryObj.fields){
             query.fields = fields.map(function (el){
@@ -125,11 +158,14 @@ function plot_field(row, key, value)
                         }
                 ;})
         }
+        else{
+            query.fields = field_query;
+        }
 
 
         var request = $.when(
             $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
-            $.ajax({type: 'POST', url:'/api/count', dataType:'json', data: {query: JSON.stringify(query)}})
+            $.ajax({type: 'POST', url:'/api/count', dataType:'json', data: {query: JSON.stringify(count_query)}})
         )
         var dfd = new $.Deferred();
         request.done(function(results, counts) {
@@ -146,7 +182,7 @@ function plot_field(row, key, value)
                         for(i=0; i<raw_row.length; ++i)
                         {
                             var key = results.content.description[i][0];
-                            row[key] = plot_field(raw_row, key, raw_row[i]);
+                            row[key] = raw_row[i];
                         }
                         return row;
                     }),

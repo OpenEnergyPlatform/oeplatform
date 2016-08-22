@@ -188,6 +188,7 @@ def parse_from_item(d):
 
 def parse_expression(d):
     # TODO: Implement
+    print(d)
     if d['type'] == 'column':
         return d['column']
     if 'star' in d and read_bool(d['star']):
@@ -203,7 +204,6 @@ def parse_condition(dl):
         dl = [dl]
     conditionlist = []
     for d in dl:
-        print("DICT",d)
         if d['type'] == 'operator_binary':
             conditionlist.append("%s %s %s" % (parse_expression(d['left']), d['operator'], parse_expression(d['right'])))
     
@@ -213,6 +213,9 @@ def parse_operator(d):
     # TODO: Implement
     if d['operator'] == 'as':
         return parse_expression(d['labeled']) + " AS " + d['label_name']
+    if d['operator'] == 'function':
+        assert(read_pgid(d['function']))
+        return '{f}({ops})'.format(f=d['function'], ops=', '.join(map(parse_expression,d['operands'])))
     return d
     
 def cadd(d, key, string=None):
