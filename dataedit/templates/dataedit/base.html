@@ -7,11 +7,13 @@
     {% get_tags as all_tags %}
     <h3>Popular tags:</h3>
     {% for tag in all_tags %}
-    <form action="/dataedit/search">
-    <button type="button" class="btn tag" style="background:{{ tag.color }}">{{ tag.label }}</button>
-    </form>
+        <form action="/dataedit/search">
+        <button type="button" class="btn tag" style="background:{{ tag.color }};color:{% readable_text_color tag.color %}">{{ tag.label }}</button>
+        </form>
     {% endfor %}
-    <a href="/dataedit/tag/create">Add tag</a>
+    {% if user.is_authenticated %}
+        <a href="/dataedit/tags/create/">Add tag</a>
+    {% endif %}
 {% endblock %}
 {% block content %}
 {% block data_search %}

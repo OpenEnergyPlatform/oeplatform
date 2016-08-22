@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import oeplatform.securitysettings as sec
 from api import actions
@@ -208,7 +209,12 @@ class TagUpdate(UpdateView):
     fields = '__all__'
     template_name_suffix = '_form'
 
-@login_required(login_url='/accounts/login/')
+    @login_required(login_url='/login/')
+    def dispatch(self, request, *args, **kwargs):
+        return super(TagUpdate, self).dispatch(request, *args,
+                                                          **kwargs)
+
+@login_required(login_url='/login/')
 def add_table_tags(request):
     schema = request.POST['schema']
     table = request.POST.get('table',None)
@@ -228,9 +234,10 @@ def add_table_tags(request):
     return redirect(request.META['HTTP_REFERER'])
 
 
-class TagCreate(CreateView):
+class TagCreate(LoginRequiredMixin, CreateView):
     model = models.Tag
     fields = '__all__'
+    template_name_suffix = '_form'
 
 
 class SearchView(View):
