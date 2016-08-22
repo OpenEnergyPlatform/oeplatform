@@ -121,8 +121,6 @@ def parse_select(d):
 
     if 'fetch' in d and d['fetch'].is_digit():
         s += ' FETCH NEXT {} ROWS ONLY'.format(d['fetch'])
-
-    print(s)
     return s
 
 
@@ -190,7 +188,6 @@ def parse_from_item(d):
 
 def parse_expression(d):
     # TODO: Implement
-    print(d)
     if d['type'] == 'column':
         return d['column']
     if d['type'] == 'star':

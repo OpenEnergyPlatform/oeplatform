@@ -200,7 +200,6 @@ def table_drop(request):
     return {}
 
 def data_search(request):
-    print("SEARCH", request)
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)

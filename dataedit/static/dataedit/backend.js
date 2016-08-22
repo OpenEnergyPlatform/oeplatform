@@ -70,23 +70,27 @@ function get_field_query(field){
 }
 
 table_fields = [];
-
+pk_fields = [];
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
     my.max_rows = 1000;
     // Initial load of dataset including initial set of records
     my.fetch = function(dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', method: "POST"});
+        var request = $.when($.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
+                             $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
         var dfd = new $.Deferred();
-        request.done(function(results) {
+        request.done(function(results, pks) {
             if (results.error) {
                 dfd.reject(results.error);
             }
+            pks = pks[0];
+            results = results[0];
             table_fields = results.content.map(construct_field);
+            pk_fields = pks.content.constrained_columns;
             dfd.resolve({
                 fields: table_fields,
-                useMemoryStore: false
+                useMemoryStore: false,
             });
         });
         request.fail(function( jqXHR, textStatus ) {
@@ -108,6 +112,12 @@ table_fields = [];
                     table: dataset.table
         };
         var field_query = table_fields.map(get_field_query);
+        var id = null;
+
+        if(pk_fields){
+            id = pk_fields[0]
+        }
+
         if(dataset.has_row_comments){
             query.from = [{
                 type: 'join',
@@ -167,9 +177,11 @@ table_fields = [];
 
         query.limit = queryObj.size;
         query.offset = queryObj.from;
-        query.order_by = [{
-            type:'column',
-            column:'id'}]
+
+        if (id != null)
+            query.order_by = [{
+                type:'column',
+                column: id}];
 
         var request = $.when(
             $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
@@ -182,6 +194,7 @@ table_fields = [];
             if (results.error) {
                 dfd.reject(results.error);
             }
+
             else
             {
                 response = {
