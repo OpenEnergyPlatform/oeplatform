@@ -124,8 +124,8 @@ pk_fields = [];
                 left: table_query,
                 right:{
                     type:'table',
-                    schema: dataset.schema,
-                    table: "_" + dataset.table +"_cor"
+                    schema: '_' + dataset.schema,
+                    table: '_' + dataset.table +'_cor'
                 },
                 join_type: 'left join',
                 on: {
@@ -219,8 +219,6 @@ pk_fields = [];
 
         return dfd.promise()
     };
-    // Save changes to the backend
-    // save: function(changes, dataset)
 }(jQuery, OEP));
 
 

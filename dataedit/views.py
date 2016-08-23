@@ -17,6 +17,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 import oeplatform.securitysettings as sec
+import api.table_handler as th
+
 from api import actions
 from dataedit import models
 from .models import TableRevision
@@ -40,12 +42,16 @@ def listschemas(request):
     schemas = sorted([(models.Schema.objects.get_or_create(name=schema)[0], len(
         {table for table in insp.get_table_names(schema=schema) if
          not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema not in excluded_schemas], key=lambda x: x[0].name)
+                      schema not in excluded_schemas and not schema.startswith('_')], key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
 
 
 def listtables(request, schema_name):
+
+    if not actions.has_schema({'schema': '_'+schema_name}):
+        th.create_meta_schema(schema_name)
+
     insp = actions.connect()
     if schema_name in excluded_schemas:
         raise Http404("Schema not accessible")
@@ -156,10 +162,21 @@ class DataView(View):
     """
 
     def get(self, request, schema, table):
+
         if schema in excluded_schemas:
             raise Http404("Schema not accessible")
         db = sec.dbname
         tags = []
+
+        if not actions.has_table(
+                {'schema': th.get_meta_schema_name(schema),
+                 'table': th.get_comment_table_name(table)}):
+            th.create_comment_table(schema, table)
+
+        if not actions.has_table(
+                {'schema': th.get_meta_schema_name(schema),
+                 'table': th.get_edit_table_name(table)}):
+            th.create_edit_table(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -178,8 +195,7 @@ class DataView(View):
         columns = actions.get_columns({'schema': schema, 'table': table})
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
-        has_row_comments = has_row_comments and actions.has_table(
-            {'schema': schema, 'table': '_' + table + '_cor'})
+
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table,
                                                            schema=schema)
