@@ -17,7 +17,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 import oeplatform.securitysettings as sec
-import api.table_handler as th
 
 from api import actions
 from dataedit import models
@@ -50,7 +49,7 @@ def listschemas(request):
 def listtables(request, schema_name):
 
     if not actions.has_schema({'schema': '_'+schema_name}):
-        th.create_meta_schema(schema_name)
+        actions.create_meta_schema(schema_name)
 
     insp = actions.connect()
     if schema_name in excluded_schemas:
@@ -169,14 +168,14 @@ class DataView(View):
         tags = []
 
         if not actions.has_table(
-                {'schema': th.get_meta_schema_name(schema),
-                 'table': th.get_comment_table_name(table)}):
-            th.create_comment_table(schema, table)
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_comment_table_name(table)}):
+            actions.create_comment_table(schema, table)
 
         if not actions.has_table(
-                {'schema': th.get_meta_schema_name(schema),
-                 'table': th.get_edit_table_name(table)}):
-            th.create_edit_table(schema, table)
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_edit_table_name(table)}):
+            actions.create_edit_table(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():

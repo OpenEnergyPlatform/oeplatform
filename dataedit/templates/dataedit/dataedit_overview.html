@@ -13,8 +13,6 @@
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
 
-<!-- you do not have to use bootstrap but we use it by default -->
-<link rel="stylesheet" href="{% static 'dataedit/recline/vendor/bootstrap/3.2.0/css/bootstrap.css' %}">
 <!-- vendor css -->
 <link href="{% static 'dataedit/recline/vendor/leaflet/0.7.3/leaflet.css' %}" rel="stylesheet">
 <link href="{% static 'dataedit/recline/vendor/leaflet.markercluster/MarkerCluster.css' %}" rel="stylesheet">
@@ -88,6 +86,11 @@
   </div>
 
   <div class="data-explorer-here"></div>
+    <div class="well">
+        <input class="form-control" type="textarea" name="comment">
+        <button class="btn btn-success" id="savebutton"> Save </button>
+    </div>
+
   <div style="clear: both;"></div>
     Data is displayed using <a href="http://okfnlabs.org/recline/">recline.js</a>
 </div>
@@ -108,22 +111,29 @@
 
     {# {% if '_comment' in header %} handle_comment_field(dataset, recline, {{ header.index('_comment') }}); {% endif %} #}
 
-    var views = [
-       {% if 'table' in kinds %}
-           {
-                view: new recline.View.SlickGrid({
+    {% if 'table' in kinds %}
+
+    var grid = new recline.View.SlickGrid({
                     model: dataset,
                     state: {
                         gridOptions: {
                             editable: true,
                             enableAddRow: true,
-                            nableReOrderRow:true
-                        }
+                            enableReOrderRow:true
+                        },
+                        columnsEditor: dataset.fields.map(function(field){
+                            return {column: field.id, editor: field.attributes.editor};
+                        })
                     }
-                }),
+    });
+    {% endif %}
+    var views = [
+       {% if 'table' in kinds %}
+        {
+                view: grid,
                 label: 'Grid',
                 id: 'Grid',
-           },
+        },
         {% endif %}
         {% if 'map' in kinds %}
             {
@@ -138,14 +148,20 @@
                 id: 'graph'
             },
     ];
+
+
+
     var multiView = new recline.View.MultiView({
-    model: dataset,
-    el: $el,
-    state: state,
-    views: views
-});
+        model: dataset,
+        el: $el,
+        state: state,
+        views: views
+    });
 return multiView;
 }
+
+
+
 
 jQuery(function($) {
     window.multiView = null;
@@ -155,6 +171,21 @@ jQuery(function($) {
     window.multiview = createMultiView(dataset);
 
 });
+
+$('#savebutton').bind('click',
+    function() {
+        changes = {
+            creates: dataset._changes.creates,
+            updates:    dataset.records.filter(
+                function(el){return !(jQuery.isEmptyObject(el.changed));}),
+            deletes: dataset._changes.deletes
+        };
+
+        dataset.backend.save(changes, dataset);
+    });
+
+
+
 </script>
 <div>
     <table class="table table-hover" style="width:460px">

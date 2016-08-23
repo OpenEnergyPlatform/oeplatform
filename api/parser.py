@@ -9,6 +9,19 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 def is_pg_qual(x):
     return pgsql_qualifier.search(x)
 
+def read_pgvalue(x):
+    # TODO: Implement check for valid values
+    if isinstance(x,str):
+        return "'" + x + "'"
+    if x is None:
+        return 'null'
+    return x
+
+def read_operator(x, right):
+    # TODO: Implement check for valid operators
+    if right['type']=='value' and right['value'] is None and x == '=':
+        return 'is'
+    return x
 
 class ValidationError(Exception):
     def __init__(self, message, value):
@@ -196,7 +209,8 @@ def parse_expression(d):
         return parse_operator(d)
     if d['type'] == 'function':
         return parse_function(d)
-
+    if d['type'] == 'value':
+        return read_pgvalue(d['value'])
     raise NotImplementedError()
 
 
@@ -208,14 +222,13 @@ def parse_condition(dl):
     for d in dl:
         if d['type'] == 'operator_binary':
             conditionlist.append("%s %s %s" % (
-                parse_expression(d['left']), d['operator'],
+                parse_expression(d['left']), read_operator(d['operator'],d['right']),
                 parse_expression(d['right'])))
 
     return " " + " AND ".join(conditionlist)
 
 
 def parse_operator(d):
-    # TODO: Implement
     if d['operator'] == 'as':
         return parse_expression(d['labeled']) + " AS " + d['label_name']
     if d['operator'] == 'function':

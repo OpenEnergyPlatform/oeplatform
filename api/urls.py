@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^delete', views.create_ajax_handler(actions.data_delete)),
     url(r'^search', views.create_ajax_handler(actions.data_search)),
     url(r'^info', views.create_ajax_handler(actions.data_info)),
+    url(r'^update', views.create_ajax_handler(actions.data_update)),
     url(r'^has_schema', views.create_ajax_handler(actions.has_schema)),
     url(r'^has_table', views.create_ajax_handler(actions.has_table)),
     url(r'^has_sequence', views.create_ajax_handler(actions.has_sequence)),

@@ -6,8 +6,10 @@ import api.references
 # debug
 import sys
 import traceback
+
 from api import parser
 from api.parser import is_pg_qual, read_bool, read_pgid
+
 from sqlalchemy.engine import reflection
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,6 +21,7 @@ from api import references
 from sqlalchemy import func, MetaData, Table
 from sqlalchemy.sql.ddl import CreateTable
 import oeplatform.securitysettings as sec
+
 import geoalchemy2
 
 Base = declarative_base()
@@ -153,6 +156,49 @@ def data_delete(request):
     raise NotImplementedError()
 
 
+def data_update(request):
+    engine = _get_engine()
+    connection = engine.connect()
+    query = {
+        'from': [{
+            'type': 'table',
+            'schema': request['schema'],
+            'table': request['table']
+        }],
+        'where': request['where']
+    }
+    rows = data_search(query)
+    setter = request['values']
+    fields = [field[0] for field in rows['description']]
+    insert_strings = []
+    for row in rows['data']:
+        insert = []
+        for (key,value) in zip(fields, row):
+            if key in setter:
+                value = setter[key]
+            insert.append(process_value(value))
+
+        insert_strings.append('('+(', '.join(insert))+')')
+
+
+    s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
+        schema=read_pgid(get_meta_schema_name(request['schema'])),
+        table=read_pgid(get_edit_table_name(request['table'])),
+        fields=', '.join(fields),
+        values=', '.join(insert_strings)
+    )
+    print(s)
+    connection.execute(s)
+    return {}
+
+def process_value(val):
+    if isinstance(val,str):
+        return "'" + val + "'"
+    if val is None:
+        return 'null'
+    else:
+        return str(val)
+
 def table_drop(request):
     db = request["db"]
     engine = _get_engine()
@@ -203,6 +249,7 @@ def data_search(request):
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)
+    print("SEARCH: " + query)
     result = connection.execute(query)
     description = result.context.cursor.description
     data = [list(r) for r in result]
@@ -486,3 +533,45 @@ def get_unique_constraints(request):
                                                                   None),
                                              **request)
     return result
+
+
+def get_comment_table_name(table):
+    return '_' + table + '_cor'
+
+
+def get_edit_table_name(table):
+    return '_' + table + '_edit'
+
+
+def get_meta_schema_name(schema):
+    return '_' + schema
+
+
+def create_meta_schema(schema):
+    engine = _get_engine()
+    query = 'CREATE SCHEMA {schema}'.format(schema=get_meta_schema_name(schema))
+    connection = engine.connect()
+    connection.execute(query)
+
+
+def create_edit_table(schema, table):
+    engine = _get_engine()
+    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
+            '(LIKE {schema}.{table}, PRIMARY KEY (_id)) ' \
+            'INHERITS (_edit_base); '.format(
+                meta_schema=get_meta_schema_name(schema),
+                edit_table=get_edit_table_name(table),
+                schema=schema,
+                table=table)
+    connection = engine.connect()
+    connection.execute(query)
+
+
+def create_comment_table(schema, table):
+    engine = _get_engine()
+    query = 'CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) ' \
+            'INHERITS (_comment_base); '.format(
+                schema=get_meta_schema_name(schema),
+                table=get_comment_table_name(table))
+    connection = engine.connect()
+    connection.execute(query)

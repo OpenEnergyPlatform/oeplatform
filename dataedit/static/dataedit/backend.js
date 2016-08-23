@@ -6,6 +6,8 @@ recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
 
+
+
 function grid_formatter(value, field, row){
     if(value==null)
         return "";
@@ -47,6 +49,7 @@ function construct_field(el){
         id: el.name,
         format: grid_formatter,
         type: el.type,
+        editor: Slick.Editors.Text,
       });
       field.renderer = grid_formatter;
       return field;
@@ -71,6 +74,8 @@ function get_field_query(field){
 
 table_fields = [];
 pk_fields = [];
+
+
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
     my.max_rows = 1000;
@@ -219,6 +224,55 @@ pk_fields = [];
 
         return dfd.promise()
     };
+
+    my.save = function(changes, dataset){
+        var dfd = new $.Deferred();
+        var request = $.when(changes.updates.map(create_query(dataset.attributes.schema, dataset.attributes.table)));
+
+        // We do not know the number of updates. Thus we set no arguments and
+        // obtain them via black magic called javascript
+        request.done(function()
+        {
+            for (var i=0; i<arguments.length; i++)
+                if(arguments[i].error)
+                    dfd.reject(arguments[i].error);
+            dfd.resolve({})
+        });
+
+        request.fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+    };
+
+    function create_query(schema, table)
+    {
+        return function(record){
+            console.log(schema,table);
+            var query = {
+                schema: schema,
+                table: table,
+                where: _.map(record._previousAttributes, function(v, k) { return condition_query(k,v); }),
+                values: record.changed
+            }
+            return $.ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}});
+        }
+    };
+
+    function condition_query(key, value)
+    {
+        return {
+            type:'operator_binary',
+            left: {
+                type: 'column',
+                column: key,
+            },
+            right: {
+                type: 'value',
+                value: value
+            },
+            operator: '='
+        };
+    }
 }(jQuery, OEP));
 
 
