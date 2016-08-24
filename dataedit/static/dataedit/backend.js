@@ -13,6 +13,8 @@ function grid_formatter(value, field, row){
         return "";
     if(field.id=='_comment')
     {
+        if(value.id== null)
+            return '';
         var el = document.createElement('div');
         el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
               + '<div class="modal-dialog">'
@@ -32,7 +34,7 @@ function grid_formatter(value, field, row){
                 + '</div>'
 
               + '</div>'
-            + '</div>)');
+            + '</div>');
         document.body.appendChild(el);
         return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
     }
@@ -49,8 +51,11 @@ function construct_field(el){
         id: el.name,
         format: grid_formatter,
         type: el.type,
-        editor: Slick.Editors.Text,
+
       });
+      if(el.name == '_comment'){
+        field.editor = CommentEditor;
+      }
       field.renderer = grid_formatter;
       return field;
 }
@@ -116,7 +121,10 @@ pk_fields = [];
                     schema: dataset.schema,
                     table: dataset.table
         };
-        var field_query = table_fields.map(get_field_query);
+        var field_query = table_fields.concat([
+            {id:'method', attributes:{type:'text'}},
+            {id:'origin', attributes:{type:'text'}},
+            {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
         var id = null;
 
         if(pk_fields){
@@ -210,6 +218,14 @@ pk_fields = [];
                             var key = results.content.description[i][0];
                             row[key] = raw_row[i];
                         }
+                        if(dataset.has_row_comments){
+                            row['_comment']={
+                                id: row['_comment'],
+                                origin: row['origin'],
+                                method: row['method'],
+                                assumption: row['assumption']
+                            };
+                        }
                         return row;
                     }),
                     total: counts.content.data[0][0],
@@ -247,12 +263,21 @@ pk_fields = [];
     function create_query(schema, table)
     {
         return function(record){
-            console.log(schema,table);
             var query = {
                 schema: schema,
                 table: table,
                 where: _.map(record._previousAttributes, function(v, k) { return condition_query(k,v); }),
                 values: record.changed
+            }
+            if('_comment' in record.changed){
+                if(record.changed._comment.create)
+                {
+                    query = {
+                        schema: '_' + schema,
+                        table: '_' + table + '_cor'
+                    }
+                    $ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}})
+                }
             }
             return $.ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}});
         }
@@ -260,6 +285,9 @@ pk_fields = [];
 
     function condition_query(key, value)
     {
+        if(key=='_comment'){
+            value = value.id
+        }
         return {
             type:'operator_binary',
             left: {

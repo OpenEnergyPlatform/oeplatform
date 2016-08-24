@@ -52,20 +52,13 @@
 <!-- Recline JS (combined distribution, all views) -->
 <script type="text/javascript" src="{% static 'dataedit/recline/dist/recline.js' %}"></script>
 
+
+<script type="text/javascript" src="{% static 'dataedit/editors.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
 
 
 <script type="text/javascript">
-        var dataset = new recline.Model.Dataset({
-            table: '{{table}}',
-            schema: '{{schema}}',
-            backend: 'OEP',
-            has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
-        });
 
-        dataset.fetch().done(function(dataset) {
-            console.log('records: ' + dataset.records);
-});
 </script>
 
 <div class="container">
@@ -87,8 +80,16 @@
 
   <div class="data-explorer-here"></div>
     <div class="well">
-        <input class="form-control" type="textarea" name="comment">
-        <button class="btn btn-success" id="savebutton"> Save </button>
+        <span class="lead">Commit your changes</span><br>
+        Your changes will not be written to the actual OpenEnergyDatabase but an
+        additional schema. <br>
+        New or changed data has to pass a validation process before it
+        is publicated in the next revision. <br>
+        <div class="form-group" style="margin:10px">
+            <label for="commit-message">Commit message</label>
+            <input class="form-control" type="textarea" name="comment" id="commit-message">
+            <button class="btn btn-success" id="savebutton"> Save </button>
+        </div>
     </div>
 
   <div style="clear: both;"></div>
@@ -96,6 +97,16 @@
 </div>
 
 <script type="text/javascript">
+
+    var dataset = new recline.Model.Dataset({
+            table: '{{table}}',
+            schema: '{{schema}}',
+            backend: 'OEP',
+            has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
+        });
+
+        dataset.fetch().done(function(dataset) {
+
 
     var createMultiView = function(dataset, state) {
         // remove existing multiview if present
@@ -122,10 +133,12 @@
                             enableReOrderRow:true
                         },
                         columnsEditor: dataset.fields.map(function(field){
-                            return {column: field.id, editor: field.attributes.editor};
-                        })
+                            return {column: field.id, editor: field.editor};
+                        }),
+                        hiddenColumns: ['method', 'origin', 'assumption']
                     }
     });
+
     {% endif %}
     var views = [
        {% if 'table' in kinds %}
@@ -185,7 +198,7 @@ $('#savebutton').bind('click',
     });
 
 
-
+});
 </script>
 <div>
     <table class="table table-hover" style="width:460px">
@@ -292,5 +305,6 @@ $('#savebutton').bind('click',
             </table>
         </div>
     </div>
+
 
 {% endblock %}
