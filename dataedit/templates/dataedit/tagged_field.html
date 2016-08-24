@@ -1,0 +1,10 @@
+<div style="display: inline-block;">
+    {{label}}
+</div>
+<div style="display:inline-block; width:40%;">
+    {% for tag in tags %}
+        <button class="btn tag" style="background:{{ tag.color }}">
+            {{tag.label}}
+        </button>
+    {%endfor%}
+</div>
