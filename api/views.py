@@ -30,20 +30,6 @@ def create_ajax_handler(func):
     return execute
 
 
-@ajax
-@csrf_exempt
-def count(request):
-    content = request.POST if request.POST else request.GET
-    content = json.loads(content['query'])
-    if 'limit' in content:
-        del content['limit']
-    if 'offset' in content:
-        del content['offset']
-    content['_count'] = True
-    data = actions.data_search(content)
-    return data['data'] if 'data' in data else 0
-
-
 def stream(data):
     size = len(data)
     chunck = 100

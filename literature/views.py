@@ -1,6 +1,9 @@
 from egoio.db_tables import references as ref
 from sqlalchemy.orm import relationship, Session
+
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
 from sqlalchemy import create_engine, MetaData
 import bibtexparser as btp
 from api.actions import _get_engine
@@ -87,7 +90,7 @@ class LiteratureView(View):
         sess.commit()
         return redirect('/literature')
 
-
+@login_required(login_url='/login/')
 def upload(request):
     file = request.FILES['bibtex']
     print(file.file)
@@ -100,7 +103,6 @@ def get_bibtype_id(bibtype):
         ref.EntryType.label == bibtype).first()
     sess.close()
     return et
-
 
 
 def read_bibtexfile(bibtex_file):
