@@ -16,3 +16,4 @@ geoalchemy2
 -e git+https://github.com/openego/ego.io.git#egg=Package
 shapely
 djangoajax
+webcolors

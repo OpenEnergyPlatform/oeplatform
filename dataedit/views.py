@@ -13,11 +13,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 import oeplatform.securitysettings as sec
+
 from api import actions
 from dataedit import models
 from .models import TableRevision
+from django.db.models import Q
+from functools import reduce
+import operator
 
 session = None
 
@@ -32,20 +38,30 @@ excluded_schemas = [
 
 def listschemas(request):
     insp = actions.connect()
-    schemas = sorted([(schema, len(
+    schemas = sorted([(models.Schema.objects.get_or_create(name=schema)[0], len(
         {table for table in insp.get_table_names(schema=schema) if
          not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema not in excluded_schemas])
+                      schema not in excluded_schemas and not schema.startswith('_')], key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
 
 
-def listtables(request, schema):
+def listtables(request, schema_name):
+
+    if not actions.has_schema({'schema': '_'+schema_name}):
+        actions.create_meta_schema(schema_name)
+
     insp = actions.connect()
-    if schema in excluded_schemas:
+    if schema_name in excluded_schemas:
         raise Http404("Schema not accessible")
-    tables = sorted([table for table in insp.get_table_names(schema=schema) if
-                     not table.startswith('_')])
+    schema,_ = models.Schema.objects.get_or_create(name=schema_name)
+    tables = []
+    for table in insp.get_table_names(schema=schema_name):
+        if not table.startswith('_'):
+            t,_ = models.Table.objects.get_or_create(name=table, schema=schema)
+            tables.append(t)
+    tables = sorted(tables, key=lambda x: x.name)
+    print([t.name for t in tables])
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema, 'tables': tables})
 
@@ -145,10 +161,21 @@ class DataView(View):
     """
 
     def get(self, request, schema, table):
+
         if schema in excluded_schemas:
             raise Http404("Schema not accessible")
         db = sec.dbname
         tags = []
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_comment_table_name(table)}):
+            actions.create_comment_table(schema, table)
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_edit_table_name(table)}):
+            actions.create_edit_table(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -167,15 +194,11 @@ class DataView(View):
         columns = actions.get_columns({'schema': schema, 'table': table})
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
-        print(actions.has_table(
-            {'schema': schema, 'table': '_' + table + '_cor'}))
-        has_row_comments = has_row_comments and actions.has_table(
-            {'schema': schema, 'table': '_' + table + '_cor'})
+
         repo = svn.local.LocalClient(sec.datarepowc)
         available_revisions = TableRevision.objects.filter(table=table,
                                                            schema=schema)
         revisions = []
-
         for rev in repo.log_default():
             try:
                 rev_obj = available_revisions.get(revision=rev.revision)
@@ -201,33 +224,35 @@ class TagUpdate(UpdateView):
     fields = '__all__'
     template_name_suffix = '_form'
 
+    @login_required(login_url='/login/')
+    def dispatch(self, request, *args, **kwargs):
+        return super(TagUpdate, self).dispatch(request, *args,
+                                                          **kwargs)
 
-def add_table_tag(request, schema, table, tag_id):
-    sch, _ = models.Schema.objects.get_or_create(name=schema)
-    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
-    tag = get_object_or_404(models.Tag, pk=tag_id)
-    tab.tags.add(tag)
-    tab.save()
-    return redirect(request.GET.get('from', '/'))
-
-def add_table_tags(request, schema, table):
-    sch, _ = models.Schema.objects.get_or_create(name=schema)
-    tab, _ = models.Table.objects.get_or_create(name=table, schema=sch)
-    tags = models.Tag.objects.all()
-    tab_tags = tab.tags.all()
-    ids = {pk for pk in request.POST if pk != 'csrfmiddlewaretoken'}
+@login_required(login_url='/login/')
+def add_table_tags(request):
+    schema = request.POST['schema']
+    table = request.POST.get('table',None)
+    obj, _ = models.Schema.objects.get_or_create(name=schema)
+    if table:
+        obj, _ = models.Table.objects.get_or_create(name=table, schema=obj)
+    tab_tags = obj.tags.all()
+    ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     for tag in models.Tag.objects.filter(pk__in=ids):
+        print(tag)
         if tag not in tab_tags:
-            tab.tags.add(tag)
+            obj.tags.add(tag)
     for tag in tab_tags:
         if str(tag.pk) not in request.POST:
-            tab.tags.remove(tag)
-    tab.save()
+            obj.tags.remove(tag)
+    obj.save()
     return redirect(request.META['HTTP_REFERER'])
 
-class TagCreate(CreateView):
+
+class TagCreate(LoginRequiredMixin, CreateView):
     model = models.Tag
     fields = '__all__'
+    template_name_suffix = '_form'
 
 
 class SearchView(View):
@@ -237,14 +262,8 @@ class SearchView(View):
     def post(self, request):
         results = []
 
-        filter_tags = set([])
-        if 'tags' in request.POST:
-            filter_tags = request.POST.getlist('tags')
-        if isinstance(filter_tags, str):
-            filter_tags = {filter_tags}
-        else:
-            filter_tags = set(filter_tags)
-
+        filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
+        print(filter_tags)
         if request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
@@ -259,18 +278,34 @@ class SearchView(View):
             post += '&fq=-(schema:%s)'%schema
         response = requests.get(post)
         response = json.loads(response.text)
+        print(len(response['response']['docs']))
 
-        for result in response['response']['docs']:
-            table = result['table']
-            schema = result['schema']
-            tags = []
-            if models.Table.objects.filter(name=table,
-                                           schema__name=schema).exists():
-                tobj = models.Table.objects.get(name=table,
-                                                schema__name=schema)
-                tags = tobj.tags.all()
-            if filter_tags.issubset({tag.label for tag in tags}) and schema not in excluded_schemas:
-                results.append((schema, table, tags))
-            else:
-                print((schema, table, tags))
-        return render(request, 'dataedit/search.html', {'results': results, 'tags':models.Tag.objects.all()})
+        # The following is basicly a big "get_or_create" for possibly a lot of
+        # schemas and tables that were returned by solr.
+        # But it should be much faster this way.
+
+        tables = {(result['schema'], result['table']) for result in
+                  response['response']['docs']}
+        query_set = reduce(operator.or_ ,{Q(schema__name=schema, name=table) for schema, table  in tables})
+
+        results = models.Table.objects.filter(query_set)
+        tables_found = {(res.schema.name, res.name) for res in results}
+        schemas = {schema for schema,_ in tables}
+        schema_mapper = {schema.name: schema for
+                         schema in models.Schema.objects.filter(name__in=schemas)}
+        new_schemas = []
+        for schema_name in (schemas - schema_mapper.keys()):
+            schema = models.Schema(name=schema_name)
+            schema_mapper[schema_name] = schema
+            new_schemas.append(schema)
+        models.Schema.objects.bulk_create(new_schemas)
+
+        new_tables = []
+        for (schema,table) in tables - tables_found:
+            table = models.Table(name=table,schema=schema_mapper[schema])
+            new_tables.append(table)
+        models.Table.objects.bulk_create(new_tables)
+
+        print(results)
+        return render(request, 'dataedit/search.html', {'results': list(results)+new_tables, 'tags':models.Tag.objects.all()})
+
