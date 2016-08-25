@@ -253,6 +253,7 @@ def add_table_tags(request):
 class TagCreate(LoginRequiredMixin, CreateView):
     model = models.Tag
     fields = '__all__'
+    success_url = '/dataedit'
     template_name_suffix = '_form'
 
 
