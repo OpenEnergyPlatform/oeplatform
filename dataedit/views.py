@@ -179,6 +179,7 @@ class DataView(View):
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
+            print(schema,table)
             tobj = models.Table.objects.get(name=table, schema__name=schema)
             tags = tobj.tags.all()
 
@@ -261,10 +262,10 @@ class SearchView(View):
 
     def post(self, request):
         results = []
-
+        print(request.POST)
         filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
         print(filter_tags)
-        if request.POST['string']:
+        if 'string' in request.POST and request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
             query = 'comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}'.format(
@@ -287,7 +288,6 @@ class SearchView(View):
         tables = {(result['schema'], result['table']) for result in
                   response['response']['docs']}
         query_set = reduce(operator.or_ ,{Q(schema__name=schema, name=table) for schema, table  in tables})
-
         results = models.Table.objects.filter(query_set)
         tables_found = {(res.schema.name, res.name) for res in results}
         schemas = {schema for schema,_ in tables}
@@ -306,6 +306,9 @@ class SearchView(View):
             new_tables.append(table)
         models.Table.objects.bulk_create(new_tables)
 
-        print(results)
-        return render(request, 'dataedit/search.html', {'results': list(results)+new_tables, 'tags':models.Tag.objects.all()})
+        if not filter_tags:
+            results =  list(results)+new_tables
+
+        results = [t for t in results if set(filter_tags.all()).issubset(t.tags.all())]
+        return render(request, 'dataedit/search.html', {'results': results, 'tags':models.Tag.objects.all(), 'selected': filter_tags})
 
