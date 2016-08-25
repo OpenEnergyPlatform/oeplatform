@@ -10,13 +10,7 @@
   box-sizing: border-box;
 }
 
-.tag {
-    padding: 0px;
-    padding-left: 5px;
-    padding-right: 5px;
-    height: 25px;
 
-}
 
 /* enable absolute positioning */
 .inner-addon {
