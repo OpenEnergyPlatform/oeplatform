@@ -1,9 +1,10 @@
+{% load dataedit.taghandler %}
 <div style="display: inline-block;">
     {{label}}
 </div>
 <div style="display:inline-block; width:40%;">
     {% for tag in tags %}
-        <button class="btn tag" style="background:{{ tag.color }}">
+        <button class="btn tag" style="background:{{ tag.color }};color:{% readable_text_color tag.color %}">
             {{tag.label}}
         </button>
     {%endfor%}

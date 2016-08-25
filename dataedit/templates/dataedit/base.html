@@ -7,8 +7,10 @@
     {% get_tags as all_tags %}
     <h3>Popular tags:</h3>
     {% for tag in all_tags %}
-        <form action="/dataedit/search">
-        <button type="button" class="btn tag" style="background:{{ tag.color }};color:{% readable_text_color tag.color %}">{{ tag.label }}</button>
+        <form action="/dataedit/search" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn tag" style="background:{{ tag.color }};color:{% readable_text_color tag.color %}" value="{{ tag.label }}">
+            <input type="hidden" name="select_{{tag.pk}}" value="on">
         </form>
     {% endfor %}
     {% if user.is_authenticated %}

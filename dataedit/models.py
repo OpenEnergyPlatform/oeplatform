@@ -29,8 +29,12 @@ class Tagable(models.Model):
         abstract = True
 
 class Schema(Tagable):
-    pass
+    class Meta:
+        unique_together = (("name"),)
 
 class Table(Tagable):
     schema = models.ForeignKey(Schema)
+
+    class Meta:
+        unique_together = (("schema", "name"),)
 
