@@ -24,7 +24,8 @@ from .models import TableRevision
 from django.db.models import Q
 from functools import reduce
 import operator
-
+import time
+from django_ajax.decorators import ajax
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -131,28 +132,50 @@ def send_dump(rev_id, schema, table):
 
 def show_revision(request, schema, table, rev_id):
     global pending_dumps
+
+    rev = TableRevision.objects.get(schema=schema, table=table,
+                                    revision=rev_id)
+    rev.last_accessed = timezone.now()
+    rev.save()
+    return send_dump(rev_id, schema, table)
+
+@ajax
+def request_revision(request, schema, table, rev_id):
+    """
+    This method handles an ajax request for a data revision of a specific table.
+    On success ta TableRevision will be stored to mark that the corresponding
+    revision is available.
+
+    :param request:
+    :param schema:
+    :param table:
+    :param rev_id:
+    :return:
+    """
+
     fname = "{schema}/{table}.tar.gz".format(schema=schema,
                                              table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
-    try:
-        rev = TableRevision.objects.get(schema=schema, table=table,
-                                        revision=rev_id)
-        rev.last_accessed = timezone.now()
-        rev.save()
-        return send_dump(rev_id, schema, table)
-    except TableRevision.DoesNotExist:
 
-        if (schema, table, rev_id) in pending_dumps:
-            if not pending_dumps[(schema, table, rev_id)].is_alive():
-                pending_dumps.pop((schema, table, rev_id))
-                rev = TableRevision(revision=rev_id, schema=schema, table=table)
-                rev.save()
-                return send_dump(rev_id, schema, table)
-        else:
-            t = threading.Thread(target=create_dump,
-                                 args=(schema, table, rev_id, fname))
-            t.start()
-            pending_dumps[(schema, table, rev_id)] = t
-        return render(request, 'dataedit/dataedit_revision_pending.html', {})
+    original = True # marks whether this method initialised the revision creation
+
+    # If some user already requested this dataset wait for this thread to finish
+    if (schema, table, rev_id) in pending_dumps:
+        t = pending_dumps[(schema, table, rev_id)]
+        original = False
+    else:
+        t = threading.Thread(target=create_dump,
+                             args=(schema, table, rev_id, fname))
+        t.start()
+        pending_dumps[(schema, table, rev_id)] = t
+
+    while t.is_alive():
+        time.sleep(10)
+
+    pending_dumps.pop((schema, table, rev_id))
+    if original:
+        rev = TableRevision(revision=rev_id, schema=schema, table=table)
+        rev.save()
+    return {}
 
 
 class DataView(View):
@@ -197,6 +220,7 @@ class DataView(View):
                                           'name' in col}
 
         repo = svn.local.LocalClient(sec.datarepowc)
+        TableRevision.objects.all().delete()
         available_revisions = TableRevision.objects.filter(table=table,
                                                            schema=schema)
         revisions = []
