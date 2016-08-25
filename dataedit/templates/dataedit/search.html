@@ -3,7 +3,7 @@
 {% block data_search %} {# This replaces the tiny search bar in the default template #}
 {% endblock %}
 {% block data_content %}
-
+{% load dataedit.taghandler %}
 <div class="searchbox_container small">
     <form action="/dataedit/search" role="form" method="post">{% csrf_token %}
         <div class="inner-addon right-addon">
@@ -16,7 +16,7 @@
                 {% for tag in tags %}
                 <span>
                     <input type="checkbox" class="hidden" name="select_{{tag.pk}}" id="select_{{tag.pk}}">
-                    <label style="background:{{tag.color}}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
+                    <label style="background:{{ tag.color }};color:{% readable_text_color tag.color %}" class="btn tag" for="select_{{tag.pk}}" {%if tag in selected %} checked {%endif%}>{{tag.label}}</label>
                 </span>
                 {% endfor %}
             </div>
