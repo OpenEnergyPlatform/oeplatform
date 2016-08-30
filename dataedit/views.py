@@ -177,6 +177,11 @@ class DataView(View):
                  'table': actions.get_edit_table_name(table)}):
             actions.create_edit_table(schema, table)
 
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_insert_table_name(table)}):
+            actions.create_insert_table(schema, table)
+
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
             tobj = models.Table.objects.get(name=table, schema__name=schema)

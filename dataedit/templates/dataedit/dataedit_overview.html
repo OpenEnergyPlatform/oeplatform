@@ -9,7 +9,6 @@
 {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=tags %}
 <hr>
 
-
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
 
@@ -77,8 +76,44 @@
   <div class="changelog">
     <h3>Changes</h3>
   </div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Data
+                </h4>
+            </div>
+            <div>
+                <div class="data-explorer-here"></div>
+            </div>
+        </div>
+        <hr>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Comments
+                </h4>
+            </div>
+            <div>
+                <div class="comment-explorer-here"></div>
+            </div>
 
-  <div class="data-explorer-here"></div>
+        </div>
+        <hr>
+        <div id="unchecked_data_div" class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Data (unchecked)
+ button         </h4>
+            </div>
+            <div>
+                <div class="data-unchecked-explorer-here"></div>
+            </div>
+
+        </div>
+    </div>
+
+
     <div class="well">
         <span class="lead">Commit your changes</span><br>
         Your changes will not be written to the actual OpenEnergyDatabase but an
@@ -98,107 +133,76 @@
 
 <script type="text/javascript">
 
-    var dataset = new recline.Model.Dataset({
+var data_record = {}
+var unchecked_record = {}
+var comment_record = {}
+
+function build_views(unchecked){
+    var dataset_main = new recline.Model.Dataset({
             table: '{{table}}',
             schema: '{{schema}}',
             backend: 'OEP',
             has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
+    });
+
+
+    dataset_main.fetch().done(function(dataset) {
+
+        plot_view(dataset,
+            true,
+            $('.data-explorer-here'), data_record)
+    });
+
+    if(unchecked){
+
+        $("#unchecked_data_div").css("display", "block");
+        var dataset_unchecked = new recline.Model.Dataset({
+                table: '_{{table}}_edit',
+                schema: '_{{schema}}',
+                backend: 'OEP',
+                has_row_comments: false
         });
 
-        dataset.fetch().done(function(dataset) {
-
-
-    var createMultiView = function(dataset, state) {
-        // remove existing multiview if present
-        var reload = false;
-        if (window.multiView) {
-        window.multiView.remove();
-        window.multiView = null;
-        reload = true;
+        dataset_unchecked.fetch().done(function(dataset) {
+            plot_view(dataset,
+                false,
+                $('.data-unchecked-explorer-here'), unchecked_record)
+        });
     }
+    else
+        $("#unchecked_data_div").css("display", "none");
 
-    var $el = $('<div />');
-    $el.appendTo(window.explorerDiv);
 
-    {# {% if '_comment' in header %} handle_comment_field(dataset, recline, {{ header.index('_comment') }}); {% endif %} #}
-
-    {% if 'table' in kinds %}
-
-    var grid = new recline.View.SlickGrid({
-                    model: dataset,
-                    state: {
-                        gridOptions: {
-                            editable: true,
-                            enableAddRow: true,
-                            enableReOrderRow:true
-                        },
-                        columnsEditor: dataset.fields.map(function(field){
-                            return {column: field.id, editor: field.editor};
-                        }),
-                        hiddenColumns: ['method', 'origin', 'assumption']
-                    }
+    var comment_dataset = new recline.Model.Dataset({
+            table: '_{{table}}_cor',
+            schema: '_{{schema}}',
+            backend: 'OEP',
+            has_row_comments: false
     });
 
-    {% endif %}
-    var views = [
-       {% if 'table' in kinds %}
-        {
-                view: grid,
-                label: 'Grid',
-                id: 'Grid',
-        },
-        {% endif %}
-        {% if 'map' in kinds %}
-            {
-                view: new recline.View.Map({model: dataset}),
-                label: 'Map',
-                id: 'map'
-            },
-        {% endif %}
-            {
-                view: new recline.View.Graph({model: dataset}),
-                label: 'Graph',
-                id: 'graph'
-            },
-    ];
-
-
-
-    var multiView = new recline.View.MultiView({
-        model: dataset,
-        el: $el,
-        state: state,
-        views: views
+    comment_dataset.fetch().done(function(dataset) {
+        plot_view(dataset,
+            true,
+            $('.comment-explorer-here'), comment_record)
     });
-return multiView;
-}
 
-
-
-
-jQuery(function($) {
-    window.multiView = null;
-    window.explorerDiv = $('.data-explorer-here');
-
-    // create the demo dataset
-    window.multiview = createMultiView(dataset);
-
-});
-
-$('#savebutton').bind('click',
+    $('#savebutton').bind('click',
     function() {
         changes = {
-            creates: dataset._changes.creates,
-            updates:    dataset.records.filter(
+            creates: dataset_main._changes.creates,
+            updates:    dataset_main.records.filter(
                 function(el){return !(jQuery.isEmptyObject(el.changed));}),
-            deletes: dataset._changes.deletes
+            deletes: dataset_main._changes.deletes
         };
 
-        dataset.backend.save(changes, dataset);
+        dataset_main.backend.save(changes, dataset_main);
     });
+}
+
+build_views(false);
 
 
-});
+
 </script>
 <div>
     <table class="table table-hover" style="width:460px">
@@ -306,5 +310,6 @@ $('#savebutton').bind('click',
         </div>
     </div>
 
+<button class="btn btn-danger" onclick="build_views(true);"> Show unchecked data </button>
 
 {% endblock %}

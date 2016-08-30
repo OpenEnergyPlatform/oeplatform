@@ -2,6 +2,121 @@ function CommentEditor(args) {
     var $input;
     var defaultValue;
     var scope = this;
+    var current_value = null;
+
+    this.init = function () {
+      $input = $("<INPUT type=text class='editor-text' />")
+          .appendTo(args.container)
+          .on("keydown.nav", function (e) {
+            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+              e.stopImmediatePropagation();
+            }
+          })
+          .focus()
+          .select();
+    };
+
+    this.destroy = function () {
+      $input.remove();
+    };
+
+    this.focus = function () {
+      $input.focus();
+    };
+
+    this.getValue = function () {
+      return $input.val()._id;
+    };
+
+    this.setValue = function (val) {
+      $input.val(val._id);
+    };
+
+    this.loadValue = function (item) {
+        var val = null;
+        if(item[args.column.field]){
+            current_value = item[args.column.field]
+            val = current_value._id
+        }
+        $input.val(val);
+        $input[0].defaultValue = current_value;
+        $input.select();
+
+    };
+
+    this.serializeValue = function () {
+      return $input.val();
+    };
+
+    this.applyValue = function (item, state) {
+        var query = {};
+        query.fields = [
+            {id:'_id', attributes:{type:'text'}},
+            {id:'method', attributes:{type:'text'}},
+            {id:'origin', attributes:{type:'text'}},
+            {id:'assumption', attributes:{type:'text'}}].map(get_field_query);
+
+        query.from = [{
+            type:'table',
+            schema: '_' + dataset.attributes.schema,
+            table: '_' + dataset.attributes.table +'_cor'
+        }];
+
+        query.where = [condition_query('_id', state)]
+
+      var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}})
+
+      var dfd = new $.Deferred();
+      request.done(function(results) {
+
+        res = results.content.data.map(function(raw_row){
+            var row = {};
+            for(i=0; i<raw_row.length; ++i)
+            {
+                var key = results.content.description[i][0];
+                row[key] = raw_row[i];
+            }
+            return row;
+        })
+        if(res){
+            console.log(res[0]);
+            item[args.column.field] = res[0];
+        }
+        else
+            alert(state + " is not a valid comment id");
+      });
+
+      request.fail(function( jqXHR, textStatus ) {
+            alert( "Request failed: " + textStatus );
+        });
+
+    };
+
+    this.isValueChanged = function () {
+      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+    };
+
+    this.validate = function () {
+      if (args.column.validator) {
+        var validationResults = args.column.validator($input.val());
+        if (!validationResults.valid) {
+          return validationResults;
+        }
+      }
+
+      return {
+        valid: true,
+        msg: null
+      };
+    };
+
+    this.init();
+}
+
+/*function CommentEditor(args) {
+    var $input;
+    var defaultValue;
+    var scope = this;
     this.init = function () {
       $container = document.createElement('div');
       $container.className = "editor_frame";
@@ -107,8 +222,8 @@ function CommentEditor(args) {
             return {
                 id: $id.value,
                 method: undefined,
-                origin: undefined
-                create = false,
+                origin: undefined,
+                create: false,
             }
         }
         else
@@ -141,4 +256,92 @@ function CommentEditor(args) {
     };
 
     this.init();
+}*/
+
+
+function EmptyEditor(args) {
+    var $value;
+    var defaultValue;
+    var scope = this;
+    this.init = function () {
+    };
+
+    this.save = function () {
+    };
+
+    this.cancel = function () {
+    };
+
+    this.destroy = function () {
+    };
+
+    this.focus = function () {
+    };
+
+    this.getValue = function () {
+        return {
+        };
+    };
+
+    this.setValue = function (val) {
+    };
+
+    this.loadValue = function (item) {
+    };
+
+
+    this.applyValue = function (item, state) {
+      item[args.column.field] = state;
+    };
+
+    this.isValueChanged = function () {
+        return false
+    };
+
+    this.validate = function () {
+
+      return {
+        valid: true,
+        msg: null
+      };
+    }
+
+    this.init();
+}
+
+
+function get_field_query(field){
+    var column_query = {
+        type: 'column',
+        column: field.id
+    };
+
+    if(field.attributes.type.startsWith('geometry')){
+        column_query = {
+            type: 'function',
+            function: 'ST_AsGeoJSON',
+            operands: [column_query],
+            as:field.id
+        };
+    }
+    return column_query;
+}
+
+function condition_query(key, value)
+{
+    if(key=='_comment'){
+        value = value.id
+    }
+    return {
+        type:'operator_binary',
+        left: {
+            type: 'column',
+            column: key,
+        },
+        right: {
+            type: 'value',
+            value: value
+        },
+        operator: '='
+    };
 }

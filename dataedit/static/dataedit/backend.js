@@ -13,10 +13,10 @@ function grid_formatter(value, field, row){
         return "";
     if(field.id=='_comment')
     {
-        if(value.id== null)
+        if(value._id== null)
             return '';
         var el = document.createElement('div');
-        el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
+        el.innerHTML = ('<div id="modal' + value._id + '" class="modal fade" role="dialog">'
               + '<div class="modal-dialog">'
                 + '<div class="modal-content">'
                   + '<div class="modal-header">'
@@ -24,9 +24,9 @@ function grid_formatter(value, field, row){
                     + '<h4 class="modal-title">Comment</h4>'
                   + '</div>'
                   + '<div class="modal-body">'
-                    + '<p> Method: '+ row.method +'</p>'
-                    + '<p> Origin: '+ row.origin +'</p>'
-                    + '<p> Assumption: '+ row.assumption +'</p>'
+                    + '<p> Method: '+ value.method +'</p>'
+                    + '<p> Origin: '+ value.origin +'</p>'
+                    + '<p> Assumption: '+ value.assumption +'</p>'
                   + '</div>'
                   + '<div class="modal-footer">'
                     + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
@@ -36,7 +36,7 @@ function grid_formatter(value, field, row){
               + '</div>'
             + '</div>');
         document.body.appendChild(el);
-        return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+        return '<a data-toggle="modal" data-target="#modal' + value._id + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
     }
     if(field.id=='ref_id')
     {
@@ -56,29 +56,16 @@ function construct_field(el){
       if(el.name == '_comment'){
         field.editor = CommentEditor;
       }
+      else
+      {
+        field.editor = Slick.Editors.Text;
+      }
       field.renderer = grid_formatter;
       return field;
 }
 
-function get_field_query(field){
-    column_query = {
-        type: 'column',
-        column: field.id
-    };
-
-    if(field.attributes.type.startsWith('geometry')){
-        column_query = {
-            type: 'function',
-            function: 'ST_AsGeoJSON',
-            operands: [column_query],
-            as:field.id
-        };
-    }
-    return column_query;
-}
-
-table_fields = [];
-pk_fields = [];
+var table_fields = [];
+var pk_fields = [];
 
 
 (function($, my) {
@@ -121,16 +108,20 @@ pk_fields = [];
                     schema: dataset.schema,
                     table: dataset.table
         };
-        var field_query = table_fields.concat([
+        var field_query;
+        if(dataset.has_row_comments){
+        field_query = table_fields.concat([
             {id:'method', attributes:{type:'text'}},
             {id:'origin', attributes:{type:'text'}},
             {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
+        }
+        else
+            field_query = table_fields.map(get_field_query)
         var id = null;
 
         if(pk_fields){
             id = pk_fields[0]
         }
-
         if(dataset.has_row_comments){
             query.from = [{
                 type: 'join',
@@ -210,7 +201,7 @@ pk_fields = [];
 
             else
             {
-                response = {
+                var response = {
                     hits: results.content.data.map(function(raw_row){
                         var row = {};
                         for(i=0; i<raw_row.length; ++i)
@@ -220,7 +211,7 @@ pk_fields = [];
                         }
                         if(dataset.has_row_comments){
                             row['_comment']={
-                                id: row['_comment'],
+                                _id: row['_comment'],
                                 origin: row['origin'],
                                 method: row['method'],
                                 assumption: row['assumption']
@@ -243,7 +234,7 @@ pk_fields = [];
 
     my.save = function(changes, dataset){
         var dfd = new $.Deferred();
-        var request = $.when(changes.updates.map(create_query(dataset.attributes.schema, dataset.attributes.table)));
+        var request = $.when(changes.updates.map(create_query(dataset.attributes.schema, dataset.attributes.table, $("#commit-message").val())));
 
         // We do not know the number of updates. Thus we set no arguments and
         // obtain them via black magic called javascript
@@ -260,15 +251,23 @@ pk_fields = [];
         });
     };
 
-    function create_query(schema, table)
+    function create_query(schema, table, message)
     {
         return function(record){
+            var conditions = [];
+            for(var col in record._previousAttributes){
+                if ($.inArray(col, ['method', 'origin', 'assumption', '_id']) == -1)
+                    conditions.push(condition_query(col,record._previousAttributes[col]));
+            }
             var query = {
                 schema: schema,
                 table: table,
-                where: _.map(record._previousAttributes, function(v, k) { return condition_query(k,v); }),
+                where: conditions,
                 values: record.changed
             }
+
+            query['message'] = message
+
             if('_comment' in record.changed){
                 if(record.changed._comment.create)
                 {
@@ -283,24 +282,7 @@ pk_fields = [];
         }
     };
 
-    function condition_query(key, value)
-    {
-        if(key=='_comment'){
-            value = value.id
-        }
-        return {
-            type:'operator_binary',
-            left: {
-                type: 'column',
-                column: key,
-            },
-            right: {
-                type: 'value',
-                value: value
-            },
-            operator: '='
-        };
-    }
+
 }(jQuery, OEP));
 
 

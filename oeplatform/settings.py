@@ -41,7 +41,8 @@ INSTALLED_APPS = (
     'dataedit',
     'colorfield',
     'django_ajax',
-	'literature'
+	'literature',
+    'rest_framework',
 )
 
 MIDDLEWARE_CLASSES = (
