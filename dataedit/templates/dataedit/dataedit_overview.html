@@ -4,7 +4,7 @@
 
 {% load staticfiles %}
 {% load bootstrap3 %}
-<h3>{{schema}}.{{table}}</h3>
+<h3>{{schema}}.{{table}}</h3> >> <a href="{{table}}/comments"> comments </a>
 
 {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=tags %}
 <hr>

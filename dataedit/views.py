@@ -165,7 +165,7 @@ class DataView(View):
 
     def get(self, request, schema, table):
 
-        if schema in excluded_schemas:
+        if schema in excluded_schemas or schema.startswith('_'):
             raise Http404("Schema not accessible")
         db = sec.dbname
         tags = []

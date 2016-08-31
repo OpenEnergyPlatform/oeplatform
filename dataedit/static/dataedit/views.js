@@ -92,8 +92,6 @@ function plot_view(dataset, editable, div, record){
                     },
             ];
 
-            debugger;
-
             var multiView = new recline.View.MultiView({
                 model: dataset,
                 el: $el,
