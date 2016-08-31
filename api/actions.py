@@ -194,13 +194,17 @@ def data_update(request):
     return {}
 
 def data_insert(request):
+    print("INSERT: ", request)
     engine = _get_engine()
     connection = engine.connect()
-
+    query = request
     # If the insert request is not for a meta table, change the request to do so
-
+    if not query['table'].startswith('_') or query['table'].endswith('_insert'):
+        query['table'] = '_' + query['table'] + '_insert'
+    if not query['schema'].startswith('_'):
+        query['schema'] = '_' + query['schema']
     query = parser.parse_insert(request, engine)
-
+    print(query, query.__dict__)
     result = connection.execute(query)
     connection.close()
     description = result.context.cursor.description

@@ -51,6 +51,13 @@
 <!-- Recline JS (combined distribution, all views) -->
 <script type="text/javascript" src="{% static 'dataedit/recline/dist/recline.js' %}"></script>
 
+<script>
+    unchecked = false;
+    function swap_checked(){
+        unchecked = !unchecked;
+        build_views();
+    }
+</script>
 
 <script type="text/javascript" src="{% static 'dataedit/editors.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
@@ -73,9 +80,7 @@
     }
   </style>
 
-  <div class="changelog">
-    <h3>Changes</h3>
-  </div>
+    <label class="btn btn-danger" for="unchecked_box"> <input type="checkbox" id="unchecked_box" onclick="swap_checked()"> Show unchecked rows</label>
     <div class="panel-group">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -86,18 +91,6 @@
             <div>
                 <div class="data-explorer-here"></div>
             </div>
-        </div>
-        <hr>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    Comments
-                </h4>
-            </div>
-            <div>
-                <div class="comment-explorer-here"></div>
-            </div>
-
         </div>
         <hr>
         <div id="unchecked_data_div" class="panel panel-default">
@@ -137,7 +130,7 @@ var data_record = {}
 var unchecked_record = {}
 var comment_record = {}
 
-function build_views(unchecked){
+function build_views(){
     var dataset_main = new recline.Model.Dataset({
             table: '{{table}}',
             schema: '{{schema}}',
@@ -173,21 +166,9 @@ function build_views(unchecked){
         $("#unchecked_data_div").css("display", "none");
 
 
-    var comment_dataset = new recline.Model.Dataset({
-            table: '_{{table}}_cor',
-            schema: '_{{schema}}',
-            backend: 'OEP',
-            has_row_comments: false
-    });
-
-    comment_dataset.fetch().done(function(dataset) {
-        plot_view(dataset,
-            true,
-            $('.comment-explorer-here'), comment_record)
-    });
-
     $('#savebutton').bind('click',
     function() {
+        debugger;
         changes = {
             creates: dataset_main._changes.creates,
             updates:    dataset_main.records.filter(
@@ -204,6 +185,39 @@ build_views(false);
 
 
 </script>
+
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#csv-upload">Upload CSV</button>
+<div id="csv-upload" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Upload a csv-file</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <div class="input-group">
+                <label class="input-group-btn">
+                    <span class="btn btn-primary">
+                        Browse&hellip; <input type="file" name="csv_file" style="display: none;">
+                    </span>
+                </label>
+                <input type="text" class="form-control" readonly>
+            </div>
+            <input class="btn btn-success" type="submit" value="Upload" />
+</form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div>
     <table class="table table-hover" style="width:460px">
         <tr>
@@ -269,6 +283,8 @@ build_views(false);
         </tr>
         {% endif %}
     </table>
+
+
 </div>
     <div id="downloadables">
         <div id="revisions" style="width:460px">
@@ -310,6 +326,6 @@ build_views(false);
         </div>
     </div>
 
-<button class="btn btn-danger" onclick="build_views(true);"> Show unchecked data </button>
+
 
 {% endblock %}

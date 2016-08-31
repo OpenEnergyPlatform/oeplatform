@@ -1,118 +1,120 @@
-function CommentEditor(args) {
-    var $input;
-    var defaultValue;
-    var scope = this;
-    var current_value = null;
+function buildCommentEditor(schema, table){
+    function CommentEditor(args) {
+        var $input;
+        var defaultValue;
+        var scope = this;
+        var current_value = null;
 
-    this.init = function () {
-      $input = $("<INPUT type=text class='editor-text' />")
-          .appendTo(args.container)
-          .on("keydown.nav", function (e) {
-            if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
-              e.stopImmediatePropagation();
+        this.init = function () {
+          $input = $("<INPUT type=text class='editor-text' />")
+              .appendTo(args.container)
+              .on("keydown.nav", function (e) {
+                if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
+                  e.stopImmediatePropagation();
+                }
+              })
+              .focus()
+              .select();
+        };
+
+        this.destroy = function () {
+          $input.remove();
+        };
+
+        this.focus = function () {
+          $input.focus();
+        };
+
+        this.getValue = function () {
+          return $input.val()._id;
+        };
+
+        this.setValue = function (val) {
+          $input.val(val._id);
+        };
+
+        this.loadValue = function (item) {
+            var val = null;
+            if(item[args.column.field]){
+                current_value = item[args.column.field]
+                val = current_value
             }
-          })
-          .focus()
-          .select();
-    };
+            $input.val(val);
+            $input[0].defaultValue = current_value;
+            $input.select();
 
-    this.destroy = function () {
-      $input.remove();
-    };
+        };
 
-    this.focus = function () {
-      $input.focus();
-    };
+        this.serializeValue = function () {
+          return $input.val();
+        };
 
-    this.getValue = function () {
-      return $input.val()._id;
-    };
+        this.applyValue = function (item, state) {
+            var query = {};
+            query.fields = [
+                {id:'_id', attributes:{type:'text'}},
+                {id:'method', attributes:{type:'text'}},
+                {id:'origin', attributes:{type:'text'}},
+                {id:'assumption', attributes:{type:'text'}}].map(get_field_query);
 
-    this.setValue = function (val) {
-      $input.val(val._id);
-    };
+            query.from = [{
+                type:'table',
+                schema: '_' + schema,
+                table: '_' + table +'_cor'
+            }];
 
-    this.loadValue = function (item) {
-        var val = null;
-        if(item[args.column.field]){
-            current_value = item[args.column.field]
-            val = current_value._id
-        }
-        $input.val(val);
-        $input[0].defaultValue = current_value;
-        $input.select();
+            query.where = [condition_query('_id', state)]
 
-    };
+          var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}})
 
-    this.serializeValue = function () {
-      return $input.val();
-    };
+          var dfd = new $.Deferred();
+          request.done(function(results) {
 
-    this.applyValue = function (item, state) {
-        var query = {};
-        query.fields = [
-            {id:'_id', attributes:{type:'text'}},
-            {id:'method', attributes:{type:'text'}},
-            {id:'origin', attributes:{type:'text'}},
-            {id:'assumption', attributes:{type:'text'}}].map(get_field_query);
-
-        query.from = [{
-            type:'table',
-            schema: '_' + dataset.attributes.schema,
-            table: '_' + dataset.attributes.table +'_cor'
-        }];
-
-        query.where = [condition_query('_id', state)]
-
-      var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}})
-
-      var dfd = new $.Deferred();
-      request.done(function(results) {
-
-        res = results.content.data.map(function(raw_row){
-            var row = {};
-            for(i=0; i<raw_row.length; ++i)
-            {
-                var key = results.content.description[i][0];
-                row[key] = raw_row[i];
+            res = results.content.data.map(function(raw_row){
+                var row = {};
+                for(i=0; i<raw_row.length; ++i)
+                {
+                    var key = results.content.description[i][0];
+                    row[key] = raw_row[i];
+                }
+                return row;
+            })
+            if(res && res != undefined && res.length > 0){
+                console.log(res[0]);
+                item[args.column.field] = res[0];
             }
-            return row;
-        })
-        if(res){
-            console.log(res[0]);
-            item[args.column.field] = res[0];
-        }
-        else
-            alert(state + " is not a valid comment id");
-      });
+            else
+                alert(state + " is not a valid comment id");
+          });
 
-      request.fail(function( jqXHR, textStatus ) {
-            alert( "Request failed: " + textStatus );
-        });
+          request.fail(function( jqXHR, textStatus ) {
+                alert( "Request failed: " + textStatus );
+            });
 
-    };
+        };
 
-    this.isValueChanged = function () {
-      return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
-    };
+        this.isValueChanged = function () {
+          return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+        };
 
-    this.validate = function () {
-      if (args.column.validator) {
-        var validationResults = args.column.validator($input.val());
-        if (!validationResults.valid) {
-          return validationResults;
-        }
-      }
+        this.validate = function () {
+          if (args.column.validator) {
+            var validationResults = args.column.validator($input.val());
+            if (!validationResults.valid) {
+              return validationResults;
+            }
+          }
 
-      return {
-        valid: true,
-        msg: null
-      };
-    };
+          return {
+            valid: true,
+            msg: null
+          };
+        };
 
-    this.init();
+        this.init();
+    }
+    return CommentEditor;
 }
-
 /*function CommentEditor(args) {
     var $input;
     var defaultValue;

@@ -58,7 +58,7 @@ function plot_view(dataset, editable, div, record){
             var state = {
                                 gridOptions: {
                                     editable: editable,
-                                    enableAddRow: false//editable,
+                                    enabledAddRow: false, //editable,
                                 },
                             };
 
@@ -73,22 +73,6 @@ function plot_view(dataset, editable, div, record){
                             model: dataset,
                             state: state
             });
-
-            /*grid.onAddNewRow.subscribe(function (e, args) {
-              var item = args.item;
-              grid.invalidateRow(data.length);
-              data.push(item);
-              grid.updateRowCount();
-              grid.render();
-            });*/
-
-            old_length = dataset.records.length;
-            dataset.records.on('add',function(record){
-              equal(dataset.records.length ,old_length + 1 );
-            });
-
-
-
 
             var views = [
                 {

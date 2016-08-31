@@ -46,23 +46,7 @@ function grid_formatter(value, field, row){
     return value;
 }
 
-function construct_field(el){
-    var field = new recline.Model.Field({
-        id: el.name,
-        format: grid_formatter,
-        type: el.type,
 
-      });
-      if(el.name == '_comment'){
-        field.editor = CommentEditor;
-      }
-      else
-      {
-        field.editor = Slick.Editors.Text;
-      }
-      field.renderer = grid_formatter;
-      return field;
-}
 
 var table_fields = [];
 var pk_fields = [];
@@ -77,6 +61,25 @@ var pk_fields = [];
         var request = $.when($.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
                              $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
         var dfd = new $.Deferred();
+
+        function construct_field(el){
+            var field = new recline.Model.Field({
+                id: el.name,
+                format: grid_formatter,
+                type: el.type,
+
+              });
+              if(el.name == '_comment'){
+                field.editor = buildCommentEditor(dataset.schema, dataset.table);
+              }
+              else
+              {
+                field.editor = Slick.Editors.Text;
+              }
+              field.renderer = grid_formatter;
+              return field;
+        }
+
         request.done(function(results, pks) {
             if (results.error) {
                 dfd.reject(results.error);
@@ -123,6 +126,9 @@ var pk_fields = [];
             id = pk_fields[0]
         }
         if(dataset.has_row_comments){
+            if(!unchecked){
+                table_query.only = true;
+            }
             query.from = [{
                 type: 'join',
                 left: table_query,
@@ -234,7 +240,23 @@ var pk_fields = [];
 
     my.save = function(changes, dataset){
         var dfd = new $.Deferred();
-        var request = $.when(changes.updates.map(create_query(dataset.attributes.schema, dataset.attributes.table, $("#commit-message").val())));
+        var request = $.when(
+                changes.creates.map(
+                    insert_query(
+                        dataset.attributes.schema,
+                        dataset.attributes.table,
+                        $("#commit-message").val()
+                    )
+                )
+            ).then(
+                changes.updates.map(
+                    update_query(
+                        dataset.attributes.schema,
+                        dataset.attributes.table,
+                        $("#commit-message").val()
+                    )
+                )
+            );
 
         // We do not know the number of updates. Thus we set no arguments and
         // obtain them via black magic called javascript
@@ -251,9 +273,33 @@ var pk_fields = [];
         });
     };
 
-    function create_query(schema, table, message)
+    function insert_query(schema, table, message)
     {
         return function(record){
+
+            debugger;
+            var query = {
+                schema: schema,
+                table: table,
+                values: record.additions
+            }
+
+            query['message'] = message
+
+            return $.ajax({type: 'POST',
+                url:'/api/insert', dataType:'json',
+                data: {
+                    query: JSON.stringify(query)
+                }
+            });
+        }
+    };
+
+
+    function update_query(schema, table, message)
+    {
+        return function(record){
+
             var conditions = [];
             for(var col in record._previousAttributes){
                 if ($.inArray(col, ['method', 'origin', 'assumption', '_id']) == -1)
@@ -268,17 +314,12 @@ var pk_fields = [];
 
             query['message'] = message
 
-            if('_comment' in record.changed){
-                if(record.changed._comment.create)
-                {
-                    query = {
-                        schema: '_' + schema,
-                        table: '_' + table + '_cor'
-                    }
-                    $ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}})
+            return $.ajax({type: 'POST',
+                url:'/api/update', dataType:'json',
+                data: {
+                    query: JSON.stringify(query)
                 }
-            }
-            return $.ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}});
+            });
         }
     };
 
