@@ -6,6 +6,68 @@ recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
 
+/*
+
+string (text): a string
+number (double, float, numeric): a number including floating point numbers.
+integer (int): an integer.
+date: a date. The preferred format is YYYY-MM-DD.
+time: a time without a date
+date-time (datetime, timestamp): a date-time. It is recommended this be in ISO 8601 format of YYYY-MM- DDThh:mm:ssZ in UTC time.
+boolean (bool)
+binary: base64 representation of binary data.
+geo_point: as per http://www.elasticsearch.org/guide/reference/mapping/geo-point-type.html. That is a field (in these examples named location) that has one of the following structures:
+geojson: as per http://geojson.org/
+array: an array
+object (json): an object
+any: value of field may be any type
+*/
+
+var typemap = {
+    BIGINT: 'integer',
+    BINARY: 'binary',
+    BLOB: 'binary',
+    BOOLEAN: 'boolean',
+    BigInteger: 'integer',
+    Boolean: 'boolean',
+    CHAR: 'boolean',
+    CLOB: 'binary',
+    Concatenable: 'any',
+    DATE: 'date',
+    DATETIME: 'date-time',
+    DECIMAL: 'number',
+    Date: 'date',
+    DateTime: 'date-time',
+    Enum: 'any',
+    FLOAT: 'number',
+    Float: 'number',
+    INT: 'integer',
+    INTEGER: 'integer',
+    Integer: 'integer',
+    Interval: 'any',
+    LargeBinary: 'binary',
+    MatchType: 'any',
+    NCHAR: 'string',
+    NVARCHAR: 'string',
+    Numeric: 'number',
+    PickleType: 'any',
+    REAL: 'number',
+    SMALLINT: 'integer',
+    SchemaType: 'any',
+    SmallInteger: 'integer',
+    String: 'string',
+    TEXT: 'string',
+    TIME: 'time',
+    TIMESTAMP: 'date-time',
+    Text: 'string',
+    Time: 'time',
+    TypeDecorator: 'any',
+    TypeEnginBases: 'any',
+    TypeEngine: 'any',
+    Unicode: 'string',
+    VARBINARY: 'binary',
+    VARCHAR: 'string',
+}
 
 
 function grid_formatter(value, field, row){
@@ -63,18 +125,19 @@ var pk_fields = [];
         var dfd = new $.Deferred();
 
         function construct_field(el){
+            var type;
+            if(el.type in typemap)
+                type=typemap[el.type];
+            else
+                type=el.type;
             var field = new recline.Model.Field({
                 id: el.name,
                 format: grid_formatter,
-                type: el.type,
+                type:type,
 
               });
               if(el.name == '_comment'){
                 field.editor = buildCommentEditor(dataset.schema, dataset.table);
-              }
-              else
-              {
-                field.editor = Slick.Editors.Text;
               }
               field.renderer = grid_formatter;
               return field;

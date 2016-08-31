@@ -64,7 +64,7 @@ function plot_view(dataset, editable, div, record){
 
             if(editable)
             {
-                state.columnsEditor = dataset.fields.map(function(field){
+                state.columnsEditor = dataset.fields.filter(function(field){return field.editor!=undefined;}).map(function(field){
                                     return {column: field.id, editor: field.editor};
                                 })
             }
@@ -92,7 +92,7 @@ function plot_view(dataset, editable, div, record){
                     },
             ];
 
-
+            debugger;
 
             var multiView = new recline.View.MultiView({
                 model: dataset,

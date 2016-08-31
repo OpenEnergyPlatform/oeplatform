@@ -5,7 +5,12 @@
 
 <div class="list-group">
 {% for schema, tables in schemas %}
-    <a href="view/{{schema.name}}" class="list-group-item">{% include 'dataedit/tagged_field.html' with label=schema.name tags=schema.tags.all %} <span class="badge"> {{tables}} </span></a>
+    <a href="view/{{schema.name}}" class="list-group-item">
+        {% include 'dataedit/tagged_field.html' with label=schema.name tags=schema.tags.all %}
+        <span class="badge">
+            {{tables}}
+        </span>
+    </a>
 {% endfor %}
 </div>
 {% endblock %}
