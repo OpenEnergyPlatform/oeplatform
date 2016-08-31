@@ -7,6 +7,12 @@ from django_ajax.decorators import ajax
 import json
 import time
 
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from django.http import JsonResponse
+
 def date_handler(obj):
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
@@ -18,15 +24,16 @@ def date_handler(obj):
 
 
 def create_ajax_handler(func):
-    @ajax
     @csrf_exempt
     def execute(request):
+        print(request.POST)
         content = request.POST if request.POST else request.GET
         data = func(json.loads(content['query']))
 
         # This must be done in order to clean the structure of non-serializable
         # objects (e.g. datetime)
-        return json.loads(json.dumps(data, default=date_handler))
+        response_data = json.loads(json.dumps(data, default=date_handler))
+        return JsonResponse({'content':response_data}, safe=False)
     return execute
 
 

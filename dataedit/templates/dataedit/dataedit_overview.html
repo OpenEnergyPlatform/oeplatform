@@ -4,11 +4,10 @@
 
 {% load staticfiles %}
 {% load bootstrap3 %}
-<h3>{{schema}}.{{table}}</h3>
+<h3>{{schema}}.{{table}}</h3> >> <a href="{{table}}/comments"> comments </a>
 
 {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=tags %}
 <hr>
-
 
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
@@ -51,20 +50,20 @@
 <!-- Recline JS (combined distribution, all views) -->
 <script type="text/javascript" src="{% static 'dataedit/recline/dist/recline.js' %}"></script>
 
+<script>
+    unchecked = false;
+    function swap_checked(){
+        unchecked = !unchecked;
+        build_views();
+    }
+</script>
+
+<script type="text/javascript" src="{% static 'dataedit/editors.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
 
 <script type="text/javascript">
-        var dataset = new recline.Model.Dataset({
-            table: '{{table}}',
-            schema: '{{schema}}',
-            backend: 'OEP',
-            has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
-        });
 
-        dataset.fetch().done(function(dataset) {
-            console.log('records: ' + dataset.records);
-});
 </script>
 
 <div class="container">
@@ -80,14 +79,44 @@
     }
   </style>
 
-  <div class="changelog">
-    <h3>Changes</h3>
-  </div>
+    <label class="btn btn-danger" for="unchecked_box"> <input type="checkbox" id="unchecked_box" onclick="swap_checked()"> Show unchecked rows</label>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Data
+                </h4>
+            </div>
+            <div>
+                <div class="data-explorer-here"></div>
+            </div>
+        </div>
+        <hr>
+        <div id="unchecked_data_div" class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    Data (unchecked)
+ button         </h4>
+            </div>
+            <div>
+                <div class="data-unchecked-explorer-here"></div>
+            </div>
 
-  <div class="data-explorer-here"></div>
+        </div>
+    </div>
+
+
     <div class="well">
-        <input class="form-control" type="textarea" name="comment">
-        <button class="btn btn-success" id="savebutton"> Save </button>
+        <span class="lead">Commit your changes</span><br>
+        Your changes will not be written to the actual OpenEnergyDatabase but an
+        additional schema. <br>
+        New or changed data has to pass a validation process before it
+        is publicated in the next revision. <br>
+        <div class="form-group" style="margin:10px">
+            <label for="commit-message">Commit message</label>
+            <input class="form-control" type="textarea" name="comment" id="commit-message">
+            <button class="btn btn-success" id="savebutton"> Save </button>
+        </div>
     </div>
 
   <div style="clear: both;"></div>
@@ -96,96 +125,98 @@
 
 <script type="text/javascript">
 
-    var createMultiView = function(dataset, state) {
-        // remove existing multiview if present
-        var reload = false;
-        if (window.multiView) {
-        window.multiView.remove();
-        window.multiView = null;
-        reload = true;
+var data_record = {}
+var unchecked_record = {}
+var comment_record = {}
+
+function build_views(){
+    var dataset_main = new recline.Model.Dataset({
+            table: '{{table}}',
+            schema: '{{schema}}',
+            backend: 'OEP',
+            has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
+    });
+
+
+    dataset_main.fetch().done(function(dataset) {
+
+        plot_view(dataset,
+            true,
+            $('.data-explorer-here'), data_record)
+    });
+
+    if(unchecked){
+
+        $("#unchecked_data_div").css("display", "block");
+        var dataset_unchecked = new recline.Model.Dataset({
+                table: '_{{table}}_edit',
+                schema: '_{{schema}}',
+                backend: 'OEP',
+                has_row_comments: false
+        });
+
+        dataset_unchecked.fetch().done(function(dataset) {
+            plot_view(dataset,
+                false,
+                $('.data-unchecked-explorer-here'), unchecked_record)
+        });
     }
-
-    var $el = $('<div />');
-    $el.appendTo(window.explorerDiv);
-
-    {# {% if '_comment' in header %} handle_comment_field(dataset, recline, {{ header.index('_comment') }}); {% endif %} #}
-
-    {% if 'table' in kinds %}
-
-    var grid = new recline.View.SlickGrid({
-                    model: dataset,
-                    state: {
-                        gridOptions: {
-                            editable: true,
-                            enableAddRow: true,
-                            enableReOrderRow:true
-                        },
-                        columnsEditor: dataset.fields.map(function(field){
-                            return {column: field.id, editor: field.attributes.editor};
-                        })
-                    }
-    });
-    {% endif %}
-    var views = [
-       {% if 'table' in kinds %}
-        {
-                view: grid,
-                label: 'Grid',
-                id: 'Grid',
-        },
-        {% endif %}
-        {% if 'map' in kinds %}
-            {
-                view: new recline.View.Map({model: dataset}),
-                label: 'Map',
-                id: 'map'
-            },
-        {% endif %}
-            {
-                view: new recline.View.Graph({model: dataset}),
-                label: 'Graph',
-                id: 'graph'
-            },
-    ];
+    else
+        $("#unchecked_data_div").css("display", "none");
 
 
-
-    var multiView = new recline.View.MultiView({
-        model: dataset,
-        el: $el,
-        state: state,
-        views: views
-    });
-return multiView;
-}
-
-
-
-
-jQuery(function($) {
-    window.multiView = null;
-    window.explorerDiv = $('.data-explorer-here');
-
-    // create the demo dataset
-    window.multiview = createMultiView(dataset);
-
-});
-
-$('#savebutton').bind('click',
+    $('#savebutton').bind('click',
     function() {
+        debugger;
         changes = {
-            creates: dataset._changes.creates,
-            updates:    dataset.records.filter(
+            creates: dataset_main._changes.creates,
+            updates:    dataset_main.records.filter(
                 function(el){return !(jQuery.isEmptyObject(el.changed));}),
-            deletes: dataset._changes.deletes
+            deletes: dataset_main._changes.deletes
         };
 
-        dataset.backend.save(changes, dataset);
+        dataset_main.backend.save(changes, dataset_main);
     });
+}
+
+build_views(false);
 
 
 
 </script>
+
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#csv-upload">Upload CSV</button>
+<div id="csv-upload" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Upload a csv-file</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <div class="input-group">
+                <label class="input-group-btn">
+                    <span class="btn btn-primary">
+                        Browse&hellip; <input type="file" name="csv_file" style="display: none;">
+                    </span>
+                </label>
+                <input type="text" class="form-control" readonly>
+            </div>
+            <input class="btn btn-success" type="submit" value="Upload" />
+</form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div>
     <table class="table table-hover" style="width:460px">
         <tr>
@@ -251,6 +282,8 @@ $('#savebutton').bind('click',
         </tr>
         {% endif %}
     </table>
+
+
 </div>
 <hr>
 <h3> Revisions </h3>
@@ -304,5 +337,7 @@ $('#savebutton').bind('click',
             </table>
         </div>
     </div>
+
+
 
 {% endblock %}

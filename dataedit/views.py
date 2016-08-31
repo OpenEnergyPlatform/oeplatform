@@ -26,6 +26,10 @@ from functools import reduce
 import operator
 import time
 from django_ajax.decorators import ajax
+import csv
+import codecs
+from io import TextIOWrapper
+
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -185,7 +189,7 @@ class DataView(View):
 
     def get(self, request, schema, table):
 
-        if schema in excluded_schemas:
+        if schema in excluded_schemas or schema.startswith('_'):
             raise Http404("Schema not accessible")
         db = sec.dbname
         tags = []
@@ -199,6 +203,11 @@ class DataView(View):
                 {'schema': actions.get_meta_schema_name(schema),
                  'table': actions.get_edit_table_name(table)}):
             actions.create_edit_table(schema, table)
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_insert_table_name(table)}):
+            actions.create_insert_table(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -238,6 +247,63 @@ class DataView(View):
                           'comment_columns': comment_columns,
                           'revisions': revisions,
                           'kinds': ['table', 'map', 'graph'],
+                          'table': table,
+                          'schema': schema,
+                          'tags': tags
+                      })
+
+    def post(self, request, schema, table):
+        print(request.POST, request.FILES)
+        if request.POST and request.FILES:
+            csvfile = TextIOWrapper(request.FILES['csv_file'].file,
+                                    encoding=request.encoding)
+
+            reader = csv.DictReader(csvfile, delimiter=',')
+
+            actions.data_insert({
+                'schema': schema,
+                'table': table,
+                'method': 'values',
+                'values': reader
+            })
+
+
+class CommentView(View):
+    """ This method handles the GET requests for the main page of data edit.
+        Initialises the session data (if necessary)
+    """
+
+    def get(self, request, schema, table):
+
+        if schema in excluded_schemas:
+            raise Http404("Schema not accessible")
+        db = sec.dbname
+        tags = []
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_comment_table_name(table)}):
+            actions.create_comment_table(schema, table)
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_edit_table_name(table)}):
+            actions.create_edit_table(schema, table)
+
+        if not actions.has_table(
+                {'schema': actions.get_meta_schema_name(schema),
+                 'table': actions.get_insert_table_name(table)}):
+            actions.create_insert_table(schema, table)
+
+        if models.Table.objects.filter(name=table,
+                                       schema__name=schema).exists():
+            tobj = models.Table.objects.get(name=table, schema__name=schema)
+            tags = tobj.tags.all()
+
+
+        return render(request,
+                      'dataedit/comment_table.html',
+                      {
                           'table': table,
                           'schema': schema,
                           'tags': tags

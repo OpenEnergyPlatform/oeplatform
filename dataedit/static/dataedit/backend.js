@@ -6,6 +6,68 @@ recline.Backend = recline.Backend || {};
 recline.Backend.OEP = OEP;
 
 
+/*
+
+string (text): a string
+number (double, float, numeric): a number including floating point numbers.
+integer (int): an integer.
+date: a date. The preferred format is YYYY-MM-DD.
+time: a time without a date
+date-time (datetime, timestamp): a date-time. It is recommended this be in ISO 8601 format of YYYY-MM- DDThh:mm:ssZ in UTC time.
+boolean (bool)
+binary: base64 representation of binary data.
+geo_point: as per http://www.elasticsearch.org/guide/reference/mapping/geo-point-type.html. That is a field (in these examples named location) that has one of the following structures:
+geojson: as per http://geojson.org/
+array: an array
+object (json): an object
+any: value of field may be any type
+*/
+
+var typemap = {
+    BIGINT: 'integer',
+    BINARY: 'binary',
+    BLOB: 'binary',
+    BOOLEAN: 'boolean',
+    BigInteger: 'integer',
+    Boolean: 'boolean',
+    CHAR: 'boolean',
+    CLOB: 'binary',
+    Concatenable: 'any',
+    DATE: 'date',
+    DATETIME: 'date-time',
+    DECIMAL: 'number',
+    Date: 'date',
+    DateTime: 'date-time',
+    Enum: 'any',
+    FLOAT: 'number',
+    Float: 'number',
+    INT: 'integer',
+    INTEGER: 'integer',
+    Integer: 'integer',
+    Interval: 'any',
+    LargeBinary: 'binary',
+    MatchType: 'any',
+    NCHAR: 'string',
+    NVARCHAR: 'string',
+    Numeric: 'number',
+    PickleType: 'any',
+    REAL: 'number',
+    SMALLINT: 'integer',
+    SchemaType: 'any',
+    SmallInteger: 'integer',
+    String: 'string',
+    TEXT: 'string',
+    TIME: 'time',
+    TIMESTAMP: 'date-time',
+    Text: 'string',
+    Time: 'time',
+    TypeDecorator: 'any',
+    TypeEnginBases: 'any',
+    TypeEngine: 'any',
+    Unicode: 'string',
+    VARBINARY: 'binary',
+    VARCHAR: 'string',
+}
 
 
 function grid_formatter(value, field, row){
@@ -13,8 +75,10 @@ function grid_formatter(value, field, row){
         return "";
     if(field.id=='_comment')
     {
+        if(value._id== null)
+            return '';
         var el = document.createElement('div');
-        el.innerHTML = ('<div id="modal' + row['id'] + '" class="modal fade" role="dialog">'
+        el.innerHTML = ('<div id="modal' + value._id + '" class="modal fade" role="dialog">'
               + '<div class="modal-dialog">'
                 + '<div class="modal-content">'
                   + '<div class="modal-header">'
@@ -22,9 +86,9 @@ function grid_formatter(value, field, row){
                     + '<h4 class="modal-title">Comment</h4>'
                   + '</div>'
                   + '<div class="modal-body">'
-                    + '<p> Method: '+ row.method +'</p>'
-                    + '<p> Origin: '+ row.origin +'</p>'
-                    + '<p> Assumption: '+ row.assumption +'</p>'
+                    + '<p> Method: '+ value.method +'</p>'
+                    + '<p> Origin: '+ value.origin +'</p>'
+                    + '<p> Assumption: '+ value.assumption +'</p>'
                   + '</div>'
                   + '<div class="modal-footer">'
                     + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
@@ -32,9 +96,9 @@ function grid_formatter(value, field, row){
                 + '</div>'
 
               + '</div>'
-            + '</div>)');
+            + '</div>');
         document.body.appendChild(el);
-        return '<a data-toggle="modal" data-target="#modal' + row['id'] + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+        return '<a data-toggle="modal" data-target="#modal' + value._id + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
     }
     if(field.id=='ref_id')
     {
@@ -44,36 +108,10 @@ function grid_formatter(value, field, row){
     return value;
 }
 
-function construct_field(el){
-    var field = new recline.Model.Field({
-        id: el.name,
-        format: grid_formatter,
-        type: el.type,
-        editor: Slick.Editors.Text,
-      });
-      field.renderer = grid_formatter;
-      return field;
-}
 
-function get_field_query(field){
-    column_query = {
-        type: 'column',
-        column: field.id
-    };
 
-    if(field.attributes.type.startsWith('geometry')){
-        column_query = {
-            type: 'function',
-            function: 'ST_AsGeoJSON',
-            operands: [column_query],
-            as:field.id
-        };
-    }
-    return column_query;
-}
-
-table_fields = [];
-pk_fields = [];
+var table_fields = [];
+var pk_fields = [];
 
 
 (function($, my) {
@@ -85,6 +123,26 @@ pk_fields = [];
         var request = $.when($.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
                              $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
         var dfd = new $.Deferred();
+
+        function construct_field(el){
+            var type;
+            if(el.type in typemap)
+                type=typemap[el.type];
+            else
+                type=el.type;
+            var field = new recline.Model.Field({
+                id: el.name,
+                format: grid_formatter,
+                type:type,
+
+              });
+              if(el.name == '_comment'){
+                field.editor = buildCommentEditor(dataset.schema, dataset.table);
+              }
+              field.renderer = grid_formatter;
+              return field;
+        }
+
         request.done(function(results, pks) {
             if (results.error) {
                 dfd.reject(results.error);
@@ -116,14 +174,24 @@ pk_fields = [];
                     schema: dataset.schema,
                     table: dataset.table
         };
-        var field_query = table_fields.map(get_field_query);
+        var field_query;
+        if(dataset.has_row_comments){
+        field_query = table_fields.concat([
+            {id:'method', attributes:{type:'text'}},
+            {id:'origin', attributes:{type:'text'}},
+            {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
+        }
+        else
+            field_query = table_fields.map(get_field_query)
         var id = null;
 
         if(pk_fields){
             id = pk_fields[0]
         }
-
         if(dataset.has_row_comments){
+            if(!unchecked){
+                table_query.only = true;
+            }
             query.from = [{
                 type: 'join',
                 left: table_query,
@@ -202,13 +270,21 @@ pk_fields = [];
 
             else
             {
-                response = {
+                var response = {
                     hits: results.content.data.map(function(raw_row){
                         var row = {};
                         for(i=0; i<raw_row.length; ++i)
                         {
                             var key = results.content.description[i][0];
                             row[key] = raw_row[i];
+                        }
+                        if(dataset.has_row_comments){
+                            row['_comment']={
+                                _id: row['_comment'],
+                                origin: row['origin'],
+                                method: row['method'],
+                                assumption: row['assumption']
+                            };
                         }
                         return row;
                     }),
@@ -227,7 +303,23 @@ pk_fields = [];
 
     my.save = function(changes, dataset){
         var dfd = new $.Deferred();
-        var request = $.when(changes.updates.map(create_query(dataset.attributes.schema, dataset.attributes.table)));
+        var request = $.when(
+                changes.creates.map(
+                    insert_query(
+                        dataset.attributes.schema,
+                        dataset.attributes.table,
+                        $("#commit-message").val()
+                    )
+                )
+            ).then(
+                changes.updates.map(
+                    update_query(
+                        dataset.attributes.schema,
+                        dataset.attributes.table,
+                        $("#commit-message").val()
+                    )
+                )
+            );
 
         // We do not know the number of updates. Thus we set no arguments and
         // obtain them via black magic called javascript
@@ -244,35 +336,57 @@ pk_fields = [];
         });
     };
 
-    function create_query(schema, table)
+    function insert_query(schema, table, message)
     {
         return function(record){
-            console.log(schema,table);
+
+            debugger;
             var query = {
                 schema: schema,
                 table: table,
-                where: _.map(record._previousAttributes, function(v, k) { return condition_query(k,v); }),
-                values: record.changed
+                values: record.additions
             }
-            return $.ajax({type: 'POST', url:'/api/update', dataType:'json', data: {query: JSON.stringify(query)}});
+
+            query['message'] = message
+
+            return $.ajax({type: 'POST',
+                url:'/api/insert', dataType:'json',
+                data: {
+                    query: JSON.stringify(query)
+                }
+            });
         }
     };
 
-    function condition_query(key, value)
+
+    function update_query(schema, table, message)
     {
-        return {
-            type:'operator_binary',
-            left: {
-                type: 'column',
-                column: key,
-            },
-            right: {
-                type: 'value',
-                value: value
-            },
-            operator: '='
-        };
-    }
+        return function(record){
+
+            var conditions = [];
+            for(var col in record._previousAttributes){
+                if ($.inArray(col, ['method', 'origin', 'assumption', '_id']) == -1)
+                    conditions.push(condition_query(col,record._previousAttributes[col]));
+            }
+            var query = {
+                schema: schema,
+                table: table,
+                where: conditions,
+                values: record.changed
+            }
+
+            query['message'] = message
+
+            return $.ajax({type: 'POST',
+                url:'/api/update', dataType:'json',
+                data: {
+                    query: JSON.stringify(query)
+                }
+            });
+        }
+    };
+
+
 }(jQuery, OEP));
 
 

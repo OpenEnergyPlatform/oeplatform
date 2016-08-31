@@ -83,3 +83,14 @@ input[type="checkbox"]:checked+label{
     font-weight: bold;
     border: 3px solid;
 }
+
+.editor_frame{
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 400px;
+    padding:20px;
+    border-radius: 10px;
+    background:#FCFCFD;
+    border: 2px solid #C5C5CF;
+}

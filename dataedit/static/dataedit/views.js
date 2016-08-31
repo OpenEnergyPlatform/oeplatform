@@ -37,3 +37,73 @@ function render_comment(value, field, record){
         return ""
     }
 }
+
+function plot_view(dataset, editable, div, record){
+
+
+        var createMultiView = function(dataset, state) {
+            // remove existing multiview if present
+            var reload = false;
+            if (record.multiView) {
+
+                record.multiView.remove();
+                record.multiView = null;
+                reload = true;
+                record.explorerDiv.contents().remove();
+            }
+
+            var $el = $('<div />');
+            $el.appendTo(record.explorerDiv);
+
+            var state = {
+                                gridOptions: {
+                                    editable: editable,
+                                    enabledAddRow: false, //editable,
+                                },
+                            };
+
+            if(editable)
+            {
+                state.columnsEditor = dataset.fields.filter(function(field){return field.editor!=undefined;}).map(function(field){
+                                    return {column: field.id, editor: field.editor};
+                                })
+            }
+
+            var grid = new recline.View.SlickGrid({
+                            model: dataset,
+                            state: state
+            });
+
+            var views = [
+                {
+                        view: grid,
+                        label: 'Grid',
+                        id: 'Grid',
+                },
+                    {
+                        view: new recline.View.Map({model: dataset}),
+                        label: 'Map',
+                        id: 'map'
+                    },
+                    {
+                        view: new recline.View.Graph({model: dataset}),
+                        label: 'Graph',
+                        id: 'graph'
+                    },
+            ];
+
+            var multiView = new recline.View.MultiView({
+                model: dataset,
+                el: $el,
+                state: state,
+                views: views
+            });
+            return multiView;
+        }
+
+        jQuery(function($) {
+            record.explorerDiv = div;
+            record.multiView = createMultiView(dataset);
+
+        });
+}

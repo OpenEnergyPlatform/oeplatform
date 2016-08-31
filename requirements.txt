@@ -17,3 +17,4 @@ geoalchemy2
 shapely
 djangoajax
 webcolors
+djangorestframework

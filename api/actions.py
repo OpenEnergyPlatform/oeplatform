@@ -1,26 +1,23 @@
 import re
 import sqlalchemy as sqla
 import json
-import api.references
 
-# debug
-import sys
 import traceback
 
 from api import parser
 from api.parser import is_pg_qual, read_bool, read_pgid
 
-from sqlalchemy.engine import reflection
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy
-from oeplatform.securitysettings import *
-pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
-_ENGINES = {}
 from api import references
 from sqlalchemy import func, MetaData, Table
-from sqlalchemy.sql.ddl import CreateTable
+from datetime import datetime
 import oeplatform.securitysettings as sec
+
+pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
+_ENGINES = {}
+
 
 import geoalchemy2
 
@@ -170,6 +167,8 @@ def data_update(request):
     rows = data_search(query)
     setter = request['values']
     fields = [field[0] for field in rows['description']]
+
+
     insert_strings = []
     for row in rows['data']:
         insert = []
@@ -179,6 +178,9 @@ def data_update(request):
             insert.append(process_value(value))
 
         insert_strings.append('('+(', '.join(insert))+')')
+
+    # Add metadata for insertions
+
 
 
     s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
@@ -190,6 +192,30 @@ def data_update(request):
     print(s)
     connection.execute(s)
     return {}
+
+def data_insert(request):
+    print("INSERT: ", request)
+    engine = _get_engine()
+    connection = engine.connect()
+    query = request
+    # If the insert request is not for a meta table, change the request to do so
+    if not query['table'].startswith('_') or query['table'].endswith('_insert'):
+        query['table'] = '_' + query['table'] + '_insert'
+    if not query['schema'].startswith('_'):
+        query['schema'] = '_' + query['schema']
+    query = parser.parse_insert(request, engine)
+    print(query, query.__dict__)
+    result = connection.execute(query)
+    connection.close()
+    description = result.context.cursor.description
+    if not result.returns_rows:
+        return {}
+
+    data = [list(r) for r in result]
+    return {'data': data,
+            'description': [[col.name, col.type_code, col.display_size,
+                             col.internal_size, col.precision, col.scale,
+                             col.null_ok] for col in description]}
 
 def process_value(val):
     if isinstance(val,str):
@@ -249,7 +275,6 @@ def data_search(request):
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)
-    print("SEARCH: " + query)
     result = connection.execute(query)
     description = result.context.cursor.description
     data = [list(r) for r in result]
@@ -339,7 +364,7 @@ def get_comment_table(db, schema, table):
     else:
         return {}
 
-
+"""
 def data_insert(request):
     engine = _get_engine()
     # load schema name and check for sanity    
@@ -385,7 +410,7 @@ def data_insert(request):
                                  col.null_ok] for col in description]}
     else:
         return request
-
+"""
 
 def data_info(context, request):
     return request
@@ -543,6 +568,9 @@ def get_edit_table_name(table):
     return '_' + table + '_edit'
 
 
+def get_insert_table_name(table):
+    return '_' + table + '_insert'
+
 def get_meta_schema_name(schema):
     return '_' + schema
 
@@ -557,12 +585,26 @@ def create_meta_schema(schema):
 def create_edit_table(schema, table):
     engine = _get_engine()
     query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
-            '(LIKE {schema}.{table}, PRIMARY KEY (_id)) ' \
-            'INHERITS (_edit_base); '.format(
+            '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
+            'INHERITS (_edit_base);'.format(
                 meta_schema=get_meta_schema_name(schema),
                 edit_table=get_edit_table_name(table),
                 schema=schema,
                 table=table)
+    print(query)
+    connection = engine.connect()
+    connection.execute(query)
+
+
+def create_insert_table(schema, table):
+    engine = _get_engine()
+    query = 'CREATE TABLE {meta_schema}.{edit_table} () ' \
+            'INHERITS (_insert_base, {schema}.{table});'.format(
+                meta_schema=get_meta_schema_name(schema),
+                edit_table=get_insert_table_name(table),
+                schema=schema,
+                table=table)
+    print(query)
     connection = engine.connect()
     connection.execute(query)
 
