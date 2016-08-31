@@ -182,6 +182,33 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
+def create_meta(schema, table):
+
+    if not actions.has_schema({'schema': '_'+schema}):
+        actions.create_meta_schema(schema)
+
+    if not actions.has_table(
+            {'schema': actions.get_meta_schema_name(schema),
+             'table': actions.get_comment_table_name(table)}):
+        actions.create_comment_table(schema, table)
+
+    create_edits(schema, table)
+    create_edits(schema, actions.get_comment_table_name(table))
+
+def create_edits(schema, table):
+    if not actions.has_table(
+            {'schema': actions.get_meta_schema_name(schema),
+             'table': actions.get_edit_table_name(table)}):
+        actions.create_edit_table(schema, table)
+
+    if not actions.has_table(
+            {'schema': actions.get_meta_schema_name(schema),
+             'table': actions.get_insert_table_name(table)}):
+        actions.create_insert_table(schema, table)
+
+
+
+
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -194,20 +221,7 @@ class DataView(View):
         db = sec.dbname
         tags = []
 
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_comment_table_name(table)}):
-            actions.create_comment_table(schema, table)
-
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_edit_table_name(table)}):
-            actions.create_edit_table(schema, table)
-
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_insert_table_name(table)}):
-            actions.create_insert_table(schema, table)
+        create_meta(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
