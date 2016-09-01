@@ -46,7 +46,7 @@ function buildCommentEditor(schema, table){
         };
 
         this.serializeValue = function () {
-          return $input.val();
+          return $input.val()._id;
         };
 
         this.applyValue = function (item, state) {
@@ -94,7 +94,7 @@ function buildCommentEditor(schema, table){
         };
 
         this.isValueChanged = function () {
-          return (!($input.val() == "" && defaultValue == null)) && ($input.val() != defaultValue);
+          return (!($input.val() == "" && defaultValue == null)) && ($input.val()._id != defaultValue._id);
         };
 
         this.validate = function () {

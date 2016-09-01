@@ -70,53 +70,89 @@ var typemap = {
 }
 
 
-function grid_formatter(value, field, row){
-    if(value==null)
-        return "";
-    if(field.id=='_comment')
-    {
-        if(value._id== null)
-            return '';
-        var el = document.createElement('div');
-        el.innerHTML = ('<div id="modal' + value._id + '" class="modal fade" role="dialog">'
-              + '<div class="modal-dialog">'
-                + '<div class="modal-content">'
-                  + '<div class="modal-header">'
-                    + '<button type="button" class="close" data-dismiss="modal">&times;</button>'
-                    + '<h4 class="modal-title">Comment</h4>'
-                  + '</div>'
-                  + '<div class="modal-body">'
-                    + '<p> Method: '+ value.method +'</p>'
-                    + '<p> Origin: '+ value.origin +'</p>'
-                    + '<p> Assumption: '+ value.assumption +'</p>'
-                  + '</div>'
-                  + '<div class="modal-footer">'
-                    + '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'
-                  + '</div>'
-                + '</div>'
+function show_comment(e, schema, table, id){
+        e.stopPropagation();
+        query = {
+            from:[{
+                type:'table',
+                table:'_'+table+'_cor',
+                schema:schema}],
+            where:[condition_query('_id',id)]
+        }
+        var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}});
+        var dfd = new $.Deferred();
 
-              + '</div>'
-            + '</div>');
-        document.body.appendChild(el);
-        return '<a data-toggle="modal" data-target="#modal' + value._id + '"><span class="glyphicon glyphicon-info-sign"></span></a>';
+         request.done(function(results) {
+                if (results.error) {
+                    dfd.reject(results.error);
+                }
+
+                results = results.content.data.map(function(raw_row){
+                    var row = {};
+                    for(i=0; i<raw_row.length; ++i)
+                    {
+                        var key = results.content.description[i][0];
+                        row[key] = raw_row[i];
+                    }
+                    return row;
+                });
+                if(results == undefined || results.length == 0){
+                    alert("Comment not found");
+                    dfd.reject("Comment not found");
+                }
+                else{
+                    var value = results[0];
+                    var $modal = jQuery("#comment_modal");
+                    jQuery('#modal_method').text(value.method);
+                    jQuery('#modal_origin').text(value.origin);
+                    jQuery('#modal_assumption').text(value.assumption);
+                    $modal.modal();
+
+                    dfd.resolve({});
+                }
+        });
+
+    return function(e){
+        console.log(e.target);
+
     }
-    if(field.id=='ref_id')
-    {
-        var ret = '<a href="/literature/entry/' + value + '">' + value + '</a>';
-        return ret
+}
+
+function construct_comment_handler(schema, table){
+    if(!schema.startsWith('_')){
+        schema = '_' + schema
     }
-    return value;
+
+
+    var grid_formatter = function (value, field, row){
+        if(value==null)
+            return "";
+        if(field.id=='_comment')
+        {
+            if(value == null)
+                return '';
+
+            return '<a class="glyphicon glyphicon-info-sign" onclick="show_comment(event, &quot;' + schema +'&quot;, &quot;' + table + '&quot;, '+ value + ');"></a>';
+        }
+        if(field.id=='ref_id')
+        {
+            var ret = '<a href="/literature/entry/' + value + '">' + value + '</a>';
+            return ret
+        }
+        return value;
+    }
+
+    return grid_formatter;
 }
 
 
 
-var table_fields = [];
-var pk_fields = [];
 
 
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
     my.max_rows = 1000;
+    my.table_fields = [];
     // Initial load of dataset including initial set of records
     my.fetch = function(dataset){
         var query = {table: dataset.table, schema: dataset.schema}
@@ -132,14 +168,14 @@ var pk_fields = [];
                 type=el.type;
             var field = new recline.Model.Field({
                 id: el.name,
-                format: grid_formatter,
+                format: construct_comment_handler(dataset.schema, dataset.table),
                 type:type,
 
               });
-              if(el.name == '_comment'){
+              /*if(el.name == '_comment'){
                 field.editor = buildCommentEditor(dataset.schema, dataset.table);
-              }
-              field.renderer = grid_formatter;
+              }*/
+              field.renderer = construct_comment_handler(dataset.schema, dataset.table);
               return field;
         }
 
@@ -150,7 +186,7 @@ var pk_fields = [];
             pks = pks[0];
             results = results[0];
             table_fields = results.content.map(construct_field);
-            pk_fields = pks.content.constrained_columns;
+            var pk_fields = pks.content.constrained_columns;
             dfd.resolve({
                 fields: table_fields,
                 useMemoryStore: false,
@@ -176,18 +212,14 @@ var pk_fields = [];
         };
         var field_query;
         if(dataset.has_row_comments){
-        field_query = table_fields.concat([
-            {id:'method', attributes:{type:'text'}},
-            {id:'origin', attributes:{type:'text'}},
-            {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
+            field_query = table_fields.concat([
+                {id:'method', attributes:{type:'text'}},
+                {id:'origin', attributes:{type:'text'}},
+                {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
         }
         else
             field_query = table_fields.map(get_field_query)
-        var id = null;
 
-        if(pk_fields){
-            id = pk_fields[0]
-        }
         if(dataset.has_row_comments){
             if(!unchecked){
                 table_query.only = true;
@@ -251,10 +283,10 @@ var pk_fields = [];
         query.limit = queryObj.size;
         query.offset = queryObj.from;
 
-        if (id != null)
+        /*if (id != null)
             query.order_by = [{
                 type:'column',
-                column: id}];
+                column: id}];*/
 
         var request = $.when(
             $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
@@ -278,14 +310,14 @@ var pk_fields = [];
                             var key = results.content.description[i][0];
                             row[key] = raw_row[i];
                         }
-                        if(dataset.has_row_comments){
+                        /*if(dataset.has_row_comments){
                             row['_comment']={
                                 _id: row['_comment'],
                                 origin: row['origin'],
                                 method: row['method'],
                                 assumption: row['assumption']
                             };
-                        }
+                        }*/
                         return row;
                     }),
                     total: counts.content.data[0][0],
@@ -365,8 +397,7 @@ var pk_fields = [];
 
             var conditions = [];
             for(var col in record._previousAttributes){
-                if ($.inArray(col, ['method', 'origin', 'assumption', '_id']) == -1)
-                    conditions.push(condition_query(col,record._previousAttributes[col]));
+                conditions.push(condition_query(col,record._previousAttributes[col]));
             }
             var query = {
                 schema: schema,

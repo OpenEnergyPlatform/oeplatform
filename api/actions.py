@@ -23,6 +23,8 @@ import geoalchemy2
 
 Base = declarative_base()
 
+class InvalidRequest(Exception):
+    pass
 
 
 def _get_table(schema, table):
@@ -49,16 +51,6 @@ def get_table_resource(schema, table):
         return None
     else:
         return result.first()
-
-
-def comment_table_create(session, schema, table):
-    session.execute("create table {schema}{table}_cor (like _comment_base including all) inherits (_comment_base)".format(schema=schema + "." if schema else "", table="_"+table))
-    #session.execute("alter table {schema}{table}_cor add primary key using index")
-
-
-def comment_table_drop(session, schema, table):
-    session.execute("drop table {schema}{table}_cor".format(schema=schema + "." if schema else "", table="_"+table))
-
 
 def table_create(request):
     # TODO: Authentication
@@ -138,7 +130,7 @@ def table_create(request):
     try:
         if create_schema:
             session.execute("create schema %s" % schema)
-        comment_table_create(session, schema, table)
+        create_meta(schema, table)
         session.execute(sql_string.replace('%', '%%'))
 
     except Exception as e:
@@ -168,24 +160,33 @@ def data_update(request):
     setter = request['values']
     fields = [field[0] for field in rows['description']]
 
+    table_name = request['table']
+    meta = MetaData(bind=engine)
+    table = Table(table_name, meta, autoload=True, schema=schema)
+    pks = [c for c in table.columns if c.primary_key]
 
     insert_strings = []
     for row in rows['data']:
         insert = []
         for (key,value) in zip(fields, row):
             if key in setter:
-                value = setter[key]
+                if not (key in pks and value != setter[key]):
+                    value = setter[key]
+                else:
+                    raise InvalidRequest(
+                        "Primary keys must remain unchanged.")
             insert.append(process_value(value))
+
 
         insert_strings.append('('+(', '.join(insert))+')')
 
     # Add metadata for insertions
-
-
+    schema = request['schema']
+    schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
 
     s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
-        schema=read_pgid(get_meta_schema_name(request['schema'])),
-        table=read_pgid(get_edit_table_name(request['table'])),
+        schema=read_pgid(schema),
+        table=read_pgid(get_edit_table_name(table_name)),
         fields=', '.join(fields),
         values=', '.join(insert_strings)
     )
@@ -198,11 +199,13 @@ def data_insert(request):
     engine = _get_engine()
     connection = engine.connect()
     query = request
+
     # If the insert request is not for a meta table, change the request to do so
     if not query['table'].startswith('_') or query['table'].endswith('_insert'):
         query['table'] = '_' + query['table'] + '_insert'
     if not query['schema'].startswith('_'):
         query['schema'] = '_' + query['schema']
+
     query = parser.parse_insert(request, engine)
     print(query, query.__dict__)
     result = connection.execute(query)
@@ -261,7 +264,6 @@ def table_drop(request):
     session = sessionmaker(bind=engine)()
     try:
         session.execute(sql_string.replace('%', '%%'))
-        comment_table_drop(session, schema, table)
     except Exception as e:
         traceback.print_exc()
         session.rollback()
@@ -275,6 +277,7 @@ def data_search(request):
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)
+    print(query)
     result = connection.execute(query)
     description = result.context.cursor.description
     data = [list(r) for r in result]
@@ -341,6 +344,45 @@ def clear_dict(d):
     return {
     k.replace(" ", "_"): d[k] if not isinstance(d[k], dict) else clear_dict(
         d[k]) for k in d}
+
+def create_meta(schema, table):
+
+    meta_schema = get_meta_schema_name(schema)
+
+    if not has_schema({'schema': '_'+schema}):
+        create_meta_schema(schema)
+
+    # Comment table
+    if not has_table(
+            {'schema': meta_schema,
+             'table': get_comment_table_name(table)}):
+        create_comment_table(schema, table)
+
+    # Table for updates
+    if not has_table(
+            {'schema': meta_schema,
+             'table': get_edit_table_name(table)}):
+        create_edit_table(schema, table)
+
+    # Table for inserts
+    if not has_table(
+            {'schema': meta_schema,
+             'table': get_insert_table_name(table)}):
+        create_insert_table(schema, table)
+
+    table = get_comment_table_name(table)
+    # Table for updates on comments
+    if not has_table(
+            {'schema': meta_schema,
+             'table': get_edit_table_name(table)}):
+        create_edit_table(meta_schema, table, meta_schema=meta_schema)
+
+    # Table for inserts on comments
+    if not has_table(
+            {'schema': meta_schema,
+             'table': get_insert_table_name(table)}):
+        create_insert_table(meta_schema, table, meta_schema=meta_schema)
+
 
 
 def get_comment_table(db, schema, table):
@@ -582,12 +624,14 @@ def create_meta_schema(schema):
     connection.execute(query)
 
 
-def create_edit_table(schema, table):
+def create_edit_table(schema, table, meta_schema=None):
+    if not meta_schema:
+        meta_schema = get_meta_schema_name(schema)
     engine = _get_engine()
     query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
             '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
             'INHERITS (_edit_base);'.format(
-                meta_schema=get_meta_schema_name(schema),
+                meta_schema=meta_schema,
                 edit_table=get_edit_table_name(table),
                 schema=schema,
                 table=table)
@@ -596,11 +640,13 @@ def create_edit_table(schema, table):
     connection.execute(query)
 
 
-def create_insert_table(schema, table):
+def create_insert_table(schema, table, meta_schema=None):
+    if not meta_schema:
+        meta_schema = get_meta_schema_name(schema)
     engine = _get_engine()
     query = 'CREATE TABLE {meta_schema}.{edit_table} () ' \
             'INHERITS (_insert_base, {schema}.{table});'.format(
-                meta_schema=get_meta_schema_name(schema),
+                meta_schema=meta_schema,
                 edit_table=get_insert_table_name(table),
                 schema=schema,
                 table=table)
@@ -609,11 +655,13 @@ def create_insert_table(schema, table):
     connection.execute(query)
 
 
-def create_comment_table(schema, table):
+def create_comment_table(schema, table, meta_schema=None):
+    if not meta_schema:
+        meta_schema = get_meta_schema_name(schema)
     engine = _get_engine()
     query = 'CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) ' \
             'INHERITS (_comment_base); '.format(
-                schema=get_meta_schema_name(schema),
+                schema=meta_schema,
                 table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)

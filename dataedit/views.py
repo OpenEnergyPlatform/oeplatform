@@ -182,33 +182,6 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
-def create_meta(schema, table):
-
-    if not actions.has_schema({'schema': '_'+schema}):
-        actions.create_meta_schema(schema)
-
-    if not actions.has_table(
-            {'schema': actions.get_meta_schema_name(schema),
-             'table': actions.get_comment_table_name(table)}):
-        actions.create_comment_table(schema, table)
-
-    create_edits(schema, table)
-    create_edits(schema, actions.get_comment_table_name(table))
-
-def create_edits(schema, table):
-    if not actions.has_table(
-            {'schema': actions.get_meta_schema_name(schema),
-             'table': actions.get_edit_table_name(table)}):
-        actions.create_edit_table(schema, table)
-
-    if not actions.has_table(
-            {'schema': actions.get_meta_schema_name(schema),
-             'table': actions.get_insert_table_name(table)}):
-        actions.create_insert_table(schema, table)
-
-
-
-
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -221,7 +194,7 @@ class DataView(View):
         db = sec.dbname
         tags = []
 
-        create_meta(schema, table)
+        actions.create_meta(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -280,7 +253,8 @@ class DataView(View):
                 'method': 'values',
                 'values': reader
             })
-
+        return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
+                                                                table=table))
 
 class CommentView(View):
     """ This method handles the GET requests for the main page of data edit.
@@ -291,23 +265,9 @@ class CommentView(View):
 
         if schema in excluded_schemas:
             raise Http404("Schema not accessible")
-        db = sec.dbname
         tags = []
 
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_comment_table_name(table)}):
-            actions.create_comment_table(schema, table)
-
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_edit_table_name(table)}):
-            actions.create_edit_table(schema, table)
-
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_insert_table_name(table)}):
-            actions.create_insert_table(schema, table)
+        actions.create_meta(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -323,6 +283,22 @@ class CommentView(View):
                           'tags': tags
                       })
 
+    def post(self, request, schema, table):
+        print(request.POST, request.FILES)
+        if request.POST and request.FILES:
+            csvfile = TextIOWrapper(request.FILES['csv_file'].file,
+                                    encoding=request.encoding)
+
+            reader = csv.DictReader(csvfile, delimiter=',')
+
+            actions.data_insert({
+                'schema': actions.get_meta_schema_name(schema),
+                'table': actions.get_comment_table_name(table),
+                'method': 'values',
+                'values': reader
+            })
+        return redirect('/dataedit/view/{schema}/{table}/comment'.format(schema=schema,
+                                                                table=table))
 
 class TagUpdate(UpdateView):
     model = models.Tag

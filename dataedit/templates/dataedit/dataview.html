@@ -1,7 +1,24 @@
 {% extends "dataedit/base.html" %}
 
 {% block data_content %}
-
+<div id="comment_modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Comment</h4>
+          </div>
+          <div class="modal-body">
+            <p> Method: <span id="modal_method"></span></p>
+            <p> Origin: <span id="modal_origin"></span> </p>
+            <p> Assumption: <span id="modal_assumption"></span></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+    </div>
+</div>
 {% load staticfiles %}
 {% load bootstrap3 %}
 {% block heading %}{% endblock %}
@@ -27,11 +44,11 @@
 <link href="{% static 'dataedit/recline/css/flot.css' %}" rel="stylesheet">
 <link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
 <!-- Vendor JS - general dependencies -->
-<script src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js' %}" type="text/javascript"></script>
+{#<script src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js' %}" type="text/javascript"></script>#}
 <script src="{% static 'dataedit/recline/vendor/underscore/1.4.4/underscore.js' %}" type="text/javascript"></script>
 <script src="{% static 'dataedit/recline/vendor/backbone/1.0.0/backbone.js' %}" type="text/javascript"></script>
 <script src="{% static 'dataedit/recline/vendor/mustache/0.5.0-dev/mustache.js' %}" type="text/javascript"></script>
-<script src="{% static 'dataedit/recline/vendor/bootstrap/3.2.0/js/bootstrap.js' %}" type="text/javascript"></script>
+{#<script src="{% static 'dataedit/recline/vendor/bootstrap/3.2.0/js/bootstrap.js' %}" type="text/javascript"></script>#}
 
 <!-- Vendor JS - view dependencies -->
 <script src="{% static 'dataedit/recline/vendor/leaflet/0.7.3/leaflet.js' %}" type="text/javascript"></script>
@@ -96,7 +113,7 @@
         <div id="unchecked_data_div" class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    Data (unchecked) button
+                    Data (unchecked)
                 </h4>
             </div>
             <div>

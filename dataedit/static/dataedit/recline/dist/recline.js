@@ -4010,7 +4010,7 @@ my.Fields = Backbone.View.extend({
       self.model.getFieldsSummary();
       self.render();
     });
-    this.$el.find('.collapse').collapse();
+    //this.$el.find('.collapse').collapse();
     this.render();
   },
   render: function() {
