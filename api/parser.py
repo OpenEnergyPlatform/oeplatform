@@ -119,7 +119,7 @@ def parse_select(d):
 
     L = []
 
-    if 'fields' in d:
+    if 'fields' in d and d['fields']:
         for field in d['fields']:
             ss = parse_expression(field)
             if 'as' in field and '_count' not in d:

@@ -44,7 +44,12 @@
 <link href="{% static 'dataedit/recline/css/flot.css' %}" rel="stylesheet">
 <link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
 <!-- Vendor JS - general dependencies -->
-{#<script src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js' %}" type="text/javascript"></script>#}
+
+<script type="text/javascript">
+    var bs_jQuery = $.noConflict(true);
+</script>
+
+<script src="{% static 'dataedit/recline/vendor/jquery/1.7.1/jquery.js' %}" type="text/javascript"></script>
 <script src="{% static 'dataedit/recline/vendor/underscore/1.4.4/underscore.js' %}" type="text/javascript"></script>
 <script src="{% static 'dataedit/recline/vendor/backbone/1.0.0/backbone.js' %}" type="text/javascript"></script>
 <script src="{% static 'dataedit/recline/vendor/mustache/0.5.0-dev/mustache.js' %}" type="text/javascript"></script>

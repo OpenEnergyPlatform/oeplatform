@@ -102,10 +102,10 @@ function show_comment(e, schema, table, id){
                 }
                 else{
                     var value = results[0];
-                    var $modal = jQuery("#comment_modal");
-                    jQuery('#modal_method').text(value.method);
-                    jQuery('#modal_origin').text(value.origin);
-                    jQuery('#modal_assumption').text(value.assumption);
+                    var $modal = bs_jQuery("#comment_modal");
+                    bs_jQuery('#modal_method').text(value.method);
+                    bs_jQuery('#modal_origin').text(value.origin);
+                    bs_jQuery('#modal_assumption').text(value.assumption);
                     $modal.modal();
 
                     dfd.resolve({});
@@ -152,7 +152,6 @@ function construct_comment_handler(schema, table){
 (function($, my) {
     my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
     my.max_rows = 1000;
-    my.table_fields = [];
     // Initial load of dataset including initial set of records
     my.fetch = function(dataset){
         var query = {table: dataset.table, schema: dataset.schema}
@@ -185,7 +184,7 @@ function construct_comment_handler(schema, table){
             }
             pks = pks[0];
             results = results[0];
-            table_fields = results.content.map(construct_field);
+            var table_fields = results.content.map(construct_field);
             var pk_fields = pks.content.constrained_columns;
             dfd.resolve({
                 fields: table_fields,
@@ -204,53 +203,35 @@ function construct_comment_handler(schema, table){
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
         console.log(queryObj.from + " - " + queryObj.size)
-        var query = {};
+
         var table_query = {
                     type:'table',
                     schema: dataset.schema,
                     table: dataset.table
         };
-        var field_query;
-        if(dataset.has_row_comments){
-            field_query = table_fields.concat([
-                {id:'method', attributes:{type:'text'}},
-                {id:'origin', attributes:{type:'text'}},
-                {id:'assumption', attributes:{type:'text'}}]).map(get_field_query);
-        }
-        else
-            field_query = table_fields.map(get_field_query)
 
-        if(dataset.has_row_comments){
-            if(!unchecked){
-                table_query.only = true;
-            }
-            query.from = [{
-                type: 'join',
-                left: table_query,
-                right:{
-                    type:'table',
-                    schema: '_' + dataset.schema,
-                    table: '_' + dataset.table +'_cor'
-                },
-                join_type: 'left join',
-                on: {
-                    type: 'operator_binary',
-                    left: {
-                        type: 'column',
-                        column: '_comment'
-                    },
-                    operator: '=',
-                    right: {
-                        type: 'column',
-                        column: '_id'
-                    }
-                }
-            }];
+        if(!unchecked){
+            table_query.only = true;
         }
-        else
-        {
-            query.from = [table_query];
+
+        var field_query = [];
+
+        if(queryObj.fields){
+            field_query = queryObj.fields.map(function (el){
+                        return {
+                                type: 'column',
+                                column: el
+                        };
+                });
         }
+
+
+
+
+
+
+        var query = {from : [table_query]};
+
 
 
         if(query.limit > my.max_rows){
