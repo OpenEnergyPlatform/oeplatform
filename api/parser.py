@@ -46,8 +46,18 @@ def read_pgid(s):
     raise ValidationError("Invalid identifier", s)
 
 
+def set_meta_info(method, user, message=None):
+    val_dict = {}
+    val_dict['_user'] = user  # TODO: Add user handling
+    val_dict['_submitted'] = datetime.now()
+    val_dict['_autocheck'] = False
+    val_dict['_humancheck'] = False
+    val_dict['_type'] = method
+    val_dict['_message'] = message
+    return val_dict
 
-def parse_insert(d, engine, method='insert'):
+
+def parse_insert(d, engine, context, message=None):
     table = Table(read_pgid(d['table']), MetaData(bind=engine), autoload=True,
                   schema=read_pgid(d['schema']))
 
@@ -77,14 +87,7 @@ def parse_insert(d, engine, method='insert'):
         def clear_meta(vals):
             val_dict = vals
             # make sure meta fields are not compromised
-            val_dict['_user'] = ''  # TODO: Add user handling
-            val_dict['_submitted'] = datetime.now()
-            val_dict['_autocheck'] = False
-            val_dict['_humancheck'] = False
-            val_dict['_type'] = method
-            if not '_message' in field_strings:
-                val_dict['_message'] = d['_message'] if '_message' in d \
-                                                    else None
+            val_dict = set_meta_info('insert', context['user'].name, message)
             return val_dict
 
         values = list(map(clear_meta, values))

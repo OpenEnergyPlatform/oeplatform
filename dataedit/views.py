@@ -252,7 +252,7 @@ class DataView(View):
                 'table': table,
                 'method': 'values',
                 'values': reader
-            })
+            }, {'user': request.user})
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
 
@@ -296,8 +296,8 @@ class CommentView(View):
                 'table': actions.get_comment_table_name(table),
                 'method': 'values',
                 'values': reader
-            })
-        return redirect('/dataedit/view/{schema}/{table}/comment'.format(schema=schema,
+            }, {'user': request.user})
+        return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
                                                                 table=table))
 
 class TagUpdate(UpdateView):

@@ -352,8 +352,6 @@ function construct_comment_handler(schema, table){
     function insert_query(schema, table, message)
     {
         return function(record){
-
-            debugger;
             var query = {
                 schema: schema,
                 table: table,

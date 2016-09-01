@@ -331,9 +331,6 @@ function get_field_query(field){
 
 function condition_query(key, value)
 {
-    if(key=='_comment'){
-        value = value.id
-    }
     return {
         type:'operator_binary',
         left: {

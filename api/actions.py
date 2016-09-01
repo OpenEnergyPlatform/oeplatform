@@ -52,7 +52,7 @@ def get_table_resource(schema, table):
     else:
         return result.first()
 
-def table_create(request):
+def table_create(request, context=None):
     # TODO: Authentication
     # TODO: column constrains: Unique,
     # load schema name and check for sanity
@@ -141,11 +141,11 @@ def table_create(request):
         session.commit()
     return {'success': True}
 
-def data_delete(request):
+def data_delete(request, context=None):
     raise NotImplementedError()
 
 
-def data_update(request):
+def data_update(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
     query = {
@@ -156,57 +156,61 @@ def data_update(request):
         }],
         'where': request['where']
     }
-    rows = data_search(query)
+    user = context['user'].name
+    rows = data_search(query, context)
     setter = request['values']
-    fields = [field[0] for field in rows['description']]
+    message = request.get('message', None)
+    meta_fields = list(parser.set_meta_info('update', user, message).items())
+    fields = [field[0] for field in rows['description']] + [f[0] for f in meta_fields]
 
     table_name = request['table']
     meta = MetaData(bind=engine)
-    table = Table(table_name, meta, autoload=True, schema=schema)
+    table = Table(table_name, meta, autoload=True, schema=request['schema'])
     pks = [c for c in table.columns if c.primary_key]
 
     insert_strings = []
-    for row in rows['data']:
-        insert = []
-        for (key,value) in zip(fields, row):
-            if key in setter:
-                if not (key in pks and value != setter[key]):
-                    value = setter[key]
-                else:
-                    raise InvalidRequest(
-                        "Primary keys must remain unchanged.")
-            insert.append(process_value(value))
+    if rows['data']:
+        for row in rows['data']:
+            insert = []
+            for (key,value) in list(zip(fields, row)) + meta_fields:
+                if key in setter:
+                    if not (key in pks and value != setter[key]):
+                        value = setter[key]
+                    else:
+                        raise InvalidRequest(
+                            "Primary keys must remain unchanged.")
+                insert.append(process_value(value))
 
 
-        insert_strings.append('('+(', '.join(insert))+')')
+            insert_strings.append('('+(', '.join(insert))+')')
 
-    # Add metadata for insertions
-    schema = request['schema']
-    schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
+        # Add metadata for insertions
+        schema = request['schema']
+        schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
 
-    s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
-        schema=read_pgid(schema),
-        table=read_pgid(get_edit_table_name(table_name)),
-        fields=', '.join(fields),
-        values=', '.join(insert_strings)
-    )
-    print(s)
-    connection.execute(s)
-    return {}
+        s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
+            schema=read_pgid(schema),
+            table=read_pgid(get_edit_table_name(table_name)),
+            fields=', '.join(fields),
+            values=', '.join(insert_strings)
+        )
+        print(s)
+        connection.execute(s)
+    return {'affected':len(rows['data'])}
 
-def data_insert(request):
+def data_insert(request, context=None):
     print("INSERT: ", request)
     engine = _get_engine()
     connection = engine.connect()
     query = request
 
     # If the insert request is not for a meta table, change the request to do so
-    if not query['table'].startswith('_') or query['table'].endswith('_insert'):
-        query['table'] = '_' + query['table'] + '_insert'
+    assert not query['table'].startswith('_') or query['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
+    query['table'] = '_' + query['table'] + '_insert'
     if not query['schema'].startswith('_'):
         query['schema'] = '_' + query['schema']
 
-    query = parser.parse_insert(request, engine)
+    query = parser.parse_insert(request, engine, context)
     print(query, query.__dict__)
     result = connection.execute(query)
     connection.close()
@@ -223,12 +227,14 @@ def data_insert(request):
 def process_value(val):
     if isinstance(val,str):
         return "'" + val + "'"
+    if isinstance(val, datetime):
+        return "'" + str(val) + "'"
     if val is None:
         return 'null'
     else:
         return str(val)
 
-def table_drop(request):
+def table_drop(request, context=None):
     db = request["db"]
     engine = _get_engine()
     connection = engine.connect()
@@ -273,7 +279,7 @@ def table_drop(request):
 
     return {}
 
-def data_search(request):
+def data_search(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)
@@ -293,7 +299,7 @@ def _get_count(q):
     return count
 
 
-def count_all(request):
+def count_all(request, context=None):
     table = request['table']
     schema = request['schema']
     engine = _get_engine()
@@ -454,7 +460,7 @@ def data_insert(request):
         return request
 """
 
-def data_info(context, request):
+def data_info(request, context=None):
     return request
 
 
@@ -474,13 +480,13 @@ def _get_engine():
     return engine
 
 
-def has_schema(request):
+def has_schema(request, context=None):
     engine = _get_engine()
     result = engine.dialect.has_schema(engine.connect(), request['schema'])
     return result
 
 
-def has_table(request):
+def has_table(request, context=None):
     engine = _get_engine()
     schema= request.pop('schema', None)
     table = request['table']
@@ -489,7 +495,7 @@ def has_table(request):
     return result
 
 
-def has_sequence(request):
+def has_sequence(request, context=None):
     engine = _get_engine()
     result = engine.dialect.has_sequence(engine.connect(),
                                          request['sequence_name'],
@@ -497,7 +503,7 @@ def has_sequence(request):
     return result
 
 
-def has_type(request):
+def has_type(request, context=None):
     engine = _get_engine()
     result = engine.dialect.has_schema(engine.connect(),
                                        request['sequence_name'],
@@ -506,7 +512,7 @@ def has_type(request):
 
 
 
-def get_table_oid(request):
+def get_table_oid(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_table_oid(engine.connect(),
                                           request['table'],
@@ -516,14 +522,14 @@ def get_table_oid(request):
 
 
 
-def get_schema_names(request):
+def get_schema_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_schema_names(engine.connect(), **request)
     return result
 
 
 
-def get_table_names(request):
+def get_table_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_table_names(engine.connect(),
                                             schema=request.pop('schema',
@@ -532,7 +538,7 @@ def get_table_names(request):
     return result
 
 
-def get_view_names(request):
+def get_view_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_view_names(engine.connect(),
                                            schema=request.pop('schema', None),
@@ -540,7 +546,7 @@ def get_view_names(request):
     return result
 
 
-def get_view_definition(request):
+def get_view_definition(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_schema_names(engine.connect(),
                                              request['view_name'],
@@ -550,7 +556,7 @@ def get_view_definition(request):
     return result
 
 
-def get_columns(request):
+def get_columns(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_columns(engine.connect(),
                                         request['table'],
@@ -559,7 +565,7 @@ def get_columns(request):
     return result
 
 
-def get_pk_constraint(request):
+def get_pk_constraint(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_pk_constraint(engine.connect(),
                                               request['table'],
@@ -569,7 +575,7 @@ def get_pk_constraint(request):
     return result
 
 
-def get_foreign_keys(request):
+def get_foreign_keys(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_foreign_keys(engine.connect(),
                                              request['table'],
@@ -582,7 +588,7 @@ def get_foreign_keys(request):
     return result
 
 
-def get_indexes(request):
+def get_indexes(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_indexes(engine.connect(),
                                         request['table'],
@@ -592,7 +598,7 @@ def get_indexes(request):
 
 
 
-def get_unique_constraints(request):
+def get_unique_constraints(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_foreign_keys(engine.connect(),
                                              request['table'],
