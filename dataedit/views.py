@@ -61,7 +61,7 @@ def get_readable_table_name(schema, table):
             return None
         return json.loads(comment)['Name'].strip() + " (" + table + ")"
     except Exception as e:
-        raise e
+        return None
     finally:
         conn.close()
 
