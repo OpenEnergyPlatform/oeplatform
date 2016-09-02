@@ -51,19 +51,27 @@ def listschemas(request):
                   {'schemas': schemas})
 
 
-def get_readable_table_name(schema, table):
+def read_label(table, comment):
+    try:
+        return json.loads(comment.replace('\n', ''))['Name'].strip() \
+               + " (" + table + ")"
+    except Exception as e:
+        print(e, comment)
+        return None
+
+def get_readable_table_names(schema):
     engine = actions._get_engine()
     conn = engine.connect()
     try:
-        res = conn.execute('SELECT obj_description((\'{table_schema}.{table_name}\')::regclass) FROM pg_class WHERE relkind = \'r\''.format(table_schema=schema, table_name=table))
-        comment = str(res.first()[0]).replace('\n','')
-        if not comment:
-            return None
-        return json.loads(comment)['Name'].strip() + " (" + table + ")"
+        res = conn.execute('SELECT table_name as TABLE, obj_description(((\'{table_schema}.\' || table_name ))::regclass) as COMMENT ' \
+                            'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(table_schema=schema))
     except Exception as e:
-        return None
+        raise e
+        return {}
     finally:
         conn.close()
+    return {table: read_label(table, comment) for (table,comment) in res}
+
 
 def listtables(request, schema_name):
 
@@ -75,10 +83,11 @@ def listtables(request, schema_name):
         raise Http404("Schema not accessible")
     schema,_ = models.Schema.objects.get_or_create(name=schema_name)
     tables = []
+    labels = get_readable_table_names(schema.name)
     for table in insp.get_table_names(schema=schema_name):
         if not table.startswith('_'):
-            t,_ = models.Table.objects.get_or_create(name=table, schema=schema)
-            tables.append((t,get_readable_table_name(schema.name,table)))
+            t, _ = models.Table.objects.get_or_create(name=table, schema=schema)
+            tables.append((t, labels[t.name] if t.name in labels else None))
     tables = sorted(tables, key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema, 'tables': tables})
