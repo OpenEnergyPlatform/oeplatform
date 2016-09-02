@@ -4,9 +4,13 @@
 <h3>Schema: {{schema.name}}</h3>
 {% include 'dataedit/taggable_setting.html' with schema=schema.name selected=schema.tags.all %}
 <div class="list-group">
-{% for table in tables %}
+{% for table, label in tables %}
     <a class="list-group-item" href="{{schema.name}}/{{table.name}}" >
-        {% include 'dataedit/tagged_field.html' with label=table.name tags=table.tags.all %}
+        {% if label %}
+            {% include 'dataedit/tagged_field.html' with label=label tags=table.tags.all %}
+        {% else %}
+            {% include 'dataedit/tagged_field.html' with label=table.name tags=table.tags.all %}
+        {% endif %}
     </a>
 {% endfor %}
 </div>

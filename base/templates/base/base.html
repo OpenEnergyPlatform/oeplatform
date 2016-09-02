@@ -14,10 +14,10 @@
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
-              <a class="navbar-brand" href="/">OEP</a>
+              <a class="navbar-brand" href="/">OpenEnergy Platform</a>
             </div>
             <ul class="nav navbar-nav">
-                <li class="inactive"><a href="/dataedit/">Data</a></li>
+                <li class="inactive"><a href="/dataedit/">Database</a></li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
                     <span class="caret"></span></a>
@@ -33,6 +33,7 @@
                         Discussion {% bootstrap_icon "new-window" %}
                     </a>
                 </li>
+                <li class="inactive"><a href="http://wiki.openmod-initiative.org/wiki/Main_Page">Wiki</a></li>
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
@@ -49,6 +50,8 @@
         </nav>
         
     {% endblock %}
+
+
 
         <div class="column-container" style="margin-top:70px">
             {# <div class="column-left">left</div> #}

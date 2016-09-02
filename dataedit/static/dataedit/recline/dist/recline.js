@@ -3257,13 +3257,13 @@ my.SlickGrid = Backbone.View.extend({
         // guess editor type
         var typeToEditorMap = {
           'string': Slick.Editors.LongText,
-          'integer': Slick.Editors.IntegerEditor,
+          'integer': Slick.Editors.Integer,
           'number': Slick.Editors.Text,
           // TODO: need a way to ensure we format date in the right way
           // Plus what if dates are in distant past or future ... (?)
           // 'date': Slick.Editors.DateEditor,
-          'date': Slick.Editors.Text,
-          'boolean': Slick.Editors.YesNoSelectEditor
+          'date': Slick.Editors.Date,
+          'boolean': Slick.Editors.YesNoSelect
           // TODO: (?) percent ...
         };
         if (field.type in typeToEditorMap) {
@@ -4010,7 +4010,7 @@ my.Fields = Backbone.View.extend({
       self.model.getFieldsSummary();
       self.render();
     });
-    this.$el.find('.collapse').collapse();
+    //this.$el.find('.collapse').collapse();
     this.render();
   },
   render: function() {

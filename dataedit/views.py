@@ -24,6 +24,11 @@ from .models import TableRevision
 from django.db.models import Q
 from functools import reduce
 import operator
+import time
+from django_ajax.decorators import ajax
+import csv
+import codecs
+from io import TextIOWrapper
 
 session = None
 
@@ -46,6 +51,20 @@ def listschemas(request):
                   {'schemas': schemas})
 
 
+def get_readable_table_name(schema, table):
+    engine = actions._get_engine()
+    conn = engine.connect()
+    try:
+        res = conn.execute('SELECT obj_description((\'{table_schema}.{table_name}\')::regclass) FROM pg_class WHERE relkind = \'r\''.format(table_schema=schema, table_name=table))
+        comment = str(res.first()[0]).replace('\n','')
+        if not comment:
+            return None
+        return json.loads(comment)['Name'].strip() + " (" + table + ")"
+    except Exception as e:
+        return None
+    finally:
+        conn.close()
+
 def listtables(request, schema_name):
 
     if not actions.has_schema({'schema': '_'+schema_name}):
@@ -59,9 +78,8 @@ def listtables(request, schema_name):
     for table in insp.get_table_names(schema=schema_name):
         if not table.startswith('_'):
             t,_ = models.Table.objects.get_or_create(name=table, schema=schema)
-            tables.append(t)
-    tables = sorted(tables, key=lambda x: x.name)
-    print([t.name for t in tables])
+            tables.append((t,get_readable_table_name(schema.name,table)))
+    tables = sorted(tables, key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema, 'tables': tables})
 
@@ -131,28 +149,50 @@ def send_dump(rev_id, schema, table):
 
 def show_revision(request, schema, table, rev_id):
     global pending_dumps
+
+    rev = TableRevision.objects.get(schema=schema, table=table,
+                                    revision=rev_id)
+    rev.last_accessed = timezone.now()
+    rev.save()
+    return send_dump(rev_id, schema, table)
+
+@ajax
+def request_revision(request, schema, table, rev_id):
+    """
+    This method handles an ajax request for a data revision of a specific table.
+    On success ta TableRevision will be stored to mark that the corresponding
+    revision is available.
+
+    :param request:
+    :param schema:
+    :param table:
+    :param rev_id:
+    :return:
+    """
+
     fname = "{schema}/{table}.tar.gz".format(schema=schema,
                                              table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
-    try:
-        rev = TableRevision.objects.get(schema=schema, table=table,
-                                        revision=rev_id)
-        rev.last_accessed = timezone.now()
-        rev.save()
-        return send_dump(rev_id, schema, table)
-    except TableRevision.DoesNotExist:
 
-        if (schema, table, rev_id) in pending_dumps:
-            if not pending_dumps[(schema, table, rev_id)].is_alive():
-                pending_dumps.pop((schema, table, rev_id))
-                rev = TableRevision(revision=rev_id, schema=schema, table=table)
-                rev.save()
-                return send_dump(rev_id, schema, table)
-        else:
-            t = threading.Thread(target=create_dump,
-                                 args=(schema, table, rev_id, fname))
-            t.start()
-            pending_dumps[(schema, table, rev_id)] = t
-        return render(request, 'dataedit/dataedit_revision_pending.html', {})
+    original = True # marks whether this method initialised the revision creation
+
+    # If some user already requested this dataset wait for this thread to finish
+    if (schema, table, rev_id) in pending_dumps:
+        t = pending_dumps[(schema, table, rev_id)]
+        original = False
+    else:
+        t = threading.Thread(target=create_dump,
+                             args=(schema, table, rev_id, fname))
+        t.start()
+        pending_dumps[(schema, table, rev_id)] = t
+
+    while t.is_alive():
+        time.sleep(10)
+
+    pending_dumps.pop((schema, table, rev_id))
+    if original:
+        rev = TableRevision(revision=rev_id, schema=schema, table=table)
+        rev.save()
+    return {}
 
 
 class DataView(View):
@@ -162,20 +202,12 @@ class DataView(View):
 
     def get(self, request, schema, table):
 
-        if schema in excluded_schemas:
+        if schema in excluded_schemas or schema.startswith('_'):
             raise Http404("Schema not accessible")
         db = sec.dbname
         tags = []
 
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_comment_table_name(table)}):
-            actions.create_comment_table(schema, table)
-
-        if not actions.has_table(
-                {'schema': actions.get_meta_schema_name(schema),
-                 'table': actions.get_edit_table_name(table)}):
-            actions.create_edit_table(schema, table)
+        actions.create_meta(schema, table)
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
@@ -197,6 +229,7 @@ class DataView(View):
                                           'name' in col}
 
         repo = svn.local.LocalClient(sec.datarepowc)
+        TableRevision.objects.all().delete()
         available_revisions = TableRevision.objects.filter(table=table,
                                                            schema=schema)
         revisions = []
@@ -219,6 +252,66 @@ class DataView(View):
                           'tags': tags
                       })
 
+    def post(self, request, schema, table):
+        print(request.POST, request.FILES)
+        if request.POST and request.FILES:
+            csvfile = TextIOWrapper(request.FILES['csv_file'].file,
+                                    encoding=request.encoding)
+
+            reader = csv.DictReader(csvfile, delimiter=',')
+
+            actions.data_insert({
+                'schema': schema,
+                'table': table,
+                'method': 'values',
+                'values': reader
+            }, {'user': request.user})
+        return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
+                                                                table=table))
+
+class CommentView(View):
+    """ This method handles the GET requests for the main page of data edit.
+        Initialises the session data (if necessary)
+    """
+
+    def get(self, request, schema, table):
+
+        if schema in excluded_schemas:
+            raise Http404("Schema not accessible")
+        tags = []
+
+        actions.create_meta(schema, table)
+
+        if models.Table.objects.filter(name=table,
+                                       schema__name=schema).exists():
+            tobj = models.Table.objects.get(name=table, schema__name=schema)
+            tags = tobj.tags.all()
+
+
+        return render(request,
+                      'dataedit/comment_table.html',
+                      {
+                          'table': table,
+                          'schema': schema,
+                          'tags': tags
+                      })
+
+    def post(self, request, schema, table):
+        print(request.POST, request.FILES)
+        if request.POST and request.FILES:
+            csvfile = TextIOWrapper(request.FILES['csv_file'].file,
+                                    encoding=request.encoding)
+
+            reader = csv.DictReader(csvfile, delimiter=',')
+
+            actions.data_insert({
+                'schema': actions.get_meta_schema_name(schema),
+                'table': actions.get_comment_table_name(table),
+                'method': 'values',
+                'values': reader
+            }, {'user': request.user})
+        return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
+                                                                table=table))
 
 class TagUpdate(UpdateView):
     model = models.Tag

@@ -2,12 +2,15 @@
 # Parsers #
 ###########
 import re
+from sqlalchemy import Table, MetaData
+from datetime import datetime
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
 def is_pg_qual(x):
     return pgsql_qualifier.search(x)
+
 
 def read_pgvalue(x):
     # TODO: Implement check for valid values
@@ -17,9 +20,10 @@ def read_pgvalue(x):
         return 'null'
     return x
 
+
 def read_operator(x, right):
     # TODO: Implement check for valid operators
-    if right['type']=='value' and right['value'] is None and x == '=':
+    if right['type'] == 'value' and ('value' not in right or right['value'] is None and x == '='):
         return 'is'
     return x
 
@@ -42,6 +46,61 @@ def read_pgid(s):
     raise ValidationError("Invalid identifier", s)
 
 
+def set_meta_info(method, user, message=None):
+    val_dict = {}
+    val_dict['_user'] = user  # TODO: Add user handling
+    val_dict['_submitted'] = datetime.now()
+    val_dict['_autocheck'] = False
+    val_dict['_humancheck'] = False
+    val_dict['_type'] = method
+    val_dict['_message'] = message
+    return val_dict
+
+
+def parse_insert(d, engine, context, message=None):
+    table = Table(read_pgid(d['table']), MetaData(bind=engine), autoload=True,
+                  schema=read_pgid(d['schema']))
+
+    meta_cols = ['_message', '_user', '_submitted', '_autocheck',
+                   '_humancheck', '_type']
+
+    field_strings = []
+    for field in d.get('fields',[]):
+        assert ('type' in field and field['type'] == 'column'), 'Only pure column expressions are allowed in insert'
+
+        field_strings.append(parse_expression(field))
+
+
+    query = table.insert()
+
+
+
+    if d['method'] == 'default':
+        query.values()
+    elif d['method'] == 'values':
+        if field_strings:
+            assert(isinstance(d['values'],list))
+            values = map(lambda x: zip(field_strings,x), d['values'])
+        else:
+            values = d['values']
+
+        def clear_meta(vals):
+            val_dict = vals
+            # make sure meta fields are not compromised
+            val_dict = set_meta_info('insert', context['user'].name, message)
+            return val_dict
+
+        values = list(map(clear_meta, values))
+
+        query = query.values(values)
+    elif d['method'] == 'query':
+        raise NotImplementedError
+
+    if 'returning' in d:
+        query = query.returning(*map(parse_expression, d['returning']))
+
+    return query
+
 def parse_select(d):
     """
         Defintion of a select query according to 
@@ -63,7 +122,7 @@ def parse_select(d):
 
     L = []
 
-    if 'fields' in d:
+    if 'fields' in d and d['fields']:
         for field in d['fields']:
             ss = parse_expression(field)
             if 'as' in field and '_count' not in d:
@@ -210,7 +269,10 @@ def parse_expression(d):
     if d['type'] == 'function':
         return parse_function(d)
     if d['type'] == 'value':
-        return read_pgvalue(d['value'])
+        if 'value' in d:
+            return read_pgvalue(d['value'])
+        else:
+            return 'null'
     raise NotImplementedError()
 
 
