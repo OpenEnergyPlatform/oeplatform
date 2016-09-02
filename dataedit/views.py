@@ -74,7 +74,6 @@ def get_readable_table_names(schema):
 
 
 def listtables(request, schema_name):
-
     if not actions.has_schema({'schema': '_'+schema_name}):
         actions.create_meta_schema(schema_name)
 
