@@ -56,12 +56,12 @@ def get_readable_table_name(schema, table):
     conn = engine.connect()
     try:
         res = conn.execute('SELECT obj_description((\'{table_schema}.{table_name}\')::regclass) FROM pg_class WHERE relkind = \'r\''.format(table_schema=schema, table_name=table))
-        comment = str(res.first()[0]).replace('\n','')['Name'].strip()
+        comment = str(res.first()[0]).replace('\n','')
         if not comment:
             return None
-        return json.loads(comment) + " (" + table + ")"
-    except:
-        return None
+        return json.loads(comment)['Name'].strip() + " (" + table + ")"
+    except Exception as e:
+        raise e
     finally:
         conn.close()
 
