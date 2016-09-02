@@ -6,8 +6,11 @@ register = template.Library()
 
 
 @register.assignment_tag
-def get_tags():
-    return models.Tag.objects.all()[:10]
+def get_tags(limit = None):
+    if limit:
+        return models.Tag.objects.all()[:limit]
+    else:
+        return models.Tag.objects.all()
 
 
 @register.simple_tag()
