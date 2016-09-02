@@ -145,8 +145,26 @@ function construct_comment_handler(schema, table){
     return grid_formatter;
 }
 
+function construct_field(dataset){
+    return function(el){
+        var type;
+        if(el.type in typemap)
+            type=typemap[el.type];
+        else
+            type=el.type;
+        var field = new recline.Model.Field({
+            id: el.name,
+            format: construct_comment_handler(dataset.schema, dataset.table),
+            type:type,
 
-
+          });
+          /*if(el.name == '_comment'){
+            field.editor = buildCommentEditor(dataset.schema, dataset.table);
+          }*/
+          field.renderer = construct_comment_handler(dataset.schema, dataset.table);
+          return field;
+    }
+}
 
 
 (function($, my) {
@@ -159,24 +177,7 @@ function construct_comment_handler(schema, table){
                              $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
         var dfd = new $.Deferred();
 
-        function construct_field(el){
-            var type;
-            if(el.type in typemap)
-                type=typemap[el.type];
-            else
-                type=el.type;
-            var field = new recline.Model.Field({
-                id: el.name,
-                format: construct_comment_handler(dataset.schema, dataset.table),
-                type:type,
 
-              });
-              /*if(el.name == '_comment'){
-                field.editor = buildCommentEditor(dataset.schema, dataset.table);
-              }*/
-              field.renderer = construct_comment_handler(dataset.schema, dataset.table);
-              return field;
-        }
 
         request.done(function(results, pks) {
             if (results.error) {
@@ -184,7 +185,7 @@ function construct_comment_handler(schema, table){
             }
             pks = pks[0];
             results = results[0];
-            var table_fields = results.content.map(construct_field);
+            var table_fields = results.content.map(construct_field(dataset));
             var pk_fields = pks.content.constrained_columns;
             dfd.resolve({
                 fields: table_fields,
@@ -204,111 +205,126 @@ function construct_comment_handler(schema, table){
     my.query = function(queryObj, dataset){
         console.log(queryObj.from + " - " + queryObj.size)
 
-        var table_query = {
-                    type:'table',
-                    schema: dataset.schema,
-                    table: dataset.table
-        };
-
-        if(!unchecked){
-            table_query.only = true;
-        }
-
-        var field_query = [];
-
-        if(queryObj.fields){
-            field_query = queryObj.fields.map(function (el){
-                        return {
-                                type: 'column',
-                                column: el
-                        };
-                });
-        }
-
-
-
-
-
-
-        var query = {from : [table_query]};
-
-
-
-        if(query.limit > my.max_rows){
-            query.limit = my.max_rows
-            alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
-        }
-
-
-
-        if(queryObj.fields){
-            query.fields = fields.map(function (el){
-                        return {
-                                type: 'column',
-                                column: el
-                        }
-                ;})
-        }
-        else{
-            query.fields = field_query;
-        }
-
-        var count_query= $.extend(true, {}, query);
-        count_query.fields = [{
-            type:'function',
-            function:'count',
-            operands: [{type:'star'}]
-            }]
-
-
-        query.limit = queryObj.size;
-        query.offset = queryObj.from;
-
-        /*if (id != null)
-            query.order_by = [{
-                type:'column',
-                column: id}];*/
-
-        var request = $.when(
-            $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
-            $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
-        )
+        var query = {table: dataset.table, schema: dataset.schema}
+        var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
         var dfd = new $.Deferred();
-        request.done(function(results, counts) {
-            results = results[0];
-            counts = counts[0];
-            if (results.error) {
-                dfd.reject(results.error);
+        request.done(function(fields) {
+
+            if (fields.error) {
+                    dfd.reject(results.error);
+                }
+            var table_fields = fields.content.map(construct_field(dataset));
+            var field_map = {};
+
+            for(i=0; i<table_fields.length; ++i)
+            {
+                field_map[table_fields[i].id] = get_field_query(table_fields[i]);
             }
 
+            var table_query = {
+                        type:'table',
+                        schema: dataset.schema,
+                        table: dataset.table
+            };
+
+            if(!unchecked){
+                table_query.only = true;
+            }
+
+            var field_query = [];
+
+            if(queryObj.fields){
+                field_query = queryObj.fields.map(function (el){return fieldmap[el];
+                            /*return {
+                                    type: 'column',
+                                    column: el
+                            };*/
+                    });
+            }
             else
             {
-                var response = {
-                    hits: results.content.data.map(function(raw_row){
-                        var row = {};
-                        for(i=0; i<raw_row.length; ++i)
-                        {
-                            var key = results.content.description[i][0];
-                            row[key] = raw_row[i];
-                        }
-                        /*if(dataset.has_row_comments){
-                            row['_comment']={
-                                _id: row['_comment'],
-                                origin: row['origin'],
-                                method: row['method'],
-                                assumption: row['assumption']
-                            };
-                        }*/
-                        return row;
-                    }),
-                    total: counts.content.data[0][0],
-                }
-                dfd.resolve(response);
+                field_query = table_fields.map(get_field_query)
             }
+
+            console.log(field_query);
+
+
+
+
+
+            var query = {from : [table_query], fields: field_query};
+
+
+
+            if(query.limit > my.max_rows){
+                query.limit = my.max_rows
+                alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
+            }
+
+
+            var count_query= $.extend(true, {}, query);
+            count_query.fields = [{
+                type:'function',
+                function:'count',
+                operands: [{type:'star'}]
+                }]
+
+
+            query.limit = queryObj.size;
+            query.offset = queryObj.from;
+
+            /*if (id != null)
+                query.order_by = [{
+                    type:'column',
+                    column: id}];*/
+
+            var request = $.when(
+                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
+                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
+            )
+            request.done(function(results, counts) {
+                results = results[0];
+                counts = counts[0];
+                if (results.error) {
+                    dfd.reject(results.error);
+                }
+
+                else
+                {
+                    var response = {
+                        hits: results.content.data.map(function(raw_row){
+                            var row = {};
+                            for(i=0; i<raw_row.length; ++i)
+                            {
+                                var key = results.content.description[i][0];
+                                row[key] = raw_row[i];
+                            }
+                            /*if(dataset.has_row_comments){
+                                row['_comment']={
+                                    _id: row['_comment'],
+                                    origin: row['origin'],
+                                    method: row['method'],
+                                    assumption: row['assumption']
+                                };
+                            }*/
+                            return row;
+                        }),
+                        total: counts.content.data[0][0],
+                    }
+                    dfd.resolve(response);
+                }
+            });
+
+            request.fail(function( jqXHR, textStatus ) {
+                alert( "Request failed: " + textStatus );
+            });
+
         });
 
+
+
         request.fail(function( jqXHR, textStatus ) {
-            alert( "Request failed: " + textStatus );
+                alert( "Request failed: " + textStatus );
         });
 
         return dfd.promise()
