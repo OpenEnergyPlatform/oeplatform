@@ -51,6 +51,20 @@ def listschemas(request):
                   {'schemas': schemas})
 
 
+def get_readable_table_name(schema, table):
+    engine = actions._get_engine()
+    conn = engine.connect()
+    try:
+        res = conn.execute('SELECT obj_description((\'{table_schema}.{table_name}\')::regclass) FROM pg_class WHERE relkind = \'r\''.format(table_schema=schema, table_name=table))
+        comment = str(res.first()[0]).replace('\n','')['Name'].strip()
+        if not comment:
+            return None
+        return json.loads(comment) + " (" + table + ")"
+    except:
+        return None
+    finally:
+        conn.close()
+
 def listtables(request, schema_name):
 
     if not actions.has_schema({'schema': '_'+schema_name}):
@@ -64,9 +78,8 @@ def listtables(request, schema_name):
     for table in insp.get_table_names(schema=schema_name):
         if not table.startswith('_'):
             t,_ = models.Table.objects.get_or_create(name=table, schema=schema)
-            tables.append(t)
-    tables = sorted(tables, key=lambda x: x.name)
-    print([t.name for t in tables])
+            tables.append((t,get_readable_table_name(schema.name,table)))
+    tables = sorted(tables, key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema, 'tables': tables})
 
