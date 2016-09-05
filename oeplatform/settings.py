@@ -97,4 +97,5 @@ USE_TZ = True
 
 
 AUTHENTICATION_BACKENDS = ['login.models.UserBackend']
+LOGIN_REDIRECT_URL = '/'
 #AUTH_USER_MODEL = 'login.myuser'
