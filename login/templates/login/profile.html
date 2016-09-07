@@ -2,5 +2,7 @@
 {% load bootstrap3 %}
 {% block content %}
 <h1> {{ user.name }} </h1>
-
+{% if user == request.user and token%}
+    <h3>Your authorization token:</h3> {{ token }}
+{% endif %}
 {% endblock %}
