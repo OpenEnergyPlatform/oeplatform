@@ -3,7 +3,12 @@ from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
 import mwclient as mw
 
-class OepUser(AbstractBaseUser):
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
+class myuser(AbstractBaseUser):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50)
     mail_address = models.EmailField(verbose_name='email address',
@@ -44,10 +49,16 @@ class UserBackend(object):
         except mw.errors.LoginError:
             return None
         else:
-            return OepUser.objects.get_or_create(name=username)[0]
+            return myuser.objects.get_or_create(name=username)[0]
 
     def get_user(self, user_id):
         try:
-            return OepUser.objects.get(pk=user_id)
-        except OepUser.DoesNotExist:
+            return myuser.objects.get(pk=user_id)
+        except myuser.DoesNotExist:
             return None
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
+

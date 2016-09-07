@@ -33,6 +33,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sessions.backends.signed_cookies',
     'bootstrap3',
+    'rest_framework',
+    'rest_framework.authtoken',
     'modelview',
     'modelview.templatetags.modelview_extras',
     'login',
@@ -41,8 +43,7 @@ INSTALLED_APPS = (
     'dataedit',
     'colorfield',
     'django_ajax',
-	'literature',
-    'rest_framework',
+    'literature',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -97,4 +98,5 @@ USE_TZ = True
 
 
 AUTHENTICATION_BACKENDS = ['login.models.UserBackend']
-#AUTH_USER_MODEL = 'login.myuser'
+AUTH_USER_MODEL = 'login.myuser'
+LOGIN_REDIRECT_URL = '/'
