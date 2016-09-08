@@ -203,8 +203,6 @@ function construct_field(dataset){
     // This method will be used by the Dataset.query method to search the backend
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
-        console.log(queryObj.from + " - " + queryObj.size)
-
         var query = {table: dataset.table, schema: dataset.schema}
         var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
         var dfd = new $.Deferred();
@@ -246,12 +244,6 @@ function construct_field(dataset){
                 field_query = table_fields.map(get_field_query)
             }
 
-            console.log(field_query);
-
-
-
-
-
             var query = {from : [table_query], fields: field_query};
 
 
@@ -269,6 +261,15 @@ function construct_field(dataset){
                 operands: [{type:'star'}]
                 }]
 
+            if(queryObj.sort){
+                query.order_by = queryObj.sort.map(function(obj){
+                    return {
+                        type:'column',
+                        column: obj.field,
+                        ordering: obj.order
+                    };
+                });
+            }
 
             query.limit = queryObj.size;
             query.offset = queryObj.from;

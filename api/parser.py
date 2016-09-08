@@ -165,7 +165,7 @@ def parse_select(d):
             ss = ''
             ss += ' ORDER BY ' + parse_expression(ob)
             if 'ordering' in ob:
-                if ob['ordering'] in ['ASC', 'DESC']:
+                if ob['ordering'] in ['asc', 'desc']:
                     ss += ' ' + ob['ordering']
                 else:
                     ss += parse_operator(ob['ordering'])
