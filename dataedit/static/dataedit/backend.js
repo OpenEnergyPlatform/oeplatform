@@ -118,6 +118,34 @@ function show_comment(e, schema, table, id){
     }
 }
 
+function translate_filter(obj){
+    if(obj.type == "term"){
+        return condition_query(obj.field, obj.term)
+    }
+    if(obj.type == "range"){
+        return {
+            type:'operator_binary',
+            left: {
+                type: 'column',
+                column: obj.field,
+            },
+            right:{
+                type:'operator_binary',
+                left: {
+                    type: 'value',
+                    value: obj.from,
+                },
+                right: {
+                    type: 'value',
+                    value: obj.to
+                },
+                operator: 'AND'
+            },
+            operator: 'between'
+        };
+    }
+}
+
 function construct_comment_handler(schema, table){
     if(!schema.startsWith('_')){
         schema = '_' + schema
@@ -253,6 +281,11 @@ function construct_field(dataset){
                 alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
             }
 
+            console.log(queryObj)
+
+            if(queryObj.filters && queryObj.filters.length > 0){
+                query.where = queryObj.filters.map(translate_filter)
+            }
 
             var count_query= $.extend(true, {}, query);
             count_query.fields = [{
