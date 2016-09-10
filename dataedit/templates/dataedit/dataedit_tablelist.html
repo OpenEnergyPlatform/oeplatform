@@ -3,6 +3,10 @@
 {% block data_content %}
 <h3>Schema: {{schema.name}}</h3>
 {% include 'dataedit/taggable_setting.html' with schema=schema.name selected=schema.tags.all %}
+<div class="well">
+Now you are in the database schema you selected and see the list of all tables of this schema.
+You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
+</div>
 <div class="list-group">
 {% for table, label in tables %}
     <a class="list-group-item" href="{{schema.name}}/{{table.name}}" >
