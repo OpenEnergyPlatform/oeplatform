@@ -165,7 +165,7 @@ def parse_select(d):
             ss = ''
             ss += ' ORDER BY ' + parse_expression(ob)
             if 'ordering' in ob:
-                if ob['ordering'] in ['ASC', 'DESC']:
+                if ob['ordering'] in ['asc', 'desc']:
                     ss += ' ' + ob['ordering']
                 else:
                     ss += parse_operator(ob['ordering'])
@@ -266,6 +266,8 @@ def parse_expression(d):
         return ' * '
     if d['type'] == 'operator':
         return parse_operator(d)
+    if d['type'] == 'operator_binary':
+        return parse_operator(d)
     if d['type'] == 'function':
         return parse_function(d)
     if d['type'] == 'value':
@@ -297,6 +299,10 @@ def parse_operator(d):
         assert (read_pgid(d['function']))
         return '{f}({ops})'.format(f=d['function'], ops=', '.join(
             map(parse_expression, d['operands'])))
+    else:
+        return "%s %s %s" % (
+            parse_expression(d['left']), read_operator(d['operator'], d['right']),
+            parse_expression(d['right']))
     return d
 
 
