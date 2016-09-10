@@ -178,12 +178,12 @@
 
   </div>
 </div>
-
 <div>
+    <h4>Metadata</h4><a href="{{table}}/meta_edit"> Edit</a>
     <table class="table table-hover" style="width:460px">
         <tr>
             <th>Name</th>
-            <td>{{comment_on_table.Name}}</td>
+            <td><span id="meta_Name">{{comment_on_table.Name}}</span><a onclick="meta_edit(Name)">Edit</a></td>
         </tr>
         {% if comment_on_table.Source %}
         <tr>
@@ -209,18 +209,20 @@
         <tr>
             <th>Date of Collection</th>
             <td>
-            {% for ref in comment_on_table.Date_of_collection %}
-                {{ref}}{% if not forloop.last %}, {% endif %}
-            {% endfor %}</td>
+                {% for ref in comment_on_table.Date_of_collection %}
+                    {{ref}}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         {% endif %}
         {% if comment_on_table.Spatial_resolution %}
         <tr>
             <th>Spatial resolution</th>
             <td>
-            {% for ref in comment_on_table.Spatial_resolution %}
-                {{ref}}{% if not forloop.last %}, {% endif %}
-            {% endfor %}</td>
+                {% for ref in comment_on_table.Spatial_resolution %}
+                    {{ref}}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
         </tr>
         {% endif %}
         {% if comment_on_table.Description %}
@@ -228,26 +230,31 @@
             <th>Description</th>
             <td>
                 <ul>
-            {% for ref in comment_on_table.Description %}
-               <li> {{ref}}</li>
-            {% endfor %}</ul></td>
+                    {% for ref in comment_on_table.Description %}
+                        <li> {{ref}}</li>
+                    {% endfor %}
+                </ul>
+            </td>
         </tr>
         {% endif %}
         {% if comment_on_table.Licence %}
         <tr>
             <th>Licence</th>
-            <ul>
-            {% for source in comment_on_table.Licence %}
-                <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
-            {% endfor %}
-            </ul>
+            <td>
+                <ul>
+                    {% for source in comment_on_table.Licence %}
+                        <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </td>
         </tr>
         {% endif %}
     </table>
-
-
+    <a href="{{table.name}}/meta_edit">Edit Metadata</a>
 </div>
+
 <hr>
+
 <h3> Revisions </h3>
 <div class="well">
     You can download older revisions of the data stored in the platform.

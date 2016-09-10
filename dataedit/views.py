@@ -212,9 +212,9 @@ class DataView(View):
 
         if schema in excluded_schemas or schema.startswith('_'):
             raise Http404("Schema not accessible")
-        db = sec.dbname
-        tags = []
 
+        tags = []
+        db = sec.dbname
         actions.create_meta(schema, table)
 
         if models.Table.objects.filter(name=table,
@@ -276,6 +276,19 @@ class DataView(View):
             }, {'user': request.user})
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
+
+class MetaView(View):
+    def get(self, request, schema, table):
+        db = sec.dbname
+        comment_on_table = actions.get_comment_table(db, schema, table)
+        return render(request, 'dataedit/meta_edit.html',{
+            'schema': schema,
+            'table': table,
+            'comment_on_table': comment_on_table
+        })
+
+    def post(self, request, schema, table):
+        pass
 
 class CommentView(View):
     """ This method handles the GET requests for the main page of data edit.

@@ -1,0 +1,33 @@
+{% extends "dataedit/base.html" %}
+
+{% block data_content %}
+<script type="javascript/text">
+    function add_list_field(id){
+
+    }
+</script>
+<div>
+    <h4>Metadata</h4>
+    <div class="table table-hover" style="width:460px">
+        <form action="" role="form">
+            <div class="form_group">
+                <label for="Name">Name</label>
+                <input class="form-control" id="Name" name="Name" type="text" value="{{comment_on_table.Name}}"/>
+            </div>
+
+            {% include 'dataedit/url_list_field.html' with name='Sources' list=comment_on_table.Source id='source'%}
+
+            {% include 'dataedit/list_field.html' with name='Reference date' list=comment_on_table.Reference_date id='ref_date'%}
+
+            {% include 'dataedit/list_field.html' with name='Date of Collection' list=comment_on_table.Date_of_collection id='date_col'%}
+
+            {% include 'dataedit/list_field.html' with name='Spatial Resolution' list=comment_on_table.Spatial_resolution id='spat_res'%}
+
+            {% include 'dataedit/list_field.html' with name='Description' list=comment_on_table.Description id='descr'%}
+
+            {% include 'dataedit/url_list_field.html' with  name='Licence' list=comment_on_table.Licence id='licence'%}
+            <input class="btn btn-success" type="submit" value="Submit" />
+        </form>
+    </div>
+</div>
+{% endblock %}

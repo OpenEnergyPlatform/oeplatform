@@ -1,0 +1,23 @@
+<div>
+    <label for="{{id}}_container">{{name}}</label>
+    <div id="{{id}}_container">
+        {% for source in list %}
+        <div>
+            <div>
+                <label>Name</label>
+                <input class="form-control" name="{{id}}_name_{{forloop.counter}}" value="{{source.Name}}"/>
+            </div>
+            <div>
+                <label>URL</label>
+                <input class="form-control" name="{{id}}_url_{{forloop.counter}}" value="{{source.URL}}"/>
+            </div>
+        </div>
+        {% if forloop.last %}
+            <script type="javascript/text">
+                    {{id}}_counter={{ forloop.counter }};
+            </script>
+        {% endif %}
+        {% endfor %}
+        <a href="#" onclick="add_list_field('{{id}}')">Add</a>
+    </div>
+</div>

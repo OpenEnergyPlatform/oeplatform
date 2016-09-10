@@ -1,0 +1,17 @@
+<div>
+    <label for="{{id}}_container">{{name}}</label>
+    <div id="{{id}}_container">
+        {% for ref in list %}
+            <div id="{{id}}_wrapper_{{forloop.counter}}">
+                <input class="form-control" name="{{id}}_{{forloop.counter}}" id="{{id}}_{{forloop.counter}}" value="{{ref}}"/>
+                <a href="#" onclick="$('#{{id}}_wrapper_{{forloop.counter}}').remove();">del</a>
+            </div>
+                {% if forloop.last %}
+                <script type="javascript/text">
+                    {{id}}_counter={{ forloop.counter }};
+                </script>
+            {% endif %}
+        {% endfor %}
+        <a href="#" onclick="add_list_field('{{id}}')">Add</a>
+    </div>
+</div>
