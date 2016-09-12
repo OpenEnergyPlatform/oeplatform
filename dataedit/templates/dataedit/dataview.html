@@ -128,6 +128,7 @@
         </div>
     </div>
 
+    {% if request.user.is_authenticated %}
     <div class="well">
         <span class="lead">Commit your changes</span><br>
         Your changes will not be written to the actual OpenEnergyDatabase but an
@@ -140,7 +141,7 @@
             <button class="btn btn-success" id="savebutton"> Save </button>
         </div>
     </div>
-
+    {% endif %}
   <div style="clear: both;"></div>
     Data is displayed using <a href="http://okfnlabs.org/recline/">recline.js</a>
 </div>

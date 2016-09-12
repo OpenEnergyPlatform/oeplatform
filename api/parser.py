@@ -76,7 +76,8 @@ def parse_insert(d, engine, context, message=None):
     query = table.insert()
 
 
-
+    if not 'method' in d:
+        d['method'] = 'values'
     if d['method'] == 'default':
         query.values()
     elif d['method'] == 'values':
@@ -89,7 +90,11 @@ def parse_insert(d, engine, context, message=None):
         def clear_meta(vals):
             val_dict = vals
             # make sure meta fields are not compromised
-            val_dict = set_meta_info('insert', context['user'].name, message)
+            if context['user'].is_anonymous:
+                username = 'Anonymous'
+            else:
+                username = context['user'].name
+            val_dict.update(set_meta_info('insert', username, message))
             return val_dict
 
         values = list(map(clear_meta, values))
