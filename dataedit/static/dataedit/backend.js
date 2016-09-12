@@ -118,6 +118,34 @@ function show_comment(e, schema, table, id){
     }
 }
 
+function translate_filter(obj){
+    if(obj.type == "term"){
+        return condition_query(obj.field, obj.term)
+    }
+    if(obj.type == "range"){
+        return {
+            type:'operator_binary',
+            left: {
+                type: 'column',
+                column: obj.field,
+            },
+            right:{
+                type:'operator_binary',
+                left: {
+                    type: 'value',
+                    value: obj.from,
+                },
+                right: {
+                    type: 'value',
+                    value: obj.to
+                },
+                operator: 'AND'
+            },
+            operator: 'between'
+        };
+    }
+}
+
 function construct_comment_handler(schema, table){
     if(!schema.startsWith('_')){
         schema = '_' + schema
@@ -203,8 +231,6 @@ function construct_field(dataset){
     // This method will be used by the Dataset.query method to search the backend
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
-        console.log(queryObj.from + " - " + queryObj.size)
-
         var query = {table: dataset.table, schema: dataset.schema}
         var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
         var dfd = new $.Deferred();
@@ -246,12 +272,6 @@ function construct_field(dataset){
                 field_query = table_fields.map(get_field_query)
             }
 
-            console.log(field_query);
-
-
-
-
-
             var query = {from : [table_query], fields: field_query};
 
 
@@ -261,6 +281,11 @@ function construct_field(dataset){
                 alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
             }
 
+            console.log(queryObj)
+
+            if(queryObj.filters && queryObj.filters.length > 0){
+                query.where = queryObj.filters.map(translate_filter)
+            }
 
             var count_query= $.extend(true, {}, query);
             count_query.fields = [{
@@ -269,6 +294,15 @@ function construct_field(dataset){
                 operands: [{type:'star'}]
                 }]
 
+            if(queryObj.sort){
+                query.order_by = queryObj.sort.map(function(obj){
+                    return {
+                        type:'column',
+                        column: obj.field,
+                        ordering: obj.order
+                    };
+                });
+            }
 
             query.limit = queryObj.size;
             query.offset = queryObj.from;

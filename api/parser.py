@@ -34,6 +34,8 @@ class ValidationError(Exception):
 
 
 def read_bool(s):
+    if isinstance(s, bool):
+        return s
     if s.lower() in ["true", "false"]:
         return s.lower() == "true"
     else:
@@ -74,7 +76,8 @@ def parse_insert(d, engine, context, message=None):
     query = table.insert()
 
 
-
+    if not 'method' in d:
+        d['method'] = 'values'
     if d['method'] == 'default':
         query.values()
     elif d['method'] == 'values':
@@ -87,7 +90,11 @@ def parse_insert(d, engine, context, message=None):
         def clear_meta(vals):
             val_dict = vals
             # make sure meta fields are not compromised
-            val_dict = set_meta_info('insert', context['user'].name, message)
+            if context['user'].is_anonymous:
+                username = 'Anonymous'
+            else:
+                username = context['user'].name
+            val_dict.update(set_meta_info('insert', username, message))
             return val_dict
 
         values = list(map(clear_meta, values))
@@ -165,7 +172,7 @@ def parse_select(d):
             ss = ''
             ss += ' ORDER BY ' + parse_expression(ob)
             if 'ordering' in ob:
-                if ob['ordering'] in ['ASC', 'DESC']:
+                if ob['ordering'] in ['asc', 'desc']:
                     ss += ' ' + ob['ordering']
                 else:
                     ss += parse_operator(ob['ordering'])
@@ -266,6 +273,8 @@ def parse_expression(d):
         return ' * '
     if d['type'] == 'operator':
         return parse_operator(d)
+    if d['type'] == 'operator_binary':
+        return parse_operator(d)
     if d['type'] == 'function':
         return parse_function(d)
     if d['type'] == 'value':
@@ -297,6 +306,10 @@ def parse_operator(d):
         assert (read_pgid(d['function']))
         return '{f}({ops})'.format(f=d['function'], ops=', '.join(
             map(parse_expression, d['operands'])))
+    else:
+        return "%s %s %s" % (
+            parse_expression(d['left']), read_operator(d['operator'], d['right']),
+            parse_expression(d['right']))
     return d
 
 
