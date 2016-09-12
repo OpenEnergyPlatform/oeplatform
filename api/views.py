@@ -26,7 +26,6 @@ def date_handler(obj):
 def create_ajax_handler(func):
     @csrf_exempt
     def execute(request):
-        print(request.POST)
         content = request.POST if request.POST else request.GET
         data = func(json.loads(content['query']), {'user': request.user})
 
