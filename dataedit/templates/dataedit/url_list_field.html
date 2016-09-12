@@ -1,23 +1,31 @@
-<div>
-    <label for="{{id}}_container">{{name}}</label>
-    <div id="{{id}}_container">
-        {% for source in list %}
-        <div>
-            <div>
-                <label>Name</label>
-                <input class="form-control" name="{{id}}_name_{{forloop.counter}}" value="{{source.Name}}"/>
+<table style="width:100%">
+    <tr><td><label for="{{id}}_container">{{name}}</label></td></tr>
+    <tr>
+        <td style="width:150px"></td>
+        <td>
+        <div id="{{id}}_container">
+            {% for source in list %}
+            <div id="{{id}}_wrapper_{{forloop.counter}}">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input class="form-control" name="{{id}}_name_{{forloop.counter}}" value="{{source.Name}}"/>
+                </div>
+                <div class="form-group">
+                    <label>URL</label>
+                    <input class="form-control" name="{{id}}_url_{{forloop.counter}}" value="{{source.URL}}"/>
+                </div>
+                <a onclick="$('#{{id}}_wrapper_{{forloop.counter}}').remove();"><span class="glyphicon glyphicon-minus-sign"></span></a>
             </div>
-            <div>
-                <label>URL</label>
-                <input class="form-control" name="{{id}}_url_{{forloop.counter}}" value="{{source.URL}}"/>
-            </div>
+            <hr>
+            {% if forloop.last %}
+                <script type="javascript/text">
+                        {{id}}_counter={{ forloop.counter }};
+                </script>
+            {% endif %}
+            {% endfor %}
         </div>
-        {% if forloop.last %}
-            <script type="javascript/text">
-                    {{id}}_counter={{ forloop.counter }};
-            </script>
-        {% endif %}
-        {% endfor %}
-        <a href="#" onclick="add_list_field('{{id}}')">Add</a>
-    </div>
-</div>
+        <a onclick="add_url_list_field('{{id}}')">Add</a>
+        </td>
+    </tr>
+
+</table>

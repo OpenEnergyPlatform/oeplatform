@@ -183,16 +183,18 @@
     <table class="table table-hover" style="width:460px">
         <tr>
             <th>Name</th>
-            <td><span id="meta_Name">{{comment_on_table.Name}}</span><a onclick="meta_edit(Name)">Edit</a></td>
+            <td><span id="meta_Name">{{comment_on_table.Name}}</span></td>
         </tr>
         {% if comment_on_table.Source %}
         <tr>
             <th>Sources</th>
-            <ul>
-            {% for source in comment_on_table.Source %}
-                <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
-            {% endfor %}
-            </ul>
+            <td>
+                <ul>
+                {% for source in comment_on_table.Source %}
+                    <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
+                {% endfor %}
+                </ul>
+            </td>
         </tr>
         {% endif %}
         {% if comment_on_table.Reference_date %}
@@ -204,22 +206,21 @@
             {% endfor %}</td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Date_of_collection %}
-
+        {% if comment_on_table.Date_of_Collection %}
         <tr>
             <th>Date of Collection</th>
             <td>
-                {% for ref in comment_on_table.Date_of_collection %}
+                {% for ref in comment_on_table.Date_of_Collection %}
                     {{ref}}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Spatial_resolution %}
+        {% if comment_on_table.Spatial_Resolution %}
         <tr>
             <th>Spatial resolution</th>
             <td>
-                {% for ref in comment_on_table.Spatial_resolution %}
+                {% for ref in comment_on_table.Spatial_Resolution %}
                     {{ref}}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </td>
@@ -237,6 +238,30 @@
             </td>
         </tr>
         {% endif %}
+        {% if comment_on_table.Notes %}
+        <tr>
+            <th>Notes</th>
+            <td>
+                <ul>
+                    {% for source in comment_on_table.Notes %}
+                        <li> {{source}} </li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endif %}
+        {% if comment_on_table.Instructions_for_proper_use %}
+        <tr>
+            <th>Proper use</th>
+            <td>
+                <ul>
+                    {% for source in comment_on_table.Instructions_for_proper_use %}
+                        <li> {{source}} </li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endif %}
         {% if comment_on_table.Licence %}
         <tr>
             <th>Licence</th>
@@ -249,8 +274,33 @@
             </td>
         </tr>
         {% endif %}
+        {% if comment_on_table.Column %}
+        <tr>
+            <th>Columns</th>
+            <td>
+                <ul>
+                    {% for source in comment_on_table.Column %}
+                        <table class="table table-hover">
+                            <tr>
+                                <td>Name: </td>
+                                <td> {{source.Name}} </td>
+                            </tr>
+                            <tr>
+                                <td>Description: </td>
+                                <td> {{source.Description}} </td>
+                            </tr>
+                            <tr>
+                                <td>Unit: </td>
+                                <td> {{source.Unit}} </td>
+                            </tr>
+                        </table>
+                        <hr>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endif %}
     </table>
-    <a href="{{table.name}}/meta_edit">Edit Metadata</a>
 </div>
 
 <hr>

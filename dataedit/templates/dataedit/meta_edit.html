@@ -1,31 +1,81 @@
 {% extends "dataedit/base.html" %}
 
 {% block data_content %}
-<script type="javascript/text">
+<script type="text/javascript">
     function add_list_field(id){
+        var index = window[id+"_counter"];
+        var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
+            <table  style="width:100%"><tr><td class="form-group"> <input class="form-control" name="'+id+'_'+index+'" id="'+id+'_'+index+'"/></td> \
+            <td><a style="position:inline" onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a></td></tr></table> \
+        </div>');
+        $div.appendTo($('#'+id+'_container'));
+        window[id+"_counter"] += 1;
+    };
 
-    }
+    function add_url_list_field(id){
+        var index = window[id+"_counter"];
+        var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
+            <div class="form-group"> \
+                <label>Name</label> \
+                <input class="form-control" name="'+id+'_name_'+index+'"/> \
+            </div> \
+            <div class="form-group"> \
+                <label>URL</label> \
+                <input class="form-control" name="'+id+'_url_'+index+'"/> \
+            </div> \
+            <a onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a><hr> \
+        </div>');
+        $div.appendTo($('#'+id+'_container'));
+        window[id+"_counter"] += 1;
+    };
 </script>
 <div>
     <h4>Metadata</h4>
-    <div class="table table-hover" style="width:460px">
-        <form action="" role="form">
+    <div class="table table-hover">
+        <form action="" role="form" method="post">{% csrf_token %}
             <div class="form_group">
-                <label for="Name">Name</label>
-                <input class="form-control" id="Name" name="Name" type="text" value="{{comment_on_table.Name}}"/>
+                <label for="name">Name</label>
+                <input class="form-control" id="name" name="name" type="text" value="{{comment_on_table.Name}}"/>
             </div>
-
+            <hr>
             {% include 'dataedit/url_list_field.html' with name='Sources' list=comment_on_table.Source id='source'%}
-
+            <hr>
             {% include 'dataedit/list_field.html' with name='Reference date' list=comment_on_table.Reference_date id='ref_date'%}
-
-            {% include 'dataedit/list_field.html' with name='Date of Collection' list=comment_on_table.Date_of_collection id='date_col'%}
-
-            {% include 'dataedit/list_field.html' with name='Spatial Resolution' list=comment_on_table.Spatial_resolution id='spat_res'%}
-
+            <hr>
+            {% include 'dataedit/list_field.html' with name='Date of Collection' list=comment_on_table.Date_of_Collection id='date_col'%}
+            <hr>
+            {% include 'dataedit/list_field.html' with name='Spatial Resolution' list=comment_on_table.Spatial_Resolution id='spat_res'%}
+            <hr>
             {% include 'dataedit/list_field.html' with name='Description' list=comment_on_table.Description id='descr'%}
-
+            <hr>
+            {% include 'dataedit/list_field.html' with name='Notes' list=comment_on_table.Notes id='notes'%}
+            <hr>
+            {% include 'dataedit/list_field.html' with name='Instructions for proper use' list=comment_on_table.Instructions_for_proper_use id='instr'%}
+            <hr>
             {% include 'dataedit/url_list_field.html' with  name='Licence' list=comment_on_table.Licence id='licence'%}
+            <table style="width:100%">
+                <tr>
+                    <td  style="width:150px"><label>Columns</label></td>
+                </tr>
+                {% for col in comment_on_table.Column %}
+                    <tr>
+                        <td></td><td style="width:150px"><label>{{col.Name}}</label></td>
+                    </tr>
+                    <tr>
+                        <td></td><td></td>
+                        <td>
+                            <div class="form_group">
+                                <label for="col_{{col.Name}}_descr">Description</label>
+                                <input class="form-control" id="col_{{col.Name}}_descr" name="col_{{col.Name}}_descr" type="text" value="{{col.Description}}"/>
+                            </div>
+                            <div class="form_group">
+                                <label for="col_{{col.Name}}_unit">Unit</label>
+                                <input class="form-control" id="col_{{col.Name}}_unit" name="col_{{col.Name}}_unit" type="text" value="{{col.Unit}}"/>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
             <input class="btn btn-success" type="submit" value="Submit" />
         </form>
     </div>

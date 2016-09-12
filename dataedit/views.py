@@ -29,6 +29,8 @@ from django_ajax.decorators import ajax
 import csv
 import codecs
 from io import TextIOWrapper
+import re
+import sqlalchemy as sqla
 
 session = None
 
@@ -93,17 +95,16 @@ def listtables(request, schema_name):
 
 
 COMMENT_KEYS = [('Name', 'Name'),
-                ('Date of collection', 'Date_of_collection'),
-                ('Spatial resolution', 'Spatial_resolution'),
+                ('Date of collection', 'Date_of_Collection'),
+                ('Spatial resolution', 'Spatial_Resolution'),
                 ('Description', 'Description'),
                 ('Licence', 'Licence'),
                 ('Column', 'Column'),
-                ('Instructions for proper use', 'Proper_use'),
+                ('Instructions for proper use', 'Instructions_for_proper_use'),
                 ('Source', 'Source'),
                 ('Reference date', 'Reference_date'),
                 ('Original file', 'Original_file'),
-                ('Spatial resolution', 'Spatial_resolution'),
-                ('', ''), ]
+                ('Notes', 'Notes'), ]
 
 
 def _type_json(json_obj):
@@ -224,8 +225,12 @@ class DataView(View):
             tags = tobj.tags.all()
 
         comment_on_table = actions.get_comment_table(db, schema, table)
+        print("comm", comment_on_table)
         comment_columns = {d["name"]: d for d in comment_on_table[
             "Table fields"]} if "Table fields" in comment_on_table else {}
+
+        if 'error' in comment_on_table:
+            comment_on_table['Notes'] = [comment_on_table['content']]
 
         comment_on_table = OrderedDict(
             [(label, comment_on_table[key]) for key, label in
@@ -281,6 +286,20 @@ class MetaView(View):
     def get(self, request, schema, table):
         db = sec.dbname
         comment_on_table = actions.get_comment_table(db, schema, table)
+        columns = actions.analyze_columns(db, schema, table)
+        if 'error' in comment_on_table:
+            comment_on_table = {'Notes':[comment_on_table['content']]}
+        comment_on_table = {k.replace(' ', '_'): v for (k, v) in comment_on_table.items()}
+        if 'Column' not in comment_on_table:
+            comment_on_table['Column'] = []
+        commented_cols = [col['Name'] for col in comment_on_table['Column']]
+        for col in columns:
+            if not col['id'] in commented_cols:
+                comment_on_table['Column'].append({
+                    'Name':col['id'],
+                    'Description': '',
+                    'Unit': ''})
+
         return render(request, 'dataedit/meta_edit.html',{
             'schema': schema,
             'table': table,
@@ -288,7 +307,61 @@ class MetaView(View):
         })
 
     def post(self, request, schema, table):
-        pass
+        columns = actions.analyze_columns(sec.dbname, schema, table)
+        comment = {
+            'Name': request.POST['name'],
+            'Source': self._load_url_list(request, 'source'),
+            'Reference date': self._load_list(request, 'ref_date'),
+            'Date of Collection': self._load_list(request, 'date_col'),
+            'Spatial Resolution': self._load_list(request, 'spat_res'),
+            'Licence': self._load_url_list(request, 'licence'),
+            'Description': self._load_list(request, 'descr'),
+            'Column': self._load_col_list(request, columns),
+            'Changes':[],
+            'Notes': self._load_list(request, 'notes'),
+            'Instructions for proper use': self._load_list(request, 'instr'),
+        }
+        engine = actions._get_engine()
+        conn = engine.connect()
+        trans = conn.begin()
+        try:
+            conn.execute(
+                sqla.text("COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema,
+                    table=table)),
+                comment=json.dumps(comment)
+            )
+        except Exception as e:
+            raise e
+        else:
+            trans.commit()
+        finally:
+            conn.close()
+        return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
+                                                                table=table))
+    name_pattern = r'[\w\s]*'
+    def loadName(self, name):
+        assert(re.match(self.name_pattern,name))
+        return name
+
+    def _load_list(self, request, name):
+        pattern = r'%s_(?P<index>\d*)'%name
+        return [request.POST[key].replace("'","\'") for key in request.POST if re.match(pattern, key)]
+
+    def _load_url_list(self, request, name):
+        pattern = r'%s_name_(?P<index>\d*)' % name
+        return [{
+                    'Name':request.POST[key].replace("'","\'"),
+                    'URL': request.POST[key.replace('_name_', '_url_')].replace("'","\'")
+                 } for key in request.POST if
+                re.match(pattern, key)]
+
+    def _load_col_list(self, request, columns):
+        return [{
+                    'Name': col['id'],
+                    'Description': request.POST['col_' + col['id'] + '_descr'],
+                    'Unit': request.POST['col_' + col['id'] + '_unit']
+                } for col in columns]
 
 class CommentView(View):
     """ This method handles the GET requests for the main page of data edit.
@@ -318,7 +391,6 @@ class CommentView(View):
                       })
 
     def post(self, request, schema, table):
-        print(request.POST, request.FILES)
         if request.POST and request.FILES:
             csvfile = TextIOWrapper(request.FILES['csv_file'].file,
                                     encoding=request.encoding)
@@ -354,7 +426,6 @@ def add_table_tags(request):
     tab_tags = obj.tags.all()
     ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     for tag in models.Tag.objects.filter(pk__in=ids):
-        print(tag)
         if tag not in tab_tags:
             obj.tags.add(tag)
     for tag in tab_tags:
@@ -377,7 +448,6 @@ class SearchView(View):
 
     def post(self, request):
         results = []
-        print(request.POST)
         filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
         print(filter_tags)
         if 'string' in request.POST and request.POST['string']:
