@@ -34,6 +34,8 @@ class ValidationError(Exception):
 
 
 def read_bool(s):
+    if isinstance(s, bool):
+        return s
     if s.lower() in ["true", "false"]:
         return s.lower() == "true"
     else:

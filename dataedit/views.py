@@ -152,7 +152,6 @@ def send_dump(rev_id, schema, table):
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
-    print(response)
     return response
 
 
@@ -220,12 +219,10 @@ class DataView(View):
 
         if models.Table.objects.filter(name=table,
                                        schema__name=schema).exists():
-            print(schema,table)
             tobj = models.Table.objects.get(name=table, schema__name=schema)
             tags = tobj.tags.all()
 
         comment_on_table = actions.get_comment_table(db, schema, table)
-        print("comm", comment_on_table)
         comment_columns = {d["name"]: d for d in comment_on_table[
             "Table fields"]} if "Table fields" in comment_on_table else {}
 
@@ -266,7 +263,6 @@ class DataView(View):
                       })
 
     def post(self, request, schema, table):
-        print(request.POST, request.FILES)
         if request.POST and request.FILES:
             csvfile = TextIOWrapper(request.FILES['csv_file'].file,
                                     encoding=request.encoding)
@@ -449,7 +445,6 @@ class SearchView(View):
     def post(self, request):
         results = []
         filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
-        print(filter_tags)
         if 'string' in request.POST and request.POST['string']:
             search_string = '*+OR+*'.join(
                 ('*' + request.POST['string'] + '*').split(' '))
@@ -464,7 +459,6 @@ class SearchView(View):
             post += '&fq=-(schema:%s)'%schema
         response = requests.get(post)
         response = json.loads(response.text)
-        print(len(response['response']['docs']))
 
         # The following is basicly a big "get_or_create" for possibly a lot of
         # schemas and tables that were returned by solr.

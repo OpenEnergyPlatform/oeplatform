@@ -57,7 +57,6 @@ def table_create(request, context=None):
     # TODO: column constrains: Unique,
     # load schema name and check for sanity
     engine = _get_engine()
-    connection = engine.connect()
 
     schema = read_pgid(request["schema"])
     create_schema = not has_schema(request)
@@ -78,61 +77,61 @@ def table_create(request, context=None):
         # TODO: check whether type_name is an actual postgres type
         # if not engine.dialect.has_type(connection,type_name):
         #    raise p.toolkit.ValidationError("Invalid field type: '%s'"% type_name )
-        fieldstrings.append(field["name"] + " " + type_name)
+        fs = field["name"] + " " + type_name
+
         if "pk" in field:
             if read_bool(field["pk"]):
                 primary_keys.append([field["name"]])
+                fs += " PRIMARY KEY"
+
+        fieldstrings.append(fs)
 
     table_constraints = {"unique": [], "pk": primary_keys, "fk": foreign_keys}
-    for con in request.pop('constraints', []):
-        if con['name'].lower() == "fk":
-            for fk in con['constraint']:
-                if not all(map(is_pg_qual,
-                               [fk["schema"], fk["table"], fk["field"]])):
-                    raise parser.ValidationError("Invalid identifier")
-                if fk["on delete"].lower() not in ["cascade", "no action",
-                                                   "restrict", "set null",
-                                                   "set default"]:
-                    raise parser.ValidationError("Invalid action")
-                foreign_keys.append(([field["name"]],
-                                     fk["schema"],
-                                     fk["table"],
-                                     fk["field"],
-                                     fk["on delete"]))
+    constraints = request.pop('constraints', {})
+    if 'fk' in constraints:
+        assert isinstance(constraints['fk'], list), \
+            "Foreign Keys should be a list"
+        for fk in constraints['fk']:
+            print(fk)
+            assert all(map(is_pg_qual, [fk["schema"], fk["table"]] + fk["fields"] + fk["names"])), "Invalid identifier"
+            if 'on_delete' in fk:
+                assert fk["on delete"].lower() in ["cascade", "no action",
+                                               "restrict", "set null",
+                                               "set default"], "Invalid on delete action"
+            else:
+                fk["on_delete"] = "no action"
+            foreign_keys.append((fk["names"],
+                                 fk["schema"],
+                                 fk["table"],
+                                 fk["fields"],
+                                 fk["on_delete"]))
 
-    fieldstrings.append("_comment int")
+    #fieldstrings.append("_comment int")
 
 
-    foreign_keys.append(("_comment", schema, "_"+table+"_cor", "id", "no action"))
+    #foreign_keys.append(("_comment", schema, "_"+table+"_cor", "id", "no action"))
     fk_constraints = []
     for (
             fk_field1, fk_schema, fk_table, fk_field2,
             fk_on_delete) in foreign_keys:
         fk_constraints.append(
-            "constraint {field1}_{schema}_{table}_{field2}_fk foreign key ({field1}) references {schema}.{table} ({field2}) match simple on update no action on delete {ondel}".format(
-                field1=fk_field1, schema=fk_schema, table=fk_table,
-                field2=fk_field2, ondel=fk_on_delete)
+            "FOREIGN KEY ({field1}) references {schema}.{table} ({field2}) match simple on update no action on delete {ondel}".format(
+                field1=",".join(fk_field1), schema=fk_schema, table=fk_table,
+                field2=",".join(fk_field2), ondel=fk_on_delete)
         )
     constraints = ", ".join(fk_constraints)
     fields = "(" + (
     ", ".join(fieldstrings + fk_constraints) if fieldstrings else "") + ")"
-    sql_string = "create table {schema}.{table} {fields} {constraints}".format(
-        schema=schema, table=table, fields=fields, constraints="")
-
-    create_dict = {'name': table}
-    # resource_dict = p.toolkit.get_action('resource_create')(
-    # context, request['resource'])
-
-    # TODO: Add author/maintainer, tags, license
-
-    resource_dict = None
+    sql_string = "create table {schema}.{table} {fields}".format(
+        schema=schema, table=table, fields=fields, constraints=constraints)
+    print(fk_constraints)
     session = sessionmaker(bind=engine)()
     try:
         if create_schema:
             session.execute("create schema %s" % schema)
-        create_meta(schema, table)
-        session.execute(sql_string.replace('%', '%%'))
 
+        session.execute(sql_string.replace('%', '%%'))
+        #create_meta(schema, table)
     except Exception as e:
         traceback.print_exc()
         session.rollback()
