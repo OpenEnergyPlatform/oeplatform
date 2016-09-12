@@ -35,11 +35,20 @@ import sqlalchemy as sqla
 session = None
 
 """ This is the initial view that initialises the database connection """
-excluded_schemas = [
-    "information_schema",
-    "public",
-    "topology",
-    "pg_catalog"
+schema_whitelist = [
+    "demand",
+    "economic",
+    "emission",
+    "environmental",
+    "grid",
+    "political_boundary",
+    "social",
+    "supply",
+    "scenario",
+    "weather",
+    "model_draft",
+    "reference",
+    "workshop"
 ]
 
 
@@ -48,7 +57,7 @@ def listschemas(request):
     schemas = sorted([(models.Schema.objects.get_or_create(name=schema)[0], len(
         {table for table in insp.get_table_names(schema=schema) if
          not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema not in excluded_schemas and not schema.startswith('_')], key=lambda x: x[0].name)
+                      schema in schema_whitelist and not schema.startswith('_')], key=lambda x: x[0].name)
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
 
@@ -80,7 +89,7 @@ def listtables(request, schema_name):
         actions.create_meta_schema(schema_name)
 
     insp = actions.connect()
-    if schema_name in excluded_schemas:
+    if schema_name not in schema_whitelist:
         raise Http404("Schema not accessible")
     schema,_ = models.Schema.objects.get_or_create(name=schema_name)
     tables = []
@@ -210,7 +219,7 @@ class DataView(View):
 
     def get(self, request, schema, table):
 
-        if schema in excluded_schemas or schema.startswith('_'):
+        if schema not in schema_whitelist or schema.startswith('_'):
             raise Http404("Schema not accessible")
 
         tags = []
@@ -366,7 +375,7 @@ class CommentView(View):
 
     def get(self, request, schema, table):
 
-        if schema in excluded_schemas:
+        if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
         tags = []
 
@@ -455,9 +464,10 @@ class SearchView(View):
         post = sec.SOLR_URL + 'select?q=' + query \
             + '&wt=json&rows=1000' \
             + '&fq=-(table:_*)'
-        for schema in excluded_schemas:
-            post += '&fq=-(schema:%s)'%schema
+        post += '&fq=(schema:(%s))'%" OR ".join(schema_whitelist)
+
         response = requests.get(post)
+        print(post, response)
         response = json.loads(response.text)
 
         # The following is basicly a big "get_or_create" for possibly a lot of
