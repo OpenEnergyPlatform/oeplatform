@@ -31,6 +31,8 @@ import codecs
 from io import TextIOWrapper
 import re
 import sqlalchemy as sqla
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 
 session = None
 
@@ -377,14 +379,8 @@ class CommentView(View):
 
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
-        tags = []
 
-        actions.create_meta(schema, table)
-
-        if models.Table.objects.filter(name=table,
-                                       schema__name=schema).exists():
-            tobj = models.Table.objects.get(name=table, schema__name=schema)
-            tags = tobj.tags.all()
+        tags = get_all_tags(schema=schema, table=table)
 
 
         return render(request,
@@ -423,20 +419,18 @@ class TagUpdate(UpdateView):
 
 @login_required(login_url='/login/')
 def add_table_tags(request):
+    ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     schema = request.POST['schema']
     table = request.POST.get('table',None)
-    obj, _ = models.Schema.objects.get_or_create(name=schema)
-    if table:
-        obj, _ = models.Table.objects.get_or_create(name=table, schema=obj)
-    tab_tags = obj.tags.all()
-    ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
-    for tag in models.Tag.objects.filter(pk__in=ids):
-        if tag not in tab_tags:
-            obj.tags.add(tag)
-    for tag in tab_tags:
-        if str(tag.pk) not in request.POST:
-            obj.tags.remove(tag)
-    obj.save()
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+    table_tags = sqla.Table("table_tags", metadata, autoload=True)
+
+    session.query(table_tags).filter_by(sqla.and_(table_tags.c.table_name==table, table_tags.c.schema_name==schema)).delete()
+    session.execute(table_tags.insert().values([{'schema_name':schema, 'table_name':table, 'tag':id} for id in ids]))
+    session.commit()
     return redirect(request.META['HTTP_REFERER'])
 
 
@@ -447,57 +441,54 @@ class TagCreate(LoginRequiredMixin, CreateView):
     template_name_suffix = '_form'
 
 
+def get_all_tags(schema=None, table=None):
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+    tags = sqla.Table("tags", metadata, autoload=True)
+
+    if table == None:
+        result = session.execute(tags.select())
+        session.commit()
+        r = [(r.id, r.name, "#" + format(r.color, '06X')) for r in result]
+        print(r)
+        return r
+
+    if schema == None:
+        schema='public'
+
+    table_tags = sqla.Table("table_tags", metadata, autoload=True)
+    tag_agg = array_agg(table_tags.c.tag)
+    result = session.execute(table_tags.select(tag_agg).filter(table_tags.c.table_name == table and table_tags.c.schema_name == schema))
+    session.commit()
+    return [(r.id, r.name, "#" + str(hex(r.color))) for r in result]
+
 class SearchView(View):
     def get(self, request):
-        return render(request, 'dataedit/search.html', {'results': [], 'tags':models.Tag.objects.all()})
+        return render(request, 'dataedit/search.html', {'results': [], 'tags':get_all_tags()})
 
     def post(self, request):
         results = []
-        filter_tags = models.Tag.objects.filter(pk__in={key[len('select_'):] for key in request.POST if key.startswith('select_')})
-        if 'string' in request.POST and request.POST['string']:
-            search_string = '*+OR+*'.join(
-                ('*' + request.POST['string'] + '*').split(' '))
-            query = 'comment%3A{s}+OR+table%3A{s}+OR+schema%3A{s}'.format(
-                s=search_string)
-        else:
-            query = '*:*'
-        post = sec.SOLR_URL + 'select?q=' + query \
-            + '&wt=json&rows=1000' \
-            + '&fq=-(table:_*)'
-        post += '&fq=(schema:(%s))'%" OR ".join(schema_whitelist)
+        engine = actions._get_engine()
+        metadata = sqla.MetaData(bind=engine)
+        Session = sessionmaker()
+        session = Session(bind=engine)
+        search_view = sqla.Table("meta_search", metadata, autoload=True)
+        table_tags = sqla.Table("table_tags", metadata, autoload=True)
 
-        response = requests.get(post)
-        print(post, response)
-        response = json.loads(response.text)
+        filter_tags = [int(key[len('select_'):]) for key in request.POST if key.startswith('select_')]
 
-        # The following is basicly a big "get_or_create" for possibly a lot of
-        # schemas and tables that were returned by solr.
-        # But it should be much faster this way.
+        tag_agg = array_agg(table_tags.c.tag)
+        query = session.query(search_view.c.schema, search_view.c.table, tag_agg).outerjoin(table_tags, (search_view.c.table == table_tags.c.table_name) and (search_view.c.table == table_tags.c.table_name))
+        if filter_tags:
+            print(filter_tags)
+            query = query.having(tag_agg.contains(filter_tags))
 
-        tables = {(result['schema'], result['table']) for result in
-                  response['response']['docs']}
-        query_set = reduce(operator.or_ ,{Q(schema__name=schema, name=table) for schema, table  in tables})
-        results = models.Table.objects.filter(query_set)
-        tables_found = {(res.schema.name, res.name) for res in results}
-        schemas = {schema for schema,_ in tables}
-        schema_mapper = {schema.name: schema for
-                         schema in models.Schema.objects.filter(name__in=schemas)}
-        new_schemas = []
-        for schema_name in (schemas - schema_mapper.keys()):
-            schema = models.Schema(name=schema_name)
-            schema_mapper[schema_name] = schema
-            new_schemas.append(schema)
-        models.Schema.objects.bulk_create(new_schemas)
+        query = query.group_by(search_view.c.schema, search_view.c.table)
+        results = session.execute(query)
 
-        new_tables = []
-        for (schema,table) in tables - tables_found:
-            table = models.Table(name=table,schema=schema_mapper[schema])
-            new_tables.append(table)
-        models.Table.objects.bulk_create(new_tables)
-
-        if not filter_tags:
-            results =  list(results)+new_tables
-
-        results = [t for t in results if set(filter_tags.all()).issubset(t.tags.all())]
-        return render(request, 'dataedit/search.html', {'results': results, 'tags':models.Tag.objects.all(), 'selected': filter_tags})
+        session.commit()
+        print(list(r for r in results))
+        return render(request, 'dataedit/search.html', {'results': results, 'tags':get_all_tags(), 'selected': filter_tags})
 
