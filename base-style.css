@@ -1,0 +1,12 @@
+/*.column-center{
+    background:#FCFCFD;
+    border: 2px solid #C5C5CF;
+}*/
+
+.tag {
+    padding: 0px;
+    padding-left: 5px;
+    padding-right: 5px;
+    height: 25px;
+    display: inline;
+}

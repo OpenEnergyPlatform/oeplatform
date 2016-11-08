@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        {% load bootstrap3 %}
+        {% bootstrap_css %}
+        {% bootstrap_javascript jquery=1%}
+        {% load staticfiles %}
+        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+    </head>
+
+<body>
+    {% block nav %}
+        <nav class="navbar navbar-default navbar-fixed-top">
+          <div class="container-fluid" style="width:80%; float:left;">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="/">OpenEnergy Platform</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="inactive"><a href="/dataedit/">Database</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li> <a href="/factsheets/models/">Models</a> </li>
+                        <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
+                        <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
+                </ul>
+                <li class="inactive"><a href="/literature/">Literature</a></li>
+
+                <li class="inactive">
+                    <a href="https://github.com/openego/oeplatform/issues" target="_blank">
+                        Discussion {% bootstrap_icon "new-window" %}
+                    </a>
+                </li>
+                <li class="inactive"><a href="http://wiki.openmod-initiative.org/wiki/Main_Page">Wiki</a></li>
+                {%block nav-additional %}{% endblock %}
+            </ul>
+          </div>
+          {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
+
+            <div style="float: right;background:inherit">
+                <a class="btn" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
+                <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+            </div>
+
+          {% else %}
+             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+          {% endif %}
+        </nav>
+        
+    {% endblock %}
+
+
+
+        <div class="container-fluid oe-wrapper" style="margin-top:70px">
+            <div class="row">
+
+                <div class="col-lg-8 col-lg-offset-1 col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            {% block content %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div>
+                                <p>
+                                    If you have ideas to improve the Open Energy Platform, you are welcome to add your comments on the discussion site of the <a href="http://wiki.openmod-initiative.org/wiki/Talk:Proposal_for_the_OpenEnergy_Platform">openmod-wiki page</a>.
+                                </p>
+                                <p>
+                                    <b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b>
+                                </p>
+                                <p>
+                                    If you want to contribute to this platform fork our project on <a href="https://github.com/openego/oeplatform">GitHub</a> or create Issues if you find bugs or if you want to request a feature.
+                                </p>
+                            </div>
+                            <div>
+                                {% block content-right %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</body>
+    
+</html>
