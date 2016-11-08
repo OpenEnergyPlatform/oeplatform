@@ -1,41 +1,7 @@
-.column-container {
-    position: relative;
-    width: 100%;
-}
-
-.column-left{ 
-    float: left; 
-    width: 10%; 
-    padding:20px;
-    border-radius: 10px;
+/*.column-center{
     background:#FCFCFD;
     border: 2px solid #C5C5CF;
-    margin-right: 1%;
-}
-
-.column-right{ 
-    top:70px; 
-    right:10px;
-    width: 15%;
-    position:fixed;
-    padding:20px;
-    border-radius: 10px;
-    background:#FCFCFD;
-    border: 2px solid #C5C5CF; 
-    margin-left:1%;
-}
-
-.column-center{ 
-    display: inline-block;
-     
-    overflow:auto;
-    margin-left:5%;
-    width: 78%;
-    padding:20px;
-    border-radius: 10px;
-    background:#FCFCFD;
-    border: 2px solid #C5C5CF;
-}
+}*/
 
 .tag {
     padding: 0px;
