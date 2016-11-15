@@ -3,6 +3,8 @@ from django.db.models import CharField, DateTimeField
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from colorfield.fields import ColorField
+
+
 # Create your models here.
 
 class TableRevision(models.Model):
@@ -38,4 +40,9 @@ class Table(Tagable):
 
     class Meta:
         unique_together = (("schema", "name"),)
+
+
+
+
+
 

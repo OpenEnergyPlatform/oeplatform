@@ -3,9 +3,9 @@
     {{label}}
 </div>
 <div style="display:inline-block; width:40%;">
-    {% for t_id, t_name, t_color in tags %}
-        <button class="btn tag" style="background:{{ t_color }};color:{% readable_text_color t_color %}">
-            {{t_name}}
+    {% for t in tags %}
+        <button class="btn tag" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
+            {{t.name}}
         </button>
     {%endfor%}
 </div>
