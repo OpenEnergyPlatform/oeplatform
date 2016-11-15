@@ -15,11 +15,11 @@ import io
 # Create your views here.
 
 
-def list_references(request):
+def list_references(request, error=None):
     engine = _get_engine()
     sess = Session(bind=engine)
     refs = [r for r in sess.query(ref.Entry)]
-    return render(request, 'literature/list_references.html', {'refs': refs})
+    return render(request, 'literature/list_references.html', {'refs': refs, 'error':error})
 
 
 def show_entry(request, entries_id):
@@ -93,8 +93,10 @@ class LiteratureView(View):
 @login_required(login_url='/login/')
 def upload(request):
     file = request.FILES['bibtex']
-    print(file.file)
-    read_bibtexfile(io.TextIOWrapper(file.file))
+    try:
+        return read_bibtexfile(io.TextIOWrapper(file.file))
+    except:
+        return list_references(request, "Not a valid bibtex file!")
 
 def get_bibtype_id(bibtype):
     engine = _get_engine()

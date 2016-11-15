@@ -1,17 +1,16 @@
 from django import template
 from dataedit import models
 import webcolors
-
+from dataedit.views import get_all_tags
 register = template.Library()
 
 
 @register.assignment_tag
-def get_tags(limit = None):
+def get_tags(schema=None, table=None, limit=None):
     if limit:
-        return models.Tag.objects.all()[:limit]
+        return get_all_tags(schema=schema, table=table)[:limit]
     else:
-        return models.Tag.objects.all()
-
+        return get_all_tags(schema=schema, table=table)
 
 @register.simple_tag()
 def readable_text_color(color_hex):

@@ -4,8 +4,8 @@
     {% if not selected %}
         No tags were added, yet.
     {% endif %}
-    {% for tag in selected %}
-        <a href="" class="btn tag" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{ tag.label }}</a>
+    {% for t_id, t_name, t_color in selected %}
+        <a href="" class="btn tag" style="background:{{t_color}};color:{% readable_text_color t_color %}">{{ tag.label }}</a>
     {% endfor %}
     {% if user.is_authenticated %}
     <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
@@ -14,18 +14,17 @@
         <form action="/dataedit/tags/add/" method="post">
             {% csrf_token %}
             <h4>Choose tags to attach:</h4>
-
-            {% for tag in all_tags %}
+            {% for t_id, t_name, t_color in all_tags %}
                 <span  >
-                    <input type="checkbox" class="hidden" name="tag_{{tag.pk}}" id="select_{{tag.pk}}" {% if tag in selected %} checked {% endif %}>
-                    <label style="background:{{tag.color}};color:{% readable_text_color tag.color %}" class="btn tag" for="select_{{tag.pk}}">{{tag.label}}</label>
+                    <input type="checkbox" class="hidden" name="tag_{{t_id}}" id="select_{{t_id}}" {% if t_id in selected %} checked {% endif %}>
+                    <label style="background:{{t_color}};color:{% readable_text_color t_color %}" class="btn tag" for="select_{{t_id}}">{{t_name}}</label>
                 </span>
             {% endfor %}
             <input type="hidden" name="schema" value="{{schema}}"/>
             {% if table %}
                 <input type="hidden" name="table" value="{{table}}"/>
             {% endif %}
-            <input type="submit" class="btn btn-success" value="Tag object">
+            <input type="submit" class="btn btn-success" value="Apply">
         </form>
     </div>
     {% endif %}
