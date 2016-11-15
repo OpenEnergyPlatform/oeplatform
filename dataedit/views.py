@@ -430,7 +430,7 @@ def get_all_tags(schema=None, table=None):
         # default schema is the public schema
         schema='public'
 
-    result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color')).filter((Table_tags.tag == Tag.id) and (Table_tags.table_name == table) and (Table_tags.schema_name == schema)))
+    result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color'), Table_tags.table_name).filter(Table_tags.tag == Tag.id).filter(Table_tags.table_name == table).filter(Table_tags.schema_name == schema))
     session.commit()
     return [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
 
