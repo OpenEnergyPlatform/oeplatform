@@ -68,7 +68,6 @@ def read_label(table, comment):
         return json.loads(comment.replace('\n', ''))['Name'].strip() \
                + " (" + table + ")"
     except Exception as e:
-        print(e, comment)
         return None
 
 def get_readable_table_names(schema):
@@ -126,7 +125,6 @@ pending_dumps = {}
 
 
 def create_dump(schema, table, rev_id, name):
-    print(table)
     if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
         os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
     if not os.path.exists(
@@ -137,7 +135,6 @@ def create_dump(schema, table, rev_id, name):
     L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
          '--revision=' + rev_id, '-q',
          sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
-    print(" ".join(L))
     return call(L, shell=False)
 
 
@@ -416,14 +413,12 @@ def get_all_tags(schema=None, table=None):
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
-    print("Load tags for" , schema, table)
 
     if table == None:
         # Neither table, not schema are defined
         result = session.execute(sqla.select([Tag]))
         session.commit()
         r = [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
-        print(r)
         return r
 
     if schema == None:
@@ -458,6 +453,5 @@ class SearchView(View):
 
         session.commit()
         ret = [{'schema': r.schema, 'table':r.table} for r in results]
-        print(ret)
         return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
 
