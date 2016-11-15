@@ -15,6 +15,5 @@ urlpatterns = [
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/comments$'.format(qual=pgsql_qualifier), views.CommentView.as_view(), name='input'),
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/meta_edit$'.format(qual=pgsql_qualifier), views.MetaView.as_view(), name='input'),
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})/(?P<rev_id>\d+)$'.format(qual=pgsql_qualifier), views.show_revision, name='input'),
-    url(r'^tags/create/', views.TagCreate.as_view(), name='tag'),
     url(r'^search', views.SearchView.as_view()),
 ]
