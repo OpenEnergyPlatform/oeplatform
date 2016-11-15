@@ -7,20 +7,17 @@
     {% get_tags 10 as all_tags %}
     <h3>Popular tags:</h3>
     <div style="overflow: hidden;">
-    {% for t_id, t_name, t_color in all_tags %}
+    {% for t in all_tags %}
         <div style="display:inline; padding:5px;float: left;">
             <form action="/dataedit/search"  method="post">
                 {% csrf_token %}
-                <input type="submit" class="btn tag" style="background:{{ t_color }};color:{% readable_text_color t_color %}" value="{{ t_name }}">
-                <input type="hidden" name="select_{{t_id}}" value="on">
+                <input type="submit" class="btn tag" style="background:{{ t.color }};color:{% readable_text_color t.color %}" value="{{ t.name }}">
+                <input type="hidden" name="select_{{t.id}}" value="on">
             </form>
         </div>
     {% endfor %}
     </ul>
     </div>
-    {% if user.is_authenticated %}
-        <a href="/dataedit/tags/create/">Add tag</a>
-    {% endif %}
 {% endblock %}
 {% block content %}
 {% block data_search %}
