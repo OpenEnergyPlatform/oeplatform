@@ -6,9 +6,10 @@
         {% bootstrap_css %}
         {% bootstrap_javascript jquery=1%}
         {% load staticfiles %}
+        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
-    
+
 <body>
     {% block nav %}
         <nav class="navbar navbar-default navbar-fixed-top">
@@ -26,10 +27,10 @@
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                 </ul>
-                <li class="inactive"><a href="/literature/">References</a></li>
+                <li class="inactive"><a href="/literature/">Literature</a></li>
 
                 <li class="inactive">
-                    <a href="http://wiki.openmod-initiative.org/wiki/Fact_sheets_for_models,_frameworks_and_scenarios" target="_blank">
+                    <a href="https://github.com/openego/oeplatform/issues" target="_blank">
                         Discussion {% bootstrap_icon "new-window" %}
                     </a>
                 </li>
@@ -53,23 +54,35 @@
 
 
 
-        <div class="column-container" style="margin-top:70px">
-            {# <div class="column-left">left</div> #}
-            <div class="column-center">
-                {% block content %}{% endblock %}                
-            </div>
-            <div class="column-right">
-                <div>
-                    If you have ideas to improve the Open Energy Platform, you are welcome to add your comments on the discussion site of the <a href="http://wiki.openmod-initiative.org/wiki/Talk:Proposal_for_the_OpenEnergy_Platform">openmod-wiki page</a>.<br>
-                    <br>
-                    <b> The design of this page is still highly volatile! Please focus on the contents of above factsheets.</b>
-                    <br>
-                    <br>
-                                If you want to contribute to this platform fork our project on <a href="https://github.com/openego/oeplatform">GitHub</a> or create Issues if you find bugs or if you want to request a feature.
+        <div class="container-fluid oe-wrapper" style="margin-top:70px">
+            <div class="row">
+
+                <div class="col-lg-8 col-lg-offset-1 col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            {% block content %}{% endblock %}
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    {% block content-right %}{% endblock %}
+
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div>
+                                <p>
+                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a> br>. You can also fork the project and contribute yourself.
+                                </p>
+                                <p>
+                                    <b> Please mention that the platform is still under discussion and therefore the design of this page is still highly volatile!.</b>
+                                </p>
+                            </div>
+                            <div>
+                                {% block content-right %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
 </body>

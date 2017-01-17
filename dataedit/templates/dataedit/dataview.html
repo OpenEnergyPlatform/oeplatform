@@ -23,7 +23,9 @@
 {% load bootstrap3 %}
 {% block heading %}{% endblock %}
 
-{% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=tags %}
+{% load dataedit.taghandler %}
+{% get_tags table=table schema=schema as table_tags%}
+{% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
 <hr>
 
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
@@ -138,7 +140,7 @@
         <div class="form-group" style="margin:10px">
             <label for="commit-message">Commit message</label>
             <input class="form-control" type="textarea" name="comment" id="commit-message">
-            <button class="btn btn-success" id="savebutton"> Save </button>
+            <a href="" class="btn btn-success" id="savebutton"> Save </a>
         </div>
     </div>
     {% endif %}

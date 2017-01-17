@@ -13,10 +13,10 @@
         <div class="well">
 <h4>Select tag filter:</h4>
             <div>
-                {% for tag in tags %}
+                {% for t in tags %}
                 <span>
-                    <input type="checkbox" class="hidden" name="select_{{tag.pk}}" id="select_{{tag.pk}}">
-                    <label style="background:{{ tag.color }};color:{% readable_text_color tag.color %}" class="btn tag" for="select_{{tag.pk}}" {%if tag in selected %} checked {%endif%}>{{tag.label}}</label>
+                    <input type="checkbox" class="hidden" name="select_{{t.id}}" id="select_{{t.id}}">
+                    <label style="background:{{ t.color }}; color:{% readable_text_color t.color %}" class="btn tag" for="select_{{t.id}}" {%if t.id in selected %} checked {%endif%}>{{t.name}}</label>
                 </span>
                 {% endfor %}
             </div>
@@ -27,10 +27,11 @@
 No matches found
 {% endif %}
 <div class="list-group">
-{% for table in results %}
+{% for r in results %}
     <div class="inner-addon right-addon">
-        <a class="list-group-item" href="/dataedit/view/{{table.schema.name}}/{{table.name}}">
-            {% include 'dataedit/tagged_field.html' with label=table.name tags=table.tags.all %}
+        <a class="list-group-item" href="/dataedit/view/{{r.schema}}/{{r.table}}">
+            {% get_tags table=r.table schema=r.schema as table_tags%}
+            {% include 'dataedit/tagged_field.html' with label=r.table tags=table_tags %}
         </a>
     </div>
 
