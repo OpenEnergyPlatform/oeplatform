@@ -47,7 +47,7 @@ schema_whitelist = [
     "supply",
     "scenario",
     "weather",
-    "model_draft",
+    # "model_draft",
     "reference",
     "workshop"
 ]
