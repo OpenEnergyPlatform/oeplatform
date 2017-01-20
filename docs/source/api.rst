@@ -119,3 +119,10 @@ Select data
 :offset (Integer):
     Specifies how many entries should be skipped before returning
     data
+
+
+Binding the API to python
+=========================
+
+.. automodule:: api.views
+    :members:
