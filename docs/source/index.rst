@@ -13,6 +13,7 @@ Contents:
 
    api
    dataedit
+   modelview
 
 Indices and tables
 ==================
