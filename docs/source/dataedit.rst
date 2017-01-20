@@ -1,6 +1,6 @@
-==============================
-The OEP database visualisation
-==============================
+======================
+Database visualisation
+======================
 
 .. automodule:: dataedit.views
     :members:

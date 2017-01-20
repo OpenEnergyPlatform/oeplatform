@@ -1,6 +1,6 @@
-=========================
-The OEP factsheet handler
-=========================
+=================
+Factsheet handler
+=================
 
 .. automodule:: modelview.views
     :members:

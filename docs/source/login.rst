@@ -1,6 +1,6 @@
-=======================
-The OEP user management
-=======================
+===============
+User management
+===============
 
 .. automodule:: login.views
     :members:
