@@ -26,6 +26,12 @@ from unittest.mock import MagicMock
 
 # -- General configuration ------------------------------------------------
 
+import django
+sys.path.insert(0, os.path.abspath('..'))
+os.environ['DJANGO_SETTINGS_MODULE'] = 'oeplatform.settings'
+django.setup()
+
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 

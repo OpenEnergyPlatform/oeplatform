@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 2
 
    api
-
+   dataedit
 
 Indices and tables
 ==================
