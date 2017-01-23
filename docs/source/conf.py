@@ -27,9 +27,8 @@ from unittest.mock import MagicMock
 # -- General configuration ------------------------------------------------
 
 import django
-path = '/'.join(os.path.realpath(__file__).split('/')[:-4])+'/oeplatform'
-sys.path.insert(0, os.path.abspath(path))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'oeplatform.settings'
+from django.conf import settings
+settings.configure()
 django.setup()
 
 
