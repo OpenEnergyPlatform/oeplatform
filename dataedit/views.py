@@ -65,12 +65,13 @@ def listschemas(request):
     """
 
     insp = actions.connect()
-    schemas = sorted([(schema, len(
-        {table for table in insp.get_table_names(schema=schema) if
-         not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema in schema_whitelist and not schema.startswith('_')], key=lambda x: x[0])
-    return render(request, 'dataedit/dataedit_schemalist.html',
-                  {'schemas': schemas})
+    engine = actions._get_engine()
+    conn = engine.connect()
+    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
+    response = conn.execute(query)
+    schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
+    print(schemas)
+    return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
 
 def read_label(table, comment):
@@ -119,10 +120,16 @@ def listtables(request, schema_name):
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
-    insp = actions.connect()
+    engine = actions._get_engine()
+    conn = engine.connect()
     labels = get_readable_table_names(schema_name)
-    tables = [(table, labels[table] if table in labels else None) for table in insp.get_table_names(schema=schema_name) if
-              not table.startswith('_')]
+    query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
+            'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
+        schema=schema_name, user=sec.dbuser)
+    print(query)
+    tables = conn.execute(query)
+    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
+              not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema_name, 'tables': tables})
@@ -284,17 +291,23 @@ class DataView(View):
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
 
-        repo = svn.local.LocalClient(sec.datarepowc)
-        TableRevision.objects.all().delete()
-        available_revisions = TableRevision.objects.filter(table=table,
-                                                           schema=schema)
         revisions = []
-        for rev in repo.log_default():
-            try:
-                rev_obj = available_revisions.get(revision=rev.revision)
-            except TableRevision.DoesNotExist:
-                rev_obj = None
-            revisions.append((rev, rev_obj))
+        try:
+            repo = svn.local.LocalClient(sec.datarepowc)
+            TableRevision.objects.all().delete()
+            available_revisions = TableRevision.objects.filter(table=table,
+                                                               schema=schema)
+
+
+            for rev in repo.log_default():
+                try:
+                    rev_obj = available_revisions.get(revision=rev.revision)
+                except TableRevision.DoesNotExist:
+                    rev_obj = None
+                revisions.append((rev, rev_obj))
+        except:
+            revisions = []
+
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
