@@ -26,6 +26,12 @@ from unittest.mock import MagicMock
 
 # -- General configuration ------------------------------------------------
 
+import django
+from django.conf import settings
+settings.configure()
+django.setup()
+
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 

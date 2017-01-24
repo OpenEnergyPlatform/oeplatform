@@ -14,6 +14,11 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 
 def date_handler(obj):
+    """
+    Implements a handler to serialize dates in JSON-strings
+    :param obj: An object
+    :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
+    """
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
     else:
@@ -24,6 +29,12 @@ def date_handler(obj):
 
 
 def create_ajax_handler(func):
+    """
+    Implements a mapper from api pages to the corresponding functions in
+    api/actions.py
+    :param func: The name of the callable function
+    :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
+    """
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
@@ -37,6 +48,11 @@ def create_ajax_handler(func):
 
 
 def stream(data):
+    """
+    TODO: Implement streaming of large datasets
+    :param data:
+    :return:
+    """
     size = len(data)
     chunck = 100
 
