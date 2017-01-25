@@ -31,6 +31,12 @@ The second database connection should point to another postgresql database. It i
     dbhost = ""
     db = ""
 
+Make sure that this database has the following extensions installed:
+      
+* hstore               
+* postgis         
+* postgis_topology
+
 Next step is to migrate the database shema from django to your django database:
 
     python manage.py migrate

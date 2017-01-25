@@ -47,31 +47,60 @@ schema_whitelist = [
     "supply",
     "scenario",
     "weather",
-    "model_draft",
+    # "model_draft",
     "reference",
     "workshop"
 ]
 
 
 def listschemas(request):
+    """
+    Loads all schemas that are present in the external database specified in
+    oeplatform/securitysettings.py. Only schemas that are present in the
+    whitelist are processed that do not start with an underscore.
+
+    :param request: A HTTP-request object sent by the Django framework
+
+    :return: Renders the schema list
+    """
+
     insp = actions.connect()
-    schemas = sorted([(schema, len(
-        {table for table in insp.get_table_names(schema=schema) if
-         not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema in schema_whitelist and not schema.startswith('_')], key=lambda x: x[0])
-    return render(request, 'dataedit/dataedit_schemalist.html',
-                  {'schemas': schemas})
+    engine = actions._get_engine()
+    conn = engine.connect()
+    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
+    response = conn.execute(query)
+    schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
+    print(schemas)
+    return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
 
 def read_label(table, comment):
+    """
+    Extracts the readable name from @comment and appends the real name in parens.
+    If comment is not a JSON-dictionary or does not contain a field 'Name' None
+    is returned.
+
+    :param table: Name to append
+
+    :param comment: String containing a JSON-dictionary according to @Metadata
+
+    :return: Readable name appended by the true table name as string or None
+    """
     try:
         return json.loads(comment.replace('\n', ''))['Name'].strip() \
                + " (" + table + ")"
     except Exception as e:
-        print(e, comment)
         return None
 
 def get_readable_table_names(schema):
+    """
+    Loads all tables from a schema with their corresponding comments, extracts
+    their readable names, if possible.
+
+    :param schema: The schema name as string
+
+    :return: A dictionary with that maps table names to readable names as returned by :py:meth:`dataedit.views.read_label`
+    """
     engine = actions._get_engine()
     conn = engine.connect()
     try:
@@ -86,10 +115,21 @@ def get_readable_table_names(schema):
 
 
 def listtables(request, schema_name):
-    insp = actions.connect()
+    """
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema_name: Name of a schema
+    :return: Renders the list of all tables in the specified schema
+    """
+    engine = actions._get_engine()
+    conn = engine.connect()
     labels = get_readable_table_names(schema_name)
-    tables = [(table, labels[table] if table in labels else None) for table in insp.get_table_names(schema=schema_name) if
-              not table.startswith('_')]
+    query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
+            'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
+        schema=schema_name, user=sec.dbuser)
+    print(query)
+    tables = conn.execute(query)
+    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
+              not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema_name, 'tables': tables})
@@ -109,6 +149,15 @@ COMMENT_KEYS = [('Name', 'Name'),
 
 
 def _type_json(json_obj):
+    """
+    Recursively labels JSON-objects by their types. Singleton lists are handled
+    as elementary objects.
+
+    :param json_obj: An JSON-object - possibly a dictionary, a list or an elementary JSON-object (e.g a string)
+
+    :return: An annotated JSON-object (type, object)
+
+    """
     if isinstance(json_obj, dict):
         return 'dict', [(k, _type_json(json_obj[k]))
                         for k
@@ -126,7 +175,6 @@ pending_dumps = {}
 
 
 def create_dump(schema, table, rev_id, name):
-    print(table)
     if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
         os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
     if not os.path.exists(
@@ -137,7 +185,6 @@ def create_dump(schema, table, rev_id, name):
     L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
          '--revision=' + rev_id, '-q',
          sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
-    print(" ".join(L))
     return call(L, shell=False)
 
 
@@ -169,7 +216,7 @@ def show_revision(request, schema, table, rev_id):
 def request_revision(request, schema, table, rev_id):
     """
     This method handles an ajax request for a data revision of a specific table.
-    On success ta TableRevision will be stored to mark that the corresponding
+    On success the TableRevision-object will be stored to mark that the corresponding
     revision is available.
 
     :param request:
@@ -210,11 +257,21 @@ class DataView(View):
     """
 
     def get(self, request, schema, table):
+        """
+        Collects the following information on the specified table:
+            * Postgresql comment on this table
+            * A list of all columns
+            * A list of all revisions of this table
 
+        :param request: An HTTP-request object sent by the Django framework
+        :param schema: Name of a schema
+        :param table: Name of a table stored in this schema
+        :return:
+        """
         if schema not in schema_whitelist or schema.startswith('_'):
             raise Http404("Schema not accessible")
 
-        tags = []
+        tags = [] # TODO: Unused - Remove
         db = sec.dbname
         actions.create_meta(schema, table)
 
@@ -234,17 +291,23 @@ class DataView(View):
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
 
-        repo = svn.local.LocalClient(sec.datarepowc)
-        TableRevision.objects.all().delete()
-        available_revisions = TableRevision.objects.filter(table=table,
-                                                           schema=schema)
         revisions = []
-        for rev in repo.log_default():
-            try:
-                rev_obj = available_revisions.get(revision=rev.revision)
-            except TableRevision.DoesNotExist:
-                rev_obj = None
-            revisions.append((rev, rev_obj))
+        try:
+            repo = svn.local.LocalClient(sec.datarepowc)
+            TableRevision.objects.all().delete()
+            available_revisions = TableRevision.objects.filter(table=table,
+                                                               schema=schema)
+
+
+            for rev in repo.log_default():
+                try:
+                    rev_obj = available_revisions.get(revision=rev.revision)
+                except TableRevision.DoesNotExist:
+                    rev_obj = None
+                revisions.append((rev, rev_obj))
+        except:
+            revisions = []
+
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
@@ -259,6 +322,15 @@ class DataView(View):
                       })
 
     def post(self, request, schema, table):
+        """
+        Handles the behaviour if a .csv-file is sent to the view of a table.
+        The contained datasets are inserted into the corresponding table via
+        the API.
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: Name of a schema
+        :param table: Name of a table
+        :return: Redirects to the view of the table the data was sent to.
+        """
         if request.POST and request.FILES:
             csvfile = TextIOWrapper(request.FILES['csv_file'].file,
                                     encoding=request.encoding)
@@ -275,7 +347,17 @@ class DataView(View):
                                                                 table=table))
 
 class MetaView(View):
+    """
+
+    """
     def get(self, request, schema, table):
+        """
+        Loads the metadata of the passed table and its columns.
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: Name of a schema
+        :param table: Name of a table
+        :return: Renders a form that contains a form with the tables metadata
+        """
         db = sec.dbname
         comment_on_table = actions.get_comment_table(db, schema, table)
         columns = actions.analyze_columns(db, schema, table)
@@ -299,6 +381,15 @@ class MetaView(View):
         })
 
     def post(self, request, schema, table):
+        """
+        Handles the send event of the form created in the get-method. The
+        metadata is transformed into a JSON-dictionary and stored in the tables
+        comment inside the database.
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: Name of a schema
+        :param table: Name of a table
+        :return: Redirects to the view of the specified table
+        """
         columns = actions.analyze_columns(sec.dbname, schema, table)
         comment = {
             'Name': request.POST['name'],
@@ -332,11 +423,18 @@ class MetaView(View):
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
     name_pattern = r'[\w\s]*'
+
     def loadName(self, name):
+        """
+        Checks whether the `name` contains only alphanumeric symbols and whitespaces
+        :param name: A string
+        :return: If the string is valid it is returned. Otherwise an AssertionError is raised.
+        """
         assert(re.match(self.name_pattern,name))
         return name
 
     def _load_list(self, request, name):
+
         pattern = r'%s_(?P<index>\d*)'%name
         return [request.POST[key].replace("'","\'") for key in request.POST if re.match(pattern, key)]
 
@@ -395,6 +493,16 @@ class CommentView(View):
 
 @login_required(login_url='/login/')
 def add_table_tags(request):
+    """
+    Updates the tags on a table according to the tag values in request.
+    The update will delete all tags that are not present in request and add all tags that are.
+
+    :param request: A HTTP-request object sent by the Django framework. The *POST* field must contain the following values:
+        * schema: The name of a schema
+        * table: The name of a table
+        * Any number of values that start with 'tag_' followed by the id of a tag.
+    :return: Redirects to the previous page
+    """
     ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     schema = request.POST['schema']
     table = request.POST.get('table',None)
@@ -412,18 +520,22 @@ def add_table_tags(request):
 
 
 def get_all_tags(schema=None, table=None):
+    """
+    Load all tags of a specific table
+    :param schema: Name of a schema
+    :param table: Name of a table
+    :return:
+    """
     engine = actions._get_engine()
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
-    print("Load tags for" , schema, table)
 
     if table == None:
         # Neither table, not schema are defined
         result = session.execute(sqla.select([Tag]))
         session.commit()
         r = [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
-        print(r)
         return r
 
     if schema == None:
@@ -435,10 +547,23 @@ def get_all_tags(schema=None, table=None):
     return [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
 
 class SearchView(View):
+    """
+
+    """
     def get(self, request):
+        """
+        Renders an empty search field with a list of tags
+        :param request: A HTTP-request object sent by the Django framework
+        :return:
+        """
         return render(request, 'dataedit/search.html', {'results': [], 'tags':get_all_tags()})
 
     def post(self, request):
+        """
+
+        :param request: A HTTP-request object sent by the Django framework. May contain a set of ids prefixed by *select_*
+        :return:
+        """
         results = []
         engine = actions._get_engine()
         metadata = sqla.MetaData(bind=engine)
@@ -458,6 +583,5 @@ class SearchView(View):
 
         session.commit()
         ret = [{'schema': r.schema, 'table':r.table} for r in results]
-        print(ret)
         return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
 
