@@ -45,4 +45,14 @@ Finally, you can run your local copy of this platform:
 
     python manage.py runserver
     
-Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser
+Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
+
+## User Management
+
+If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running: 
+
+    from login.models import myuser
+    u = myuser.objects.create_user('test','test@mail.com')
+    u.set_password('pass')
+    u.save()
+
