@@ -251,10 +251,12 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
+@login_required(login_url='/login/')
 def tag_overview(request):
     return render(request=request, template_name='dataedit/tag_overview.html')
 
 
+@login_required(login_url='/login/')
 def tag_editor(request, id =""):
         tags = get_all_tags()
 
@@ -283,6 +285,7 @@ def tag_editor(request, id =""):
                       context={"name" : "", "color" : "#000000", "assigned": False})
 
 
+@login_required(login_url='/login/')
 def change_tag(request):
     if "submit_save" in request.POST:
         if "tag_id" in request.POST:
