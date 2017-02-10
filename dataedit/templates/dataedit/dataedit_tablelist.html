@@ -2,6 +2,7 @@
 
 {% block data_content %}
 {% load dataedit.taghandler %}
+
 <h3>Schema: {{schema}}</h3>
 {% include 'dataedit/taggable_setting.html' with schema=schema.name %}
 <div class="well">
@@ -9,13 +10,14 @@ Now you are in the database schema you selected and see the list of all tables o
 You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
 </div>
 <div class="list-group">
-{% for table, label in tables %}
+
+{% for table, label, indication_color in tables %}
     {% get_tags table=table schema=schema as table_tags%}
     <a class="list-group-item" href="{{schema}}/{{table}}" >
         {% if label %}
-            {% include 'dataedit/tagged_field.html' with label=label tags=table_tags %}
+            {% include 'dataedit/tagged_field.html' with label=label tags=table_tags indication_color=indication_color %}
         {% else %}
-            {% include 'dataedit/tagged_field.html' with label=table tags=table_tags %}
+            {% include 'dataedit/tagged_field.html' with label=table tags=table_tags indication_color=indication_color %}
         {% endif %}
     </a>
 {% endfor %}

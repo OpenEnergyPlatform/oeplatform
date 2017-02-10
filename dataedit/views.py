@@ -128,12 +128,26 @@ def listtables(request, schema_name):
         schema=schema_name, user=sec.dbuser)
     print(query)
     tables = conn.execute(query)
-    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
+    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None, get_indication_color(schema_name, table.tablename)) for table in tables if
               not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
+    indication_colors = get_indication_color(schema_name, tables)
+    #indication_color = "#FF0000"
+
+
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema_name, 'tables': tables})
 
+
+def get_indication_color(schema_name, tablename):
+
+    not_allowed_symbols = [',', '.', '_']
+
+    for symbol in not_allowed_symbols:
+        if symbol in tablename:
+            return "#FF0000"
+
+    return "#008000"
 
 COMMENT_KEYS = [('Name', 'Name'),
                 ('Date of collection', 'Date_of_Collection'),
@@ -635,6 +649,13 @@ def get_all_tags(schema=None, table=None):
     result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color'), Table_tags.table_name).filter(Table_tags.tag == Tag.id).filter(Table_tags.table_name == table).filter(Table_tags.schema_name == schema))
     session.commit()
     return [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
+
+
+def get_indication_light():
+
+
+    return;
+
 
 class SearchView(View):
     """

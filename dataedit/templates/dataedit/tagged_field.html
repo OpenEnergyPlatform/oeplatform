@@ -1,4 +1,7 @@
 {% load dataedit.taghandler %}
+{% if indication_color != None %}
+    <button class="btn tag" style="background: {{ indication_color }};color: #FFFFFF;width: 15px; height: 15px"></button>
+{% endif %}
 <div style="display: inline-block;">
     {{label}}
 </div>
@@ -8,4 +11,5 @@
             {{t.name}}
         </button>
     {%endfor%}
+
 </div>
