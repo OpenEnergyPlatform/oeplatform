@@ -1,0 +1,26 @@
+
+{% if indication_light.2 == 0 %}
+
+    <div class="alert alert-warning">
+        <strong> Great! </strong> The data-set ist complete.
+    </div>
+
+{% endif %}
+
+{% if indication_light.2 == 1 %}
+
+    <div class="alert alert-warning">
+       <strong> Warning ! </strong> {{indication_light.1}}
+    </div>
+
+{% endif %}
+
+
+{% if indication_light.2 == 2 %}
+
+    <div class="alert alert-danger">
+        <strong> Attention! </strong> {{indication_light.1}}
+    </div>
+
+{% endif %}
+

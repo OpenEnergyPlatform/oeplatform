@@ -33,6 +33,7 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
+
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -67,9 +68,11 @@ def listschemas(request):
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
-    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
+    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(
+        user=sec.dbuser)
     response = conn.execute(query)
-    schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
+    schemas = sorted([(row.schemaname, row.tables) for row in response if
+                      row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
     print(schemas)
     return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
@@ -92,6 +95,7 @@ def read_label(table, comment):
     except Exception as e:
         return None
 
+
 def get_readable_table_names(schema):
     """
     Loads all tables from a schema with their corresponding comments, extracts
@@ -104,14 +108,15 @@ def get_readable_table_names(schema):
     engine = actions._get_engine()
     conn = engine.connect()
     try:
-        res = conn.execute('SELECT table_name as TABLE, obj_description(((\'{table_schema}.\' || table_name ))::regclass) as COMMENT ' \
-                            'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(table_schema=schema))
+        res = conn.execute(
+            'SELECT table_name as TABLE, obj_description(((\'{table_schema}.\' || table_name ))::regclass) as COMMENT ' \
+            'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(table_schema=schema))
     except Exception as e:
         raise e
         return {}
     finally:
         conn.close()
-    return {table: read_label(table, comment) for (table,comment) in res}
+    return {table: read_label(table, comment) for (table, comment) in res}
 
 
 def listtables(request, schema_name):
@@ -126,28 +131,81 @@ def listtables(request, schema_name):
     query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
             'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
         schema=schema_name, user=sec.dbuser)
-    print(query)
+
     tables = conn.execute(query)
-    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None, get_indication_color(schema_name, table.tablename)) for table in tables if
+    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None,
+               get_indication_color(table.tablename, schema_name)[0]) for table in tables if
               not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
-    indication_colors = get_indication_color(schema_name, tables)
-    #indication_color = "#FF0000"
-
 
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema_name, 'tables': tables})
 
 
-def get_indication_color(schema_name, tablename):
+def get_indication_color(table, schema):
+    """
 
-    not_allowed_symbols = [',', '.', '_']
+    :rtype: tuple
+    """
+    red_color = "#FF0000"
+    yellow_color = "#FFA500"
+    green_color = "#008000"
+
+    db = sec.dbname
+    comment_on_table = actions.get_comment_table(db, schema, table)
+
+    """
+    red: Serve violations (forbidden symbols in name, not owned by the database user used by the platform, meta-data missing)
+    yellow: Minor violations (meta-data incomplete)
+    green: Everything seems fine
+    """
+
+    return_color = green_color
+    return_reason = ""
+    return_code = 0
+
+    # Meta-Data
+
+    # Check for meta-data incomplete
+
+    incomplete_meta_data = [] in comment_on_table.values()
+    if incomplete_meta_data:
+        return_color = yellow_color
+        return_reason = "Incomplete meta-data."
+        return_code = 1
+
+    # Check for meta-data missing
+
+    no_metadata = True
+
+    for key in comment_on_table:
+        if comment_on_table[key] != "":
+            no_metadata = False
+        break
+
+    if no_metadata:
+        return_color = red_color
+        return_reason = "Missing complete meta-data."
+        return_code = 2
+
+    # Not allowed symbols
+
+    not_allowed_symbols = [',', '.', ' ']
 
     for symbol in not_allowed_symbols:
-        if symbol in tablename:
-            return "#FF0000"
+        if symbol in table:
+            return_color = red_color
+            return_reason = "Forbidden symbols in name."
+            return_code = 2
 
-    return "#008000"
+    if not table.islower():
+        return_color = red_color
+        return_reason = "Bad formatting in name."
+        return_code = 2
+
+
+    return return_color, return_reason, return_code
+
 
 COMMENT_KEYS = [('Name', 'Name'),
                 ('Date of collection', 'Date_of_Collection'),
@@ -226,6 +284,7 @@ def show_revision(request, schema, table, rev_id):
     rev.save()
     return send_dump(rev_id, schema, table)
 
+
 @ajax
 def request_revision(request, schema, table, rev_id):
     """
@@ -243,7 +302,7 @@ def request_revision(request, schema, table, rev_id):
     fname = "{schema}/{table}.tar.gz".format(schema=schema,
                                              table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
 
-    original = True # marks whether this method initialised the revision creation
+    original = True  # marks whether this method initialised the revision creation
 
     # If some user already requested this dataset wait for this thread to finish
     if (schema, table, rev_id) in pending_dumps:
@@ -271,32 +330,32 @@ def tag_overview(request):
 
 
 @login_required(login_url='/login/')
-def tag_editor(request, id =""):
-        tags = get_all_tags()
+def tag_editor(request, id=""):
+    tags = get_all_tags()
 
-        create_new = True
+    create_new = True
 
-        for t in tags:
-            if id != "" and int(id) == t["id"]:
-                tag = t
+    for t in tags:
+        if id != "" and int(id) == t["id"]:
+            tag = t
 
-                # inform the user if tag is assigned to an object
-                engine = actions._get_engine()
-                Session = sessionmaker()
-                session = Session(bind=engine)
+            # inform the user if tag is assigned to an object
+            engine = actions._get_engine()
+            Session = sessionmaker()
+            session = Session(bind=engine)
 
-                assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
+            assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
 
-                return render(request=request, template_name='dataedit/tag_editor.html',
-                              context=
-                              {
-                                  "name" : tag['name'],
-                                  "id" : tag['id'],
-                                  "color" : tag['color'],
-                                  "assigned" : assigned
-                              })
-        return render(request=request, template_name='dataedit/tag_editor.html',
-                      context={"name" : "", "color" : "#000000", "assigned": False})
+            return render(request=request, template_name='dataedit/tag_editor.html',
+                          context=
+                          {
+                              "name": tag['name'],
+                              "id": tag['id'],
+                              "color": tag['color'],
+                              "assigned": assigned
+                          })
+    return render(request=request, template_name='dataedit/tag_editor.html',
+                  context={"name": "", "color": "#000000", "assigned": False})
 
 
 @login_required(login_url='/login/')
@@ -375,7 +434,7 @@ class DataView(View):
         if schema not in schema_whitelist or schema.startswith('_'):
             raise Http404("Schema not accessible")
 
-        tags = [] # TODO: Unused - Remove
+        tags = []  # TODO: Unused - Remove
         db = sec.dbname
         actions.create_meta(schema, table)
 
@@ -402,7 +461,6 @@ class DataView(View):
             available_revisions = TableRevision.objects.filter(table=table,
                                                                schema=schema)
 
-
             for rev in repo.log_default():
                 try:
                     rev_obj = available_revisions.get(revision=rev.revision)
@@ -411,6 +469,8 @@ class DataView(View):
                 revisions.append((rev, rev_obj))
         except:
             revisions = []
+
+        indication_tuple = get_indication_color(table, schema)
 
         return render(request,
                       'dataedit/dataedit_overview.html',
@@ -422,7 +482,8 @@ class DataView(View):
                           'kinds': ['table', 'map', 'graph'],
                           'table': table,
                           'schema': schema,
-                          'tags': tags
+                          'tags': tags,
+                          'indication_light': indication_tuple
                       })
 
     def post(self, request, schema, table):
@@ -448,12 +509,14 @@ class DataView(View):
                 'values': reader
             }, {'user': request.user})
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
-                                                                table=table))
+                                                                 table=table))
+
 
 class MetaView(View):
     """
 
     """
+
     def get(self, request, schema, table):
         """
         Loads the metadata of the passed table and its columns.
@@ -466,7 +529,7 @@ class MetaView(View):
         comment_on_table = actions.get_comment_table(db, schema, table)
         columns = actions.analyze_columns(db, schema, table)
         if 'error' in comment_on_table:
-            comment_on_table = {'Notes':[comment_on_table['content']]}
+            comment_on_table = {'Notes': [comment_on_table['content']]}
         comment_on_table = {k.replace(' ', '_'): v for (k, v) in comment_on_table.items()}
         if 'Column' not in comment_on_table:
             comment_on_table['Column'] = []
@@ -474,11 +537,11 @@ class MetaView(View):
         for col in columns:
             if not col['id'] in commented_cols:
                 comment_on_table['Column'].append({
-                    'Name':col['id'],
+                    'Name': col['id'],
                     'Description': '',
                     'Unit': ''})
 
-        return render(request, 'dataedit/meta_edit.html',{
+        return render(request, 'dataedit/meta_edit.html', {
             'schema': schema,
             'table': table,
             'comment_on_table': comment_on_table
@@ -504,7 +567,7 @@ class MetaView(View):
             'Licence': self._load_url_list(request, 'licence'),
             'Description': self._load_list(request, 'descr'),
             'Column': self._load_col_list(request, columns),
-            'Changes':[],
+            'Changes': [],
             'Notes': self._load_list(request, 'notes'),
             'Instructions for proper use': self._load_list(request, 'instr'),
         }
@@ -525,7 +588,8 @@ class MetaView(View):
         finally:
             conn.close()
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
-                                                                table=table))
+                                                                 table=table))
+
     name_pattern = r'[\w\s]*'
 
     def loadName(self, name):
@@ -534,20 +598,20 @@ class MetaView(View):
         :param name: A string
         :return: If the string is valid it is returned. Otherwise an AssertionError is raised.
         """
-        assert(re.match(self.name_pattern,name))
+        assert (re.match(self.name_pattern, name))
         return name
 
     def _load_list(self, request, name):
 
-        pattern = r'%s_(?P<index>\d*)'%name
-        return [request.POST[key].replace("'","\'") for key in request.POST if re.match(pattern, key)]
+        pattern = r'%s_(?P<index>\d*)' % name
+        return [request.POST[key].replace("'", "\'") for key in request.POST if re.match(pattern, key)]
 
     def _load_url_list(self, request, name):
         pattern = r'%s_name_(?P<index>\d*)' % name
         return [{
-                    'Name':request.POST[key].replace("'","\'"),
-                    'URL': request.POST[key.replace('_name_', '_url_')].replace("'","\'")
-                 } for key in request.POST if
+                    'Name': request.POST[key].replace("'", "\'"),
+                    'URL': request.POST[key.replace('_name_', '_url_')].replace("'", "\'")
+                } for key in request.POST if
                 re.match(pattern, key)]
 
     def _load_col_list(self, request, columns):
@@ -556,6 +620,7 @@ class MetaView(View):
                     'Description': request.POST['col_' + col['id'] + '_descr'],
                     'Unit': request.POST['col_' + col['id'] + '_unit']
                 } for col in columns]
+
 
 class CommentView(View):
     """ This method handles the GET requests for the main page of data edit.
@@ -568,7 +633,6 @@ class CommentView(View):
             raise Http404("Schema not accessible")
 
         tags = get_all_tags(schema=schema, table=table)
-
 
         return render(request,
                       'dataedit/comment_table.html',
@@ -592,7 +656,7 @@ class CommentView(View):
                 'values': reader
             }, {'user': request.user})
         return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
-                                                                table=table))
+                                                                          table=table))
 
 
 @login_required(login_url='/login/')
@@ -609,15 +673,15 @@ def add_table_tags(request):
     """
     ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
     schema = request.POST['schema']
-    table = request.POST.get('table',None)
+    table = request.POST.get('table', None)
     engine = actions._get_engine()
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
 
-    session.query(Table_tags).filter(Table_tags.table_name==table and Table_tags.schema_name==schema).delete()
+    session.query(Table_tags).filter(Table_tags.table_name == table and Table_tags.schema_name == schema).delete()
     for id in ids:
-        t = Table_tags(**{'schema_name':schema, 'table_name':table, 'tag':id})
+        t = Table_tags(**{'schema_name': schema, 'table_name': table, 'tag': id})
         session.add(t)
     session.commit()
     return redirect(request.META['HTTP_REFERER'])
@@ -639,35 +703,32 @@ def get_all_tags(schema=None, table=None):
         # Neither table, not schema are defined
         result = session.execute(sqla.select([Tag]))
         session.commit()
-        r = [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
+        r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')} for r in result]
         return r
 
     if schema == None:
         # default schema is the public schema
-        schema='public'
+        schema = 'public'
 
-    result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color'), Table_tags.table_name).filter(Table_tags.tag == Tag.id).filter(Table_tags.table_name == table).filter(Table_tags.schema_name == schema))
+    result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color'),
+                                           Table_tags.table_name).filter(Table_tags.tag == Tag.id).filter(
+        Table_tags.table_name == table).filter(Table_tags.schema_name == schema))
     session.commit()
-    return [{'id':r.id, 'name': r.name, 'color':"#" + format(r.color, '06X')} for r in result]
-
-
-def get_indication_light():
-
-
-    return;
+    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')} for r in result]
 
 
 class SearchView(View):
     """
 
     """
+
     def get(self, request):
         """
         Renders an empty search field with a list of tags
         :param request: A HTTP-request object sent by the Django framework
         :return:
         """
-        return render(request, 'dataedit/search.html', {'results': [], 'tags':get_all_tags()})
+        return render(request, 'dataedit/search.html', {'results': [], 'tags': get_all_tags()})
 
     def post(self, request):
         """
@@ -685,7 +746,9 @@ class SearchView(View):
         filter_tags = [int(key[len('select_'):]) for key in request.POST if key.startswith('select_')]
 
         tag_agg = array_agg(Table_tags.tag)
-        query = session.query(search_view.c.schema.label('schema'), search_view.c.table.label('table'), tag_agg).outerjoin(Table_tags, (search_view.c.table == Table_tags.table_name) and (search_view.c.table == Table_tags.table_name))
+        query = session.query(search_view.c.schema.label('schema'), search_view.c.table.label('table'),
+                              tag_agg).outerjoin(Table_tags, (search_view.c.table == Table_tags.table_name) and (
+            search_view.c.table == Table_tags.table_name))
         if filter_tags:
             query = query.having(tag_agg.contains(filter_tags))
 
@@ -693,6 +756,6 @@ class SearchView(View):
         results = session.execute(query)
 
         session.commit()
-        ret = [{'schema': r.schema, 'table':r.table} for r in results]
-        return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
-
+        ret = [{'schema': r.schema, 'table': r.table} for r in results]
+        return render(request, 'dataedit/search.html',
+                      {'results': ret, 'tags': get_all_tags(), 'selected': filter_tags})
