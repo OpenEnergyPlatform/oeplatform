@@ -153,6 +153,8 @@ def get_indication_color(table, schema):
 
     db = sec.dbname
     comment_on_table = actions.get_comment_table(db, schema, table)
+    table_owner = actions.get_table_owner(table)
+
 
     """
     red: Serve violations (forbidden symbols in name, not owned by the database user used by the platform, meta-data missing)
@@ -183,6 +185,7 @@ def get_indication_color(table, schema):
             no_metadata = False
         break
 
+
     if no_metadata:
         return_color = red_color
         return_reason = "Missing complete meta-data."
@@ -202,6 +205,19 @@ def get_indication_color(table, schema):
         return_color = red_color
         return_reason = "Bad formatting in name."
         return_code = 2
+
+    #Tableowner
+
+    if table_owner is None:
+        return_color = red_color
+        return_reason = "Missing owner for table."
+        return_code = 2
+
+    if not table_owner == sec.dbuser:
+        return_color = red_color
+        return_reason = "Table is not owned by database user."
+        return_code = 2
+
 
 
     return return_color, return_reason, return_code

@@ -670,3 +670,21 @@ def create_comment_table(schema, table, meta_schema=None):
                 table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)
+
+
+def get_table_owner(table):
+
+    engine = _get_engine()
+    query = 'SELECT tableowner FROM pg_tables WHERE tablename = \'{table}\''
+
+    connection = engine.connect()
+    result = connection.execute(query)
+
+    row = result.first()
+
+    print(row)
+
+    if row is None:
+        return None
+
+    return row['tableowner']
