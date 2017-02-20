@@ -34,13 +34,13 @@ class Table(View):
         :param request:
         :return:
         """
-        return {
+        return JsonResponse({
             'schema': schema,
             'name': table,
             'columns': actions.describe_columns(schema,table),
             'indexed': actions.describe_indexes(schema, table),
             'constraints': actions.describe_constraints(schema, table)
-        }
+        })
 
 
 
