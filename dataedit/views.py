@@ -14,7 +14,6 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 import oeplatform.securitysettings as sec
 

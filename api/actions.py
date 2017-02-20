@@ -27,30 +27,137 @@ class InvalidRequest(Exception):
     pass
 
 
+def describe_columns(schema, table):
+    """
+    Loads the description of all columns of the specified table and return their
+    description as a dictionary. Each column is identified by its name and
+    points to a dictionary containing the information specified in https://www.postgresql.org/docs/9.3/static/infoschema-columns.html:
+
+    * ordinal_position
+    * column_default
+    * is_nullable
+    * data_type
+    * character_maximum_length
+    * character_octet_length
+    * numeric_precision
+    * numeric_precision_radix
+    * numeric_scale
+    * datetime_precision
+    * interval_type
+    * interval_precision
+    * dtd_identifier
+    * is_updatable
+
+    :param schema: Schema name
+
+    :param table: Table name
+
+    :return: A dictionary of describing dictionaries representing the columns
+    identified by their column names
+    """
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query ='select column_name, ' \
+           'ordinal_position, column_default, is_nullable, data_type, ' \
+           'character_maximum_length, character_octet_length, ' \
+           'numeric_precision, numeric_precision_radix, numeric_scale, ' \
+           'datetime_precision, interval_type, interval_precision, ' \
+           'maximum_cardinality, dtd_identifier, is_updatable ' \
+            'from INFORMATION_SCHEMA.COLUMNS where table_name = ' \
+            '\'{table}\' and table_schema=\'{schema}\';'.format(
+                        table=table, schema=schema)
+    response = session.execute(query)
+    session.close()
+    return {column.column_name:{
+                'ordinal_position': column.ordinal_position,
+                'column_default': column.column_default,
+                'is_nullable': column.is_nullable,
+                'data_type': column.data_type,
+                'character_maximum_length': column.character_maximum_length,
+                'character_octet_length': column.character_octet_length,
+                'numeric_precision': column.numeric_precision,
+                'numeric_precision_radix': column.numeric_precision_radix,
+                'numeric_scale': column.numeric_scale,
+                'datetime_precision': column.datetime_precision,
+                'interval_type': column.interval_type,
+                'interval_precision': column.interval_precision,
+                'maximum_cardinality': column.maximum_cardinality,
+                'dtd_identifier': column.dtd_identifier,
+                'is_updatable': column.is_updatable
+            } for column in response}
+
+def describe_indexes(schema, table):
+    """
+    Loads the description of all indexes of the specified table and return their
+    description as a dictionary. Each index is identified by its name and
+    points to a dictionary containing the following information:
+
+    * indexname: The name of the index
+    * indexdef: The SQL-Statement used to create this index
+
+    :param schema: Schema name
+
+    :param table: Table name
+
+    :return: A dictionary of describing dictionaries representing the indexed
+    identified by their column names
+    """
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query ='select indexname, indexdef from pg_indexes where tablename = ' \
+            '\'{table}\' and schemaname=\'{schema}\';'.format(
+                        table=table, schema=schema)
+    print(query)
+    response = session.execute(query)
+    session.close()
+
+    # Use a single-value dictionary to allow future extension with downward
+    # compatibility
+    return {column.indexname:{
+                'indexdef': column.indexdef,
+            } for column in response}
+
+
+def describe_constraints(schema, table):
+    """
+    Loads the description of all constraints of the specified table and return their
+    description as a dictionary. Each constraints is identified by its name and
+    points to a dictionary containing the following information specified in https://www.postgresql.org/docs/9.3/static/infoschema-table-constraints.html:
+
+    * constraint_typ
+    * is_deferrable
+    * initially_deferred
+    * definition: This additional entry contains the SQL-query used to create
+        this constraints
+
+    :param schema: Schema name
+
+    :param table: Table name
+
+    :return: A dictionary of describing dictionaries representing the columns
+    identified by their column names
+    """
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query ='select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name=\'{table}\' AND constraint_schema=\'{schema}\';'.format(
+                        table=table, schema=schema)
+    response = session.execute(query)
+    session.close()
+    return {column.constraint_name:{
+                'constraint_typ': column.constraint_type,
+                'is_deferrable': column.is_deferrable,
+                'initially_deferred': column.initially_deferred,
+                'definition': column.definition
+            } for column in response}
+
+
 def _get_table(schema, table):
     engine = _get_engine()
     metadata = MetaData()
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
-
-class DataStore(Base):
-    __tablename__ = 'ckan_datastore'
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True,
-                           autoincrement=True)
-    schema = sqlalchemy.Column(sqlalchemy.String(30))
-    table = sqlalchemy.Column(sqlalchemy.String(30))
-    resource = sqlalchemy.Column(sqlalchemy.String(40))
-    dataset = sqlalchemy.Column(sqlalchemy.String(30))
-
-
-
-def get_table_resource(schema, table):
-    result = sqlalchemy.select(DataStore.c.resource, DataStore.c.dataset).where(
-        DataStore.c.table == table, DataStore.c.schema == schema)
-    if not result:
-        return None
-    else:
-        return result.first()
 
 def table_create(request, context=None):
     # TODO: Authentication

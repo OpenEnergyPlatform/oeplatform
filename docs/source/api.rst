@@ -126,3 +126,6 @@ Binding the API to python
 
 .. automodule:: api.views
     :members:
+
+.. automodule:: api.actions
+    :members:

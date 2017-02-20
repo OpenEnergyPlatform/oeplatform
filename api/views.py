@@ -13,6 +13,72 @@ from rest_framework.response import Response
 
 from django.http import JsonResponse
 
+from django.views.generic import View
+
+class Table(View):
+    """
+    Handels the creation of tables and serves information on existing tables
+    """
+    def get(self, request, schema, table):
+        """
+        Returns a dictionary that describes the DDL-make-up of this table.
+        Fields are:
+
+        * name : Name of the table,
+        * schema: Name of the schema,
+        * columns : as specified in :meth:`api.actions.describe_columns`
+        * indexes : as specified in :meth:`api.actions.describe_indexes`
+        * constraints: as specified in
+                    :meth:`api.actions.describe_constraints`
+
+        :param request:
+        :return:
+        """
+        return {
+            'schema': schema,
+            'name': table,
+            'columns': actions.describe_columns(schema,table),
+            'indexed': actions.describe_indexes(schema, table),
+            'constraints': actions.describe_constraints(schema, table)
+        }
+
+
+
+
+    def post(self, request):
+        pass
+
+    def put(self, request):
+        pass
+
+
+class Index(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        pass
+
+    def put(self, request):
+        pass
+
+class Rows(View):
+
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        pass
+
+    def put(self, request):
+        pass
+
+class Session(View):
+    def get(self, request, length=1):
+        return request.session['resonse']
+
+
 def date_handler(obj):
     """
     Implements a handler to serialize dates in JSON-strings
