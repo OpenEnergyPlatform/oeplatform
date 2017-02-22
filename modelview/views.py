@@ -52,7 +52,15 @@ def listsheets(request,sheettype):
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
         models = [(m.pk, m.model_name) for m in c.objects.all()]
-    return render(request, "modelview/modellist.html", {'models':models})
+    if sheettype == 'scenario':
+        label='Scenario'
+    elif sheettype == 'studie':
+        label='Study'
+    elif sheettype == 'framework':
+        label='Framework'
+    else:
+        label='Model'
+    return render(request, "modelview/modellist.html", {'models':models, 'label':label})
 
 def show(request, sheettype, model_name):
     """
