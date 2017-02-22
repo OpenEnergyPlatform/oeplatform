@@ -1,8 +1,13 @@
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render, redirect,\
+    render_to_response
 from django.views.generic import View
 from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser
 from rest_framework.authtoken.models import Token
+from django.template.context import RequestContext
+from .forms import GroupPermForm
+from django.contrib.admin.helpers import Fieldset
+
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -22,6 +27,32 @@ class ProfileView(View):
         return render(request, "login/profile.html", {'user': user,
                                                       'token': token})
 
+class GroupManagement(View):
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        perm = user.get_writeable_tables()
+        return render(request, "login/admin_group.html", {'user': user, 'perm': perm})
+    
+class GroupEdit(View):
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        perm = user.get_writeable_tables()
+        form = GroupPermForm
+        fieldsets = (
+                     Fieldset(form,'Available',),
+                     Fieldset(form,'Chosen',),
+                     )
+        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form, 'fieldsets': fieldsets})
+    
+    def post(selfself, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        perm = user.get_writeable_tables()
+        form = GroupPermForm(request.POST)
+        if form.is_valid():
+            groupperms = form.cleaned_data.get('groupperms')
+            # do something with your results
+        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form})
+    
 class ProfileUpdateView(UpdateView):
     """
     Autogenerate a update form for users.

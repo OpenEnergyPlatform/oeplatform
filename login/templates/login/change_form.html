@@ -1,0 +1,17 @@
+{% extends "login/admin_group.html" %}
+{% block form %}
+<form method='post'>
+	
+	{% for formset in fieldsets %}
+		<fieldset style="float:left;">
+	 	{% csrf_token %}
+	 	{{ formset.name }}
+    	{{ formset.form.as_p }} 
+    	</fieldset>
+    	<fieldset style="float:left; width:50px;">&nbsp;</fieldset>   
+	{% endfor %} 
+	  
+    <p style="clear:left;"><input type='submit' value='submit'></p>
+
+</form>
+{% endblock %}

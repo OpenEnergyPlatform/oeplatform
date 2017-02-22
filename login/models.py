@@ -1,14 +1,38 @@
 from django.db import models
+from django.contrib import auth
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import PermissionDenied
 import mwclient as mw
+from api import actions
 
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
+from django.contrib.contenttypes.models import ContentType
 
+def addcontenttypes():
+    """
+    Insert all schemas that are present in the external database specified in
+    oeplatform/securitysettings.py in the django_content_type table. This is
+    important for the Group-Permission-Management. 
+    """
+    insp = actions.connect()
+    engine = actions._get_engine()
+    conn = engine.connect()
+    query = 'SELECT schemaname FROM pg_tables WHERE  schemaname NOT LIKE \'\_%%\' group by schemaname;'.format(st='%\_%')
+    res = conn.execute(query)
+    for shema in res:
+        print(not shema.schemaname in ['information_schema', 'pg_catalog'])
+        print(shema.schemaname)
+        if not shema.schemaname in ['information_schema', 'pg_catalog']:
+            query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=shema.schemaname)
+            table = conn.execute(query)
+            for tab in table:             
+                ct_add = ContentType.objects.get_or_create(app_label=shema.schemaname, model=tab.tables)        
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
@@ -31,14 +55,15 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class myuser(AbstractBaseUser):
+class myuser(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50, null=True)
     mail_address = models.EmailField(verbose_name='email address',
                                      max_length=255, unique=True, )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-
+    groupadmin = models.ManyToManyField(Group)
+    
     USERNAME_FIELD = 'name'
 
     REQUIRED_FIELDS = [name]
@@ -47,25 +72,50 @@ class myuser(AbstractBaseUser):
         objects = UserManager()
 
     def has_perm(self, perm, obj=None):
-        return self.is_admin
+        if self.is_admin:
+            return True
+        for backend in auth.get_backends():
+            if not hasattr(backend, 'has_perm'):
+                continue
+            try:
+                if backend.has_perm(self, perm, obj):
+                    return True
+            except PermissionDenied:
+                return False
+        return False
 
     def has_module_perms(self, app_label):
-        return self.is_admin
-
+        if self.is_admin:
+            return True
+        for backend in auth.get_backends():
+            if not hasattr(backend, 'has_module_perms'):
+                continue
+            try:
+                if backend.has_module_perms(self, app_label):
+                    return True
+            except PermissionDenied:
+                return False
+        return False
+    
+    def get_writeable_tables(self):
+        permissions = set()
+        for backend in auth.get_backends():
+            if hasattr(backend, "get_group_permissions"):
+                permissions.update(backend.get_group_permissions(self, obj=None))
+        return permissions 
+    
     def get_full_name(self):
         return self.name
 
     def get_short_name(self):
         return self.name
-
+    
     def __str__(self):  # __unicode__ on Python 2
         return self.name
 
     @property
     def is_staff(self):
         return self.is_admin
-
-
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):

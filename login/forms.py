@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from .models import myuser as OepUser
 
-from .models import OepUser
 
 
 class UserChangeForm(forms.ModelForm):
@@ -23,3 +23,11 @@ class UserChangeForm(forms.ModelForm):
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
         return self.initial["password"]
+
+class GroupPermForm(forms.Form):
+    OPTIONS = (
+            (1, "ADD"),
+            (2, "EDIT"),
+            (3, "REMOVE"),
+            )
+    groupperms = forms.MultipleChoiceField(widget=forms.SelectMultiple, label = '', choices=OPTIONS)

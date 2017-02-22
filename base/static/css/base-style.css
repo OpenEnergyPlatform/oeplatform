@@ -10,3 +10,6 @@
     height: 25px;
     display: inline;
 }
+.fieldset {
+	float: left;
+}
