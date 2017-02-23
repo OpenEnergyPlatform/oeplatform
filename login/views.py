@@ -37,7 +37,7 @@ class GroupEdit(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         perm = user.get_writeable_tables()
-        form = GroupPermForm
+        form = GroupPermForm(user = user)
         fieldsets = (
                      Fieldset(form,'Available',),
                      Fieldset(form,'Chosen',),
@@ -47,11 +47,15 @@ class GroupEdit(View):
     def post(selfself, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
         perm = user.get_writeable_tables()
-        form = GroupPermForm(request.POST)
+        form = GroupPermForm(request.POST, user= user)
         if form.is_valid():
             groupperms = form.cleaned_data.get('groupperms')
             # do something with your results
-        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form})
+            fieldsets = (
+                     Fieldset(form,'Available',),
+                     Fieldset(form,'Chosen',),
+                     )
+        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form, 'fieldsets': fieldsets})
     
 class ProfileUpdateView(UpdateView):
     """

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import PermissionDenied
 import mwclient as mw
@@ -26,13 +26,21 @@ def addcontenttypes():
     query = 'SELECT schemaname FROM pg_tables WHERE  schemaname NOT LIKE \'\_%%\' group by schemaname;'.format(st='%\_%')
     res = conn.execute(query)
     for shema in res:
-        print(not shema.schemaname in ['information_schema', 'pg_catalog'])
-        print(shema.schemaname)
         if not shema.schemaname in ['information_schema', 'pg_catalog']:
             query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=shema.schemaname)
             table = conn.execute(query)
             for tab in table:             
-                ct_add = ContentType.objects.get_or_create(app_label=shema.schemaname, model=tab.tables)        
+                ContentType.objects.get_or_create(app_label=shema.schemaname, model=tab.tables)
+                ct_add = ContentType.objects.get(app_label=shema.schemaname, model=tab.tables)
+                p_add = Permission.objects.get_or_create(name='Can add data in {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
+                                   codename='add_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
+                                   content_type=ct_add)
+                p_change = Permission.objects.get_or_create(name='Can change data in {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
+                                   codename='change_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
+                                   content_type=ct_add)
+                p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
+                                   codename='delete_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
+                                   content_type=ct_add)        
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
