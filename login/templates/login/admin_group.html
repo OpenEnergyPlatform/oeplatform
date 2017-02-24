@@ -1,11 +1,13 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
-<h1>Hi {{ user.name }} </h1>
+<h1>Group Management </h1>
 {% if user == request.user%}
-    <h3>You are Administrator?</h3> {{ user.is_admin }}
-    <h3>Your Permission:</h3> {{ perm }}
-    <a class="btn" href="/user/group/edit/{{ user.pk }}" >{% bootstrap_icon "user" %} Group</a>
+    <h3>You are group administrator?</h3> {{ user.is_admin }}
+    <h3>Select group to change</h3>
+    <table>
+    {{ groupresult }}
+    </table>
     {% block form %}{% endblock %}
 {% endif %}
 {% endblock %}

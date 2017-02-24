@@ -5,8 +5,9 @@ from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser
 from rest_framework.authtoken.models import Token
 from django.template.context import RequestContext
-from .forms import GroupPermForm
+from .forms import GroupPermForm, ListGroups
 from django.contrib.admin.helpers import Fieldset
+
 
 
 class ProfileView(View):
@@ -30,23 +31,23 @@ class ProfileView(View):
 class GroupManagement(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        perm = user.get_writeable_tables()
-        return render(request, "login/admin_group.html", {'user': user, 'perm': perm})
+        groups = ListGroups(user = user)       
+        return render(request, "login/admin_group.html", {'user': user, 'groupresult': groups})
     
 class GroupEdit(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        perm = user.get_writeable_tables()
+        groups = ListGroups(user = user)
         form = GroupPermForm(user = user)
         fieldsets = (
                      Fieldset(form,'Available',),
                      Fieldset(form,'Chosen',),
                      )
-        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form, 'fieldsets': fieldsets})
+        return render(request, "login/change_form.html", {'user': user, 'groupresult': groups, 'fieldsets': fieldsets})
     
     def post(selfself, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        perm = user.get_writeable_tables()
+        groups = ListGroups(user = user)
         form = GroupPermForm(request.POST, user= user)
         if form.is_valid():
             groupperms = form.cleaned_data.get('groupperms')
@@ -55,7 +56,7 @@ class GroupEdit(View):
                      Fieldset(form,'Available',),
                      Fieldset(form,'Chosen',),
                      )
-        return render(request, "login/change_form.html", {'user': user, 'perm': perm, 'form': form, 'fieldsets': fieldsets})
+        return render(request, "login/change_form.html", {'user': user, 'groupresult': groups, 'fieldsets': fieldsets})
     
 class ProfileUpdateView(UpdateView):
     """

@@ -1,9 +1,11 @@
 from django import forms
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from .models import myuser as OepUser
+from random import choice
 
 
 
@@ -28,13 +30,18 @@ class GroupPermForm(forms.Form):
     def __init__(self,*args,**kwargs):
         user = kwargs.pop("user")     # user is the parameter passed from views.py
         super(GroupPermForm, self).__init__(*args,**kwargs)
-        OPTIONS = (
-                (1, "ADD"),
-                (2, "EDIT"),
-                (3, "REMOVE"),
-                )
         #perm_data = Permission.objects.filter(content_type_id=102)
         group = user.groupadmin.get()
         perm_data = group.permissions.all()
-        OPTIONS =[((choice.id), (choice)) for choice in perm_data]
+        OPTIONS =[((choice.id), (choice),) for choice in perm_data]
         self.fields['groupperms'] = forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={'class': 'selectfilter'}), label = '', choices=OPTIONS)
+        
+class ListGroups(forms.Form):
+    def __init__(self,*args,**kwargs):
+        user = kwargs.pop("user")     # user is the parameter passed from views.py
+        super(ListGroups, self).__init__(*args,**kwargs)
+        group = user.groupadmin.all()
+        OPTIONS =[((choice.id), mark_safe("<a href='/user/group/edit/{id}'>{ch}</a>".format(id = choice.id, ch=choice))) for choice in group]
+        self.fields['groups'] = forms.MultipleChoiceField(choices=OPTIONS, required=False, widget=forms.CheckboxSelectMultiple)
+        
+        
