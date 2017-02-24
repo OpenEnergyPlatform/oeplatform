@@ -1,24 +1,20 @@
-from django.shortcuts import render
-from api import actions
-from django.http import HttpResponse
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django_ajax.decorators import ajax
 import json
 import time
 
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
 from django.http import JsonResponse
-
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
+from api import actions
+
+
 class Table(View):
+
+
     """
     Handels the creation of tables and serves information on existing tables
     """
+
     def get(self, request, schema, table):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
@@ -37,23 +33,98 @@ class Table(View):
         return JsonResponse({
             'schema': schema,
             'name': table,
-            'columns': actions.describe_columns(schema,table),
+            'columns': actions.describe_columns(schema, table),
             'indexed': actions.describe_indexes(schema, table),
             'constraints': actions.describe_constraints(schema, table)
         })
 
-
-
-
     def post(self, request):
         pass
 
-    def put(self, request):
-        pass
+    def put(self, request, schema, table):
+        """
+        Every request to unsave http methods have to contain a "csrftoken".
+        This token is used to deny cross site reference forwarding.
+        In every request the header had to contain "X-CSRFToken" with the actual csrftoken.
+        The token can be requested at / and will be returned as cookie.
+
+        :param request:
+        :return:
+        """
+
+        # Should be a global variable.
+        # Using global variables gets me there:
+        # NameError: name 'SQL_DATATYPE_DICT' is not defined
+
+        _SQL_DATATYPE_DICT = {'character varying': 'VARCHAR'}
+
+        # There must be a better way to do this.
+        json_data = json.loads(request.body.decode("utf-8"))
+
+        constraints = []
+        columns = []
+
+        for key in json_data['constraints']:
+            value = json_data['constraints'][key]['definition']
+
+            # "PRIMARY KEY (groups_id)"
+            # "FOREIGN KEY (database_id) REFERENCES reference.jabref_database(database_id)"
+
+            # Creating dicts with one entry is inefficient.
+            # Passing more parameters is easy later which is needed
+            if 'PRIMARY KEY' or 'FOREIGN KEY' in value:
+                insert_val = {}
+                insert_val['definition'] = value
+
+                constraints.append(insert_val)
+
+        """
+        "hierarchical_context": {
+            "interval_type": null,
+            "data_type": "integer",
+            "datetime_precision": null,
+            "interval_precision": null,
+            "dtd_identifier": "10",
+            "numeric_precision_radix": 2,
+            "is_updatable": "YES",
+            "column_default": null,
+            "ordinal_position": 10,
+            "maximum_cardinality": null,
+            "numeric_scale": 0,
+            "character_octet_length": null,
+            "is_nullable": "YES",
+            "numeric_precision": 32,
+            "character_maximum_length": null
+        }
+        """
+
+        for c in json_data['columns']:
+
+            # Parse Datatype
+            data_type = json_data['columns'][c]['data_type']
+
+            # Check for size
+            size = json_data['columns'][c]['character_maximum_length']
+            if isinstance(size, int):
+                data_type += " (" + str(size) + ")"
+
+            # Check for null
+
+            not_null = 'NO' in json_data['columns'][c]['is_nullable']
+
+            x = {'datatype': data_type,
+                 'notnull': not_null,
+                 'name': str(c),
+                 }
+
+            columns.append(x)
+
+        result = actions.table_create(schema, table, columns, constraints)
+
+        return JsonResponse({})
 
 
 class Index(View):
-
     def get(self, request):
         pass
 
@@ -62,9 +133,9 @@ class Index(View):
 
     def put(self, request):
         pass
+
 
 class Rows(View):
-
     def get(self, request):
         pass
 
@@ -73,6 +144,7 @@ class Rows(View):
 
     def put(self, request):
         pass
+
 
 class Session(View):
     def get(self, request, length=1):
@@ -101,6 +173,7 @@ def create_ajax_handler(func):
     :param func: The name of the callable function
     :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
     """
+
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
@@ -109,7 +182,8 @@ def create_ajax_handler(func):
         # This must be done in order to clean the structure of non-serializable
         # objects (e.g. datetime)
         response_data = json.loads(json.dumps(data, default=date_handler))
-        return JsonResponse({'content':response_data}, safe=False)
+        return JsonResponse({'content': response_data}, safe=False)
+
     return execute
 
 

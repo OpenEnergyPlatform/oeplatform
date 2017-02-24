@@ -1,25 +1,20 @@
-import re
-import sqlalchemy as sqla
 import json
-
+import re
 import traceback
-
-from api import parser
-from api.parser import is_pg_qual, read_bool, read_pgid
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy
-from api import references
-from sqlalchemy import func, MetaData, Table
 from datetime import datetime
+
+import sqlalchemy as sqla
+from sqlalchemy import func, MetaData, Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 import oeplatform.securitysettings as sec
+from api import parser
+from api import references
+from api.parser import is_pg_qual, read_pgid
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
-
-
-import geoalchemy2
 
 Base = declarative_base()
 
@@ -153,11 +148,55 @@ def describe_constraints(schema, table):
             } for column in response}
 
 
+def table_create(schema, table, columns, constraints):
+    # Building and joining a string array seems to be more efficient than native string concats.
+    # https://waymoot.org/home/python_string/
+
+    str_list = []
+
+    str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema = schema, table = table))
+
+    first_column = True
+    for c in columns:
+        if not first_column:
+            str_list.append(",")
+        str_list.append("{name} {datatype} {notnull}".format(name=c['name'], datatype=c['datatype'], notnull="NOT NULL" if c['notnull'] else ""))
+        first_column = False
+
+
+    # TODO: Test SQL Injection
+    # 'definition' is an part sql statement, which can be used for sql injection
+    for const in constraints:
+        str_list.append(",{definition}".format(definition=const['definition']))
+
+    str_list.append(");")
+
+    sql_string = ''.join(str_list)
+
+    print("SQL String: " + sql_string)
+
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+
+    resp = session.execute(sql_string)
+    session.close()
+
+
+
+"""
+ACTIONS FROM OLD API
+"""
+
+
 def _get_table(schema, table):
     engine = _get_engine()
     metadata = MetaData()
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
+
+"""
+
 
 def table_create(request, context=None):
     # TODO: Authentication
@@ -203,8 +242,8 @@ def table_create(request, context=None):
             assert all(map(is_pg_qual, [fk["schema"], fk["table"]] + fk["fields"] + fk["names"])), "Invalid identifier"
             if 'on_delete' in fk:
                 assert fk["on delete"].lower() in ["cascade", "no action",
-                                               "restrict", "set null",
-                                               "set default"], "Invalid on delete action"
+                                                   "restrict", "set null",
+                                                   "set default"], "Invalid on delete action"
             else:
                 fk["on_delete"] = "no action"
             foreign_keys.append((fk["names"],
@@ -228,7 +267,7 @@ def table_create(request, context=None):
         )
     constraints = ", ".join(fk_constraints)
     fields = "(" + (
-    ", ".join(fieldstrings + fk_constraints) if fieldstrings else "") + ")"
+        ", ".join(fieldstrings + fk_constraints) if fieldstrings else "") + ")"
     sql_string = "create table {schema}.{table} {fields}".format(
         schema=schema, table=table, fields=fields, constraints=constraints)
     print(fk_constraints)
@@ -246,6 +285,8 @@ def table_create(request, context=None):
     else:
         session.commit()
     return {'success': True}
+
+"""
 
 def data_delete(request, context=None):
     raise NotImplementedError()
