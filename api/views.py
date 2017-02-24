@@ -106,7 +106,7 @@ class Table(View):
             # Check for size
             size = json_data['columns'][c]['character_maximum_length']
             if isinstance(size, int):
-                data_type += " (" + str(size) + ")"
+                data_type += "(" + str(size) + ")"
 
             # Check for null
 

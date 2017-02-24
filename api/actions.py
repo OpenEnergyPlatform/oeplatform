@@ -179,10 +179,19 @@ def table_create(schema, table, columns, constraints):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
 
-    resp = session.execute(sql_string)
+    try:
+        session.execute(sql_string)
+
+    except Exception as e:
+        return {'success' : False,
+                'exception' : e}
+
+    # Why is commit() not part of close() ?
+    # I have to commit the changes before closing session. Otherwise the changes are not persistent.
+    session.commit()
     session.close()
 
-
+    return {'success': True}
 
 """
 ACTIONS FROM OLD API
