@@ -148,6 +148,26 @@ def describe_constraints(schema, table):
             } for column in response}
 
 
+def _perform_sql(sql_statement):
+
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+
+    try:
+        session.execute(sql_statement)
+
+    except Exception as e:
+        return {'success' : False,
+                'exception' : e}
+
+    # Why is commit() not part of close() ?
+    # I have to commit the changes before closing session. Otherwise the changes are not persistent.
+    session.commit()
+    session.close()
+
+    return {'success': True}
+
 def table_create(schema, table, columns, constraints):
     # Building and joining a string array seems to be more efficient than native string concats.
     # https://waymoot.org/home/python_string/
@@ -175,23 +195,54 @@ def table_create(schema, table, columns, constraints):
 
     print("SQL String: " + sql_string)
 
+    return _perform_sql(sql_string)
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
 
-    try:
-        session.execute(sql_string)
+def table_change_column(schema, table, column_definition):
+    # Check if column exists
 
-    except Exception as e:
-        return {'success' : False,
-                'exception' : e}
+    existing_column_description = describe_columns(schema, table)
 
-    # Why is commit() not part of close() ?
-    # I have to commit the changes before closing session. Otherwise the changes are not persistent.
-    session.commit()
-    session.close()
+    if len(existing_column_description) <= 0:
+        return {'success': False,
+                'error': 'Table does not exists.'}
 
-    return {'success': True}
+    # There is a table named schema.table.
+    sql = []
+
+    usename = column_definition['name']
+
+    if column_definition['name'] in existing_column_description:
+        # Column exists and want to be changed
+
+        # Figure out, which column should be changed and constraint or datatype or name should be changed
+
+        if column_definition['newname'] is not None:
+            # Rename table
+            sql.append("ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {newname};".format(schema = schema, table = table, name = column_definition['name'], newname = column_definition['newname']))
+            # All other operations should work with new name
+            usename = column_definition['newname']
+
+        # TODO: Fix rudimentary handling of datatypes
+        if column_definition['data_type'] != existing_column_description[column_definition['name']]['data_type']:
+            sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type']))
+
+        # sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
+    else:
+        # Column does not exist and should be created
+        sql.append("ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
+
+    sql_string = ''.join(sql)
+
+    print(sql_string)
+
+    return _perform_sql(sql_string)
+
+
+
+def table_change_constraint(schema, table, constraint_definition):
+    pass
+
 
 """
 ACTIONS FROM OLD API

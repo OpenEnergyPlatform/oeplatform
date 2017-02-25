@@ -38,8 +38,44 @@ class Table(View):
             'constraints': actions.describe_constraints(schema, table)
         })
 
-    def post(self, request):
-        pass
+    def post(self, request, schema, table):
+        json_data = json.loads(request.body.decode("utf-8"))
+
+        if 'column' in json_data['type']:
+
+            data_type = json_data['data_type']
+            # Migrate Postgres to Python Structures
+            size = json_data['character_maximum_length']
+            if isinstance(size, int):
+                data_type += "(" + str(size) + ")"
+
+            # Check for null
+
+            notnull = 'NO' in ['is_nullable']
+
+            newname = json_data.get('newname', None)
+
+            column_definition = {'type' : json_data['type'],
+                                 'name' : json_data['name'],
+                                 'notnull' : notnull,
+                                 'data_type' : data_type,
+                                 'newname' : newname
+                                 }
+
+            print(json_data)
+            print(column_definition)
+
+            result = actions.table_change_column(schema, table, column_definition)
+            return JsonResponse(result)
+
+        elif 'constraint' in json_data['type']:
+
+            # TODO: Think about Constraints
+
+            # Changing Constraint
+            constraint_definition = {}
+
+            result = actions.table_change_constraint(schema, table, constraint_definition)
 
     def put(self, request, schema, table):
         """
@@ -51,12 +87,6 @@ class Table(View):
         :param request:
         :return:
         """
-
-        # Should be a global variable.
-        # Using global variables gets me there:
-        # NameError: name 'SQL_DATATYPE_DICT' is not defined
-
-        _SQL_DATATYPE_DICT = {'character varying': 'VARCHAR'}
 
         # There must be a better way to do this.
         json_data = json.loads(request.body.decode("utf-8"))
@@ -73,30 +103,9 @@ class Table(View):
             # Creating dicts with one entry is inefficient.
             # Passing more parameters is easy later which is needed
             if 'PRIMARY KEY' or 'FOREIGN KEY' in value:
-                insert_val = {}
-                insert_val['definition'] = value
+                insert_val = {'definition': value}
 
                 constraints.append(insert_val)
-
-        """
-        "hierarchical_context": {
-            "interval_type": null,
-            "data_type": "integer",
-            "datetime_precision": null,
-            "interval_precision": null,
-            "dtd_identifier": "10",
-            "numeric_precision_radix": 2,
-            "is_updatable": "YES",
-            "column_default": null,
-            "ordinal_position": 10,
-            "maximum_cardinality": null,
-            "numeric_scale": 0,
-            "character_octet_length": null,
-            "is_nullable": "YES",
-            "numeric_precision": 32,
-            "character_maximum_length": null
-        }
-        """
 
         for c in json_data['columns']:
 
@@ -121,7 +130,7 @@ class Table(View):
 
         result = actions.table_create(schema, table, columns, constraints)
 
-        return JsonResponse({})
+        return JsonResponse(result)
 
 
 class Index(View):
