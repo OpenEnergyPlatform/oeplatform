@@ -159,7 +159,7 @@ def _perform_sql(sql_statement):
 
     except Exception as e:
         return {'success' : False,
-                'exception' : e}
+                'exception' : str(e)}
 
     # Why is commit() not part of close() ?
     # I have to commit the changes before closing session. Otherwise the changes are not persistent.
@@ -167,6 +167,10 @@ def _perform_sql(sql_statement):
     session.close()
 
     return {'success': True}
+
+def _get_error(reason):
+    return {'sucsess': False,
+            'error': reason}
 
 def table_create(schema, table, columns, constraints):
     # Building and joining a string array seems to be more efficient than native string concats.
@@ -210,7 +214,7 @@ def table_change_column(schema, table, column_definition):
     # There is a table named schema.table.
     sql = []
 
-    usename = column_definition['name']
+    current_name = column_definition['name']
 
     if column_definition['name'] in existing_column_description:
         # Column exists and want to be changed
@@ -221,16 +225,18 @@ def table_change_column(schema, table, column_definition):
             # Rename table
             sql.append("ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {newname};".format(schema = schema, table = table, name = column_definition['name'], newname = column_definition['newname']))
             # All other operations should work with new name
-            usename = column_definition['newname']
+            current_name = column_definition['newname']
 
         # TODO: Fix rudimentary handling of datatypes
         if column_definition['data_type'] != existing_column_description[column_definition['name']]['data_type']:
-            sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type']))
+            sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type']))
 
+        # TODO: Implement NotNull
+        # Disabled, cause statement gets invalid for some curious reason.
         # sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
     else:
         # Column does not exist and should be created
-        sql.append("ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = usename, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
+        sql.append("ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
 
     sql_string = ''.join(sql)
 
@@ -239,10 +245,32 @@ def table_change_column(schema, table, column_definition):
     return _perform_sql(sql_string)
 
 
-
 def table_change_constraint(schema, table, constraint_definition):
-    pass
+    existing_column_description = describe_columns(schema, table)
 
+    if len(existing_column_description) <= 0:
+        return {'success': False,
+                'error': 'Table does not exists.'}
+
+    # There is a table named schema.table.
+    sql = []
+
+    if 'ADD' in constraint_definition['action']:
+        sql.append('ALTER TABLE {schema}.{table} {action} CONSTRAINT {constraint_name} {constraint_type} ({constraint_parameter})'.format(schema = schema, table = table, action = constraint_definition['action'], constraint_name = constraint_definition['constraint_name'], constraint_parameter = constraint_definition['constraint_parameter'], constraint_type = constraint_definition['constraint_type']))
+
+        if 'FOREIGN KEY' in constraint_definition['constraint_type']:
+            if constraint_definition['reference_table'] is None or constraint_definition['reference_column'] is None:
+                return _get_error('references are not defined correctly')
+            sql.append(' REFERENCES {reference_table}({reference_column})'.format(reference_column = constraint_definition['reference_column'], reference_table = constraint_definition['reference_table']))
+
+        sql.append(';')
+    elif 'DROP' in constraint_definition['action']:
+        sql.append('ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}'.format(schema = schema, table = table, constraint_name = constraint_definition['constraint_name']))
+
+    sql_string = ''.join(sql)
+
+    print(sql_string)
+    return _perform_sql(sql_string)
 
 """
 ACTIONS FROM OLD API
@@ -260,6 +288,7 @@ def _get_table(schema, table):
 
 def table_create(request, context=None):
     # TODO: Authentication
+    # TODO: column constrains: Unique,
     # TODO: column constrains: Unique,
     # load schema name and check for sanity
     engine = _get_engine()

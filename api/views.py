@@ -55,8 +55,7 @@ class Table(View):
 
             newname = json_data.get('newname', None)
 
-            column_definition = {'type' : json_data['type'],
-                                 'name' : json_data['name'],
+            column_definition = {'name' : json_data['name'],
                                  'notnull' : notnull,
                                  'data_type' : data_type,
                                  'newname' : newname
@@ -70,12 +69,25 @@ class Table(View):
 
         elif 'constraint' in json_data['type']:
 
-            # TODO: Think about Constraints
 
-            # Changing Constraint
-            constraint_definition = {}
+
+            # Input has nothing to do with DDL from Postgres.
+            # Input is completely different.
+            # dict.get() returns None, if key does not exist
+            constraint_definition = {
+                'action': json_data['action'],  # {ADD, DROP}
+                'constraint_type': json_data.get('constraint_type'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
+                'constraint_name': json_data.get('constraint_name'),  # {myForeignKey, myUniqueConstraint}
+                'constraint_parameter': json_data.get('constraint_parameter'),  # Things in Brackets, e.g. name of column
+                'reference_table': json_data.get('reference_table'),
+                'reference_column': json_data.get('reference_column')
+            }
 
             result = actions.table_change_constraint(schema, table, constraint_definition)
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'success': False,
+                                 'error': 'type not recognised.'})
 
     def put(self, request, schema, table):
         """
