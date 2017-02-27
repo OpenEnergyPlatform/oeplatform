@@ -149,7 +149,11 @@ def describe_constraints(schema, table):
 
 
 def _perform_sql(sql_statement):
-
+    """
+    Performs a sql command on standard database.
+    :param sql_statement: SQL-Command
+    :return: Dictionary with results
+    """
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
@@ -169,6 +173,13 @@ def _perform_sql(sql_statement):
 
 
 def get_error(success, http_status_code = 200, reason = None):
+    """
+    Unified error description
+    :param success: Task was successful or unsuccessful
+    :param http_status_code: HTTP status code for indication
+    :param reason: reason, why task failed, humanreadable
+    :return: Dictionary with results
+    """
     dict = {'success' : success,
             'error' : reason,
             'http_status': http_status_code}
@@ -176,6 +187,15 @@ def get_error(success, http_status_code = 200, reason = None):
 
 
 def table_create(schema, table, columns, constraints):
+    """
+    Creates a new table.
+    :param schema: schema
+    :param table: table
+    :param columns: Description of columns, accoring to Issue #184
+    :param constraints: Description of constraints, according to Issue #184
+    :return: Dictionary with results
+    """
+
     # Building and joining a string array seems to be more efficient than native string concats.
     # https://waymoot.org/home/python_string/
 
@@ -205,8 +225,16 @@ def table_create(schema, table, columns, constraints):
 
 
 def table_change_column(schema, table, column_definition):
-    # Check if column exists
+    """
+    Changes a table column.
+    :param schema: schema
+    :param table: table
+    :param column_definition: column definition according to Issue #184
+    :return: Dictionary with results
+    """
 
+
+    # Check if column exists
     existing_column_description = describe_columns(schema, table)
 
     if len(existing_column_description) <= 0:
@@ -251,6 +279,13 @@ def table_change_column(schema, table, column_definition):
 
 
 def table_change_constraint(schema, table, constraint_definition):
+    """
+    Changes constraint of table
+    :param schema: schema
+    :param table: table
+    :param constraint_definition: constraint definition according to Issue #184
+    :return: Dictionary with results
+    """
     existing_column_description = describe_columns(schema, table)
 
     if len(existing_column_description) <= 0:

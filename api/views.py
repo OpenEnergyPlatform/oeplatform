@@ -37,6 +37,14 @@ class Table(View):
         })
 
     def post(self, request, schema, table):
+        """
+        Changes properties of tables and table columns
+        :param request:
+        :param schema:
+        :param table:
+        :return:
+        """
+
         json_data = json.loads(request.body.decode("utf-8"))
 
         if 'column' in json_data['type']:
