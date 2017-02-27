@@ -9,8 +9,6 @@ from api import actions
 
 
 class Table(View):
-
-
     """
     Handels the creation of tables and serves information on existing tables
     """
@@ -43,33 +41,23 @@ class Table(View):
 
         if 'column' in json_data['type']:
 
-            data_type = json_data['data_type']
             # Migrate Postgres to Python Structures
+            data_type = json_data['data_type']
+
             size = json_data['character_maximum_length']
             if isinstance(size, int):
                 data_type += "(" + str(size) + ")"
 
-            # Check for null
-
-            notnull = 'NO' in ['is_nullable']
-
-            newname = json_data.get('newname', None)
-
-            column_definition = {'name' : json_data['name'],
-                                 'notnull' : notnull,
-                                 'data_type' : data_type,
-                                 'newname' : newname
+            column_definition = {'name': json_data['name'],
+                                 'notnull': 'NO' in ['is_nullable'],
+                                 'data_type': data_type,
+                                 'new_name': json_data.get('newname', None)
                                  }
 
-            print(json_data)
-            print(column_definition)
-
             result = actions.table_change_column(schema, table, column_definition)
-            return JsonResponse(result)
+            return JsonResponse(result, status = result['http_status'])
 
         elif 'constraint' in json_data['type']:
-
-
 
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
@@ -78,16 +66,16 @@ class Table(View):
                 'action': json_data['action'],  # {ADD, DROP}
                 'constraint_type': json_data.get('constraint_type'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
                 'constraint_name': json_data.get('constraint_name'),  # {myForeignKey, myUniqueConstraint}
-                'constraint_parameter': json_data.get('constraint_parameter'),  # Things in Brackets, e.g. name of column
+                'constraint_parameter': json_data.get('constraint_parameter'),
+            # Things in Brackets, e.g. name of column
                 'reference_table': json_data.get('reference_table'),
                 'reference_column': json_data.get('reference_column')
             }
 
             result = actions.table_change_constraint(schema, table, constraint_definition)
-            return JsonResponse(result)
+            return JsonResponse(result, status = result['http_status'])
         else:
-            return JsonResponse({'success': False,
-                                 'error': 'type not recognised.'})
+            return JsonResponse(actions.get_error(False, 400, 'type not recognised'),status =  400)
 
     def put(self, request, schema, table):
         """
@@ -142,7 +130,7 @@ class Table(View):
 
         result = actions.table_create(schema, table, columns, constraints)
 
-        return JsonResponse(result)
+        return JsonResponse(result, status = result['http_status'])
 
 
 class Index(View):
