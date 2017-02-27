@@ -1,17 +1,44 @@
-{% extends "login/admin_group.html" %}
-{% block form %}
-<form method='post'>
-	
-	{% for formset in fieldsets %}
-		<fieldset style="float:left;">
-	 	{% csrf_token %}
-	 	{{ formset.name }}
-    	{{ formset.form.as_p }} 
-    	</fieldset>
-    	<fieldset style="float:left; width:50px;">&nbsp;</fieldset>   
-	{% endfor %} 
-	  
-    <p style="clear:left;"><input type='submit' value='ADD'></p>
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+	<h2>Group Management </h2>
+	{% if group_id == None %}
+	    <h3>Create Group</h3>
+	{% else %}
+	    <h3>Edit Group</h3>
+	{% endif %}
 
+<form method='post'>{% csrf_token %}
+	<table style="table-layout:fixed; width:100%">
+	    <tr>
+	        <td style="padding:15px 15px 15px 15px; width:20%;"> Name</td>
+	        <td style="width:80%"><input name="tag_text" type="text" class="form-control" value="{{ name }}"/></td>
+	    </tr>
+	    <tr>
+	        {% for formset in fieldsets %}		 	
+				 	<td style="width:45%">
+				 	{{ formset.name }}
+			    	{{ formset }}
+			    	</td> 
+			{% endfor %}
+	    </tr>	
+	    <tr>
+	        <td></td>
+	        <td style="padding-top:15px;">
+	            <input type="submit" name="submit_save" class="btn btn-success" value="Save"/>
+	            <a href="/user/{{ user.pk }}/group/" class="btn btn-default">Cancel</a>
+	            {% if group_id != None %}
+	            <input type="submit" name="submit_delete" class="btn btn-warning" value="Delete"/>
+	            {% endif %}
+	        </td>
+	    </tr>
+	</table>
 </form>
+{% endblock %}
+{% block content-right %}
+<hr>
+<h3>Manage Groups</h3>
+<div style="overflow: hidden;">
+	<a href="/user/{{ user.pk }}/group/" class="btn btn-default">Manage Groups</a>
+</div>
 {% endblock %}

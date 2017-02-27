@@ -6,3 +6,10 @@
     <h3>Your authorization token:</h3> {{ token }}
 {% endif %}
 {% endblock %}
+{% block content-right %}
+<hr>
+<h3>Manage Groups</h3>
+<div style="overflow: hidden;">
+	<a href="/user/{{ user.pk }}/group/" class="btn btn-default">Manage Groups</a>
+</div>
+{% endblock %}

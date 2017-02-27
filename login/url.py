@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^profie/', views.ProfileView.as_view(), name='input'),
     url(r'^group/', views.GroupManagement.as_view(), name='input'),
     url(r'^group/edit/', views.GroupEdit.as_view(), name='input'),
+    url(r'^group/new/', views.GroupEdit.as_view(), name='input'),
 ]

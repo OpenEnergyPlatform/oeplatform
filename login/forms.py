@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from .models import myuser as OepUser
 from random import choice
-
+ 
 
 
 class UserChangeForm(forms.ModelForm):
@@ -28,10 +28,10 @@ class UserChangeForm(forms.ModelForm):
 
 class GroupPermForm(forms.Form):
     def __init__(self,*args,**kwargs):
-        user = kwargs.pop("user")     # user is the parameter passed from views.py
+        group = kwargs.pop("group")     # user is the parameter passed from views.py
         super(GroupPermForm, self).__init__(*args,**kwargs)
         #perm_data = Permission.objects.filter(content_type_id=102)
-        group = user.groupadmin.get()
+        #group = user.groupadmin.get()
         perm_data = group.permissions.all()
         OPTIONS =[((choice.id), (choice),) for choice in perm_data]
         self.fields['groupperms'] = forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={'class': 'selectfilter'}), label = '', choices=OPTIONS)
