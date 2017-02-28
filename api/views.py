@@ -1,11 +1,19 @@
 import json
 import time
 
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 from api import actions
+
+
+class ModHttpResponse(HttpResponse):
+    def __init__(self, dictonary):
+        if dictonary['success']:
+            HttpResponse.__init__(self, status=200)
+        HttpResponse.__init__(self, status=dictonary['http_status'], reason=dictonary['error'])
 
 
 class Table(View):
@@ -63,7 +71,7 @@ class Table(View):
                                  }
 
             result = actions.table_change_column(schema, table, column_definition)
-            return JsonResponse(result, status = result['http_status'])
+            return ModHttpResponse(result)
 
         elif 'constraint' in json_data['type']:
 
@@ -75,15 +83,15 @@ class Table(View):
                 'constraint_type': json_data.get('constraint_type'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
                 'constraint_name': json_data.get('constraint_name'),  # {myForeignKey, myUniqueConstraint}
                 'constraint_parameter': json_data.get('constraint_parameter'),
-            # Things in Brackets, e.g. name of column
+                # Things in Brackets, e.g. name of column
                 'reference_table': json_data.get('reference_table'),
                 'reference_column': json_data.get('reference_column')
             }
 
             result = actions.table_change_constraint(schema, table, constraint_definition)
-            return JsonResponse(result, status = result['http_status'])
+            return ModHttpResponse(result)
         else:
-            return JsonResponse(actions.get_error(False, 400, 'type not recognised'),status =  400)
+            return ModHttpResponse(actions.get_error(False, 400, 'type not recognised'))
 
     def put(self, request, schema, table):
         """
@@ -138,7 +146,7 @@ class Table(View):
 
         result = actions.table_create(schema, table, columns, constraints)
 
-        return JsonResponse(result, status = result['http_status'])
+        return ModHttpResponse(result)
 
 
 class Index(View):

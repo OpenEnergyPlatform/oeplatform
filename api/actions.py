@@ -162,7 +162,7 @@ def _perform_sql(sql_statement):
         session.execute(sql_statement)
 
     except Exception as e:
-        return get_error(False, 400, str(e))
+        return get_error(False, 500, "The sql action could not be finished correctly.")
 
     # Why is commit() not part of close() ?
     # I have to commit the changes before closing session. Otherwise the changes are not persistent.
@@ -181,7 +181,7 @@ def get_error(success, http_status_code = 200, reason = None):
     :return: Dictionary with results
     """
     dict = {'success' : success,
-            'error' : reason,
+            'error' : str(reason).replace('\n', ' ').replace('\r', ' '),
             'http_status': http_status_code}
     return dict
 
