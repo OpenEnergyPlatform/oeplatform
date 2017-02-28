@@ -158,21 +158,27 @@ def _perform_sql(sql_statement):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
 
+    # Statement built and no changes required, so statement is empty.
+    print("SQL STATEMENT: |" + sql_statement + "|")
+    if not sql_statement or sql_statement.isspace():
+        return get_response_dict(success = True)
+
     try:
         session.execute(sql_statement)
 
     except Exception as e:
-        return get_error(False, 500, "The sql action could not be finished correctly.")
+        print("SQL Action failed. \n Error:\n" + str(e))
+        return get_response_dict(False, 500, "The sql action could not be finished correctly.")
 
     # Why is commit() not part of close() ?
     # I have to commit the changes before closing session. Otherwise the changes are not persistent.
     session.commit()
     session.close()
 
-    return get_error(success = True)
+    return get_response_dict(success = True)
 
 
-def get_error(success, http_status_code = 200, reason = None):
+def get_response_dict(success, http_status_code = 200, reason = None):
     """
     Unified error description
     :param success: Task was successful or unsuccessful
@@ -181,7 +187,7 @@ def get_error(success, http_status_code = 200, reason = None):
     :return: Dictionary with results
     """
     dict = {'success' : success,
-            'error' : str(reason).replace('\n', ' ').replace('\r', ' '),
+            'error' : str(reason).replace('\n', ' ').replace('\r', ' ') if reason is not None else None,
             'http_status': http_status_code}
     return dict
 
@@ -238,7 +244,7 @@ def table_change_column(schema, table, column_definition):
     existing_column_description = describe_columns(schema, table)
 
     if len(existing_column_description) <= 0:
-        return get_error(False, 400, 'table is not defined.')
+        return get_response_dict(False, 400, 'table is not defined.')
 
     # There is a table named schema.table.
     sql = []
@@ -257,20 +263,23 @@ def table_change_column(schema, table, column_definition):
             # All other operations should work with new name
             current_name = column_definition['new_name']
 
+        cdef_datatype = column_definition.get('data_type')
         # TODO: Fix rudimentary handling of datatypes
-        if column_definition['data_type'] != existing_column_description[column_definition['name']]['data_type']:
+        if cdef_datatype is not None and cdef_datatype != existing_column_description[column_definition['name']]['data_type']:
             sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type']))
 
         c_null = 'NO' in existing_column_description[start_name]['is_nullable']
-        if c_null != column_definition['notnull']:
+        cdef_null = column_definition.get('notnull');
+        if cdef_null is not None and c_null != cdef_null:
             if c_null:
-                # Change to notnull
-                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NULL;'.format(schema = schema, table = table, c_name = current_name))
-            else:
                 # Change to nullable
                 sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;'.format(schema = schema, table = table, c_name = current_name))
+            else:
+                # Change to not null
+                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;'.format(schema = schema, table = table, c_name = current_name))
     else:
         # Column does not exist and should be created
+        # Request will end in 500, if an argument is missing.
         sql.append("ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
 
     sql_string = ''.join(sql)
@@ -300,7 +309,7 @@ def table_change_constraint(schema, table, constraint_definition):
 
         if 'FOREIGN KEY' in constraint_definition['constraint_type']:
             if constraint_definition['reference_table'] is None or constraint_definition['reference_column'] is None:
-                return get_error(False, 400, 'references are not defined correctly')
+                return get_response_dict(False, 400, 'references are not defined correctly')
             sql.append(' REFERENCES {reference_table}({reference_column})'.format(reference_column = constraint_definition['reference_column'], reference_table = constraint_definition['reference_table']))
 
         sql.append(';')

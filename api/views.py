@@ -13,7 +13,12 @@ class ModHttpResponse(HttpResponse):
     def __init__(self, dictonary):
         if dictonary['success']:
             HttpResponse.__init__(self, status=200)
-        HttpResponse.__init__(self, status=dictonary['http_status'], reason=dictonary['error'])
+
+        # TODO: Find smarter way to just define a parameter, if an expression is true.
+        if dictonary['error'] is not None:
+            HttpResponse.__init__(self, status=dictonary['http_status'], reason = dictonary['error'])
+        else:
+            HttpResponse.__init__(self, status=dictonary['http_status'])
 
 
 class Table(View):
@@ -58,16 +63,22 @@ class Table(View):
         if 'column' in json_data['type']:
 
             # Migrate Postgres to Python Structures
-            data_type = json_data['data_type']
+            data_type = json_data.get('data_type')
 
-            size = json_data['character_maximum_length']
-            if isinstance(size, int):
+            size = json_data.get('character_maximum_length')
+            if size is not None and data_type is not None:
                 data_type += "(" + str(size) + ")"
 
+
+            notnull = None
+            is_nullable = json_data.get('is_nullable')
+            if is_nullable is not None:
+                notnull = 'NO' in is_nullable
+
             column_definition = {'name': json_data['name'],
-                                 'notnull': 'NO' in ['is_nullable'],
+                                 'notnull': notnull,
                                  'data_type': data_type,
-                                 'new_name': json_data.get('newname', None)
+                                 'new_name': json_data.get('newname')
                                  }
 
             result = actions.table_change_column(schema, table, column_definition)
@@ -91,7 +102,7 @@ class Table(View):
             result = actions.table_change_constraint(schema, table, constraint_definition)
             return ModHttpResponse(result)
         else:
-            return ModHttpResponse(actions.get_error(False, 400, 'type not recognised'))
+            return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
 
     def put(self, request, schema, table):
         """
