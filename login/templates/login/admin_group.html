@@ -12,7 +12,7 @@
     <h3>Select Group to change:</h3>
 	<div class="list-group">
 	{% for group in groupresult %}
-	    <a class="list-group-item" href="edit/{{group.id}}" >
+	    <a class="list-group-item" href="/user/{{ user.pk }}/group/edit/{{group.id}}" >
 	        <div style="display: inline-block;">
 			    {{group}}
 			</div>

@@ -5,7 +5,7 @@ from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser
 from rest_framework.authtoken.models import Token
 from django.template.context import RequestContext
-from .forms import GroupPermForm, ListGroups
+from .forms import GroupPermForm, ListGroups, AllPermForm
 from django.contrib.admin.helpers import Fieldset
 from django.contrib.auth.models import Group
 
@@ -32,7 +32,6 @@ class ProfileView(View):
 class GroupManagement(View):
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        #groups = ListGroups(user = user)
         groups = user.groupadmin.all()       
         return render(request, "login/admin_group.html", {'user': user, 'groupresult': groups})
     
@@ -41,35 +40,47 @@ class GroupEdit(View):
         user = get_object_or_404(OepUser, pk=user_id)
         if group_id != "":
             group = get_object_or_404(Group, pk=group_id)
-            #groups = ListGroups(user = user)
-            form = GroupPermForm(group = group)
-            fieldsets = (
-                         Fieldset(form,'Available',),
-                         Fieldset(form,'Chosen',),
-                         )
-            return render(request, "login/change_form.html", {'user': user, 'group_id': group_id, 'fieldsets': fieldsets})
-        """
-        Insert function for all available permissions
-        """
-        form = GroupPermForm(group = get_object_or_404(Group, pk=1))
-        fieldsets = (
-                    Fieldset(form,'Available',),
-                    Fieldset(form,'Chosen',),
-                    )
-        return render(request, "login/change_form.html", {'user': user, 'fieldsets': fieldsets})
+            form = AllPermForm(user = user, group = group)
+            form.label = group.name
+            return render(request, "login/change_form.html", {'user': user, 'group_id': group_id, 'form': form})
+        form = AllPermForm(user = user, group = "")
+        return render(request, "login/change_form.html", {'user': user, 'form': form})
         
-    def post(selfself, request, user_id, group_id):
+    def post(self, request, user_id, group_id=""):
         user = get_object_or_404(OepUser, pk=user_id)
-        groups = ListGroups(user = user)
-        form = GroupPermForm(request.POST, user= user)
+        if group_id != "":
+            group = get_object_or_404(Group, pk=group_id)
+            form = AllPermForm(request.POST, user = user, group = group)
+        else:
+            form = AllPermForm(request.POST, user = user, group = "")
+        form.label = request.POST["group_name"]
+        print(form.is_valid())
         if form.is_valid():
-            groupperms = form.cleaned_data.get('groupperms')
-            # do something with your results
-            fieldsets = (
-                     Fieldset(form,'Available',),
-                     Fieldset(form,'Chosen',),
-                     )
-        return render(request, "login/change_form.html", {'user': user, 'groupresult': groups, 'fieldsets': fieldsets})
+            groupperms = form.cleaned_data.get('allperms')
+            print(groupperms)
+            if "Save" in request.POST["submit"]:
+                print('save')
+                if group_id != "":
+                    if groupperms == None:
+                        group.permissions.clear()
+                    else:
+                        group.permissions.set(groupperms) 
+                    Group.objects.filter(id = group_id).update(name = form.label)
+                else:
+                    group = Group.objects.create(name = form.label)
+                    if groupperms != None:
+                        group.permissions.set(groupperms)
+                    user.groupadmin.add(group)
+                    user.groups.add(group)
+                        
+        
+            elif "Delete" in request.POST["submit"]:
+                group.permissions.clear()
+                user.groupadmin.remove(group)
+                Group.objects.filter(id = group_id).delete()
+                print('delete')
+        groups = user.groupadmin.all()  
+        return render(request, "login/admin_group.html", {'user': user, 'groupresult': groups})
     
 class ProfileUpdateView(UpdateView):
     """

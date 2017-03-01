@@ -80,6 +80,9 @@ class myuser(AbstractBaseUser, PermissionsMixin):
         objects = UserManager()
 
     def has_perm(self, perm, obj=None):
+        """
+        
+        """
         if self.is_admin:
             return True
         for backend in auth.get_backends():
@@ -93,6 +96,9 @@ class myuser(AbstractBaseUser, PermissionsMixin):
         return False
 
     def has_module_perms(self, app_label):
+        """
+        
+        """
         if self.is_admin:
             return True
         for backend in auth.get_backends():
@@ -106,12 +112,35 @@ class myuser(AbstractBaseUser, PermissionsMixin):
         return False
     
     def get_writeable_tables(self):
+        """
+        
+        """
         permissions = set()
         for backend in auth.get_backends():
             if hasattr(backend, "get_group_permissions"):
                 permissions.update(backend.get_group_permissions(self, obj=None))
         return permissions 
     
+    def get_all_avail_perms(self):
+        """
+        
+        """
+        insp = actions.connect()
+        engine = actions._get_engine()
+        conn = engine.connect()
+        query = 'SELECT schemaname, tablename as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\')AND tablename NOT LIKE \'%%\\_%%\';'.format(user=sec.dbuser)
+        res = conn.execute(query)
+        ct_ids = list()
+        i=0
+        for shema in res:
+            ct_add = ContentType.objects.get(app_label=shema.schemaname, model=shema.tables)
+            #ct_ids=ct_ids+'{id},'.format(id=ct_add.id)
+            ct_ids.insert(i, ct_add.id)
+            i+1
+        print(ct_ids)
+        result = Permission.objects.filter(content_type_id__in=ct_ids)
+        return result
+        
     def get_full_name(self):
         return self.name
 

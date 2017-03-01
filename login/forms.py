@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser
 from random import choice
  
@@ -34,9 +35,32 @@ class GroupPermForm(forms.Form):
         #group = user.groupadmin.get()
         perm_data = group.permissions.all()
         OPTIONS =[((choice.id), (choice),) for choice in perm_data]
-        self.fields['groupperms'] = forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={'class': 'selectfilter'}), label = '', choices=OPTIONS)
+        self.fields['groupperms'] = forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={'class': 'selectfilter'}), label = group.name, choices=OPTIONS)
+
+class AllPermForm(forms.ModelForm):
+    """
         
+    """
+    class Meta:
+        model = OepUser
+        fields =('allperms',)
+    allperms = forms.ModelMultipleChoiceField(queryset="", widget=FilteredSelectMultiple("Permissions", is_stacked=False), required=False,)
+    
+    def __init__(self,*args,**kwargs):
+        user = kwargs.pop("user")
+        group = kwargs.pop("group")     # user is the parameter passed from views.py
+        super(AllPermForm, self).__init__(*args,**kwargs)
+        self.fields['allperms'] = forms.ModelMultipleChoiceField(queryset=user.get_all_avail_perms(),
+                                                                 widget=FilteredSelectMultiple("Permissions", 
+                                                                 is_stacked=False),
+                                                                 required=False,)
+        if group != "":
+            self.fields['allperms'].initial = group.permissions.all()
+  
 class ListGroups(forms.Form):
+    """
+        
+    """
     def __init__(self,*args,**kwargs):
         user = kwargs.pop("user")     # user is the parameter passed from views.py
         super(ListGroups, self).__init__(*args,**kwargs)
