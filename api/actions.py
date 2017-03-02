@@ -18,6 +18,7 @@ _ENGINES = {}
 
 Base = declarative_base()
 
+
 class InvalidRequest(Exception):
     pass
 
@@ -53,34 +54,35 @@ def describe_columns(schema, table):
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    query ='select column_name, ' \
-           'ordinal_position, column_default, is_nullable, data_type, ' \
-           'character_maximum_length, character_octet_length, ' \
-           'numeric_precision, numeric_precision_radix, numeric_scale, ' \
-           'datetime_precision, interval_type, interval_precision, ' \
-           'maximum_cardinality, dtd_identifier, is_updatable ' \
+    query = 'select column_name, ' \
+            'ordinal_position, column_default, is_nullable, data_type, ' \
+            'character_maximum_length, character_octet_length, ' \
+            'numeric_precision, numeric_precision_radix, numeric_scale, ' \
+            'datetime_precision, interval_type, interval_precision, ' \
+            'maximum_cardinality, dtd_identifier, is_updatable ' \
             'from INFORMATION_SCHEMA.COLUMNS where table_name = ' \
             '\'{table}\' and table_schema=\'{schema}\';'.format(
-                        table=table, schema=schema)
+        table=table, schema=schema)
     response = session.execute(query)
     session.close()
-    return {column.column_name:{
-                'ordinal_position': column.ordinal_position,
-                'column_default': column.column_default,
-                'is_nullable': column.is_nullable,
-                'data_type': column.data_type,
-                'character_maximum_length': column.character_maximum_length,
-                'character_octet_length': column.character_octet_length,
-                'numeric_precision': column.numeric_precision,
-                'numeric_precision_radix': column.numeric_precision_radix,
-                'numeric_scale': column.numeric_scale,
-                'datetime_precision': column.datetime_precision,
-                'interval_type': column.interval_type,
-                'interval_precision': column.interval_precision,
-                'maximum_cardinality': column.maximum_cardinality,
-                'dtd_identifier': column.dtd_identifier,
-                'is_updatable': column.is_updatable
-            } for column in response}
+    return {column.column_name: {
+        'ordinal_position': column.ordinal_position,
+        'column_default': column.column_default,
+        'is_nullable': column.is_nullable,
+        'data_type': column.data_type,
+        'character_maximum_length': column.character_maximum_length,
+        'character_octet_length': column.character_octet_length,
+        'numeric_precision': column.numeric_precision,
+        'numeric_precision_radix': column.numeric_precision_radix,
+        'numeric_scale': column.numeric_scale,
+        'datetime_precision': column.datetime_precision,
+        'interval_type': column.interval_type,
+        'interval_precision': column.interval_precision,
+        'maximum_cardinality': column.maximum_cardinality,
+        'dtd_identifier': column.dtd_identifier,
+        'is_updatable': column.is_updatable
+    } for column in response}
+
 
 def describe_indexes(schema, table):
     """
@@ -100,18 +102,18 @@ def describe_indexes(schema, table):
     """
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    query ='select indexname, indexdef from pg_indexes where tablename = ' \
+    query = 'select indexname, indexdef from pg_indexes where tablename = ' \
             '\'{table}\' and schemaname=\'{schema}\';'.format(
-                        table=table, schema=schema)
+        table=table, schema=schema)
     print(query)
     response = session.execute(query)
     session.close()
 
     # Use a single-value dictionary to allow future extension with downward
     # compatibility
-    return {column.indexname:{
-                'indexdef': column.indexdef,
-            } for column in response}
+    return {column.indexname: {
+        'indexdef': column.indexdef,
+    } for column in response}
 
 
 def describe_constraints(schema, table):
@@ -136,16 +138,16 @@ def describe_constraints(schema, table):
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    query ='select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name=\'{table}\' AND constraint_schema=\'{schema}\';'.format(
-                        table=table, schema=schema)
+    query = 'select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name=\'{table}\' AND constraint_schema=\'{schema}\';'.format(
+        table=table, schema=schema)
     response = session.execute(query)
     session.close()
-    return {column.constraint_name:{
-                'constraint_typ': column.constraint_type,
-                'is_deferrable': column.is_deferrable,
-                'initially_deferred': column.initially_deferred,
-                'definition': column.definition
-            } for column in response}
+    return {column.constraint_name: {
+        'constraint_typ': column.constraint_type,
+        'is_deferrable': column.is_deferrable,
+        'initially_deferred': column.initially_deferred,
+        'definition': column.definition
+    } for column in response}
 
 
 def _perform_sql(sql_statement):
@@ -161,7 +163,7 @@ def _perform_sql(sql_statement):
     # Statement built and no changes required, so statement is empty.
     print("SQL STATEMENT: |" + sql_statement + "|")
     if not sql_statement or sql_statement.isspace():
-        return get_response_dict(success = True)
+        return get_response_dict(success=True)
 
     try:
         session.execute(sql_statement)
@@ -175,10 +177,50 @@ def _perform_sql(sql_statement):
     session.commit()
     session.close()
 
-    return get_response_dict(success = True)
+    return get_response_dict(success=True)
 
 
-def get_response_dict(success, http_status_code = 200, reason = None):
+def remove_queued_column(id):
+    sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id = id)
+    _perform_sql(sql)
+
+
+def apply_queued_column(id):
+
+    column_description = get_column_change(id)
+    res = table_change_column(column_description)
+
+    if res.get('success') is True:
+        sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
+        _perform_sql(sql)
+        return res
+
+    else:
+        sql = "UPDATE api_columns SET reviewed=True, changed=False WHERE id='{id}'".format(id=id)
+        _perform_sql(sql)
+        return res
+
+
+def apply_queued_constraint(id):
+    constraint_description = get_constraint_change(id)
+    res = table_change_constraint(constraint_description)
+
+    if res.get('success') is True:
+        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
+        _perform_sql(sql)
+        return res
+
+    else:
+        sql = "UPDATE api_constraints SET reviewed=True, changed=False WHERE id='{id}'".format(id=id)
+        _perform_sql(sql)
+        return res
+
+
+def remove_queued_constraint(id):
+    return None
+
+
+def get_response_dict(success, http_status_code=200, reason=None):
     """
     Unified error description
     :param success: Task was successful or unsuccessful
@@ -186,10 +228,178 @@ def get_response_dict(success, http_status_code = 200, reason = None):
     :param reason: reason, why task failed, humanreadable
     :return: Dictionary with results
     """
-    dict = {'success' : success,
-            'error' : str(reason).replace('\n', ' ').replace('\r', ' ') if reason is not None else None,
+    dict = {'success': success,
+            'error': str(reason).replace('\n', ' ').replace('\r', ' ') if reason is not None else None,
             'http_status': http_status_code}
     return dict
+
+
+def parse_scolumnd_from_columnd(schema, table, name, column_description):
+    # Migrate Postgres to Python Structures
+    data_type = column_description.get('data_type')
+    size = column_description.get('character_maximum_length')
+    if size is not None and data_type is not None:
+        data_type += "(" + str(size) + ")"
+
+    notnull = None
+    is_nullable = column_description.get('is_nullable')
+    if is_nullable is not None:
+        notnull = 'NO' in is_nullable
+
+    return {'column_name': name,
+            'not_null': notnull,
+            'data_type': data_type,
+            'new_name': column_description.get('new_name'),
+            'c_schema': schema,
+            'c_table': table
+            }
+
+
+def parse_sconstd_from_constd(schema, table, name_const, constraint_description):
+    defi = constraint_description.get('definition')
+    return {
+        'action': None,  # {ADD, DROP}
+        'constraint_type': constraint_description.get('constraint_typ'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
+        'constraint_name': name_const,
+        'constraint_parameter': constraint_description.get('definition').split('(')[1].split(')')[0],
+        # Things in Brackets, e.g. name of column
+        'reference_table': defi.split('REFERENCES ')[1].split('(')[2] if 'REFERENCES' in defi else None,
+        'reference_column': defi.split('(')[2].split(')')[1] if 'REFERENCES' in defi else None,
+        'c_schema': schema,
+        'c_table': table
+    }
+
+
+def replace_None_with_NULL(dictonary):
+    # Replacing None with null for Database
+    for key, value in dictonary.items():
+        if value is None:
+            dictonary[key] = 'NULL'
+
+    return dictonary
+
+
+def queue_constraint_change(schema, table, constraint_def):
+    cd = replace_None_with_NULL(constraint_def)
+
+    sql_string = "INSERT INTO public.api_constraints (action, constraint_type" \
+                 ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) " \
+                 "VALUES ('{action}', '{c_type}', '{c_name}', '{c_parameter}', '{r_table}', '{r_column}' , '{c_schema}' " \
+                 ", '{c_table}');".format(action=cd['action'], c_type=cd['constraint_type'],
+                                          c_name=cd['constraint_name'], c_parameter=cd['constraint_parameter'],
+                                          r_table=cd['reference_table'], r_column=cd['reference_column'],
+                                          c_schema=schema, c_table=table).replace('\'NULL\'', 'NULL')
+
+    return _perform_sql(sql_string)
+
+
+def queue_column_change(schema, table, column_definition):
+    column_definition = replace_None_with_NULL(column_definition)
+
+    sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " \
+                 "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');" \
+        .format(name=column_definition['column_name'], not_null=column_definition['not_null'],
+                data_type=column_definition['data_type'], new_name=column_definition['new_name'], c_schema=schema,
+                c_table=table) \
+        .replace('\'NULL\'', 'NULL')
+
+    return _perform_sql(sql_string)
+
+
+def get_column_change(i_id):
+    all_changes = get_column_changes()
+    for change in all_changes:
+        print(change.get('id'))
+        if int(change.get('id')) == int(i_id):
+            return change
+
+    return None
+
+
+def get_constraint_change(i_id):
+    all_changes = get_constraints_changes()
+
+    for change in all_changes:
+        if int(change.get('id')) == int(i_id):
+            return change
+
+    return None
+
+
+def get_column_changes(reviewed=None, changed=None):
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query = ["SELECT * FROM public.api_columns"]
+
+    if reviewed is not None or changed is not None:
+        query.append(" WHERE ")
+
+        if reviewed is not None:
+            query.append(" reviewed = " + str(reviewed))
+
+        if reviewed is not None and changed is not None:
+            query.append(" AND ")
+
+        if changed is not None:
+            query.append(" changed = " + str(changed))
+
+    query.append(";")
+
+    sql = ''.join(query)
+
+    print(sql)
+    response = session.execute(sql)
+    session.close()
+
+    return [{'column_name': column.column_name,
+             'not_null': column.not_null,
+             'data_type': column.data_type,
+             'new_name': column.new_name,
+             'reviewed': column.reviewed,
+             'changed': column.changed,
+             'c_schema': column.c_schema,
+             'c_table': column.c_table,
+             'id': column.id
+             } for column in response]
+
+
+def get_constraints_changes(reviewed=None, changed=None):
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query = ["SELECT * FROM public.api_constraints"]
+
+    if reviewed is not None or changed is not None:
+        query.append(" WHERE ")
+
+        if reviewed is not None:
+            query.append(" reviewed = " + str(reviewed))
+
+        if reviewed is not None and changed is not None:
+            query.append(" AND ")
+
+        if changed is not None:
+            query.append(" changed = " + str(changed))
+
+    query.append(";")
+
+    sql = ''.join(query)
+
+    print(sql)
+    response = session.execute(sql)
+    session.close()
+
+    return [{'action': column.action,
+             'constraint_type': column.constraint_type,
+             'constraint_name': column.constraint_name,
+             'constraint_parameter': column.constraint_parameter,
+             'reference_table': column.reference_table,
+             'reference_column': column.reference_column,
+             'reviewed': column.reviewed,
+             'changed': column.changed,
+             'c_schema': column.c_schema,
+             'c_table': column.c_table,
+             'id': column.id
+             } for column in response]
 
 
 def table_create(schema, table, columns, constraints):
@@ -206,15 +416,17 @@ def table_create(schema, table, columns, constraints):
     # https://waymoot.org/home/python_string/
 
     str_list = []
-    str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema = schema, table = table))
+    str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
     first_column = True
+    #TODO: There must be bug in CREATE TABLE. I entered 'character varying' as datatype and the database shows 'character'.
+
     for c in columns:
         if not first_column:
             str_list.append(",")
-        str_list.append("{name} {datatype} {notnull}".format(name=c['name'], datatype=c['datatype'], notnull="NOT NULL" if c['notnull'] else ""))
+        str_list.append("{name} {datatype} {notnull}".format(name=c['name'], datatype=c['datatype'],
+                                                             notnull="NOT NULL" if c['notnull'] else ""))
         first_column = False
-
 
     # TODO: Test SQL Injection
     # 'definition' is an part sql statement, which can be used for sql injection
@@ -230,7 +442,7 @@ def table_create(schema, table, columns, constraints):
     return _perform_sql(sql_string)
 
 
-def table_change_column(schema, table, column_definition):
+def table_change_column(column_definition):
     """
     Changes a table column.
     :param schema: schema
@@ -239,6 +451,8 @@ def table_change_column(schema, table, column_definition):
     :return: Dictionary with results
     """
 
+    schema = column_definition['c_schema']
+    table = column_definition['c_table']
 
     # Check if column exists
     existing_column_description = describe_columns(schema, table)
@@ -249,45 +463,67 @@ def table_change_column(schema, table, column_definition):
     # There is a table named schema.table.
     sql = []
 
-    start_name = column_definition['name']
-    current_name = column_definition['name']
+    start_name = column_definition['column_name']
+    current_name = column_definition['column_name']
 
-    if column_definition['name'] in existing_column_description:
+    if column_definition['column_name'] in existing_column_description:
         # Column exists and want to be changed
 
         # Figure out, which column should be changed and constraint or datatype or name should be changed
 
         if column_definition['new_name'] is not None:
             # Rename table
-            sql.append("ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {new_name};".format(schema = schema, table = table, name = column_definition['name'], new_name = column_definition['new_name']))
+            sql.append(
+                "ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {new_name};".format(schema=schema, table=table,
+                                                                                          name=column_definition[
+                                                                                              'column_name'],
+                                                                                          new_name=column_definition[
+                                                                                              'new_name']))
             # All other operations should work with new name
             current_name = column_definition['new_name']
 
         cdef_datatype = column_definition.get('data_type')
         # TODO: Fix rudimentary handling of datatypes
-        if cdef_datatype is not None and cdef_datatype != existing_column_description[column_definition['name']]['data_type']:
-            sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type']))
+        if cdef_datatype is not None and cdef_datatype != existing_column_description[column_definition['name']][
+            'data_type']:
+            sql.append("ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(schema=schema,
+                                                                                                      table=table,
+                                                                                                      c_name=current_name,
+                                                                                                      c_datatype=
+                                                                                                      column_definition[
+                                                                                                          'data_type']))
 
         c_null = 'NO' in existing_column_description[start_name]['is_nullable']
-        cdef_null = column_definition.get('notnull');
+        cdef_null = column_definition.get('not_null');
         if cdef_null is not None and c_null != cdef_null:
             if c_null:
                 # Change to nullable
-                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;'.format(schema = schema, table = table, c_name = current_name))
+                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;'.format(schema=schema,
+                                                                                                      table=table,
+                                                                                                      c_name=current_name))
             else:
                 # Change to not null
-                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;'.format(schema = schema, table = table, c_name = current_name))
+                sql.append('ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;'.format(schema=schema,
+                                                                                                     table=table,
+                                                                                                     c_name=current_name))
     else:
         # Column does not exist and should be created
         # Request will end in 500, if an argument is missing.
-        sql.append("ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema = schema, table = table, c_name = current_name, c_datatype = column_definition['data_type'],c_notnull="NOT NULL" if column_definition['notnull'] else "" ))
+        sql.append(
+            "ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(schema=schema, table=table,
+                                                                                         c_name=current_name,
+                                                                                         c_datatype=column_definition[
+                                                                                             'data_type'],
+                                                                                         c_notnull="NOT NULL" if
+                                                                                         column_definition[
+                                                                                             'notnull'] else ""))
 
     sql_string = ''.join(sql)
 
     return _perform_sql(sql_string)
 
 
-def table_change_constraint(schema, table, constraint_definition):
+def table_change_constraint(constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
@@ -295,6 +531,10 @@ def table_change_constraint(schema, table, constraint_definition):
     :param constraint_definition: constraint definition according to Issue #184
     :return: Dictionary with results
     """
+
+    table = constraint_definition['c_table']
+    schema = constraint_definition['c_schema']
+
     existing_column_description = describe_columns(schema, table)
 
     if len(existing_column_description) <= 0:
@@ -305,21 +545,32 @@ def table_change_constraint(schema, table, constraint_definition):
     sql = []
 
     if 'ADD' in constraint_definition['action']:
-        sql.append('ALTER TABLE {schema}.{table} {action} CONSTRAINT {constraint_name} {constraint_type} ({constraint_parameter})'.format(schema = schema, table = table, action = constraint_definition['action'], constraint_name = constraint_definition['constraint_name'], constraint_parameter = constraint_definition['constraint_parameter'], constraint_type = constraint_definition['constraint_type']))
+        sql.append(
+            'ALTER TABLE {schema}.{table} {action} CONSTRAINT {constraint_name} {constraint_type} ({constraint_parameter})'.format(
+                schema=schema, table=table, action=constraint_definition['action'],
+                constraint_name=constraint_definition['constraint_name'],
+                constraint_parameter=constraint_definition['constraint_parameter'],
+                constraint_type=constraint_definition['constraint_type']))
 
         if 'FOREIGN KEY' in constraint_definition['constraint_type']:
             if constraint_definition['reference_table'] is None or constraint_definition['reference_column'] is None:
                 return get_response_dict(False, 400, 'references are not defined correctly')
-            sql.append(' REFERENCES {reference_table}({reference_column})'.format(reference_column = constraint_definition['reference_column'], reference_table = constraint_definition['reference_table']))
+            sql.append(' REFERENCES {reference_table}({reference_column})'.format(
+                reference_column=constraint_definition['reference_column'],
+                reference_table=constraint_definition['reference_table']))
 
         sql.append(';')
     elif 'DROP' in constraint_definition['action']:
-        sql.append('ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}'.format(schema = schema, table = table, constraint_name = constraint_definition['constraint_name']))
+        sql.append('ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}'.format(schema=schema, table=table,
+                                                                                           constraint_name=
+                                                                                           constraint_definition[
+                                                                                               'constraint_name']))
 
     sql_string = ''.join(sql)
 
     print(sql_string)
     return _perform_sql(sql_string)
+
 
 """
 ACTIONS FROM OLD API
@@ -331,6 +582,7 @@ def _get_table(schema, table):
     metadata = MetaData()
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
+
 
 """
 
@@ -426,6 +678,7 @@ def table_create(request, context=None):
 
 """
 
+
 def data_delete(request, context=None):
     raise NotImplementedError()
 
@@ -457,7 +710,7 @@ def data_update(request, context=None):
     if rows['data']:
         for row in rows['data']:
             insert = []
-            for (key,value) in list(zip(fields, row)) + meta_fields:
+            for (key, value) in list(zip(fields, row)) + meta_fields:
                 if key in setter:
                     if not (key in pks and value != setter[key]):
                         value = setter[key]
@@ -466,8 +719,7 @@ def data_update(request, context=None):
                             "Primary keys must remain unchanged.")
                 insert.append(process_value(value))
 
-
-            insert_strings.append('('+(', '.join(insert))+')')
+            insert_strings.append('(' + (', '.join(insert)) + ')')
 
         # Add metadata for insertions
         schema = request['schema']
@@ -481,7 +733,8 @@ def data_update(request, context=None):
         )
         print(s)
         connection.execute(s)
-    return {'affected':len(rows['data'])}
+    return {'affected': len(rows['data'])}
+
 
 def data_insert(request, context=None):
     print("INSERT: ", request)
@@ -490,7 +743,8 @@ def data_insert(request, context=None):
     query = request
 
     # If the insert request is not for a meta table, change the request to do so
-    assert not query['table'].startswith('_') or query['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
+    assert not query['table'].startswith('_') or query['table'].endswith(
+        '_cor'), "Insertions on meta tables are only allowed on comment tables"
     query['table'] = '_' + query['table'] + '_insert'
     if not query['schema'].startswith('_'):
         query['schema'] = '_' + query['schema']
@@ -509,8 +763,9 @@ def data_insert(request, context=None):
                              col.internal_size, col.precision, col.scale,
                              col.null_ok] for col in description]}
 
+
 def process_value(val):
-    if isinstance(val,str):
+    if isinstance(val, str):
         return "'" + val + "'"
     if isinstance(val, datetime):
         return "'" + str(val) + "'"
@@ -518,6 +773,7 @@ def process_value(val):
         return 'null'
     else:
         return str(val)
+
 
 def table_drop(request, context=None):
     db = request["db"]
@@ -527,7 +783,7 @@ def table_drop(request, context=None):
     # load schema name and check for sanity    
     schema = request.pop("schema", "public")
     if not is_pg_qual(schema):
-        return {'success':False, 'reason':'Invalid schema name: %s'%schema}
+        return {'success': False, 'reason': 'Invalid schema name: %s' % schema}
         # Check whether schema exists
 
     # load table name and check for sanity
@@ -564,6 +820,7 @@ def table_drop(request, context=None):
 
     return {}
 
+
 def data_search(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
@@ -590,13 +847,14 @@ def count_all(request, context=None):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     t = _get_table(schema, table)
-    return session.query(t).count()#_get_count(session.query(t))
+    return session.query(t).count()  # _get_count(session.query(t))
+
 
 def _get_header(results):
     header = []
     for field in results.cursor.description:
         header.append({
-            'id': field[0],#.decode('utf-8'),
+            'id': field[0],  # .decode('utf-8'),
             'type': field[1]
         })
     return header
@@ -608,10 +866,10 @@ def analyze_columns(db, schema, table):
     result = connection.execute(
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(
             schema=schema, table=table))
-    return [{'id':r['id'],'type':r['type']} for r in result]
+    return [{'id': r['id'], 'type': r['type']} for r in result]
 
-def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
+def search(db, schema, table, fields=None, pk=None, offset=0, limit=100):
     if not fields:
         fields = '*'
     else:
@@ -624,7 +882,7 @@ def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
         schema=schema, table=table, fields=fields)
 
     if pk:
-         sql_string += " where {} = {}".format(pk[0],pk[1])
+        sql_string += " where {} = {}".format(pk[0], pk[1])
 
     sql_string += " limit {}".format(limit)
     sql_string += " offset {}".format(offset)
@@ -633,14 +891,14 @@ def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
 def clear_dict(d):
     return {
-    k.replace(" ", "_"): d[k] if not isinstance(d[k], dict) else clear_dict(
-        d[k]) for k in d}
+        k.replace(" ", "_"): d[k] if not isinstance(d[k], dict) else clear_dict(
+            d[k]) for k in d}
+
 
 def create_meta(schema, table):
-
     meta_schema = get_meta_schema_name(schema)
 
-    if not has_schema({'schema': '_'+schema}):
+    if not has_schema({'schema': '_' + schema}):
         create_meta_schema(schema)
 
     # Comment table
@@ -675,7 +933,6 @@ def create_meta(schema, table):
         create_insert_table(meta_schema, table, meta_schema=meta_schema)
 
 
-
 def get_comment_table(db, schema, table):
     engine = _get_engine()
     connection = engine.connect()
@@ -687,15 +944,16 @@ def get_comment_table(db, schema, table):
     if res:
         jsn = res.first().obj_description
         if jsn:
-            jsn = jsn.replace('\n','')
+            jsn = jsn.replace('\n', '')
         else:
             return {}
         try:
             return json.loads(jsn)
         except ValueError:
-            return{'error': 'No json format', 'content': jsn}
+            return {'error': 'No json format', 'content': jsn}
     else:
         return {}
+
 
 """
 def data_insert(request):
@@ -745,6 +1003,7 @@ def data_insert(request):
         return request
 """
 
+
 def data_info(request, context=None):
     return request
 
@@ -753,6 +1012,7 @@ def connect():
     engine = _get_engine()
     insp = sqla.inspect(engine)
     return insp
+
 
 def _get_engine():
     engine = sqla.create_engine(
@@ -773,7 +1033,7 @@ def has_schema(request, context=None):
 
 def has_table(request, context=None):
     engine = _get_engine()
-    schema= request.pop('schema', None)
+    schema = request.pop('schema', None)
     table = request['table']
     result = engine.dialect.has_table(engine.connect(), table,
                                       schema=schema)
@@ -796,7 +1056,6 @@ def has_type(request, context=None):
     return result
 
 
-
 def get_table_oid(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_table_oid(engine.connect(),
@@ -806,19 +1065,17 @@ def get_table_oid(request, context=None):
     return result
 
 
-
 def get_schema_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_schema_names(engine.connect(), **request)
     return result
 
 
-
 def get_table_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_table_names(engine.connect(),
                                             schema=request.pop('schema',
-                                                                 None),
+                                                               None),
                                             **request)
     return result
 
@@ -836,7 +1093,7 @@ def get_view_definition(request, context=None):
     result = engine.dialect.get_schema_names(engine.connect(),
                                              request['view_name'],
                                              schema=request.pop('schema',
-                                                                  None),
+                                                                None),
                                              **request)
     return result
 
@@ -855,7 +1112,7 @@ def get_pk_constraint(request, context=None):
     result = engine.dialect.get_pk_constraint(engine.connect(),
                                               request['table'],
                                               schema=request.pop('schema',
-                                                                   None),
+                                                                 None),
                                               **request)
     return result
 
@@ -865,7 +1122,7 @@ def get_foreign_keys(request, context=None):
     result = engine.dialect.get_foreign_keys(engine.connect(),
                                              request['table'],
                                              schema=request.pop('schema',
-                                                                  None),
+                                                                None),
                                              postgresql_ignore_search_path=request.pop(
                                                  'postgresql_ignore_search_path',
                                                  False),
@@ -882,13 +1139,12 @@ def get_indexes(request, context=None):
     return result
 
 
-
 def get_unique_constraints(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_foreign_keys(engine.connect(),
                                              request['table'],
                                              schema=request.pop('schema',
-                                                                  None),
+                                                                None),
                                              **request)
     return result
 
@@ -903,6 +1159,7 @@ def get_edit_table_name(table):
 
 def get_insert_table_name(table):
     return '_' + table + '_insert'
+
 
 def get_meta_schema_name(schema):
     return '_' + schema
@@ -922,10 +1179,10 @@ def create_edit_table(schema, table, meta_schema=None):
     query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
             '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
             'INHERITS (_edit_base);'.format(
-                meta_schema=meta_schema,
-                edit_table=get_edit_table_name(table),
-                schema=schema,
-                table=table)
+        meta_schema=meta_schema,
+        edit_table=get_edit_table_name(table),
+        schema=schema,
+        table=table)
     print(query)
     connection = engine.connect()
     connection.execute(query)
@@ -937,10 +1194,10 @@ def create_insert_table(schema, table, meta_schema=None):
     engine = _get_engine()
     query = 'CREATE TABLE {meta_schema}.{edit_table} () ' \
             'INHERITS (_insert_base, {schema}.{table});'.format(
-                meta_schema=meta_schema,
-                edit_table=get_insert_table_name(table),
-                schema=schema,
-                table=table)
+        meta_schema=meta_schema,
+        edit_table=get_insert_table_name(table),
+        schema=schema,
+        table=table)
     print(query)
     connection = engine.connect()
     connection.execute(query)
@@ -952,7 +1209,9 @@ def create_comment_table(schema, table, meta_schema=None):
     engine = _get_engine()
     query = 'CREATE TABLE {schema}.{table} (PRIMARY KEY (_id)) ' \
             'INHERITS (_comment_base); '.format(
-                schema=meta_schema,
-                table=get_comment_table_name(table))
+        schema=meta_schema,
+        table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)
+
+

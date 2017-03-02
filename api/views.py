@@ -62,32 +62,15 @@ class Table(View):
 
         if 'column' in json_data['type']:
 
-            # Migrate Postgres to Python Structures
-            data_type = json_data.get('data_type')
-
-            size = json_data.get('character_maximum_length')
-            if size is not None and data_type is not None:
-                data_type += "(" + str(size) + ")"
-
-
-            notnull = None
-            is_nullable = json_data.get('is_nullable')
-            if is_nullable is not None:
-                notnull = 'NO' in is_nullable
-
-            column_definition = {'name': json_data['name'],
-                                 'notnull': notnull,
-                                 'data_type': data_type,
-                                 'new_name': json_data.get('newname')
-                                 }
-
-            result = actions.table_change_column(schema, table, column_definition)
+            column_definition = actions.parse_scolumnd_from_columnd(schema, table, json_data['name'], json_data)
+            result = actions.queue_column_change(schema, table, column_definition)
             return ModHttpResponse(result)
 
         elif 'constraint' in json_data['type']:
 
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
+            # Using actions.parse_sconstd_from_constd is not applicable
             # dict.get() returns None, if key does not exist
             constraint_definition = {
                 'action': json_data['action'],  # {ADD, DROP}
@@ -99,7 +82,7 @@ class Table(View):
                 'reference_column': json_data.get('reference_column')
             }
 
-            result = actions.table_change_constraint(schema, table, constraint_definition)
+            result = actions.queue_constraint_change(schema, table, constraint_definition)
             return ModHttpResponse(result)
         else:
             return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
