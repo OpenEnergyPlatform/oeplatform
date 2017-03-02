@@ -8,10 +8,10 @@ from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import api.parser
 import oeplatform.securitysettings as sec
 from api import parser
 from api import references
-from api.parser import is_pg_qual, read_pgid
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
@@ -181,11 +181,23 @@ def _perform_sql(sql_statement):
 
 
 def remove_queued_column(id):
+    """
+    Remove a requested change.
+    :param id: id of Change
+    :return: Nothing
+    """
+
     sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id = id)
     _perform_sql(sql)
 
 
 def apply_queued_column(id):
+
+    """
+    Apply a requested change
+    :param id: id of Change
+    :return: Result of Database Operation
+    """
 
     column_description = get_column_change(id)
     res = table_change_column(column_description)
@@ -202,6 +214,12 @@ def apply_queued_column(id):
 
 
 def apply_queued_constraint(id):
+    """
+    Apply a requested change to constraints
+    :param id: id of Change
+    :return: Result of Database Operation
+    """
+
     constraint_description = get_constraint_change(id)
     res = table_change_constraint(constraint_description)
 
@@ -217,7 +235,14 @@ def apply_queued_constraint(id):
 
 
 def remove_queued_constraint(id):
-    return None
+    """
+    Remove a requested change to constraints
+    :param id:
+    :return:
+    """
+
+    sql = "UPDATE api_constraints SET reviewed=True WHERE id='{id}'".format(id=id)
+    _perform_sql(sql)
 
 
 def get_response_dict(success, http_status_code=200, reason=None):
@@ -234,53 +259,17 @@ def get_response_dict(success, http_status_code=200, reason=None):
     return dict
 
 
-def parse_scolumnd_from_columnd(schema, table, name, column_description):
-    # Migrate Postgres to Python Structures
-    data_type = column_description.get('data_type')
-    size = column_description.get('character_maximum_length')
-    if size is not None and data_type is not None:
-        data_type += "(" + str(size) + ")"
-
-    notnull = None
-    is_nullable = column_description.get('is_nullable')
-    if is_nullable is not None:
-        notnull = 'NO' in is_nullable
-
-    return {'column_name': name,
-            'not_null': notnull,
-            'data_type': data_type,
-            'new_name': column_description.get('new_name'),
-            'c_schema': schema,
-            'c_table': table
-            }
-
-
-def parse_sconstd_from_constd(schema, table, name_const, constraint_description):
-    defi = constraint_description.get('definition')
-    return {
-        'action': None,  # {ADD, DROP}
-        'constraint_type': constraint_description.get('constraint_typ'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
-        'constraint_name': name_const,
-        'constraint_parameter': constraint_description.get('definition').split('(')[1].split(')')[0],
-        # Things in Brackets, e.g. name of column
-        'reference_table': defi.split('REFERENCES ')[1].split('(')[2] if 'REFERENCES' in defi else None,
-        'reference_column': defi.split('(')[2].split(')')[1] if 'REFERENCES' in defi else None,
-        'c_schema': schema,
-        'c_table': table
-    }
-
-
-def replace_None_with_NULL(dictonary):
-    # Replacing None with null for Database
-    for key, value in dictonary.items():
-        if value is None:
-            dictonary[key] = 'NULL'
-
-    return dictonary
-
-
 def queue_constraint_change(schema, table, constraint_def):
-    cd = replace_None_with_NULL(constraint_def)
+    """
+    Queue a change to a constraint
+    :param schema: Schema
+    :param table: Table
+    :param constraint_def: Dict with constraint definition
+    :return: Result of database command
+    """
+
+
+    cd = api.parser.replace_None_with_NULL(constraint_def)
 
     sql_string = "INSERT INTO public.api_constraints (action, constraint_type" \
                  ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) " \
@@ -294,7 +283,16 @@ def queue_constraint_change(schema, table, constraint_def):
 
 
 def queue_column_change(schema, table, column_definition):
-    column_definition = replace_None_with_NULL(column_definition)
+    """
+    Quere a change to a column
+    :param schema: Schema
+    :param table: Table
+    :param column_definition: Dict with column definition
+    :return: Result of database command
+    """
+
+
+    column_definition = api.parser.replace_None_with_NULL(column_definition)
 
     sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " \
                  "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');" \
@@ -307,6 +305,11 @@ def queue_column_change(schema, table, column_definition):
 
 
 def get_column_change(i_id):
+    """
+    Get one explicit change
+    :param i_id: ID of Change
+    :return: Change or None, if no change found
+    """
     all_changes = get_column_changes()
     for change in all_changes:
         print(change.get('id'))
@@ -317,6 +320,11 @@ def get_column_change(i_id):
 
 
 def get_constraint_change(i_id):
+    """
+    Get one explicit change
+    :param i_id: ID of Change
+    :return: Change or None, if no change found
+    """
     all_changes = get_constraints_changes()
 
     for change in all_changes:
@@ -327,6 +335,13 @@ def get_constraint_change(i_id):
 
 
 def get_column_changes(reviewed=None, changed=None):
+    """
+    Get all column changes
+    :param reviewed: Reviewed Changes
+    :param changed: Applied Changes
+    :return: List with Column Definitions
+    """
+
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     query = ["SELECT * FROM public.api_columns"]
@@ -364,6 +379,12 @@ def get_column_changes(reviewed=None, changed=None):
 
 
 def get_constraints_changes(reviewed=None, changed=None):
+    """
+    Get all constraint changes
+    :param reviewed: Reviewed Changes
+    :param changed: Applied Changes
+    :return: List with Column Definitons
+    """
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     query = ["SELECT * FROM public.api_constraints"]
@@ -726,8 +747,8 @@ def data_update(request, context=None):
         schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
 
         s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
-            schema=read_pgid(schema),
-            table=read_pgid(get_edit_table_name(table_name)),
+            schema=api.parser.read_pgid(schema),
+            table=api.parser.read_pgid(get_edit_table_name(table_name)),
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
@@ -782,14 +803,14 @@ def table_drop(request, context=None):
 
     # load schema name and check for sanity    
     schema = request.pop("schema", "public")
-    if not is_pg_qual(schema):
+    if not api.parser.is_pg_qual(schema):
         return {'success': False, 'reason': 'Invalid schema name: %s' % schema}
         # Check whether schema exists
 
     # load table name and check for sanity
     table = request.pop("table", None)
 
-    if not is_pg_qual(table):
+    if not api.parser.is_pg_qual(table):
         return {'success': False, 'reason': 'Invalid table name: %s' % table}
 
     try:

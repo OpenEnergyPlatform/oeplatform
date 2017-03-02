@@ -24,6 +24,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.actions as dba
+import api.parser
 import oeplatform.securitysettings as sec
 from api import actions
 from dataedit.structures import Table_tags, Tag
@@ -50,6 +51,11 @@ schema_whitelist = [
 
 
 def admin_constraints(request):
+    """
+    Way to apply changes
+    :param request:
+    :return:
+    """
     post_dict = dict(request.POST)
     action = post_dict.get('action')[0]
     id = post_dict.get('id')[0]
@@ -66,6 +72,11 @@ def admin_constraints(request):
 
 
 def admin_columns(request):
+    """
+    Way to apply changes
+    :param request:
+    :return:
+    """
 
     post_dict = dict(request.POST)
     action = post_dict.get('action')[0]
@@ -83,6 +94,11 @@ def admin_columns(request):
 
 
 def admin(request):
+    """
+    Loads the dataedit admin interface
+    :param request:
+    :return:
+    """
     # I want to display old and new data, if different.
 
     display_message = None
@@ -127,7 +143,7 @@ def admin(request):
             display_message = "There are insufficient requests in database."
             continue
 
-        old = dba.parse_scolumnd_from_columnd(schema, table, name, old_description.get(name))
+        old = api.parser.parse_scolumnd_from_columnd(schema, table, name, old_description.get(name))
 
         for key in list(change):
             value = change[key]

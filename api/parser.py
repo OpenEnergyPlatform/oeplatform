@@ -2,8 +2,9 @@
 # Parsers #
 ###########
 import re
-from sqlalchemy import Table, MetaData
 from datetime import datetime
+
+from sqlalchemy import Table, MetaData
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -367,3 +368,48 @@ def parse_column_constraint(d):
 def parse_table_constraint(d):
     raise NotImplementedError
     # TODO: Implement
+
+
+def parse_scolumnd_from_columnd(schema, table, name, column_description):
+    # Migrate Postgres to Python Structures
+    data_type = column_description.get('data_type')
+    size = column_description.get('character_maximum_length')
+    if size is not None and data_type is not None:
+        data_type += "(" + str(size) + ")"
+
+    notnull = None
+    is_nullable = column_description.get('is_nullable')
+    if is_nullable is not None:
+        notnull = 'NO' in is_nullable
+
+    return {'column_name': name,
+            'not_null': notnull,
+            'data_type': data_type,
+            'new_name': column_description.get('new_name'),
+            'c_schema': schema,
+            'c_table': table
+            }
+
+
+def parse_sconstd_from_constd(schema, table, name_const, constraint_description):
+    defi = constraint_description.get('definition')
+    return {
+        'action': None,  # {ADD, DROP}
+        'constraint_type': constraint_description.get('constraint_typ'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
+        'constraint_name': name_const,
+        'constraint_parameter': constraint_description.get('definition').split('(')[1].split(')')[0],
+        # Things in Brackets, e.g. name of column
+        'reference_table': defi.split('REFERENCES ')[1].split('(')[2] if 'REFERENCES' in defi else None,
+        'reference_column': defi.split('(')[2].split(')')[1] if 'REFERENCES' in defi else None,
+        'c_schema': schema,
+        'c_table': table
+    }
+
+
+def replace_None_with_NULL(dictonary):
+    # Replacing None with null for Database
+    for key, value in dictonary.items():
+        if value is None:
+            dictonary[key] = 'NULL'
+
+    return dictonary

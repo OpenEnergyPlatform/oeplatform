@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
+import api.parser
 from api import actions
 
 
@@ -62,7 +63,7 @@ class Table(View):
 
         if 'column' in json_data['type']:
 
-            column_definition = actions.parse_scolumnd_from_columnd(schema, table, json_data['name'], json_data)
+            column_definition = api.parser.parse_scolumnd_from_columnd(schema, table, json_data['name'], json_data)
             result = actions.queue_column_change(schema, table, column_definition)
             return ModHttpResponse(result)
 
