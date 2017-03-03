@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import PermissionsMixin
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 import mwclient as mw
 from api import actions
@@ -12,7 +13,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
-from django.contrib.contenttypes.models import ContentType
+
 
 def addcontenttypes():
     """
@@ -25,22 +26,31 @@ def addcontenttypes():
     conn = engine.connect()
     query = 'SELECT schemaname FROM pg_tables WHERE  schemaname NOT LIKE \'\_%%\' group by schemaname;'.format(st='%\_%')
     res = conn.execute(query)
-    for shema in res:
-        if not shema.schemaname in ['information_schema', 'pg_catalog']:
-            query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=shema.schemaname)
+    for schema in res:
+        if not schema.schemaname in ['information_schema', 'pg_catalog']:
+            query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=schema.schemaname)
             table = conn.execute(query)
-            for tab in table:             
-                ContentType.objects.get_or_create(app_label=shema.schemaname, model=tab.tables)
-                ct_add = ContentType.objects.get(app_label=shema.schemaname, model=tab.tables)
-                p_add = Permission.objects.get_or_create(name='Can add data in {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
-                                   codename='add_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
-                                   content_type=ct_add)
-                p_change = Permission.objects.get_or_create(name='Can change data in {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
-                                   codename='change_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
-                                   content_type=ct_add)
-                p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=shema.schemaname, t=tab.tables),
-                                   codename='delete_{s}_{t}'.format(s=shema.schemaname, t=tab.tables),
-                                   content_type=ct_add)        
+            for tab in table:
+                _create_tableperm(schema=schema.schemaname, table=tab.tables)            
+      
+
+def _create_tableperm(schema, table):
+    """
+    Create Content Type and Permissions for the given schema and table
+    :param schema: Name of the schema
+    :param table: Name of the table  
+    """
+    ContentType.objects.get_or_create(app_label=schema, model=table)
+    ct_add = ContentType.objects.get(app_label=schema, model=table)
+    p_add = Permission.objects.get_or_create(name='Can add data in {s}.{t} '.format(s=schema, t=table),
+                                             codename='add_{s}_{t}'.format(s=schema, t=table),
+                                             content_type=ct_add)
+    p_change = Permission.objects.get_or_create(name='Can change data in {s}.{t} '.format(s=schema, t=table),
+                                                codename='change_{s}_{t}'.format(s=schema, t=table),
+                                                content_type=ct_add)
+    p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=schema, t=table),
+                                                codename='delete_{s}_{t}'.format(s=schema, t=table),
+                                                content_type=ct_add) 
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
@@ -81,7 +91,7 @@ class myuser(AbstractBaseUser, PermissionsMixin):
 
     def has_perm(self, perm, obj=None):
         """
-        
+        Returns the authorization for a specific perm
         """
         if self.is_admin:
             return True
@@ -97,7 +107,7 @@ class myuser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         """
-        
+        Returns the authorization for a specific shema. 
         """
         if self.is_admin:
             return True
@@ -111,19 +121,15 @@ class myuser(AbstractBaseUser, PermissionsMixin):
                 return False
         return False
     
-    def get_writeable_tables(self):
+    def has_write_permissions(self, schema, table):
         """
-        
+        This function returns the authorization given the schema and table.
         """
-        permissions = set()
-        for backend in auth.get_backends():
-            if hasattr(backend, "get_group_permissions"):
-                permissions.update(backend.get_group_permissions(self, obj=None))
-        return permissions 
+        return self.has_perm('{schema}.{table}'.format(schema=schema, table=table))
     
     def get_all_avail_perms(self):
         """
-        
+        Returns all available permissons by user(tableowner)
         """
         insp = actions.connect()
         engine = actions._get_engine()
@@ -132,12 +138,11 @@ class myuser(AbstractBaseUser, PermissionsMixin):
         res = conn.execute(query)
         ct_ids = list()
         i=0
-        for shema in res:
-            ct_add = ContentType.objects.get(app_label=shema.schemaname, model=shema.tables)
+        for schema in res:
+            ct_add = ContentType.objects.get(app_label=schema.schemaname, model=schema.tables)
             #ct_ids=ct_ids+'{id},'.format(id=ct_add.id)
             ct_ids.insert(i, ct_add.id)
             i+1
-        print(ct_ids)
         result = Permission.objects.filter(content_type_id__in=ct_ids)
         return result
         

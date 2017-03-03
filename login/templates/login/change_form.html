@@ -10,7 +10,7 @@
 	{% else %}
 	    <h3>Edit Group</h3>
 	{% endif %}
-
+		<h3>{{ error }}</h3>
 <form method='post'>{% csrf_token %}
 	<table style="table-layout:fixed; width:100%">
 	    <tr>
@@ -20,6 +20,14 @@
 	    <tr>
 	    	<td style="padding:15px 15px 15px 15px; width:20%; "> Permissions </td>
 	        {% for field in form %}		 	
+				 	<td style="width:45%">
+				 	{{ field }}
+			    	</td> 
+			{% endfor %}
+	    </tr>
+	    <tr>
+	    	<td style="padding:15px 15px 15px 15px; width:20%; "> Members </td>
+	        {% for field in members %}		 	
 				 	<td style="width:45%">
 				 	{{ field }}
 			    	</td> 

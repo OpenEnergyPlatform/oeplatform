@@ -1,13 +1,8 @@
 from django import forms
-from django.contrib import admin
-from django.utils.safestring import mark_safe
-from django.contrib.auth.models import Group, Permission
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser
-from random import choice
- 
+
 
 
 class UserChangeForm(forms.ModelForm):
@@ -27,24 +22,34 @@ class UserChangeForm(forms.ModelForm):
         # field does not have access to the initial value
         return self.initial["password"]
 
-class GroupPermForm(forms.Form):
+class GroupUserForm(forms.ModelForm):
+    """
+     A form for setting members of a group.     
+    """
+    class Meta:
+        model = OepUser
+        fields = ('groupmembers',)
+    
+    groupmembers = forms.ModelMultipleChoiceField(queryset=OepUser.objects.filter(is_superuser=False).filter(is_admin=False), 
+                                                  widget=FilteredSelectMultiple("Members", is_stacked=False), 
+                                                  required=False,)
+    
     def __init__(self,*args,**kwargs):
-        group = kwargs.pop("group")     # user is the parameter passed from views.py
-        super(GroupPermForm, self).__init__(*args,**kwargs)
-        #perm_data = Permission.objects.filter(content_type_id=102)
-        #group = user.groupadmin.get()
-        perm_data = group.permissions.all()
-        OPTIONS =[((choice.id), (choice),) for choice in perm_data]
-        self.fields['groupperms'] = forms.MultipleChoiceField(widget=forms.SelectMultiple(attrs={'class': 'selectfilter'}), label = group.name, choices=OPTIONS)
+        group_id = kwargs.pop("group_id")     # group_id is the parameter passed from views.py      
+        super(GroupUserForm, self).__init__(*args,**kwargs)
+        if group_id != "":
+            self.fields['groupmembers'].initial = OepUser.objects.filter(groups__id=group_id)
 
 class AllPermForm(forms.ModelForm):
     """
-        
+     A form for create/edit permissions of a group.   
     """
     class Meta:
         model = OepUser
         fields =('allperms',)
-    allperms = forms.ModelMultipleChoiceField(queryset="", widget=FilteredSelectMultiple("Permissions", is_stacked=False), required=False,)
+    allperms = forms.ModelMultipleChoiceField(queryset="", 
+                                              widget=FilteredSelectMultiple("Permissions", is_stacked=False), 
+                                              required=False,)
     
     def __init__(self,*args,**kwargs):
         user = kwargs.pop("user")
@@ -56,16 +61,5 @@ class AllPermForm(forms.ModelForm):
                                                                  required=False,)
         if group != "":
             self.fields['allperms'].initial = group.permissions.all()
-  
-class ListGroups(forms.Form):
-    """
-        
-    """
-    def __init__(self,*args,**kwargs):
-        user = kwargs.pop("user")     # user is the parameter passed from views.py
-        super(ListGroups, self).__init__(*args,**kwargs)
-        group = user.groupadmin.all()
-        OPTIONS =[((choice.id), mark_safe("<a href='/user/group/edit/{id}'>{ch}</a>".format(id = choice.id, ch=choice))) for choice in group]
-        self.fields['groups'] = forms.MultipleChoiceField(choices=OPTIONS, required=False, widget=forms.CheckboxSelectMultiple)
         
         
