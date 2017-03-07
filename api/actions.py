@@ -334,7 +334,7 @@ def get_constraint_change(i_id):
     return None
 
 
-def get_column_changes(reviewed=None, changed=None):
+def get_column_changes(reviewed=None, changed=None, schema = None, table = None):
     """
     Get all column changes
     :param reviewed: Reviewed Changes
@@ -346,17 +346,24 @@ def get_column_changes(reviewed=None, changed=None):
     session = sessionmaker(bind=engine)()
     query = ["SELECT * FROM public.api_columns"]
 
-    if reviewed is not None or changed is not None:
+    if reviewed is not None or changed is not None or schema is not None or table is not None:
         query.append(" WHERE ")
 
-        if reviewed is not None:
-            query.append(" reviewed = " + str(reviewed))
+        where = []
 
-        if reviewed is not None and changed is not None:
-            query.append(" AND ")
+        if reviewed is not None:
+            where.append("reviewed = " + str(reviewed))
 
         if changed is not None:
-            query.append(" changed = " + str(changed))
+            where.append("changed = " + str(changed))
+
+        if schema is not None:
+            where.append("c_schema = '{schema}'".format(schema = schema))
+
+        if table is not None:
+            where.append("c_table = '{table}'".format(table = table))
+
+        query.append(" AND ".join(where))
 
     query.append(";")
 
@@ -378,7 +385,7 @@ def get_column_changes(reviewed=None, changed=None):
              } for column in response]
 
 
-def get_constraints_changes(reviewed=None, changed=None):
+def get_constraints_changes(reviewed=None, changed=None, schema = None, table = None):
     """
     Get all constraint changes
     :param reviewed: Reviewed Changes
@@ -389,17 +396,24 @@ def get_constraints_changes(reviewed=None, changed=None):
     session = sessionmaker(bind=engine)()
     query = ["SELECT * FROM public.api_constraints"]
 
-    if reviewed is not None or changed is not None:
+    if reviewed is not None or changed is not None or schema is not None or table is not None:
         query.append(" WHERE ")
 
-        if reviewed is not None:
-            query.append(" reviewed = " + str(reviewed))
+        where = []
 
-        if reviewed is not None and changed is not None:
-            query.append(" AND ")
+        if reviewed is not None:
+            where.append("reviewed = " + str(reviewed))
 
         if changed is not None:
-            query.append(" changed = " + str(changed))
+            where.append("changed = " + str(changed))
+
+        if schema is not None:
+            where.append("c_schema = '{schema}'".format(schema = schema))
+
+        if table is not None:
+            where.append("c_table = '{table}'".format(table = table))
+
+        query.append(" AND ".join(where))
 
     query.append(";")
 

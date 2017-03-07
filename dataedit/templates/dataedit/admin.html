@@ -1,97 +1,107 @@
-{% extends "base/base.html" %}
-
 {% block content %}
 {% load dict_handler %}
+{% load bootstrap3   %}
 {% csrf_token %}
 
-<div class = "api-changes">
-    <h2>API Changes</h2>
 
-    {% if display_message is not None %}
-        <div class="alert alert-info">
-            <strong>Info!</strong> {{ display_message }}
-        </div>
-    {% endif %}
+<h2>API Changes</h2>
 
-    <h4>Column Changes</h4>
+{% if display_message is not None %}
+    <div class="alert alert-info">
+        <strong>Info!</strong> {{ display_message }}
+    </div>
+{% endif %}
+
+<h4>Column Changes</h4>
+<ul class="list-group">
+    {% for key, value in data.api_columns.items%}
+        <li class="list-group-item" >
+        <table class="table">
+            <thead>
+            <tr>
+              <th>Category</th>
+              <th>Old Value</th>
+              <th>New Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for k, v in value.new.items%}
+                {% if k in display_items %}
+                <tr>
+                    <th scope="row">{{ k }}</th>
+                    <td>{{ value.old|get_item:k }}</td>
+                    <td>{{ value.new|get_item:k }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+
+        </table>
+
+            <form action="/dataedit/admin/columns/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
+                <input type="hidden" name="action" value="apply">
+                <input type="hidden" name="schema" value="{{ value.new|get_item:'c_schema'}}">
+                <input type="hidden" name="table" value="{{ value.new|get_item:'c_table'}}">
+                <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
+            </form>
+            <form action="/dataedit/admin/columns/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
+                <input type="hidden" name="action" value="deny">
+                <input type="hidden" name="schema" value="{{ value.new|get_item:'c_schema'}}">
+                <input type="hidden" name="table" value="{{ value.new|get_item:'c_table'}}">
+                <button type="submit" value="deny" class="btn btn-danger">Deny</button>
+            </form>
+
+        </li>
+    {% endfor%}
+</ul>
+
+<h4>Constraint Changes</h4>
     <ul class="list-group">
-        {% for key, value in data.api_columns.items%}
-            <li class="list-group-item" >
-            <table class="table">
-                <thead>
+    {% for key, value in data.api_constraints.items%}
+        <li class="list-group-item" >
+        <table class="table">
+            <thead>
+            <tr>
+              <th>Category</th>
+              <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for k, v in value.items%}
+                {% if k in display_items %}
                 <tr>
-                  <th>Category</th>
-                  <th>Old Value</th>
-                  <th>New Value</th>
+                    <th scope="row">{{ k }}</th>
+                    <td>{{ value|get_item:k }}</td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for k, v in value.new.items%}
-                    {% if k in display_items %}
-                    <tr>
-                        <th scope="row">{{ k }}</th>
-                        <td>{{ value.old|get_item:k }}</td>
-                        <td>{{ value.new|get_item:k }}</td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table>
-                <form action="columns/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
-                    <input type="hidden" name="action" value="apply">
-                    <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
-                </form>
-                <form action="columns/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
-                    <input type="hidden" name="action" value="deny">
-                    <button type="submit" value="deny" class="btn btn-danger">Deny</button>
-                </form>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
 
-            </li>
-        {% endfor%}
-    </ul>
+            <form action="/dataedit/admin/constraints/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ value.id }}">
+                <input type="hidden" name="action" value="apply">
+                <input type="hidden" name="schema" value="{{ value.c_schema}}">
+                <input type="hidden" name="table" value="{{ value.c_table}}">
+                <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
+            </form>
+            <form action="/dataedit/admin/constraints/" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ value.id }}">
+                <input type="hidden" name="action" value="deny">
+                <input type="hidden" name="schema" value="{{ value.c_schema}}">
+                <input type="hidden" name="table" value="{{ value.c_table}}">
+                <button type="submit" value="deny" class="btn btn-danger">Deny</button>
+            </form>
 
-    <h4>Constraint Changes</h4>
-        <ul class="list-group">
-        {% for key, value in data.api_constraints.items%}
-            <li class="list-group-item" >
-            <table class="table">
-                <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Value</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for k, v in value.items%}
-                    {% if k in display_items %}
-                    <tr>
-                        <th scope="row">{{ k }}</th>
-                        <td>{{ value|get_item:k }}</td>
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-                </tbody>
-            </table>
-                <form action="constraints/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{ value.id }}">
-                    <input type="hidden" name="action" value="apply">
-                    <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
-                </form>
-                <form action="constraints/" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{ value.id }}">
-                    <input type="hidden" name="action" value="deny">
-                    <button type="submit" value="deny" class="btn btn-danger">Deny</button>
-                </form>
+        </li>
+    {% endfor%}
+</ul>
 
-            </li>
-        {% endfor%}
-    </ul>
-</div>
 
 {% endblock %}

@@ -14,7 +14,6 @@ import svn.local
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, \
     Http404
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -59,6 +58,8 @@ def admin_constraints(request):
     post_dict = dict(request.POST)
     action = post_dict.get('action')[0]
     id = post_dict.get('id')[0]
+    schema = post_dict.get('schema')[0]
+    table = post_dict.get('table')[0]
 
     print('action: ' + action)
     print('id: ' + id)
@@ -68,7 +69,7 @@ def admin_constraints(request):
     elif 'apply' in action:
         actions.apply_queued_constraint(id)
 
-    return HttpResponseRedirect('..')
+        return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
 
 
 def admin_columns(request):
@@ -81,6 +82,8 @@ def admin_columns(request):
     post_dict = dict(request.POST)
     action = post_dict.get('action')[0]
     id = post_dict.get('id')[0]
+    schema = post_dict.get('schema')[0]
+    table = post_dict.get('table')[0]
 
     print('action: ' + action)
     print('id: ' + id)
@@ -90,10 +93,10 @@ def admin_columns(request):
     elif 'apply' in action:
         actions.apply_queued_column(id)
 
-    return HttpResponseRedirect('..')
+    return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table = table))
 
 
-def admin(request):
+def change_requests(schema, table):
     """
     Loads the dataedit admin interface
     :param request:
@@ -102,8 +105,8 @@ def admin(request):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = dba.get_column_changes(reviewed=False)
-    api_constraints = dba.get_constraints_changes(reviewed=False)
+    api_columns = dba.get_column_changes(reviewed=False, schema = schema, table = table)
+    api_constraints = dba.get_constraints_changes(reviewed=False, schema = schema, table = table)
 
     # print(api_columns)
     # print(api_constraints)
@@ -116,19 +119,9 @@ def admin(request):
 
     keyword_whitelist = ['column_name', 'c_table', 'c_schema', 'reviewed', 'changed', 'id']
 
+    old_description = dba.describe_columns(schema, table)
+
     for change in api_columns:
-
-        schema = change['c_schema']
-        table = change['c_table']
-
-        cache_result = cache.get((schema, table))
-        old_description = None
-        if cache_result is None:
-            old_description = dba.describe_columns(schema, table)
-            cache[(schema, table)] = old_description
-        else:
-            old_description = cache_result
-
 
         name = change['column_name']
         id = change['id']
@@ -164,7 +157,10 @@ def admin(request):
 
         data['api_constraints'][id] = value
 
-    return render(request, 'dataedit/admin.html', {'data':data, 'display_items': ['c_schema', 'c_table', 'column_name', 'not_null', 'data_type', 'reference_table', 'constraint_parameter', 'reference_column', 'action', 'constraint_type', 'constraint_name' ], 'display_message': display_message})
+    return {'data':data,
+            'display_items': ['c_schema', 'c_table', 'column_name', 'not_null', 'data_type', 'reference_table', 'constraint_parameter', 'reference_column', 'action', 'constraint_type', 'constraint_name' ],
+            'display_message': display_message
+            }
 
 
 def listschemas(request):
@@ -426,6 +422,12 @@ class DataView(View):
         except:
             revisions = []
 
+        api_changes = change_requests(schema, table)
+
+        data = api_changes.get('data')
+        display_message = api_changes.get('display_message')
+        display_items = api_changes.get('display_items')
+
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
@@ -436,7 +438,10 @@ class DataView(View):
                           'kinds': ['table', 'map', 'graph'],
                           'table': table,
                           'schema': schema,
-                          'tags': tags
+                          'tags': tags,
+                          'data': data,
+                          'display_message': display_message,
+                          'display_items': display_items
                       })
 
     def post(self, request, schema, table):
