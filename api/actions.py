@@ -8,6 +8,8 @@ from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import geoalchemy2
+
 import api.parser
 import oeplatform.securitysettings as sec
 from api import parser

@@ -79,7 +79,7 @@ function show_comment(e, schema, table, id){
                 schema:schema}],
             where:[condition_query('_id',id)]
         }
-        var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}});
+        var request = $.ajax({type: 'POST', url:'/api/legacy/search', dataType:'json', data: {query: JSON.stringify(query)}});
         var dfd = new $.Deferred();
 
          request.done(function(results) {
@@ -201,8 +201,8 @@ function construct_field(dataset){
     // Initial load of dataset including initial set of records
     my.fetch = function(dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.when($.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
-                             $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
+        var request = $.when($.ajax({url:"/api/legacy/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
+                             $.ajax({type: 'POST', url:'/api/legacy/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
         var dfd = new $.Deferred();
 
 
@@ -232,7 +232,7 @@ function construct_field(dataset){
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
+        var request = $.ajax({url:"/api/legacy/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
         var dfd = new $.Deferred();
         request.done(function(fields) {
 
@@ -313,8 +313,8 @@ function construct_field(dataset){
                     column: id}];*/
 
             var request = $.when(
-                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
-                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
+                $.ajax({type: 'POST', url:'/api/legacy/search', dataType:'json', data: {query: JSON.stringify(query)}}),
+                $.ajax({type: 'POST', url:'/api/legacy/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
             )
             request.done(function(results, counts) {
                 results = results[0];
@@ -411,7 +411,7 @@ function construct_field(dataset){
             query['message'] = message
 
             return $.ajax({type: 'POST',
-                url:'/api/insert', dataType:'json',
+                url:'/api/legacy/insert', dataType:'json',
                 data: {
                     query: JSON.stringify(query)
                 }
@@ -438,7 +438,7 @@ function construct_field(dataset){
             query['message'] = message
 
             return $.ajax({type: 'POST',
-                url:'/api/update', dataType:'json',
+                url:'/api/legacy/update', dataType:'json',
                 data: {
                     query: JSON.stringify(query)
                 }
