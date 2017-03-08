@@ -69,7 +69,7 @@ def admin_constraints(request):
     elif 'apply' in action:
         actions.apply_queued_constraint(id)
 
-        return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
+    return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
 
 
 def admin_columns(request):
@@ -132,20 +132,25 @@ def change_requests(schema, table):
 
         old_cd = old_description.get(name)
 
-        if old_cd is None:
-            display_message = "There are insufficient requests in database."
-            continue
-
-        old = api.parser.parse_scolumnd_from_columnd(schema, table, name, old_description.get(name))
-
-        for key in list(change):
-            value = change[key]
-            if key not in keyword_whitelist and (value is None or value == old[key]):
-                old.pop(key)
-                change.pop(key)
-
         data['api_columns'][id] = {}
-        data['api_columns'][id]['old'] = old
+        data['api_columns'][id]['old'] = {}
+
+
+        if old_cd is not None:
+            old = api.parser.parse_scolumnd_from_columnd(schema, table, name, old_description.get(name))
+
+            for key in list(change):
+                value = change[key]
+                if key not in keyword_whitelist and (value is None or value == old[key]):
+                    old.pop(key)
+                    change.pop(key)
+            data['api_columns'][id]['old'] = old
+        else:
+            data['api_columns'][id]['old']['c_schema'] = schema
+            data['api_columns'][id]['old']['c_table'] = table
+            data['api_columns'][id]['old']['column_name'] = name
+            data['api_columns'][id]['fallback'] = True
+
         data['api_columns'][id]['new'] = change
 
     for i in range(len(api_constraints)):
@@ -154,13 +159,19 @@ def change_requests(schema, table):
         if value.get('reference_table') is None or value.get('reference_column') is None:
             value.pop('reference_table')
             value.pop('reference_column')
+        if old_description.get(value.get('constraint_parameter')) is None:
+            value['fallback'] = True
 
         data['api_constraints'][id] = value
 
-    return {'data':data,
-            'display_items': ['c_schema', 'c_table', 'column_name', 'not_null', 'data_type', 'reference_table', 'constraint_parameter', 'reference_column', 'action', 'constraint_type', 'constraint_name' ],
+    display_style = ['c_schema', 'c_table', 'column_name', 'not_null', 'data_type', 'reference_table',
+                     'constraint_parameter', 'reference_column', 'action', 'constraint_type', 'constraint_name']
+
+    return {'data': data,
+            'display_items': display_style,
             'display_message': display_message
             }
+
 
 
 def listschemas(request):
