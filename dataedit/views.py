@@ -48,6 +48,7 @@ schema_whitelist = [
     "scenario",
     "weather",
     # "model_draft",
+    "openstreetmap",
     "reference",
     "workshop"
 ]
