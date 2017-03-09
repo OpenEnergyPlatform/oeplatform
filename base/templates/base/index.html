@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
-
+{% load staticfiles %}
 <h3>Some introductory words</h3> <br>
 On this part of our platform you find the OpenEnergy database (oedb) and the fact sheets. Both are already usable though still under
 continuous improvement. They were developed following the requirement to improve the transparency of energy system models 
@@ -11,5 +11,8 @@ the base to discuss various scenarios.
 <br>
 <br>
 Thanks a lot for your feedback!
- 
+<br>
+<center>
+    <img src="{% static 'OEP_logo_2.png' %}" width="200px"/>
+</center>
 {% endblock %}

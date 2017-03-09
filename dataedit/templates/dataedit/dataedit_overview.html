@@ -1,5 +1,7 @@
 {% extends 'dataedit/dataview.html' %}
 
+{% block title %} - {{schema}}.{{table}}{% endblock %}
+
 {% block heading %}
     <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}}</h3> >> <a href="{{table}}/comments"> comments </a>
     <div class="well">Below is the data that is contained in the table you selected. Only a limited
