@@ -1,0 +1,49 @@
+{% extends "dataedit/base.html" %}
+{% load staticfiles %}
+
+{% block data_content %}
+
+{% if id != None %}
+    <h3>Edit Tag</h3>
+{% else %}
+    <h3>Create Tag</h3>
+{% endif %}
+
+<form action="/dataedit/tags/set" method="post">
+{% csrf_token %}
+
+{% if id != None %}
+<input name="tag_id" type="hidden" value="{{ id }}"/>
+{% endif %}
+
+<table style="table-layout:fixed; width:100%">
+    <tr>
+        <td style="padding:15px 15px 15px 15px; width:20%;"> Name</td>
+        <td style="width:80%"><input name="tag_text" type="text" class="form-control" value="{{ name }}"/></td>
+    </tr>
+    <tr>
+        <td style="padding:15px 15px 15px 15px;">Color</td>
+        <td><input name="tag_color" type="color" class="form-control" value="{{ color }}"/></td>
+    </tr>
+
+    <tr>
+        <td></td>
+        <td style="padding-top:15px;">
+            {% if assigned %}
+            <div style="padding-bottom: 15px">
+                This Tag is assigned to at least one object.
+            </div>
+            {% endif %}
+            <input type="submit" name="submit_save" class="btn btn-success" value="Save"/>
+            <a href="/dataedit/tags" class="btn btn-default">Cancel</a>
+            {% if id != None %}
+            <input type="submit" name="submit_delete" class="btn btn-warning" value="Delete"/>
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+
+</form>
+
+{% endblock %}

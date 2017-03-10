@@ -252,6 +252,96 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
+@login_required(login_url='/login/')
+def tag_overview(request):
+    return render(request=request, template_name='dataedit/tag_overview.html')
+
+
+@login_required(login_url='/login/')
+def tag_editor(request, id =""):
+        tags = get_all_tags()
+
+        create_new = True
+
+        for t in tags:
+            if id != "" and int(id) == t["id"]:
+                tag = t
+
+                # inform the user if tag is assigned to an object
+                engine = actions._get_engine()
+                Session = sessionmaker()
+                session = Session(bind=engine)
+
+                assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
+
+                return render(request=request, template_name='dataedit/tag_editor.html',
+                              context=
+                              {
+                                  "name" : tag['name'],
+                                  "id" : tag['id'],
+                                  "color" : tag['color'],
+                                  "assigned" : assigned
+                              })
+        return render(request=request, template_name='dataedit/tag_editor.html',
+                      context={"name" : "", "color" : "#000000", "assigned": False})
+
+
+@login_required(login_url='/login/')
+def change_tag(request):
+    if "submit_save" in request.POST:
+        if "tag_id" in request.POST:
+            id = request.POST["tag_id"]
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            edit_tag(id, name, color)
+        else:
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            add_tag(name, color)
+
+    elif "submit_delete" in request.POST:
+        id = request.POST["tag_id"]
+        delete_tag(id)
+
+    return redirect('/dataedit/tags/')
+
+
+def edit_tag(id, name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.query(Tag).filter(Tag.id == id).one()
+
+    result.name = name
+    result.color = str(int(color[1:], 16))
+
+    session.commit()
+
+
+def delete_tag(id):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    # delete all occurrences of the tag from Table_tag
+    session.query(Table_tags).filter(Table_tags.tag == id).delete()
+
+    # delete the tag from Tag
+    session.query(Tag).filter(Tag.id == id).delete()
+
+    session.commit()
+
+
+def add_tag(name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
+    session.commit()
+
+
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
