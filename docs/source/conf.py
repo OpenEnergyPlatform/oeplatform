@@ -310,6 +310,9 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
+        if name == "_mock_methods":
+            return name._mock_methods
+        else:
             return Mock()
 
 MOCK_MODULES = ['shapely']
