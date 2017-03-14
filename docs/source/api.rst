@@ -2,6 +2,44 @@
 Data interface (REST)
 =====================
 
+
+Data Structures
+===============
+
+Constraint Definition
+---------------------
+
+:constraint_definition (Dictonary):
+    Specifies a definition of a constraint.
+        * ``action`` Action of constraint (e.g. ADD, DROP)
+        * ``constraint_type`` Type of constraint (e.g. UNIQUE, PRIMARY KEY, FOREIGN KEY)
+        * ``constraint_name`` Name of constraint.
+        * ``constraint_parameter`` Parameter of constraint.
+        * ``reference_table`` Name of reference table, can be None.
+        * ``reference_column`` Name of reference column, can be None.
+
+Column Definition
+-----------------
+
+:column_definition (Dictonary):
+    Specifies a definition of a column.
+        * ``name`` Name of column.
+        * ``new_name`` New name of column, can be None.
+        * ``data_type`` New datatype of column, can be None.
+        * ``is_nullable`` New null value of column, can be None.
+        * ``character_maximum_length`` New data length of column, can be None.
+
+Response Definition
+-------------------
+
+:response_dictonary (Dictonary):
+    Describes the result of an api action.
+        * ``success (Boolean)`` Result of Action
+        * ``error (String)`` Error Message
+        * ``http_status (Integer)`` HTTP status code (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+
+
+
 Create a table
 ==============
 
