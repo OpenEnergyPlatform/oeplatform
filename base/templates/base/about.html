@@ -2,6 +2,10 @@
 {% load bootstrap3 %}
 {% block content %}
 
+{% load staticfiles %} {# Important for using the *static* tag #}
+
 <h3>About us</h3> <br>
+
+<img src="{% static 'logos/Uni_FL_Hauptlogo_CMYK.jpg'%}" width="200px"/>
 
 {% endblock %}
