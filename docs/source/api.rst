@@ -39,6 +39,58 @@ Response Definition
         * ``http_status (Integer)`` HTTP status code (https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
 
 
+Table (RESTful)
+===============
+
+URL: /schema/{schema}/table/{table}
+
+GET
+---
+
+PUT
+---
+
+Creates a new table in database.
+
+Example:
+
+.. code-block:: json
+
+    {
+      "constraints": [
+        {
+          "constraint_type": "FOREIGN KEY",
+          "constraint_name": "fkey_schema_table_database_id",
+          "constraint_parameter": "database_id",
+          "reference_table": "example.table",
+          "reference_column": "database_id_ref"
+        },
+        {
+          "constraint_type": "PRIMARY KEY",
+          "constraint_name": "pkey_schema_table_id",
+          "constraint_parameter": "id",
+          "reference_table": null,
+          "reference_column": null
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "data_type": "int",
+          "is_nullable": "YES",
+          "character_maximum_length": null
+        },
+        {
+          "name": "name",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "character_maximum_length": 50
+        }
+      ]
+    }
+
+POST
+----
 
 Create a table
 ==============

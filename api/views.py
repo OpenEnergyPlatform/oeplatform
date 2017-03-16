@@ -1,25 +1,13 @@
 import json
 import time
 
-from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 import api.parser
 from api import actions
-
-
-class ModHttpResponse(HttpResponse):
-    def __init__(self, dictonary):
-        if dictonary['success']:
-            HttpResponse.__init__(self, status=200)
-
-        # TODO: Find smarter way to just define a parameter, if an expression is true.
-        if dictonary['error'] is not None:
-            HttpResponse.__init__(self, status=dictonary['http_status'], reason = dictonary['error'])
-        else:
-            HttpResponse.__init__(self, status=dictonary['http_status'])
+from api.helpers.http import ModHttpResponse
 
 
 class Table(View):
@@ -102,44 +90,20 @@ class Table(View):
         # There must be a better way to do this.
         json_data = json.loads(request.body.decode("utf-8"))
 
-        constraints = []
-        columns = []
+        constraint_definitions = []
+        column_definitions = []
 
-        for key in json_data['constraints']:
-            value = json_data['constraints'][key]['definition']
+        for constraint_definiton in json_data['constraints']:
+            constraint_definiton.update({"action": "ADD",
+                                         "c_table": table,
+                                         "c_schema": schema})
+            constraint_definitions.append(constraint_definiton)
+        for column_definition in json_data['columns']:
+            column_definition.update({"c_table": table,
+                                      "c_schema": schema})
+            column_definitions.append(column_definition)
 
-            # "PRIMARY KEY (groups_id)"
-            # "FOREIGN KEY (database_id) REFERENCES reference.jabref_database(database_id)"
-
-            # Creating dicts with one entry is inefficient.
-            # Passing more parameters is easy later which is needed
-            if 'PRIMARY KEY' or 'FOREIGN KEY' in value:
-                insert_val = {'definition': value}
-
-                constraints.append(insert_val)
-
-        for c in json_data['columns']:
-
-            # Parse Datatype
-            data_type = json_data['columns'][c]['data_type']
-
-            # Check for size
-            size = json_data['columns'][c]['character_maximum_length']
-            if isinstance(size, int):
-                data_type += "(" + str(size) + ")"
-
-            # Check for null
-
-            not_null = 'NO' in json_data['columns'][c]['is_nullable']
-
-            x = {'datatype': data_type,
-                 'notnull': not_null,
-                 'name': str(c),
-                 }
-
-            columns.append(x)
-
-        result = actions.table_create(schema, table, columns, constraints)
+        result = actions.table_create(schema, table, column_definitions, constraint_definitions)
 
         return ModHttpResponse(result)
 

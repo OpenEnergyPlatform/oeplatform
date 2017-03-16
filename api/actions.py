@@ -8,8 +8,6 @@ from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-import geoalchemy2
-
 import api.parser
 import oeplatform.securitysettings as sec
 from api import parser
@@ -172,6 +170,7 @@ def _perform_sql(sql_statement):
 
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
+        session.rollback()
         return get_response_dict(False, 500, "The sql action could not be finished correctly.")
 
     # Why is commit() not part of close() ?
@@ -189,12 +188,11 @@ def remove_queued_column(id):
     :return: Nothing
     """
 
-    sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id = id)
+    sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id=id)
     _perform_sql(sql)
 
 
 def apply_queued_column(id):
-
     """
     Apply a requested change
     :param id: id of Change
@@ -270,7 +268,6 @@ def queue_constraint_change(schema, table, constraint_def):
     :return: Result of database command
     """
 
-
     cd = api.parser.replace_None_with_NULL(constraint_def)
 
     sql_string = "INSERT INTO public.api_constraints (action, constraint_type" \
@@ -292,7 +289,6 @@ def queue_column_change(schema, table, column_definition):
     :param column_definition: Dict with column definition
     :return: Result of database command
     """
-
 
     column_definition = api.parser.replace_None_with_NULL(column_definition)
 
@@ -336,7 +332,7 @@ def get_constraint_change(i_id):
     return None
 
 
-def get_column_changes(reviewed=None, changed=None, schema = None, table = None):
+def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
     """
     Get all column changes
     :param reviewed: Reviewed Changes
@@ -360,10 +356,10 @@ def get_column_changes(reviewed=None, changed=None, schema = None, table = None)
             where.append("changed = " + str(changed))
 
         if schema is not None:
-            where.append("c_schema = '{schema}'".format(schema = schema))
+            where.append("c_schema = '{schema}'".format(schema=schema))
 
         if table is not None:
-            where.append("c_table = '{table}'".format(table = table))
+            where.append("c_table = '{table}'".format(table=table))
 
         query.append(" AND ".join(where))
 
@@ -387,7 +383,7 @@ def get_column_changes(reviewed=None, changed=None, schema = None, table = None)
              } for column in response]
 
 
-def get_constraints_changes(reviewed=None, changed=None, schema = None, table = None):
+def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None):
     """
     Get all constraint changes
     :param reviewed: Reviewed Changes
@@ -410,10 +406,10 @@ def get_constraints_changes(reviewed=None, changed=None, schema = None, table = 
             where.append("changed = " + str(changed))
 
         if schema is not None:
-            where.append("c_schema = '{schema}'".format(schema = schema))
+            where.append("c_schema = '{schema}'".format(schema=schema))
 
         if table is not None:
-            where.append("c_table = '{table}'".format(table = table))
+            where.append("c_table = '{table}'".format(table=table))
 
         query.append(" AND ".join(where))
 
@@ -444,8 +440,8 @@ def table_create(schema, table, columns, constraints):
     Creates a new table.
     :param schema: schema
     :param table: table
-    :param columns: Description of columns, accoring to Issue #184
-    :param constraints: Description of constraints, according to Issue #184
+    :param columns: Description of columns
+    :param constraints: Description of constraints
     :return: Dictionary with results
     """
 
@@ -455,29 +451,34 @@ def table_create(schema, table, columns, constraints):
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
-    first_column = True
-    #TODO: There must be bug in CREATE TABLE. I entered 'character varying' as datatype and the database shows 'character'.
+    print("Columns: " + str(columns))
+    print("Constraints: " + str(constraints))
 
+    first_column = True
     for c in columns:
         if not first_column:
             str_list.append(",")
-        str_list.append("{name} {datatype} {notnull}".format(name=c['name'], datatype=c['datatype'],
-                                                             notnull="NOT NULL" if c['notnull'] else ""))
+        str_list.append("{name} {data_type} {not_null}"
+                        .format(name=c['name'], data_type=c['data_type'],
+                                not_null="NOT NULL" if "NO" in c['is_nullable'] else ""))
         first_column = False
 
-    # TODO: Test SQL Injection
-    # 'definition' is an part sql statement, which can be used for sql injection
-    for const in constraints:
-        str_list.append(",{definition}".format(definition=const['definition']))
-
     str_list.append(");")
-
     sql_string = ''.join(str_list)
 
-    print("SQL String: " + sql_string)
+    print("SQL CREATE String: " + sql_string)
 
-    return _perform_sql(sql_string)
+    results = [_perform_sql(sql_string)]
 
+    for constraint_definition in constraints:
+        print("ConDef in CREATE TABLE: " + str(constraint_definition))
+        results.append(table_change_constraint(constraint_definition))
+
+    for res in results:
+        if not res['success']:
+            return res
+
+    return get_response_dict(success=True)
 
 def table_change_column(column_definition):
     """
@@ -1250,5 +1251,3 @@ def create_comment_table(schema, table, meta_schema=None):
         table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)
-
-
