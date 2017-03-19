@@ -171,7 +171,7 @@ def _perform_sql(sql_statement):
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
-        return get_response_dict(False, 500, "The sql action could not be finished correctly.")
+        return get_response_dict(False, 500, "The sql action could not be finished correctly.", e)
 
     # Why is commit() not part of close() ?
     # I have to commit the changes before closing session. Otherwise the changes are not persistent.
@@ -204,13 +204,12 @@ def apply_queued_column(id):
 
     if res.get('success') is True:
         sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
-        _perform_sql(sql)
-        return res
-
     else:
-        sql = "UPDATE api_columns SET reviewed=True, changed=False WHERE id='{id}'".format(id=id)
-        _perform_sql(sql)
-        return res
+        ex_str = str(res.get('exception'))
+        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id, ex_str=ex_str)
+
+    _perform_sql(sql)
+    return res
 
 
 def apply_queued_constraint(id):
@@ -225,13 +224,11 @@ def apply_queued_constraint(id):
 
     if res.get('success') is True:
         sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
-        _perform_sql(sql)
-        return res
-
     else:
-        sql = "UPDATE api_constraints SET reviewed=True, changed=False WHERE id='{id}'".format(id=id)
-        _perform_sql(sql)
-        return res
+        ex_str = str(res.get('exception'))
+        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id, ex_str=ex_str)
+    _perform_sql(sql)
+    return res
 
 
 def remove_queued_constraint(id):
@@ -245,17 +242,19 @@ def remove_queued_constraint(id):
     _perform_sql(sql)
 
 
-def get_response_dict(success, http_status_code=200, reason=None):
+def get_response_dict(success, http_status_code=200, reason=None, exception=None):
     """
     Unified error description
     :param success: Task was successful or unsuccessful
     :param http_status_code: HTTP status code for indication
     :param reason: reason, why task failed, humanreadable
+    :param exception exception, if available
     :return: Dictionary with results
     """
     dict = {'success': success,
             'error': str(reason).replace('\n', ' ').replace('\r', ' ') if reason is not None else None,
-            'http_status': http_status_code}
+            'http_status': http_status_code,
+            'exception': exception}
     return dict
 
 
@@ -379,7 +378,8 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
              'changed': column.changed,
              'c_schema': column.c_schema,
              'c_table': column.c_table,
-             'id': column.id
+             'id': column.id,
+             'exception': column.exception
              } for column in response]
 
 
@@ -431,7 +431,8 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
              'changed': column.changed,
              'c_schema': column.c_schema,
              'c_table': column.c_table,
-             'id': column.id
+             'id': column.id,
+             'exception': column.exception
              } for column in response]
 
 

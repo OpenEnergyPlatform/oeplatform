@@ -149,7 +149,7 @@ def change_requests(schema, table):
             data['api_columns'][id]['old']['c_schema'] = schema
             data['api_columns'][id]['old']['c_table'] = table
             data['api_columns'][id]['old']['column_name'] = name
-            data['api_columns'][id]['fallback'] = True
+
 
         data['api_columns'][id]['new'] = change
 
@@ -159,8 +159,6 @@ def change_requests(schema, table):
         if value.get('reference_table') is None or value.get('reference_column') is None:
             value.pop('reference_table')
             value.pop('reference_column')
-        if old_description.get(value.get('constraint_parameter')) is None:
-            value['fallback'] = True
 
         data['api_constraints'][id] = value
 

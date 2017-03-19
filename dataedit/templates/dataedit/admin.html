@@ -14,6 +14,10 @@
             {% for key, value in data.api_columns.items%}
                 <li class="list-group-item" >
                 <table class="table">
+                    <div class="alert alert-danger">
+                      <strong>SQL Exception!</strong> On last call a sql exception occurred! <br>
+                        {{  value.new|get_item:'exception' }}
+                    </div>
                     <thead>
                     <tr>
                       <th>Category</th>
@@ -46,7 +50,7 @@
                         <input type="hidden" name="action" value="apply">
                         <input type="hidden" name="schema" value="{{ value.new|get_item:'c_schema'}}">
                         <input type="hidden" name="table" value="{{ value.new|get_item:'c_table'}}">
-                        <button type="submit" value="apply" class="btn btn-success" {% if value.fallback is True %} disabled {% endif %} style="margin-right: 20px">Apply</button>
+                        <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
                     </form>
                     <form action="/dataedit/admin/columns/" method="post">
                         {% csrf_token %}
@@ -93,7 +97,7 @@
                         <input type="hidden" name="action" value="apply">
                         <input type="hidden" name="schema" value="{{ value.c_schema}}">
                         <input type="hidden" name="table" value="{{ value.c_table}}">
-                        <button type="submit" value="apply" class="btn btn-success pull-left" {% if value.fallback is True %} disabled {% endif %} style="margin-right: 20px">Apply</button>
+                        <button type="submit" value="apply" class="btn btn-success pull-left" style="margin-right: 20px">Apply</button>
                     </form>
                     <form action="/dataedit/admin/constraints/" method="post">
                         {% csrf_token %}
