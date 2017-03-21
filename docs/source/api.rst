@@ -47,10 +47,13 @@ URL: /schema/{schema}/table/{table}
 GET
 ---
 
+Reference needed.
+
 PUT
 ---
 
 Creates a new table in database.
+JSON should contain a constraint definition array and a column definition array.
 
 Example:
 
@@ -91,6 +94,41 @@ Example:
 
 POST
 ----
+
+JSON should contain a column or constraint definition.
+Additionally ``action`` and ``type`` should be mentioned.
+
+- ``type`` can be ``constraint`` or ``column``.
+- ``action`` can be ``ADD`` and ``DROP``.
+- ``constraint_type`` can be every constraint type supported by Postgres.
+- ``reference_table`` and ``reference_column`` can be null, if not necessary.
+
+Example:
+
+.. code-block:: json
+
+    {
+      "type" : "constraint",
+      "action": "ADD",
+      "constraint_type": "FOREIGN KEY",
+      "constraint_name": "fkey_label",
+      "constraint_parameter": "changed_name",
+      "reference_table" : "reference.group_types",
+      "reference_column" : "label"
+    }
+
+    {
+      "type" : "column",
+      "name" : "test_name",
+      "newname" : "changed_name",
+      "data_type": "character varying",
+      "is_nullable": "NO",
+      "character_maximum_length": 50
+    }
+
+================
+Deprecated Stuff
+================
 
 Create a table
 ==============
