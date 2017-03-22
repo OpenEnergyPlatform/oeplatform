@@ -1,6 +1,7 @@
 ###########
 # Parsers #
 ###########
+import decimal
 import re
 from datetime import datetime
 
@@ -413,3 +414,25 @@ def replace_None_with_NULL(dictonary):
             dictonary[key] = 'NULL'
 
     return dictonary
+
+
+def split(string, seperator):
+    if string is None:
+        return None
+    else:
+        return str(string).split(seperator)
+
+
+def replace(string, occuring_symb, replace_symb):
+    if string is None:
+        return None
+    else:
+        return str(string).replace(occuring_symb, replace_symb)
+
+
+def alchemyencoder(obj):
+    """JSON encoder function for SQLAlchemy special classes."""
+    if isinstance(obj, datetime.date):
+        return obj.isoformat()
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)

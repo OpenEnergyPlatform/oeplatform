@@ -166,7 +166,7 @@ def _perform_sql(sql_statement):
         return get_response_dict(success=True)
 
     try:
-        session.execute(sql_statement)
+        result = session.execute(sql_statement)
 
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
@@ -178,7 +178,7 @@ def _perform_sql(sql_statement):
     session.commit()
     session.close()
 
-    return get_response_dict(success=True)
+    return get_response_dict(success=True, result=result)
 
 
 def remove_queued_column(id):
@@ -242,7 +242,7 @@ def remove_queued_constraint(id):
     _perform_sql(sql)
 
 
-def get_response_dict(success, http_status_code=200, reason=None, exception=None):
+def get_response_dict(success, http_status_code=200, reason=None, exception=None, result=None):
     """
     Unified error description
     :param success: Task was successful or unsuccessful
@@ -254,7 +254,9 @@ def get_response_dict(success, http_status_code=200, reason=None, exception=None
     dict = {'success': success,
             'error': str(reason).replace('\n', ' ').replace('\r', ' ') if reason is not None else None,
             'http_status': http_status_code,
-            'exception': exception}
+            'exception': exception,
+            'result': result
+            }
     return dict
 
 
@@ -610,6 +612,56 @@ def table_change_constraint(constraint_definition):
     print(sql_string)
     return _perform_sql(sql_string)
 
+
+def get_rows(request, data):
+
+    sql = ['SELECT']
+    column_list = data.get('column_list')
+    if column_list is None:
+        sql.append('*')
+    else:
+        sql.append(','.join(column_list))
+
+    sql.append('FROM {schema}.{table}'.format(schema=data['schema'], table=data['table']))
+
+    where = data.get('where')
+    if where is not None:
+        sql.append('WHERE')
+
+        for i in range(0, int(len(where)/2)):
+            first = where[2 * i]
+            second = where[2 * i + 1]
+
+            if i != 0:
+                # TODO: Add Support for OR Connections
+                sql.append('AND')
+
+            sql.append(first + '=' + second)
+
+    orderby = data.get('orderby')
+    if orderby is not None:
+        sql.append('ORDER BY')
+        sql.append(','.join(orderby))
+
+    limit = data.get('limit')
+    if limit is not None and limit.isdigit():
+        sql.append('LIMIT ' + limit)
+
+    offset = data.get('offset')
+    if offset is not None and offset.isdigit():
+        sql.append('OFFSET ' + offset)
+
+    sql_command = ' '.join(sql)
+    print(sql_command)
+
+    resp_dict = _perform_sql(sql_command)
+    result = resp_dict.get('result')
+
+    if result is None:
+        # Returning an empty list is equivalent to returning an empty result.
+        return []
+
+    return [dict(r) for r in result]
 
 """
 ACTIONS FROM OLD API

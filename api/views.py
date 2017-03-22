@@ -1,12 +1,14 @@
 import json
 import time
 
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 import api.parser
 from api import actions
+from api import parser
 from api.helpers.http import ModHttpResponse
 
 
@@ -120,8 +122,23 @@ class Index(View):
 
 
 class Rows(View):
-    def get(self, request):
-        pass
+    def get(self, request, schema, table, column_list, where, orderby, limit, offset):
+
+        data = {"schema": schema,
+                "table": table,
+                "column_list": parser.split(str(column_list), ','),
+                "where": parser.split(parser.replace(where, "=", ","), ","),
+                "orderby": parser.split(str(orderby),','),
+                "limit": limit,
+                "offset": offset
+              }
+
+        return_obj = actions.get_rows(request, data)
+
+        print(return_obj)
+        # TODO: Figure out what JsonResponse does different.
+        response = json.dumps(return_obj, default=date_handler)
+        return HttpResponse(response, content_type='application/json')
 
     def post(self, request):
         pass
