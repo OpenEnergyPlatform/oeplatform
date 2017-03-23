@@ -72,9 +72,13 @@ class UserBackend(object):
     def authenticate(self, username=None, password=None):
         url = 'https://wiki.openmod-initiative.org/api.php?action=login'
         data = {'format':'json', 'lgname':username}
+
+        #A first request to receive the required token
         token_req = requests.post(url, data)
         data['lgpassword'] = password
         data['lgtoken'] = token_req.json()['login']['token']
+
+        # A second request for the actual authentication
         login_req = requests.post(url, data, cookies=token_req.cookies)
 
         if login_req.json()['login']['result'] == 'Success':
