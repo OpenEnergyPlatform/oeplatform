@@ -10,7 +10,7 @@ structures = r'table|sequence'
 urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$', views.Table.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
-    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/columns/(?P<column_list>[\w\d_\s\,]+)/where/(?P<where>[\w\d\s\'\=\,]+)/orderby/(?P<orderby>[\w\d_\s\,]+)/limit/(?P<limit>[\d]+)/offset/(?P<offset>[\d]+)/$', views.Rows.as_view()),
+    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/$', views.Rows.as_view()),
 
 
     url(r'^legacy/create', views.create_ajax_handler(actions.table_create)),

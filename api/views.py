@@ -122,16 +122,22 @@ class Index(View):
 
 
 class Rows(View):
-    def get(self, request, schema, table, column_list, where, orderby, limit, offset):
+    def get(self, request, schema, table):
 
-        data = {"schema": schema,
-                "table": table,
-                "column_list": parser.split(str(column_list), ','),
-                "where": parser.split(parser.replace(where, "=", ","), ","),
-                "orderby": parser.split(str(orderby),','),
-                "limit": limit,
-                "offset": offset
-              }
+        columns = request.GET.get('columns')
+        where = request.GET.get('where')
+        orderby = request.GET.get('orderby')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        data = {'schema': schema,
+                'table': table,
+                'columns': parser.split(columns, ','),
+                'where': parser.split(parser.replace(where, "=", ","), ","),
+                'orderby': parser.split(orderby, ','),
+                'limit': limit,
+                'offset': offset
+                }
 
         return_obj = actions.get_rows(request, data)
 

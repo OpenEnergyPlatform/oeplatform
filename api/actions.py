@@ -616,11 +616,11 @@ def table_change_constraint(constraint_definition):
 def get_rows(request, data):
 
     sql = ['SELECT']
-    column_list = data.get('column_list')
-    if column_list is None:
+    columns = data.get('columns')
+    if columns is None:
         sql.append('*')
     else:
-        sql.append(','.join(column_list))
+        sql.append(','.join(columns))
 
     sql.append('FROM {schema}.{table}'.format(schema=data['schema'], table=data['table']))
 
@@ -635,6 +635,9 @@ def get_rows(request, data):
             if i != 0:
                 # TODO: Add Support for OR Connections
                 sql.append('AND')
+
+            if not second.isdigit():
+                second = "'" + second + "'"
 
             sql.append(first + '=' + second)
 
