@@ -126,6 +126,24 @@ Example:
       "character_maximum_length": 50
     }
 
+
+Rows (RESTful)
+==============
+
+GET
+---
+
+URL: :code:`/schema/<schema>/tables/<table>/rows/`
+
+You can use this part to get information from the database.
+
+You can specify the following parameters in the url:
+    * ``columns (List)`` List of selected columns, e.g. :code:`id,name`
+    * ``where (List)`` List of where clauses, e.g. :code:`id=1,name=jackson`
+    * ``orderby (List)`` List of order columns, e.g. :code:`name,code`
+    * ``limit (Number)`` Number of displayed items, e.g. :code:`100`
+    * ``offset (Number)`` Number of offset from start, e.g. :code:`10`
+
 ================
 Deprecated Stuff
 ================
