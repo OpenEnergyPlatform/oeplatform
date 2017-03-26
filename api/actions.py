@@ -624,22 +624,17 @@ def get_rows(request, data):
 
     sql.append('FROM {schema}.{table}'.format(schema=data['schema'], table=data['table']))
 
-    where = data.get('where')
-    if where is not None:
+    where_clauses = data.get('where')
+    print(where_clauses)
+    if where_clauses is not None:
         sql.append('WHERE')
+        for clause in where_clauses:
+            sql.append(clause['first'])
+            sql.append(parser.parse_sql_operator(clause['operator']))
+            sql.append(clause['second'] if str(clause['second']).isdigit() else "'{second}'".format(second = clause['second']))
+            if clause.get('connector') is not None:
+                sql.append(clause['connector'])
 
-        for i in range(0, int(len(where)/2)):
-            first = where[2 * i]
-            second = where[2 * i + 1]
-
-            if i != 0:
-                # TODO: Add Support for OR Connections
-                sql.append('AND')
-
-            if not second.isdigit():
-                second = "'" + second + "'"
-
-            sql.append(first + '=' + second)
 
     orderby = data.get('orderby')
     if orderby is not None:
@@ -654,6 +649,7 @@ def get_rows(request, data):
     if offset is not None and offset.isdigit():
         sql.append('OFFSET ' + offset)
 
+    print(sql)
     sql_command = ' '.join(sql)
     print(sql_command)
 

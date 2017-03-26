@@ -123,17 +123,29 @@ class Index(View):
 
 class Rows(View):
     def get(self, request, schema, table):
-
         columns = request.GET.get('columns')
         where = request.GET.get('where')
         orderby = request.GET.get('orderby')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
 
+        # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
+        # CONNECTORS could be AND, OR
+        # If you connect two values with an +, it will convert the + to a space. Whatever.
+        where_splitted = where.split(' ')
+        print('Iterations:' + str(int(len(where_splitted) / 4)))
+
+        where_clauses = [{'first': where_splitted[4 * i],
+                          'operator': where_splitted[4 * i + 1],
+                          'second': where_splitted[4 * i + 2],
+                          'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i in range(int(len(where_splitted) / 4) + 1)]
+
+
+        # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
                 'table': table,
                 'columns': parser.split(columns, ','),
-                'where': parser.split(parser.replace(where, "=", ","), ","),
+                'where': where_clauses,
                 'orderby': parser.split(orderby, ','),
                 'limit': limit,
                 'offset': offset

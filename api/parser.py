@@ -16,7 +16,7 @@ def is_pg_qual(x):
 
 def read_pgvalue(x):
     # TODO: Implement check for valid values
-    if isinstance(x,str):
+    if isinstance(x, str):
         return "'" + x + "'"
     if x is None:
         return 'null'
@@ -28,6 +28,7 @@ def read_operator(x, right):
     if right['type'] == 'value' and ('value' not in right or right['value'] is None and x == '='):
         return 'is'
     return x
+
 
 class ValidationError(Exception):
     def __init__(self, message, value):
@@ -66,17 +67,15 @@ def parse_insert(d, engine, context, message=None):
                   schema=read_pgid(d['schema']))
 
     meta_cols = ['_message', '_user', '_submitted', '_autocheck',
-                   '_humancheck', '_type']
+                 '_humancheck', '_type']
 
     field_strings = []
-    for field in d.get('fields',[]):
+    for field in d.get('fields', []):
         assert ('type' in field and field['type'] == 'column'), 'Only pure column expressions are allowed in insert'
 
         field_strings.append(parse_expression(field))
 
-
     query = table.insert()
-
 
     if not 'method' in d:
         d['method'] = 'values'
@@ -84,8 +83,8 @@ def parse_insert(d, engine, context, message=None):
         query.values()
     elif d['method'] == 'values':
         if field_strings:
-            assert(isinstance(d['values'],list))
-            values = map(lambda x: zip(field_strings,x), d['values'])
+            assert (isinstance(d['values'], list))
+            values = map(lambda x: zip(field_strings, x), d['values'])
         else:
             values = d['values']
 
@@ -109,6 +108,7 @@ def parse_insert(d, engine, context, message=None):
         query = query.returning(*map(parse_expression, d['returning']))
 
     return query
+
 
 def parse_select(d):
     """
@@ -295,7 +295,7 @@ def parse_condition(dl):
     for d in dl:
         if d['type'] == 'operator_binary':
             conditionlist.append("%s %s %s" % (
-                parse_expression(d['left']), read_operator(d['operator'],d['right']),
+                parse_expression(d['left']), read_operator(d['operator'], d['right']),
                 parse_expression(d['right'])))
 
     return " " + " AND ".join(conditionlist)
@@ -436,3 +436,16 @@ def alchemyencoder(obj):
         return obj.isoformat()
     elif isinstance(obj, decimal.Decimal):
         return float(obj)
+
+
+sql_operators = {'EQUAL': '=',
+                 'GREATER': '>',
+                 'LOWER': '<',
+                 'NOTEQUAL': '!=',
+                 'NOTGREATER': '<=',
+                 'NOTLOWER': '>=',
+                 }
+
+
+def parse_sql_operator(key: str) -> str:
+    return sql_operators.get(key)

@@ -139,7 +139,9 @@ You can use this part to get information from the database.
 
 You can specify the following parameters in the url:
     * ``columns (List)`` List of selected columns, e.g. :code:`id,name`
-    * ``where (List)`` List of where clauses, e.g. :code:`id=1,name=jackson`
+    * ``where (List)`` List of where clauses, e.g. :code:`id+OPERATOR+1+CONNECTOR+name+OPERATOR+georg`
+        * OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
+        * CONNECTORS could be AND, OR
     * ``orderby (List)`` List of order columns, e.g. :code:`name,code`
     * ``limit (Number)`` Number of displayed items, e.g. :code:`100`
     * ``offset (Number)`` Number of offset from start, e.g. :code:`10`
