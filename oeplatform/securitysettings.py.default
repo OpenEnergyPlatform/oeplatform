@@ -39,7 +39,10 @@ dbname = ""
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CONTACT_ADDRESSES=['root@localhost']
+CONTACT_ADDRESSES = {
+    'technical': ['tech@localhost'],
+    'other': ['other@localhost']
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST_USER = ''

@@ -20,12 +20,13 @@ class ContactView(View):
     def post(self, request):
         form = ContactForm(data=request.POST)
         if form.is_valid():
+            receps = sec.CONTACT_ADDRESSES[request.POST['contact']]
             send_mail(
                 request.POST.get('contact_topic'),
                 request.POST.get(
                     'contact_name') + " wrote: \n" + request.POST.get('content'),
             request.POST.get('contact_email'),
-                sec.CONTACT_ADDRESSES,
+                receps,
                 fail_silently=False,
             )
             return render(request, 'base/contact.html', {'form': ContactForm(),
