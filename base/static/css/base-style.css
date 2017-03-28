@@ -30,3 +30,18 @@
 .circular_image img{
   width:100%;
 }
+
+.btn-logout {
+    margin:5px;
+    color:#ffffff;
+}
+
+.btn-profile {
+    margin:5px;
+    color:#ffffff;
+}
+
+.profile-bar{
+    float: right;
+    background:none;
+}
