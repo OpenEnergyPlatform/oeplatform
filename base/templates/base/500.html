@@ -1,0 +1,17 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+{% load staticfiles %}
+<h3>Sorry, something went wrong!</h3> <br>
+An unexpected error occured while processing your request.
+The admin has been informed about this incident.
+<br>
+For further information use our <a href="/contact">contact form</a>.
+<br>
+<br>
+Thanks a lot for your feedback!
+<br>
+<center>
+    <img src="{% static 'OEP_logo_2.png' %}" width="200px"/>
+</center>
+{% endblock %}
