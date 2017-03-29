@@ -38,3 +38,9 @@ class ContactView(View):
         print(ContactForm().as_table())
         return render(request, 'base/contact.html',
                       {'form': ContactForm(), 'success': False})
+
+
+def handler500(request):
+    response = render(request,'base/500.html', {})
+    response.status_code = 500
+    return response
