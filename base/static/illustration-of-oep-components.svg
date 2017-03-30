@@ -9,6 +9,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    version="1.1"
    id="svg10"
    xml:space="preserve"
@@ -349,7 +350,9 @@
 </g></g><g
        id="g116"><g
          id="g118"
-         clip-path="url(#clipPath122)" /></g><path
+         clip-path="url(#clipPath122)" /></g>
+    <a xlink:href="/dataedit/">
+      <path
        d="m 343.79,97.441 21.18,21.179 H 502.98 L 524.16,97.441 V 67.487 L 502.98,46.307 H 364.97 l -21.18,21.18 z"
        style="fill:#486980;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="path124"
@@ -364,7 +367,7 @@
              y="0"
              sodipodi:role="line"
              id="tspan134">OpenEnergy</tspan></text>
-</g></g><g
+      </g></g><g
        id="g138"><g
          id="g140"
          clip-path="url(#clipPath144)" /></g><g
@@ -378,7 +381,8 @@
              y="0"
              sodipodi:role="line"
              id="tspan154">Database</tspan></text>
-</g></g><g
+      </g></g>
+    </a><g
        id="g158"><g
          id="g160"
          clip-path="url(#clipPath164)" /></g><path
@@ -399,7 +403,9 @@
 </g></g><g
        id="g180"><g
          id="g182"
-         clip-path="url(#clipPath186)" /></g><path
+         clip-path="url(#clipPath186)" /></g>
+  <a xlink:href="/factsheets/scenarios/">
+    <path
        d="m 11.346,324.24 21.18,21.18 H 170.54 l 21.18,-21.18 V 294.29 L 170.54,273.11 H 32.526 l -21.18,21.18 z"
        style="fill:#486980;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="path188"
@@ -414,7 +420,7 @@
              y="0"
              sodipodi:role="line"
              id="tspan198">Scenario </tspan></text>
-</g></g><g
+      </g></g><g
        id="g202"><g
          id="g204"
          clip-path="url(#clipPath208)"><text
@@ -425,7 +431,8 @@
              y="0"
              sodipodi:role="line"
              id="tspan210">Factsheet</tspan></text>
-</g></g><g
+      </g></g>
+    </a><g
        id="g214"><g
          id="g216"
          clip-path="url(#clipPath220)" /></g><path
@@ -457,7 +464,9 @@
 </g></g><g
        id="g248"><g
          id="g250"
-         clip-path="url(#clipPath254)" /></g><path
+         clip-path="url(#clipPath254)" /></g>
+    <a xlink:href="/literature/">
+      <path
        d="m 661.55,324.24 21.18,21.18 h 138.02 l 21.18,-21.18 V 294.29 L 820.75,273.11 H 682.73 l -21.18,21.18 z"
        style="fill:#486980;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="path256"
@@ -472,7 +481,7 @@
              y="0"
              sodipodi:role="line"
              id="tspan266">Literature</tspan></text>
-</g></g><g
+      </g></g><g
        id="g270"><g
          id="g272"
          clip-path="url(#clipPath276)" /></g><g
@@ -486,7 +495,8 @@
              y="0"
              sodipodi:role="line"
              id="tspan286">Function</tspan></text>
-</g></g><g
+      </g></g>
+    </a><g
        id="g290"><g
          id="g292"
          clip-path="url(#clipPath296)" /></g><path
@@ -507,11 +517,14 @@
 </g></g><g
        id="g312"><g
          id="g314"
-         clip-path="url(#clipPath318)" /></g><path
+         clip-path="url(#clipPath318)" /></g>
+    <a xlink:href="/factsheets/frameworks/">
+      <path
        d="m 11.346,516.81 21.18,21.18 H 170.54 l 21.18,-21.18 V 486.86 L 170.54,465.68 H 32.526 l -21.18,21.18 z"
        style="fill:#486980;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="path320"
-       inkscape:connector-curvature="0" /><g
+       inkscape:connector-curvature="0" />
+      <g
        id="g322"><g
          id="g324"
          clip-path="url(#clipPath328)"><text
@@ -522,7 +535,7 @@
              y="0"
              sodipodi:role="line"
              id="tspan330">Framework </tspan></text>
-</g></g><g
+    </g></g><g
        id="g334"><g
          id="g336"
          clip-path="url(#clipPath340)"><text
@@ -533,10 +546,14 @@
              y="0"
              sodipodi:role="line"
              id="tspan342">Factsheet</tspan></text>
-</g></g><g
+    </g></g>
+
+  </a><g
        id="g346"><g
          id="g348"
-         clip-path="url(#clipPath352)" /></g><path
+         clip-path="url(#clipPath352)" /></g>
+    <a xlink:href="/factsheets/models/">
+      <path
        d="m 11.346,421.07 21.18,21.18 H 170.54 l 21.18,-21.18 V 391.11 L 170.54,369.93 H 32.526 l -21.18,21.18 z"
        style="fill:#486980;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="path354"
@@ -551,7 +568,7 @@
              y="0"
              sodipodi:role="line"
              id="tspan364">Model </tspan></text>
-</g></g><g
+      </g></g><g
        id="g368"><g
          id="g370"
          clip-path="url(#clipPath374)"><text
@@ -562,7 +579,8 @@
              y="0"
              sodipodi:role="line"
              id="tspan376">Factsheet</tspan></text>
-</g></g><g
+      </g></g>
+    </a><g
        id="g380"><g
          id="g382"
          clip-path="url(#clipPath386)" /></g><path
