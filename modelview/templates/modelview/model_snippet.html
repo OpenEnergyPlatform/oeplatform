@@ -13,9 +13,9 @@
     <td> 
         {% if not add %} 
             {% if val != None %}
-                {% if val = False %}
+                {% if val == False %}
                     <span class='glyphicon glyphicon-remove'></span> 
-                {% elif val = True  %}
+                {% elif val == True  %}
                     <span class='glyphicon glyphicon-ok'></span> 
                 {% else %}
                     {% get_field model field %} 

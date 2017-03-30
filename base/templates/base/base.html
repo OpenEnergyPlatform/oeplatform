@@ -6,6 +6,10 @@
         {% bootstrap_css %}
         {% bootstrap_javascript jquery=1%}
         {% load staticfiles %}
+        <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
+        <title>
+            OEP{% block title %}{% endblock %}
+        </title>
         <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
@@ -15,7 +19,12 @@
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
-              <a class="navbar-brand" href="/">OpenEnergy Platform</a>
+                  <div class="circular_image">
+                    <img src="{% static 'OEP_logo_2_no_text.svg' %}"/>
+                  </div>
+              <a class="navbar-brand" href="/">
+
+                  OpenEnergy Platform</a>
             </div>
             <ul class="nav navbar-nav">
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
@@ -48,9 +57,9 @@
           </div>
           {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
-            <div style="float: right;background:inherit">
-                <a class="btn" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
-                <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+            <div class="btn profile-bar">
+                <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
+                <a class="btn-logout" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
 
           {% else %}

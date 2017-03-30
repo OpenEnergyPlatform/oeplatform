@@ -1,0 +1,27 @@
+{% extends "dataedit/base.html" %}
+{% load staticfiles %}
+
+{% block data_content %}
+
+{% load dataedit.taghandler %}
+{% get_tags as all_tags %}
+<h3>Current Tags:</h3>
+<div style="overflow: hidden;">
+    {% for t in all_tags %}
+        <a href="/dataedit/tags/{{ t.id }}" class="btn tag"
+           style="margin:0 5px 5px 0; color:{% readable_text_color t.color %}; display:inline; float: left; background:{{ t.color }}">
+            {{ t.name }}
+        </a>
+    {% endfor %}
+    </ul>
+</div>
+<br>
+
+<div style="float:left; padding-right:15px">
+    <a href="/dataedit/tags/new/" class="btn btn-info">Create new Tag</a>
+</div>
+<div style="clear:right">
+    <a style="padding-left:15px; clear:right" href="/dataedit/" class="btn btn-default">Back to Database</a>
+</div>
+
+{% endblock %}
