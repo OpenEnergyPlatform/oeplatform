@@ -41,6 +41,9 @@ def getClasses(sheettype):
     return c,f
      
 
+def overview(request):
+    return render(request, "modelview/overview.html",)
+
 def listsheets(request,sheettype):
     """
     Lists all available model, framework or scenario factsheet objects.

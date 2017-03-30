@@ -32,18 +32,26 @@
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
+                        <li> <a href="/factsheets/overview/">Overview</a> </li>
                         <li> <a href="/factsheets/models/">Models</a> </li>
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
-                </ul>
+                    </ul>
+                </li>
                 <li class="inactive"><a href="/literature/">Literature</a></li>
-
                 <li class="inactive">
-                    <a href="https://github.com/openego/oeplatform/issues" target="_blank">
-                        Discussion {% bootstrap_icon "new-window" %}
+                    <a href="/discussion" target="_blank">
+                        Discussion
                     </a>
                 </li>
-                <li class="inactive"><a href="http://wiki.openmod-initiative.org/wiki/Main_Page">Wiki</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Main_Page" target="_blank">OpenMod Wiki {% bootstrap_icon "new-window" %}</a> </li>
+                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary {% bootstrap_icon "new-window" %}</a> </li>
+                    </ul>
+                </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
@@ -93,7 +101,23 @@
                 </div>
 
             </div>
+
+            <nav class="navbar navbar-default  navbar-fixed-bottom">
+                  <div class="container-fluid" style="width:80%; float:left;">
+                    <ul class="nav navbar-nav">
+                        <li class="inactive"><a href="/about/">About us</a></li>
+                        <li class="inactive"><a href="/faq/">FAQ</a></li>
+                        <li class="inactive"><a href="/contact/">Contact us</a></li>
+                        <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
+                        <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
+                        <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
+                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
+                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
+                    </ul>
+                  </div>
+            </nav>
         </div>
+
 </body>
     
 </html>
