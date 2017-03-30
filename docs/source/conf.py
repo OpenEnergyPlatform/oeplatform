@@ -27,8 +27,8 @@ from unittest.mock import MagicMock
 # -- General configuration ------------------------------------------------
 
 import django
-sys.path.insert(0, os.path.abspath('..'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'oeplatform.settings'
+from django.conf import settings
+settings.configure()
 django.setup()
 
 
@@ -310,6 +310,9 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
+        if name == "_mock_methods":
+            return name._mock_methods
+        else:
             return Mock()
 
 MOCK_MODULES = ['shapely']

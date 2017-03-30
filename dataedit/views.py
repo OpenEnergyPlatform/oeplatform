@@ -48,6 +48,7 @@ schema_whitelist = [
     "scenario",
     "weather",
     # "model_draft",
+    "openstreetmap",
     "reference",
     "workshop"
 ]
@@ -65,12 +66,13 @@ def listschemas(request):
     """
 
     insp = actions.connect()
-    schemas = sorted([(schema, len(
-        {table for table in insp.get_table_names(schema=schema) if
-         not table.startswith('_')})) for schema in insp.get_schema_names() if
-                      schema in schema_whitelist and not schema.startswith('_')], key=lambda x: x[0])
-    return render(request, 'dataedit/dataedit_schemalist.html',
-                  {'schemas': schemas})
+    engine = actions._get_engine()
+    conn = engine.connect()
+    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
+    response = conn.execute(query)
+    schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
+    print(schemas)
+    return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
 
 def read_label(table, comment):
@@ -119,10 +121,16 @@ def listtables(request, schema_name):
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
-    insp = actions.connect()
+    engine = actions._get_engine()
+    conn = engine.connect()
     labels = get_readable_table_names(schema_name)
-    tables = [(table, labels[table] if table in labels else None) for table in insp.get_table_names(schema=schema_name) if
-              not table.startswith('_')]
+    query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
+            'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
+        schema=schema_name, user=sec.dbuser)
+    print(query)
+    tables = conn.execute(query)
+    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
+              not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_tablelist.html',
                   {'schema': schema_name, 'tables': tables})
@@ -244,6 +252,96 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
+@login_required(login_url='/login/')
+def tag_overview(request):
+    return render(request=request, template_name='dataedit/tag_overview.html')
+
+
+@login_required(login_url='/login/')
+def tag_editor(request, id =""):
+        tags = get_all_tags()
+
+        create_new = True
+
+        for t in tags:
+            if id != "" and int(id) == t["id"]:
+                tag = t
+
+                # inform the user if tag is assigned to an object
+                engine = actions._get_engine()
+                Session = sessionmaker()
+                session = Session(bind=engine)
+
+                assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
+
+                return render(request=request, template_name='dataedit/tag_editor.html',
+                              context=
+                              {
+                                  "name" : tag['name'],
+                                  "id" : tag['id'],
+                                  "color" : tag['color'],
+                                  "assigned" : assigned
+                              })
+        return render(request=request, template_name='dataedit/tag_editor.html',
+                      context={"name" : "", "color" : "#000000", "assigned": False})
+
+
+@login_required(login_url='/login/')
+def change_tag(request):
+    if "submit_save" in request.POST:
+        if "tag_id" in request.POST:
+            id = request.POST["tag_id"]
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            edit_tag(id, name, color)
+        else:
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            add_tag(name, color)
+
+    elif "submit_delete" in request.POST:
+        id = request.POST["tag_id"]
+        delete_tag(id)
+
+    return redirect('/dataedit/tags/')
+
+
+def edit_tag(id, name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.query(Tag).filter(Tag.id == id).one()
+
+    result.name = name
+    result.color = str(int(color[1:], 16))
+
+    session.commit()
+
+
+def delete_tag(id):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    # delete all occurrences of the tag from Table_tag
+    session.query(Table_tags).filter(Table_tags.tag == id).delete()
+
+    # delete the tag from Tag
+    session.query(Tag).filter(Tag.id == id).delete()
+
+    session.commit()
+
+
+def add_tag(name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
+    session.commit()
+
+
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -284,17 +382,23 @@ class DataView(View):
         has_row_comments = '_comment' in {col['name'] for col in columns if
                                           'name' in col}
 
-        repo = svn.local.LocalClient(sec.datarepowc)
-        TableRevision.objects.all().delete()
-        available_revisions = TableRevision.objects.filter(table=table,
-                                                           schema=schema)
         revisions = []
-        for rev in repo.log_default():
-            try:
-                rev_obj = available_revisions.get(revision=rev.revision)
-            except TableRevision.DoesNotExist:
-                rev_obj = None
-            revisions.append((rev, rev_obj))
+        try:
+            repo = svn.local.LocalClient(sec.datarepowc)
+            TableRevision.objects.all().delete()
+            available_revisions = TableRevision.objects.filter(table=table,
+                                                               schema=schema)
+
+
+            for rev in repo.log_default():
+                try:
+                    rev_obj = available_revisions.get(revision=rev.revision)
+                except TableRevision.DoesNotExist:
+                    rev_obj = None
+                revisions.append((rev, rev_obj))
+        except:
+            revisions = []
+
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
