@@ -36,7 +36,7 @@
             {% endif %}
             <input type="submit" name="submit_save" class="btn btn-success" value="Save"/>
             <a href="/dataedit/tags" class="btn btn-default">Cancel</a>
-            {% if id != None %}
+            {% if id != None and user.is_superuser %}
             <input type="submit" name="submit_delete" class="btn btn-warning" value="Delete"/>
             {% endif %}
         </td>

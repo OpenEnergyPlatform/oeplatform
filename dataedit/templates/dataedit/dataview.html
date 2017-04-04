@@ -120,7 +120,7 @@
         <div id="unchecked_data_div" class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">
-                    Data (unchecked)
+                    Data (unverified)
                 </h4>
             </div>
             <div>
@@ -137,9 +137,16 @@
         additional schema. <br>
         New or changed data has to pass a validation process before it
         is publicated in the next revision. <br>
+
         <div class="form-group" style="margin:10px">
             <label for="commit-message">Commit message</label>
             <input class="form-control" type="textarea" name="comment" id="commit-message">
+
+            Along with you proposed changes the OEP will save your username and the
+            current timestamp. These dates will be shown on the overview of data
+            modifications.
+
+        <p><input name="agree">I agree</p>
             <a href="" class="btn btn-success" id="savebutton"> Save </a>
         </div>
     </div>
@@ -170,6 +177,15 @@
                 </label>
                 <input type="text" class="form-control" readonly>
             </div>
+
+            <div class="well">
+                Along with you proposed changes the OEP will save your username
+                and the current timestamp. These dates will be shown on the
+                overview of data modifications.
+
+                <p><input name="agree">I agree</p>
+            </div>
+
             <input class="btn btn-success" type="submit" value="Upload" />
 </form>
 
@@ -308,7 +324,7 @@
 
 <hr>
 
-<h3> Revisions </h3>
+<h3> Releases </h3>
 <div class="well">
     You can download older revisions of the data stored in the platform.
     Each revision has a unique id which can be used for citations. In order to
@@ -322,7 +338,7 @@
         <div id="revisions" style="width:460px">
             <table class="table table-hover">
                 <tr>
-                    <th> Revision </th>
+                    <th> Release </th>
                     <th> Created </th>
                     <th> Last Access </th>
                     <th> Available </th>

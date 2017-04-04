@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
 from django.contrib.auth.models import User
-import mwclient as mw
+import requests
+import json
 
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -69,14 +70,22 @@ class myuser(AbstractBaseUser):
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
-        site = mw.Site(("http","wiki.openmod-initiative.org"),"/")
-        print("Login using wiki interface")
-        try:
-            site.login(username, password)
-        except mw.errors.LoginError:
-            return None
-        else:
+        url = 'https://wiki.openmod-initiative.org/api.php?action=login'
+        data = {'format':'json', 'lgname':username}
+
+        #A first request to receive the required token
+        token_req = requests.post(url, data)
+        data['lgpassword'] = password
+        data['lgtoken'] = token_req.json()['login']['token']
+
+        # A second request for the actual authentication
+        login_req = requests.post(url, data, cookies=token_req.cookies)
+
+        if login_req.json()['login']['result'] == 'Success':
             return myuser.objects.get_or_create(name=username)[0]
+        else:
+            return None
+
 
     def get_user(self, user_id):
         try:
