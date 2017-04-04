@@ -347,7 +347,8 @@ def view_edit(request, schema, table):
     if post_id:
         view = DBView.objects.get(id=post_id)
         context = { "type": view.type, "view": view, "schema": schema, "table": table }
-        context.update(json.loads(view.data))
+        if view.data != '':
+            context.update(json.loads(view.data))
         return render(request, template_name='dataedit/view_editor.html', context=context)
     else:
         type = request.GET.get("type")
