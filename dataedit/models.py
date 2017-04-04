@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import CharField, DateTimeField
+from django.db.models import CharField, DateTimeField, BooleanField
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from colorfield.fields import ColorField
@@ -42,7 +42,10 @@ class Table(Tagable):
         unique_together = (("schema", "name"),)
 
 
-
-
-
-
+class View(models.Model):
+    name = CharField(max_length=50, null=False)
+    table = CharField(max_length=1000, null=False)
+    schema = CharField(max_length=1000, null=False)
+    type = CharField(max_length=10, null=False)
+    data = CharField(max_length=3000, null=False)
+    is_default = BooleanField(default=False)
