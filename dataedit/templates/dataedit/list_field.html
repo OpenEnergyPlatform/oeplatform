@@ -4,25 +4,18 @@
         <td style="width:150px"/>
         <td>
             <div id="{{id}}_container">
-                {% for ref in list %}
-                    <div id="{{id}}_wrapper_{{forloop.counter}}">
-                        <table  style="width:100%">
-                            <tr>
-                                <td class="form-group">
-                                    <input class="form-control" name="{{id}}_{{forloop.counter}}" id="{{id}}_{{forloop.counter}}" value="{{ref}}"/>
-                                </td>
-                                <td>
-                                    <a onclick="$('#{{id}}_wrapper_{{forloop.counter}}').remove();"><span class="glyphicon glyphicon-minus-sign"/></a>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                        {% if forloop.last %}
-                        <script type="javascript/text">
-                            {{id}}_counter={{ forloop.counter }};
-                        </script>
-                    {% endif %}
-                {% endfor %}
+                <script type="text/javascript">
+                    {% for ref in list %}
+                        var obj = 
+                        <div id="{{id}}_wrapper_{{forloop.counter}}">
+                            <table  style="width:100%">
+                                <tr>
+
+                                </tr>
+                            </table>
+                        </div>
+                    {% endfor %}
+                </script>
             </div>
             <a onclick="add_list_field('{{id}}')">Add</a>
         </td>
