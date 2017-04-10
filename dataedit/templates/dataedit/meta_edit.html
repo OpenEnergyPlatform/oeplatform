@@ -13,27 +13,27 @@
     <div class="table table-hover">
         <form action="" role="form" method="post">{% csrf_token %}
             <div class="form_group">
-                <label for="name">Title</label>
-                <input class="form-control" id="name" name="name" type="text" value="{{comment_on_table.title}}"/>
+                <label for="title">Title</label>
+                <input class="form-control" id="title" name="title" type="text" value="{{comment_on_table.title}}"/>
             </div>
+            <hr>
             <div class="form_group">
                 <label for="description">Description</label>
                 <input class="form-control" id="description" name="description" type="text" value="{{comment_on_table.description}}"/>
             </div>
-            <div class="form_group">
-                <label for="language">Language</label>
-                <input class="form-control" id="language" name="language" type="text" value="{{comment_on_table.language}}"/>
-            </div>
+            <hr>
             <div class="form_group">
                 <label for="reference_date">Reference Date</label>
                 <input class="form-control" id="reference_date" name="reference_date" type="text" value="{{comment_on_table.reference_date}}"/>
             </div>
             <hr>
-            {% include 'dataedit/url_list_field.html' with name='Sources' list=comment_on_table.Source id='sources'%}
+            {% include 'dataedit/list_field.html' with name='Languages' list=comment_on_table.language id='language'%}
+            <hr>
+            {% include 'dataedit/list_field.html' with name='Sources' list=comment_on_table.sources id='sources'%}
             <hr>
             {% include 'dataedit/list_field.html' with name='Spatial' list=comment_on_table.spatial id='spatial'%}
             <hr>
-            {% include 'dataedit/url_list_field.html' with  name='License' list=comment_on_table.license id='license'%}
+            {% include 'dataedit/list_field.html' with  name='License' list=comment_on_table.license id='license'%}
             <hr>
             {% include 'dataedit/list_field.html' with name='Contributors' list=comment_on_table.contributors id='contributors'%}
             <hr>
@@ -48,13 +48,14 @@
                     <tr>
                         <td></td><td></td>
                         <td>
+                            <input type="hidden" name="field{{forloop.counter}}_name" value="{{col.name}}"/>
                             <div class="form_group">
-                                <label for="col_{{col.name}}_descr">Description</label>
-                                <input class="form-control" id="col_{{col.name}}_descr" name="col_{{col.name}}_descr" type="text" value="{{col.description}}"/>
+                                <label for="field{{forloop.counter}}_description">Description</label>
+                                <input class="form-control" id="field{{forloop.counter}}_description" name="field{{forloop.counter}}_description" type="text" value="{{col.description}}"/>
                             </div>
                             <div class="form_group">
-                                <label for="col_{{col.name}}_unit">Unit</label>
-                                <input class="form-control" id="col_{{col.name}}_unit" name="col_{{col.name}}_unit" type="text" value="{{col.unit}}"/>
+                                <label for="field{{forloop.counter}}_unit">Unit</label>
+                                <input class="form-control" id="field{{forloop.counter}}_unit" name="field{{forloop.counter}}_unit" type="text" value="{{col.unit}}"/>
                             </div>
                         </td>
                     </tr>

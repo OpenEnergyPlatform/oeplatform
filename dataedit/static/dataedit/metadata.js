@@ -1,9 +1,9 @@
 indexes = {
-'sources':0,
-'spatial':0,
-'license':0,
-'contributors':0,
-'resources':[],
+    'sources':0,
+    'spatial':0,
+    'license':0,
+    'contributors':0,
+    'language':0,
 };
 
 function create_box($parent){
@@ -21,62 +21,104 @@ function create_box($parent){
     return $subcontainer
 }
 
-function add_labeled_textfield($container, label, id){
+function add_labeled_textfield($container, label, id, value){
     var $input_label = $('<label for="' + id + '">'+label+'</label>');
-    var $input = $('<input autocomplete="off" class="input form-control" id="' + id + '" name="' + id + '" type="text">');
+    var $input = $('<input autocomplete="off" class="input form-control" id="' + id + '" name="' + id + '" type="text" value="' + value + '">');
     $container.append($input_label);
     $container.append($input);
 }
 
-function add_source($parent){
-    prefix='source';
+function add_sources($parent, obj){
+    prefix='sources';
     indexes[prefix] = indexes[prefix] +1;
     var $container = create_box($parent);
-    add_labeled_textfield($container, 'Description', prefix+indexes[prefix]+'_description');
-    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url');
-    add_labeled_textfield($container, 'License', prefix+indexes[prefix]+'_license');
-    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright');
+
+    if('undefined' === typeof obj){
+        var obj={};
+        obj.name='';
+        obj.description='';
+        obj.url='';
+        obj.license='';
+        obj.copyright='';
+    }
+
+    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name', obj.name);
+    add_labeled_textfield($container, 'Description', prefix+indexes[prefix]+'_description', obj.description);
+    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url', obj.url);
+    add_labeled_textfield($container, 'License', prefix+indexes[prefix]+'_license', obj.license);
+    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright', obj.copyright);
 };
 
-function add_spatial($parent){
-    prefix='source';
+function add_spatial($parent, obj){
+    prefix='spatial';
     indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);;
-    add_labeled_textfield($container, 'Extend', prefix+indexes[prefix]+'_extend');
-    add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_Resolution');
+    var $container = create_box($parent);
+
+    if('undefined' === typeof obj){
+        var obj={};
+        obj.extend='';
+        obj.resolution='';
+    }
+
+    add_labeled_textfield($container, 'Extend', prefix+indexes[prefix]+'_extend', obj.extend);
+    add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_resolution', obj.resolution);
 };
 
-function add_license($parent){
+function add_license($parent, obj){
     prefix='license';
     indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);;
-    add_labeled_textfield($container, 'ID', prefix+indexes[prefix]+'_id');
-    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name');
-    add_labeled_textfield($container, 'Version', prefix+indexes[prefix]+'_version');
-    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url');
-    add_labeled_textfield($container, 'Instruction', prefix+indexes[prefix]+'_instruction');
-    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright');
+    var $container = create_box($parent);
+
+    if('undefined' === typeof obj){
+        var obj={};
+        obj.id='';
+        obj.name='';
+        obj.version='';
+        obj.url='';
+        obj.instruction='';
+        obj.copyright='';
+    }
+
+    add_labeled_textfield($container, 'ID', prefix+indexes[prefix]+'_id', obj.id);
+    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name', obj.name);
+    add_labeled_textfield($container, 'Version', prefix+indexes[prefix]+'_version', obj.version);
+    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url', obj.url);
+    add_labeled_textfield($container, 'Instruction', prefix+indexes[prefix]+'_instruction', obj.instruction);
+    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright', obj.copyright);
 };
 
-function add_contributors($parent){
-    prefix='license';
+function add_language($parent, obj){
+    prefix='language';
     indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);;
-    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name');
-    add_labeled_textfield($container, 'E-Mail', prefix+indexes[prefix]+'_email');
-    add_labeled_textfield($container, 'Date', prefix+indexes[prefix]+'_date');
-    add_labeled_textfield($container, 'Comment', prefix+indexes[prefix]+'_comment');
+    var $container = create_box($parent);
+
+    if('undefined' === typeof obj){
+        var obj={};
+        obj.language='';
+    }
+
+    add_labeled_textfield($container, 'Language', prefix+indexes[prefix], obj.language);
 };
 
-function add_resources($parent){
-    prefix='license';
+function add_contributors($parent, obj){
+    prefix='contributors';
     indexes[prefix] = indexes[prefix] +1;
     var $container = create_box($parent);;
-    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name');
-    add_labeled_textfield($container, 'E-Mail', prefix+indexes[prefix]+'_email');
-    add_labeled_textfield($container, 'Date', prefix+indexes[prefix]+'_date');
-    add_labeled_textfield($container, 'Comment', prefix+indexes[prefix]+'_comment');
+
+    if('undefined' === typeof obj){
+        var obj={};
+        obj.name='';
+        obj.email='';
+        obj.date='';
+        obj.comment='';
+    }
+
+    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name', obj.name);
+    add_labeled_textfield($container, 'E-Mail', prefix+indexes[prefix]+'_email', obj.email);
+    add_labeled_textfield($container, 'Date', prefix+indexes[prefix]+'_date', obj.date);
+    add_labeled_textfield($container, 'Comment', prefix+indexes[prefix]+'_comment', obj.comment);
 };
+
 
 function add_list_field(id){
     var index = window[id+"_counter"];
@@ -88,6 +130,7 @@ function add_list_field(id){
     window[id+"_counter"] += 1;
     add_source($div);
 };
+
 
 function add_url_list_field(id){
     var index = window[id+"_counter"];

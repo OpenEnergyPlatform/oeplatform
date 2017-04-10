@@ -15,3 +15,12 @@
 .metaformframe{
    padding:5px;
 }
+
+.metaproperty{
+    font-weight: bold;
+    margin-right:10px;
+}
+
+.metavalue{
+   width:100%
+}

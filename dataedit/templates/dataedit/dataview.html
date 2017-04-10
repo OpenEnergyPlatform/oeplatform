@@ -45,6 +45,7 @@
 <link href="{% static 'dataedit/recline/css/slickgrid.css' %}"rel="stylesheet">
 <link href="{% static 'dataedit/recline/css/flot.css' %}" rel="stylesheet">
 <link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
+<link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
 <!-- Vendor JS - general dependencies -->
 
 <script type="text/javascript">
@@ -199,123 +200,110 @@
 </div>
 <div>
     <h4>Metadata</h4><a href="{{table}}/meta_edit"> Edit</a>
-    <table class="table table-hover" style="width:460px">
+    <table class="table">
         <tr>
-            <th>Name</th>
-            <td><span id="meta_Name">{{comment_on_table.Name}}</span></td>
+            <th>Title</th>
+            <td>{{comment_on_table.title}}</td>
         </tr>
-        {% if comment_on_table.Source %}
+        <tr>
+            <th>Description</th>
+            <td>{{comment_on_table.description}}</td>
+        </tr>
+        <tr>
+            <th>Languages</th>
+            <td>
+              <ul>
+                {% for row in comment_on_table.language %}
+                    <li>{{row}}</li>
+                {% endfor %}
+              </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>Reference date</th>
+            <td>{{comment_on_table.reference_date}}</td>
+        </tr>
+        {% if comment_on_table.sources %}
         <tr>
             <th>Sources</th>
             <td>
-                <ul>
-                {% for source in comment_on_table.Source %}
-                    <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
+
+                {% for row in comment_on_table.sources %}
+                    <p class="metaproperty">
+                    {% if row.url %}
+                        <a href="{{row.url}}">{{row.name}}</a>
+                    {% else %}
+                        {{row.name}}
+                    {% endif %}
+                    </p>
+                    <ul>
+                        <li> Description: {{row.description }}</li>
+                        <li> License: {{row.license }}</li>
+                    </ul>
                 {% endfor %}
-                </ul>
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Reference_date %}
+        {% if comment_on_table.spatial %}
         <tr>
-            <th>Reference date</th>
+            <th>Spatial</th>
             <td>
-            {% for ref in comment_on_table.Reference_date %}
-                {{ref}}{% if not forloop.last %}, {% endif %}
+            {% for row in comment_on_table.spatial %}
+                {{row.extend}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
             {% endfor %}</td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Date_of_Collection %}
+
+        {% if comment_on_table.license %}
         <tr>
-            <th>Date of Collection</th>
+            <th>License</th>
             <td>
-                {% for ref in comment_on_table.Date_of_Collection %}
-                    {{ref}}{% if not forloop.last %}, {% endif %}
+                {% for row in comment_on_table.license %}
+                    <p class="metaproperty">
+                        {% if row.url %}
+                            <a href="{{row.url}}">{{row.name}} ({{row.id}})</a>
+                        {% else %}
+                            {{row.name}} ({{row.id}})
+                        {% endif %}
+                    </p>
+                    <ul>
+                        <li> Version: {{row.version }}</li>
+                        <li> Instruction: {{row.instruction }}</li>
+                        <li> Copyright: {{row.copyright }}</li>
+                    </ul>
                 {% endfor %}
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Spatial_Resolution %}
+        {% if comment_on_table.contributor %}
         <tr>
-            <th>Spatial resolution</th>
+            <th>Contributors</th>
             <td>
-                {% for ref in comment_on_table.Spatial_Resolution %}
-                    {{ref}}{% if not forloop.last %}, {% endif %}
+                {% for row in comment_on_table.contributors %}
+                    <p class="metaproperty">
+                        {% if row.email %}
+                            <a href="mailto:{{row.email}}">{{row.name}} ({{row.date}})</a>
+                        {% else %}
+                            {{row.name}} ({{row.date}})
+                        {% endif %}
+                    </p>
+                    {{row.comment}}
                 {% endfor %}
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.Description %}
-        <tr>
-            <th>Description</th>
-            <td>
-                <ul>
-                    {% for ref in comment_on_table.Description %}
-                        <li> {{ref}}</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.Notes %}
-        <tr>
-            <th>Notes</th>
-            <td>
-                <ul>
-                    {% for source in comment_on_table.Notes %}
-                        <li> {{source}} </li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.Instructions_for_proper_use %}
-        <tr>
-            <th>Proper use</th>
-            <td>
-                <ul>
-                    {% for source in comment_on_table.Instructions_for_proper_use %}
-                        <li> {{source}} </li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.Licence %}
-        <tr>
-            <th>Licence</th>
-            <td>
-                <ul>
-                    {% for source in comment_on_table.Licence %}
-                        <li> <a href="{{source.URL}}">{{source.Name }}</a></li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.Column %}
+        {% if comment_on_table.fields %}
         <tr>
             <th>Columns</th>
             <td>
+                    {% for source in comment_on_table.fields %}
+                <p class="metaproperty">{{source.name}}</p>
                 <ul>
-                    {% for source in comment_on_table.Column %}
-                        <table class="table table-hover">
-                            <tr>
-                                <td>Name: </td>
-                                <td> {{source.Name}} </td>
-                            </tr>
-                            <tr>
-                                <td>Description: </td>
-                                <td> {{source.Description}} </td>
-                            </tr>
-                            <tr>
-                                <td>Unit: </td>
-                                <td> {{source.Unit}} </td>
-                            </tr>
-                        </table>
-                        <hr>
-                    {% endfor %}
+                    <li>Description: {{source.description}} </li>
+                    <li>Unit: {{source.unit}} </li>
                 </ul>
+                <hr>
+                    {% endfor %}
             </td>
         </tr>
         {% endif %}
@@ -336,7 +324,7 @@
 </div>
     <div id="downloadables">
         <div id="revisions" style="width:460px">
-            <table class="table table-hover">
+            <table class="table">
                 <tr>
                     <th> Release </th>
                     <th> Created </th>
