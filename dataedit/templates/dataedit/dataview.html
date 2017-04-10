@@ -297,12 +297,13 @@
             <th>Columns</th>
             <td>
                     {% for source in comment_on_table.fields %}
-                <p class="metaproperty">{{source.name}}</p>
-                <ul>
-                    <li>Description: {{source.description}} </li>
-                    <li>Unit: {{source.unit}} </li>
-                </ul>
-                <hr>
+                        <p class="metaproperty">{{source.name}} {% if source.unit %} (in {{source.unit}}) {% endif %}</p>
+                        {% if source.description %}
+                            {{source.description}}
+                        {% else %}
+                            No description
+                        {% endif %}
+                        <hr>
                     {% endfor %}
             </td>
         </tr>
