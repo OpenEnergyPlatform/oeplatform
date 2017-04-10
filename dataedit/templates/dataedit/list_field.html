@@ -1,21 +1,15 @@
+{% load dataedit.metadata %}
 <table style="width:100%">
     <tr><td><label for="{{id}}_container">{{name}}</label></td></tr>
     <tr>
         <td style="width:150px"/>
         <td>
             <div id="{{id}}_container">
-                <script type="text/javascript">
+                {# <script type="text/javascript"> #}
                     {% for ref in list %}
-                        var obj = 
-                        <div id="{{id}}_wrapper_{{forloop.counter}}">
-                            <table  style="width:100%">
-                                <tr>
-
-                                </tr>
-                            </table>
-                        </div>
+                        {{ref}}
                     {% endfor %}
-                </script>
+                {# </script> #}
             </div>
             <a onclick="add_list_field('{{id}}')">Add</a>
         </td>

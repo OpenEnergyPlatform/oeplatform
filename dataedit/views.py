@@ -452,11 +452,16 @@ class MetaView(View):
         db = sec.dbname
         comment_on_table = actions.get_comment_table(db, schema, table)
         columns = actions.analyze_columns(db, schema, table)
-        if 'error' in comment_on_table:
+
+        print(comment_on_table)
+
+        if 'error' in comment_on_table or not comment_on_table['resources']:
             comment_on_table = {'Notes':[comment_on_table['content']]}
-        comment_on_table = {k.replace(' ', '_'): v for (k, v) in comment_on_table.items()}
-        if 'Column' not in comment_on_table:
+
+        comment_on_table['fields'] = comment_on_table['resources'][0]['schema']['fields']
+        if 'Column' not in comment_on_table['resources'][0]['schema']:
             comment_on_table['Column'] = []
+
         commented_cols = [col['Name'] for col in comment_on_table['Column']]
         for col in columns:
             if not col['id'] in commented_cols:
@@ -676,3 +681,55 @@ class SearchView(View):
         ret = [{'schema': r.schema, 'table':r.table} for r in results]
         return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
 
+
+"""
+Metadata handler
+"""
+
+def load_source(x):
+    return {"name": x['name'], "description": x['description'], "url": x['url'],
+            "license": x['license'], "copyright": x['copyright']}
+
+
+def load_spatial(x):
+    return {"extend": x['extend'], "resolution": x['resolution']}
+
+
+def load_contributors(x):
+    return {"name": x['name'], "email": x['email'], "date": x['date'],
+            "comment": x['comment']}
+
+
+def load_license(x):
+    return {"id": x['id'],
+            "name": x['name'],
+            "version": x['name'],
+            "url": x['url'],
+            "instruction": x['instruction'],
+            "copyright": x['copyright']}
+
+
+def load_field(x):
+    return {"name": x['name'],
+            "description": x['description'],
+            "unit": x['unit']}
+
+
+def load_meta(c):
+    return {
+        "title": c['title'],
+        "description": c['description'],
+        "language": [x for x in c['language']],
+        "reference_date": c['reference_date'],
+        "sources": [load_source(x) for x in c['sources']],
+        "spatial": [load_spatial(x) for x in c['spatial']],
+        "license": [load_license(x) for x in c['license']],
+        "contributors": [load_contributors(x) for x in c['contributors']],
+        "resources": [{
+            "schema": {
+                "fields": [load_field(x) for x in
+                           c['resources'][0]['schema']['fields']]
+            },
+            "meta_version": "1.2"
+        }]
+    }

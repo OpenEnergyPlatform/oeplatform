@@ -12,13 +12,13 @@ function create_box($parent){
     var $header = $('<div class="metacontainer-header"></div>')
 
     var $removeBtn = $('<a style="color:white" onclick="$(\'#'+prefix+indexes[prefix]+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a>');
-    var $container = $('<div class="metaformframe" id='+prefix+indexes[prefix]+'></div>')
+    var $subcontainer = $('<div class="metaformframe" id='+prefix+indexes[prefix]+'></div>')
 
     $header.append($removeBtn);
     $container.append($header);
-    $container.append($container);
+    $container.append($subcontainer);
     $parent.append($container);
-    return $container
+    return $subcontainer
 }
 
 function add_labeled_textfield($container, label, id){

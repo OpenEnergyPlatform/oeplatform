@@ -396,7 +396,6 @@ def get_comment_table(db, schema, table):
 
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table)
-
     res = connection.execute(sql_string)
     if res:
         jsn = res.first().obj_description
