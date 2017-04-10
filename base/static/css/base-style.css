@@ -54,3 +54,16 @@
     background:none;
 
 }
+
+.logo-container{
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 250px;
+}
+
+.flex-item {
+    margin: 10px;
+}
