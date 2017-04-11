@@ -29,14 +29,13 @@
   margin-left: 15px;
   margin-right: 5px;
   margin-top: 2px;
-
-  /*for demo*/
   display:inline-block;
   vertical-align:middle;
 }
 
 .circular_image img{
-  width:100%;
+  width: 45px;
+  height: 45px;
 }
 
 .btn-logout {
