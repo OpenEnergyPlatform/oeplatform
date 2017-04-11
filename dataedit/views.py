@@ -48,6 +48,7 @@ schema_whitelist = [
     "scenario",
     "weather",
     # "model_draft",
+    "openstreetmap",
     "reference",
     "workshop"
 ]
@@ -251,6 +252,96 @@ def request_revision(request, schema, table, rev_id):
     return {}
 
 
+@login_required(login_url='/login/')
+def tag_overview(request):
+    return render(request=request, template_name='dataedit/tag_overview.html')
+
+
+@login_required(login_url='/login/')
+def tag_editor(request, id =""):
+        tags = get_all_tags()
+
+        create_new = True
+
+        for t in tags:
+            if id != "" and int(id) == t["id"]:
+                tag = t
+
+                # inform the user if tag is assigned to an object
+                engine = actions._get_engine()
+                Session = sessionmaker()
+                session = Session(bind=engine)
+
+                assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
+
+                return render(request=request, template_name='dataedit/tag_editor.html',
+                              context=
+                              {
+                                  "name" : tag['name'],
+                                  "id" : tag['id'],
+                                  "color" : tag['color'],
+                                  "assigned" : assigned
+                              })
+        return render(request=request, template_name='dataedit/tag_editor.html',
+                      context={"name" : "", "color" : "#000000", "assigned": False})
+
+
+@login_required(login_url='/login/')
+def change_tag(request):
+    if "submit_save" in request.POST:
+        if "tag_id" in request.POST:
+            id = request.POST["tag_id"]
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            edit_tag(id, name, color)
+        else:
+            name = request.POST["tag_text"]
+            color = request.POST["tag_color"]
+            add_tag(name, color)
+
+    elif "submit_delete" in request.POST:
+        id = request.POST["tag_id"]
+        delete_tag(id)
+
+    return redirect('/dataedit/tags/')
+
+
+def edit_tag(id, name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.query(Tag).filter(Tag.id == id).one()
+
+    result.name = name
+    result.color = str(int(color[1:], 16))
+
+    session.commit()
+
+
+def delete_tag(id):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    # delete all occurrences of the tag from Table_tag
+    session.query(Table_tags).filter(Table_tags.tag == id).delete()
+
+    # delete the tag from Tag
+    session.query(Tag).filter(Tag.id == id).delete()
+
+    session.commit()
+
+
+def add_tag(name, color):
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
+    session.commit()
+
+
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -275,21 +366,7 @@ class DataView(View):
         db = sec.dbname
         actions.create_meta(schema, table)
 
-        comment_on_table = actions.get_comment_table(db, schema, table)
-        comment_columns = {d["name"]: d for d in comment_on_table[
-            "Table fields"]} if "Table fields" in comment_on_table else {}
-
-        if 'error' in comment_on_table:
-            comment_on_table['Notes'] = [comment_on_table['content']]
-
-        comment_on_table = OrderedDict(
-            [(label, comment_on_table[key]) for key, label in
-             COMMENT_KEYS
-             if key in comment_on_table])
-
-        columns = actions.get_columns({'schema': schema, 'table': table})
-        has_row_comments = '_comment' in {col['name'] for col in columns if
-                                          'name' in col}
+        comment_on_table = load_comments(schema, table)
 
         revisions = []
         try:
@@ -311,9 +388,7 @@ class DataView(View):
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
-                          'has_row_comments': has_row_comments,
                           'comment_on_table': dict(comment_on_table),
-                          'comment_columns': comment_columns,
                           'revisions': revisions,
                           'kinds': ['table', 'map', 'graph'],
                           'table': table,
@@ -358,21 +433,8 @@ class MetaView(View):
         :param table: Name of a table
         :return: Renders a form that contains a form with the tables metadata
         """
-        db = sec.dbname
-        comment_on_table = actions.get_comment_table(db, schema, table)
-        columns = actions.analyze_columns(db, schema, table)
-        if 'error' in comment_on_table:
-            comment_on_table = {'Notes':[comment_on_table['content']]}
-        comment_on_table = {k.replace(' ', '_'): v for (k, v) in comment_on_table.items()}
-        if 'Column' not in comment_on_table:
-            comment_on_table['Column'] = []
-        commented_cols = [col['Name'] for col in comment_on_table['Column']]
-        for col in columns:
-            if not col['id'] in commented_cols:
-                comment_on_table['Column'].append({
-                    'Name':col['id'],
-                    'Description': '',
-                    'Unit': ''})
+
+        comment_on_table = load_comments(schema, table)
 
         return render(request, 'dataedit/meta_edit.html',{
             'schema': schema,
@@ -391,19 +453,11 @@ class MetaView(View):
         :return: Redirects to the view of the specified table
         """
         columns = actions.analyze_columns(sec.dbname, schema, table)
-        comment = {
-            'Name': request.POST['name'],
-            'Source': self._load_url_list(request, 'source'),
-            'Reference date': self._load_list(request, 'ref_date'),
-            'Date of Collection': self._load_list(request, 'date_col'),
-            'Spatial Resolution': self._load_list(request, 'spat_res'),
-            'Licence': self._load_url_list(request, 'licence'),
-            'Description': self._load_list(request, 'descr'),
-            'Column': self._load_col_list(request, columns),
-            'Changes':[],
-            'Notes': self._load_list(request, 'notes'),
-            'Instructions for proper use': self._load_list(request, 'instr'),
-        }
+
+
+        comment = load_meta(request.POST)
+        print(json.dumps(comment, indent=2))
+
         engine = actions._get_engine()
         conn = engine.connect()
         trans = conn.begin()
@@ -585,3 +639,116 @@ class SearchView(View):
         ret = [{'schema': r.schema, 'table':r.table} for r in results]
         return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
 
+
+"""
+Metadata handler
+"""
+
+
+def load_comments(schema, table):
+    comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
+    columns = actions.analyze_columns(sec.dbname, schema, table)
+    try:
+        if 'error' in comment_on_table:
+            comment_on_table = {'description': [comment_on_table['content']], 'fields': []}
+            commented_cols = []
+        elif 'resources' not in comment_on_table:
+            comment_on_table = {
+                'title': comment_on_table['Name'],
+                'description': "; ".join(comment_on_table['Description']),
+                'language': [],
+                'reference_date': comment_on_table['Reference date'],
+                'sources': [
+                    {'name': x['Name'], 'description': '', 'url': x['URL'], 'license': ' ', 'copyright': ' '} for x in comment_on_table['Source']],
+                'spatial': [
+                    {'extend': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+                'license': [
+                    {'id': '',
+                    'name': x,
+                    'version': '',
+                    'url': '',
+                    'instruction': '',
+                    'copyright': ''} for x in comment_on_table['Licence']],
+                'contributors': [
+                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'], 'comment': x['Comment']} for x in comment_on_table['Changes']],
+                'resources': [{
+                    'schema': {
+                        'fields': [
+                            {'name': x['Name'], 'description': x['Description'], 'unit': x['Unit'] } for x in comment_on_table['Column']]},
+                    'meta_version': '1.2' }] }
+
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema']['fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+        else:
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                'fields']
+
+            if 'fields' not in comment_on_table['resources'][0]['schema']:
+                comment_on_table['fields'] = []
+            else:
+                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                    'fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+    except Exception as e:
+        print(e)
+        comment_on_table = {'description': comment_on_table, 'fields': []}
+        commented_cols = []
+
+    for col in columns:
+        if not col['id'] in commented_cols:
+            comment_on_table['fields'].append({
+                'name': col['id'],
+                'description': '',
+                'unit': ''})
+
+    return comment_on_table
+
+def load_sources(x):
+    return {"name": x['name'], "description": x['description'], "url": x['url'],
+            "license": x['license'], "copyright": x['copyright']}
+
+def load_language(x):
+    return x['']
+
+def load_spatial(x):
+    return {"extend": x['extend'], "resolution": x['resolution']}
+
+
+def load_contributors(x):
+    return {"name": x['name'], "email": x['email'], "date": x['date'],
+            "comment": x['comment']}
+
+
+def load_license(x):
+    return {"id": x['id'],
+            "name": x['name'],
+            "version": x['version'],
+            "url": x['url'],
+            "instruction": x['instruction'],
+            "copyright": x['copyright']}
+
+
+def load_field(x):
+    return {"name": x['name'],
+            "description": x['description'],
+            "unit": x['unit']}
+
+
+def load_meta(c):
+    d = {
+        'title': c['title'],
+        'description': c['description'],
+        'reference_date': c['reference_date'],
+    }
+
+
+    for prefix, f, props in [('language', load_language,1),('sources', load_sources,5), ('spatial', load_spatial,2), ('license', load_license,6), ('contributors', load_contributors,4), ('field', load_field, 3)]:
+        count = len([(k,c[k]) for k in c if k.startswith(prefix)])//props
+        d[prefix] = [f({k[len('%s%d'%(prefix,i+1))+1:]:c[k] for k in c if k.startswith('%s%d'%(prefix,i+1))}) for i in range(count)]
+
+    d['resources'] = [{'schema':{'fields':d['field']}, 'meta_version': '1.2'}]
+    del d['field']
+
+    return d

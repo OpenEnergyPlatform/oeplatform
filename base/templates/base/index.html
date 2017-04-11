@@ -1,15 +1,24 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
+{% load staticfiles %}
 
-<h3>Some introductory words</h3> <br>
-On this part of our platform you find the OpenEnergy database (oedb) and the fact sheets. Both are already usable though still under
-continuous improvement. They were developed following the requirement to improve the transparency of energy system models 
-and their outputs as well as the reproducibility of their scenario results. The fact sheets aim to give an overview of the existing models 
-to modelers and other stakeholders interested in energy system modelling. Moreover, together with the database they are meant to provide 
-the base to discuss various scenarios. 
-<br>
-<br>
-Thanks a lot for your feedback!
- 
+<h3>Welcome to the OpenEnergy Platform!</h3> <br>
+
+This platform mainly addresses students, researchers and scientists in the field of energy modelling and 
+analytics as well as interested persons in those fields. The platform provides great tools to make 
+your energy system modelling process transparent!
+<ul>
+	<li>You can <strong>give, get and document  data</strong> of your modelling process (figureXX) through to the <a href="http://oep.iks.cs.ovgu.de/dataedit/" target="_blank">OpenEnergy Database (oedb)</a>.  This includes raw data, processed data and results .</li>
+	<li>You can <strong>describe, search and compare energy system models</strong>, frameworks as well as concrete studies and scenarios with the various <a href="http://oep.iks.cs.ovgu.de/factsheets/" target="_blank">Fact Sheets</a>. You can link your code to the model description (<a href="http://oep.iks.cs.ovgu.de/factsheets/models/" target="_blank">Fact Sheets</a>).</li>
+	<li>You can <strong>find and refer literature to models and data</strong> using the <a href="http://oep.iks.cs.ovgu.de/literature/" target="_blank">literature-schema</a> of the oedb. We assume you provide code on the platform of your choice (e.g. GitHub). For all data in the database a minimum of metadata is required in order to improve the transparency.</li>
+	<li>You can <strong>unify your wording</strong> with other researchers using the <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary</a>. We experienced that transparent data and code doesn’t mean that the results of a study are understandable. Within discussions it is a crucial point to “use the same language”.   In the Glossary the expressions used in the Fact Sheets and in the data tables can be explained and discussed.</li>
+	<li><strong>You are invited to join</strong> <a href="https://github.com/openego/oeplatform/issues" target="_blank">our discussion</a> if you have suggestions or you want to involve yourself into the development. You can participate in the discussion on standardisation of the fact sheets or improvements of the oedb or about including further features. Important: The discussions are still going on.</li>
+	<li>You can <strong>meet us </strong>at the<a href="https://wiki.openmod-initiative.org/wiki/Events" target="_blank"> openmod meetings</a>!</li>
+</ul>
+With the included tools we want to enhance reproducibility. We know that (for most modelling processes) you need more than just data and code to reproduce the results. Especially when complex or different models are included in the modelling a proper code documentation and a description of the steps of the modelling process are needed. We will continuously report and discuss about new tools and processes to enhance reproducibility at the openmod meetings. You’re invited to contribute!
+
+<center>
+    {% include 'illustration-of-oep-components.svg' %}
+</center>
 {% endblock %}

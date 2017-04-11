@@ -1,0 +1,13 @@
+% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+
+{% load staticfiles %} {# Important for using the *static* tag #}
+<ul>
+	<li>Discussion {% bootstrap_icon "new-window" %}
+The OpenEnergy Platform is a collaborative project and is continuously under development. The discussion about new features or improvements is carried on at <a href="https://github.com/openego/oeplatform/issues" target="_blank">GitHub</a>! (Please don’t forget to set tags if you create a new issue.)</li>
+	<li>If you want to report problems or if you have questions according to this website, please use the <a href="http://oep.iks.cs.ovgu.de/contact/" target="_blank">contact</a> form.</li>
+	<li>Transparency of energy system modelling and fruitful debates about it are very much depending on a common understanding of expressions. Therefore we started a <a href="http://href=">glossary</a>. You can watch up; debate and add expressions.</li>
+	<li>At the <a href="https://forum.openmod-initiative.org/" target="_blank">discussion forum</a> of the openmod initiative you can discuss about various subjects concerning open science in energy system modelling.</li>
+</ul>
+{% endblock %}
