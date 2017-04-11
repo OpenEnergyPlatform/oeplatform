@@ -6,22 +6,50 @@
 
 <h3> Overview </h3>
 
-<div class="well">
-The Factsheets are a standardised collection and presentation of data in a format which emphasizes key points concisely.
-The use of interactive fields and pre-defined responses is designed to make it easy to insert and filter for existing modules.
-The Factsheets are seperated in three categories: Framework-, Model-, and Scenario- Factsheet. <br/> <br/>
-When publishing a study, there is a full set of linked factsheets. Startig with a basic description of the used framework, an adapted model is described.
-Usually different scenarios with modified input data and assumptions are calculated and compared.</div>
+<div>
+The Factsheets are a standardized<sup><a href="#fn1" id="ref1">[1]</a></sup> collection and presentation of information about modelling frameworks, models and scenarios used in climate and energy system modelling.
 
- <div class="list-group">
-  <a href="/factsheets/models" class="list-group-item">Model Factsheets</a>
-  <a href="/factsheets/frameworks" class="list-group-item">Framework Factsheets</a>
-  <a href="/factsheets/scenarios" class="list-group-item">Scenario Factsheets</a>
-</div>
+It is presented in a format which emphasises key points concisely.
+
+The use of interactive fields and pre-defined responses is designed to make it easy to insert new Factsheets and filter for existing entries.
+<br/>
+<br/>
+
+The Factsheets are separated in three categories: Framework-, Model-, and Scenario-Factsheets:
+
+A Framework is mostly a kind of toolbox where you can build a model of. Examples are TIMES, oemof, OSeMOSYS, Balmorel.
+
+The Model is then adapted for a certain region, a set of technologies or other regarded aspects.
+
+With the model you can simulate several Scenarios of the region (e.g. CO<sub>2</sub> neutral energy supply, phase out coal, zero acceptance of wind power).
 
 <center>
     {% include 'modelview/FactSheets_schema.svg' %}
 </center>
 
+When publishing a study, there is a full set of linked Factsheets.
+
+Starting with a basic description of the used framework, an adapted model is described.
+
+Usually different scenarios with modified input data and assumptions are calculated and compared.
+
+As input data is one of the most important information of the scenario, the scenario factsheet will include links to the datasets in a publicly available database (the concept of the OpenEnergy Database is to provide a place to store and publish this data).
+<br/>
+<br/>
+
+
+
+The current Factsheets are a result of bringing together existing characterizations and improving it in two workshops and in an online discussion.
+
+This discussion is reopened with the growing interest to use the factsheets.
+
+The next working group on model factsheets will take place at the <a href=" https://wiki.openmod-initiative.org/wiki/Open_Energy_Modelling_Workshop_-_Frankfurt_2017" target="_blank">openmod meeting in April 2017 </a> with follow-up discussions in the transparency working group of the platform for system analyses on German level end of April and at the <a href=" http://www.reeem.org/index.php/event/european-modelling-platform-for-europe-emp-e-2017-in-brussels/" target="_blank">Energy Modelling Platform for Europe in May 2017 </a>.
+<br/>
+<br/>
+
+<sup id="fn1">[1] The standardization process is still going on.</sup>
+<br/>
+<br/>
+</div>
 
 {% endblock %}
