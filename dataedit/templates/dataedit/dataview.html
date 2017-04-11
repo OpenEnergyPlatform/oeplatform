@@ -158,46 +158,6 @@
 
 {% block script %}{% endblock %}
 
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#csv-upload">Upload CSV</button>
-<div id="csv-upload" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Upload a csv-file</h4>
-      </div>
-      <div class="modal-body">
-        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
-                <div class="input-group">
-                <label class="input-group-btn">
-                    <span class="btn btn-primary">
-                        Browse&hellip; <input type="file" name="csv_file" style="display: none;">
-                    </span>
-                </label>
-                <input type="text" class="form-control" readonly>
-            </div>
-
-            <div class="well">
-                Along with you proposed changes the OEP will save your username
-                and the current timestamp. These dates will be shown on the
-                overview of data modifications.
-
-                <p><input name="agree">I agree</p>
-            </div>
-
-            <input class="btn btn-success" type="submit" value="Upload" />
-</form>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-
-  </div>
-</div>
 <div>
     <h4>Metadata</h4><a href="{{table}}/meta_edit"> Edit</a>
     <table class="table">
@@ -313,57 +273,6 @@
 
 <hr>
 
-<h3> Releases </h3>
-<div class="well">
-    You can download older revisions of the data stored in the platform.
-    Each revision has a unique id which can be used for citations. In order to
-    save memory not all revisions are available. You can request a dump of the
-    current table by clicking the <kbd>Request</kbd> button. Once your data is
-    available this button will change into a <kbd>Download</kbd> button. <br>
-    Each dump will be deleted if 3 days have passed since the last access and
-    you have to request it again.
-</div>
-    <div id="downloadables">
-        <div id="revisions" style="width:460px">
-            <table class="table">
-                <tr>
-                    <th> Release </th>
-                    <th> Created </th>
-                    <th> Last Access </th>
-                    <th> Available </th>
-                </tr>
-                {% for entry, av in revisions %}
-
-                <tr>
-                    <td> {{ entry.revision }} </td>
-                     <td>
-                    {% if av %}
-                        {{ av.created }}
-                    {% else %}
-                        -
-                    {% endif %}
-                    </td>
-                    <td>
-                    {% if av %}
-                        {{ av.last_accessed }}
-                    {% else %}
-                        -
-                    {% endif %}
-                    </td>
-                    <td>
-                        <div id="revision_request">
-                            {% if av %}
-                                <a class="btn btn-success" href="{{table}}/{{entry.revision}}/download" >Download</a>
-                            {% else %}
-                                <btn class="btn btn-default" onclick="request_dump('{{schema}}', '{{table}}', {{entry.revision}});" >Request</btn>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
 
 
 
