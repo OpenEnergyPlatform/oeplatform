@@ -207,11 +207,11 @@
         </tr>
         <tr>
             <th>Description</th>
-            <td>{{comment_on_table.description}}</td>
+            <td class="metavalue">{{comment_on_table.description}}</td>
         </tr>
         <tr>
             <th>Languages</th>
-            <td>
+            <td class="metavalue">
               <ul>
                 {% for row in comment_on_table.language %}
                     <li>{{row}}</li>
@@ -221,7 +221,7 @@
         </tr>
         <tr>
             <th>Reference date</th>
-            <td>{{comment_on_table.reference_date}}</td>
+            <td class="metavalue">{{comment_on_table.reference_date}}</td>
         </tr>
         {% if comment_on_table.sources %}
         <tr>
