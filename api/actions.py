@@ -324,12 +324,18 @@ def analyze_columns(db, schema, table):
             schema=schema, table=table))
     return [{'id':r['id'],'type':r['type']} for r in result]
 
+def quote(x):
+    if not x.startwith('"') and '(' not in x:
+        return '"' + x + '"'
+    else:
+        return x
+
 def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
     if not fields:
         fields = '*'
     else:
-        fields = ', '.join(fields)
+        fields = ', '.join(map(quote(fields)))
     engine = _get_engine()
     connection = engine.connect()
     refs = connection.execute(references.Entry.__table__.select())
