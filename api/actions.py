@@ -325,7 +325,7 @@ def analyze_columns(db, schema, table):
     return [{'id':r['id'],'type':r['type']} for r in result]
 
 def quote(x):
-    if not x.startwith('"') and '(' not in x:
+    if not x.startswith('"') and '(' not in x:
         return '"' + x + '"'
     else:
         return x
