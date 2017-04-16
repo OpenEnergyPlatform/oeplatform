@@ -161,8 +161,21 @@ class Rows(View):
     def post(self, request):
         pass
 
-    def put(self, request):
-        pass
+    def put(self, request, schema, table):
+
+        data = json.loads(request.body.decode("utf-8"))
+        print(data)
+
+        column_data = data['columnData']
+
+        for key, value in column_data.items():
+
+            if not parser.is_pg_qual(key) or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
+                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400, reason="Your request was malformed."))
+
+        result = actions.put_rows(schema, table, column_data)
+
+        return ModHttpResponse(result)
 
 
 class Session(View):

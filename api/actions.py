@@ -206,7 +206,8 @@ def apply_queued_column(id):
         sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
     else:
         ex_str = str(res.get('exception'))
-        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id, ex_str=ex_str)
+        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id,
+                                                                                                                ex_str=ex_str)
 
     _perform_sql(sql)
     return res
@@ -226,7 +227,8 @@ def apply_queued_constraint(id):
         sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(id=id)
     else:
         ex_str = str(res.get('exception'))
-        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id, ex_str=ex_str)
+        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(
+            id=id, ex_str=ex_str)
     _perform_sql(sql)
     return res
 
@@ -483,6 +485,7 @@ def table_create(schema, table, columns, constraints):
 
     return get_response_dict(success=True)
 
+
 def table_change_column(column_definition):
     """
     Changes a table column.
@@ -614,7 +617,6 @@ def table_change_constraint(constraint_definition):
 
 
 def get_rows(request, data):
-
     sql = ['SELECT']
     columns = data.get('columns')
     if columns is None:
@@ -631,10 +633,10 @@ def get_rows(request, data):
         for clause in where_clauses:
             sql.append(clause['first'])
             sql.append(parser.parse_sql_operator(clause['operator']))
-            sql.append(clause['second'] if str(clause['second']).isdigit() else "'{second}'".format(second = clause['second']))
+            sql.append(
+                clause['second'] if str(clause['second']).isdigit() else "'{second}'".format(second=clause['second']))
             if clause.get('connector') is not None:
                 sql.append(clause['connector'])
-
 
     orderby = data.get('orderby')
     if orderby is not None:
@@ -661,6 +663,19 @@ def get_rows(request, data):
         return []
 
     return [dict(r) for r in result]
+
+
+def put_rows(schema, table, column_data):
+    keys = list(column_data.keys())
+    values = list(column_data.values())
+
+    values = ["'{0}'".format(value) for value in values]
+
+    sql = "INSERT INTO {schema}.{table} ({keys}) VALUES({values})".format(schema=schema, table=table, keys=','.join(keys),
+                                                                        values=','.join(values))
+
+    return _perform_sql(sql)
+
 
 """
 ACTIONS FROM OLD API
@@ -870,7 +885,7 @@ def table_drop(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
 
-    # load schema name and check for sanity    
+    # load schema name and check for sanity
     schema = request.pop("schema", "public")
     if not api.parser.is_pg_qual(schema):
         return {'success': False, 'reason': 'Invalid schema name: %s' % schema}
