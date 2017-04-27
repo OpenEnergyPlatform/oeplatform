@@ -4,6 +4,8 @@
 import re
 from sqlalchemy import Table, MetaData
 from datetime import datetime
+from api import actions
+
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -268,7 +270,7 @@ def parse_from_item(d):
 def parse_expression(d):
     # TODO: Implement
     if d['type'] == 'column':
-        return d['column']
+        return actions.quote(d['column'])
     if d['type'] == 'star':
         return ' * '
     if d['type'] == 'operator':
