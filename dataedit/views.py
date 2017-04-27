@@ -365,7 +365,7 @@ def view_save(request, schema, table):
     post_table = request.POST.get("table")
     post_schema = request.POST.get("schema")
 
-    post_data = ""
+    post_data = {}
 
     if post_type == 'graph':
         post_x_axis = request.POST.get('x-axis')
@@ -374,25 +374,29 @@ def view_save(request, schema, table):
             item_name, item_value = item
             if item_name.startswith('y-axis-') and item_value == 'on':
                 y_axis_list.append(item_name['y-axis-'.__len__():])
-        post_data = json.dumps({ 'x_axis': post_x_axis, 'y_axis': y_axis_list })
+        post_data = { 'x_axis': post_x_axis, 'y_axis': y_axis_list }
     elif post_type == 'map':
         post_pos_type = request.POST.get('location_type')
         if post_pos_type == 'single-column':
             post_geo_column = request.POST.get('geo_data')
-            post_data = json.dumps({ 'geo_type': 'single-column', 'geo_column': post_geo_column })
+            post_data = { 'geo_type': 'single-column', 'geo_column': post_geo_column }
         elif post_pos_type == 'lat_long':
             post_geo_lat = request.POST.get('geo_lat')
             post_geo_long = request.POST.get('geo_long')
-            post_data = json.dumps({ 'geo_type': 'lat_long', 'geo_lat': post_geo_lat, 'geo_long': post_geo_long })
+            post_data = { 'geo_type': 'lat_long', 'geo_lat': post_geo_lat, 'geo_long': post_geo_long }
+
+    post_filter = request.POST.get("filter")
+    if (post_filter != ""):
+        post_data.update({ 'filter': json.loads(post_filter)})
 
     if post_id:
         update_view = DBView.objects.filter(id = post_id).get()
         update_view.name = post_name
-        update_view.data = post_data
+        update_view.data = json.dumps(post_data)
         update_view.save()
         return redirect('../../' + table + "?view=" + post_id)
     else:
-        new_view = DBView(name=post_name, type=post_type, data=post_data, table=table, schema=schema)
+        new_view = DBView(name=post_name, type=post_type, data=json.dumps(post_data), table=table, schema=schema)
         new_view.save()
         return redirect('../../' + table + "?view=" + str(new_view.id))
 

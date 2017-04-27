@@ -60,40 +60,66 @@
         build_views();
     }
 </script>
-
-<script type="text/javascript">
+<script>
     var preview_dataset = new recline.Model.Dataset({
-        table: '{{table}}',
-        schema: '{{schema}}',
+        table: '{{ table }}',
+        schema: '{{ schema }}',
         backend: 'OEP',
     });
 
-    var graph;
-    var data;
-    var map;
+    var graph, map, table;
+
+    var filter = [];
+    {% if type == "graph" %}
+        var graph_group;
+        var graph_series = [];
+        var toggle_all_y_axis_columns = false;
+    {% endif %}
+
+	{% for f in filter %}
+		filter.push({{ f|safe }});
+	{% endfor %}
+
+	apply_filter();
+
+    {% if filter %}
+        window.onload = function() {
+	    // page needs to be loaded to make changes in document
+			show_filter();
+			save_filter();
+        }
+    {% endif %}
 
     preview_dataset.fetch().done(function(dataset) {
-        data = dataset;
 
-        var is_first = true;
-        var first_column;
+        // fill select entries for filter column selection
+        var id_filter_columns = $('#id_filter_columns');
         dataset.fields.each(function(field) {
-            if (is_first) { first_column = field; is_first = false; }
+            id_filter_columns.append('<option value=\"' + field.id + '\" style=\"border: none;"> ' + field.id + '</option>');
         });
 
         {% if type == "graph" %}
-            var id_columns = $('#id_columns');
-            id_columns.append('<table>');
-            var column_number = 0;
+
+            // load variables
             {% if y_axis %}
-            graph_series = {{ y_axis|safe }};
-            {% else %}
-            graph_series = [];
+                graph_series = {{ y_axis|safe }};
             {% endif %}
-            graph_group = first_column.id;
-            dataset.fields.each(function(field) {
-                if (column_number == 0)
-                    id_columns.append('<tr>');
+            {% if x_axis %}
+                graph_group = "{{ x_axis }}";
+            {% else %}
+                graph_group = preview_dataset.fields.at(0).id;
+            {% endif %}
+
+            // init document
+
+            // create checkboxes for y-axis
+			var id_columns = document.getElementById("id_columns");
+            var column_number = 0;
+			var current_row;
+            preview_dataset.fields.each(function(field) {
+				if (column_number == 0) {
+					current_row = document.createElement("tr");
+				}
 
                 var is_selected = false;
                 for (var i = 0; i < graph_series.length; i++) {
@@ -101,36 +127,77 @@
                     is_selected = true;
                     }
                 }
-                if (is_selected)
-                {
-                    id_columns.append('<td><input class="column-checkbox" onclick=\"y_axis_change()\" type=\"checkbox\" checked id=\"y-'
-                        + field.id + '\" name=\"y-axis-' + field.id + '\">&nbsp;&nbsp;</td><td><label for=\"y-' + field.id
-                        + '\">' + field.id + '</label>&nbsp;&nbsp;&nbsp;</td>');
-                }
-                else
-                {
-                    id_columns.append('<td><input class="column-checkbox" onclick=\"y_axis_change()\" type=\"checkbox\" id=\"y-'
-                        + field.id + '\" name=\"y-axis-' + field.id + '\">&nbsp;&nbsp;</td><td><label for=\"y-' + field.id
-                        + '\">' + field.id + '</label>&nbsp;&nbsp;&nbsp;</td>');
-                }
 
-                if (column_number == 3) { id_columns.append('</tr>'); column_number = 0; }
-                else { column_number++; }
+				var td = document.createElement("td");
+				var input = document.createElement("input");
+				input.className = "column-checkbox";
+				input.addEventListener('click', function() { update(false); });
+				input.type = "checkbox";
+				if (is_selected) input.checked = true;
+				input.id = "y-" + field.id;
+				input.name = "y-axis-" + field.id;
+				td.appendChild(input);
+				current_row.appendChild(td);
+
+				td = document.createElement("td");
+				var label = document.createElement("label");
+				label.htmlFor = "y-" + field.id;
+				label.appendChild(document.createTextNode(field.id));
+				td.appendChild(label);
+				current_row.appendChild(td);
+
+                if (column_number == 3)
+				{
+					column_number = 0;
+					id_columns.appendChild(current_row);
+				}
+                else column_number++;
             });
-            id_columns.append('</table>');
+			if (column_number != 0)
+				id_columns.appendChild(current_row);
 
+			// create toggle-all checkbox
+			var tr = document.createElement("tr");
+			var td = document.createElement("td");
+			var input = document.createElement("input");
+			input.type = "checkbox";
+			input.id = "toggle-all";
+			input.addEventListener('click', function()
+			{
+                toggle_all_y_axis_columns = !toggle_all_y_axis_columns;
+                $(".column-checkbox").each(function(nr, item) { item.checked = toggle_all_y_axis_columns; });
+                update(false);
+			});
+			td.appendChild(document.createElement("br"));
+			td.appendChild(input);
+			tr.appendChild(td);
+			var td2 = document.createElement("td");
+			var label = document.createElement("label");
+			label.htmlFor = "toggle-all";
+			label.appendChild(document.createTextNode("Toggle all"));
+			td2.appendChild(document.createElement("br"));
+			td2.appendChild(label);
+			tr.appendChild(td2);
+			id_columns.appendChild(tr);
+
+			// fill select entries for x-axis
             var id_x_axis = $('#id_x-axis');
             dataset.fields.each(function(field) {
                 id_x_axis.append('<option value=\"' + field.id + '\" style=\"border: none;\"> ' + field.id + '</option>');
             });
 
-            {% if x_axis %}
-                id_x_axis.val("{{ x_axis }}");
-                graph_group = "{{ x_axis }}";
-            {% endif %}
+            id_x_axis.val(graph_group);
 
         {% elif type == "map" %}
 
+            // check radio buttons
+            {% if geo_type == "single-column" %}
+                document.getElementById("location_single_column").checked = true;
+            {% elif geo_type == "lat_long" %}
+                document.getElementById("location_lat_long").checked = true;
+            {% endif %}
+
+            // fill select entries for geo-fields
             var id_geo_data = $('#id_geo_data');
             var id_geo_lat = $('#id_geo_lat');
             var id_geo_long = $('#id_geo_long');
@@ -149,78 +216,36 @@
 
         {% endif %}
 
-        var $el = $('#container');
 
-        {% if type == "table" %}
-
-            var grid = new recline.View.SlickGrid({
-                model: dataset,
-                el: $el
-            });
-            grid.visible = true;
-            grid.render();
-
-        {% elif type == "graph" %}
-
-            graph = new recline.View.Graph({
-                model: dataset,
-                el: $el,
-                state:
-                {
-                    graphType: "lines-and-points",
-                    group: graph_group,
-                    series: graph_series
-                }
-            });
-            graph.render();
-            graph.redraw();
-
-        {% elif type == "map" %}
-
-            map = new recline.View.Map({
-                model: dataset,
-                el: $el,
-                state:
-                {
-                    {% if geo_type == "single-column" %}
-                        geomField: "{{ geo_column }}"
-                    {% elif geo_type == "lat_long" %}
-                        lonField: "{{ geo_long }}",
-                        latField: "{{ geo_lat }}"
-                    {% else %}
-                        geomField: first_column.id
-                    {% endif %}
-                }
-            });
-            map.render();
-
-        {% endif %}
+        update(true); // initialize and draw preview
     });
 
-    function x_axis_change()
+    {% if type == "table" %}
+    function update(initial)
     {
-        graph_group = document.getElementById("id_x-axis").value;
-        updateGraph();
-    }
-
-    function y_axis_change()
-    {
-        var list = [];
-        data.fields.each(function(field) {
-            var checkbox = document.getElementById("y-" + field.id);
-            if (checkbox.checked) { list.push(field.id); }
+        grid = new recline.View.SlickGrid({
+            model: preview_dataset,
+            el: (initial)? $('#container') : grid.el
         });
-        graph_series = list;
-        updateGraph();
+        grid.visible = true;
+        grid.render();
     }
-
-    var graph_group;
-    var graph_series;
-    function updateGraph()
+    {% elif type == "graph" %}
+    function update(initial)
     {
+        if (!initial)
+        {
+            graph_group = document.getElementById("id_x-axis").value;
+            graph_series = [];
+            preview_dataset.fields.each(function(field) {
+                var checkbox = document.getElementById("y-" + field.id);
+                if (checkbox.checked) { graph_series.push(field.id); }
+            });
+        }
+
         graph = new recline.View.Graph({
-            model: graph.model,
-            el: graph.el,
+            model: preview_dataset,
+            el: (initial)? $('#container') : graph.el,
             state:
             {
                 graphType: "lines-and-points",
@@ -231,43 +256,139 @@
         graph.render();
         graph.redraw();
     }
-
-    var toggle_all_columns = $("#toggle-all").checked;
-    function toggle_all()
-    {
-        toggle_all_columns = !toggle_all_columns;
-        $(".column-checkbox").each(function(nr, item) { item.checked = toggle_all_columns; });
-        y_axis_change();
-    }
-
-    function geo_data_changed()
-    {
+    {% elif type == "map" %}
+	function update(initial)
+	{
         if (document.getElementById("location_single_column").checked)
-        {
-            map = new recline.View.Map({
-                model: map.model,
-                el: map.el,
-                state:
-                {
-                    geomField: document.getElementById("id_geo_data").value
-                }
-            });
-            map.render();
-        }
+			var state =
+			{
+				geomField: document.getElementById("id_geo_data").value
+			}
         else
+            var state =
+			{
+				lonField: document.getElementById("id_geo_long").value,
+				latField: document.getElementById("id_geo_lat").value
+			}
+		map = new recline.View.Map({
+			model: preview_dataset,
+			el: (initial)? $('#container') : map.el,
+			state: state
+		});
+		map.render();
+	}
+	{% endif %}
+
+    function add_filter()
+    {
+        var id_filter_columns = document.getElementById("id_filter_columns");
+        var id_filter_type_equals = document.getElementById("id_filter_type_equals");
+        var id_filter_type_range = document.getElementById("id_filter_type_range");
+
+        if (id_filter_type_equals.checked)
         {
-            map = new recline.View.Map({
-                model: map.model,
-                el: map.el,
-                state:
-                {
-                    lonField: document.getElementById("id_geo_long").value,
-                    latField: document.getElementById("id_geo_lat").value
-                }
-            });
-            map.render();
+            var id_filter_value = document.getElementById("id_filter_value");
+            filter.push({ column: id_filter_columns.value,
+                           type:   "equals",
+                           value:  id_filter_value.value });
+            id_filter_value.value = "";
+        }
+        else if (id_filter_type_range.checked)
+        {
+            var id_filter_start = document.getElementById("id_filter_start");
+            var id_filter_end = document.getElementById("id_filter_end");
+            filter.push({ column: id_filter_columns.value,
+                           type:   "range",
+                           start:  id_filter_start.value,
+                           end:    id_filter_end.value });
+            id_filter_start.value = 0;
+            id_filter_end.value = 0;
+        }
+        id_filter_columns.selectedIndex = 0;
+
+        show_filter();
+        apply_filter();
+		save_filter();
+    }
+    function remove_filter(index)
+    {
+        filter.splice(index, 1);
+        show_filter();
+        apply_filter();
+        save_filter();
+    }
+
+    function show_filter()
+    {
+        var id_filter_list = document.getElementById("id_filter_list");
+        while (id_filter_list.hasChildNodes()) {
+            id_filter_list.removeChild(id_filter_list.lastChild);
+        }
+
+        for (var i = 0; i < filter.length; i++)
+        {
+            var filter_type = filter[i].type;
+
+            if (filter_type === "equals")
+            {
+                var p = document.createElement("p");
+                var a = document.createElement("a");
+                let index = i;
+                a.addEventListener('click', function(event) { event.preventDefault(); remove_filter(index); });
+                a.href = "#";
+                a.appendChild(document.createTextNode(" Remove"));
+                p.appendChild(document.createTextNode(filter[i].column + " = " + filter[i].value));
+                p.appendChild(a);
+                id_filter_list.appendChild(p);
+            }
+            else if (filter_type === "range")
+            {
+                var p = document.createElement("p");
+                var a = document.createElement("a");
+                let index = i;
+                a.addEventListener('click', function(event) { event.preventDefault(); remove_filter(index); });
+                a.href = "#";
+                a.appendChild(document.createTextNode(" Remove"));
+                p.appendChild(document.createTextNode(filter[i].start + " ≤ " + filter[i].column + " ≤ " + filter[i].end));
+                p.appendChild(a);
+                id_filter_list.appendChild(p);
+            }
+
         }
     }
+
+    function apply_filter()
+    {
+        var query = new recline.Model.Query();
+        for (var i = 0; i < filter.length; i++)
+        {
+            if (filter[i].type === "equals")
+            {
+                query.addFilter(
+                {
+                    type: 'term',
+                    field: filter[i].column,
+                    term: filter[i].value
+                });
+            }
+            else if (filter[i].type === "range")
+            {
+                query.addFilter(
+                {
+                    type: 'range',
+                    field: filter[i].column,
+                    from: filter[i].start,
+                    to: filter[i].end
+                });
+            }
+        }
+        preview_dataset.query(query);
+    }
+	function save_filter()
+	{
+        document.getElementById('id_filter_submit').value = JSON.stringify(filter);
+	}
+
 </script>
 
 {% if not new %}
@@ -287,12 +408,16 @@
     <input type="hidden" name="id" value="{{ view.id }}">
     {% endif %}
     <table style="tabel-layout: fixed; width: 100%">
+		<colgroup>
+		   <col span="1" style="width: 20%;">
+		   <col span="1" style="width: 80%;">
+		</colgroup>
         <tr>
             <td>
                 <label for="id_name">Name</label>
             </td>
             <td>
-                <input id="id_name" type="text" class="form-control"
+                <input required id="id_name" type="text" class="form-control"
                        value="{% if not new %}{{ view.name }}{% endif %}" name="name">
             </td>
         </tr>
@@ -306,7 +431,7 @@
             </td>
             <td>
                 <br>
-                <select id="id_x-axis" name="x-axis" class="form-control" onchange="x_axis_change()"></select>
+                <select id="id_x-axis" name="x-axis" class="form-control" onchange="update(false)"></select>
             </td>
         </tr>
         <tr>
@@ -317,10 +442,19 @@
             </td>
             <td>
                 <br>
-                <div id="id_columns">
-                </div>
+                <table id="id_columns" style="table-layout: fixed; width: 100%">
+					<colgroup>
+						<col span="1" style="width: 5%">
+						<col span="1" style="width: 20%">
+						<col span="1" style="width: 5%">
+						<col span="1" style="width: 20%">
+						<col span="1" style="width: 5%">
+						<col span="1" style="width: 20%">
+						<col span="1" style="width: 5%">
+						<col span="1" style="width: 20%">
+					</colgroup>
+                </table>
                 <br>
-                <input type="checkbox" id="toggle-all" onclick="toggle_all();"> Toggle all
                 <br>
             </td>
         </tr>
@@ -342,7 +476,7 @@
                     <tr>
                         <td>
                             <input type="radio" id="location_single_column" name="location_type"
-                                   value="single-column" onchange="geo_data_changed()"
+                                   value="single-column" onchange="update(false)"
                                    {% if geo_type == "single-column" %}checked{% endif %}>
                         </td>
                         <td colspan="2">
@@ -352,7 +486,7 @@
                     <tr>
                         <td></td>
                         <td colspan="2">
-                            <select id="id_geo_data" name="geo_data" class="form-control" onchange="geo_data_changed()">
+                            <select id="id_geo_data" name="geo_data" class="form-control" onchange="update(false)">
                             </select>
                             <br>
                         </td>
@@ -361,7 +495,7 @@
                     <tr>
                         <td>
                             <input type="radio" id="location_lat_long" name="location_type"
-                                   value="lat_long" onchange="geo_data_changed()"
+                                   value="lat_long" onchange="update(false)"
                                    {% if geo_type == "lat_long" %}checked{% endif %}>
                         </td>
                         <td colspan="2">
@@ -372,7 +506,7 @@
                         <td></td>
                         <td><label for="id_geo_lat">Latitude</label></td>
                         <td>
-                            <select id="id_geo_lat" name="geo_lat" class="form-control" onchange="geo_data_changed()">
+                            <select id="id_geo_lat" name="geo_lat" class="form-control" onchange="update(false)">
                             </select>
                         </td>
                     </tr>
@@ -380,7 +514,7 @@
                         <td></td>
                         <td><label for="id_geo_long">Longitude</label></td>
                         <td>
-                            <select id="id_geo_long" name="geo_long" class="form-control" onchange="geo_data_changed()">
+                            <select id="id_geo_long" name="geo_long" class="form-control" onchange="update(false)">
                             </select>
                         </td>
                     </tr>
@@ -388,10 +522,76 @@
             </td>
         </tr>
         {% endif %}
+        <tr>
+            <td>
+                <br>
+                <label>Filter</label>
+                <input type="hidden" name="filter" id="id_filter_submit">
+            </td>
+            <td>
+                <br>
+                <div class="well" id="id_filter_list">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Add filter</label>
+            </td>
+            <td>
+                <div class="well">
+                    <table style="tabel-layout: fixed; width: 100%">
+                        <tr>
+                            <td colspan="4">
+                                <select id="id_filter_columns" class="form-control"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <br>
+                                <input type="radio" name="filter_type" id="id_filter_type_equals">
+                                <label for="id_filter_type_equals"> Equals</label>
+                            </td>
+                            <td colspan="3">
+                                <br>
+                                <input type="text" formaction="javascript:void(0);" id="id_filter_value" class="form-control">
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <br>
+                                <input type="radio" name="filter_type" id="id_filter_type_range">
+                                <label for="id_filter_type_range"> Between</label>
+                            </td>
+                            <td>
+                                <br>
+                                <input type="number" id="id_filter_start" class="form-control">
+                            </td>
+                            <td style="text-align: center;">
+                                <br>
+                                and
+                            </td>
+                            <td>
+                                <br>
+                                <input type="number" id="id_filter_end" class="form-control">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <br>
+                                <button type="button" onclick="add_filter()" class="btn btn-default">Add filter</button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
     </table>
 
     <br>
-    <label>Preview</label>
+    <label>Preview </label>
+    <button class="btn btn-default" type="button" onclick="update()">Refresh</button>
     <br>
 
     <div id="container" style="min-height: 500px">

@@ -61,7 +61,33 @@
                 has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
+        {% if filter %}
+            var query = new recline.Model.Query();
+            {% for f in filter %}
+
+            {% if f.type == "equals" %}
+                query.addFilter(
+                {
+                    type: 'term',
+                    field: "{{ f.column }}",
+                    term: "{{ f.value }}"
+                });
+            {% elif f.type == "range" %}
+                query.addFilter(
+                {
+                    type: 'range',
+                    field: "{{ f.column }}",
+                    from: "{{ f.start }}",
+                    to: "{{ f.end }}"
+                });
+            {% endif %}
+
+            {% endfor %}
+            dataset_main.query(query);
+        {% endif %}
+
         dataset_main.fetch().done(function(dataset) {
+
 
             var visualization_container = $('#main-visualization-container');
             {% if current_view.type == "table" %}
