@@ -301,8 +301,8 @@
                            type:   "range",
                            start:  id_filter_start.value,
                            end:    id_filter_end.value });
-            id_filter_start.value = 0;
-            id_filter_end.value = 0;
+            id_filter_start.value = "";
+            id_filter_end.value = "";
         }
         id_filter_columns.selectedIndex = 0;
 
@@ -602,6 +602,7 @@
     <input type="submit" class="btn btn-success" value="Save">
     <a href="/dataedit/view/{{ schema }}/{{ table }}{% if not new %}?view={{ view.id }}{% endif %}"
        class="btn btn-default">Cancel</a>
+    <br><br><br>
 </form>
 
 {% endblock %}
