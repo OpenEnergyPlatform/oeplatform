@@ -33,6 +33,7 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
+from operator import add
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -174,47 +175,75 @@ def _type_json(json_obj):
 
 pending_dumps = {}
 
+def get_dependencies(schema, table, found=None):
+    if not found:
+        found = {(schema, table)}
 
-def create_dump(schema, table, rev_id, name):
-    if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
-    if not os.path.exists(
-                    sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                    schema=schema)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                 schema=schema))
-    L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
-         '--revision=' + rev_id, '-q',
-         sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
+    query = 'SELECT DISTINCT \
+        ccu.table_name AS foreign_table, \
+        ccu.table_schema AS foreign_schema \
+        FROM  \
+        information_schema.table_constraints AS tc \
+        JOIN information_schema.constraint_column_usage AS ccu \
+          ON ccu.constraint_name = tc.constraint_name \
+        WHERE constraint_type = \'FOREIGN KEY\' AND tc.table_schema=\'{schema}\'\
+        AND tc.table_name=\'{table}\';'.format(schema=schema, table=table)
+
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.execute(query)
+    found_new = {(row.foreign_schema, row.foreign_table) for row in result
+                 if (row.foreign_schema, row.foreign_table) not in found}
+    found = found.union(found_new)
+    found.add((schema, table))
+    session.close()
+    for s,t in found_new:
+        found = found.union(get_dependencies(s,t,found))
+
+    return found
+
+def create_dump(schema, table, date):
+    assert re.match(actions.pgsql_qualifier,table)
+    assert re.match(actions.pgsql_qualifier, schema)
+    for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
+        if not os.path.exists(sec.MEDIA_ROOT + path):
+            os.mkdir(sec.MEDIA_ROOT + path)
+    L = ['pg_dump', '-O', '-x', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
+         str(sec.dbport), '-d', sec.dbname, '-f',
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + date+'.dump'] + reduce(add, (['-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
+    print(' '.join(L))
     return call(L, shell=False)
 
 
-def send_dump(rev_id, schema, table):
-    path = sec.MEDIA_ROOT + '/dumps/{rev}/{schema}/{table}.tar.gz'.format(
-        rev=rev_id, schema=schema, table=table)
+def send_dump(schema, table, date):
+    path = sec.MEDIA_ROOT + '/dumps/{schema}/{table}/{date}.dump'.format(
+        date=date, schema=schema, table=table)
     f = FileWrapper(open(path, "rb"))
     response = HttpResponse(f,
-                            content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
+                            content_type='application/x-gzip')
 
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        '{table}.tar.gz'.format(table=table))
+        '{schema}_{table}_{date}.tar.gz'.format(date=date, schema=schema, table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
     return response
 
 
-def show_revision(request, schema, table, rev_id):
+def show_revision(request, schema, table, date):
     global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table,
-                                    revision=rev_id)
+                                    date=date)
     rev.last_accessed = timezone.now()
     rev.save()
-    return send_dump(rev_id, schema, table)
+    return send_dump(schema, table, date)
 
 @ajax
-def request_revision(request, schema, table, rev_id):
+def request_revision(request, schema, table, date):
     """
     This method handles an ajax request for a data revision of a specific table.
     On success the TableRevision-object will be stored to mark that the corresponding
@@ -227,27 +256,27 @@ def request_revision(request, schema, table, rev_id):
     :return:
     """
 
-    fname = "{schema}/{table}.tar.gz".format(schema=schema,
-                                             table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
+    fname = "{schema}/{table}/{date}.tar.gz".format(schema=schema,
+                                             table=table, date=date)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
 
     original = True # marks whether this method initialised the revision creation
 
     # If some user already requested this dataset wait for this thread to finish
-    if (schema, table, rev_id) in pending_dumps:
-        t = pending_dumps[(schema, table, rev_id)]
+    if (schema, table, date) in pending_dumps:
+        t = pending_dumps[(schema, table, date)]
         original = False
     else:
         t = threading.Thread(target=create_dump,
-                             args=(schema, table, rev_id, fname))
+                             args=(schema, table, date, fname))
         t.start()
-        pending_dumps[(schema, table, rev_id)] = t
+        pending_dumps[(schema, table, date)] = t
 
     while t.is_alive():
         time.sleep(10)
 
-    pending_dumps.pop((schema, table, rev_id))
+    pending_dumps.pop((schema, table, date))
     if original:
-        rev = TableRevision(revision=rev_id, schema=schema, table=table)
+        rev = TableRevision(schema=schema, table=table, date=date)
         rev.save()
     return {}
 
@@ -341,6 +370,15 @@ def add_tag(name, color):
     session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
     session.commit()
 
+
+class RevisionView(View):
+    def get(self, request, schema, table):
+        revisions = TableRevision.objects.filter(schema=schema, table=table)
+        return render(request,
+               'dataedit/dataedit_revision.html',{
+               'schema': schema,
+                'table': table,
+                'revisions': revisions})
 
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
