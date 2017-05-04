@@ -175,6 +175,60 @@ def _type_json(json_obj):
 
 pending_dumps = {}
 
+
+class RevisionView(View):
+    def get(self, request, schema, table):
+        revisions = TableRevision.objects.filter(schema=schema, table=table)
+        return render(request,
+               'dataedit/dataedit_revision.html',{
+               'schema': schema,
+                'table': table,
+                'revisions': revisions})
+
+    def post(self, request, schema, table, date=None):
+        """
+        This method handles an ajax request for a data revision of a specific table.
+        On success the TableRevision-object will be stored to mark that the corresponding
+        revision is available.
+
+        :param request:
+        :param schema:
+        :param table:
+        :param date:
+        :return:
+        """
+
+        if date is None:
+            date = time.strftime('%Y-%m-%d %H:%M:%S')
+            fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
+
+        print(date)
+
+        original = True  # marks whether this method initialised the revision creation
+
+        # If some user already requested this dataset wait for this thread to finish
+        if (schema, table, date) in pending_dumps:
+            t = pending_dumps[(schema, table, date)]
+            original = False
+        else:
+            t = threading.Thread(target=create_dump,
+                                 args=(schema, table, fname))
+            t.start()
+            pending_dumps[(schema, table, date)] = t
+
+        while t.is_alive():
+            time.sleep(10)
+
+        pending_dumps.pop((schema, table, date))
+        if original:
+            path = '/media/dumps/{schema}/{table}/{fname}.dump'.format(
+                fname=fname, schema=schema, table=table)
+            rev = TableRevision(schema=schema, table=table, date=date, path=path)
+            rev.save()
+        return self.get(request, schema, table)
+
+
 def get_dependencies(schema, table, found=None):
     if not found:
         found = {(schema, table)}
@@ -205,7 +259,8 @@ def get_dependencies(schema, table, found=None):
 
     return found
 
-def create_dump(schema, table, date):
+
+def create_dump(schema, table, fname):
     assert re.match(actions.pgsql_qualifier,table)
     assert re.match(actions.pgsql_qualifier, schema)
     for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
@@ -213,14 +268,14 @@ def create_dump(schema, table, date):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = ['pg_dump', '-O', '-x', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
          str(sec.dbport), '-d', sec.dbname, '-f',
-         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + date+'.dump'] + reduce(add, (['-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
     print(' '.join(L))
     return call(L, shell=False)
 
 
-def send_dump(schema, table, date):
-    path = sec.MEDIA_ROOT + '/dumps/{schema}/{table}/{date}.dump'.format(
-        date=date, schema=schema, table=table)
+def send_dump(schema, table, fname):
+    path = sec.MEDIA_ROOT + '/dumps/{schema}/{table}/{fname}.dump'.format(
+        fname=fname, schema=schema, table=table)
     f = FileWrapper(open(path, "rb"))
     response = HttpResponse(f,
                             content_type='application/x-gzip')
@@ -241,45 +296,6 @@ def show_revision(request, schema, table, date):
     rev.last_accessed = timezone.now()
     rev.save()
     return send_dump(schema, table, date)
-
-@ajax
-def request_revision(request, schema, table, date):
-    """
-    This method handles an ajax request for a data revision of a specific table.
-    On success the TableRevision-object will be stored to mark that the corresponding
-    revision is available.
-
-    :param request:
-    :param schema:
-    :param table:
-    :param rev_id:
-    :return:
-    """
-
-    fname = "{schema}/{table}/{date}.tar.gz".format(schema=schema,
-                                             table=table, date=date)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
-
-    original = True # marks whether this method initialised the revision creation
-
-    # If some user already requested this dataset wait for this thread to finish
-    if (schema, table, date) in pending_dumps:
-        t = pending_dumps[(schema, table, date)]
-        original = False
-    else:
-        t = threading.Thread(target=create_dump,
-                             args=(schema, table, date, fname))
-        t.start()
-        pending_dumps[(schema, table, date)] = t
-
-    while t.is_alive():
-        time.sleep(10)
-
-    pending_dumps.pop((schema, table, date))
-    if original:
-        rev = TableRevision(schema=schema, table=table, date=date)
-        rev.save()
-    return {}
-
 
 @login_required(login_url='/login/')
 def tag_overview(request):
@@ -369,16 +385,6 @@ def add_tag(name, color):
 
     session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
     session.commit()
-
-
-class RevisionView(View):
-    def get(self, request, schema, table):
-        revisions = TableRevision.objects.filter(schema=schema, table=table)
-        return render(request,
-               'dataedit/dataedit_revision.html',{
-               'schema': schema,
-                'table': table,
-                'revisions': revisions})
 
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.

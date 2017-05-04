@@ -12,6 +12,7 @@ class TableRevision(models.Model):
     schema = CharField(max_length=1000, null=False)
     date = DateTimeField(max_length=1000, null=False, default=datetime.now)
     created = DateTimeField(null=False, default=timezone.now)
+    path = CharField(max_length=1000, null=False)
     last_accessed = DateTimeField(null=False, default=timezone.now)
 
 
