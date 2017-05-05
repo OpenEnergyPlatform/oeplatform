@@ -267,7 +267,7 @@ def create_dump(schema, table, fname):
     for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
-    L = ['pg_dump', '-O', '-x', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
+    L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
          str(sec.dbport), '-d', sec.dbname, '-f',
          sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
     print(' '.join(L))
