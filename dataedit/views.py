@@ -198,9 +198,9 @@ class RevisionView(View):
         :return:
         """
 
-        if date is None:
-            date = time.strftime('%Y-%m-%d %H:%M:%S')
-            fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
+        date = time.strftime('%Y-%m-%d %H:%M:%S')
+        fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
 
         print(date)
@@ -222,9 +222,10 @@ class RevisionView(View):
 
         pending_dumps.pop((schema, table, date))
         if original:
-            path = '/media/dumps/{schema}/{table}/{fname}.dump'.format(
+            path = '/dumps/{schema}/{table}/{fname}.dump'.format(
                 fname=fname, schema=schema, table=table)
-            rev = TableRevision(schema=schema, table=table, date=date, path=path)
+            size = os.path.getsize(sec.MEDIA_ROOT + path)
+            rev = TableRevision(schema=schema, table=table, date=date, path='/media' + path, size=size)
             rev.save()
         return self.get(request, schema, table)
 
@@ -268,7 +269,7 @@ def create_dump(schema, table, fname):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = ['pg_dump', '-O', '-x', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
          str(sec.dbport), '-d', sec.dbname, '-f',
-         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
     print(' '.join(L))
     return call(L, shell=False)
 
@@ -281,7 +282,7 @@ def send_dump(schema, table, fname):
                             content_type='application/x-gzip')
 
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        '{schema}_{table}_{date}.tar.gz'.format(date=date, schema=schema, table=table))
+        '{schema}_{table}_{date}.tar.gz'.format(date=fname, schema=schema, table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
