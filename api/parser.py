@@ -29,7 +29,7 @@ def read_pgvalue(x):
 
 def read_operator(x, right):
     # TODO: Implement check for valid operators
-    if right['type'] == 'value' and ('value' not in right or right['value'] is None and x == '='):
+    if isinstance(right, dict) and right['type'] == 'value' and ('value' not in right or right['value'] is None and x == '='):
         return 'is'
     return x
 
@@ -252,10 +252,10 @@ def parse_from_item(d):
         if 'natural' in d and read_bool(d['natural']):
             s += ' NATURAL'
         if 'join_type' in d:
-            if d['join_type'].lower() in ['join', 'inner join', 'left join',
+            if d['join_type'].lower().strip() in ['join', 'inner join', 'left join',
                                           'left outer join', 'right join',
                                           'right outer join', 'full join',
-                                          'full inner join', 'cross join']:
+                                          'full inner join', 'full outer join', 'cross join']:
                 s += ' ' + d['join_type']
             else:
                 raise ValidationError('Invalid join type')
@@ -273,22 +273,35 @@ def parse_from_item(d):
 
 def parse_expression(d):
     # TODO: Implement
-    if d['type'] == 'column':
-        return quote(d['column'])
-    if d['type'] == 'star':
-        return ' * '
-    if d['type'] == 'operator':
-        return parse_operator(d)
-    if d['type'] == 'operator_binary':
-        return parse_operator(d)
-    if d['type'] == 'function':
-        return parse_function(d)
-    if d['type'] == 'value':
-        if 'value' in d:
-            return read_pgvalue(d['value'])
-        else:
-            return 'null'
-    raise NotImplementedError()
+    if isinstance(d, dict):
+        if d['type'] == 'column':
+            name = quote(d['column'])
+            if 'table' in d:
+                name = quote(d['table']) + '.' + name
+                if 'schema' in d:
+                    name = quote(d['schema']) + '.' + name
+            return name
+        if d['type'] == 'star':
+            return ' * '
+        if d['type'] == 'operator':
+            return parse_operator(d)
+        if d['type'] == 'operator_binary':
+            return parse_operator(d)
+        if d['type'] == 'operator_unary':
+            return parse_operator_unary(d)
+        if d['type'] == 'modifier_unary':
+            return parse_modifier_unary(d)
+        if d['type'] == 'function':
+            return parse_function(d)
+        if d['type'] == 'value':
+            if 'value' in d:
+                return read_pgvalue(d['value'])
+            else:
+                return 'null'
+    if isinstance(d, list):
+        return '(' + ', '.join(parse_expression(x) for x in d) + ')'
+    else:
+        return d
 
 
 def parse_condition(dl):
@@ -318,6 +331,14 @@ def parse_operator(d):
             parse_expression(d['right']))
     return d
 
+
+def parse_operator_unary(d):
+    return "%s %s" % (read_operator(d['operator'], d['operand']),
+                      parse_expression(d['operand']))
+
+def parse_modifier_unary(d):
+    return "%s %s" % (parse_expression(d['operand']),
+                      read_operator(d['operator'], d['operand']))
 
 def parse_function(d):
     assert (read_pgid(d['function']))

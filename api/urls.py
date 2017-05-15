@@ -28,5 +28,13 @@ urlpatterns = [
     url(r'^get_indexes', views.create_ajax_handler(actions.get_indexes)),
     url(r'^get_unique_constraints', views.create_ajax_handler(actions.get_unique_constraints)),
     url(r'^request_dump', views.create_ajax_handler(actions.get_unique_constraints)),
+
+    url(r'^set_isolation_level', views.create_ajax_handler(actions.set_isolation_level)),
+    url(r'^get_isolation_level', views.create_ajax_handler(actions.get_isolation_level)),
+    url(r'^do_begin_twophase', views.create_ajax_handler(actions.do_begin_twophase)),
+    url(r'^do_prepare_twophase', views.create_ajax_handler(actions.do_prepare_twophase)),
+    url(r'^do_rollback_twophase', views.create_ajax_handler(actions.do_rollback_twophase)),
+    url(r'^do_commit_twophase', views.create_ajax_handler(actions.do_commit_twophase)),
+
     url(r'^show_revisions', views.create_ajax_handler(actions.get_unique_constraints)),
 ]

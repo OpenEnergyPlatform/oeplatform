@@ -38,6 +38,7 @@ def create_ajax_handler(func):
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
+        print(content)
         data = func(json.loads(content['query']), {'user': request.user})
 
         # This must be done in order to clean the structure of non-serializable

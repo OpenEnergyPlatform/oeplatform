@@ -1,5 +1,6 @@
 import re
 import sqlalchemy as sqla
+import sqlalchemy.exc as exc
 import json
 
 import traceback
@@ -18,10 +19,20 @@ import oeplatform.securitysettings as sec
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 
+RESPONSE_SUCCESS = {'success': True}
+
+
 
 import geoalchemy2
 
 Base = declarative_base()
+
+
+def __response_success():
+    return {'success': True}
+
+def __response_error(message):
+    return {'success': False, 'message':message}
 
 class InvalidRequest(Exception):
     pass
@@ -605,6 +616,78 @@ def get_unique_constraints(request, context=None):
                                                                   None),
                                              **request)
     return result
+
+def __get_connection(request):
+    # TODO: Implement session-based connection handler
+    engine = _get_engine()
+    return engine.connect()
+
+
+def get_isolation_level(request,):
+    connection = __get_connection(request)
+    cursor = connection.cursor()
+    result = cursor.execute('show transaction isolation level')
+    cursor.close()
+    return result
+
+def set_isolation_level(request):
+    level = request.get('level', None)
+    engine = _get_engine()
+    connection = __get_connection(request)
+    try:
+        engine.dialect.set_isolation_level(connection, level)
+    except exc.ArgumentError as ae:
+        return __response_error(ae.message)
+    return __response_success()
+
+
+def do_begin_twophase(request):
+    xid = request.get('xid', None)
+    engine = _get_engine()
+    connection = __get_connection(request)
+    engine.dialect.do_begin_twophase(connection, xid)
+    return __response_success()
+
+
+def do_prepare_twophase(request):
+    xid = request.get('xid', None)
+    engine = _get_engine()
+    connection = __get_connection(request)
+    engine.dialect.do_prepare_twophase(connection, xid)
+    return __response_success()
+
+
+def do_rollback_twophase(request):
+    xid = request.get('xid', None)
+    is_prepared = request.get('is_prepared', True)
+    recover = request.get('recover', False)
+    engine = _get_engine()
+    connection = __get_connection(request)
+    engine.dialect.do_rollback_twophase(connection, xid,
+                                        is_prepared=is_prepared,
+                                        recover=recover)
+    return __response_success()
+
+
+def do_commit_twophase(request):
+    xid = request.get('xid', None)
+    is_prepared = request.get('is_prepared', True)
+    recover = request.get('recover', False)
+    engine = _get_engine()
+    connection = __get_connection(request)
+    engine.dialect.do_commit_twophase(connection, xid, is_prepared=is_prepared,
+                                      recover=recover)
+    return __response_success()
+
+
+def do_recover_twophase(request):
+    engine = _get_engine()
+    connection = __get_connection(request)
+    return engine.dialect.do_commit_twophase(connection)
+
+
+def _get_default_schema_name(self, connection):
+    return connection.scalar("select current_schema()")
 
 
 def get_comment_table_name(table):
