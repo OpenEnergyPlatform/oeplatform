@@ -105,7 +105,6 @@ def describe_indexes(schema, table):
     query = 'select indexname, indexdef from pg_indexes where tablename = ' \
             '\'{table}\' and schemaname=\'{schema}\';'.format(
         table=table, schema=schema)
-    print(query)
     response = session.execute(query)
     session.close()
 
@@ -313,7 +312,6 @@ def get_column_change(i_id):
     """
     all_changes = get_column_changes()
     for change in all_changes:
-        print(change.get('id'))
         if int(change.get('id')) == int(i_id):
             return change
 
@@ -370,7 +368,6 @@ def get_column_changes(reviewed=None, changed=None, schema=None, table=None):
 
     sql = ''.join(query)
 
-    print(sql)
     response = session.execute(sql)
     session.close()
 
@@ -421,7 +418,6 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
     sql = ''.join(query)
 
-    print(sql)
     response = session.execute(sql)
     session.close()
 
@@ -456,27 +452,24 @@ def table_create(schema, table, columns, constraints):
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
-    print("Columns: " + str(columns))
-    print("Constraints: " + str(constraints))
-
     first_column = True
     for c in columns:
         if not first_column:
             str_list.append(",")
-        str_list.append("{name} {data_type} {not_null}"
+        str_list.append("{name} {data_type} {length} {not_null}"
                         .format(name=c['name'], data_type=c['data_type'],
+                                length=('(' + str(c['character_maximum_length']) + ')') if c[
+                                    'character_maximum_length'] else "",
                                 not_null="NOT NULL" if "NO" in c['is_nullable'] else ""))
         first_column = False
 
     str_list.append(");")
     sql_string = ''.join(str_list)
 
-    print("SQL CREATE String: " + sql_string)
 
     results = [_perform_sql(sql_string)]
 
     for constraint_definition in constraints:
-        print("ConDef in CREATE TABLE: " + str(constraint_definition))
         results.append(table_change_constraint(constraint_definition))
 
     for res in results:
@@ -671,8 +664,9 @@ def put_rows(schema, table, column_data):
 
     values = ["'{0}'".format(value) for value in values]
 
-    sql = "INSERT INTO {schema}.{table} ({keys}) VALUES({values})".format(schema=schema, table=table, keys=','.join(keys),
-                                                                        values=','.join(values))
+    sql = "INSERT INTO {schema}.{table} ({keys}) VALUES({values})".format(schema=schema, table=table,
+                                                                          keys=','.join(keys),
+                                                                          values=','.join(values))
 
     return _perform_sql(sql)
 

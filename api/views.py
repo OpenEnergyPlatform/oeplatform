@@ -49,6 +49,8 @@ class Table(View):
         :return:
         """
 
+
+
         json_data = json.loads(request.body.decode("utf-8"))
 
         if 'column' in json_data['type']:
@@ -132,13 +134,14 @@ class Rows(View):
         # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
-        where_splitted = where.split(' ')
-        print('Iterations:' + str(int(len(where_splitted) / 4)))
 
-        where_clauses = [{'first': where_splitted[4 * i],
-                          'operator': where_splitted[4 * i + 1],
-                          'second': where_splitted[4 * i + 2],
-                          'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i in range(int(len(where_splitted) / 4) + 1)]
+        where_clauses = None
+        if where:
+            where_splitted = where.split(' ')
+            where_clauses = [{'first': where_splitted[4 * i],
+                              'operator': where_splitted[4 * i + 1],
+                              'second': where_splitted[4 * i + 2],
+                              'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i in range(int(len(where_splitted) / 4) + 1)]
 
 
         # TODO: Validate where_clauses. Should not be vulnerable
@@ -153,7 +156,6 @@ class Rows(View):
 
         return_obj = actions.get_rows(request, data)
 
-        print(return_obj)
         # TODO: Figure out what JsonResponse does different.
         response = json.dumps(return_obj, default=date_handler)
         return HttpResponse(response, content_type='application/json')
@@ -164,14 +166,13 @@ class Rows(View):
     def put(self, request, schema, table):
 
         data = json.loads(request.body.decode("utf-8"))
-        print(data)
 
         column_data = data['columnData']
 
         for key, value in column_data.items():
 
-            if not parser.is_pg_qual(key) or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
-                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400, reason="Your request was malformed."))
+            if not parser.is_pg_qual(key): #or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
+                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400, reason="Your request was malformed."), 400)
 
         result = actions.put_rows(schema, table, column_data)
 
