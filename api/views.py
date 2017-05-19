@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_ajax.decorators import ajax
 import json
 import time
+from decimal import Decimal
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -19,6 +20,8 @@ def date_handler(obj):
     :param obj: An object
     :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
     """
+    if isinstance(obj, Decimal):
+        return float(obj)
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
     else:

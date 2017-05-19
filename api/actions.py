@@ -19,8 +19,8 @@ import oeplatform.securitysettings as sec
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 
-RESPONSE_SUCCESS = {'success': True}
 
+__CONNECTIONS = {}
 
 
 import geoalchemy2
@@ -623,71 +623,107 @@ def __get_connection(request):
     return engine.connect()
 
 
-def get_isolation_level(request,):
+def get_isolation_level(request, context):
+    engine = _get_engine()
     connection = __get_connection(request)
-    cursor = connection.cursor()
-    result = cursor.execute('show transaction isolation level')
-    cursor.close()
+    result = engine.dialect.get_isolation_level(connection.connection)
     return result
 
-def set_isolation_level(request):
+def set_isolation_level(request, context):
     level = request.get('level', None)
     engine = _get_engine()
     connection = __get_connection(request)
     try:
-        engine.dialect.set_isolation_level(connection, level)
+        engine.dialect.set_isolation_level(connection.connection, level)
     except exc.ArgumentError as ae:
         return __response_error(ae.message)
     return __response_success()
 
 
-def do_begin_twophase(request):
+def do_begin_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
     connection = __get_connection(request)
-    engine.dialect.do_begin_twophase(connection, xid)
+    engine.dialect.do_begin_twophase(connection.connection, xid)
     return __response_success()
 
 
-def do_prepare_twophase(request):
+def do_prepare_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
     connection = __get_connection(request)
-    engine.dialect.do_prepare_twophase(connection, xid)
+    engine.dialect.do_prepare_twophase(connection.connection, xid)
     return __response_success()
 
 
-def do_rollback_twophase(request):
+def do_rollback_twophase(request, context):
     xid = request.get('xid', None)
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
     connection = __get_connection(request)
-    engine.dialect.do_rollback_twophase(connection, xid,
+    engine.dialect.do_rollback_twophase(connection.connection, xid,
                                         is_prepared=is_prepared,
                                         recover=recover)
     return __response_success()
 
 
-def do_commit_twophase(request):
+def do_commit_twophase(request, context):
     xid = request.get('xid', None)
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
     connection = __get_connection(request)
-    engine.dialect.do_commit_twophase(connection, xid, is_prepared=is_prepared,
+    engine.dialect.do_commit_twophase(connection.connection, xid, is_prepared=is_prepared,
                                       recover=recover)
     return __response_success()
 
 
-def do_recover_twophase(request):
+def do_recover_twophase(request, context):
     engine = _get_engine()
     connection = __get_connection(request)
-    return engine.dialect.do_commit_twophase(connection)
+    return engine.dialect.do_commit_twophase(connection.connection)
 
 
 def _get_default_schema_name(self, connection):
     return connection.scalar("select current_schema()")
+
+def open_raw_connection(request, context):
+    engine = _get_engine()
+    connection = engine.connect
+    connection_id = connection.__hash__()
+    if connection_id not in __CONNECTIONS:
+        __CONNECTIONS[connection_id]=connection
+    return {'connection_id': connection_id}
+
+def close_raw_connection(request, context):
+    connection_id = request['connection_id']
+    if connection_id in __CONNECTIONS:
+        connection = __CONNECTIONS[connection_id]
+        connection.close()
+        return __response_success()
+    else:
+        return __response_error("Connection (%s) not found"%connection_id)
+
+def open_cursor(request, context):
+    connection_id = request['connection_id']
+    if connection_id in __CONNECTIONS:
+        connection = __CONNECTIONS[connection_id]
+        cursor = connection.cursor()
+        cursor_id = cursor.__hash__()
+        return {'cursor_id': cursor_id}
+    else:
+        return __response_error("Cursor (%s) not found"%connection_id)
+
+def close_cursor(request, context):
+    connection_id = request['connection_id']
+    if connection_id in __CONNECTIONS:
+        connection = __CONNECTIONS[connection_id]
+        cursor = connection.cursor()
+        cursor_id = cursor.__hash__()
+        return {'cursor_id': cursor_id}
+    else:
+        return __response_error("Connection (%s) not found" % connection_id)
 
 
 def get_comment_table_name(table):
@@ -703,6 +739,7 @@ def get_insert_table_name(table):
 
 def get_meta_schema_name(schema):
     return '_' + schema
+
 
 
 def create_meta_schema(schema):
