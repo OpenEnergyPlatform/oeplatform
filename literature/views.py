@@ -47,7 +47,7 @@ FORM_MAP = {'article': forms.ArticleForm,
             'unpublished': forms.UnpublishedForm}
 
 
-class LiteratureView(View, LoginRequiredMixin):
+class LiteratureView(LoginRequiredMixin, View):
     def get(self, request, entries_id=None):
         if entries_id:
             engine = _get_engine()
