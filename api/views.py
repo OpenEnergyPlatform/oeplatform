@@ -129,7 +129,7 @@ class Fields(View):
 
         returnValue = actions.getValue(schema, table, column, id);
 
-        return HttpResponse(returnValue);
+        return HttpResponse(returnValue if returnValue is not None else "", status= (404 if returnValue is None else 200))
 
     def post(self, request):
         pass

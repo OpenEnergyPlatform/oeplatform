@@ -1320,12 +1320,18 @@ def getValue(schema, table, column, id):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
 
-    rows = session.execute(sql)
+
+    try:
+        result = session.execute(sql)
+
+        returnValue = None
+        for row in result:
+            returnValue = row[column]
+
+        return returnValue
+    except Exception as e:
+        print("SQL Action failed. \n Error:\n" + str(e))
+        session.rollback()
+
     session.close()
-
-    returnValue = None
-    for row in rows:
-        returnValue = row[column]
-
-
-    return returnValue
+    return None
