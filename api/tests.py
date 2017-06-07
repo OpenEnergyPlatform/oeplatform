@@ -77,13 +77,13 @@ class APITestCase(TestCase):
         self.assertEqual(body, self.content_data)
 
     def test_a_initializationDatabase(self):
-        actions._perform_sql("DROP SCHEMA IF EXISTS schema1 CASCADE")
-        actions._perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
-        actions._perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS schema1 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
 
-        actions._perform_sql("CREATE SCHEMA schema1")
-        actions._perform_sql("CREATE SCHEMA schema2")
-        actions._perform_sql("CREATE SCHEMA schema3")
+        actions.perform_sql("CREATE SCHEMA schema1")
+        actions.perform_sql("CREATE SCHEMA schema2")
+        actions.perform_sql("CREATE SCHEMA schema3")
 
     def test_create_table(self):
 
@@ -97,6 +97,8 @@ class APITestCase(TestCase):
 
     def test_modify_table(self):
 
+
+
         data_column = {"type": "column", "name": "number", "data_type": "int", "is_nullable": "NO",
                        "character_maximum_length": None}
         data_constraint = {"type": "constraint", "action": "ADD", "constraint_type": "UNIQUE",
@@ -109,11 +111,11 @@ class APITestCase(TestCase):
 
         c_column_resp = self.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=j_data_column)
+            data=data_column)
 
         c_constraint_resp = self.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=j_data_constraint)
+            data=data_constraint)
 
         self.assertEqual(c_column_resp.status_code, 200, 'Status Code is not 200.')
         self.assertEqual(c_constraint_resp.status_code, 200, 'Status Code is not 200.')

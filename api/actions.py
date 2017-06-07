@@ -149,7 +149,7 @@ def describe_constraints(schema, table):
     } for column in response}
 
 
-def _perform_sql(sql_statement):
+def perform_sql(sql_statement):
     """
     Performs a sql command on standard database.
     :param sql_statement: SQL-Command
@@ -188,7 +188,7 @@ def remove_queued_column(id):
     """
 
     sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id=id)
-    _perform_sql(sql)
+    perform_sql(sql)
 
 
 def apply_queued_column(id):
@@ -208,7 +208,7 @@ def apply_queued_column(id):
         sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(id=id,
                                                                                                                 ex_str=ex_str)
 
-    _perform_sql(sql)
+    perform_sql(sql)
     return res
 
 
@@ -228,7 +228,7 @@ def apply_queued_constraint(id):
         ex_str = str(res.get('exception'))
         sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(
             id=id, ex_str=ex_str)
-    _perform_sql(sql)
+    perform_sql(sql)
     return res
 
 
@@ -240,7 +240,7 @@ def remove_queued_constraint(id):
     """
 
     sql = "UPDATE api_constraints SET reviewed=True WHERE id='{id}'".format(id=id)
-    _perform_sql(sql)
+    perform_sql(sql)
 
 
 def get_response_dict(success, http_status_code=200, reason=None, exception=None, result=None):
@@ -280,7 +280,7 @@ def queue_constraint_change(schema, table, constraint_def):
                                           r_table=cd['reference_table'], r_column=cd['reference_column'],
                                           c_schema=schema, c_table=table).replace('\'NULL\'', 'NULL')
 
-    return _perform_sql(sql_string)
+    return perform_sql(sql_string)
 
 
 def queue_column_change(schema, table, column_definition):
@@ -301,7 +301,7 @@ def queue_column_change(schema, table, column_definition):
                 c_table=table) \
         .replace('\'NULL\'', 'NULL')
 
-    return _perform_sql(sql_string)
+    return perform_sql(sql_string)
 
 
 def get_column_change(i_id):
@@ -467,7 +467,7 @@ def table_create(schema, table, columns, constraints):
     sql_string = ''.join(str_list)
 
 
-    results = [_perform_sql(sql_string)]
+    results = [perform_sql(sql_string)]
 
     for constraint_definition in constraints:
         results.append(table_change_constraint(constraint_definition))
@@ -557,7 +557,7 @@ def table_change_column(column_definition):
 
     sql_string = ''.join(sql)
 
-    return _perform_sql(sql_string)
+    return perform_sql(sql_string)
 
 
 def table_change_constraint(constraint_definition):
@@ -606,7 +606,7 @@ def table_change_constraint(constraint_definition):
     sql_string = ''.join(sql)
 
     print(sql_string)
-    return _perform_sql(sql_string)
+    return perform_sql(sql_string)
 
 
 def get_rows(request, data):
@@ -648,7 +648,7 @@ def get_rows(request, data):
     sql_command = ' '.join(sql)
     print(sql_command)
 
-    resp_dict = _perform_sql(sql_command)
+    resp_dict = perform_sql(sql_command)
     result = resp_dict.get('result')
 
     if result is None:
@@ -668,7 +668,7 @@ def put_rows(schema, table, column_data):
                                                                           keys=','.join(keys),
                                                                           values=','.join(values))
 
-    return _perform_sql(sql)
+    return perform_sql(sql)
 
 
 """
@@ -1312,3 +1312,20 @@ def create_comment_table(schema, table, meta_schema=None):
         table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)
+
+
+def getValue(schema, table, column, id):
+    sql = "SELECT {column} FROM {schema}.{table} WHERE id={id}".format(column=column, schema=schema, table=table, id=id)
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+
+    rows = session.execute(sql)
+    session.close()
+
+    returnValue = None
+    for row in rows:
+        returnValue = row[column]
+
+
+    return returnValue

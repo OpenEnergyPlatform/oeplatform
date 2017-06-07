@@ -3,12 +3,12 @@ from django.conf.urls import url
 from api import actions
 from api import views
 
-
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
 structures = r'table|sequence'
 urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$', views.Table.as_view()),
+    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$', views.Fields.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/$', views.Rows.as_view()),
 

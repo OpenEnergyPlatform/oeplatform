@@ -49,8 +49,6 @@ class Table(View):
         :return:
         """
 
-
-
         json_data = json.loads(request.body.decode("utf-8"))
 
         if 'column' in json_data['type']:
@@ -123,6 +121,23 @@ class Index(View):
         pass
 
 
+class Fields(View):
+    def get(self, request, schema, table, id, column):
+
+        if not parser.is_pg_qual(table) or not  parser.is_pg_qual(schema) or not parser.is_pg_qual(id) or not parser.is_pg_qual(column):
+            return ModHttpResponse({"error": "Bad Request", "http_status": 400})
+
+        returnValue = actions.getValue(schema, table, column, id);
+
+        return HttpResponse(returnValue);
+
+    def post(self, request):
+        pass
+
+    def put(self, request):
+        pass
+
+
 class Rows(View):
     def get(self, request, schema, table):
         columns = request.GET.get('columns')
@@ -141,8 +156,8 @@ class Rows(View):
             where_clauses = [{'first': where_splitted[4 * i],
                               'operator': where_splitted[4 * i + 1],
                               'second': where_splitted[4 * i + 2],
-                              'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i in range(int(len(where_splitted) / 4) + 1)]
-
+                              'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i
+                             in range(int(len(where_splitted) / 4) + 1)]
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
@@ -171,8 +186,9 @@ class Rows(View):
 
         for key, value in column_data.items():
 
-            if not parser.is_pg_qual(key): #or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
-                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400, reason="Your request was malformed."), 400)
+            if not parser.is_pg_qual(key):  # or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
+                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400,
+                                                              reason="Your request was malformed."), 400)
 
         result = actions.put_rows(schema, table, column_data)
 
