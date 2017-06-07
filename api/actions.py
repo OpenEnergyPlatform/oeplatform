@@ -21,7 +21,7 @@ _ENGINES = {}
 
 
 __CONNECTIONS = {}
-
+__CURSORS = {}
 
 import geoalchemy2
 
@@ -688,13 +688,15 @@ def do_recover_twophase(request, context):
 def _get_default_schema_name(self, connection):
     return connection.scalar("select current_schema()")
 
+
 def open_raw_connection(request, context):
     engine = _get_engine()
-    connection = engine.connect
+    connection = engine.connect().connection
     connection_id = connection.__hash__()
     if connection_id not in __CONNECTIONS:
         __CONNECTIONS[connection_id]=connection
     return {'connection_id': connection_id}
+
 
 def close_raw_connection(request, context):
     connection_id = request['connection_id']
@@ -705,6 +707,7 @@ def close_raw_connection(request, context):
     else:
         return __response_error("Connection (%s) not found"%connection_id)
 
+
 def open_cursor(request, context):
     connection_id = request['connection_id']
     if connection_id in __CONNECTIONS:
@@ -713,17 +716,17 @@ def open_cursor(request, context):
         cursor_id = cursor.__hash__()
         return {'cursor_id': cursor_id}
     else:
-        return __response_error("Cursor (%s) not found"%connection_id)
+        return __response_error("Connection (%s) not found"%connection_id)
+
 
 def close_cursor(request, context):
-    connection_id = request['connection_id']
-    if connection_id in __CONNECTIONS:
-        connection = __CONNECTIONS[connection_id]
-        cursor = connection.cursor()
-        cursor_id = cursor.__hash__()
+    cursor_id = request['cursor_id']
+    if cursor_id in __CURSORS:
+        cursor = __CURSORS[cursor_id]
+        cursor.close()
         return {'cursor_id': cursor_id}
     else:
-        return __response_error("Connection (%s) not found" % connection_id)
+        return __response_error("Cursor (%s) not found" % cursor_id)
 
 
 def get_comment_table_name(table):
