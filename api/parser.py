@@ -310,8 +310,6 @@ def parse_expression(d, separator=', '):
 
 def parse_condition(dl):
     # TODO: Implement
-    import json
-    print(json.dumps(dl, indent=2))
     if type(dl) == dict:
         dl = [dl]
 
