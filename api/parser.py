@@ -302,22 +302,20 @@ def parse_expression(d):
                 return 'null'
     if isinstance(d, list):
         return ', '.join(parse_expression(x) for x in d)
+    if isinstance(d, str):
+        return '\'' + d + '\''
     else:
         return d
 
 
 def parse_condition(dl):
     # TODO: Implement
+    import json
+    print(json.dumps(dl, indent=2))
     if type(dl) == dict:
         dl = [dl]
-    conditionlist = []
-    for d in dl:
-        if d['type'] == 'operator_binary':
-            conditionlist.append("%s %s %s" % (
-                parse_expression(d['left']), read_operator(d['operator'],d['right']),
-                parse_expression(d['right'])))
 
-    return " " + " AND ".join(conditionlist)
+    return " " + " AND ".join([parse_expression(d) for d in dl])
 
 
 def parse_operator(d):
