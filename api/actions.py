@@ -27,6 +27,8 @@ import geoalchemy2
 
 Base = declarative_base()
 
+class ResponsiveException(Exception):
+    pass
 
 def __response_success():
     return {'success': True}
@@ -157,7 +159,7 @@ def data_delete(request, context=None):
 
 def data_update(request, context=None):
     engine = _get_engine()
-    connection = engine.connect()
+    cursor = __load_cursor(context['cursor_id'])
     query = {
         'from': [{
             'type': 'table',
@@ -205,25 +207,23 @@ def data_update(request, context=None):
             values=', '.join(insert_strings)
         )
         print(s)
-        connection.execute(s)
+        cursor.execute(s)
     return {'affected':len(rows['data'])}
 
 def data_insert(request, context=None):
-    print("INSERT: ", request)
     engine = _get_engine()
-    connection = engine.connect()
-    query = request
+    cursor = __load_cursor(context['cursor_id'])
 
     # If the insert request is not for a meta table, change the request to do so
-    assert not query['table'].startswith('_') or query['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
-    query['table'] = '_' + query['table'] + '_insert'
-    if not query['schema'].startswith('_'):
-        query['schema'] = '_' + query['schema']
+    assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
+    request['table'] = '_' + request['table'] + '_insert'
+    if not request['schema'].startswith('_'):
+        request['schema'] = '_' + request['schema']
 
     query = parser.parse_insert(request, engine, context)
     print(query, query.__dict__)
-    result = connection.execute(query)
-    connection.close()
+    result = cursor.execute(query)
+
     description = result.context.cursor.description
     if not result.returns_rows:
         return {}
@@ -245,9 +245,8 @@ def process_value(val):
         return str(val)
 
 def table_drop(request, context=None):
-    db = request["db"]
     engine = _get_engine()
-    connection = engine.connect()
+    cursor = __load_cursor(context['cursor_id'])
 
     # load schema name and check for sanity    
     schema = request.pop("schema", "public")
@@ -291,14 +290,12 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     engine = _get_engine()
-    connection = engine.connect()
+    cursor = __load_cursor(context['cursor_id'])
     query = parser.parse_select(request)
     print(query)
-    result = connection.execute(query)
-    description = result.context.cursor.description
-    data = [list(r) for r in result]
-    return {'data': data,
-            'description': [[col.name, col.type_code, col.display_size,
+    cursor.execute(query)
+    description = cursor.description
+    return {'description': [[col.name, col.type_code, col.display_size,
                              col.internal_size, col.precision, col.scale,
                              col.null_ok] for col in description]}
 
@@ -625,16 +622,16 @@ def __get_connection(request):
 
 def get_isolation_level(request, context):
     engine = _get_engine()
-    connection = __get_connection(request)
-    result = engine.dialect.get_isolation_level(connection.connection)
+    cursor = __load_cursor(context['cursor_id'])
+    result = engine.dialect.get_isolation_level(cursor)
     return result
 
 def set_isolation_level(request, context):
     level = request.get('level', None)
     engine = _get_engine()
-    connection = __get_connection(request)
+    cursor = __load_cursor(context['cursor_id'])
     try:
-        engine.dialect.set_isolation_level(connection.connection, level)
+        engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
         return __response_error(ae.message)
     return __response_success()
@@ -643,16 +640,16 @@ def set_isolation_level(request, context):
 def do_begin_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    connection = __get_connection(request)
-    engine.dialect.do_begin_twophase(connection.connection, xid)
+    cursor = __load_cursor(context['cursor_id'])
+    engine.dialect.do_begin_twophase(cursor, xid)
     return __response_success()
 
 
 def do_prepare_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    connection = __get_connection(request)
-    engine.dialect.do_prepare_twophase(connection.connection, xid)
+    cursor = __load_cursor(context['cursor_id'])
+    engine.dialect.do_prepare_twophase(cursor, xid)
     return __response_success()
 
 
@@ -661,8 +658,8 @@ def do_rollback_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    connection = __get_connection(request)
-    engine.dialect.do_rollback_twophase(connection.connection, xid,
+    cursor = __load_cursor(context['cursor_id'])
+    engine.dialect.do_rollback_twophase(cursor, xid,
                                         is_prepared=is_prepared,
                                         recover=recover)
     return __response_success()
@@ -673,16 +670,16 @@ def do_commit_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    connection = __get_connection(request)
-    engine.dialect.do_commit_twophase(connection.connection, xid, is_prepared=is_prepared,
+    cursor = __load_cursor(context['cursor_id'])
+    engine.dialect.do_commit_twophase(cursor, xid, is_prepared=is_prepared,
                                       recover=recover)
     return __response_success()
 
 
 def do_recover_twophase(request, context):
     engine = _get_engine()
-    connection = __get_connection(request)
-    return engine.dialect.do_commit_twophase(connection.connection)
+    cursor = __load_cursor(context['cursor_id'])
+    return engine.dialect.do_commit_twophase(cursor)
 
 
 def _get_default_schema_name(self, connection):
@@ -714,19 +711,43 @@ def open_cursor(request, context):
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
         cursor_id = cursor.__hash__()
+        __CURSORS[cursor_id] = cursor
         return {'cursor_id': cursor_id}
     else:
         return __response_error("Connection (%s) not found"%connection_id)
 
 
+def __load_cursor(cursor_id):
+    try:
+        return __CURSORS[cursor_id]
+    except KeyError:
+        print(__CURSORS)
+        raise ResponsiveException("Cursor (%s) not found" % cursor_id)
+
+
 def close_cursor(request, context):
-    cursor_id = request['cursor_id']
+    cursor_id = context['cursor_id']
     if cursor_id in __CURSORS:
         cursor = __CURSORS[cursor_id]
         cursor.close()
         return {'cursor_id': cursor_id}
     else:
         return __response_error("Cursor (%s) not found" % cursor_id)
+
+
+def fetchone(request, context):
+    cursor = __load_cursor(context['cursor_id'])
+    return cursor.fetchone()
+
+
+def fetchall(request, context):
+    cursor = __load_cursor(context['cursor_id'])
+    return cursor.fetchall()
+
+
+def fetchmany(request, context):
+    cursor = __load_cursor(context['cursor_id'])
+    return cursor.fetchmany(request['size'])
 
 
 def get_comment_table_name(table):

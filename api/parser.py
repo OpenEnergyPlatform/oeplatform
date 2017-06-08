@@ -281,6 +281,8 @@ def parse_expression(d):
                 if 'schema' in d:
                     name = quote(d['schema']) + '.' + name
             return name
+        if d['type'] == 'grouping':
+            return '(' + parse_expression(d['grouping']) + ')'
         if d['type'] == 'star':
             return ' * '
         if d['type'] == 'operator':
