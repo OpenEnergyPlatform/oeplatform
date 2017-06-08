@@ -271,7 +271,7 @@ def parse_from_item(d):
     return s
 
 
-def parse_expression(d):
+def parse_expression(d, separator=', '):
     # TODO: Implement
     if isinstance(d, dict):
         if d['type'] == 'column':
@@ -301,7 +301,7 @@ def parse_expression(d):
             else:
                 return 'null'
     if isinstance(d, list):
-        return ', '.join(parse_expression(x) for x in d)
+        return separator.join(parse_expression(x) for x in d)
     if isinstance(d, str):
         return '\'' + d + '\''
     else:
@@ -315,7 +315,7 @@ def parse_condition(dl):
     if type(dl) == dict:
         dl = [dl]
 
-    return " " + " AND ".join([parse_expression(d) for d in dl])
+    return " " + " AND ".join([parse_expression(d, separator=' AND ') for d in dl])
 
 
 def parse_operator(d):
