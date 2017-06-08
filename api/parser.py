@@ -301,7 +301,7 @@ def parse_expression(d):
             else:
                 return 'null'
     if isinstance(d, list):
-        return '(' + ', '.join(parse_expression(x) for x in d) + ')'
+        return ', '.join(parse_expression(x) for x in d)
     else:
         return d
 
@@ -323,15 +323,10 @@ def parse_condition(dl):
 def parse_operator(d):
     if d['operator'] == 'as':
         return parse_expression(d['labeled']) + " AS " + d['label_name']
-    if d['operator'] == 'function':
-        assert (read_pgid(d['function']))
-        return '{f}({ops})'.format(f=d['function'], ops=', '.join(
-            map(parse_expression, d['operands'])))
     else:
         return "%s %s %s" % (
             parse_expression(d['left']), read_operator(d['operator'], d['right']),
             parse_expression(d['right']))
-    return d
 
 
 def parse_operator_unary(d):
@@ -344,8 +339,13 @@ def parse_modifier_unary(d):
 
 def parse_function(d):
     assert (read_pgid(d['function']))
-    return '{f}({ops})'.format(f=d['function'], ops=', '.join(
-        map(parse_expression, d['operands'])))
+    operand_struc = d['operands']
+    if isinstance(operand_struc, list):
+        operands = ', '.join(map(parse_expression, d['operands']))
+    else:
+        operands = parse_expression(operand_struc)
+
+    return '{f}{ops}'.format(f=d['function'], ops=operands)
 
 
 def cadd(d, key, string=None):
