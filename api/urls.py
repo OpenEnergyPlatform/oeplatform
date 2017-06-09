@@ -12,11 +12,6 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/$', views.Rows.as_view()),
 
-
-    url(r'^v0/advanced/create', views.create_ajax_handler(actions.table_create)),
-    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert)),
-    url(r'^v0/advanced/drop', views.create_ajax_handler(actions.table_drop)),
-    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete)),
     url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search)),
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),
     url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update)),

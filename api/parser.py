@@ -132,8 +132,6 @@ def parse_select(d):
         s += ' ALL'
     elif 'distinct' in d:
         s += ' DISTINCT'
-        if d['distinct']:
-            s += ' (' + ', '.join(map(parse_expression, d)) + ') '
 
     L = []
 
