@@ -1,18 +1,189 @@
-from django.shortcuts import render
-from api import actions
-from django.http import HttpResponse
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django_ajax.decorators import ajax
 import json
 import time
 from decimal import Decimal
 
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
+from django.http import HttpResponse
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
+
+import api.parser
+from api import actions
+from api import parser
+from api.helpers.http import ModHttpResponse
+
+
+class Table(View):
+    """
+    Handels the creation of tables and serves information on existing tables
+    """
+
+    def get(self, request, schema, table):
+        """
+        Returns a dictionary that describes the DDL-make-up of this table.
+        Fields are:
+
+        * name : Name of the table,
+        * schema: Name of the schema,
+        * columns : as specified in :meth:`api.actions.describe_columns`
+        * indexes : as specified in :meth:`api.actions.describe_indexes`
+        * constraints: as specified in
+                    :meth:`api.actions.describe_constraints`
+
+        :param request:
+        :return:
+        """
+        return JsonResponse({
+            'schema': schema,
+            'name': table,
+            'columns': actions.describe_columns(schema, table),
+            'indexed': actions.describe_indexes(schema, table),
+            'constraints': actions.describe_constraints(schema, table)
+        })
+
+    def post(self, request, schema, table):
+        """
+        Changes properties of tables and table columns
+        :param request:
+        :param schema:
+        :param table:
+        :return:
+        """
+
+
+
+        json_data = json.loads(request.body.decode("utf-8"))
+
+        if 'column' in json_data['type']:
+
+            column_definition = api.parser.parse_scolumnd_from_columnd(schema, table, json_data['name'], json_data)
+            result = actions.queue_column_change(schema, table, column_definition)
+            return ModHttpResponse(result)
+
+        elif 'constraint' in json_data['type']:
+
+            # Input has nothing to do with DDL from Postgres.
+            # Input is completely different.
+            # Using actions.parse_sconstd_from_constd is not applicable
+            # dict.get() returns None, if key does not exist
+            constraint_definition = {
+                'action': json_data['action'],  # {ADD, DROP}
+                'constraint_type': json_data.get('constraint_type'),  # {FOREIGN KEY, PRIMARY KEY, UNIQUE, CHECK}
+                'constraint_name': json_data.get('constraint_name'),  # {myForeignKey, myUniqueConstraint}
+                'constraint_parameter': json_data.get('constraint_parameter'),
+                # Things in Brackets, e.g. name of column
+                'reference_table': json_data.get('reference_table'),
+                'reference_column': json_data.get('reference_column')
+            }
+
+            result = actions.queue_constraint_change(schema, table, constraint_definition)
+            return ModHttpResponse(result)
+        else:
+            return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
+
+    def put(self, request, schema, table):
+        """
+        Every request to unsave http methods have to contain a "csrftoken".
+        This token is used to deny cross site reference forwarding.
+        In every request the header had to contain "X-CSRFToken" with the actual csrftoken.
+        The token can be requested at / and will be returned as cookie.
+
+        :param request:
+        :return:
+        """
+
+        # There must be a better way to do this.
+        json_data = json.loads(request.body.decode("utf-8"))
+
+        constraint_definitions = []
+        column_definitions = []
+
+        for constraint_definiton in json_data['constraints']:
+            constraint_definiton.update({"action": "ADD",
+                                         "c_table": table,
+                                         "c_schema": schema})
+            constraint_definitions.append(constraint_definiton)
+        for column_definition in json_data['columns']:
+            column_definition.update({"c_table": table,
+                                      "c_schema": schema})
+            column_definitions.append(column_definition)
+
+        result = actions.table_create(schema, table, column_definitions, constraint_definitions)
+
+        return ModHttpResponse(result)
+
+
+class Index(View):
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        pass
+
+    def put(self, request):
+        pass
+
+
+class Rows(View):
+    def get(self, request, schema, table):
+        columns = request.GET.get('columns')
+        where = request.GET.get('where')
+        orderby = request.GET.get('orderby')
+        limit = request.GET.get('limit')
+        offset = request.GET.get('offset')
+
+        # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
+        # CONNECTORS could be AND, OR
+        # If you connect two values with an +, it will convert the + to a space. Whatever.
+
+        where_clauses = None
+        if where:
+            where_splitted = where.split(' ')
+            where_clauses = [{'first': where_splitted[4 * i],
+                              'operator': where_splitted[4 * i + 1],
+                              'second': where_splitted[4 * i + 2],
+                              'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i in range(int(len(where_splitted) / 4) + 1)]
+
+
+        # TODO: Validate where_clauses. Should not be vulnerable
+        data = {'schema': schema,
+                'table': table,
+                'columns': parser.split(columns, ','),
+                'where': where_clauses,
+                'orderby': parser.split(orderby, ','),
+                'limit': limit,
+                'offset': offset
+                }
+
+        return_obj = actions.get_rows(request, data)
+
+        # TODO: Figure out what JsonResponse does different.
+        response = json.dumps(return_obj, default=date_handler)
+        return HttpResponse(response, content_type='application/json')
+
+    def post(self, request):
+        pass
+
+    def put(self, request, schema, table):
+
+        data = json.loads(request.body.decode("utf-8"))
+
+        column_data = data['columnData']
+
+        for key, value in column_data.items():
+
+            if not parser.is_pg_qual(key): #or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
+                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400, reason="Your request was malformed."), 400)
+
+        result = actions.put_rows(schema, table, column_data)
+
+        return ModHttpResponse(result)
+
+
+class Session(View):
+    def get(self, request, length=1):
+        return request.session['resonse']
+
 
 def date_handler(obj):
     """
@@ -38,6 +209,7 @@ def create_ajax_handler(func):
     :param func: The name of the callable function
     :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
     """
+
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
@@ -50,7 +222,8 @@ def create_ajax_handler(func):
         # This must be done in order to clean the structure of non-serializable
         # objects (e.g. datetime)
         response_data = json.loads(json.dumps(data, default=date_handler))
-        return JsonResponse({'content':response_data}, safe=False)
+        return JsonResponse({'content': response_data}, safe=False)
+
     return execute
 
 

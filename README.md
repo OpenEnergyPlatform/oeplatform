@@ -31,13 +31,15 @@ The second database connection should point to another postgresql database. It i
     dbhost = ""
     db = ""
 
-Make sure that this database has the following extensions installed:
+You have to include a third database, which is used for testing. This database shouldn't include productive data.
+
+Make sure that both databases has the following extensions installed:
       
 * hstore               
 * postgis         
 * postgis_topology
 
-Next step is to migrate the database shema from django to your django database:
+Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
   
