@@ -27,14 +27,18 @@ import geoalchemy2
 
 Base = declarative_base()
 
+
 class ResponsiveException(Exception):
     pass
+
 
 def __response_success():
     return {'success': True}
 
+
 def __response_error(message):
     return {'success': False, 'message':message}
+
 
 class InvalidRequest(Exception):
     pass
@@ -45,6 +49,7 @@ def _get_table(schema, table):
     metadata = MetaData()
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
+
 
 class DataStore(Base):
     __tablename__ = 'ckan_datastore'
@@ -64,6 +69,7 @@ def get_table_resource(schema, table):
         return None
     else:
         return result.first()
+
 
 def table_create(request, context=None):
     # TODO: Authentication
@@ -153,6 +159,7 @@ def table_create(request, context=None):
         session.commit()
     return {'success': True}
 
+
 def data_delete(request, context=None):
     raise NotImplementedError()
 
@@ -210,6 +217,7 @@ def data_update(request, context=None):
         cursor.execute(s)
     return {'affected':len(rows['data'])}
 
+
 def data_insert(request, context=None):
     engine = _get_engine()
     cursor = __load_cursor(context['cursor_id'])
@@ -234,6 +242,7 @@ def data_insert(request, context=None):
                              col.internal_size, col.precision, col.scale,
                              col.null_ok] for col in description]}
 
+
 def process_value(val):
     if isinstance(val,str):
         return "'" + val + "'"
@@ -243,6 +252,7 @@ def process_value(val):
         return 'null'
     else:
         return str(val)
+
 
 def table_drop(request, context=None):
     engine = _get_engine()
@@ -288,6 +298,7 @@ def table_drop(request, context=None):
 
     return {}
 
+
 def data_search(request, context=None):
     engine = _get_engine()
     cursor = __load_cursor(context['cursor_id'])
@@ -298,6 +309,7 @@ def data_search(request, context=None):
     return {'description': [[col.name, col.type_code, col.display_size,
                              col.internal_size, col.precision, col.scale,
                              col.null_ok] for col in description]}
+
 
 
 def _get_count(q):
@@ -313,6 +325,7 @@ def count_all(request, context=None):
     session = sessionmaker(bind=engine)()
     t = _get_table(schema, table)
     return session.query(t).count()#_get_count(session.query(t))
+
 
 def _get_header(results):
     header = []
@@ -359,6 +372,7 @@ def clear_dict(d):
     k.replace(" ", "_"): d[k] if not isinstance(d[k], dict) else clear_dict(
         d[k]) for k in d}
 
+
 def create_meta(schema, table):
 
     meta_schema = get_meta_schema_name(schema)
@@ -396,7 +410,6 @@ def create_meta(schema, table):
             {'schema': meta_schema,
              'table': get_insert_table_name(table)}):
         create_insert_table(meta_schema, table, meta_schema=meta_schema)
-
 
 
 def get_comment_table(db, schema, table):
@@ -476,6 +489,7 @@ def connect():
     insp = sqla.inspect(engine)
     return insp
 
+
 def _get_engine():
     engine = sqla.create_engine(
         'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
@@ -518,7 +532,6 @@ def has_type(request, context=None):
     return result
 
 
-
 def get_table_oid(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_table_oid(engine.connect(),
@@ -528,12 +541,10 @@ def get_table_oid(request, context=None):
     return result
 
 
-
 def get_schema_names(request, context=None):
     engine = _get_engine()
     result = engine.dialect.get_schema_names(engine.connect(), **request)
     return result
-
 
 
 def get_table_names(request, context=None):
@@ -614,6 +625,7 @@ def get_unique_constraints(request, context=None):
                                              **request)
     return result
 
+
 def __get_connection(request):
     # TODO: Implement session-based connection handler
     engine = _get_engine()
@@ -625,6 +637,7 @@ def get_isolation_level(request, context):
     cursor = __load_cursor(context['cursor_id'])
     result = engine.dialect.get_isolation_level(cursor)
     return result
+
 
 def set_isolation_level(request, context):
     level = request.get('level', None)
@@ -761,9 +774,9 @@ def get_edit_table_name(table):
 def get_insert_table_name(table):
     return '_' + table + '_insert'
 
+
 def get_meta_schema_name(schema):
     return '_' + schema
-
 
 
 def create_meta_schema(schema):
