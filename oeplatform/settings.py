@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'colorfield',
     'django_ajax',
     'literature',
+    'axes'
 )
 
 MIDDLEWARE_CLASSES = (
