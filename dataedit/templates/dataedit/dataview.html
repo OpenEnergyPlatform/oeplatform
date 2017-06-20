@@ -189,7 +189,7 @@
             <th>Spatial</th>
             <td>
             {% for row in comment_on_table.spatial %}
-                {{row.extend}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
+                {{row.extent}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
             {% endfor %}</td>
         </tr>
         {% endif %}

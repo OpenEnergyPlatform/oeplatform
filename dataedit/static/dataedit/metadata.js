@@ -48,11 +48,11 @@ function add_spatial($parent, obj){
 
     if('undefined' === typeof obj){
         var obj={};
-        obj.extend='';
+        obj.extent='';
         obj.resolution='';
     }
 
-    add_labeled_textfield($container, 'Extend', prefix+indexes[prefix]+'_extend', obj.extend);
+    add_labeled_textfield($container, 'Extent', prefix+indexes[prefix]+'_extent', obj.extent);
     add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_resolution', obj.resolution);
 };
 
@@ -68,7 +68,7 @@ function add_temporal($parent, obj){
 		obj.resolution='';
     }
 
-    add_labeled_textfield($container, 'Start', prefix+indexes[prefix]+'_start', obj.extend);
+    add_labeled_textfield($container, 'Start', prefix+indexes[prefix]+'_start', obj.extent);
     add_labeled_textfield($container, 'End', prefix+indexes[prefix]+'_end', obj.resolution);
 	add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_resolution', obj.resolution);
 };
