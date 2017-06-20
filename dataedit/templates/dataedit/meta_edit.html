@@ -29,9 +29,11 @@
             <hr>
             {% include 'dataedit/list_field.html' with name='Languages' list=comment_on_table.language id='language'%}
             <hr>
-            {% include 'dataedit/list_field.html' with name='Sources' list=comment_on_table.sources id='sources'%}
-            <hr>
             {% include 'dataedit/list_field.html' with name='Spatial' list=comment_on_table.spatial id='spatial'%}
+			<hr>
+			{% include 'dataedit/list_field.html' with name='Temporal' list=comment_on_table.temporal id='temporal'%}
+			<hr>
+            {% include 'dataedit/list_field.html' with name='Sources' list=comment_on_table.sources id='sources'%}
             <hr>
             {% include 'dataedit/list_field.html' with  name='License' list=comment_on_table.license id='license'%}
             <hr>
