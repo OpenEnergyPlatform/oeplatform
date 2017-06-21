@@ -466,7 +466,7 @@ class DataView(View):
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
 
-class MetaView(View):
+class MetaView(LoginRequiredMixin, View):
     """
 
     """
