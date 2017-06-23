@@ -122,7 +122,6 @@ def read_bibtexfile(bibtex_file):
         props['entry_types_id'] = get_bibtype_id(ent['ENTRYTYPE'])
 
         en = ref.Entry(**props)
-        print(en.entry_types_id.label)
         sess.add(en)
     sess.commit()
     sess.close()

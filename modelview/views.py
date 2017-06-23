@@ -158,7 +158,6 @@ class FSAdd(LoginRequiredMixin, View):
             c_study,f_study = getClasses('studie')
             formstudy = processPost(request.POST,  c_study, f_study, files=request.FILES, pk=pk)
             errorsStudy=[]
-            print(request.POST['new'])
             if request.POST['new'] == 'True':
                 if formstudy.is_valid():
                     n=formstudy.save()

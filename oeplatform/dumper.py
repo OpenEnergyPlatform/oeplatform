@@ -45,12 +45,10 @@ for schema in insp.get_schema_names():
                      sec.dbname, '-F', 'd', '-f',
                      sec.datarepowc + schema + '/' + table, '-t',
                      schema + '.' + table, '-w', ]
-                print(L)
                 call(L)
                 L=['tar', '-zcf',
                    sec.datarepowc + schema + '/' +table + '.tar.gz',  '-C', sec.datarepowc + schema + '/',
                       table+'/']
-                print(L)
                 call(L)
                 L= ['rm', '-r', sec.datarepowc + schema + '/' + table]
 

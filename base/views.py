@@ -35,10 +35,12 @@ class ContactView(View):
             return render(request, 'base/contact.html', {'form': form,
                                                          'success': False})
     def get(self, request):
-        print(ContactForm().as_table())
         return render(request, 'base/contact.html',
                       {'form': ContactForm(), 'success': False})
 
+
+def robot(request):
+    return render(request,'base/robots.txt', {}, content_type='text/plain')
 
 def handler500(request):
     response = render(request,'base/500.html', {})
