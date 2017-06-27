@@ -18,6 +18,8 @@ def read_pgvalue(x):
     # TODO: Implement check for valid values
     if isinstance(x,str):
         return "'" + x + "'"
+    elif isinstance(x,int):
+        return str(x)
     if x is None:
         return 'null'
     return x

@@ -318,12 +318,21 @@ function get_field_query(field){
         column: field.id
     };
 
-    if(field.attributes.type.startsWith('geometry')){
+    if (field.attributes.type.startsWith('geometry')) {
+       // transform coordinates from whatever format they're in
+       //   into epsg 4326, i.e. latitude and longitude
+        column_query = {
+            type: "function",
+            function: "ST_Transform",
+            operands: [column_query, {type: "value", value: 4326}],
+            as: field.id
+        };
+        // convert geo-data in readable geo-json
         column_query = {
             type: 'function',
             function: 'ST_AsGeoJSON',
             operands: [column_query],
-            as:field.id
+            as: field.id
         };
     }
     return column_query;
