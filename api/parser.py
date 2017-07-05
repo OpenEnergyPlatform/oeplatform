@@ -12,6 +12,12 @@ def is_pg_qual(x):
     return pgsql_qualifier.search(x)
 
 
+def quote(x):
+    if not x.startswith('"') and '(' not in x:
+        return '"' + x + '"'
+    else:
+        return x
+
 def read_pgvalue(x):
     # TODO: Implement check for valid values
     if isinstance(x,str):
@@ -268,7 +274,7 @@ def parse_from_item(d):
 def parse_expression(d):
     # TODO: Implement
     if d['type'] == 'column':
-        return d['column']
+        return quote(d['column'])
     if d['type'] == 'star':
         return ' * '
     if d['type'] == 'operator':

@@ -1,6 +1,26 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
+{% block content-right %}
+    {% if label == 'Model' %}
+
+    {% elif label == 'Framework'  %}
+
+    {% elif label == 'Scenario' %}
+
+    {% endif %}
+{% endblock %}
+
 {% block content %}
+<h3>{{label}} Factsheets</h3>
+
+{% if label == 'Model' %}
+
+{% elif label == 'Framework'  %}
+
+{% elif label == 'Scenario' %}
+
+{% endif %}
+
 <div class="list-group">
 {% for id, name in models %}
     <a class="list-group-item" href="{{id}}">{{ name }}</a>

@@ -1,30 +1,26 @@
+{% load dataedit.metadata %}
 <table style="width:100%">
     <tr><td><label for="{{id}}_container">{{name}}</label></td></tr>
     <tr>
-        <td style="width:150px"/>
         <td>
             <div id="{{id}}_container">
-                {% for ref in list %}
-                    <div id="{{id}}_wrapper_{{forloop.counter}}">
-                        <table  style="width:100%">
-                            <tr>
-                                <td class="form-group">
-                                    <input class="form-control" name="{{id}}_{{forloop.counter}}" id="{{id}}_{{forloop.counter}}" value="{{ref}}"/>
-                                </td>
-                                <td>
-                                    <a onclick="$('#{{id}}_wrapper_{{forloop.counter}}').remove();"><span class="glyphicon glyphicon-minus-sign"/></a>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                        {% if forloop.last %}
-                        <script type="javascript/text">
-                            {{id}}_counter={{ forloop.counter }};
-                        </script>
-                    {% endif %}
-                {% endfor %}
+                 <script type="text/javascript">
+                    {% for ref in list %}
+                    var obj={
+                        {% if ref|is_dict %}
+                            {% for key,val in ref.items %}
+                                {{key}}:"{{val}}",
+                            {% endfor %}
+                        {% else %}
+                                {{id}}:"{{ref}}",
+                        {% endif %}
+                    };
+                    add_{{id}}($('#{{id}}_container'),obj);
+                    {% endfor %}
+
+                 </script>
             </div>
-            <a onclick="add_list_field('{{id}}')">Add</a>
+            <a onclick="add_{{id}}($('#{{id}}_container'))">Add</a>
         </td>
     </tr>
 

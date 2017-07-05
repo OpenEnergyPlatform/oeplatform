@@ -12,6 +12,10 @@
 		<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
 		<script type="text/javascript" src="/static/admin/js/SelectBox.js"></script>
 		<script type="text/javascript" src="/static/admin/js/SelectFilter2.js"></script>
+        <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
+        <title>
+            OEP{% block title %}{% endblock %}
+        </title>
         <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
         <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
     </head>
@@ -21,7 +25,12 @@
         <nav class="navbar navbar-default navbar-fixed-top">
           <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
-              <a class="navbar-brand" href="/">OpenEnergy Platform</a>
+                  <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
+                    <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
+                  </div>
+              <a class="navbar-brand" href="/">
+
+                  OpenEnergy Platform</a>
             </div>
             <ul class="nav navbar-nav">
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
@@ -29,26 +38,34 @@
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
+                        <li> <a href="/factsheets/overview/">Overview</a> </li>
                         <li> <a href="/factsheets/models/">Models</a> </li>
                         <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
-                </ul>
+                    </ul>
+                </li>
                 <li class="inactive"><a href="/literature/">Literature</a></li>
-
                 <li class="inactive">
-                    <a href="https://github.com/openego/oeplatform/issues" target="_blank">
-                        Discussion {% bootstrap_icon "new-window" %}
+                    <a href="/discussion" target="_blank">
+                        Discussion
                     </a>
                 </li>
-                <li class="inactive"><a href="http://wiki.openmod-initiative.org/wiki/Main_Page">Wiki</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
+                    <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Main_Page" target="_blank">OpenMod Wiki {% bootstrap_icon "new-window" %}</a> </li>
+                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary {% bootstrap_icon "new-window" %}</a> </li>
+                    </ul>
+                </li>
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
           {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
-            <div style="float: right;background:inherit">
-                <a class="btn" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
-                <a class="btn" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+            <div class="btn profile-bar">
+                <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
+                <a class="btn-logout" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
 
           {% else %}
@@ -76,10 +93,11 @@
                         <div class="panel-body">
                             <div>
                                 <p>
-                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>.<br>You can also fork the project and contribute yourself.
+                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                                    You can also fork the project and get involved.
                                 </p>
                                 <p>
-                                    <b> Please mention that the platform is still under discussion and therefore the design of this page is still highly volatile!.</b>
+                                    <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
                                 </p>
                             </div>
                             <div>
@@ -90,7 +108,23 @@
                 </div>
 
             </div>
+
+            <nav class="navbar navbar-default  navbar-fixed-bottom">
+                  <div class="container-fluid" style="width:80%; float:left;">
+                    <ul class="nav navbar-nav">
+                        <li class="inactive"><a href="/about/">About us</a></li>
+                        <li class="inactive"><a href="/faq/">FAQ</a></li>
+                        <li class="inactive"><a href="/contact/">Contact us</a></li>
+                        <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
+                        <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
+                        <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
+                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
+                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
+                    </ul>
+                  </div>
+            </nav>
         </div>
+
 </body>
     
 </html>

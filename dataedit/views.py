@@ -33,6 +33,7 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
+from operator import add
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -48,6 +49,7 @@ schema_whitelist = [
     "scenario",
     "weather",
     # "model_draft",
+    "openstreetmap",
     "reference",
     "workshop"
 ]
@@ -174,82 +176,127 @@ def _type_json(json_obj):
 pending_dumps = {}
 
 
-def create_dump(schema, table, rev_id, name):
-    if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
-    if not os.path.exists(
-                    sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                    schema=schema)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                 schema=schema))
-    L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
-         '--revision=' + rev_id, '-q',
-         sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
+class RevisionView(View):
+    def get(self, request, schema, table):
+        revisions = TableRevision.objects.filter(schema=schema, table=table)
+        return render(request,
+               'dataedit/dataedit_revision.html',{
+               'schema': schema,
+                'table': table,
+                'revisions': revisions})
+
+    def post(self, request, schema, table, date=None):
+        """
+        This method handles an ajax request for a data revision of a specific table.
+        On success the TableRevision-object will be stored to mark that the corresponding
+        revision is available.
+
+        :param request:
+        :param schema:
+        :param table:
+        :param date:
+        :return:
+        """
+
+
+        date = time.strftime('%Y-%m-%d %H:%M:%S')
+        fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
+
+        print(date)
+
+        original = True  # marks whether this method initialised the revision creation
+
+        # If some user already requested this dataset wait for this thread to finish
+        if (schema, table, date) in pending_dumps:
+            t = pending_dumps[(schema, table, date)]
+            original = False
+        else:
+            t = threading.Thread(target=create_dump,
+                                 args=(schema, table, fname))
+            t.start()
+            pending_dumps[(schema, table, date)] = t
+
+        while t.is_alive():
+            time.sleep(10)
+
+        pending_dumps.pop((schema, table, date))
+        if original:
+            path = '/dumps/{schema}/{table}/{fname}.dump'.format(
+                fname=fname, schema=schema, table=table)
+            size = os.path.getsize(sec.MEDIA_ROOT + path)
+            rev = TableRevision(schema=schema, table=table, date=date, path='/media' + path, size=size)
+            rev.save()
+        return self.get(request, schema, table)
+
+
+def get_dependencies(schema, table, found=None):
+    if not found:
+        found = {(schema, table)}
+
+    query = 'SELECT DISTINCT \
+        ccu.table_name AS foreign_table, \
+        ccu.table_schema AS foreign_schema \
+        FROM  \
+        information_schema.table_constraints AS tc \
+        JOIN information_schema.constraint_column_usage AS ccu \
+          ON ccu.constraint_name = tc.constraint_name \
+        WHERE constraint_type = \'FOREIGN KEY\' AND tc.table_schema=\'{schema}\'\
+        AND tc.table_name=\'{table}\';'.format(schema=schema, table=table)
+
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.execute(query)
+    found_new = {(row.foreign_schema, row.foreign_table) for row in result
+                 if (row.foreign_schema, row.foreign_table) not in found}
+    found = found.union(found_new)
+    found.add((schema, table))
+    session.close()
+    for s,t in found_new:
+        found = found.union(get_dependencies(s,t,found))
+
+    return found
+
+
+def create_dump(schema, table, fname):
+    assert re.match(actions.pgsql_qualifier,table)
+    assert re.match(actions.pgsql_qualifier, schema)
+    for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
+        if not os.path.exists(sec.MEDIA_ROOT + path):
+            os.mkdir(sec.MEDIA_ROOT + path)
+    L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
+         str(sec.dbport), '-d', sec.dbname, '-f',
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
+    print(' '.join(L))
     return call(L, shell=False)
 
 
-def send_dump(rev_id, schema, table):
-    path = sec.MEDIA_ROOT + '/dumps/{rev}/{schema}/{table}.tar.gz'.format(
-        rev=rev_id, schema=schema, table=table)
+def send_dump(schema, table, fname):
+    path = sec.MEDIA_ROOT + '/dumps/{schema}/{table}/{fname}.dump'.format(
+        fname=fname, schema=schema, table=table)
     f = FileWrapper(open(path, "rb"))
     response = HttpResponse(f,
-                            content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
+                            content_type='application/x-gzip')
 
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        '{table}.tar.gz'.format(table=table))
+        '{schema}_{table}_{date}.tar.gz'.format(date=fname, schema=schema, table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
     return response
 
 
-def show_revision(request, schema, table, rev_id):
+def show_revision(request, schema, table, date):
     global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table,
-                                    revision=rev_id)
+                                    date=date)
     rev.last_accessed = timezone.now()
     rev.save()
-    return send_dump(rev_id, schema, table)
-
-@ajax
-def request_revision(request, schema, table, rev_id):
-    """
-    This method handles an ajax request for a data revision of a specific table.
-    On success the TableRevision-object will be stored to mark that the corresponding
-    revision is available.
-
-    :param request:
-    :param schema:
-    :param table:
-    :param rev_id:
-    :return:
-    """
-
-    fname = "{schema}/{table}.tar.gz".format(schema=schema,
-                                             table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
-
-    original = True # marks whether this method initialised the revision creation
-
-    # If some user already requested this dataset wait for this thread to finish
-    if (schema, table, rev_id) in pending_dumps:
-        t = pending_dumps[(schema, table, rev_id)]
-        original = False
-    else:
-        t = threading.Thread(target=create_dump,
-                             args=(schema, table, rev_id, fname))
-        t.start()
-        pending_dumps[(schema, table, rev_id)] = t
-
-    while t.is_alive():
-        time.sleep(10)
-
-    pending_dumps.pop((schema, table, rev_id))
-    if original:
-        rev = TableRevision(revision=rev_id, schema=schema, table=table)
-        rev.save()
-    return {}
-
+    return send_dump(schema, table, date)
 
 @login_required(login_url='/login/')
 def tag_overview(request):
@@ -340,7 +387,6 @@ def add_tag(name, color):
     session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
     session.commit()
 
-
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -365,21 +411,7 @@ class DataView(View):
         db = sec.dbname
         actions.create_meta(schema, table)
 
-        comment_on_table = actions.get_comment_table(db, schema, table)
-        comment_columns = {d["name"]: d for d in comment_on_table[
-            "Table fields"]} if "Table fields" in comment_on_table else {}
-
-        if 'error' in comment_on_table:
-            comment_on_table['Notes'] = [comment_on_table['content']]
-
-        comment_on_table = OrderedDict(
-            [(label, comment_on_table[key]) for key, label in
-             COMMENT_KEYS
-             if key in comment_on_table])
-
-        columns = actions.get_columns({'schema': schema, 'table': table})
-        has_row_comments = '_comment' in {col['name'] for col in columns if
-                                          'name' in col}
+        comment_on_table = load_comments(schema, table)
 
         revisions = []
         try:
@@ -401,9 +433,7 @@ class DataView(View):
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
-                          'has_row_comments': has_row_comments,
                           'comment_on_table': dict(comment_on_table),
-                          'comment_columns': comment_columns,
                           'revisions': revisions,
                           'kinds': ['table', 'map', 'graph'],
                           'table': table,
@@ -448,21 +478,8 @@ class MetaView(View):
         :param table: Name of a table
         :return: Renders a form that contains a form with the tables metadata
         """
-        db = sec.dbname
-        comment_on_table = actions.get_comment_table(db, schema, table)
-        columns = actions.analyze_columns(db, schema, table)
-        if 'error' in comment_on_table:
-            comment_on_table = {'Notes':[comment_on_table['content']]}
-        comment_on_table = {k.replace(' ', '_'): v for (k, v) in comment_on_table.items()}
-        if 'Column' not in comment_on_table:
-            comment_on_table['Column'] = []
-        commented_cols = [col['Name'] for col in comment_on_table['Column']]
-        for col in columns:
-            if not col['id'] in commented_cols:
-                comment_on_table['Column'].append({
-                    'Name':col['id'],
-                    'Description': '',
-                    'Unit': ''})
+
+        comment_on_table = load_comments(schema, table)
 
         return render(request, 'dataedit/meta_edit.html',{
             'schema': schema,
@@ -481,19 +498,11 @@ class MetaView(View):
         :return: Redirects to the view of the specified table
         """
         columns = actions.analyze_columns(sec.dbname, schema, table)
-        comment = {
-            'Name': request.POST['name'],
-            'Source': self._load_url_list(request, 'source'),
-            'Reference date': self._load_list(request, 'ref_date'),
-            'Date of Collection': self._load_list(request, 'date_col'),
-            'Spatial Resolution': self._load_list(request, 'spat_res'),
-            'Licence': self._load_url_list(request, 'licence'),
-            'Description': self._load_list(request, 'descr'),
-            'Column': self._load_col_list(request, columns),
-            'Changes':[],
-            'Notes': self._load_list(request, 'notes'),
-            'Instructions for proper use': self._load_list(request, 'instr'),
-        }
+
+
+        comment = load_meta(request.POST)
+        print(json.dumps(comment, indent=2))
+
         engine = actions._get_engine()
         conn = engine.connect()
         trans = conn.begin()
@@ -675,3 +684,116 @@ class SearchView(View):
         ret = [{'schema': r.schema, 'table':r.table} for r in results]
         return render(request, 'dataedit/search.html', {'results': ret, 'tags':get_all_tags(), 'selected': filter_tags})
 
+
+"""
+Metadata handler
+"""
+
+
+def load_comments(schema, table):
+    comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
+    columns = actions.analyze_columns(sec.dbname, schema, table)
+    try:
+        if 'error' in comment_on_table:
+            comment_on_table = {'description': [comment_on_table['content']], 'fields': []}
+            commented_cols = []
+        elif 'resources' not in comment_on_table:
+            comment_on_table = {
+                'title': comment_on_table['Name'],
+                'description': "; ".join(comment_on_table['Description']),
+                'language': [],
+                'reference_date': comment_on_table['Reference date'],
+                'sources': [
+                    {'name': x['Name'], 'description': '', 'url': x['URL'], 'license': ' ', 'copyright': ' '} for x in comment_on_table['Source']],
+                'spatial': [
+                    {'extend': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+                'license': [
+                    {'id': '',
+                    'name': x,
+                    'version': '',
+                    'url': '',
+                    'instruction': '',
+                    'copyright': ''} for x in comment_on_table['Licence']],
+                'contributors': [
+                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'], 'comment': x['Comment']} for x in comment_on_table['Changes']],
+                'resources': [{
+                    'schema': {
+                        'fields': [
+                            {'name': x['Name'], 'description': x['Description'], 'unit': x['Unit'] } for x in comment_on_table['Column']]},
+                    'meta_version': '1.2' }] }
+
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema']['fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+        else:
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                'fields']
+
+            if 'fields' not in comment_on_table['resources'][0]['schema']:
+                comment_on_table['fields'] = []
+            else:
+                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                    'fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+    except Exception as e:
+        print(e)
+        comment_on_table = {'description': comment_on_table, 'fields': []}
+        commented_cols = []
+
+    for col in columns:
+        if not col['id'] in commented_cols:
+            comment_on_table['fields'].append({
+                'name': col['id'],
+                'description': '',
+                'unit': ''})
+
+    return comment_on_table
+
+def load_sources(x):
+    return {"name": x['name'], "description": x['description'], "url": x['url'],
+            "license": x['license'], "copyright": x['copyright']}
+
+def load_language(x):
+    return x['']
+
+def load_spatial(x):
+    return {"extend": x['extend'], "resolution": x['resolution']}
+
+
+def load_contributors(x):
+    return {"name": x['name'], "email": x['email'], "date": x['date'],
+            "comment": x['comment']}
+
+
+def load_license(x):
+    return {"id": x['id'],
+            "name": x['name'],
+            "version": x['version'],
+            "url": x['url'],
+            "instruction": x['instruction'],
+            "copyright": x['copyright']}
+
+
+def load_field(x):
+    return {"name": x['name'],
+            "description": x['description'],
+            "unit": x['unit']}
+
+
+def load_meta(c):
+    d = {
+        'title': c['title'],
+        'description': c['description'],
+        'reference_date': c['reference_date'],
+    }
+
+
+    for prefix, f, props in [('language', load_language,1),('sources', load_sources,5), ('spatial', load_spatial,2), ('license', load_license,6), ('contributors', load_contributors,4), ('field', load_field, 3)]:
+        count = len([(k,c[k]) for k in c if k.startswith(prefix)])//props
+        d[prefix] = [f({k[len('%s%d'%(prefix,i+1))+1:]:c[k] for k in c if k.startswith('%s%d'%(prefix,i+1))}) for i in range(count)]
+
+    d['resources'] = [{'schema':{'fields':d['field']}, 'meta_version': '1.2'}]
+    del d['field']
+
+    return d

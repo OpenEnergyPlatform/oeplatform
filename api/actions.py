@@ -5,7 +5,7 @@ import json
 import traceback
 
 from api import parser
-from api.parser import is_pg_qual, read_bool, read_pgid
+from api.parser import is_pg_qual, read_bool, read_pgid, quote
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -324,12 +324,13 @@ def analyze_columns(db, schema, table):
             schema=schema, table=table))
     return [{'id':r['id'],'type':r['type']} for r in result]
 
+
 def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
     if not fields:
         fields = '*'
     else:
-        fields = ', '.join(fields)
+        fields = ', '.join(map(quote(fields)))
     engine = _get_engine()
     connection = engine.connect()
     refs = connection.execute(references.Entry.__table__.select())
@@ -396,7 +397,6 @@ def get_comment_table(db, schema, table):
 
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table)
-
     res = connection.execute(sql_string)
     if res:
         jsn = res.first().obj_description

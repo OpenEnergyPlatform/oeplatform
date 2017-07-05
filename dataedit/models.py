@@ -1,17 +1,19 @@
 from django.db import models
-from django.db.models import CharField, DateTimeField
+from django.db.models import CharField, DateTimeField, IntegerField
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from colorfield.fields import ColorField
-
+from datetime import datetime
 
 # Create your models here.
 
 class TableRevision(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    revision = CharField(max_length=1000, null=False)
+    date = DateTimeField(max_length=1000, null=False, default=datetime.now)
     created = DateTimeField(null=False, default=timezone.now)
+    path = CharField(max_length=1000, null=False)
+    size = IntegerField(null=False)
     last_accessed = DateTimeField(null=False, default=timezone.now)
 
 

@@ -1,0 +1,26 @@
+.metacontainer{
+    border-color:rgb(32, 80, 128);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 5px;
+}
+
+.metacontainer-header{
+    background:rgb(32, 80, 128);
+    border-top-radius: 5px;
+    padding-right:2px;
+    text-align:right;
+}
+
+.metaformframe{
+   padding:5px;
+}
+
+.metaproperty{
+    font-weight: bold;
+    margin-right:10px;
+}
+
+.metavalue{
+   width:100%
+}

@@ -5,8 +5,10 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
-import mwclient as mw
+from django.contrib.auth.models import User
 from api import actions
+import requests
+import json
 
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -19,7 +21,7 @@ def addcontenttypes():
     """
     Insert all schemas that are present in the external database specified in
     oeplatform/securitysettings.py in the django_content_type table. This is
-    important for the Group-Permission-Management. 
+    important for the Group-Permission-Management.
     """
     insp = actions.connect()
     engine = actions._get_engine()
@@ -31,14 +33,14 @@ def addcontenttypes():
             query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=schema.schemaname)
             table = conn.execute(query)
             for tab in table:
-                _create_tableperm(schema=schema.schemaname, table=tab.tables)            
-      
+                _create_tableperm(schema=schema.schemaname, table=tab.tables)
+
 
 def _create_tableperm(schema, table):
     """
     Create Content Type and Permissions for the given schema and table
     :param schema: Name of the schema
-    :param table: Name of the table  
+    :param table: Name of the table
     """
     ContentType.objects.get_or_create(app_label=schema, model=table)
     ct_add = ContentType.objects.get(app_label=schema, model=table)
@@ -50,7 +52,7 @@ def _create_tableperm(schema, table):
                                                 content_type=ct_add)
     p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=schema, t=table),
                                                 codename='delete_{s}_{t}'.format(s=schema, t=table),
-                                                content_type=ct_add) 
+                                                content_type=ct_add)
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
@@ -81,7 +83,7 @@ class myuser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     groupadmin = models.ManyToManyField(Group)
-    
+
     USERNAME_FIELD = 'name'
 
     REQUIRED_FIELDS = [name]
@@ -107,7 +109,7 @@ class myuser(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         """
-        Returns the authorization for a specific shema. 
+        Returns the authorization for a specific shema.
         """
         if self.is_admin:
             return True
@@ -120,13 +122,13 @@ class myuser(AbstractBaseUser, PermissionsMixin):
             except PermissionDenied:
                 return False
         return False
-    
+
     def has_write_permissions(self, schema, table):
         """
         This function returns the authorization given the schema and table.
         """
         return self.has_perm('{schema}.{table}'.format(schema=schema, table=table))
-    
+
     def get_all_avail_perms(self):
         """
         Returns all available permissons by user(tableowner)
@@ -145,13 +147,13 @@ class myuser(AbstractBaseUser, PermissionsMixin):
             i+1
         result = Permission.objects.filter(content_type_id__in=ct_ids)
         return result
-        
+
     def get_full_name(self):
         return self.name
 
     def get_short_name(self):
         return self.name
-    
+
     def __str__(self):  # __unicode__ on Python 2
         return self.name
 
@@ -161,14 +163,22 @@ class myuser(AbstractBaseUser, PermissionsMixin):
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
-        site = mw.Site(("http","wiki.openmod-initiative.org"),"/")
-        print("Login using wiki interface")
-        try:
-            site.login(username, password)
-        except mw.errors.LoginError:
-            return None
-        else:
+        url = 'https://wiki.openmod-initiative.org/api.php?action=login'
+        data = {'format':'json', 'lgname':username}
+
+        #A first request to receive the required token
+        token_req = requests.post(url, data)
+        data['lgpassword'] = password
+        data['lgtoken'] = token_req.json()['login']['token']
+
+        # A second request for the actual authentication
+        login_req = requests.post(url, data, cookies=token_req.cookies)
+
+        if login_req.json()['login']['result'] == 'Success':
             return myuser.objects.get_or_create(name=username)[0]
+        else:
+            return None
+
 
     def get_user(self, user_id):
         try:
