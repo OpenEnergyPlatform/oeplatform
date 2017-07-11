@@ -34,6 +34,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
 from operator import add
+from dataedit.models import Table
+
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -430,6 +432,10 @@ class DataView(View):
         except:
             revisions = []
 
+        is_admin = False
+        if request.user:
+            is_admin = request.user.has_admin_permission(schema, table)
+
         return render(request,
                       'dataedit/dataedit_overview.html',
                       {
@@ -438,7 +444,8 @@ class DataView(View):
                           'kinds': ['table', 'map', 'graph'],
                           'table': table,
                           'schema': schema,
-                          'tags': tags
+                          'tags': tags,
+                          'is_admin': is_admin
                       })
 
     def post(self, request, schema, table):

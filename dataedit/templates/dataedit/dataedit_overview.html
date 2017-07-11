@@ -12,6 +12,11 @@
                 <td>
                     <a href="{{table}}/download" class="glyphicon glyphicon-download-alt"> </a>
                 </td>
+                {% if is_admin and schema=='model_draft'%}
+                <td>
+                    <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
+                </td>
+                {% endif %}
             </tr>
         </table>
 

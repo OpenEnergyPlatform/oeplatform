@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
@@ -15,7 +15,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
-
+import dataedit.models as datamodels
 
 def addcontenttypes():
     """
@@ -42,8 +42,7 @@ def _create_tableperm(schema, table):
     :param schema: Name of the schema
     :param table: Name of the table
     """
-    ContentType.objects.get_or_create(app_label=schema, model=table)
-    ct_add = ContentType.objects.get(app_label=schema, model=table)
+    ct_add, _ = ContentType.objects.get_or_create(app_label=schema, model=table)
     p_add = Permission.objects.get_or_create(name='Can add data in {s}.{t} '.format(s=schema, t=table),
                                              codename='add_{s}_{t}'.format(s=schema, t=table),
                                              content_type=ct_add)
@@ -53,6 +52,7 @@ def _create_tableperm(schema, table):
     p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=schema, t=table),
                                                 codename='delete_{s}_{t}'.format(s=schema, t=table),
                                                 content_type=ct_add)
+
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
@@ -75,14 +75,50 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class myuser(AbstractBaseUser, PermissionsMixin):
+
+class PermissionHolder:
+    permissions = models.ManyToManyField(datamodels.Table,
+                                         related_name='writers')
+
+
+    def has_write_permissions(self, schema, table):
+        """
+        This function returns the authorization given the schema and table.
+        """
+        return self.permissions.get(name=schema, schema__name=schema).exists()
+
+    def has_delete_permissions(self, schema, table):
+        """
+        This function returns the authorization given the schema and table.
+        """
+        return self.permissions.get(name=schema, schema__name=schema).exists()
+
+    def has_admin_permissions(self, schema, table):
+        """
+        This function returns the authorization given the schema and table.
+        """
+        return self.permissions.get(name=schema, schema__name=schema).exists()
+
+class UserGroup(PermissionHolder):
+    pass
+
+
+class Permission(models.Model):
+    table = models.ForeignKey(datamodels.Table, primary_key=True)
+    user = models.ForeignKey(myuser, primary_key=True, related_name='permissions')
+    group = models.ForeignKey(Group, primary_key=True, related_name='permissions')
+    permission = models.IntegerField(choices=((0,'None'), (1,'Write'),
+                                              (2,'Delete'), (3,'Admin')))
+
+
+class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50, null=True)
     mail_address = models.EmailField(verbose_name='email address',
                                      max_length=255, unique=True, )
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    groupadmin = models.ManyToManyField(Group)
+    groupadmin = models.ManyToManyField(UserGroup)
 
     USERNAME_FIELD = 'name'
 
@@ -90,63 +126,6 @@ class myuser(AbstractBaseUser, PermissionsMixin):
 
     if sec.DEBUG:
         objects = UserManager()
-
-    def has_perm(self, perm, obj=None):
-        """
-        Returns the authorization for a specific perm
-        """
-        if self.is_admin:
-            return True
-        for backend in auth.get_backends():
-            if not hasattr(backend, 'has_perm'):
-                continue
-            try:
-                if backend.has_perm(self, perm, obj):
-                    return True
-            except PermissionDenied:
-                return False
-        return False
-
-    def has_module_perms(self, app_label):
-        """
-        Returns the authorization for a specific shema.
-        """
-        if self.is_admin:
-            return True
-        for backend in auth.get_backends():
-            if not hasattr(backend, 'has_module_perms'):
-                continue
-            try:
-                if backend.has_module_perms(self, app_label):
-                    return True
-            except PermissionDenied:
-                return False
-        return False
-
-    def has_write_permissions(self, schema, table):
-        """
-        This function returns the authorization given the schema and table.
-        """
-        return self.has_perm('{schema}.{table}'.format(schema=schema, table=table))
-
-    def get_all_avail_perms(self):
-        """
-        Returns all available permissons by user(tableowner)
-        """
-        insp = actions.connect()
-        engine = actions._get_engine()
-        conn = engine.connect()
-        query = 'SELECT schemaname, tablename as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\')AND tablename NOT LIKE \'%%\\_%%\';'.format(user=sec.dbuser)
-        res = conn.execute(query)
-        ct_ids = list()
-        i=0
-        for schema in res:
-            ct_add = ContentType.objects.get(app_label=schema.schemaname, model=schema.tables)
-            #ct_ids=ct_ids+'{id},'.format(id=ct_add.id)
-            ct_ids.insert(i, ct_add.id)
-            i+1
-        result = Permission.objects.filter(content_type_id__in=ct_ids)
-        return result
 
     def get_full_name(self):
         return self.name
@@ -160,6 +139,7 @@ class myuser(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
+
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
@@ -190,4 +170,3 @@ class UserBackend(object):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-
