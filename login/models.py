@@ -17,6 +17,11 @@ from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
 import dataedit.models as datamodels
 
+NO_PERM = 0
+WRITE_PERM = 4
+DELETE_PERM = 8
+ADMIN_PERM = 12
+
 def addcontenttypes():
     """
     Insert all schemas that are present in the external database specified in
@@ -76,8 +81,8 @@ class UserManager(BaseUserManager):
         return user
 
 
-class PermissionHolder:
-    permissions = models.ManyToManyField(datamodels.Table,
+class PermissionHolder(models.Model):
+    on_tables = models.ManyToManyField(datamodels.Table,
                                          related_name='writers')
 
 
@@ -85,30 +90,41 @@ class PermissionHolder:
         """
         This function returns the authorization given the schema and table.
         """
-        return self.permissions.get(name=schema, schema__name=schema).exists()
+        return self.__get_perm(schema, table) >= WRITE_PERM
 
     def has_delete_permissions(self, schema, table):
         """
         This function returns the authorization given the schema and table.
         """
-        return self.permissions.get(name=schema, schema__name=schema).exists()
+        return self.__get_perm(schema, table) >= DELETE_PERM
 
     def has_admin_permissions(self, schema, table):
         """
         This function returns the authorization given the schema and table.
         """
-        return self.permissions.get(name=schema, schema__name=schema).exists()
+        return self.__get_perm(schema, table) >= ADMIN_PERM
+
+    def __get_perm(self, schema, table):
+        return self.permissions.get(table__name=schema,
+                                    table__schema__name=schema).permission
+
 
 class UserGroup(PermissionHolder):
     pass
 
 
 class Permission(models.Model):
-    table = models.ForeignKey(datamodels.Table, primary_key=True)
-    user = models.ForeignKey(myuser, primary_key=True, related_name='permissions')
-    group = models.ForeignKey(Group, primary_key=True, related_name='permissions')
-    permission = models.IntegerField(choices=((0,'None'), (1,'Write'),
-                                              (2,'Delete'), (3,'Admin')))
+    table = models.ForeignKey(datamodels.Table)
+    holder = models.ForeignKey(PermissionHolder,
+                               related_name='permissions')
+    permission = models.IntegerField(choices=((NO_PERM, 'None'),
+                                              (WRITE_PERM, 'Write'),
+                                              (DELETE_PERM, 'Delete'),
+                                              (ADMIN_PERM, 'Admin')),
+                                     default=NO_PERM)
+
+    class Meta:
+        unique_together = (('table', 'holder'),)
 
 
 class myuser(AbstractBaseUser, PermissionHolder):

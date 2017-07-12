@@ -30,7 +30,7 @@ class GroupUserForm(forms.ModelForm):
         model = OepUser
         fields = ('groupmembers',)
     
-    groupmembers = forms.ModelMultipleChoiceField(queryset=OepUser.objects.filter(is_superuser=False).filter(is_admin=False), 
+    groupmembers = forms.ModelMultipleChoiceField(queryset=OepUser.objects,
                                                   widget=FilteredSelectMultiple("Members", is_stacked=False), 
                                                   required=False,)
     
