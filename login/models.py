@@ -81,9 +81,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class PermissionHolder(models.Model):
-    on_tables = models.ManyToManyField(datamodels.Table,
-                                         related_name='writers')
+class PermissionHolder():
 
 
     def has_write_permissions(self, schema, table):
@@ -105,19 +103,18 @@ class PermissionHolder(models.Model):
         return self.__get_perm(schema, table) >= ADMIN_PERM
 
     def __get_perm(self, schema, table):
-        return self.permissions.get(table__name=schema,
+        return self.permissions.get(table__name=table,
                                     table__schema__name=schema).permission
 
 
-class UserGroup(PermissionHolder):
+class UserGroup(Group, PermissionHolder):
     pass
 
 
-class Permission(models.Model):
-    table = models.ForeignKey(datamodels.Table)
-    holder = models.ForeignKey(PermissionHolder,
-                               related_name='permissions')
-    permission = models.IntegerField(choices=((NO_PERM, 'None'),
+class TablePermission(models.Model):
+    table = models.ForeignKey(datamodels.Table, to_field='id')
+
+    level = models.IntegerField(choices=((NO_PERM, 'None'),
                                               (WRITE_PERM, 'Write'),
                                               (DELETE_PERM, 'Delete'),
                                               (ADMIN_PERM, 'Admin')),
@@ -125,6 +122,7 @@ class Permission(models.Model):
 
     class Meta:
         unique_together = (('table', 'holder'),)
+        abstract = True
 
 
 class myuser(AbstractBaseUser, PermissionHolder):
@@ -132,9 +130,9 @@ class myuser(AbstractBaseUser, PermissionHolder):
     affiliation = models.CharField(max_length=50, null=True)
     mail_address = models.EmailField(verbose_name='email address',
                                      max_length=255, unique=True, )
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    groupadmin = models.ManyToManyField(UserGroup)
 
     USERNAME_FIELD = 'name'
 
@@ -155,6 +153,16 @@ class myuser(AbstractBaseUser, PermissionHolder):
     @property
     def is_staff(self):
         return self.is_admin
+
+
+class UserPermission(TablePermission):
+    holder = models.ForeignKey(myuser,
+                               related_name='table_permissions')
+
+
+class GroupPermission(TablePermission):
+    holder = models.ForeignKey(UserGroup,
+                               related_name='table_permissions')
 
 
 class UserBackend(object):
@@ -186,3 +194,4 @@ class UserBackend(object):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
