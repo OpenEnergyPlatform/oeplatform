@@ -22,42 +22,6 @@ WRITE_PERM = 4
 DELETE_PERM = 8
 ADMIN_PERM = 12
 
-def addcontenttypes():
-    """
-    Insert all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py in the django_content_type table. This is
-    important for the Group-Permission-Management.
-    """
-    insp = actions.connect()
-    engine = actions._get_engine()
-    conn = engine.connect()
-    query = 'SELECT schemaname FROM pg_tables WHERE  schemaname NOT LIKE \'\_%%\' group by schemaname;'.format(st='%\_%')
-    res = conn.execute(query)
-    for schema in res:
-        if not schema.schemaname in ['information_schema', 'pg_catalog']:
-            query = 'SELECT tablename as tables FROM pg_tables WHERE schemaname = \'{s}\' AND tablename NOT LIKE \'\_%%\';'.format(s=schema.schemaname)
-            table = conn.execute(query)
-            for tab in table:
-                _create_tableperm(schema=schema.schemaname, table=tab.tables)
-
-
-def _create_tableperm(schema, table):
-    """
-    Create Content Type and Permissions for the given schema and table
-    :param schema: Name of the schema
-    :param table: Name of the table
-    """
-    ct_add, _ = ContentType.objects.get_or_create(app_label=schema, model=table)
-    p_add = Permission.objects.get_or_create(name='Can add data in {s}.{t} '.format(s=schema, t=table),
-                                             codename='add_{s}_{t}'.format(s=schema, t=table),
-                                             content_type=ct_add)
-    p_change = Permission.objects.get_or_create(name='Can change data in {s}.{t} '.format(s=schema, t=table),
-                                                codename='change_{s}_{t}'.format(s=schema, t=table),
-                                                content_type=ct_add)
-    p_delete = Permission.objects.get_or_create(name='Can delete data from {s}.{t} '.format(s=schema, t=table),
-                                                codename='delete_{s}_{t}'.format(s=schema, t=table),
-                                                content_type=ct_add)
-
 
 class UserManager(BaseUserManager):
     def create_user(self, name, mail_address, affiliation=None):
@@ -103,8 +67,12 @@ class PermissionHolder():
         return self.__get_perm(schema, table) >= ADMIN_PERM
 
     def __get_perm(self, schema, table):
-        return self.permissions.get(table__name=table,
-                                    table__schema__name=schema).permission
+        perm = self.table_permissions.filter(table__name=table,
+                                   table__schema__name=schema).first()
+        if perm:
+            return perm.permission
+        else:
+            return NO_PERM
 
 
 class UserGroup(Group, PermissionHolder):
@@ -112,13 +80,15 @@ class UserGroup(Group, PermissionHolder):
 
 
 class TablePermission(models.Model):
-    table = models.ForeignKey(datamodels.Table, to_field='id')
+    choices = ((NO_PERM, 'None'),
+               (WRITE_PERM, 'Write'),
+               (DELETE_PERM, 'Delete'),
+               (ADMIN_PERM, 'Admin'))
+    table = models.ForeignKey(datamodels.Table)
 
-    level = models.IntegerField(choices=((NO_PERM, 'None'),
-                                              (WRITE_PERM, 'Write'),
-                                              (DELETE_PERM, 'Delete'),
-                                              (ADMIN_PERM, 'Admin')),
+    level = models.IntegerField(choices=choices,
                                      default=NO_PERM)
+
 
     class Meta:
         unique_together = (('table', 'holder'),)

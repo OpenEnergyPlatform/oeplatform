@@ -6,17 +6,15 @@
     <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}} </h3>
         <table>
             <tr>
-                <td style="padding:5px">
+                <td>
                     <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
                 </td>
-                <td>
+                <td style="padding:5px">
                     <a href="{{table}}/download" class="glyphicon glyphicon-download-alt"> </a>
                 </td>
-                {% if is_admin and schema=='model_draft'%}
                 <td>
                     <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
                 </td>
-                {% endif %}
             </tr>
         </table>
 

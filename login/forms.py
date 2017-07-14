@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from .models import myuser as OepUser
+from .models import myuser as OepUser, UserPermission
 
 
 
@@ -61,5 +61,3 @@ class AllPermForm(forms.ModelForm):
                                                                  required=False,)
         if group != "":
             self.fields['allperms'].initial = group.permissions.all()
-        
-        

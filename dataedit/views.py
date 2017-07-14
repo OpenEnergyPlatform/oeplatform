@@ -34,7 +34,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
 from operator import add
-from dataedit.models import Table
+from login import models as login_models
+from dataedit.models import Table, Schema
 
 session = None
 
@@ -434,7 +435,7 @@ class DataView(View):
 
         is_admin = False
         if request.user:
-            is_admin = request.user.has_admin_permission(schema, table)
+            is_admin = request.user.has_admin_permissions(schema, table)
 
         return render(request,
                       'dataedit/dataedit_overview.html',
@@ -596,6 +597,56 @@ class CommentView(View):
         return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
                                                                 table=table))
 
+class PermissionView(View):
+    """ This method handles the GET requests for the main page of data edit.
+        Initialises the session data (if necessary)
+    """
+
+    def get(self, request, schema, table):
+
+        if schema not in schema_whitelist:
+            raise Http404("Schema not accessible")
+
+        user_perms = login_models.UserPermission.objects.filter(table__name=table,
+                                                                table__schema__name=schema)
+        group_perms = login_models.GroupPermission.objects.filter(
+            table__name=table,
+            table__schema__name=schema)
+
+
+
+        return render(request,
+                      'dataedit/table_permissions.html',
+                      {
+                          'table': table,
+                          'schema': schema,
+                          'user_perms': user_perms,
+                          'group_perms': group_perms,
+                          'choices': login_models.TablePermission.choices
+                      })
+
+    def post(self, request, schema, table):
+        if request.POST['mode'] == 'add_user':
+            return self.__add_user(request, schema, table)
+        if request.POST['mode'] == 'change_user':
+            return self.__change_user(request, schema, table)
+
+
+    def __add_user(self, request, schema, table):
+        user = login_models.myuser.objects.filter(name=request.POST['name']).first()
+        table_obj = Table.load(schema, table)
+
+        p = login_models.UserPermission.objects.create(holder=user,table=table_obj)
+        p.save()
+        return self.get(request, schema, table)
+
+    def __change_user(self, request, schema, table):
+        user = login_models.myuser.objects.filter(name=request.POST['name']).first()
+        table_obj = Table.load(schema, table)
+        p = login_models.UserPermission.objects.get(holder=user, table=table_obj)
+        p.level = request.POST['level']
+        p.save()
+        return self.get(request, schema, table)
 
 @login_required(login_url='/login/')
 def add_table_tags(request):
