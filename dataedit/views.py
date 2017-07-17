@@ -620,12 +620,12 @@ class PermissionView(View):
             permission_level = max(user_membership.level, permission_level)
 
         # Check permissions of all groups and choose least restrictive one
-        group_perms = (perm.level for membership in request.user.memberships.all()
+        group_perm_levels = (perm.level for membership in request.user.memberships.all()
                        for perm in membership.group.table_permissions.filter(table=table_obj))
 
-        if group_perms:
+        if group_perm_levels:
             permission_level = max(itertools.chain([permission_level],
-                                                   group_perms))
+                                                   group_perm_levels))
 
         return render(request,
                       'dataedit/table_permissions.html',
@@ -645,11 +645,17 @@ class PermissionView(View):
             return self.__change_user(request, schema, table)
         if request.POST['mode'] == 'remove_user':
             return self.__remove_user(request, schema, table)
+        if request.POST['mode'] == 'add_group':
+            return self.__add_group(request, schema, table)
+        if request.POST['mode'] == 'alter_group':
+            return self.__change_group(request, schema, table)
+        if request.POST['mode'] == 'remove_group':
+            return self.__remove_group(request, schema, table)
+
 
     def __add_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(name=request.POST['name']).first()
         table_obj = Table.load(schema, table)
-
         p = login_models.UserPermission.objects.create(holder=user,table=table_obj)
         p.save()
         return self.get(request, schema, table)
@@ -657,7 +663,7 @@ class PermissionView(View):
     def __change_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(id=request.POST['user_id']).first()
         table_obj = Table.load(schema, table)
-        p = login_models.UserPermission.objects.get(holder=user, table=table_obj)
+        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = request.POST['level']
         p.save()
         return self.get(request, schema, table)
@@ -666,6 +672,29 @@ class PermissionView(View):
         user = get_object_or_404(login_models.myuser, name=request.POST['name'])
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.UserPermission, holder=user,
+                              table=table_obj)
+        p.delete()
+        return self.get(request, schema, table)
+
+    def __add_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, name=request.POST['name'])
+        table_obj = Table.load(schema, table)
+        p = login_models.GroupPermission.objects.create(holder=group,table=table_obj)
+        p.save()
+        return self.get(request, schema, table)
+
+    def __change_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.GroupPermission ,holder=group, table=table_obj)
+        p.level = request.POST['level']
+        p.save()
+        return self.get(request, schema, table)
+
+    def __remove_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.GroupPermission, holder=group,
                               table=table_obj)
         p.delete()
         return self.get(request, schema, table)
