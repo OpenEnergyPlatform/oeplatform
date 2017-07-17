@@ -7,6 +7,8 @@ from .forms import GroupUserForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 import login.models as models
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -39,7 +41,7 @@ class GroupManagement(View):
         return render(request, "login/list_memberships.html", {'membership': membership})
 
 
-class GroupCreate(View):
+class GroupCreate(View, LoginRequiredMixin):
     def get(self, request, group_id=None):
         """
         Load the chosen action(create or edit) for a group.
@@ -85,7 +87,7 @@ class GroupCreate(View):
             membership.save()
         return redirect('/user/groups/{id}/members'.format(id=group.id))
 
-class GroupEdit(View):
+class GroupEdit(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
         Load the chosen action(create or edit) for a group. 
@@ -163,7 +165,7 @@ class GroupEdit(View):
         g.save()
         return self.get(request)
 
-class ProfileUpdateView(UpdateView):
+class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     """
     Autogenerate a update form for users.
     """
