@@ -15,7 +15,7 @@ from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.core.exceptions import PermissionDenied
 import oeplatform.securitysettings as sec
 
 from api import actions
@@ -625,6 +625,10 @@ class PermissionView(View):
                       })
 
     def post(self, request, schema, table):
+        table_obj = Table.load(schema, table)
+        if request.user.get_table_permission_level(
+                table) < login_models.ADMIN_PERM:
+            raise PermissionDenied
         if request.POST['mode'] == 'add_user':
             return self.__add_user(request, schema, table)
         if request.POST['mode'] == 'alter_user':
