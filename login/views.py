@@ -6,6 +6,7 @@ from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
 from .forms import GroupUserForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
+import login.models as models
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -116,10 +117,11 @@ class GroupEdit(View):
         group = get_object_or_404(UserGroup, id=group_id)
         membership = get_object_or_404(GroupMembership, group=group,
                                        user=request.user)
-        if membership.level < ADMIN_PERM:
-            raise PermissionDenied
+
         errors = {}
         if mode == 'add_user':
+            if membership.level < models.WRITE_PERM:
+                raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST['name'])
                 membership = GroupMembership.objects.create(group=group,
@@ -129,17 +131,27 @@ class GroupEdit(View):
             except OepUser.DoesNotExist:
                 errors['name'] = 'User does not exist'
         elif mode == 'remove_user':
+            if membership.level < models.DELETE_PERM:
+                raise PermissionDenied
             user = OepUser.objects.get(id=request.POST['user_id'])
             membership = GroupMembership.objects.get(group=group,
                                                      user=user)
             membership.delete()
         elif mode == 'alter_user':
+            if membership.level < models.ADMIN_PERM:
+                raise PermissionDenied
             user = OepUser.objects.get(id=request.POST['user_id'])
             membership = GroupMembership.objects.get(group=group,
                                                      user=user)
             membership.level = request.POST['level']
             membership.save()
-
+        elif mode == 'delete_group':
+            if membership.level < models.ADMIN_PERM:
+                raise PermissionDenied
+            group.delete()
+            return redirect('/user/groups')
+        else:
+            raise PermissionDenied
         return render(request, "login/change_form.html", {'group': group,
                                                           'choices': GroupMembership.choices,
                                                           'errors': errors,
