@@ -5,7 +5,7 @@ from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
 from .forms import GroupUserForm
 from django.contrib.auth.models import Group
-from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -53,7 +53,7 @@ class GroupCreate(View):
             membership = get_object_or_404(GroupMembership, group=group,
                                            user=request.user)
             if membership.level < ADMIN_PERM:
-                return HttpResponseForbidden()
+                raise PermissionDenied
         return render(request, "login/group_create.html", {'group': group})
 
     def post(self, request, group_id=None):
@@ -71,7 +71,7 @@ class GroupCreate(View):
             group = UserGroup.objects.get(id=group_id)
             membership = get_object_or_404(GroupMembership, group=group, user=request.user)
             if membership.level < ADMIN_PERM:
-                return HttpResponseForbidden()
+                raise PermissionDenied
             group.name = request.POST['name']
             group.description = request.POST['description']
             group.save()
@@ -95,8 +95,13 @@ class GroupEdit(View):
         :return: Profile renderer   
         """
         group = get_object_or_404(UserGroup, pk=group_id)
+        is_admin = False
+        membership = GroupMembership.objects.filter(group=group, user=request.user).first()
+        if membership:
+            is_admin = membership.level >= ADMIN_PERM
         return render(request, "login/change_form.html", {'group': group,
-                                                          'choices': GroupMembership.choices})
+                                                          'choices': GroupMembership.choices,
+                                                          'is_admin': is_admin})
         
     def post(self, request, group_id):
         """
@@ -113,7 +118,7 @@ class GroupEdit(View):
         membership = get_object_or_404(GroupMembership, group=group,
                                        user=request.user)
         if membership.level < ADMIN_PERM:
-            return HttpResponseForbidden()
+            raise PermissionDenied
         errors = {}
         if mode == 'add_user':
             try:
@@ -138,7 +143,8 @@ class GroupEdit(View):
 
         return render(request, "login/change_form.html", {'group': group,
                                                           'choices': GroupMembership.choices,
-                                                          'errors': errors})
+                                                          'errors': errors,
+                                                          'is_admin': True})
 
     def __add_user(self, request, group):
         user = OepUser.objects.filter(id=request.POST['user_id']).first()

@@ -11,23 +11,25 @@
 		{% for membership in group.memberships.all %}
 		<div class="panel-body">
 			<div>
-				<form class="form-inline" action="members" method="post" style ="display:inline-block;">
-					{% csrf_token %}
-					<input type="hidden" name="mode" value="alter_user">
-					<input type="hidden" name="user_id" value="{{membership.user.id}}">
-					<label for="level">{{ membership.user.name }}</label>
-					<select class="form-control" id="level" name="level" onchange="this.form.submit()">
-						{% for value, choice in choices %}
-							<option value="{{value}}" {% if membership.level == value %} selected="selected" {% endif %}>{{choice}}</option>
-						{% endfor %}
-					</select>
-				</form>
-				<form action="members" method="post" style="display:inline-block;float:right">
-					{% csrf_token %}
-					<input type="hidden" name="mode" value="remove_user">
-					<input type="hidden" name="user_id" value="{{membership.user.id}}">
-					<input type="submit" class="btn btn-danger" value="Delete">
-				</form>
+                <label for="level">{{ membership.user.name }}</label>
+				{% if is_admin %}
+                    <form class="form-inline" action="members" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <select class="form-control" id="level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if membership.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="members" method="post" style="display:inline-block;float:right">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </form>
+                {% endif %}
 			</div>
 		</div>
 		{% endfor %}
