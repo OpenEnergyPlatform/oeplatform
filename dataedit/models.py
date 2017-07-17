@@ -40,6 +40,14 @@ class Schema(Tagable):
 class Table(Tagable):
     schema = models.ForeignKey(Schema)
 
+    @classmethod
+    def load(cls, schema, table):
+        table_obj, _ = Table.objects.get_or_create(name=table,
+                                                   schema=Schema.objects.get_or_create(
+                                                       name=schema)[0])
+
+        return table_obj
+
     class Meta:
         unique_together = (("schema", "name"),)
 
