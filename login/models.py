@@ -76,7 +76,7 @@ class PermissionHolder():
 
 
 class UserGroup(Group, PermissionHolder):
-    pass
+    description = models.TextField(null=False, default='')
 
 
 class TablePermission(models.Model):
@@ -134,6 +134,15 @@ class GroupPermission(TablePermission):
     holder = models.ForeignKey(UserGroup,
                                related_name='table_permissions')
 
+class GroupMembership(models.Model):
+    choices = ((NO_PERM, 'None'),
+               (WRITE_PERM, 'Invite'),
+               (DELETE_PERM, 'Remove'),
+               (ADMIN_PERM, 'Admin'))
+    user = models.ForeignKey(myuser, related_name='memberships')
+    group = models.ForeignKey(UserGroup, related_name='memberships')
+    level = models.IntegerField(choices=choices,
+                                default=WRITE_PERM)
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):

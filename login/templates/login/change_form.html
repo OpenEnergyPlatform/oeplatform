@@ -3,53 +3,42 @@
 
 {% block content %}
 {% load staticfiles %}
-<link rel="stylesheet" href="{% static 'css/filterform.css' %}">
-	<h2>Group Management </h2>
-	{% if group_id == None %}
-	    <h3>Create Group</h3>
-	{% else %}
-	    <h3>Edit Group</h3>
-	{% endif %}
-		<h3>{{ error }}</h3>
-<form method='post'>{% csrf_token %}
-	<table style="table-layout:fixed; width:100%">
-	    <tr>
-	        <td style="padding:15px 15px 15px 15px; width:20%; "> Name </td>
-	        <td style="width:80%"><input name="group_name" type="text" class="form-control" value="{{ form.label }}"/></td>
-	    </tr>
-	    <tr>
-	    	<td style="padding:15px 15px 15px 15px; width:20%; "> Permissions </td>
-	        {% for field in form %}		 	
-				 	<td style="width:45%">
-				 	{{ field }}
-			    	</td> 
-			{% endfor %}
-	    </tr>
-	    <tr>
-	    	<td style="padding:15px 15px 15px 15px; width:20%; "> Members </td>
-	        {% for field in members %}		 	
-				 	<td style="width:45%">
-				 	{{ field }}
-			    	</td> 
-			{% endfor %}
-	    </tr>	
-	    <tr>
-	        <td></td>
-	        <td style="padding-top:15px;">
-	            <input type="submit" name="submit" class="btn btn-success" value="Save"/>
-	            <a href="/user/{{ user.pk }}/group/" class="btn btn-default">Cancel</a>
-	            {% if group_id != None %}
-	            <input type="submit" name="submit" class="btn btn-warning" value="Delete"/>
-	            {% endif %}
-	        </td>
-	    </tr>
-	</table>
-</form>
-{% endblock %}
-{% block content-right %}
-<hr>
-<h3>Manage Groups</h3>
-<div style="overflow: hidden;">
-	<a href="/user/{{ user.pk }}/group/" class="btn btn-default">Manage Groups</a>
-</div>
+	<h4> {{group.name}} <a href="edit"><span class="glyphicon glyphicon-pencil"></span></a> </h4>
+	<div class="panel panel-default" style="width:60%">
+		<div class="panel-heading">
+			Members
+		</div>
+		{% for membership in group.memberships.all %}
+		<div class="panel-body">
+			<div>
+				<form class="form-inline" action="edit" method="post" style ="display:inline-block;">
+					{% csrf_token %}
+					<input type="hidden" name="mode" value="change_user">
+					<input type="hidden" name="user_id" value="{{membership.user.id}}">
+					<label for="level">{{ membership.user.name }}</label>
+					<select class="form-control" id="level" name="level" onchange="this.form.submit()">
+						{% for value, choice in choices %}
+							<option value="{{value}}" {% if membership.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+						{% endfor %}
+					</select>
+				</form>
+				<form action="edit" method="post" style="display:inline-block;float:right">
+					{% csrf_token %}
+					<input type="hidden" name="mode" value="remove_user">
+					<input type="hidden" name="user_id" value="{{membership.user.id}}">
+					<input type="submit" class="btn btn-danger" value="Delete">
+				</form>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<form action="edit" method="post"  style="width:60%">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user">
+        <input class="form-control" name="name" type="text" placeholder="Add a user" >
+		{% if "name" in errors %}
+    		<div style="color:#ff0000">{{ errors.name }}</div>
+		{% endif %}
+		<input type="submit" value="Add">
+    </form>
 {% endblock %}

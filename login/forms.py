@@ -40,24 +40,3 @@ class GroupUserForm(forms.ModelForm):
         if group_id != "":
             self.fields['groupmembers'].initial = OepUser.objects.filter(groups__id=group_id)
 
-class AllPermForm(forms.ModelForm):
-    """
-     A form for create/edit permissions of a group.   
-    """
-    class Meta:
-        model = OepUser
-        fields =('allperms',)
-    allperms = forms.ModelMultipleChoiceField(queryset="", 
-                                              widget=FilteredSelectMultiple("Permissions", is_stacked=False), 
-                                              required=False,)
-    
-    def __init__(self,*args,**kwargs):
-        user = kwargs.pop("user")
-        group = kwargs.pop("group")     # user is the parameter passed from views.py
-        super(AllPermForm, self).__init__(*args,**kwargs)
-        self.fields['allperms'] = forms.ModelMultipleChoiceField(queryset=user.get_all_avail_perms(),
-                                                                 widget=FilteredSelectMultiple("Permissions", 
-                                                                 is_stacked=False),
-                                                                 required=False,)
-        if group != "":
-            self.fields['allperms'].initial = group.permissions.all()
