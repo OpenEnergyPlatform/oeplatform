@@ -82,8 +82,7 @@ class GroupCreate(View):
                                                         group=group,
                                                         level=ADMIN_PERM)
             membership.save()
-        return render(request, "login/change_form.html", {'group': group,
-                                                          'choices': GroupMembership.choices})
+        return redirect('/user/groups/{id}/members'.format(id=group.id))
 
 class GroupEdit(View):
     def get(self, request, group_id):
