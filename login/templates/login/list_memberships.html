@@ -7,7 +7,9 @@
     <div style="float:left; padding-right:15px">
     	<a href="new" class="btn btn-info">Create new Group</a>
 	</div>
+    <ul class="list-group">
 	{% for membership in request.user.memberships.all %}
-			<a href="{{ membership.group.id }}/edit">{{ membership.group.name }}</a>
+			<li class="list-group-item"><a href="{{ membership.group.id }}/edit">{{ membership.group.name }}</a></li>
     {% endfor %}
+    </ul>
 {% endblock %}
