@@ -669,7 +669,7 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __remove_user(self, request, schema, table):
-        user = get_object_or_404(login_models.myuser, name=request.POST['name'])
+        user = get_object_or_404(login_models.myuser, id=request.POST['user_id'])
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.UserPermission, holder=user,
                               table=table_obj)
