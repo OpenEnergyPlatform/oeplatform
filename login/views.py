@@ -50,6 +50,10 @@ class GroupCreate(View):
         group = None
         if group_id:
             group = UserGroup.objects.get(id=group_id)
+            membership = get_object_or_404(GroupMembership, group=group,
+                                           user=request.user)
+            if membership.level < ADMIN_PERM:
+                return HttpResponseForbidden()
         return render(request, "login/group_create.html", {'group': group})
 
     def post(self, request, group_id=None):
@@ -122,8 +126,9 @@ class GroupEdit(View):
                 errors['name'] = 'User does not exist'
         elif mode == 'remove_user':
             user = OepUser.objects.get(id=request.POST['user_id'])
-            GroupMembership.objects.remove(group=group,
-                                           user=user)
+            membership = GroupMembership.objects.get(group=group,
+                                                     user=user)
+            membership.delete()
         elif mode == 'alter_user':
             user = OepUser.objects.get(id=request.POST['user_id'])
             membership = GroupMembership.objects.get(group=group,

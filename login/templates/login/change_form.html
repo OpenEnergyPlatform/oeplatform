@@ -11,9 +11,9 @@
 		{% for membership in group.memberships.all %}
 		<div class="panel-body">
 			<div>
-				<form class="form-inline" action="edit" method="post" style ="display:inline-block;">
+				<form class="form-inline" action="members" method="post" style ="display:inline-block;">
 					{% csrf_token %}
-					<input type="hidden" name="mode" value="change_user">
+					<input type="hidden" name="mode" value="alter_user">
 					<input type="hidden" name="user_id" value="{{membership.user.id}}">
 					<label for="level">{{ membership.user.name }}</label>
 					<select class="form-control" id="level" name="level" onchange="this.form.submit()">
@@ -22,7 +22,7 @@
 						{% endfor %}
 					</select>
 				</form>
-				<form action="edit" method="post" style="display:inline-block;float:right">
+				<form action="members" method="post" style="display:inline-block;float:right">
 					{% csrf_token %}
 					<input type="hidden" name="mode" value="remove_user">
 					<input type="hidden" name="user_id" value="{{membership.user.id}}">
@@ -32,7 +32,7 @@
 		</div>
 		{% endfor %}
 	</div>
-	<form action="edit" method="post"  style="width:60%">
+	<form action="members" method="post"  style="width:60%">
         {% csrf_token %}
         <input type="hidden" name="mode" value="add_user">
         <input class="form-control" name="name" type="text" placeholder="Add a user" >
