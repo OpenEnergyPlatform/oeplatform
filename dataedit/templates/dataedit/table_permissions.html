@@ -26,17 +26,29 @@ You if you are logged in, you can add tags to this schema to improve the searcha
     </form>
 
     {% for perm in user_perms %}
-        {{ perm.holder.name }}
-            <form action="permissions" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="mode" value="change_user">
-                <input type="hidden" name="name" value="{{perm.holder.name}}">
-                <select name="level" onchange="this.form.submit()">
-                    {% for value, choice in choices %}
-                        <option value="{{value}}" {% if perm.level == value %} selected {% endif %}>{{choice}}</option>
-                    {% endfor %}
-                </select>
-            </form>
+        <div class="panel-body">
+            <div>
+                <label for="level">{{ perm.holder.name }}</label>
+                {% if is_admin %}
+                    <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_user">
+                        <input type="hidden" name="user_id" value="{{perm.holder.id}}">
+                        <select class="form-control" id="level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_user">
+                        <input type="hidden" name="user_id" value="{{perm.holder.id}}">
+                        <input type="submit" class="btn btn-danger" value="Remove user">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
     {% endfor %}
 
 {% endblock %}

@@ -36,6 +36,7 @@ from dataedit.structures import Table_tags, Tag
 from operator import add
 from login import models as login_models
 from dataedit.models import Table, Schema
+import itertools
 
 session = None
 
@@ -607,13 +608,24 @@ class PermissionView(View):
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
 
-        user_perms = login_models.UserPermission.objects.filter(table__name=table,
-                                                                table__schema__name=schema)
-        group_perms = login_models.GroupPermission.objects.filter(
-            table__name=table,
-            table__schema__name=schema)
+        table_obj = Table.load(schema, table)
 
+        user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
 
+        # Check admin permissions for user
+        permission_level = login_models.NO_PERM
+        user_membership = request.user.table_permissions.filter(table=table_obj).first()
+        if user_membership:
+            permission_level = max(user_membership.level, permission_level)
+
+        # Check permissions of all groups and choose least restrictive one
+        group_perms = (perm.level for membership in request.user.memberships.all()
+                       for perm in membership.group.table_permissions.filter(table=table_obj))
+
+        if group_perms:
+            permission_level = max(itertools.chain([permission_level],
+                                                   group_perms))
 
         return render(request,
                       'dataedit/table_permissions.html',
@@ -622,15 +634,17 @@ class PermissionView(View):
                           'schema': schema,
                           'user_perms': user_perms,
                           'group_perms': group_perms,
-                          'choices': login_models.TablePermission.choices
+                          'choices': login_models.TablePermission.choices,
+                          'is_admin': permission_level >= login_models.ADMIN_PERM
                       })
 
     def post(self, request, schema, table):
         if request.POST['mode'] == 'add_user':
             return self.__add_user(request, schema, table)
-        if request.POST['mode'] == 'change_user':
+        if request.POST['mode'] == 'alter_user':
             return self.__change_user(request, schema, table)
-
+        if request.POST['mode'] == 'remove_user':
+            return self.__remove_user(request, schema, table)
 
     def __add_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(name=request.POST['name']).first()
@@ -641,12 +655,21 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __change_user(self, request, schema, table):
-        user = login_models.myuser.objects.filter(name=request.POST['name']).first()
+        user = login_models.myuser.objects.filter(id=request.POST['user_id']).first()
         table_obj = Table.load(schema, table)
         p = login_models.UserPermission.objects.get(holder=user, table=table_obj)
         p.level = request.POST['level']
         p.save()
         return self.get(request, schema, table)
+
+    def __remove_user(self, request, schema, table):
+        user = get_object_or_404(login_models.myuser, name=request.POST['name'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.UserPermission, holder=user,
+                              table=table_obj)
+        p.delete()
+        return self.get(request, schema, table)
+
 
 @login_required(login_url='/login/')
 def add_table_tags(request):
