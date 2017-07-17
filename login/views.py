@@ -106,6 +106,10 @@ class GroupEdit(View):
         """
         mode = request.POST['mode']
         group = get_object_or_404(UserGroup, id=group_id)
+        membership = get_object_or_404(GroupMembership, group=group,
+                                       user=request.user)
+        if membership.level < ADMIN_PERM:
+            return HttpResponseForbidden()
         errors = {}
         if mode == 'add_user':
             try:
