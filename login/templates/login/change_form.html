@@ -4,6 +4,9 @@
 {% block content %}
 {% load staticfiles %}
 	<h4> {{group.name}} <a href="edit"><span class="glyphicon glyphicon-pencil"></span></a> </h4>
+    {% if group.description %}
+        <div class="well"> <b>Description:</b> {{group.description}} </div>
+    {% endif %}
 	<div class="panel panel-default" style="width:60%">
 		<div class="panel-heading">
 			Members
