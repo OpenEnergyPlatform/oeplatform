@@ -1,0 +1,42 @@
+{% extends "dataedit/base.html" %}
+{% block title %} - {{schema}}{% endblock %}
+{% block data_content %}
+{% load dataedit.taghandler %}
+<h3>Manage permissions on {{schema}}.{{table}}</h3>
+<div class="well">
+Now you are in the database schema you selected and see the list of all tables of this schema.
+You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
+</div>
+    <h4> Manage Group Permissions</h4>
+    {% for perm in group_perms %}
+        {{ perm.holder.name }}
+            <select>
+                <option>None</option>
+                <option>Write</option>
+                <option>Delete</option>
+                <option>Admin</option>
+            </select>
+    {% endfor %}
+
+    <h4> Manage User Permissions</h4>
+    <form action="permissions" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user">
+        <input name="name" type="text" placeholder="Add a user" ><input type="submit" value="Add">
+    </form>
+
+    {% for perm in user_perms %}
+        {{ perm.holder.name }}
+            <form action="permissions" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="mode" value="change_user">
+                <input type="hidden" name="name" value="{{perm.holder.name}}">
+                <select name="level" onchange="this.form.submit()">
+                    {% for value, choice in choices %}
+                        <option value="{{value}}" {% if perm.level == value %} selected {% endif %}>{{choice}}</option>
+                    {% endfor %}
+                </select>
+            </form>
+    {% endfor %}
+
+{% endblock %}
