@@ -613,20 +613,6 @@ class PermissionView(View):
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
 
-        # Check admin permissions for user
-        permission_level = login_models.NO_PERM
-        user_membership = request.user.table_permissions.filter(table=table_obj).first()
-        if user_membership:
-            permission_level = max(user_membership.level, permission_level)
-
-        # Check permissions of all groups and choose least restrictive one
-        group_perm_levels = (perm.level for membership in request.user.memberships.all()
-                       for perm in membership.group.table_permissions.filter(table=table_obj))
-
-        if group_perm_levels:
-            permission_level = max(itertools.chain([permission_level],
-                                                   group_perm_levels))
-
         return render(request,
                       'dataedit/table_permissions.html',
                       {
@@ -635,7 +621,7 @@ class PermissionView(View):
                           'user_perms': user_perms,
                           'group_perms': group_perms,
                           'choices': login_models.TablePermission.choices,
-                          'is_admin': permission_level >= login_models.ADMIN_PERM
+                          'is_admin': request.user.get_permission_level(table_obj) >= login_models.ADMIN_PERM
                       })
 
     def post(self, request, schema, table):

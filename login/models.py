@@ -8,6 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from api import actions
 import requests
+import itertools
 import json
 
 from django.conf import settings
@@ -78,6 +79,8 @@ class PermissionHolder():
 class UserGroup(Group, PermissionHolder):
     description = models.TextField(null=False, default='')
 
+    def get_permission_level(self, table):
+        return max(itertools.chain([NO_PERM], (perm.level for perm in self.table_permissions.filter(table=table))))
 
 class TablePermission(models.Model):
     choices = ((NO_PERM, 'None'),
@@ -124,6 +127,25 @@ class myuser(AbstractBaseUser, PermissionHolder):
     def is_staff(self):
         return self.is_admin
 
+    def get_permission_level(self, table):
+        # Check admin permissions for user
+        permission_level = NO_PERM
+        user_membership = self.table_permissions.filter(
+            table=table).first()
+
+        permission_level = NO_PERM
+        if user_membership:
+            permission_level = max(user_membership.level, permission_level)
+
+        # Check permissions of all groups and choose least restrictive one
+        group_perm_levels = (membership.group.get_permission_level(table) for membership in
+                             self.memberships.all())
+
+        if group_perm_levels:
+            permission_level = max(itertools.chain([permission_level],
+                                                   group_perm_levels))
+
+        return permission_level
 
 class UserPermission(TablePermission):
     holder = models.ForeignKey(myuser,
