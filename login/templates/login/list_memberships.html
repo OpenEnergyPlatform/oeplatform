@@ -4,12 +4,13 @@
 {% block content %}
 {% load staticfiles %}
 	<h4> My Memberships</h4>
-    <div style="float:left; padding-right:15px">
-    	<a href="new" class="btn btn-info">Create new Group</a>
-	</div>
+
     <ul class="list-group">
 	{% for membership in request.user.memberships.all %}
-			<li class="list-group-item"><a href="{{ membership.group.id }}/edit">{{ membership.group.name }}</a></li>
+			<li class="list-group-item"><a href="{{ membership.group.id }}/members">{{ membership.group.name }}</a></li>
     {% endfor %}
     </ul>
+    <div>
+    	<a href="new" class="btn btn-info">Create new Group</a>
+	</div>
 {% endblock %}
