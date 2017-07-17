@@ -1,0 +1,27 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% load dataedit.taghandler %}
+{% load staticfiles %}
+
+{% block content %}
+    {% if revisions %}
+    <table class="table table-hover">
+        <tr>
+            <th>Date</th>
+            <th>Included datasets</th>
+        </tr>
+        {% for rev in revisions %}
+            <tr>
+                <td> {{rev.date}} </td>
+                <td><a href="{{rev.path}}"> Download</a>  ({% format_bytes rev.size %}) </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        No cached revisions.
+    {% endif %}
+<form action="" method="post">{% csrf_token %}
+    <input type="submit" class="btn btn-success" value="Request Revision"/>
+</form>
+
+{% endblock %}

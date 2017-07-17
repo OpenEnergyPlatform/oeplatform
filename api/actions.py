@@ -5,7 +5,7 @@ import json
 import traceback
 
 from api import parser
-from api.parser import is_pg_qual, read_bool, read_pgid
+from api.parser import is_pg_qual, read_bool, read_pgid, quote
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -324,11 +324,6 @@ def analyze_columns(db, schema, table):
             schema=schema, table=table))
     return [{'id':r['id'],'type':r['type']} for r in result]
 
-def quote(x):
-    if not x.startswith('"') and '(' not in x:
-        return '"' + x + '"'
-    else:
-        return x
 
 def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
