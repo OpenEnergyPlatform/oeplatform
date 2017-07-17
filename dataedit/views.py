@@ -621,7 +621,7 @@ class PermissionView(View):
                           'user_perms': user_perms,
                           'group_perms': group_perms,
                           'choices': login_models.TablePermission.choices,
-                          'is_admin': request.user.get_permission_level(table_obj) >= login_models.ADMIN_PERM
+                          'is_admin': request.user.get_table_permission_level(table_obj) >= login_models.ADMIN_PERM
                       })
 
     def post(self, request, schema, table):
