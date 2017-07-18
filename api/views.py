@@ -10,10 +10,10 @@ import api.parser
 from api import actions
 from api import parser
 from api.helpers.http import ModHttpResponse
-
+from rest_framework.views import APIView
 import geoalchemy2  # Although this import seems unused is has to be here
 
-class Table(View):
+class Table(APIView):
     """
     Handels the creation of tables and serves information on existing tables
     """
@@ -89,18 +89,19 @@ class Table(View):
         :param request:
         :return:
         """
-
-        # There must be a better way to do this.
-        json_data = json.loads(request.body.decode("utf-8"))
+        json_data = request.data['query']
 
         constraint_definitions = []
         column_definitions = []
 
-        for constraint_definiton in json_data['constraints']:
+        for constraint_definiton in json_data.get('constraints',[]):
             constraint_definiton.update({"action": "ADD",
                                          "c_table": table,
                                          "c_schema": schema})
             constraint_definitions.append(constraint_definiton)
+
+        if 'columns' not in json_data:
+            return
         for column_definition in json_data['columns']:
             column_definition.update({"c_table": table,
                                       "c_schema": schema})
@@ -111,7 +112,7 @@ class Table(View):
         return ModHttpResponse(result)
 
 
-class Index(View):
+class Index(APIView):
     def get(self, request):
         pass
 
@@ -122,7 +123,7 @@ class Index(View):
         pass
 
 
-class Fields(View):
+class Fields(APIView):
     def get(self, request, schema, table, id, column):
 
         if not parser.is_pg_qual(table) or not  parser.is_pg_qual(schema) or not parser.is_pg_qual(id) or not parser.is_pg_qual(column):
@@ -139,7 +140,7 @@ class Fields(View):
         pass
 
 
-class Rows(View):
+class Rows(APIView):
     def get(self, request, schema, table):
         columns = request.GET.get('columns')
         where = request.GET.get('where')
@@ -196,7 +197,7 @@ class Rows(View):
         return ModHttpResponse(result)
 
 
-class Session(View):
+class Session(APIView):
     def get(self, request, length=1):
         return request.session['resonse']
 
