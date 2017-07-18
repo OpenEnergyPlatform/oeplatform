@@ -1,20 +1,10 @@
 import json
 import re
 import traceback
-
-from django.core.exceptions import PermissionDenied
-
-from api import parser
-from api.parser import is_pg_qual, read_bool, read_pgid, quote
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy
-from api import references
-from sqlalchemy import func, MetaData, Table
 from datetime import datetime
 
 import sqlalchemy as sqla
+from django.core.exceptions import PermissionDenied
 from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -23,6 +13,7 @@ import api.parser
 import oeplatform.securitysettings as sec
 from api import parser
 from api import references
+from api.parser import quote
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
