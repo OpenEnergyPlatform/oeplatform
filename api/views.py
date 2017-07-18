@@ -231,7 +231,6 @@ def create_ajax_handler(func):
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
-        print(content)
         context = {'user': request.user}
         if 'cursor_id' in content:
             context['cursor_id'] = int(content['cursor_id'])

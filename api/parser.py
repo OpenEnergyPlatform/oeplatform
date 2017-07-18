@@ -337,7 +337,7 @@ def parse_function(d):
     assert (read_pgid(d['function']))
     operand_struc = d['operands']
     if isinstance(operand_struc, list):
-        operands = ', '.join(map(parse_expression, d['operands']))
+        operands = '(' + (', '.join(map(parse_expression, d['operands']))) + ')'
     else:
         operands = parse_expression(operand_struc)
 
