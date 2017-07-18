@@ -65,7 +65,7 @@ function buildCommentEditor(schema, table){
 
             query.where = [condition_query('_id', state)]
 
-          var request = $.ajax({type: 'POST', url:'/api/legacy/search', dataType:'json', data: {query: JSON.stringify(query)}})
+          var request = $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {query: JSON.stringify(query)}})
 
           var dfd = new $.Deferred();
           request.done(function(results) {

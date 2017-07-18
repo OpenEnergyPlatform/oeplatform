@@ -5,9 +5,12 @@ import traceback
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
 from sqlalchemy import func, MetaData, Table
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.session import sessionmaker
 
 from datetime import datetime
 import oeplatform.securitysettings as sec
+import api
 from api import parser
 from api import references
 from api.parser import quote

@@ -448,7 +448,7 @@ def tag_overview(request):
 
 @login_required(login_url='/login/')
 def tag_editor(request, id=""):
-        tags = get_all_tags()
+    tags = get_all_tags()
 
     create_new = True
 
