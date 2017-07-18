@@ -1,5 +1,6 @@
 import json
 import time
+from decimal import Decimal
 
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -208,6 +209,8 @@ def date_handler(obj):
     :param obj: An object
     :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
     """
+    if isinstance(obj, Decimal):
+        return float(obj)
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
     else:
@@ -228,7 +231,11 @@ def create_ajax_handler(func):
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
-        data = func(json.loads(content['query']), {'user': request.user})
+        print(content)
+        context = {'user': request.user}
+        if 'cursor_id' in content:
+            context['cursor_id'] = int(content['cursor_id'])
+        data = func(json.loads(content['query']), context)
 
         # This must be done in order to clean the structure of non-serializable
         # objects (e.g. datetime)

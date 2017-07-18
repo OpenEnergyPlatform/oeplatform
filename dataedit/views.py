@@ -32,6 +32,7 @@ from dataedit.structures import Table_tags, Tag
 from login import models as login_models
 from .models import TableRevision
 
+from operator import add
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -339,8 +340,6 @@ class RevisionView(View):
         date = time.strftime('%Y-%m-%d %H:%M:%S')
         fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
-        print(date)
-
         original = True  # marks whether this method initialised the revision creation
 
         # If some user already requested this dataset wait for this thread to finish
@@ -449,7 +448,7 @@ def tag_overview(request):
 
 @login_required(login_url='/login/')
 def tag_editor(request, id=""):
-    tags = get_all_tags()
+        tags = get_all_tags()
 
     create_new = True
 
