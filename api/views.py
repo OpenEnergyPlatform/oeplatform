@@ -11,6 +11,7 @@ from api import actions
 from api import parser
 from api.helpers.http import ModHttpResponse
 
+import geoalchemy2  # Although this import seems unused is has to be here
 
 class Table(View):
     """
