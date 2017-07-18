@@ -14,7 +14,7 @@ import svn.local
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, \
     Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
@@ -589,8 +589,7 @@ class DataView(View):
                           'tags': tags,
                           'data': data,
                           'display_message': display_message,
-                          'display_items': display_items
-                          'tags': tags,
+                          'display_items': display_items,
                           'is_admin': is_admin
                       })
 
