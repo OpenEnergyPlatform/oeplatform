@@ -4,33 +4,22 @@ import os
 import re
 import threading
 import time
-from collections import OrderedDict
+from functools import reduce
 from io import TextIOWrapper
+from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
 import svn.local
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, \
     Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
-from django.views.generic import View, CreateView, UpdateView
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
-import oeplatform.securitysettings as sec
-
-from api import actions
-from .models import TableRevision
-from django.db.models import Q
-from functools import reduce
-import operator
-import time
-from django_ajax.decorators import ajax
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -38,13 +27,10 @@ import api.actions as dba
 import api.parser
 import oeplatform.securitysettings as sec
 from api import actions
+from dataedit.models import Table
 from dataedit.structures import Table_tags, Tag
-from .models import TableRevision
-
-from operator import add
 from login import models as login_models
-from dataedit.models import Table, Schema
-import itertools
+from .models import TableRevision
 
 session = None
 
@@ -87,7 +73,8 @@ def admin_constraints(request):
     elif 'apply' in action:
         actions.apply_queued_constraint(id)
 
-    return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
+    return redirect(
+        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
 
 
 def admin_columns(request):
@@ -111,7 +98,8 @@ def admin_columns(request):
     elif 'apply' in action:
         actions.apply_queued_column(id)
 
-    return redirect("/dataedit/view/{schema}/{table}".format(schema=schema, table = table))
+    return redirect(
+        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table))
 
 
 def change_requests(schema, table):
@@ -123,8 +111,10 @@ def change_requests(schema, table):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = dba.get_column_changes(reviewed=False, schema = schema, table = table)
-    api_constraints = dba.get_constraints_changes(reviewed=False, schema = schema, table = table)
+    api_columns = dba.get_column_changes(reviewed=False, schema=schema,
+                                         table=table)
+    api_constraints = dba.get_constraints_changes(reviewed=False, schema=schema,
+                                                  table=table)
 
     # print(api_columns)
     # print(api_constraints)
@@ -135,7 +125,8 @@ def change_requests(schema, table):
     data['api_columns'] = {}
     data['api_constraints'] = {}
 
-    keyword_whitelist = ['column_name', 'c_table', 'c_schema', 'reviewed', 'changed', 'id']
+    keyword_whitelist = ['column_name', 'c_table', 'c_schema', 'reviewed',
+                         'changed', 'id']
 
     old_description = dba.describe_columns(schema, table)
 
@@ -153,13 +144,15 @@ def change_requests(schema, table):
         data['api_columns'][id] = {}
         data['api_columns'][id]['old'] = {}
 
-
         if old_cd is not None:
-            old = api.parser.parse_scolumnd_from_columnd(schema, table, name, old_description.get(name))
+            old = api.parser.parse_scolumnd_from_columnd(schema, table, name,
+                                                         old_description.get(
+                                                             name))
 
             for key in list(change):
                 value = change[key]
-                if key not in keyword_whitelist and (value is None or value == old[key]):
+                if key not in keyword_whitelist and (
+                        value is None or value == old[key]):
                     old.pop(key)
                     change.pop(key)
             data['api_columns'][id]['old'] = old
@@ -168,26 +161,27 @@ def change_requests(schema, table):
             data['api_columns'][id]['old']['c_table'] = table
             data['api_columns'][id]['old']['column_name'] = name
 
-
         data['api_columns'][id]['new'] = change
 
     for i in range(len(api_constraints)):
         value = api_constraints[i]
         id = value.get('id')
-        if value.get('reference_table') is None or value.get('reference_column') is None:
+        if value.get('reference_table') is None or value.get(
+                'reference_column') is None:
             value.pop('reference_table')
             value.pop('reference_column')
 
         data['api_constraints'][id] = value
 
-    display_style = ['c_schema', 'c_table', 'column_name', 'not_null', 'data_type', 'reference_table',
-                     'constraint_parameter', 'reference_column', 'action', 'constraint_type', 'constraint_name']
+    display_style = ['c_schema', 'c_table', 'column_name', 'not_null',
+                     'data_type', 'reference_table',
+                     'constraint_parameter', 'reference_column', 'action',
+                     'constraint_type', 'constraint_name']
 
     return {'data': data,
             'display_items': display_style,
             'display_message': display_message
             }
-
 
 
 def listschemas(request):
@@ -208,9 +202,11 @@ def listschemas(request):
         user=sec.dbuser)
     response = conn.execute(query)
     schemas = sorted([(row.schemaname, row.tables) for row in response if
-                      row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
+                      row.schemaname in schema_whitelist and not row.schemaname.startswith(
+                          '_')], key=lambda x: x[0])
     print(schemas)
-    return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
+    return render(request, 'dataedit/dataedit_schemalist.html',
+                  {'schemas': schemas})
 
 
 def read_label(table, comment):
@@ -246,7 +242,8 @@ def get_readable_table_names(schema):
     try:
         res = conn.execute(
             'SELECT table_name as TABLE, obj_description(((\'{table_schema}.\' || table_name ))::regclass) as COMMENT ' \
-            'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(table_schema=schema))
+            'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(
+                table_schema=schema))
     except Exception as e:
         raise e
         return {}
@@ -269,7 +266,9 @@ def listtables(request, schema_name):
         schema=schema_name, user=sec.dbuser)
     print(query)
     tables = conn.execute(query)
-    tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
+    tables = [(table.tablename,
+               labels[table.tablename] if table.tablename in labels else None)
+              for table in tables if
               not table.tablename.startswith('_')]
     tables = sorted(tables, key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_tablelist.html',
@@ -319,10 +318,10 @@ class RevisionView(View):
     def get(self, request, schema, table):
         revisions = TableRevision.objects.filter(schema=schema, table=table)
         return render(request,
-               'dataedit/dataedit_revision.html',{
-               'schema': schema,
-                'table': table,
-                'revisions': revisions})
+                      'dataedit/dataedit_revision.html', {
+                          'schema': schema,
+                          'table': table,
+                          'revisions': revisions})
 
     def post(self, request, schema, table, date=None):
         """
@@ -337,10 +336,8 @@ class RevisionView(View):
         :return:
         """
 
-
         date = time.strftime('%Y-%m-%d %H:%M:%S')
         fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
-
 
         print(date)
 
@@ -364,7 +361,8 @@ class RevisionView(View):
             path = '/dumps/{schema}/{table}/{fname}.dump'.format(
                 fname=fname, schema=schema, table=table)
             size = os.path.getsize(sec.MEDIA_ROOT + path)
-            rev = TableRevision(schema=schema, table=table, date=date, path='/media' + path, size=size)
+            rev = TableRevision(schema=schema, table=table, date=date,
+                                path='/media' + path, size=size)
             rev.save()
         return self.get(request, schema, table)
 
@@ -394,21 +392,26 @@ def get_dependencies(schema, table, found=None):
     found = found.union(found_new)
     found.add((schema, table))
     session.close()
-    for s,t in found_new:
-        found = found.union(get_dependencies(s,t,found))
+    for s, t in found_new:
+        found = found.union(get_dependencies(s, t, found))
 
     return found
 
 
 def create_dump(schema, table, fname):
-    assert re.match(actions.pgsql_qualifier,table)
+    assert re.match(actions.pgsql_qualifier, table)
     assert re.match(actions.pgsql_qualifier, schema)
-    for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
+    for path in ['/dumps', '/dumps/{schema}'.format(schema=schema),
+                 '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
-    L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
+    L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U',
+         sec.dbuser, '-h', sec.dbhost, '-p',
          str(sec.dbport), '-d', sec.dbname, '-f',
-         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema,
+                                                            table=table) + fname + '.dump'] + reduce(
+        add, (['-n', s, '-t', s + '.' + t] for s, t in
+              get_dependencies(schema, table)), [])
     print(' '.join(L))
     return call(L, shell=False)
 
@@ -421,7 +424,8 @@ def send_dump(schema, table, fname):
                             content_type='application/x-gzip')
 
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        '{schema}_{table}_{date}.tar.gz'.format(date=fname, schema=schema, table=table))
+        '{schema}_{table}_{date}.tar.gz'.format(date=fname, schema=schema,
+                                                table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
@@ -437,38 +441,41 @@ def show_revision(request, schema, table, date):
     rev.save()
     return send_dump(schema, table, date)
 
+
 @login_required(login_url='/login/')
 def tag_overview(request):
     return render(request=request, template_name='dataedit/tag_overview.html')
 
 
 @login_required(login_url='/login/')
-def tag_editor(request, id =""):
-        tags = get_all_tags()
+def tag_editor(request, id=""):
+    tags = get_all_tags()
 
-        create_new = True
+    create_new = True
 
-        for t in tags:
-            if id != "" and int(id) == t["id"]:
-                tag = t
+    for t in tags:
+        if id != "" and int(id) == t["id"]:
+            tag = t
 
-                # inform the user if tag is assigned to an object
-                engine = actions._get_engine()
-                Session = sessionmaker()
-                session = Session(bind=engine)
+            # inform the user if tag is assigned to an object
+            engine = actions._get_engine()
+            Session = sessionmaker()
+            session = Session(bind=engine)
 
-                assigned = session.query(Table_tags).filter(Table_tags.tag == t["id"]).count() > 0
+            assigned = session.query(Table_tags).filter(
+                Table_tags.tag == t["id"]).count() > 0
 
-                return render(request=request, template_name='dataedit/tag_editor.html',
-                              context=
-                              {
-                                  "name" : tag['name'],
-                                  "id" : tag['id'],
-                                  "color" : tag['color'],
-                                  "assigned" : assigned
-                              })
-        return render(request=request, template_name='dataedit/tag_editor.html',
-                      context={"name" : "", "color" : "#000000", "assigned": False})
+            return render(request=request,
+                          template_name='dataedit/tag_editor.html',
+                          context=
+                          {
+                              "name": tag['name'],
+                              "id": tag['id'],
+                              "color": tag['color'],
+                              "assigned": assigned
+                          })
+    return render(request=request, template_name='dataedit/tag_editor.html',
+                  context={"name": "", "color": "#000000", "assigned": False})
 
 
 @login_required(login_url='/login/')
@@ -523,8 +530,10 @@ def add_tag(name, color):
     Session = sessionmaker()
     session = Session(bind=engine)
 
-    session.add(Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
+    session.add(
+        Tag(**{'name': name, 'color': str(int(color[1:], 16)), 'id': None}))
     session.commit()
+
 
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
@@ -660,9 +669,10 @@ class MetaView(View):
         trans = conn.begin()
         try:
             conn.execute(
-                sqla.text("COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                    schema=schema,
-                    table=table)),
+                sqla.text(
+                    "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                        schema=schema,
+                        table=table)),
                 comment=json.dumps(comment)
             )
         except Exception as e:
@@ -688,13 +698,15 @@ class MetaView(View):
     def _load_list(self, request, name):
 
         pattern = r'%s_(?P<index>\d*)' % name
-        return [request.POST[key].replace("'", "\'") for key in request.POST if re.match(pattern, key)]
+        return [request.POST[key].replace("'", "\'") for key in request.POST if
+                re.match(pattern, key)]
 
     def _load_url_list(self, request, name):
         pattern = r'%s_name_(?P<index>\d*)' % name
         return [{
                     'Name': request.POST[key].replace("'", "\'"),
-                    'URL': request.POST[key.replace('_name_', '_url_')].replace("'", "\'")
+                    'URL': request.POST[key.replace('_name_', '_url_')].replace(
+                        "'", "\'")
                 } for key in request.POST if
                 re.match(pattern, key)]
 
@@ -739,8 +751,10 @@ class CommentView(View):
                 'method': 'values',
                 'values': reader
             }, {'user': request.user})
-        return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
-                                                                          table=table))
+        return redirect(
+            '/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
+                                                              table=table))
+
 
 class PermissionView(View):
     """ This method handles the GET requests for the main page of data edit.
@@ -755,7 +769,8 @@ class PermissionView(View):
         table_obj = Table.load(schema, table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
-        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
+        group_perms = login_models.GroupPermission.objects.filter(
+            table=table_obj)
 
         return render(request,
                       'dataedit/table_permissions.html',
@@ -765,7 +780,8 @@ class PermissionView(View):
                           'user_perms': user_perms,
                           'group_perms': group_perms,
                           'choices': login_models.TablePermission.choices,
-                          'is_admin': request.user.get_table_permission_level(table_obj) >= login_models.ADMIN_PERM
+                          'is_admin': request.user.get_table_permission_level(
+                              table_obj) >= login_models.ADMIN_PERM
                       })
 
     def post(self, request, schema, table):
@@ -786,24 +802,28 @@ class PermissionView(View):
         if request.POST['mode'] == 'remove_group':
             return self.__remove_group(request, schema, table)
 
-
     def __add_user(self, request, schema, table):
-        user = login_models.myuser.objects.filter(name=request.POST['name']).first()
+        user = login_models.myuser.objects.filter(
+            name=request.POST['name']).first()
         table_obj = Table.load(schema, table)
-        p = login_models.UserPermission.objects.create(holder=user,table=table_obj)
+        p = login_models.UserPermission.objects.create(holder=user,
+                                                       table=table_obj)
         p.save()
         return self.get(request, schema, table)
 
     def __change_user(self, request, schema, table):
-        user = login_models.myuser.objects.filter(id=request.POST['user_id']).first()
+        user = login_models.myuser.objects.filter(
+            id=request.POST['user_id']).first()
         table_obj = Table.load(schema, table)
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
+        p = get_object_or_404(login_models.UserPermission, holder=user,
+                              table=table_obj)
         p.level = request.POST['level']
         p.save()
         return self.get(request, schema, table)
 
     def __remove_user(self, request, schema, table):
-        user = get_object_or_404(login_models.myuser, id=request.POST['user_id'])
+        user = get_object_or_404(login_models.myuser,
+                                 id=request.POST['user_id'])
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.UserPermission, holder=user,
                               table=table_obj)
@@ -811,22 +831,27 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
     def __add_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, name=request.POST['name'])
+        group = get_object_or_404(login_models.UserGroup,
+                                  name=request.POST['name'])
         table_obj = Table.load(schema, table)
-        p = login_models.GroupPermission.objects.create(holder=group,table=table_obj)
+        p = login_models.GroupPermission.objects.create(holder=group,
+                                                        table=table_obj)
         p.save()
         return self.get(request, schema, table)
 
     def __change_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        group = get_object_or_404(login_models.UserGroup,
+                                  id=request.POST['group_id'])
         table_obj = Table.load(schema, table)
-        p = get_object_or_404(login_models.GroupPermission ,holder=group, table=table_obj)
+        p = get_object_or_404(login_models.GroupPermission, holder=group,
+                              table=table_obj)
         p.level = request.POST['level']
         p.save()
         return self.get(request, schema, table)
 
     def __remove_group(self, request, schema, table):
-        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        group = get_object_or_404(login_models.UserGroup,
+                                  id=request.POST['group_id'])
         table_obj = Table.load(schema, table)
         p = get_object_or_404(login_models.GroupPermission, holder=group,
                               table=table_obj)
@@ -846,7 +871,8 @@ def add_table_tags(request):
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
-    ids = {int(field[len('tag_'):]) for field in request.POST if field.startswith('tag_')}
+    ids = {int(field[len('tag_'):]) for field in request.POST if
+           field.startswith('tag_')}
     schema = request.POST['schema']
     table = request.POST.get('table', None)
     engine = actions._get_engine()
@@ -854,9 +880,11 @@ def add_table_tags(request):
     Session = sessionmaker()
     session = Session(bind=engine)
 
-    session.query(Table_tags).filter(Table_tags.table_name == table and Table_tags.schema_name == schema).delete()
+    session.query(Table_tags).filter(
+        Table_tags.table_name == table and Table_tags.schema_name == schema).delete()
     for id in ids:
-        t = Table_tags(**{'schema_name': schema, 'table_name': table, 'tag': id})
+        t = Table_tags(
+            **{'schema_name': schema, 'table_name': table, 'tag': id})
         session.add(t)
     session.commit()
     return redirect(request.META['HTTP_REFERER'])
@@ -878,18 +906,24 @@ def get_all_tags(schema=None, table=None):
         # Neither table, not schema are defined
         result = session.execute(sqla.select([Tag]))
         session.commit()
-        r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')} for r in result]
+        r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+             for r in result]
         return r
 
     if schema == None:
         # default schema is the public schema
         schema = 'public'
 
-    result = session.execute(session.query(Tag.name.label('name'), Tag.id.label('id'), Tag.color.label('color'),
-                                           Table_tags.table_name).filter(Table_tags.tag == Tag.id).filter(
-        Table_tags.table_name == table).filter(Table_tags.schema_name == schema))
+    result = session.execute(
+        session.query(Tag.name.label('name'), Tag.id.label('id'),
+                      Tag.color.label('color'),
+                      Table_tags.table_name).filter(
+            Table_tags.tag == Tag.id).filter(
+            Table_tags.table_name == table).filter(
+            Table_tags.schema_name == schema))
     session.commit()
-    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')} for r in result]
+    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+            for r in result]
 
 
 class SearchView(View):
@@ -903,7 +937,8 @@ class SearchView(View):
         :param request: A HTTP-request object sent by the Django framework
         :return:
         """
-        return render(request, 'dataedit/search.html', {'results': [], 'tags': get_all_tags()})
+        return render(request, 'dataedit/search.html',
+                      {'results': [], 'tags': get_all_tags()})
 
     def post(self, request):
         """
@@ -918,12 +953,15 @@ class SearchView(View):
         session = Session(bind=engine)
         search_view = sqla.Table("meta_search", metadata, autoload=True)
 
-        filter_tags = [int(key[len('select_'):]) for key in request.POST if key.startswith('select_')]
+        filter_tags = [int(key[len('select_'):]) for key in request.POST if
+                       key.startswith('select_')]
 
         tag_agg = array_agg(Table_tags.tag)
-        query = session.query(search_view.c.schema.label('schema'), search_view.c.table.label('table'),
-                              tag_agg).outerjoin(Table_tags, (search_view.c.table == Table_tags.table_name) and (
-        search_view.c.table == Table_tags.table_name))
+        query = session.query(search_view.c.schema.label('schema'),
+                              search_view.c.table.label('table'),
+                              tag_agg).outerjoin(Table_tags, (
+        search_view.c.table == Table_tags.table_name) and (
+                                                     search_view.c.table == Table_tags.table_name))
         if filter_tags:
             query = query.having(tag_agg.contains(filter_tags))
 
@@ -933,7 +971,8 @@ class SearchView(View):
         session.commit()
         ret = [{'schema': r.schema, 'table': r.table} for r in results]
         return render(request, 'dataedit/search.html',
-                      {'results': ret, 'tags': get_all_tags(), 'selected': filter_tags})
+                      {'results': ret, 'tags': get_all_tags(),
+                       'selected': filter_tags})
 
 
 """
@@ -946,7 +985,8 @@ def load_comments(schema, table):
     columns = actions.analyze_columns(sec.dbname, schema, table)
     try:
         if 'error' in comment_on_table:
-            comment_on_table = {'description': [comment_on_table['content']], 'fields': []}
+            comment_on_table = {'description': [comment_on_table['content']],
+                                'fields': []}
             commented_cols = []
         elif 'resources' not in comment_on_table:
             comment_on_table = {
@@ -955,35 +995,45 @@ def load_comments(schema, table):
                 'language': [],
                 'reference_date': comment_on_table['Reference date'],
                 'sources': [
-                    {'name': x['Name'], 'description': '', 'url': x['URL'], 'license': ' ', 'copyright': ' '} for x in comment_on_table['Source']],
+                    {'name': x['Name'], 'description': '', 'url': x['URL'],
+                     'license': ' ', 'copyright': ' '} for x in
+                    comment_on_table['Source']],
                 'spatial': [
-                    {'extend': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+                    {'extend': x, 'resolution': ''} for x in
+                    comment_on_table['Spatial resolution']],
                 'license': [
                     {'id': '',
-                    'name': x,
-                    'version': '',
-                    'url': '',
-                    'instruction': '',
-                    'copyright': ''} for x in comment_on_table['Licence']],
+                     'name': x,
+                     'version': '',
+                     'url': '',
+                     'instruction': '',
+                     'copyright': ''} for x in comment_on_table['Licence']],
                 'contributors': [
-                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'], 'comment': x['Comment']} for x in comment_on_table['Changes']],
+                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'],
+                     'comment': x['Comment']} for x in
+                    comment_on_table['Changes']],
                 'resources': [{
                     'schema': {
                         'fields': [
-                            {'name': x['Name'], 'description': x['Description'], 'unit': x['Unit'] } for x in comment_on_table['Column']]},
-                    'meta_version': '1.2' }] }
+                            {'name': x['Name'], 'description': x['Description'],
+                             'unit': x['Unit']} for x in
+                            comment_on_table['Column']]},
+                    'meta_version': '1.2'}]}
 
-            comment_on_table['fields'] = comment_on_table['resources'][0]['schema']['fields']
+            comment_on_table['fields'] = \
+            comment_on_table['resources'][0]['schema']['fields']
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
         else:
-            comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+            comment_on_table['fields'] = \
+            comment_on_table['resources'][0]['schema'][
                 'fields']
 
             if 'fields' not in comment_on_table['resources'][0]['schema']:
                 comment_on_table['fields'] = []
             else:
-                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                comment_on_table['fields'] = \
+                comment_on_table['resources'][0]['schema'][
                     'fields']
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
@@ -1001,12 +1051,15 @@ def load_comments(schema, table):
 
     return comment_on_table
 
+
 def load_sources(x):
     return {"name": x['name'], "description": x['description'], "url": x['url'],
             "license": x['license'], "copyright": x['copyright']}
 
+
 def load_language(x):
     return x['']
+
 
 def load_spatial(x):
     return {"extend": x['extend'], "resolution": x['resolution']}
@@ -1039,12 +1092,18 @@ def load_meta(c):
         'reference_date': c['reference_date'],
     }
 
+    for prefix, f, props in [('language', load_language, 1),
+                             ('sources', load_sources, 5),
+                             ('spatial', load_spatial, 2),
+                             ('license', load_license, 6),
+                             ('contributors', load_contributors, 4),
+                             ('field', load_field, 3)]:
+        count = len([(k, c[k]) for k in c if k.startswith(prefix)]) // props
+        d[prefix] = [f(
+            {k[len('%s%d' % (prefix, i + 1)) + 1:]: c[k] for k in c if
+             k.startswith('%s%d' % (prefix, i + 1))}) for i in range(count)]
 
-    for prefix, f, props in [('language', load_language,1),('sources', load_sources,5), ('spatial', load_spatial,2), ('license', load_license,6), ('contributors', load_contributors,4), ('field', load_field, 3)]:
-        count = len([(k,c[k]) for k in c if k.startswith(prefix)])//props
-        d[prefix] = [f({k[len('%s%d'%(prefix,i+1))+1:]:c[k] for k in c if k.startswith('%s%d'%(prefix,i+1))}) for i in range(count)]
-
-    d['resources'] = [{'schema':{'fields':d['field']}, 'meta_version': '1.2'}]
+    d['resources'] = [{'schema': {'fields': d['field']}, 'meta_version': '1.2'}]
     del d['field']
 
     return d
