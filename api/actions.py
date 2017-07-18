@@ -2,6 +2,8 @@ import json
 import re
 import traceback
 
+from django.core.exceptions import PermissionDenied
+
 from api import parser
 from api.parser import is_pg_qual, read_bool, read_pgid, quote
 
@@ -789,6 +791,7 @@ def process_value(val):
 
 
 def table_drop(request, context=None):
+    raise PermissionDenied
     db = request["db"]
     engine = _get_engine()
     connection = engine.connect()
