@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+{% load staticfiles %}
+
+    <script type="text/javascript">
+        function getConfirmation(exec){
+           debugger;
+           var retVal = confirm("Do you want to delete this group ?");
+           if( retVal == true ){
+              exec();
+           }
+    </script>
+
+    <h4 style ="display:inline-block;">
+        {{group.name}}
+        <a href="edit">
+            <span class="glyphicon glyphicon-pencil">
+            </span>
+        </a>
+    </h4>
+    <form action="members" style ="display:inline-block;float:right"  method="post" onsubmit="return confirm('Are you sure you want to delete this group: {{group.name}}?')">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="delete_group">
+        <input class="btn btn-danger" type="submit" value="Delete group">
+    </form>
+    {% if group.description %}
+        <div class="well"> <b>Description:</b> {{group.description}} </div>
+    {% endif %}
+	<div class="panel panel-default" style="width:60%">
+		<div class="panel-heading">
+			Members
+		</div>
+		{% for membership in group.memberships.all %}
+		<div class="panel-body">
+			<div>
+                <label for="level">{{ membership.user.name }}</label>
+				{% if is_admin %}
+                    <form class="form-inline" action="members" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <select class="form-control" id="level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if membership.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="members" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{membership.user.name}} from {{group.name}} and retract all permissions?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_user">
+                        <input type="hidden" name="user_id" value="{{membership.user.id}}">
+                        <input type="submit" class="btn btn-danger" value="Remove user">
+                    </form>
+                {% endif %}
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	<form action="members" method="post"  style="width:60%">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user">
+        <input class="form-control" name="name" type="text" placeholder="Add a user" >
+		{% if "name" in errors %}
+    		<div style="color:#ff0000">{{ errors.name }}</div>
+		{% endif %}
+        <b>Note:</b> Users have to log in on the OEP at least once in order to be registered.<br>
+		<input type="submit" value="Add">
+    </form>
+{% endblock %}

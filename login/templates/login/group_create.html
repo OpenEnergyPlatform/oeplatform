@@ -1,0 +1,21 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+{% block title %} Edit Group {% endblock %}
+{% block content %}
+{% load staticfiles %}
+	<h4> Add Group </h4>
+
+        <form id="group-form" action="" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Group Name:</label>
+                <input class="form-control" id="name" name="name" type="text" placeholder="Group name" value="{{group.name}}">
+            </div>
+            <div class="form-group">
+                <label for="description">Group Description:</label>
+                <textarea class="form-control" id="description" name="description" placeholder="Group description" >{{group.description}}</textarea>
+            </div>
+            <input form="group-form" class="btn btn-success" type="submit" value="Create">
+        </form>
+
+{% endblock %}

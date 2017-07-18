@@ -1,10 +1,8 @@
 from django import forms
-from django.contrib import admin
-from django.contrib.auth.models import Group
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from .models import myuser as OepUser, UserPermission
 
-from .models import OepUser
 
 
 class UserChangeForm(forms.ModelForm):
@@ -23,3 +21,22 @@ class UserChangeForm(forms.ModelForm):
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
         return self.initial["password"]
+
+class GroupUserForm(forms.ModelForm):
+    """
+     A form for setting members of a group.     
+    """
+    class Meta:
+        model = OepUser
+        fields = ('groupmembers',)
+    
+    groupmembers = forms.ModelMultipleChoiceField(queryset=OepUser.objects,
+                                                  widget=FilteredSelectMultiple("Members", is_stacked=False), 
+                                                  required=False,)
+    
+    def __init__(self,*args,**kwargs):
+        group_id = kwargs.pop("group_id")     # group_id is the parameter passed from views.py      
+        super(GroupUserForm, self).__init__(*args,**kwargs)
+        if group_id != "":
+            self.fields['groupmembers'].initial = OepUser.objects.filter(groups__id=group_id)
+

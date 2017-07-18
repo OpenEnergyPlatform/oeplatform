@@ -19,6 +19,8 @@ from django.contrib import admin
 from oeplatform import settings
 from django.conf.urls.static import static
 
+handler500 = 'base.views.handler500'
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('api.urls')),

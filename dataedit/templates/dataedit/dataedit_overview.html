@@ -1,7 +1,23 @@
 {% extends 'dataedit/dataview.html' %}
 
+{% block title %} - {{schema}}.{{table}}{% endblock %}
+
 {% block heading %}
-    <h3>{{schema}}.{{table}}</h3> >> <a href="{{table}}/comments"> comments </a>
+    <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}} </h3>
+        <table>
+            <tr>
+                <td>
+                    <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
+                </td>
+                <td style="padding:5px">
+                    <a href="{{table}}/download" class="glyphicon glyphicon-download-alt"> </a>
+                </td>
+                <td>
+                    <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
+                </td>
+            </tr>
+        </table>
+
     <div class="well">Below is the data that is contained in the table you selected. Only a limited
     amout of data is fetched at one time. You can browse different chuncks of data using the
     data view interface. <br>

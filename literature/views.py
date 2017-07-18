@@ -18,7 +18,7 @@ import io
 def list_references(request, error=None):
     engine = _get_engine()
     sess = Session(bind=engine)
-    refs = [r for r in sess.query(ref.Entry)]
+    refs = sorted((r for r in sess.query(ref.Entry)), key=lambda r: r.title)
     return render(request, 'literature/list_references.html', {'refs': refs, 'error':error})
 
 
