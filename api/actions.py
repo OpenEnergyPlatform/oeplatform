@@ -846,15 +846,16 @@ def table_drop(request, context=None):
 
 
 def data_search(request, context=None):
-    engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
     query = parser.parse_select(request)
-    print(query)
+    cursor = __load_cursor(context['cursor_id'])
     cursor.execute(query)
-    description = cursor.description
-    return {'description': [[col.name, col.type_code, col.display_size,
-                             col.internal_size, col.precision, col.scale,
-                             col.null_ok] for col in description]}
+    description = [[col.name, col.type_code, col.display_size,
+                                 col.internal_size, col.precision, col.scale,
+                                 col.null_ok] for col in cursor.description]
+    result = {'description': description}
+    if request.get('fetchall', False):
+        result['data'] = list(cursor.fetchall())
+    return result
 
 
 
@@ -1216,7 +1217,7 @@ def close_raw_connection(request, context):
 
 
 def open_cursor(request, context):
-    connection_id = request['connection_id']
+    connection_id = context['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()

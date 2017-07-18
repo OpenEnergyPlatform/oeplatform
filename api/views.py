@@ -220,7 +220,7 @@ def date_handler(obj):
 # Create your views here.
 
 
-def create_ajax_handler(func):
+def create_ajax_handler(func, create_cursor=True):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
@@ -234,12 +234,17 @@ def create_ajax_handler(func):
         context = {'user': request.user}
         if 'cursor_id' in content:
             context['cursor_id'] = int(content['cursor_id'])
-        data = func(json.loads(content['query']), context)
+        else:
+            if create_cursor:
+                context.update(actions.open_raw_connection(request, context))
+                context.update(actions.open_cursor(request, context))
+        data = func(json.loads(content.get('query', '{}')), context)
 
         # This must be done in order to clean the structure of non-serializable
         # objects (e.g. datetime)
         response_data = json.loads(json.dumps(data, default=date_handler))
-        return JsonResponse({'content': response_data}, safe=False)
+        return JsonResponse({'content': response_data,
+                             'cursor_id': context['cursor_id']}, safe=False)
 
     return execute
 

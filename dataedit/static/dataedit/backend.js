@@ -272,7 +272,7 @@ function construct_field(dataset){
                 field_query = table_fields.map(get_field_query)
             }
 
-            var query = {from : [table_query], fields: field_query};
+            var query = {from : [table_query], fields: field_query, fetchall:true};
 
 
 
@@ -418,7 +418,6 @@ function construct_field(dataset){
             });
         }
     };
-
 
     function update_query(schema, table, message)
     {
