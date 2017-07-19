@@ -19,11 +19,11 @@ Create table
 
 We want to create the following table:
 
-+---------+--------------+-----------------------+
-| id: int | name: string | geom: geometry(Point) |
-+=========+==============+=======================+
-|         |              |                       |
-+---------+--------------+-----------------------+
++-------------+--------------+-----------------------+
+| **id**: int | name: string | geom: geometry(Point) |
++=============+==============+=======================+
+|             |              |                       |
++-------------+--------------+-----------------------+
 
 In order to do so, we send the following PUT request::
 
@@ -41,6 +41,12 @@ In order to do so, we send the following PUT request::
                 },{
                     "name":"geom",
                     "data_type": "geometry(point)"
+                }
+            ],
+            "constraints": [
+                {
+                    "constraint_type": "PRIMARY KEY",
+                    "constraint_parameter": "id",
                 }
             ]
         }
@@ -71,6 +77,12 @@ tool **curl**::
                         },{
                             "name":"geom",
                             "data_type": "geometry(point)"
+                        }
+                    ],
+                    "constraints": [
+                        {
+                            "constraint_type": "PRIMARY KEY",
+                            "constraint_parameter": "id",
                         }
                     ]
                 }
