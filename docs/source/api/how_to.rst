@@ -17,13 +17,13 @@ your request:
 Create table
 ************
 
-We want to create the following table:
+We want to create the following table with primary key `id`:
 
-+-------------+--------------+-----------------------+
-| **id**: int | name: string | geom: geometry(Point) |
-+=============+==============+=======================+
-|             |              |                       |
-+-------------+--------------+-----------------------+
++-----------+-------------------+-----------------------+
+| *id*: int | name: varchar(50) | geom: geometry(Point) |
++===========+===================+=======================+
+|           |                   |                       |
++-----------+-------------------+-----------------------+
 
 In order to do so, we send the following PUT request::
 
