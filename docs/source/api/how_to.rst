@@ -117,7 +117,7 @@ just the name "John Doe":
         -H "Content-Type: application/json"
         -H 'Authorization: Token <your-token>'
         -d '{"query": {"name": "John Doe"}}'
-        oep.iks.cs.ovgu.de/api/v0/schema/model_draft/tables/example_table/rows/
+        oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
 
 Again, a 200-Resonse_ indicates success.
 
@@ -132,7 +132,7 @@ No authorization is required to do so.
 
     curl
         -X GET
-        oep.iks.cs.ovgu.de/api/v0/schema/model_draft/tables/example_table/rows/
+        oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
 
 The data will be returned as list of JSON-dictionaries similar to the ones used
 when adding new rows::
