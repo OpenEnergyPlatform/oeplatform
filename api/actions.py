@@ -603,9 +603,9 @@ def table_change_constraint(constraint_definition):
 
     if 'ADD' in constraint_definition['action']:
         sql.append(
-            'ALTER TABLE {schema}.{table} {action} CONSTRAINT {constraint_name} {constraint_type} ({constraint_parameter})'.format(
+            'ALTER TABLE {schema}.{table} {action} {constraint_name} {constraint_type} ({constraint_parameter})'.format(
                 schema=schema, table=table, action=constraint_definition['action'],
-                constraint_name=constraint_definition['constraint_name'],
+                constraint_name= 'CONSTRAINT '+constraint_definition['constraint_name'] if 'constraint_name' in constraint_definition else '',
                 constraint_parameter=constraint_definition['constraint_parameter'],
                 constraint_type=constraint_definition['constraint_type']))
 
