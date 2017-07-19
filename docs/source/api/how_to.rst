@@ -108,3 +108,27 @@ just the name "John Doe":
         oep.iks.cs.ovgu.de/api/v0/schema/model_draft/tables/example_table/rows/
 
 Again, a 200-Resonse_ indicates success.
+
+Select data
+***********
+
+You can insert data into a specific table by sending a GET-request to its
+`/rows` subresource.
+No authorization is required to do so.
+
+**curl**::
+
+    curl
+        -X GET
+        oep.iks.cs.ovgu.de/api/v0/schema/model_draft/tables/example_table/rows/
+
+The data will be returned as list of JSON-dictionaries similar to the ones used
+when adding new rows::
+
+    [
+        {
+            "name": "John Doe",
+            "geom": null,
+            "id": 1
+        }
+    ]
