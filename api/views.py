@@ -179,7 +179,7 @@ class Rows(APIView):
         return HttpResponse(response, content_type='application/json')
 
     def post(self, request, schema, table):
-        data = json.loads(request.body.decode("utf-8"))
+        data = request.data
 
         column_data = data['query']
 
