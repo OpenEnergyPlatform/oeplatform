@@ -85,15 +85,26 @@ been created.
 Insert data
 ***********
 
-::
+You can insert data into a specific table by sending a POST-request to its
+`/rows` subresource. The `query` part of the sent data contians the row you want
+to insert in form of a JSON-dictionary:::
+
+    {
+        'name_of_column_1': 'value_in_column_1',
+        'name_of_column_2': 'value_in_column_2',
+        ...
+    }
+
+In the following example, we want to add a row containing
+just the name "John Doe":
+
+**curl**::
 
     curl
-        -X PUT
+        -X POST
         -H "Content-Type: application/json"
         -H 'Authorization: Token <your-token>'
         -d '{"query": {"name": "John Doe"}}'
         oep.iks.cs.ovgu.de/api/v0/schema/model_draft/tables/example_table/rows/
 
-
-
-
+Again, a 200-Resonse_ indicates success.
