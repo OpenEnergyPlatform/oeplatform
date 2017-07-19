@@ -178,14 +178,10 @@ class Rows(APIView):
         response = json.dumps(return_obj, default=date_handler)
         return HttpResponse(response, content_type='application/json')
 
-    def post(self, request):
-        pass
-
-    def put(self, request, schema, table):
-
+    def post(self, request, schema, table):
         data = json.loads(request.body.decode("utf-8"))
 
-        column_data = data['columnData']
+        column_data = data['query']
 
         for key, value in column_data.items():
 
