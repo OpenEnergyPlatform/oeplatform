@@ -847,14 +847,21 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     query = parser.parse_select(request)
-    cursor = __load_cursor(context['cursor_id'])
+    fetch_all = 'cursor_id' in context
+    if fetch_all:
+        engine = _get_engine()
+        connection = engine.connect()
+        cursor = connection.connection.cursor()
+    else:
+        cursor = __load_cursor(context['cursor_id'])
     cursor.execute(query)
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
                                  col.null_ok] for col in cursor.description]
     result = {'description': description}
-    if request.get('fetchall', False):
+    if fetch_all:
         result['data'] = list(cursor.fetchall())
+        connection.close()
     return result
 
 
