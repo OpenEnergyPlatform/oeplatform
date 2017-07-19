@@ -478,9 +478,9 @@ def table_create(schema, table, columns, constraints):
             str_list.append(",")
         str_list.append("{name} {data_type} {length} {not_null}"
                         .format(name=c['name'], data_type=c['data_type'],
-                                length=('(' + str(c['character_maximum_length']) + ')') if c[
-                                    'character_maximum_length'] else "",
-                                not_null="NOT NULL" if "NO" in c['is_nullable'] else ""))
+                                length=('(' + str(c['character_maximum_length']) + ')') if c.get(
+                                    'character_maximum_length', False) else "",
+                                not_null="NOT NULL" if "NO" in c.get('is_nullable', []) else ""))
         first_column = False
 
     str_list.append(");")
