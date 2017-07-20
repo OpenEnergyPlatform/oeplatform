@@ -35,7 +35,7 @@ def __response_success():
     return {'success': True}
 
 
-def __response_error(message):
+def _response_error(message):
     return {'success': False, 'message':message}
 
 
@@ -1151,7 +1151,7 @@ def set_isolation_level(request, context):
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
-        return __response_error(ae.message)
+        return _response_error(ae.message)
     return __response_success()
 
 
@@ -1220,7 +1220,7 @@ def close_raw_connection(request, context):
         connection.close()
         return __response_success()
     else:
-        return __response_error("Connection (%s) not found"%connection_id)
+        return _response_error("Connection (%s) not found" % connection_id)
 
 
 def open_cursor(request, context):
@@ -1232,7 +1232,7 @@ def open_cursor(request, context):
         __CURSORS[cursor_id] = cursor
         return {'cursor_id': cursor_id}
     else:
-        return __response_error("Connection (%s) not found"%connection_id)
+        return _response_error("Connection (%s) not found" % connection_id)
 
 
 def __load_cursor(cursor_id):
@@ -1250,7 +1250,7 @@ def close_cursor(request, context):
         cursor.close()
         return {'cursor_id': cursor_id}
     else:
-        return __response_error("Cursor (%s) not found" % cursor_id)
+        return _response_error("Cursor (%s) not found" % cursor_id)
 
 
 def fetchone(request, context):

@@ -142,7 +142,7 @@ class Fields(APIView):
 
 
 class Rows(APIView):
-    def get(self, request, schema, table):
+    def get(self, request, schema, table, id=''):
         columns = request.GET.get('columns')
         where = request.GET.get('where')
         orderby = request.GET.get('orderby')
@@ -178,21 +178,62 @@ class Rows(APIView):
         response = json.dumps(return_obj, default=date_handler)
         return HttpResponse(response, content_type='application/json')
 
-    def post(self, request, schema, table):
-        data = request.data
+    def post(self, request, schema, table, row_id=None):
+        column_data = request.data['query']
+        if row_id:
+            return self.__update_row(schema, table, column_data, row_id)
+        else:
+            return self.__insert_row(schema, table, column_data, row_id)
 
-        column_data = data['query']
+    def put(self, request, schema, table, row_id=None):
+        if not row_id:
+            return actions._response_error('This methods requires an id')
 
-        for key, value in column_data.items():
+        column_data = request.data['query']
+        engine = actions._get_engine()
+        conn = engine.connect()
 
-            if not parser.is_pg_qual(key):  # or ((not str(value).isdigit()) and not parser.is_pg_qual(value)):
-                return JsonResponse(actions.get_response_dict(success=False, http_status_code=400,
-                                                              reason="Your request was malformed."), 400)
+        # check whether id is already in use
+        count = conn.execute('select count(*) '
+                             'from {schema}.{table} '
+                             'where id = {id};'.format(schema=schema,
+                                                     table=table,
+                                                     id=row_id))
+        print(count)
+        if count:
+            return self.__update_row(self, schema, table, column_data)
+        else:
+            return self.__insert_row(self, schema, table, column_data)
 
-        result = actions.put_rows(schema, table, column_data)
+    def __insert_row(self, schema, table, row, row_id=None):
+        if row.get('id', row_id) != row_id:
+            return actions._response_error('The id given in the query does not '
+                                           'match the id given in the url')
+        if row_id:
+            row['id'] = row_id
+
+        if not all(map(parser.is_pg_qual, row.keys())):
+            return JsonResponse(actions.get_response_dict(success=False,
+                                                          http_status_code=400,
+                                                          reason="Your request was malformed."),
+                                400)
+
+        result = actions.put_rows(schema, table, row)
 
         return ModHttpResponse(result)
 
+    def __update_row(self, schema, table, row, id):
+        query = {
+            'schema': schema,
+            'table': table,
+            'where': {
+                'first': 'id',
+                'operator': '=',
+                'second': id
+            },
+            'values': [row]
+        }
+        return actions.data_update(request=query)
 
 class Session(APIView):
     def get(self, request, length=1):
