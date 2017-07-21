@@ -2,6 +2,7 @@ import re
 import json
 import traceback
 
+import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
 from sqlalchemy import func, MetaData, Table
@@ -29,6 +30,30 @@ Base = declarative_base()
 
 class ResponsiveException(Exception):
     pass
+
+
+def load_cursor(f):
+    def wrapper(*args, **kwargs):
+        fetch_all = 'cursor_id' not in args[1].data
+        if fetch_all:
+            engine = _get_engine()
+            connection = engine.connect()
+            cursor = connection.connection.cursor()
+            cursor_id = cursor.__hash__
+            __CURSORS[cursor_id] = cursor
+            args[1].data['cursor_id'] = cursor_id
+
+        result = f(*args, **kwargs)
+
+        if fetch_all:
+            try:
+                result['data'] = cursor.fetchall()
+            except psycopg2.ProgrammingError as e:
+                pass
+            close_cursor({}, {'cursor_id': cursor_id})
+
+        return result
+    return wrapper
 
 
 def __response_success():
@@ -708,8 +733,6 @@ def data_delete(request, context=None):
 
 
 def data_update(request, context=None):
-    engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
     query = {
         'from': [{
             'type': 'table',
@@ -719,7 +742,18 @@ def data_update(request, context=None):
         'where': request['where']
     }
     user = context['user'].name
-    rows = data_search(query, context)
+
+    engine = _get_engine()
+    conn = engine.connect()
+    cursor = conn.connection.cursor()
+    cursor_id = cursor.__hash__
+    __CURSORS[cursor_id] = cursor
+    context2 = dict(context)
+    context2['cursor_id'] = cursor_id
+    rows = data_search(query, context2)
+    rows['data'] = cursor.fetchall()
+    conn.close()
+
     setter = request['values']
     message = request.get('message', None)
     meta_fields = list(parser.set_meta_info('update', user, message).items())
@@ -731,6 +765,7 @@ def data_update(request, context=None):
     pks = [c for c in table.columns if c.primary_key]
 
     insert_strings = []
+    cursor = __load_cursor(context['cursor_id'])
     if rows['data']:
         for row in rows['data']:
             insert = []
@@ -756,15 +791,14 @@ def data_update(request, context=None):
             values=', '.join(insert_strings)
         )
         print(s)
+
         cursor.execute(s)
     return {'affected': len(rows['data'])}
 
 
 def data_insert(request, context=None):
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
     connection = engine.connect()
-    query = request
 
     # If the insert request is not for a meta table, change the request to do so
     assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
@@ -774,7 +808,7 @@ def data_insert(request, context=None):
 
     query = parser.parse_insert(request, engine, context)
     print(query, query.__dict__)
-    result = cursor.execute(query)
+    result = connection.execute(query)
 
     description = result.context.cursor.description
     if not result.returns_rows:
@@ -847,21 +881,14 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     query = parser.parse_select(request)
-    fetch_all = 'cursor_id' in context
-    if fetch_all:
-        engine = _get_engine()
-        connection = engine.connect()
-        cursor = connection.connection.cursor()
-    else:
-        cursor = __load_cursor(context['cursor_id'])
+    print(query)
+
+    cursor = __load_cursor(context['cursor_id'])
     cursor.execute(query)
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
                                  col.null_ok] for col in cursor.description]
     result = {'description': description}
-    if fetch_all:
-        result['data'] = list(cursor.fetchall())
-        connection.close()
     return result
 
 
