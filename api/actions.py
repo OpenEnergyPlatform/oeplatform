@@ -1429,6 +1429,7 @@ def apply_changes(schema, table):
 
 
 def apply_insert(session, table, row):
+    print("apply insert", row)
     session.execute(table.insert(), row)
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(
         schema=get_meta_schema_name(table.schema),
@@ -1438,6 +1439,7 @@ def apply_insert(session, table, row):
 
 
 def apply_update(session, table, row):
+    print("apply update", row)
     session.execute(table.update(table.c.id==row['id']), row)
     session.execute(
         'UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(

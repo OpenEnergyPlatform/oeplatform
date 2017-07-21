@@ -202,11 +202,11 @@ class Rows(APIView):
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
         if exists > 0:
-            response = JsonResponse(self.__update_row(request, schema, table, column_data, row_id))
+            response = self.__update_row(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
-            return response
+            return JsonResponse(response)
         else:
-            result = self.__insert_row(request, schema, table, column_data)
+            result = self.__insert_row(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(result)
 
@@ -217,7 +217,8 @@ class Rows(APIView):
         if row.get('id', row_id) != row_id:
             return actions._response_error('The id given in the query does not '
                                            'match the id given in the url')
-
+        if row_id:
+            row['id'] = row_id
         if not all(map(parser.is_pg_qual, row.keys())):
             return actions.get_response_dict(success=False,
                                              http_status_code=400,
@@ -252,7 +253,7 @@ class Rows(APIView):
                 'right': row_id,
                 'type': 'operator_binary'
             },
-            'values': [row]
+            'values': row
         }
         return actions.data_update(query, context)
 

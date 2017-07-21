@@ -214,7 +214,7 @@ def parse_from_item(d):
     """
     # TODO: If 'type' is not set assume just a table name is present
     if d['type'] == 'table':
-        s = 'only ' if d.pop('only', False) else ''
+        s = 'only ' if d.get('only', True) else ''
         schema = read_pgid(d.pop('schema', ''))
         if schema:
             s += schema + "."
