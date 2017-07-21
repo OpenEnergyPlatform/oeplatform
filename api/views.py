@@ -201,13 +201,14 @@ class Rows(APIView):
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
-        print(exists)
         if exists > 0:
-            return JsonResponse(self.__update_row(request, schema, table, column_data, row_id), 200)
+            response = JsonResponse(self.__update_row(request, schema, table, column_data, row_id))
+            actions.apply_changes(schema, table)
+            return response
         else:
             result = self.__insert_row(request, schema, table, column_data)
-            print(result)
-            return JsonResponse(result, 401)
+            actions.apply_changes(schema, table)
+            return JsonResponse(result)
 
 
 
@@ -216,15 +217,22 @@ class Rows(APIView):
         if row.get('id', row_id) != row_id:
             return actions._response_error('The id given in the query does not '
                                            'match the id given in the url')
-        if row_id:
-            row['id'] = row_id
 
         if not all(map(parser.is_pg_qual, row.keys())):
             return actions.get_response_dict(success=False,
                                              http_status_code=400,
                                              reason="Your request was malformed.")
 
-        result = actions.put_rows(schema, table, row)
+        context = {'cursor_id': request.data['cursor_id'],
+                   'user': request.user}
+
+        query = {
+            'schema': schema,
+            'table': table,
+            'values': [row]
+        }
+
+        result = actions.data_insert(query, context)
 
         return result
 

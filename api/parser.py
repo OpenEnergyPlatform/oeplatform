@@ -60,10 +60,6 @@ def read_pgid(s):
 def set_meta_info(method, user, message=None):
     val_dict = {}
     val_dict['_user'] = user  # TODO: Add user handling
-    val_dict['_submitted'] = datetime.now()
-    val_dict['_autocheck'] = False
-    val_dict['_humancheck'] = False
-    val_dict['_type'] = method
     val_dict['_message'] = message
     return val_dict
 
@@ -72,8 +68,7 @@ def parse_insert(d, engine, context, message=None):
     table = Table(read_pgid(d['table']), MetaData(bind=engine), autoload=True,
                   schema=read_pgid(d['schema']))
 
-    meta_cols = ['_message', '_user', '_submitted', '_autocheck',
-                 '_humancheck', '_type']
+    meta_cols = ['_message', '_user']
 
     field_strings = []
     for field in d.get('fields', []):
@@ -85,9 +80,7 @@ def parse_insert(d, engine, context, message=None):
 
     if not 'method' in d:
         d['method'] = 'values'
-    if d['method'] == 'default':
-        query.values()
-    elif d['method'] == 'values':
+    if d['method'] == 'values':
         if field_strings:
             assert (isinstance(d['values'], list))
             values = map(lambda x: zip(field_strings, x), d['values'])
@@ -107,8 +100,6 @@ def parse_insert(d, engine, context, message=None):
         values = list(map(clear_meta, values))
 
         query = query.values(values)
-    elif d['method'] == 'query':
-        raise NotImplementedError
 
     if 'returning' in d:
         query = query.returning(*map(parse_expression, d['returning']))

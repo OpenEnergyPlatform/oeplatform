@@ -1,6 +1,7 @@
 import re
 import json
 import traceback
+import itertools
 
 import psycopg2
 import sqlalchemy as sqla
@@ -46,11 +47,13 @@ def load_cursor(f):
         result = f(*args, **kwargs)
 
         if fetch_all:
-            try:
-                result['data'] = cursor.fetchall()
-            except psycopg2.ProgrammingError as e:
-                pass
+            # try:
+            #    result['data'] = cursor.fetchall()
+            #except psycopg2.ProgrammingError as e:
+            #    pass
             close_cursor({}, {'cursor_id': cursor_id})
+            connection.connection.commit()
+            connection.close()
 
         return result
     return wrapper
@@ -751,7 +754,7 @@ def data_update(request, context=None):
     context2 = dict(context)
     context2['cursor_id'] = cursor_id
     rows = data_search(query, context2)
-    rows['data'] = cursor.fetchall()
+    rows['data'] = [x for x in cursor.fetchall()]
     conn.close()
 
     setter = request['values']
@@ -782,11 +785,11 @@ def data_update(request, context=None):
 
         # Add metadata for insertions
         schema = request['schema']
-        schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
+        meta_schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
 
-        s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values}".format(
-            schema=api.parser.read_pgid(schema),
-            table=api.parser.read_pgid(get_edit_table_name(table_name)),
+        s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values};".format(
+            schema=api.parser.read_pgid(meta_schema),
+            table=api.parser.read_pgid(get_edit_table_name(schema, table_name)),
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
@@ -798,21 +801,21 @@ def data_update(request, context=None):
 
 def data_insert(request, context=None):
     engine = _get_engine()
-    connection = engine.connect()
-
+    cursor = __load_cursor(context['cursor_id'])
     # If the insert request is not for a meta table, change the request to do so
     assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
-    request['table'] = '_' + request['table'] + '_insert'
+    request['table'] = get_insert_table_name(request['schema'],
+                                             request['table'])
     if not request['schema'].startswith('_'):
         request['schema'] = '_' + request['schema']
 
     query = parser.parse_insert(request, engine, context)
-    print(query, query.__dict__)
-    result = connection.execute(query)
+    compiled = query.compile()
+    result = cursor.execute(str(compiled), dict(compiled.params))
 
-    description = result.context.cursor.description
-    if not result.returns_rows:
-        return {}
+    description = cursor.description
+
+    return {}
 
     data = [list(r) for r in result]
     return {'data': data,
@@ -1044,8 +1047,10 @@ def has_table(request, context=None):
     engine = _get_engine()
     schema = request.pop('schema', None)
     table = request['table']
+    conn = engine.connect()
     result = engine.dialect.has_table(engine.connect(), table,
                                       schema=schema)
+    conn.close()
     return result
 
 
@@ -1299,13 +1304,20 @@ def get_comment_table_name(table):
     return '_' + table + '_cor'
 
 
-def get_edit_table_name(table):
-    return '_' + table + '_edit'
+def get_edit_table_name(schema, table, create=True):
+    table_name = '_' + table + '_edit'
+    if create and not has_table({'schema': get_meta_schema_name(schema),
+                                 'table': table_name}):
+        create_edit_table(schema, table)
+    return table_name
 
 
-def get_insert_table_name(table):
-    return '_' + table + '_insert'
-
+def get_insert_table_name(schema, table, create=True):
+    table_name = '_' + table + '_insert'
+    if create and not has_table({'schema': get_meta_schema_name(schema),
+                                 'table': table_name}):
+        create_insert_table(schema, table)
+    return table_name
 
 def get_meta_schema_name(schema):
     return '_' + schema
@@ -1326,7 +1338,7 @@ def create_edit_table(schema, table, meta_schema=None):
             '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
             'INHERITS (_edit_base);'.format(
         meta_schema=meta_schema,
-        edit_table=get_edit_table_name(table),
+        edit_table=get_edit_table_name(schema, table, create=False),
         schema=schema,
         table=table)
     print(query)
@@ -1341,7 +1353,7 @@ def create_insert_table(schema, table, meta_schema=None):
     query = 'CREATE TABLE {meta_schema}.{edit_table} () ' \
             'INHERITS (_insert_base, {schema}.{table});'.format(
         meta_schema=meta_schema,
-        edit_table=get_insert_table_name(table),
+        edit_table=get_insert_table_name(schema, table, create=False),
         schema=schema,
         table=table)
     print(query)
@@ -1382,3 +1394,54 @@ def getValue(schema, table, column, id):
 
     session.close()
     return None
+
+
+def apply_changes(schema, table):
+    def add_type(d, type):
+        d['_type'] = type
+        return d
+    engine = _get_engine()
+    conn = engine.connect()
+    meta_schema = get_meta_schema_name(schema)
+    insert_table = get_insert_table_name(schema, table)
+    columns = list(describe_columns(schema, table).keys()) + ['_submitted']
+    changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
+                            'from {schema}.{table} '
+                            'where _applied = FALSE;'.format(schema=meta_schema,
+                                                             table=insert_table)))
+
+
+    update_table = get_edit_table_name(schema, table)
+    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
+                            'from {schema}.{table} '
+                            'where _applied = FALSE;'.format(schema=meta_schema,
+                                                             table=update_table))))
+
+    engine = _get_engine()
+    table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
+    session = sessionmaker(bind=engine)()
+    for change in sorted(changes, key=lambda x: x['_submitted']):
+        if change['_type'] == 'insert':
+            apply_insert(session, table_obj, change)
+        elif change['_type'] == 'update':
+            apply_update(session, table_obj, change)
+    session.commit()
+
+
+def apply_insert(session, table, row):
+    session.execute(table.insert(), row)
+    session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(
+        schema=get_meta_schema_name(table.schema),
+        table=get_insert_table_name(table.schema, table.name),
+        id=row['id']
+    ))
+
+
+def apply_update(session, table, row):
+    session.execute(table.update(table.c.id==row['id']), row)
+    session.execute(
+        'UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(
+            schema=get_meta_schema_name(table.schema),
+            table=get_edit_table_name(table.schema, table.name),
+            id=row['id']
+        ))
