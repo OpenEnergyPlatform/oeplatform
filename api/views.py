@@ -178,12 +178,14 @@ class Rows(APIView):
         response = json.dumps(return_obj, default=date_handler)
         return HttpResponse(response, content_type='application/json')
 
+    @actions.load_cursor
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
         if row_id:
-            return self.__update_row(schema, table, column_data, row_id)
+            return self.__update_row(request, schema, table, column_data, row_id)
         else:
-            return self.__insert_row(schema, table, column_data, row_id)
+            return self.__insert_row(request, schema, table, column_data, row_id)
+
 
     def put(self, request, schema, table, row_id=None):
         if not row_id:
@@ -194,18 +196,23 @@ class Rows(APIView):
         conn = engine.connect()
 
         # check whether id is already in use
-        count = conn.execute('select count(*) '
+        exists = conn.execute('select count(*) '
                              'from {schema}.{table} '
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
-                                                     id=row_id))
-        print(count)
-        if count:
-            return self.__update_row(self, schema, table, column_data)
+                                                     id=row_id)).first()[0] > 0 if row_id else False
+        print(exists)
+        if exists > 0:
+            return JsonResponse(self.__update_row(request, schema, table, column_data, row_id), 200)
         else:
-            return self.__insert_row(self, schema, table, column_data)
+            result = self.__insert_row(request, schema, table, column_data)
+            print(result)
+            return JsonResponse(result, 401)
 
-    def __insert_row(self, schema, table, row, row_id=None):
+
+
+    @actions.load_cursor
+    def __insert_row(self, request, schema, table, row, row_id=None):
         if row.get('id', row_id) != row_id:
             return actions._response_error('The id given in the query does not '
                                            'match the id given in the url')
@@ -213,27 +220,33 @@ class Rows(APIView):
             row['id'] = row_id
 
         if not all(map(parser.is_pg_qual, row.keys())):
-            return JsonResponse(actions.get_response_dict(success=False,
-                                                          http_status_code=400,
-                                                          reason="Your request was malformed."),
-                                400)
+            return actions.get_response_dict(success=False,
+                                             http_status_code=400,
+                                             reason="Your request was malformed.")
 
         result = actions.put_rows(schema, table, row)
 
-        return ModHttpResponse(result)
+        return result
 
-    def __update_row(self, schema, table, row, id):
+    @actions.load_cursor
+    def __update_row(self, request, schema, table, row, row_id):
+        context = {'cursor_id': request.data['cursor_id'],
+                   'user': request.user}
         query = {
             'schema': schema,
             'table': table,
             'where': {
-                'first': 'id',
+                'left': {
+                    'type': 'column',
+                    'column': 'id'
+                },
                 'operator': '=',
-                'second': id
+                'right': row_id,
+                'type': 'operator_binary'
             },
             'values': [row]
         }
-        return actions.data_update(request=query)
+        return actions.data_update(query, context)
 
 class Session(APIView):
     def get(self, request, length=1):
