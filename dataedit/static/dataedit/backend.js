@@ -232,7 +232,7 @@ function construct_field(dataset){
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:"/api/v0/advanced/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
+        var request = $.ajax({url:"/api/v0/schema/" + schema + "/tables/" + table + '/columns', data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
         var dfd = new $.Deferred();
         request.done(function(fields) {
 

@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
 import geoalchemy2  # Although this import seems unused is has to be here
 
+
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
@@ -156,9 +157,19 @@ class Index(APIView):
     def put(self, request):
         pass
 
+class Column(APIView):
+    def get(self, request, schema, table, column=None):
+        response = actions.describe_columns(schema, table)
+        if column:
+            try:
+                response = response[column]
+            except KeyError:
+                raise actions.APIError('The column specified is not part of '
+                                       'this table.')
+        return JsonResponse(response)
 
 class Fields(APIView):
-    def get(self, request, schema, table, id, column):
+    def get(self, request, schema, table, id, column=None):
 
         if not parser.is_pg_qual(table) or not  parser.is_pg_qual(schema) or not parser.is_pg_qual(id) or not parser.is_pg_qual(column):
             return ModHttpResponse({"error": "Bad Request", "http_status": 400})
