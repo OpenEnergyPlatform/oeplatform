@@ -207,9 +207,9 @@ class Energymodel(BasicFactsheet):
     
     example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be a good research question that could be answered with the model?', null=True) 
 
-    validation_models = BooleanField(verbose_name='cross-checked with other models') 
-    validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)')  
-    validation_others = BooleanField(verbose_name='others') 
+    validation_models = BooleanField(verbose_name='cross-checked with other models', default=False)
+    validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)', default=False)
+    validation_others = BooleanField(verbose_name='others', default=False)
     validation_others_text = CharField(max_length=1000, null=True)
     
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)

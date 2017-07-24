@@ -803,10 +803,8 @@ def data_update(request, context=None):
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
-        print(s)
-
-        cursor.execute(s)
-    return {'affected': len(rows['data'])}
+        connection.execute(s)
+    return {'affected':len(rows['data'])}
 
 
 def data_insert(request, context=None):
