@@ -14,17 +14,20 @@ from api import actions
 from api import parser
 from api.helpers.http import ModHttpResponse
 from rest_framework.views import APIView
+from dataedit.models import Table as DBTable
 import geoalchemy2  # Although this import seems unused is has to be here
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
         table = kwargs.get('table')
-        if request.user.get_permission_level(schema, table) < permission:
+        if request.user.get_table_permission_level(
+                DBTable.load(schema, table)) < permission:
             raise PermissionDenied
         else:
             return f(caller, request,*args, **kwargs)
     return wrapper
+
 
 def require_write_permission(f):
     return permission_wrapper(login_models.WRITE_PERM, f)
