@@ -2,6 +2,7 @@ import json
 import time
 from decimal import Decimal
 
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -13,6 +14,18 @@ from api import parser
 from api.helpers.http import ModHttpResponse
 from rest_framework.views import APIView
 import geoalchemy2  # Although this import seems unused is has to be here
+
+def permission_wrapper(permission, f):
+    def wrapper(caller, request, *args, **kwargs):
+        schema = kwargs.get('schema')
+        table = kwargs.get('table')
+        if request.user.get_permission_level(schema, table):
+            return f(caller, request,*args, **kwargs)
+        else:
+            raise PermissionDenied
+
+def require_write_permission(f):
+    return permission_wrapper(0,f)
 
 class Table(APIView):
     """
