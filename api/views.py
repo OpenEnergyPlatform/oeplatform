@@ -66,6 +66,7 @@ class Table(APIView):
             'constraints': actions.describe_constraints(schema, table)
         })
 
+    @require_write_permission
     def post(self, request, schema, table):
         """
         Changes properties of tables and table columns
@@ -104,6 +105,7 @@ class Table(APIView):
         else:
             return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
 
+    @require_write_permission
     def put(self, request, schema, table):
         """
         Every request to unsave http methods have to contain a "csrftoken".
@@ -202,6 +204,7 @@ class Rows(APIView):
         response = json.dumps(return_obj, default=date_handler)
         return HttpResponse(response, content_type='application/json')
 
+    @require_write_permission
     @actions.load_cursor
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
@@ -210,7 +213,7 @@ class Rows(APIView):
         else:
             return self.__insert_row(request, schema, table, column_data, row_id)
 
-
+    @require_write_permission
     def put(self, request, schema, table, row_id=None):
         if not row_id:
             return actions._response_error('This methods requires an id')
@@ -233,8 +236,6 @@ class Rows(APIView):
             result = self.__insert_row(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(result)
-
-
 
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
@@ -311,6 +312,7 @@ def create_ajax_handler(func, create_cursor=True):
     :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
     """
 
+    @require_write_permission
     @csrf_exempt
     def execute(request):
         content = request.POST if request.POST else request.GET
