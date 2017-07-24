@@ -17,7 +17,6 @@ from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
 import geoalchemy2  # Although this import seems unused is has to be here
 
-
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
@@ -230,7 +229,6 @@ class Rows(APIView):
         return HttpResponse(response, content_type='application/json')
 
     @require_write_permission
-    @actions.load_cursor
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
         if row_id:
@@ -329,34 +327,37 @@ def date_handler(obj):
 # Create your views here.
 
 
-def create_ajax_handler(func, create_cursor=True):
+def create_ajax_handler(func):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
     :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
     """
+    class AJAX_View(APIView):
 
-    @require_write_permission
-    @csrf_exempt
-    def execute(request):
-        content = request.POST if request.POST else request.GET
-        context = {'user': request.user}
-        if 'cursor_id' in content:
-            context['cursor_id'] = int(content['cursor_id'])
-        else:
-            if create_cursor:
-                context.update(actions.open_raw_connection(request, context))
-                context.update(actions.open_cursor(request, context))
-        data = func(json.loads(content.get('query', '{}')), context)
+        def get(self, request):
+            return JsonResponse(self.execute(request))
 
-        # This must be done in order to clean the structure of non-serializable
-        # objects (e.g. datetime)
-        response_data = json.loads(json.dumps(data, default=date_handler))
-        return JsonResponse({'content': response_data,
-                             'cursor_id': context['cursor_id']}, safe=False)
 
-    return execute
+        def post(self, request):
+            return JsonResponse(self.execute(request))
+
+        @actions.load_cursor
+        def execute(self, request):
+            content = request.data
+            context = {'user': request.user,
+                       'cursor_id': request.data['cursor_id']}
+            data = func(json.loads(content.get('query', ['{}'])[0]),
+                        context)
+
+            # This must be done in order to clean the structure of non-serializable
+            # objects (e.g. datetime)
+            response_data = json.loads(json.dumps(data, default=date_handler))
+            return {'content': response_data,
+                    'cursor_id': context['cursor_id']}
+
+    return AJAX_View.as_view()
 
 
 def stream(data):

@@ -45,17 +45,22 @@ def load_cursor(f):
             engine = _get_engine()
             connection = engine.connect()
             cursor = connection.connection.cursor()
-            cursor_id = cursor.__hash__
+            cursor_id = cursor.__hash__()
             __CURSORS[cursor_id] = cursor
+
+            # django_restframework passes different data dictionaries depending
+            # on the request type: PUT -> Mutable, POST -> Immutable
+            # Thus, we have to replace the data dictionary by one we can mutate.
+            args[1]._full_data = dict(args[1].data)
             args[1].data['cursor_id'] = cursor_id
 
         result = f(*args, **kwargs)
 
         if fetch_all:
-            # try:
-            #    result['data'] = cursor.fetchall()
-            #except psycopg2.ProgrammingError as e:
-            #    pass
+            try:
+               result['data'] = cursor.fetchall()
+            except Exception as e:
+               pass
             close_cursor({}, {'cursor_id': cursor_id})
             connection.connection.commit()
             connection.close()
