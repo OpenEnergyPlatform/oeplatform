@@ -963,36 +963,9 @@ def create_meta(schema, table):
     if not has_schema({'schema': '_' + schema}):
         create_meta_schema(schema)
 
-    # Comment table
-    if not has_table(
-            {'schema': meta_schema,
-             'table': get_comment_table_name(schema, table)}):
-        create_comment_table(schema, table)
-
-    # Table for updates
-    if not has_table(
-            {'schema': meta_schema,
-             'table': get_edit_table_name(schema, table)}):
-        create_edit_table(schema, table)
-
+    get_edit_table_name(schema, table)
     # Table for inserts
-    if not has_table(
-            {'schema': meta_schema,
-             'table': get_insert_table_name(schema, table)}):
-        create_insert_table(schema, table)
-
-    table = get_comment_table_name(schema, table)
-    # Table for updates on comments
-    if not has_table(
-            {'schema': meta_schema,
-             'table': get_edit_table_name(schema, table)}):
-        create_edit_table(meta_schema, table, meta_schema=meta_schema)
-
-    # Table for inserts on comments
-    if not has_table(
-            {'schema': meta_schema,
-             'table': get_insert_table_name(schema, table)}):
-        create_insert_table(meta_schema, table, meta_schema=meta_schema)
+    get_insert_table_name(schema, table)
 
 
 def get_comment_table(db, schema, table):
@@ -1300,8 +1273,12 @@ def fetchmany(request, context):
     return cursor.fetchmany(request['size'])
 
 
-def get_comment_table_name(table):
-    return '_' + table + '_cor'
+def get_comment_table_name(schema, table, create=True):
+    table_name = '_' + table + '_cor'
+    if create and not has_table({'schema': get_meta_schema_name(schema),
+                                 'table': table_name}):
+        create_edit_table(schema, table)
+    return table_name
 
 
 def get_edit_table_name(schema, table, create=True):
