@@ -119,6 +119,16 @@ just the name "John Doe":
         -d '{"query": {"name": "John Doe"}}'
         oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
 
+.. testsetup:: *
+
+    from oeplatform.securitysettings import token_test_user as your_token
+    oep_url = 'http://localhost:8000'
+
+.. testcode::
+
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> requests.put(oep_url+'/api/v0/schema/model_draft/tables/example_table/', data=data, auth=('Token', your_token))
+    <Response [401]>
 Again, a 200-Resonse_ indicates success.
 
 Select data
