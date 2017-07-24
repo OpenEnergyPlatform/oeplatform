@@ -318,10 +318,9 @@ function construct_field(dataset){
             query.limit = queryObj.size;
             query.offset = queryObj.from;
 
-            /*if (id != null)
-                query.order_by = [{
-                    type:'column',
-                    column: id}];*/
+            // This must be a POST-Request for now, even thought no changes should happen.
+            // Reason is, that geo-data must be transformed to geo-JSON and function calls
+            // are not available via get, yet.
             var request = $.when(
                 $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(query)}}),
                 $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(count_query)}})
