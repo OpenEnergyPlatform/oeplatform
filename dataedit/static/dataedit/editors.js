@@ -318,7 +318,7 @@ function get_field_query(field){
         column: field.id
     };
 
-    if(field.attributes.type.startsWith('geometry')){
+    if(field.data_type.startsWith('geometry')){
         column_query = {
             type: 'function',
             function: 'ST_AsGeoJSON',
