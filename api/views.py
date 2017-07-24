@@ -24,7 +24,7 @@ def permission_wrapper(permission, f):
             raise PermissionDenied
         else:
             return f(caller, request,*args, **kwargs)
-
+    return wrapper
 
 def require_write_permission(f):
     return permission_wrapper(login_models.WRITE_PERM, f)
