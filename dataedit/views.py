@@ -76,7 +76,6 @@ def listschemas(request):
     query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
     response = conn.execute(query)
     schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
-    print(schemas)
     return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
 
@@ -132,7 +131,6 @@ def listtables(request, schema_name):
     query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
             'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
         schema=schema_name, user=sec.dbuser)
-    print(query)
     tables = conn.execute(query)
     tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
               not table.tablename.startswith('_')]
@@ -206,9 +204,6 @@ class RevisionView(View):
         date = time.strftime('%Y-%m-%d %H:%M:%S')
         fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
 
-
-        print(date)
-
         original = True  # marks whether this method initialised the revision creation
 
         # If some user already requested this dataset wait for this thread to finish
@@ -274,7 +269,6 @@ def create_dump(schema, table, fname):
     L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
          str(sec.dbport), '-d', sec.dbname, '-f',
          sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
-    print(' '.join(L))
     return call(L, shell=False)
 
 
@@ -475,7 +469,7 @@ class DataView(View):
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
 
-class MetaView(View):
+class MetaView(LoginRequiredMixin, View):
     """
 
     """
@@ -510,7 +504,6 @@ class MetaView(View):
 
 
         comment = load_meta(request.POST)
-        print(json.dumps(comment, indent=2))
 
         engine = actions._get_engine()
         conn = engine.connect()
@@ -837,7 +830,6 @@ def load_comments(schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
     except Exception as e:
-        print(e)
         comment_on_table = {'description': comment_on_table, 'fields': []}
         commented_cols = []
 

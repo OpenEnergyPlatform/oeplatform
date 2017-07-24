@@ -92,7 +92,6 @@ def table_create(request, context=None):
         assert isinstance(constraints['fk'], list), \
             "Foreign Keys should be a list"
         for fk in constraints['fk']:
-            print(fk)
             assert all(map(is_pg_qual, [fk["schema"], fk["table"]] + fk["fields"] + fk["names"])), "Invalid identifier"
             if 'on_delete' in fk:
                 assert fk["on delete"].lower() in ["cascade", "no action",
@@ -124,7 +123,6 @@ def table_create(request, context=None):
     ", ".join(fieldstrings + fk_constraints) if fieldstrings else "") + ")"
     sql_string = "create table {schema}.{table} {fields}".format(
         schema=schema, table=table, fields=fields, constraints=constraints)
-    print(fk_constraints)
     session = sessionmaker(bind=engine)()
     try:
         if create_schema:
@@ -193,12 +191,10 @@ def data_update(request, context=None):
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
-        print(s)
         connection.execute(s)
     return {'affected':len(rows['data'])}
 
 def data_insert(request, context=None):
-    print("INSERT: ", request)
     engine = _get_engine()
     connection = engine.connect()
     query = request
@@ -210,7 +206,6 @@ def data_insert(request, context=None):
         query['schema'] = '_' + query['schema']
 
     query = parser.parse_insert(request, engine, context)
-    print(query, query.__dict__)
     result = connection.execute(query)
     connection.close()
     description = result.context.cursor.description
@@ -282,7 +277,6 @@ def data_search(request, context=None):
     engine = _get_engine()
     connection = engine.connect()
     query = parser.parse_select(request)
-    print(query)
     result = connection.execute(query)
     description = result.context.cursor.description
     data = [list(r) for r in result]
@@ -640,7 +634,6 @@ def create_edit_table(schema, table, meta_schema=None):
                 edit_table=get_edit_table_name(table),
                 schema=schema,
                 table=table)
-    print(query)
     connection = engine.connect()
     connection.execute(query)
 
@@ -655,7 +648,6 @@ def create_insert_table(schema, table, meta_schema=None):
                 edit_table=get_insert_table_name(table),
                 schema=schema,
                 table=table)
-    print(query)
     connection = engine.connect()
     connection.execute(query)
 
