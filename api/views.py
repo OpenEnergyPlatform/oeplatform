@@ -175,18 +175,17 @@ class Fields(APIView):
 
 
 class Rows(APIView):
-    def get(self, request, schema, table, id=''):
+    def get(self, request, schema, table, row_id=None):
         columns = request.GET.get('columns')
         where = request.GET.get('where')
         orderby = request.GET.get('orderby')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
-
         # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
 
-        where_clauses = None
+        where_clauses = []
         if where:
             where_splitted = where.split(' ')
             where_clauses = [{'first': where_splitted[4 * i],
@@ -194,6 +193,10 @@ class Rows(APIView):
                               'second': where_splitted[4 * i + 2],
                               'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i
                              in range(int(len(where_splitted) / 4) + 1)]
+        if row_id:
+            where_clauses.append({'first': 'id',
+             'operator': 'EQUAL',
+             'second': row_id})
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
@@ -207,8 +210,12 @@ class Rows(APIView):
 
         return_obj = actions.get_rows(request, data)
 
+        if row_id:
+            return_obj = return_obj[0]
+
         # TODO: Figure out what JsonResponse does different.
         response = json.dumps(return_obj, default=date_handler)
+
         return HttpResponse(response, content_type='application/json')
 
     @require_write_permission
