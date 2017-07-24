@@ -966,32 +966,32 @@ def create_meta(schema, table):
     # Comment table
     if not has_table(
             {'schema': meta_schema,
-             'table': get_comment_table_name(table)}):
+             'table': get_comment_table_name(schema, table)}):
         create_comment_table(schema, table)
 
     # Table for updates
     if not has_table(
             {'schema': meta_schema,
-             'table': get_edit_table_name(table)}):
+             'table': get_edit_table_name(schema, table)}):
         create_edit_table(schema, table)
 
     # Table for inserts
     if not has_table(
             {'schema': meta_schema,
-             'table': get_insert_table_name(table)}):
+             'table': get_insert_table_name(schema, table)}):
         create_insert_table(schema, table)
 
-    table = get_comment_table_name(table)
+    table = get_comment_table_name(schema, table)
     # Table for updates on comments
     if not has_table(
             {'schema': meta_schema,
-             'table': get_edit_table_name(table)}):
+             'table': get_edit_table_name(schema, table)}):
         create_edit_table(meta_schema, table, meta_schema=meta_schema)
 
     # Table for inserts on comments
     if not has_table(
             {'schema': meta_schema,
-             'table': get_insert_table_name(table)}):
+             'table': get_insert_table_name(schema, table)}):
         create_insert_table(meta_schema, table, meta_schema=meta_schema)
 
 
