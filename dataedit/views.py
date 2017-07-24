@@ -14,6 +14,7 @@ import sqlalchemy as sqla
 import svn.local
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, \
     Http404
 from django.shortcuts import render, redirect, get_object_or_404
