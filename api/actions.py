@@ -21,6 +21,11 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 
 
+class APIError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 __CONNECTIONS = {}
 __CURSORS = {}
 
