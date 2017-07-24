@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
+import login.models as login_models
 import api.parser
 from api import actions
 from api import parser
@@ -19,13 +20,23 @@ def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
         table = kwargs.get('table')
-        if request.user.get_permission_level(schema, table):
-            return f(caller, request,*args, **kwargs)
-        else:
+        if request.user.get_permission_level(schema, table) < permission:
             raise PermissionDenied
+        else:
+            return f(caller, request,*args, **kwargs)
+
 
 def require_write_permission(f):
-    return permission_wrapper(0,f)
+    return permission_wrapper(login_models.WRITE_PERM, f)
+
+
+def require_delete_permission(f):
+    return permission_wrapper(login_models.DELETE_PERM, f)
+
+
+def require_admin_permission(f):
+    return permission_wrapper(login_models.ADMIN_PERM, f)
+
 
 class Table(APIView):
     """
