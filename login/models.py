@@ -71,7 +71,7 @@ class PermissionHolder():
         perm = self.table_permissions.filter(table__name=table,
                                    table__schema__name=schema).first()
         if perm:
-            return perm.permission
+            return perm.level
         else:
             return NO_PERM
 

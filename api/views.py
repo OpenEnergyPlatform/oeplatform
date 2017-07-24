@@ -69,7 +69,6 @@ class Table(APIView):
             'constraints': actions.describe_constraints(schema, table)
         })
 
-    @require_write_permission
     def post(self, request, schema, table):
         """
         Changes properties of tables and table columns
@@ -108,7 +107,7 @@ class Table(APIView):
         else:
             return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
 
-    @require_write_permission
+
     def put(self, request, schema, table):
         """
         Every request to unsave http methods have to contain a "csrftoken".
@@ -138,6 +137,11 @@ class Table(APIView):
             column_definitions.append(column_definition)
 
         result = actions.table_create(schema, table, column_definitions, constraint_definitions)
+
+        perm, _ = login_models.UserPermission.objects.get_or_create(table=DBTable.load(schema, table),
+                                                    holder=request.user)
+        perm.level = login_models.ADMIN_PERM
+        perm.save()
 
         return ModHttpResponse(result)
 
