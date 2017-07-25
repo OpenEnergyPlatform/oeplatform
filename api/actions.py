@@ -208,12 +208,15 @@ def describe_constraints(schema, table):
     } for column in response}
 
 
-def perform_sql(sql_statement):
+def perform_sql(sql_statement, parameter=None):
     """
     Performs a sql command on standard database.
     :param sql_statement: SQL-Command
     :return: Dictionary with results
     """
+
+    if not parameter:
+        parameter = {}
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
@@ -224,7 +227,7 @@ def perform_sql(sql_statement):
         return get_response_dict(success=True)
 
     try:
-        result = session.execute(sql_statement)
+        result = session.execute(sql_statement, parameter)
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
@@ -669,6 +672,8 @@ def table_change_constraint(constraint_definition):
 
 def get_rows(request, data):
     sql = ['SELECT']
+    params = {}
+    params_count = 0
     columns = data.get('columns')
     if not columns:
         sql.append('*')
@@ -679,18 +684,22 @@ def get_rows(request, data):
 
     where_clauses = data.get('where')
 
+
     if where_clauses:
         sql.append('WHERE')
         for clause in where_clauses:
-            sql.append(clause['first'])
+            sql.append(':_%d' % params_count)
             sql.append(parser.parse_sql_operator(clause['operator']))
-            sql.append(
-                clause['second'] if str(clause['second']).isdigit() else "'{second}'".format(second=clause['second']))
+            sql.append(':_%d' % (params_count+1))
+            params['_%d' % params_count] = clause['first']
+            params['_%d' % (params_count+1)] = clause['second'] if str(
+                clause['second']).isdigit() else "'{second}'".format(
+                second=clause['second'])
             if clause.get('connector') is not None:
                 sql.append(clause['connector'])
 
     orderby = data.get('orderby')
-    if orderby is not None:
+    if orderby:
         sql.append('ORDER BY')
         sql.append(','.join(orderby))
 
@@ -706,7 +715,7 @@ def get_rows(request, data):
     sql_command = ' '.join(sql)
     print(sql_command)
 
-    resp_dict = perform_sql(sql_command)
+    resp_dict = perform_sql(sql_command, params)
     result = resp_dict.get('result')
 
     if result is None:
