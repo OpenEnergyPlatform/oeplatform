@@ -162,7 +162,17 @@ In the following example, we want to add a row containing just the name
     >>> json_result['data'] # Show the id of the new row
     [[1]]
 
-Again, a 200-Resonse_ indicates success.
+Alternatively, we can specify that the new row should be stored under id 12:
+
+**python**:
+
+.. doctest::
+
+    >>> import requests
+    >>> data = {"query": {"name": "Mary Doe XII"}}
+    >>> result = requests.put(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/12', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    201
 
 Select data
 ***********
@@ -196,7 +206,7 @@ when adding new rows::
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result ==  [{'id': 1, 'name': 'John Doe', 'geom': None}]
+    >>> json_result ==  [{'id': 1, 'name': 'John Doe', 'geom': None}, {'id': 12, 'name': 'Mary Doe XII', 'geom': None}]
     True
 
 .. testcleanup::
