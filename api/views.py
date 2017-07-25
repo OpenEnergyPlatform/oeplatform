@@ -207,9 +207,9 @@ class Rows(APIView):
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
 
-        if not offset.isdigit():
+        if offset is not None and not offset.isdigit():
             raise actions.APIError("Offset must be integer")
-        if not limit.isdigit():
+        if limit is not None and not limit.isdigit():
             raise actions.APIError("Limit must be integer")
         if not all(parser.is_pg_qual(c) for c in columns):
             raise actions.APIError("Columns are no postgres qualifiers")
