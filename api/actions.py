@@ -822,14 +822,13 @@ def data_insert(request, context=None):
     result = cursor.execute(str(compiled), dict(compiled.params))
 
     description = cursor.description
+    response = {'description': [[col.name, col.type_code, col.display_size,
+                col.internal_size, col.precision, col.scale,
+                col.null_ok] for col in description]}
+    if result:
+        response['data'] = [list(r) for r in result]
+    return response
 
-    return {}
-
-    data = [list(r) for r in result]
-    return {'data': data,
-            'description': [[col.name, col.type_code, col.display_size,
-                             col.internal_size, col.precision, col.scale,
-                             col.null_ok] for col in description]}
 
 
 def process_value(val):

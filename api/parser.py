@@ -5,7 +5,7 @@ import decimal
 import re
 from datetime import datetime
 
-from sqlalchemy import Table, MetaData
+from sqlalchemy import Table, MetaData, Column
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -102,7 +102,7 @@ def parse_insert(d, engine, context, message=None):
         query = query.values(values)
 
     if 'returning' in d:
-        query = query.returning(*map(parse_expression, d['returning']))
+        query = query.returning(*map(Column, d['returning']))
 
     return query
 

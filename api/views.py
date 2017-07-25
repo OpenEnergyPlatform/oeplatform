@@ -283,6 +283,8 @@ class Rows(APIView):
             'values': [row]
         }
 
+        if not row_id:
+            query['returning'] = ['id']
         result = actions.data_insert(query, context)
 
         return result

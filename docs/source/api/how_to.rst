@@ -121,7 +121,7 @@ been created.
 Insert data
 ***********
 
-You can insert data into a specific table by sending a POST-request to its
+You can insert data into a specific table by sending a request to its
 `/rows` subresource. The `query` part of the sent data contians the row you want
 to insert in form of a JSON-dictionary:::
 
@@ -131,8 +131,14 @@ to insert in form of a JSON-dictionary:::
         ...
     }
 
-In the following example, we want to add a row containing
-just the name "John Doe":
+If you the row you want to insert should have a specific id, send a PUT-request
+to the `/rows/{id}/` subresource.
+In case the id should be generated automatically, just ommit the id field in the
+data dictionary and send a POST-request to the `/rows/` subresource. If
+successful, the response will contain the id of the new row.
+
+In the following example, we want to add a row containing just the name
+"John Doe", **but** we do not want to set the the id of this entry.
 
 **curl**::
 
@@ -149,8 +155,12 @@ just the name "John Doe":
 
     >>> import requests
     >>> data = {"query": {"name": "John Doe"}}
-    >>> requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    <Response [201]>
+    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    201
+    >>> json_result = result.json()
+    >>> json_result['data'] # Show the id of the new row
+    [[1]]
 
 Again, a 200-Resonse_ indicates success.
 
