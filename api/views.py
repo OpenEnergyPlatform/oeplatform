@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from decimal import Decimal
 
@@ -220,14 +221,15 @@ class Rows(APIView):
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
 
+        where_expression = '^(?P<first>.+)(?P<operator>' \
+                           + '|'.join(parser.sql_operators) \
+                           + ')(?P<second>.+)$'
         where_clauses = []
         if where:
-            where_splitted = where.split(' ')
-            where_clauses = [{'first': where_splitted[4 * i],
-                              'operator': where_splitted[4 * i + 1],
-                              'second': where_splitted[4 * i + 2],
-                              'connector': where_splitted[4 * i + 3] if len(where_splitted) > 4 * i + 3 else None} for i
-                             in range(int(len(where_splitted) / 4) + 1)]
+            where_splitted = re.findall(where_expression, where)
+            where_clauses = [{'first': match[0],
+                              'operator': match[1],
+                              'second': match[2]} for match in where_splitted]
         if row_id:
             where_clauses.append({'first': 'id',
              'operator': 'EQUALS',
