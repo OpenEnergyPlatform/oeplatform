@@ -1,10 +1,17 @@
 How to work with the API - An example
 =====================================
 
-.. testsetup:: *
+.. testsetup::
 
-    from oeplatform.securitysettings import token_test_user as your_token
+    from api.actions import _get_engine
+    engine = _get_engine()
+    connection = engine.connect()
+    connection.execute('CREATE SCHEMA IF NOT EXISTS example_schema;')
+    connection.execute('CREATE SCHEMA IF NOT EXISTS _example_schema;')
+    connection.close()
+
     oep_url = 'http://localhost:8000'
+    from oeplatform.securitysettings import token_test_user as your_token
 
 
 Authenticate
@@ -101,15 +108,15 @@ or **python**:
 
     >>> import requests
     >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
-    >>> requests.put(oep_url+'/api/v0/schema/model_draft/tables/example_table/', data=data, auth=('Token', your_token))
-    <Response [401]>
+    >>> requests.put(oep_url+'/api/v0/schema/example_schema/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    <Response [201]>
 
 
-If everything went right, you will receive a 401-Resonse_ and the table has
+If everything went right, you will receive a 201-Resonse_ and the table has
 been created.
 
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-.. _401-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+.. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 Insert data
 ***********
@@ -136,6 +143,14 @@ just the name "John Doe":
         -d '{"query": {"name": "John Doe"}}'
         oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
 
+**python**:
+
+.. doctest::
+
+    >>> import requests
+    >>> data = {"query": {"name": "John Doe"}}
+    >>> requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    <Response [201]>
 
 Again, a 200-Resonse_ indicates success.
 
@@ -162,3 +177,13 @@ when adding new rows::
             "id": 1
         }
     ]
+
+
+.. testcleanup::
+
+    from api.actions import _get_engine
+    engine = _get_engine()
+    connection = engine.connect()
+    connection.execute('DROP SCHEMA example_schema CASCADE;')
+    connection.execute('DROP SCHEMA _example_schema CASCADE;')
+    connection.close()
