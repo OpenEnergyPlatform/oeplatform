@@ -78,7 +78,7 @@ class Table(APIView):
         :return:
         """
 
-        json_data = json.loads(request.body.decode("utf-8"))
+        json_data = request.data
 
         if 'column' in json_data['type']:
 
