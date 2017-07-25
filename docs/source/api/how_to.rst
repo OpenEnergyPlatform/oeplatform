@@ -188,6 +188,16 @@ when adding new rows::
         }
     ]
 
+**python**:
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', )
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result ==  [{'id': 1, 'name': 'John Doe', 'geom': None}]
+    True
 
 .. testcleanup::
 
