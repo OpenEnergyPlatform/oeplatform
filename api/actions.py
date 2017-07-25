@@ -678,8 +678,8 @@ def get_rows(request, data):
     sql.append('FROM {schema}.{table}'.format(schema=data['schema'], table=data['table']))
 
     where_clauses = data.get('where')
-    print(where_clauses)
-    if where_clauses is not None:
+
+    if where_clauses:
         sql.append('WHERE')
         for clause in where_clauses:
             sql.append(clause['first'])
@@ -695,11 +695,11 @@ def get_rows(request, data):
         sql.append(','.join(orderby))
 
     limit = data.get('limit')
-    if limit is not None and limit.isdigit():
+    if limit and limit.isdigit():
         sql.append('LIMIT ' + limit)
 
     offset = data.get('offset')
-    if offset is not None and offset.isdigit():
+    if offset and offset.isdigit():
         sql.append('OFFSET ' + offset)
 
     print(sql)
