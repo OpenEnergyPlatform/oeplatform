@@ -22,8 +22,9 @@ _ENGINES = {}
 
 
 class APIError(Exception):
-    def __init__(self, message):
+    def __init__(self, message, status=500):
         self.message = message
+        self.status = status
 
 
 __CONNECTIONS = {}
@@ -224,11 +225,10 @@ def perform_sql(sql_statement):
 
     try:
         result = session.execute(sql_statement)
-
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
-        return get_response_dict(False, 500, "The sql action could not be finished correctly.", e)
+        raise APIError(str(e))
 
     # Why is commit() not part of close() ?
     # I have to commit the changes before closing session. Otherwise the changes are not persistent.
@@ -532,6 +532,7 @@ def table_create(schema, table, columns, constraints):
 
     for res in results:
         if not res['success']:
+            print(res)
             return res
 
     return get_response_dict(success=True)
@@ -633,8 +634,7 @@ def table_change_constraint(constraint_definition):
     existing_column_description = describe_columns(schema, table)
 
     if len(existing_column_description) <= 0:
-        return {'success': False,
-                'error': 'Table does not exists.'}
+        raise APIError('Table does not exist')
 
     # There is a table named schema.table.
     sql = []
@@ -649,7 +649,7 @@ def table_change_constraint(constraint_definition):
 
         if 'FOREIGN KEY' in constraint_definition['constraint_type']:
             if constraint_definition['reference_table'] is None or constraint_definition['reference_column'] is None:
-                return get_response_dict(False, 400, 'references are not defined correctly')
+                raise APIError('references are not defined correctly')
             sql.append(' REFERENCES {reference_table}({reference_column})'.format(
                 reference_column=constraint_definition['reference_column'],
                 reference_table=constraint_definition['reference_table']))

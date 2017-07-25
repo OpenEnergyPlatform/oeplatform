@@ -15,6 +15,9 @@ from api import parser
 from api.helpers.http import ModHttpResponse
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
+
+from rest_framework import status
+
 import geoalchemy2  # Although this import seems unused is has to be here
 
 def permission_wrapper(permission, f):
@@ -107,7 +110,6 @@ class Table(APIView):
         else:
             return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
 
-
     def put(self, request, schema, table):
         """
         Every request to unsave http methods have to contain a "csrftoken".
@@ -119,7 +121,6 @@ class Table(APIView):
         :return:
         """
         json_data = request.data['query']
-
         constraint_definitions = []
         column_definitions = []
 
@@ -130,7 +131,7 @@ class Table(APIView):
             constraint_definitions.append(constraint_definiton)
 
         if 'columns' not in json_data:
-            return
+            raise actions.APIError("Table contains no columns")
         for column_definition in json_data['columns']:
             column_definition.update({"c_table": table,
                                       "c_schema": schema})
@@ -143,7 +144,7 @@ class Table(APIView):
         perm.level = login_models.ADMIN_PERM
         perm.save()
 
-        return ModHttpResponse(result)
+        return JsonResponse(result, status=status.HTTP_201_CREATED)
 
 
 class Index(APIView):
@@ -232,14 +233,15 @@ class Rows(APIView):
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
         if row_id:
-            return self.__update_row(request, schema, table, column_data, row_id)
+            return JsonResponse(self.__update_row(request, schema, table, column_data, row_id))
         else:
-            return self.__insert_row(request, schema, table, column_data, row_id)
+            return JsonResponse(self.__insert_row(request, schema, table, column_data, row_id), status=status.HTTP_201_CREATED)
 
     @require_write_permission
     def put(self, request, schema, table, row_id=None):
         if not row_id:
-            return actions._response_error('This methods requires an id')
+            return JsonResponse(actions._response_error('This methods requires an id'),
+                                status=status.HTTP_400_BAD_REQUEST)
 
         column_data = request.data['query']
         engine = actions._get_engine()
@@ -258,7 +260,7 @@ class Rows(APIView):
         else:
             result = self.__insert_row(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
-            return JsonResponse(result)
+            return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
