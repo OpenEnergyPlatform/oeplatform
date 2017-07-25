@@ -192,6 +192,16 @@ class Rows(APIView):
         orderby = request.GET.getlist('orderby')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
+
+        if not offset.isdigit():
+            raise actions.APIError("Offset must be integer")
+        if not limit.isdigit():
+            raise actions.APIError("Limit must be integer")
+        if not all(parser.is_pg_qual(c) for c in columns):
+            raise actions.APIError("Columns are no postgres qualifiers")
+        if not all(parser.is_pg_qual(c) for c in orderby):
+            raise actions.APIError("Columns in groupby-clause are no postgres qualifiers")
+
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
