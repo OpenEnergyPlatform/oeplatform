@@ -187,9 +187,9 @@ class Fields(APIView):
 
 class Rows(APIView):
     def get(self, request, schema, table, row_id=None):
-        columns = request.GET.get('columns')
+        columns = request.GET.getlist('column')
         where = request.GET.get('where')
-        orderby = request.GET.get('orderby')
+        orderby = request.GET.getlist('orderby')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
         # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
@@ -212,9 +212,9 @@ class Rows(APIView):
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
                 'table': table,
-                'columns': parser.split(columns, ','),
+                'columns': columns,
                 'where': where_clauses,
-                'orderby': parser.split(orderby, ','),
+                'orderby': orderby,
                 'limit': limit,
                 'offset': offset
                 }
