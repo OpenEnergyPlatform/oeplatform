@@ -670,7 +670,7 @@ def table_change_constraint(constraint_definition):
 def get_rows(request, data):
     sql = ['SELECT']
     columns = data.get('columns')
-    if columns is None:
+    if not columns:
         sql.append('*')
     else:
         sql.append(','.join(columns))
