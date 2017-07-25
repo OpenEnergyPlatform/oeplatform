@@ -20,6 +20,17 @@ from rest_framework import status
 
 import geoalchemy2  # Although this import seems unused is has to be here
 
+
+def api_exception(f):
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except actions.APIError as e:
+            return JsonResponse({'reason': e.message},
+                                status=e.status)
+    return wrapper
+
+
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
@@ -48,7 +59,7 @@ class Table(APIView):
     """
     Handels the creation of tables and serves information on existing tables
     """
-
+    @api_exception
     def get(self, request, schema, table):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
@@ -72,6 +83,7 @@ class Table(APIView):
             'constraints': actions.describe_constraints(schema, table)
         })
 
+    @api_exception
     def post(self, request, schema, table):
         """
         Changes properties of tables and table columns
@@ -110,6 +122,7 @@ class Table(APIView):
         else:
             return ModHttpResponse(actions.get_response_dict(False, 400, 'type not recognised'))
 
+    @api_exception
     def put(self, request, schema, table):
         """
         Every request to unsave http methods have to contain a "csrftoken".
@@ -186,6 +199,7 @@ class Fields(APIView):
 
 
 class Rows(APIView):
+    @api_exception
     def get(self, request, schema, table, row_id=None):
         columns = request.GET.getlist('column')
         where = request.GET.get('where')
@@ -239,6 +253,7 @@ class Rows(APIView):
 
         return HttpResponse(response, content_type='application/json')
 
+    @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
@@ -247,6 +262,7 @@ class Rows(APIView):
         else:
             return JsonResponse(self.__insert_row(request, schema, table, column_data, row_id), status=status.HTTP_201_CREATED)
 
+    @api_exception
     @require_write_permission
     def put(self, request, schema, table, row_id=None):
         if not row_id:
