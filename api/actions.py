@@ -675,7 +675,7 @@ def get_rows(request, data):
     else:
         sql.append(','.join(columns))
 
-    sql.append('FROM {schema}.{table}'.format(schema=data['schema'], table=data['table']))
+    sql.append('FROM ONLY {schema}.{table}'.format(schema=data['schema'], table=data['table']))
 
     where_clauses = data.get('where')
 
