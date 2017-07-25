@@ -688,13 +688,19 @@ def get_rows(request, data):
     if where_clauses:
         sql.append('WHERE')
         for clause in where_clauses:
-            sql.append(':_%d' % params_count)
+            if not parser.is_pg_qual(clause['first']):
+                sql.append(':_%d' % params_count)
+                params['_%d' % params_count] = clause['first']
+                params_count += 1
+            else:
+                sql.append(clause['first'])
             sql.append(parser.parse_sql_operator(clause['operator']))
-            sql.append(':_%d' % (params_count+1))
-            params['_%d' % params_count] = clause['first']
-            params['_%d' % (params_count+1)] = clause['second'] if str(
-                clause['second']).isdigit() else "'{second}'".format(
-                second=clause['second'])
+            if not parser.is_pg_qual(clause['second']):
+                sql.append(':_%d' % params_count)
+                params['_%d' % params_count] = clause['second']
+                params_count += 1
+            else:
+                sql.append(clause['second'])
             if clause.get('connector') is not None:
                 sql.append(clause['connector'])
 
