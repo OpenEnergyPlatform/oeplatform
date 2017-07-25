@@ -192,7 +192,7 @@ class Rows(APIView):
         orderby = request.GET.getlist('orderby')
         limit = request.GET.get('limit')
         offset = request.GET.get('offset')
-        # OPERATORS could be EQUAL, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
+        # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
 
@@ -206,7 +206,7 @@ class Rows(APIView):
                              in range(int(len(where_splitted) / 4) + 1)]
         if row_id:
             where_clauses.append({'first': 'id',
-             'operator': 'EQUAL',
+             'operator': 'EQUALS',
              'second': row_id})
 
         # TODO: Validate where_clauses. Should not be vulnerable

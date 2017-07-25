@@ -452,7 +452,7 @@ def alchemyencoder(obj):
         return float(obj)
 
 
-sql_operators = {'EQUAL': '=',
+sql_operators = {'EQUALS': '=',
                  'GREATER': '>',
                  'LOWER': '<',
                  'NOTEQUAL': '!=',
