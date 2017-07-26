@@ -318,7 +318,7 @@ Alter data
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result #== [{'name': 'Doe', 'first_name': 'John'},{'name': 'Doe XII', 'first_name': 'Mary'}]
+    >>> json_result == [{'name': 'Doe', 'first_name': 'John'},{'name': 'Doe XII', 'first_name': 'Mary'}]
     True
 
 .. testcleanup::
