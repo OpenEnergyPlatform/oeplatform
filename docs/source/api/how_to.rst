@@ -209,6 +209,37 @@ when adding new rows::
     >>> json_result ==  [{'id': 1, 'name': 'John Doe', 'geom': None}, {'id': 12, 'name': 'Mary Doe XII', 'geom': None}]
     True
 
+
+There are also optional parameters for these GET-queries:
+
+* limit: Limit the number of returned rows
+* offset: Ignore the specified amount of rows
+* orderby: Name of a column to refer when ordering
+* column: Name of a column to include in the results. If not present, all
+          columns are returned
+* where: Constraint fourmulated as `VALUE+OPERATOR+VALUE` with
+
+    * VALUE: Constant or name of a column
+    * OPERATOR: One of the following:
+
+        * `EQUALS` or `=`,
+        * `GREATER` or `>`,
+        * `LOWER` or `<`,
+        * `NOTEQUAL` or `!=` or `<>`,
+        * `NOTGREATER` or `<=`,
+        * `NOTLOWER` or `>=`,
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?where=name=John+Doe", )
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result == [{'id': 1, 'name': 'John Doe', 'geom': None}]
+    True
+
+
+
 .. testcleanup::
 
     from api.actions import _get_engine
