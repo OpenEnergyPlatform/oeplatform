@@ -134,7 +134,7 @@ to insert in form of a JSON-dictionary:::
 If you the row you want to insert should have a specific id, send a PUT-request
 to the `/rows/{id}/` subresource.
 In case the id should be generated automatically, just ommit the id field in the
-data dictionary and send a POST-request to the `/rows/` subresource. If
+data dictionary and send a POST-request to the `/rows/new` subresource. If
 successful, the response will contain the id of the new row.
 
 In the following example, we want to add a row containing just the name
@@ -155,7 +155,7 @@ In the following example, we want to add a row containing just the name
 
     >>> import requests
     >>> data = {"query": {"name": "John Doe"}}
-    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     201
     >>> json_result = result.json()
@@ -281,9 +281,45 @@ Add columns table
 .. doctest::
 
     >>> data = {'data_type': 'varchar', 'character_maximum_length': 30}
-    >>> result = requests.put(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/firstname", json=data, headers={'Authorization': 'Token %s'%your_token})
+    >>> result = requests.put(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token})
     >>> result.status_code
     201
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name")
+    >>> result.status_code
+    200
+    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': 'YES', 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': 'YES', 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
+    True
+
+Alter data
+**********
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/')
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> codes = []
+    >>> for row in json_result:
+    ...     first_name, last_name = str(row['name']).split(' ', 1)
+    ...     data = {'query': {'name': last_name, 'first_name': first_name}}
+    ...     result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/{id}'.format(id=row['id']), json=data, headers={'Authorization': 'Token %s'%your_token})
+    ...     codes.append(result.status_code == 200)
+    ...     result.status_code
+    200
+    200
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?column=name&column=first_name")
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result #== [{'name': 'Doe', 'first_name': 'John'},{'name': 'Doe XII', 'first_name': 'Mary'}]
+    True
 
 .. testcleanup::
 

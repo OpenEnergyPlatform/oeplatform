@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$', views.Fields.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$', views.Rows.as_view()),
+    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
 
     url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search)),
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),

@@ -256,13 +256,17 @@ class Rows(APIView):
 
     @api_exception
     @require_write_permission
-    def post(self, request, schema, table, row_id=None):
+    def post(self, request, schema, table, row_id=None, action=None):
         column_data = request.data['query']
         if row_id:
             return JsonResponse(self.__update_rows(request, schema, table, column_data, row_id))
         else:
-            return JsonResponse(self.__insert_row(request, schema, table, column_data, row_id), status=status.HTTP_201_CREATED)
-
+            if action=='new':
+                return JsonResponse(self.__insert_row(request, schema, table, column_data, row_id), status=status.HTTP_201_CREATED)
+            else:
+                return JsonResponse(
+                    self.__update_rows(request, schema, table, column_data,
+                                       None))
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, row_id=None):
