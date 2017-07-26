@@ -497,6 +497,31 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
              } for column in response]
 
 
+def get_column_definition_query(c):
+    return "{name} {data_type} {length} {not_null}".format(
+        name=c['name'],
+        data_type=c['data_type'],
+        length=('(' + str(c['character_maximum_length']) + ')')
+                    if c.get('character_maximum_length', False)
+                    else '',
+        not_null="NOT NULL"
+                    if "NO" in c.get('is_nullable', [])
+                    else ""
+        )
+
+
+def column_add(schema, table, column, description):
+    description['name'] = column
+    settings = get_column_definition_query(description)
+    s = 'ALTER TABLE {schema}.{table} ADD COLUMN {settings}'.format(
+        schema=schema,
+        table=table,
+        settings=settings
+    )
+
+    perform_sql(s)
+
+
 def table_create(schema, table, columns, constraints):
     """
     Creates a new table.
@@ -513,16 +538,7 @@ def table_create(schema, table, columns, constraints):
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
-    first_column = True
-    for c in columns:
-        if not first_column:
-            str_list.append(",")
-        str_list.append("{name} {data_type} {length} {not_null}"
-                        .format(name=c['name'], data_type=c['data_type'],
-                                length=('(' + str(c['character_maximum_length']) + ')') if c.get(
-                                    'character_maximum_length', False) else "",
-                                not_null="NOT NULL" if "NO" in c.get('is_nullable', []) else ""))
-        first_column = False
+    str_list.append(', '.join(get_column_definition_query(c) for c in columns))
 
     str_list.append(");")
     sql_string = ''.join(str_list)

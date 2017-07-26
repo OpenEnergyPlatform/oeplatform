@@ -171,7 +171,9 @@ class Index(APIView):
     def put(self, request):
         pass
 
+
 class Column(APIView):
+
     def get(self, request, schema, table, column=None):
         response = actions.describe_columns(schema, table)
         if column:
@@ -181,6 +183,11 @@ class Column(APIView):
                 raise actions.APIError('The column specified is not part of '
                                        'this table.')
         return JsonResponse(response)
+
+    def put(self, request, schema, table, column):
+        actions.column_add(schema, table, column, request.data)
+        return JsonResponse({}, 201)
+
 
 class Fields(APIView):
     def get(self, request, schema, table, id, column=None):

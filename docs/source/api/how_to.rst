@@ -266,6 +266,18 @@ There are also optional parameters for these GET-queries:
     >>> json_result == [{'id': 1, 'name': 'John Doe'},{'id': 12, 'name': 'Mary Doe XII'}]
     True
 
+Add columns table
+*****************
+
+.. doctest::
+
+    >>> data = {'data_type': 'varchar', 'character_maximum_length': 30}
+    >>> result = requests.put(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/firstname", json=data, headers={'Authorization': 'Token %s'%your_token})
+    >>> result.status_code
+    201
+    >>> json_result = result.json()
+    True
+
 .. testcleanup::
 
     from api.actions import _get_engine
