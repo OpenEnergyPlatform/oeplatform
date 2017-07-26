@@ -296,21 +296,40 @@ Add columns table
 Alter data
 **********
 
+Our current table looks as follows:
+
++-----------+-------------------+-----------------------+------------------------+
+| *id*: int | name: varchar(50) | geom: geometry(Point) | first_name: varchar(30)|
++===========+===================+=======================+========================+
+|       1   | John Doe          | NULL                  | NULL                   |
++-----------+-------------------+-----------------------+------------------------+
+|       12  | Mary Doe XII      | NULL                  | NULL                   |
++-----------+-------------------+-----------------------+------------------------+
+
+Our next task is to distribute for and last name to the different columns:
+
 .. doctest::
 
-    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/')
+    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/') # Load the names via GET
     >>> result.status_code
     200
-    >>> json_result = result.json()
-    >>> codes = []
-    >>> for row in json_result:
-    ...     first_name, last_name = str(row['name']).split(' ', 1)
-    ...     data = {'query': {'name': last_name, 'first_name': first_name}}
+    >>> for row in result.json():
+    ...     first_name, last_name = str(row['name']).split(' ', 1) # Split the names at the first space
+    ...     data = {'query': {'name': last_name, 'first_name': first_name}} # Build the data dictionary and post it to /rows/<id>
     ...     result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/{id}'.format(id=row['id']), json=data, headers={'Authorization': 'Token %s'%your_token})
-    ...     codes.append(result.status_code == 200)
     ...     result.status_code
     200
     200
+
+Now, our table looks as follows:
+
++-----------+-------------------+-----------------------+------------------------+
+| *id*: int | name: varchar(50) | geom: geometry(Point) | first_name: varchar(30)|
++===========+===================+=======================+========================+
+|       1   | Doe               | NULL                  | John                   |
++-----------+-------------------+-----------------------+------------------------+
+|       12  | Doe XII           | NULL                  | Mary                   |
++-----------+-------------------+-----------------------+------------------------+
 
 .. doctest::
 
