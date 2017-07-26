@@ -238,7 +238,23 @@ There are also optional parameters for these GET-queries:
     >>> json_result == [{'id': 1, 'name': 'John Doe', 'geom': None}]
     True
 
+.. doctest::
 
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?offset=1")
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result == [{'id': 12, 'name': 'Mary Doe XII', 'geom': None}]
+    True
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?column=name&column=id")
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result == [{'id': 1, 'name': 'John Doe'},{'id': 12, 'name': 'Mary Doe XII'}]
+    True
 
 .. testcleanup::
 
