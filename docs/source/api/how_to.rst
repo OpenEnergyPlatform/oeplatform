@@ -250,6 +250,15 @@ There are also optional parameters for these GET-queries:
 
 .. doctest::
 
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/1", )
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result == {'id': 1, 'name': 'John Doe', 'geom': None}
+    True
+
+.. doctest::
+
     >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?offset=1")
     >>> result.status_code
     200
@@ -275,8 +284,6 @@ Add columns table
     >>> result = requests.put(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/firstname", json=data, headers={'Authorization': 'Token %s'%your_token})
     >>> result.status_code
     201
-    >>> json_result = result.json()
-    True
 
 .. testcleanup::
 
