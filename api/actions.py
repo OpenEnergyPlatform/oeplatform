@@ -513,14 +513,12 @@ def get_column_definition_query(c):
 def column_add(schema, table, column, description):
     description['name'] = column
     settings = get_column_definition_query(description)
-    s = 'ALTER TABLE {schema}.{table} ADD COLUMN {settings}'.format(
-        schema=schema,
-        table=table,
-        settings=settings
-    )
-
-    perform_sql(s)
-
+    s = 'ALTER TABLE {schema}.{table} ADD COLUMN ' + settings
+    perform_sql(s.format(schema=schema, table=table))
+    # Do the same for update tables. Insert tables are covered by inheritance.
+    meta_schema = get_meta_schema_name(schema)
+    perform_sql(s.format(schema=meta_schema,
+                         table=get_edit_table_name(schema, table)))
 
 def table_create(schema, table, columns, constraints):
     """
@@ -834,7 +832,7 @@ def data_update(request, context=None):
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
-        connection.execute(s)
+        cursor.execute(s)
     return {'affected':len(rows['data'])}
 
 

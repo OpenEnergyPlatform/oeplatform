@@ -186,7 +186,7 @@ class Column(APIView):
 
     def put(self, request, schema, table, column):
         actions.column_add(schema, table, column, request.data)
-        return JsonResponse({}, 201)
+        return JsonResponse({}, status=201)
 
 
 class Fields(APIView):
@@ -228,15 +228,8 @@ class Rows(APIView):
         # CONNECTORS could be AND, OR
         # If you connect two values with an +, it will convert the + to a space. Whatever.
 
-        where_expression = '^(?P<first>.+)(?P<operator>' \
-                           + '|'.join(parser.sql_operators) \
-                           + ')(?P<second>.+)$'
-        where_clauses = []
-        if where:
-            where_splitted = re.findall(where_expression, where)
-            where_clauses = [{'first': match[0],
-                              'operator': match[1],
-                              'second': match[2]} for match in where_splitted]
+        where_clauses = self.__read_where_clause(where)
+
         if row_id:
             where_clauses.append({'first': 'id',
              'operator': 'EQUALS',
@@ -257,17 +250,16 @@ class Rows(APIView):
         if row_id:
             return_obj = return_obj[0]
 
+        print([x for x in return_obj])
         # TODO: Figure out what JsonResponse does different.
-        response = json.dumps(return_obj, default=date_handler)
-
-        return HttpResponse(response, content_type='application/json')
+        return JsonResponse(return_obj, safe=False)
 
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None):
         column_data = request.data['query']
         if row_id:
-            return JsonResponse(self.__update_row(request, schema, table, column_data, row_id))
+            return JsonResponse(self.__update_rows(request, schema, table, column_data, row_id))
         else:
             return JsonResponse(self.__insert_row(request, schema, table, column_data, row_id), status=status.HTTP_201_CREATED)
 
@@ -289,7 +281,7 @@ class Rows(APIView):
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
         if exists > 0:
-            response = self.__update_row(request, schema, table, column_data, row_id)
+            response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(response)
         else:
@@ -297,6 +289,18 @@ class Rows(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    def __read_where_clause(self, where):
+        where_expression = '^(?P<first>.+)(?P<operator>' \
+                           + '|'.join(parser.sql_operators) \
+                           + ')(?P<second>.+)$'
+        where_clauses = []
+        if where:
+            where_splitted = re.findall(where_expression, where)
+            where_clauses = [{'first': match[0],
+                              'operator': match[1],
+                              'second': match[2]} for match in where_splitted]
+
+        return where_clauses
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row.get('id', row_id) != row_id:
@@ -325,13 +329,20 @@ class Rows(APIView):
         return result
 
     @actions.load_cursor
-    def __update_row(self, request, schema, table, row, row_id):
+    def __update_rows(self, request, schema, table, row, row_id=None):
         context = {'cursor_id': request.data['cursor_id'],
                    'user': request.user}
+
+        where = request.GET.get('where')
+
         query = {
             'schema': schema,
             'table': table,
-            'where': {
+            'where': self.__read_where_clause(where),
+            'values': row
+        }
+        if row_id:
+            query['where'].append({
                 'left': {
                     'type': 'column',
                     'column': 'id'
@@ -339,9 +350,7 @@ class Rows(APIView):
                 'operator': '=',
                 'right': row_id,
                 'type': 'operator_binary'
-            },
-            'values': row
-        }
+            })
         return actions.data_update(query, context)
 
 class Session(APIView):
