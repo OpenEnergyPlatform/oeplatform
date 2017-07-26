@@ -222,7 +222,7 @@ def perform_sql(sql_statement, parameter=None):
     session = sessionmaker(bind=engine)()
 
     # Statement built and no changes required, so statement is empty.
-    print("SQL STATEMENT: |" + sql_statement + "|")
+    print("SQL STATEMENT: |" + sql_statement + "|", parameter)
     if not sql_statement or sql_statement.isspace():
         return get_response_dict(success=True)
 
