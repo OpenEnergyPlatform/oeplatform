@@ -174,6 +174,16 @@ Alternatively, we can specify that the new row should be stored under id 12:
     >>> result.status_code
     201
 
+Our database should have the following structure now:
+
++-----------+-------------------+-----------------------+
+| *id*: int | name: varchar(50) | geom: geometry(Point) |
++===========+===================+=======================+
+|       1   | John Doe          | NULL                  |
++-----------+-------------------+-----------------------+
+|       12  | Mary Doe XII      | NULL                  |
++-----------+-------------------+-----------------------+
+
 Select data
 ***********
 
