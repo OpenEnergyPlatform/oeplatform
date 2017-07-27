@@ -45,7 +45,8 @@ In order to do so, we send the following PUT request::
             "columns": [
                 {
                     "name":"id",
-                    "data_type": "Integer"
+                    "data_type": "Integer",
+                    "is_nullable": "NO"
                 },{
                     "name":"name",
                     "data_type": "varchar",
@@ -81,7 +82,8 @@ tool **curl**::
                     "columns": [
                         {
                             "name":"id",
-                            "data_type": "Integer"
+                            "data_type": "Integer",
+                            "is_nullable": "NO"
                         },{
                             "name":"name",
                             "data_type": "varchar",
@@ -107,13 +109,26 @@ or **python**:
 .. doctest::
 
     >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
     >>> requests.put(oep_url+'/api/v0/schema/example_schema/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
-
 If everything went right, you will receive a 201-Resonse_ and the table has
 been created.
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/columns')
+    >>> result.status_code
+    200
+    >>> json_result = result.json()
+    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': 'NO', 'data_type': 'integer', 'numeric_precision': 32, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('example_schema.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
+    True
+    >>> json_result['geom'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': 'YES', 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
+    True
+    >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': 'YES', 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
+    True
+
 
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -331,14 +346,45 @@ Now, our table looks as follows:
 |       12  | Doe XII           | NULL                  | Mary                   |
 +-----------+-------------------+-----------------------+------------------------+
 
+Alter tables
+************
+
+Currently, rows are allowed that contain no first name. In order to prohibit
+such behaviour, we have to set column `first_name` to `NOT NULL`. Such `ALTER
+TABLE` commands can be executed by POST-ing a dictionary with the corresponding
+values to the column's resource:
+
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?column=name&column=first_name")
+    >>> data = {'is_nullable': 'NO'}
+    >>> result = requests.post(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    200
+
+We can check, whether your command worked by retrieving the corresponding resource:
+
+.. doctest::
+
+    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name")
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result == [{'name': 'Doe', 'first_name': 'John'},{'name': 'Doe XII', 'first_name': 'Mary'}]
-    True
+    >>> json_result['is_nullable']
+    'NO'
+
+After prohibiting null-values in the first name column, such rows can not be
+added anymore.
+
+.. doctest::
+
+    >>> import requests
+    >>> data = {"query": {"name": "McPaul"}}
+    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    500
+    >>> result.json()['reason']
+    'ERROR:  null value in column "first_name" violates not-null constraint'
+
 
 .. testcleanup::
 
