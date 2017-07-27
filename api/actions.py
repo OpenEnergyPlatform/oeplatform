@@ -146,7 +146,7 @@ def describe_columns(schema, table):
         'maximum_cardinality': column.maximum_cardinality,
         'dtd_identifier': column.dtd_identifier,
         'is_updatable': column.is_updatable
-    } for column in response}
+    } for column in response if column != '_delete'}
 
 
 def describe_indexes(schema, table):
@@ -505,7 +505,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column_definition_query(c):
-    return "{name} {data_type} {length} {not_null}".format(
+    return "{name} {data_type} {length} {not_null} {default}".format(
         name=c['name'],
         data_type=c['data_type'],
         length=('(' + str(c['character_maximum_length']) + ')')
@@ -513,6 +513,9 @@ def get_column_definition_query(c):
                     else '',
         not_null="NOT NULL"
                     if "NO" in c.get('is_nullable', [])
+                    else "",
+        default= 'DEFAULT ' + parser.read_pgvalue(c['column_default'])
+                    if 'column_default' in c
                     else ""
         )
 
@@ -716,18 +719,31 @@ def table_change_constraint(constraint_definition):
     print(sql_string)
     return perform_sql(sql_string)
 
+def __add_delete_column(schema, table):
+    columns = describe_columns(schema, table)
+    if '_delete' not in columns:
+        column_add(schema, table, '_delete', {'data_type': 'Boolean',
+                                              'is_nullable': 'NO',
+                                              'column_default': 'FALSE'})
 
 def get_rows(request, data):
     sql = ['SELECT']
     params = {}
     params_count = 0
     columns = data.get('columns')
+
+    schema = data['schema']
+    table = data['table']
+
+    __add_delete_column(schema, table)
+
     if not columns:
         sql.append('*')
     else:
         sql.append(','.join(columns))
 
-    sql.append('FROM ONLY {schema}.{table}'.format(schema=data['schema'], table=data['table']))
+    sql.append('FROM ONLY {schema}.{table}'.format(schema=schema,
+                                                   table=table))
 
     where_clauses = data.get('where')
 
@@ -775,7 +791,7 @@ def get_rows(request, data):
         # Returning an empty list is equivalent to returning an empty result.
         return []
 
-    return [dict(r) for r in result]
+    return [{k:r[k] for k in dict(r) if k != '_delete'} for r in result]
 
 
 def put_rows(schema, table, column_data):
@@ -804,8 +820,11 @@ def _get_table(schema, table):
 
 
 def data_delete(request, context=None):
-    raise NotImplementedError()
-
+    schema = request['schema']
+    table = request['table']
+    __add_delete_column(schema, table)
+    request['values']={'_delete':True}
+    data_update(request, context)
 
 def data_update(request, context=None):
     query = {

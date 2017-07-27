@@ -302,6 +302,31 @@ class Rows(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @actions.load_cursor
+    def delete(self, request, table, schema, row_id):
+        where = request.GET.get('where')
+        query = {
+            'schema': schema,
+            'table': table,
+            'where': self.__read_where_clause(where),
+        }
+
+        context = {'cursor_id': request.data['cursor_id'],
+                   'user': request.user}
+
+        if row_id:
+            query['where'].append({
+                'left': {
+                    'type': 'column',
+                    'column': 'id'
+                },
+                'operator': '=',
+                'right': row_id,
+                'type': 'operator_binary'
+            })
+        actions.data_delete(query,context)
+        return JsonResponse({})
+
     def __read_where_clause(self, where):
         where_expression = '^(?P<first>.+)(?P<operator>' \
                            + '|'.join(parser.sql_operators) \
