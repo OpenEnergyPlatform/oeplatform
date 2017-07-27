@@ -15,8 +15,7 @@ import oeplatform.securitysettings as sec
 import api
 from api import parser
 from api import references
-from api.parser import quote
-
+from api.parser import quote, read_pgid, read_bool
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 
@@ -510,6 +509,41 @@ def get_column_definition_query(c):
         )
 
 
+def column_alter(query, context, schema, table, column):
+    alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
+        schema=schema,
+        table=table,
+        column=column
+    )
+    add_constraint_preamble = "ALTER TABLE {schema}.{table} ADD CONSTRAINT {column} ".format(
+        schema=schema,
+        table=table,
+        column=column
+    )
+
+    drop_constraint_preamble = "ALTER TABLE {schema}.{table} DROP CONSTRAINT {column} ".format(
+        schema=schema,
+        table=table,
+        column=column
+    )
+
+    if "data_type" in query:
+        sql = alter_preamble + "SET DATA TYPE " + read_pgid(query['data_type'])
+        if 'character_maximum_length' in query:
+            sql += '(' +  parser.read_pgvalue(query['character_maximum_length']) + ')'
+        perform_sql(sql)
+    if "is_nullable" in query:
+        if read_bool(query['is_nullable']):
+            sql = alter_preamble + ' DROP NOT NULL'
+        else:
+            sql = alter_preamble + ' SET NOT NULL'
+        perform_sql(sql)
+    if 'column_default' in query:
+        value = parser.read_pgvalue(query['column_default'])
+        sql = alter_preamble + 'SET DEFAULT ' + value
+        perform_sql(sql)
+    return get_response_dict(success=True)
+
 def column_add(schema, table, column, description):
     description['name'] = column
     settings = get_column_definition_query(description)
@@ -519,6 +553,8 @@ def column_add(schema, table, column, description):
     meta_schema = get_meta_schema_name(schema)
     perform_sql(s.format(schema=meta_schema,
                          table=get_edit_table_name(schema, table)))
+    return get_response_dict(success=True)
+
 
 def table_create(schema, table, columns, constraints):
     """
@@ -848,8 +884,11 @@ def data_insert(request, context=None):
 
     query = parser.parse_insert(request, engine, context)
     compiled = query.compile()
-    result = cursor.execute(str(compiled), dict(compiled.params))
-
+    try:
+        result = cursor.execute(str(compiled), dict(compiled.params))
+    except Exception as e:
+        print("SQL Action failed. \n Error:\n" + str(e))
+        raise APIError(str(e))
     description = cursor.description
     response = {}
     if description:

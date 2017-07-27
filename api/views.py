@@ -173,7 +173,7 @@ class Index(APIView):
 
 
 class Column(APIView):
-
+    @api_exception
     def get(self, request, schema, table, column=None):
         response = actions.describe_columns(schema, table)
         if column:
@@ -184,6 +184,12 @@ class Column(APIView):
                                        'this table.')
         return JsonResponse(response)
 
+    @api_exception
+    def post(self, request, schema, table, column):
+        response = actions.column_alter(request.data, {}, schema, table, column)
+        return JsonResponse(response)
+
+    @api_exception
     def put(self, request, schema, table, column):
         actions.column_add(schema, table, column, request.data)
         return JsonResponse({}, status=201)

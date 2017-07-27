@@ -47,6 +47,8 @@ def read_bool(s):
         return s
     if s.lower() in ["true", "false"]:
         return s.lower() == "true"
+    elif s.lower() in ["yes", "no"]:
+        return s.lower() == "true"
     else:
         raise actions.APIError("Invalid value in binary field", s)
 
