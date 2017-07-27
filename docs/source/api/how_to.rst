@@ -305,7 +305,7 @@ Add columns table
     >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name")
     >>> result.status_code
     200
-    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': 'YES', 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': 'YES', 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
+    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': 'YES', 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 5, 'is_nullable': 'YES', 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '5', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
     True
 
 Alter data
@@ -385,6 +385,13 @@ added anymore.
     >>> result.json()['reason']
     'ERROR:  null value in column "first_name" violates not-null constraint'
 
+.. doctest::
+
+    >>> import requests
+    >>> data = {"query": {"name": "McPaul"}}
+    >>> result = requests.delete(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/1', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    200
 
 .. testcleanup::
 
