@@ -253,7 +253,7 @@ class Rows(APIView):
 
         return_obj = actions.get_rows(request, data)
 
-        if row_id:
+        if row_id and return_obj:
             return_obj = return_obj[0]
 
         print([x for x in return_obj])
@@ -302,8 +302,14 @@ class Rows(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+
+    def delete(self, request, table, schema, row_id=None):
+        result = self.__delete_rows(request, schema, table, row_id)
+        actions.apply_changes(schema, table)
+        return JsonResponse(result)
+
     @actions.load_cursor
-    def delete(self, request, table, schema, row_id):
+    def __delete_rows(self, request, schema, table, row_id=None):
         where = request.GET.get('where')
         query = {
             'schema': schema,
@@ -324,8 +330,7 @@ class Rows(APIView):
                 'right': row_id,
                 'type': 'operator_binary'
             })
-        actions.data_delete(query,context)
-        return JsonResponse({})
+        return actions.data_delete(query, context)
 
     def __read_where_clause(self, where):
         where_expression = '^(?P<first>.+)(?P<operator>' \

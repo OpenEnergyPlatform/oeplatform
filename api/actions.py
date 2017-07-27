@@ -146,7 +146,7 @@ def describe_columns(schema, table):
         'maximum_cardinality': column.maximum_cardinality,
         'dtd_identifier': column.dtd_identifier,
         'is_updatable': column.is_updatable
-    } for column in response if column != '_delete'}
+    } for column in response}
 
 
 def describe_indexes(schema, table):
@@ -719,12 +719,6 @@ def table_change_constraint(constraint_definition):
     print(sql_string)
     return perform_sql(sql_string)
 
-def __add_delete_column(schema, table):
-    columns = describe_columns(schema, table)
-    if '_delete' not in columns:
-        column_add(schema, table, '_delete', {'data_type': 'Boolean',
-                                              'is_nullable': 'NO',
-                                              'column_default': 'FALSE'})
 
 def get_rows(request, data):
     sql = ['SELECT']
@@ -732,18 +726,12 @@ def get_rows(request, data):
     params_count = 0
     columns = data.get('columns')
 
-    schema = data['schema']
-    table = data['table']
-
-    __add_delete_column(schema, table)
-
     if not columns:
         sql.append('*')
     else:
         sql.append(','.join(columns))
 
-    sql.append('FROM ONLY {schema}.{table}'.format(schema=schema,
-                                                   table=table))
+    sql.append('FROM ONLY {schema}.{table}'.format(schema=data['schema'], table=data['table']))
 
     where_clauses = data.get('where')
 
@@ -791,7 +779,7 @@ def get_rows(request, data):
         # Returning an empty list is equivalent to returning an empty result.
         return []
 
-    return [{k:r[k] for k in dict(r) if k != '_delete'} for r in result]
+    return [dict(r) for r in result]
 
 
 def put_rows(schema, table, column_data):
@@ -818,15 +806,7 @@ def _get_table(schema, table):
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
-
-def data_delete(request, context=None):
-    schema = request['schema']
-    table = request['table']
-    __add_delete_column(schema, table)
-    request['values']={'_delete':True}
-    data_update(request, context)
-
-def data_update(request, context=None):
+def __change_rows(request, context, target_table, setter, fields=None):
     query = {
         'from': [{
             'type': 'table',
@@ -835,6 +815,10 @@ def data_update(request, context=None):
         }],
         'where': request['where']
     }
+    if fields:
+        query['fields'] = [{'type': 'column',
+                             'column': f} for f in fields]
+
     user = context['user'].name
 
     engine = _get_engine()
@@ -848,10 +832,12 @@ def data_update(request, context=None):
     rows['data'] = [x for x in cursor.fetchall()]
     conn.close()
 
-    setter = request['values']
+
     message = request.get('message', None)
     meta_fields = list(parser.set_meta_info('update', user, message).items())
-    fields = [field[0] for field in rows['description']] + [f[0] for f in meta_fields]
+    if fields is None:
+        fields = [field[0] for field in rows['description']]
+    fields += [f[0] for f in meta_fields]
 
     table_name = request['table']
     meta = MetaData(bind=engine)
@@ -873,19 +859,33 @@ def data_update(request, context=None):
                 insert.append(process_value(value))
 
             insert_strings.append('(' + (', '.join(insert)) + ')')
-
+        print(insert_strings)
         # Add metadata for insertions
         schema = request['schema']
-        meta_schema = get_meta_schema_name(schema) if not schema.startswith('_') else schema
+        meta_schema = get_meta_schema_name(schema) if not schema.startswith(
+            '_') else schema
 
         s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values};".format(
             schema=api.parser.read_pgid(meta_schema),
-            table=api.parser.read_pgid(get_edit_table_name(schema, table_name)),
+            table=target_table,
             fields=', '.join(fields),
             values=', '.join(insert_strings)
         )
+        print(s)
         cursor.execute(s)
     return {'affected':len(rows['data'])}
+
+
+def data_delete(request, context=None):
+    target_table = get_delete_table_name(request['schema'],request['table'])
+    setter = []
+    return __change_rows(request, context, target_table, setter, ['id'])
+
+
+def data_update(request, context=None):
+    target_table = get_edit_table_name(request['schema'],request['table'])
+    setter = request['values']
+    return __change_rows(request, context, target_table, setter)
 
 
 def data_insert(request, context=None):
@@ -1368,6 +1368,14 @@ def get_comment_table_name(schema, table, create=True):
     return table_name
 
 
+def get_delete_table_name(schema, table, create=True):
+    table_name = '_' + table + '_delete'
+    if create and not has_table({'schema': get_meta_schema_name(schema),
+                                 'table': table_name}):
+        create_delete_table(schema, table)
+    return table_name
+
+
 def get_edit_table_name(schema, table, create=True):
     table_name = '_' + table + '_edit'
     if create and not has_table({'schema': get_meta_schema_name(schema),
@@ -1409,6 +1417,21 @@ def create_edit_table(schema, table, meta_schema=None):
     connection = engine.connect()
     connection.execute(query)
 
+
+def create_delete_table(schema, table, meta_schema=None):
+    if not meta_schema:
+        meta_schema = get_meta_schema_name(schema)
+    engine = _get_engine()
+    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
+            '(id bigint) ' \
+            'INHERITS (_edit_base);'.format(
+        meta_schema=meta_schema,
+        edit_table=get_delete_table_name(schema, table, create=False),
+        schema=schema,
+        table=table)
+    print(query)
+    connection = engine.connect()
+    connection.execute(query)
 
 def create_insert_table(schema, table, meta_schema=None):
     if not meta_schema:
@@ -1467,6 +1490,7 @@ def apply_changes(schema, table):
     engine = _get_engine()
     conn = engine.connect()
     meta_schema = get_meta_schema_name(schema)
+
     insert_table = get_insert_table_name(schema, table)
     columns = list(describe_columns(schema, table).keys()) + ['_submitted']
     changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
@@ -1475,12 +1499,27 @@ def apply_changes(schema, table):
                                                              table=insert_table)))
 
 
+    columns2 = columns + ['_id']
     update_table = get_edit_table_name(schema, table)
-    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
+    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns2}, 'update') for row in conn.execute('select * '
                             'from {schema}.{table} '
                             'where _applied = FALSE;'.format(schema=meta_schema,
                                                              table=update_table))))
 
+    delete_table = get_delete_table_name(schema, table)
+    changes = itertools.chain(changes, (
+        add_type({c: getattr(row, c) for c in ['_id', 'id', '_submitted']}, 'delete') for row in
+        conn.execute('select * '
+                     'from {schema}.{table} '
+                     'where _applied = FALSE;'.format(schema=meta_schema,
+                                                      table=delete_table))))
+
+    print('select * '
+                     'from {schema}.{table} '
+                     'where _applied = FALSE;'.format(schema=meta_schema,
+                                                      table=delete_table))
+    changes = list(changes)
+    print(changes)
     engine = _get_engine()
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
     session = sessionmaker(bind=engine)()
@@ -1489,6 +1528,8 @@ def apply_changes(schema, table):
             apply_insert(session, table_obj, change)
         elif change['_type'] == 'update':
             apply_update(session, table_obj, change)
+        elif change['_type'] == 'delete':
+            apply_deletion(session, table_obj, change)
     session.commit()
     session.close()
 
@@ -1507,8 +1548,18 @@ def apply_update(session, table, row):
     print("apply update", row)
     session.execute(table.update(table.c.id==row['id']), row)
     session.execute(
-        'UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(
+        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
             schema=get_meta_schema_name(table.schema),
             table=get_edit_table_name(table.schema, table.name),
-            id=row['id']
+            id=row['_id']
+        ))
+
+def apply_deletion(session, table, row):
+    print("apply deletion", row)
+    session.execute(table.delete(table.c.id==row['id']), row)
+    session.execute(
+        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
+            schema=get_meta_schema_name(table.schema),
+            table=get_delete_table_name(table.schema, table.name),
+            id=row['_id']
         ))
