@@ -515,17 +515,6 @@ def column_alter(query, context, schema, table, column):
         table=table,
         column=column
     )
-    add_constraint_preamble = "ALTER TABLE {schema}.{table} ADD CONSTRAINT {column} ".format(
-        schema=schema,
-        table=table,
-        column=column
-    )
-
-    drop_constraint_preamble = "ALTER TABLE {schema}.{table} DROP CONSTRAINT {column} ".format(
-        schema=schema,
-        table=table,
-        column=column
-    )
 
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query['data_type'])
@@ -886,9 +875,9 @@ def data_insert(request, context=None):
     compiled = query.compile()
     try:
         result = cursor.execute(str(compiled), dict(compiled.params))
-    except Exception as e:
-        print("SQL Action failed. \n Error:\n" + str(e))
-        raise APIError(str(e))
+    except psycopg2.IntegrityError as e:
+        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
+        raise APIError(str(e.pgerror.split('\n')[0]))
     description = cursor.description
     response = {}
     if description:
