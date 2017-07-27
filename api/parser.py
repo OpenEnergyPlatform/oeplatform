@@ -66,9 +66,9 @@ def set_meta_info(method, user, message=None):
     return val_dict
 
 
-def parse_insert(d, engine, context, message=None):
-    table = Table(read_pgid(d['table']), MetaData(bind=engine), autoload=True,
-                  schema=read_pgid(d['schema']))
+def parse_insert(d, context, message=None):
+    table = Table(read_pgid(d['table']), MetaData(bind=actions._get_engine())
+                  , autoload=True, schema=read_pgid(d['schema']))
 
     meta_cols = ['_message', '_user']
 

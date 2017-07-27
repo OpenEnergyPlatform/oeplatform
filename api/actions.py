@@ -238,11 +238,12 @@ def perform_sql(sql_statement, parameter=None):
         print("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
         raise APIError(str(e))
-
-    # Why is commit() not part of close() ?
-    # I have to commit the changes before closing session. Otherwise the changes are not persistent.
-    session.commit()
-    session.close()
+    else:
+        # Why is commit() not part of close() ?
+        # I have to commit the changes before closing session. Otherwise the changes are not persistent.
+        session.commit()
+    finally:
+        session.close()
 
     return get_response_dict(success=True, result=result)
 
@@ -869,7 +870,6 @@ def data_update(request, context=None):
 
 
 def data_insert(request, context=None):
-    engine = _get_engine()
     cursor = __load_cursor(context['cursor_id'])
     # If the insert request is not for a meta table, change the request to do so
     assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
@@ -878,7 +878,7 @@ def data_insert(request, context=None):
     if not request['schema'].startswith('_'):
         request['schema'] = '_' + request['schema']
 
-    query = parser.parse_insert(request, engine, context)
+    query = parser.parse_insert(request, context)
     compiled = query.compile()
     try:
         result = cursor.execute(str(compiled), dict(compiled.params))
@@ -951,7 +951,8 @@ def table_drop(request, context=None):
         raise e
     else:
         session.commit()
-    session.close()
+    finally:
+        session.close()
     return {}
 
 
@@ -1318,6 +1319,7 @@ def close_cursor(request, context):
     cursor_id = context['cursor_id']
     if cursor_id in __CURSORS:
         cursor = __CURSORS[cursor_id]
+        del __CURSORS[cursor_id]
         cursor.close()
         return {'cursor_id': cursor_id}
     else:
