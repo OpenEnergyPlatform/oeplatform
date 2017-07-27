@@ -4,7 +4,7 @@
 import decimal
 import re
 from datetime import datetime
-
+from api import actions
 from sqlalchemy import Table, MetaData, Column
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -48,13 +48,13 @@ def read_bool(s):
     if s.lower() in ["true", "false"]:
         return s.lower() == "true"
     else:
-        raise ValidationError("Invalid value in binary field", s)
+        raise actions.APIError("Invalid value in binary field", s)
 
 
 def read_pgid(s):
     if is_pg_qual(s):
         return s
-    raise ValidationError("Invalid identifier", s)
+    raise actions.APIError("Invalid identifier", s)
 
 
 def set_meta_info(method, user, message=None):
@@ -156,7 +156,7 @@ def parse_select(d):
         if sel['type'].lower() in ['union', 'intersect', 'except']:
             s += ' ' + sel['type']
         else:
-            raise ValidationError('UNION/INTERSECT/EXCEPT expected')
+            raise actions.APIError('UNION/INTERSECT/EXCEPT expected')
         if 'all' in sel and read_bool(sel['all']):
             s += ' ALL '
         elif 'distinct' in sel and read_bool(sel['distinct']):
@@ -178,7 +178,7 @@ def parse_select(d):
                 if ob['nulls'].lower() in ['first', 'last']:
                     ss += ob['nulls']
                 else:
-                    raise ValidationError('Invalid NULLS option')
+                    raise actions.APIError('Invalid NULLS option')
             L.append(ss)
         s += ', '.join(L)
 
@@ -189,7 +189,7 @@ def parse_select(d):
         elif isinstance(d['limit'], int) or d['limit'].is_digit():
             s += ' ' + str(d['limit'])
         else:
-            raise ValidationError('Invalid LIMIT (expected ALL or a digit)')
+            raise actions.APIError('Invalid LIMIT (expected ALL or a digit)')
 
     if 'offset' in d and (
                 isinstance(d['offset'], int) or d['offset'].is_digit()):
@@ -249,7 +249,7 @@ def parse_from_item(d):
                                           'full inner join', 'full outer join', 'cross join']:
                 s += ' ' + d['join_type']
             else:
-                raise ValidationError('Invalid join type')
+                raise actions.APIError('Invalid join type')
         else:
             s += ' JOIN '
 
