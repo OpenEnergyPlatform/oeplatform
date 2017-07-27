@@ -17,7 +17,7 @@ from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
-_ENGINES = {}
+
 
 
 class APIError(Exception):
@@ -28,6 +28,13 @@ class APIError(Exception):
 
 __CONNECTIONS = {}
 __CURSORS = {}
+__ENGINE = sqla.create_engine(
+    'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
+        sec.dbuser,
+        sec.dbpasswd,
+        sec.dbhost,
+        sec.dbport,
+        sec.dbname))
 
 import geoalchemy2
 
@@ -944,7 +951,7 @@ def table_drop(request, context=None):
         raise e
     else:
         session.commit()
-
+    session.close()
     return {}
 
 
@@ -1066,14 +1073,7 @@ def connect():
 
 
 def _get_engine():
-    engine = sqla.create_engine(
-        'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
-            sec.dbuser,
-            sec.dbpasswd,
-            sec.dbhost,
-            sec.dbport,
-            sec.dbname))
-    return engine
+    return __ENGINE
 
 
 def has_schema(request, context=None):
@@ -1469,6 +1469,7 @@ def apply_changes(schema, table):
         elif change['_type'] == 'update':
             apply_update(session, table_obj, change)
     session.commit()
+    session.close()
 
 
 def apply_insert(session, table, row):
