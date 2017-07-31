@@ -106,7 +106,7 @@ def parse_insert(d, context, message=None):
     if 'returning' in d:
         query = query.returning(*map(Column, d['returning']))
 
-    return query
+    return query, values
 
 
 def parse_select(d):
@@ -143,7 +143,7 @@ def parse_select(d):
         s += ' FROM ' + ', '.join(parse_from_item(f) for f in d['from'])
 
     # [ WHERE condition ]
-    if 'where' in d:
+    if d.get('where', False):
         s += ' WHERE ' + parse_condition(d['where'])
 
     if 'group_by' in d:

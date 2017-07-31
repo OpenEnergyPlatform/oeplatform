@@ -1,7 +1,8 @@
-import re
-import json
-import traceback
 import itertools
+import json
+import re
+import traceback
+from datetime import datetime
 
 import psycopg2
 import sqlalchemy as sqla
@@ -10,18 +11,19 @@ from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
-from datetime import datetime
-import oeplatform.securitysettings as sec
 import api
+import oeplatform.securitysettings as sec
 from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
 
 class APIError(Exception):
     def __init__(self, message, status=500):
+        print(message)
         self.message = message
         self.status = status
 
@@ -35,8 +37,6 @@ __ENGINE = sqla.create_engine(
         sec.dbhost,
         sec.dbport,
         sec.dbname))
-
-import geoalchemy2
 
 Base = declarative_base()
 
@@ -200,18 +200,16 @@ def describe_constraints(schema, table):
     identified by their column names
     """
 
-    engine = _get_engine()
-    session = sessionmaker(bind=engine)()
-    query = 'select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name=\'{table}\' AND constraint_schema=\'{schema}\';'.format(
-        table=table, schema=schema)
-    response = session.execute(query)
-    session.close()
+
     return {column.constraint_name: {
-        'constraint_typ': column.constraint_type,
+        'constraint_type': column.constraint_type,
         'is_deferrable': column.is_deferrable,
         'initially_deferred': column.initially_deferred,
+        'conkey': column.conkey,
         'definition': column.definition
     } for column in response}
+
+
 
 
 def perform_sql(sql_statement, parameter=None):
@@ -549,10 +547,14 @@ def column_add(schema, table, column, description):
     settings = get_column_definition_query(description)
     s = 'ALTER TABLE {schema}.{table} ADD COLUMN ' + settings
     perform_sql(s.format(schema=schema, table=table))
-    # Do the same for update tables. Insert tables are covered by inheritance.
+    # Do the same for update and insert tables.
     meta_schema = get_meta_schema_name(schema)
     perform_sql(s.format(schema=meta_schema,
                          table=get_edit_table_name(schema, table)))
+
+    meta_schema = get_meta_schema_name(schema)
+    perform_sql(s.format(schema=meta_schema,
+                         table=get_insert_table_name(schema, table)))
     return get_response_dict(success=True)
 
 
@@ -806,6 +808,21 @@ def _get_table(schema, table):
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
+
+def __internal_select(query, context):
+    engine = _get_engine()
+    conn = engine.connect()
+    cursor = conn.connection.cursor()
+    cursor_id = cursor.__hash__
+    __CURSORS[cursor_id] = cursor
+    context2 = dict(context)
+    context2['cursor_id'] = cursor_id
+    rows = data_search(query, context2)
+    rows['data'] = [x for x in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
 def __change_rows(request, context, target_table, setter, fields=None):
     query = {
         'from': [{
@@ -821,17 +838,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
     user = context['user'].name
 
-    engine = _get_engine()
-    conn = engine.connect()
-    cursor = conn.connection.cursor()
-    cursor_id = cursor.__hash__
-    __CURSORS[cursor_id] = cursor
-    context2 = dict(context)
-    context2['cursor_id'] = cursor_id
-    rows = data_search(query, context2)
-    rows['data'] = [x for x in cursor.fetchall()]
-    conn.close()
-
+    rows = __internal_select(query, context)
 
     message = request.get('message', None)
     meta_fields = list(parser.set_meta_info('update', user, message).items())
@@ -840,7 +847,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     fields += [f[0] for f in meta_fields]
 
     table_name = request['table']
-    meta = MetaData(bind=engine)
+    meta = MetaData(bind=_get_engine())
     table = Table(table_name, meta, autoload=True, schema=request['schema'])
     pks = [c for c in table.columns if c.primary_key]
 
@@ -887,17 +894,85 @@ def data_update(request, context=None):
     setter = request['values']
     return __change_rows(request, context, target_table, setter)
 
+def data_insert_check(schema, table, values, context):
+
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query = 'SELECT array_agg(column_name::text) as columns, conkeys.conname, contype AS type FROM pg_constraint AS conkeys JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = conkeys.conname WHERE table_name=\'{table}\' AND table_schema=\'{schema}\' AND conrelid=\'{schema}.{table}\'::regclass::oid GROUP BY (conkeys.conname,contype);'.format(
+        table=table, schema=schema)
+    print(query)
+    response = session.execute(query)
+    session.close()
+
+    for constraint in response:
+        print(constraint)
+        columns = constraint.columns
+        if constraint.type.lower() == 'c':
+            print(constraint)
+        elif constraint.type.lower() == 'f':
+            print(constraint['conkey'])
+        elif constraint.type.lower() in ['u', 'p']:
+            for row in values:
+                print(row)
+                print(columns)
+                query = {
+                    'from':
+                        [{
+                            'type': 'table',
+                            'schema': schema,
+                            'table': table
+                        }],
+                    'where':
+                        [
+                            {
+                                'left':
+                                    {
+                                        'type': 'column',
+                                        'column': c
+                                    },
+                                'operator': '=',
+                                'right': {'type': 'value', 'value': row[c]} if c in row else {'type': 'value'},
+                                'type': 'operator_binary'
+                            } for c in columns
+                        ],
+                    'fields': [{'type': 'column',
+                                    'column': f} for f in columns]
+                }
+                rows =__internal_select(query, context)
+                if rows['data']:
+                    print(rows['data'])
+                    raise APIError('Action violates constraint {cn}. Failing row was {row}'.format(cn=constraint.conname, row='(' + (', '.join(str(row[c]) for c in row if not c.startswith('_')))) + ')')
+
+    for column_name, column in describe_columns(schema, table).items():
+        if column['is_nullable'] == 'NO':
+            for row in values:
+                val = row.get(column_name, None)
+                if (val is None
+                    or (isinstance(val, str)
+                        and val.lower() == 'null')):
+                    if not (column_name not in row and column['column_default']):
+                        raise APIError(
+                            'Action violates not-null constraint on {col}. Failing row was {row}'.format(
+                                col=column_name, row='(' + (', '.join(
+                                    str(row[c]) for c in row if
+                                    not c.startswith('_')))) + ')')
+
 
 def data_insert(request, context=None):
     cursor = __load_cursor(context['cursor_id'])
     # If the insert request is not for a meta table, change the request to do so
     assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
+    orig_schema = request['schema']
+    orig_table = request['table']
+
     request['table'] = get_insert_table_name(request['schema'],
                                              request['table'])
     if not request['schema'].startswith('_'):
         request['schema'] = '_' + request['schema']
 
-    query = parser.parse_insert(request, context)
+    query, values = parser.parse_insert(request, context)
+    print(dir(query))
+    data_insert_check(orig_schema, orig_table, values, context)
     compiled = query.compile()
     try:
         result = cursor.execute(str(compiled), dict(compiled.params))
@@ -1437,8 +1512,9 @@ def create_insert_table(schema, table, meta_schema=None):
     if not meta_schema:
         meta_schema = get_meta_schema_name(schema)
     engine = _get_engine()
-    query = 'CREATE TABLE {meta_schema}.{edit_table} () ' \
-            'INHERITS (_insert_base, {schema}.{table});'.format(
+    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
+            '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
+            'INHERITS (_edit_base);'.format(
         meta_schema=meta_schema,
         edit_table=get_insert_table_name(schema, table, create=False),
         schema=schema,
@@ -1492,16 +1568,15 @@ def apply_changes(schema, table):
     meta_schema = get_meta_schema_name(schema)
 
     insert_table = get_insert_table_name(schema, table)
-    columns = list(describe_columns(schema, table).keys()) + ['_submitted']
+    columns = list(describe_columns(schema, table).keys()) + ['_submitted', '_id']
     changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
                             'from {schema}.{table} '
                             'where _applied = FALSE;'.format(schema=meta_schema,
                                                              table=insert_table)))
 
 
-    columns2 = columns + ['_id']
     update_table = get_edit_table_name(schema, table)
-    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns2}, 'update') for row in conn.execute('select * '
+    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
                             'from {schema}.{table} '
                             'where _applied = FALSE;'.format(schema=meta_schema,
                                                              table=update_table))))
