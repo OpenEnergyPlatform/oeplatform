@@ -3,6 +3,7 @@ from django.conf.urls import url
 from base import views
 
 urlpatterns = [
+    url(r'^robots.txt$', views.robot),
     url(r'^$', views.Welcome.as_view(), name='index'),
     url(r'^about/$', views.redir, {'target': 'about'}, name='index'),
     url(r'^faq/$', views.redir, {'target': 'faq'}, name='index'),

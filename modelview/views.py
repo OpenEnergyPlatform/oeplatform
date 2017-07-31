@@ -22,6 +22,10 @@ from .models import Energymodel, Energyframework, Energyscenario, Energystudy
 from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm, EnergystudyForm
 from django.contrib.postgres.fields import ArrayField
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+
+
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
@@ -119,7 +123,7 @@ def processPost(post, c, f, files=None, pk=None, key=None):
         return f(fields,files)     
     
     
-
+@login_required
 def editModel(request,model_name, sheettype):
     """
     Constructs a form accoring to existing model
@@ -131,7 +135,7 @@ def editModel(request,model_name, sheettype):
     
     return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
 
-class FSAdd(View):    
+class FSAdd(LoginRequiredMixin, View):
     def get(self,request, sheettype, method='add'):
         c,f = getClasses(sheettype) 
         if method == 'add':
@@ -154,7 +158,6 @@ class FSAdd(View):
             c_study,f_study = getClasses('studie')
             formstudy = processPost(request.POST,  c_study, f_study, files=request.FILES, pk=pk)
             errorsStudy=[]
-            print(request.POST['new'])
             if request.POST['new'] == 'True':
                 if formstudy.is_valid():
                     n=formstudy.save()

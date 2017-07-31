@@ -15,7 +15,7 @@ from django.utils.encoding import smart_str
 from django.views.generic import View, CreateView, UpdateView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.core.exceptions import PermissionDenied
 import oeplatform.securitysettings as sec
 
 from api import actions
@@ -34,21 +34,26 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.dialects.postgresql import array_agg, ARRAY
 from dataedit.structures import Table_tags, Tag
+from operator import add
+from login import models as login_models
+from dataedit.models import Table, Schema
+import itertools
+
 session = None
 
 """ This is the initial view that initialises the database connection """
 schema_whitelist = [
     "demand",
-    "economic",
+    "economy",
     "emission",
-    "environmental",
+    "environment",
     "grid",
-    "political_boundary",
-    "social",
+    "boundaries",
+    "society",
     "supply",
     "scenario",
-    "weather",
-    # "model_draft",
+    "climate",
+    "model_draft",
     "openstreetmap",
     "reference",
     "workshop"
@@ -72,7 +77,6 @@ def listschemas(request):
     query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(user=sec.dbuser)
     response = conn.execute(query)
     schemas = sorted([(row.schemaname, row.tables) for row in response if row.schemaname in schema_whitelist and not row.schemaname.startswith('_')], key=lambda x: x[0])
-    print(schemas)
     return render(request, 'dataedit/dataedit_schemalist.html', {'schemas': schemas})
 
 
@@ -128,7 +132,6 @@ def listtables(request, schema_name):
     query = 'SELECT tablename FROM pg_tables WHERE schemaname = \'{schema}\' ' \
             'AND pg_has_role(\'{user}\', tableowner, \'MEMBER\');'.format(
         schema=schema_name, user=sec.dbuser)
-    print(query)
     tables = conn.execute(query)
     tables = [(table.tablename, labels[table.tablename] if table.tablename in labels else None) for table in tables if
               not table.tablename.startswith('_')]
@@ -176,82 +179,123 @@ def _type_json(json_obj):
 pending_dumps = {}
 
 
-def create_dump(schema, table, rev_id, name):
-    if not os.path.exists(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}'.format(rev=rev_id))
-    if not os.path.exists(
-                    sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                    schema=schema)):
-        os.mkdir(sec.MEDIA_ROOT + '/dumps/{rev}/{schema}'.format(rev=rev_id,
-                                                                 schema=schema))
-    L = ['svn', 'export', "file://" + sec.datarepo + name, '--force',
-         '--revision=' + rev_id, '-q',
-         sec.MEDIA_ROOT + '/dumps/' + rev_id + '/' + name]
+class RevisionView(View):
+    def get(self, request, schema, table):
+        revisions = TableRevision.objects.filter(schema=schema, table=table)
+        return render(request,
+               'dataedit/dataedit_revision.html',{
+               'schema': schema,
+                'table': table,
+                'revisions': revisions})
+
+    def post(self, request, schema, table, date=None):
+        """
+        This method handles an ajax request for a data revision of a specific table.
+        On success the TableRevision-object will be stored to mark that the corresponding
+        revision is available.
+
+        :param request:
+        :param schema:
+        :param table:
+        :param date:
+        :return:
+        """
+
+
+        date = time.strftime('%Y-%m-%d %H:%M:%S')
+        fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
+        original = True  # marks whether this method initialised the revision creation
+
+        # If some user already requested this dataset wait for this thread to finish
+        if (schema, table, date) in pending_dumps:
+            t = pending_dumps[(schema, table, date)]
+            original = False
+        else:
+            t = threading.Thread(target=create_dump,
+                                 args=(schema, table, fname))
+            t.start()
+            pending_dumps[(schema, table, date)] = t
+
+        while t.is_alive():
+            time.sleep(10)
+
+        pending_dumps.pop((schema, table, date))
+        if original:
+            path = '/dumps/{schema}/{table}/{fname}.dump'.format(
+                fname=fname, schema=schema, table=table)
+            size = os.path.getsize(sec.MEDIA_ROOT + path)
+            rev = TableRevision(schema=schema, table=table, date=date, path='/media' + path, size=size)
+            rev.save()
+        return self.get(request, schema, table)
+
+
+def get_dependencies(schema, table, found=None):
+    if not found:
+        found = {(schema, table)}
+
+    query = 'SELECT DISTINCT \
+        ccu.table_name AS foreign_table, \
+        ccu.table_schema AS foreign_schema \
+        FROM  \
+        information_schema.table_constraints AS tc \
+        JOIN information_schema.constraint_column_usage AS ccu \
+          ON ccu.constraint_name = tc.constraint_name \
+        WHERE constraint_type = \'FOREIGN KEY\' AND tc.table_schema=\'{schema}\'\
+        AND tc.table_name=\'{table}\';'.format(schema=schema, table=table)
+
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    result = session.execute(query)
+    found_new = {(row.foreign_schema, row.foreign_table) for row in result
+                 if (row.foreign_schema, row.foreign_table) not in found}
+    found = found.union(found_new)
+    found.add((schema, table))
+    session.close()
+    for s,t in found_new:
+        found = found.union(get_dependencies(s,t,found))
+
+    return found
+
+
+def create_dump(schema, table, fname):
+    assert re.match(actions.pgsql_qualifier,table)
+    assert re.match(actions.pgsql_qualifier, schema)
+    for path in ['/dumps', '/dumps/{schema}'.format(schema=schema), '/dumps/{schema}/{table}'.format(schema=schema, table=table)]:
+        if not os.path.exists(sec.MEDIA_ROOT + path):
+            os.mkdir(sec.MEDIA_ROOT + path)
+    L = ['pg_dump', '-O', '-x', '-w', '-Fc', '--quote-all-identifiers', '-U', sec.dbuser, '-h', sec.dbhost, '-p',
+         str(sec.dbport), '-d', sec.dbname, '-f',
+         sec.MEDIA_ROOT + '/dumps/{schema}/{table}/'.format(schema=schema, table=table) + fname+'.dump'] + reduce(add, (['-n', s, '-t', s + '.' + t] for s,t in get_dependencies(schema,table)),[])
     return call(L, shell=False)
 
 
-def send_dump(rev_id, schema, table):
-    path = sec.MEDIA_ROOT + '/dumps/{rev}/{schema}/{table}.tar.gz'.format(
-        rev=rev_id, schema=schema, table=table)
+def send_dump(schema, table, fname):
+    path = sec.MEDIA_ROOT + '/dumps/{schema}/{table}/{fname}.dump'.format(
+        fname=fname, schema=schema, table=table)
     f = FileWrapper(open(path, "rb"))
     response = HttpResponse(f,
-                            content_type='application/x-gzip')  # mimetype is replaced by content_type for django 1.7
+                            content_type='application/x-gzip')
 
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(
-        '{table}.tar.gz'.format(table=table))
+        '{schema}_{table}_{date}.tar.gz'.format(date=fname, schema=schema, table=table))
 
     # It's usually a good idea to set the 'Content-Length' header too.
     # You can also set any other required headers: Cache-Control, etc.
     return response
 
 
-def show_revision(request, schema, table, rev_id):
+def show_revision(request, schema, table, date):
     global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table,
-                                    revision=rev_id)
+                                    date=date)
     rev.last_accessed = timezone.now()
     rev.save()
-    return send_dump(rev_id, schema, table)
-
-@ajax
-def request_revision(request, schema, table, rev_id):
-    """
-    This method handles an ajax request for a data revision of a specific table.
-    On success the TableRevision-object will be stored to mark that the corresponding
-    revision is available.
-
-    :param request:
-    :param schema:
-    :param table:
-    :param rev_id:
-    :return:
-    """
-
-    fname = "{schema}/{table}.tar.gz".format(schema=schema,
-                                             table=table)  # "{schema}_{table}_{rev_id}.sql".format(schema=schema, table=table, rev_id=rev_id)
-
-    original = True # marks whether this method initialised the revision creation
-
-    # If some user already requested this dataset wait for this thread to finish
-    if (schema, table, rev_id) in pending_dumps:
-        t = pending_dumps[(schema, table, rev_id)]
-        original = False
-    else:
-        t = threading.Thread(target=create_dump,
-                             args=(schema, table, rev_id, fname))
-        t.start()
-        pending_dumps[(schema, table, rev_id)] = t
-
-    while t.is_alive():
-        time.sleep(10)
-
-    pending_dumps.pop((schema, table, rev_id))
-    if original:
-        rev = TableRevision(revision=rev_id, schema=schema, table=table)
-        rev.save()
-    return {}
-
+    return send_dump(schema, table, date)
 
 @login_required(login_url='/login/')
 def tag_overview(request):
@@ -465,7 +509,9 @@ class DataView(View):
         except:
             revisions = []
 
-        table_views = DBView.objects.filter(table = table).filter(schema = schema)
+        is_admin = False
+        if request.user:
+            is_admin = request.user.has_admin_permissions(schema, table)
 
         try:
             current_view = table_views.get(id = request.GET.get("view"))
@@ -486,7 +532,8 @@ class DataView(View):
             'schema': schema,
             'tags': tags,
             'views': table_views,
-            'current_view': current_view
+            'current_view': current_view,
+            'is_admin': is_admin
         }
 
         if current_view.data != '':
@@ -520,7 +567,7 @@ class DataView(View):
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                 table=table))
 
-class MetaView(View):
+class MetaView(LoginRequiredMixin, View):
     """
 
     """
@@ -555,7 +602,6 @@ class MetaView(View):
 
 
         comment = load_meta(request.POST)
-        print(json.dumps(comment, indent=2))
 
         engine = actions._get_engine()
         conn = engine.connect()
@@ -642,6 +688,97 @@ class CommentView(View):
             }, {'user': request.user})
         return redirect('/dataedit/view/{schema}/{table}/comments'.format(schema=schema,
                                                                 table=table))
+
+class PermissionView(View):
+    """ This method handles the GET requests for the main page of data edit.
+        Initialises the session data (if necessary)
+    """
+
+    def get(self, request, schema, table):
+
+        if schema not in schema_whitelist:
+            raise Http404("Schema not accessible")
+
+        table_obj = Table.load(schema, table)
+
+        user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
+
+        return render(request,
+                      'dataedit/table_permissions.html',
+                      {
+                          'table': table,
+                          'schema': schema,
+                          'user_perms': user_perms,
+                          'group_perms': group_perms,
+                          'choices': login_models.TablePermission.choices,
+                          'is_admin': request.user.get_table_permission_level(table_obj) >= login_models.ADMIN_PERM
+                      })
+
+    def post(self, request, schema, table):
+        table_obj = Table.load(schema, table)
+        if request.user.get_table_permission_level(
+                table) < login_models.ADMIN_PERM:
+            raise PermissionDenied
+        if request.POST['mode'] == 'add_user':
+            return self.__add_user(request, schema, table)
+        if request.POST['mode'] == 'alter_user':
+            return self.__change_user(request, schema, table)
+        if request.POST['mode'] == 'remove_user':
+            return self.__remove_user(request, schema, table)
+        if request.POST['mode'] == 'add_group':
+            return self.__add_group(request, schema, table)
+        if request.POST['mode'] == 'alter_group':
+            return self.__change_group(request, schema, table)
+        if request.POST['mode'] == 'remove_group':
+            return self.__remove_group(request, schema, table)
+
+
+    def __add_user(self, request, schema, table):
+        user = login_models.myuser.objects.filter(name=request.POST['name']).first()
+        table_obj = Table.load(schema, table)
+        p = login_models.UserPermission.objects.create(holder=user,table=table_obj)
+        p.save()
+        return self.get(request, schema, table)
+
+    def __change_user(self, request, schema, table):
+        user = login_models.myuser.objects.filter(id=request.POST['user_id']).first()
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
+        p.level = request.POST['level']
+        p.save()
+        return self.get(request, schema, table)
+
+    def __remove_user(self, request, schema, table):
+        user = get_object_or_404(login_models.myuser, id=request.POST['user_id'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.UserPermission, holder=user,
+                              table=table_obj)
+        p.delete()
+        return self.get(request, schema, table)
+
+    def __add_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, name=request.POST['name'])
+        table_obj = Table.load(schema, table)
+        p = login_models.GroupPermission.objects.create(holder=group,table=table_obj)
+        p.save()
+        return self.get(request, schema, table)
+
+    def __change_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.GroupPermission ,holder=group, table=table_obj)
+        p.level = request.POST['level']
+        p.save()
+        return self.get(request, schema, table)
+
+    def __remove_group(self, request, schema, table):
+        group = get_object_or_404(login_models.UserGroup, id=request.POST['group_id'])
+        table_obj = Table.load(schema, table)
+        p = get_object_or_404(login_models.GroupPermission, holder=group,
+                              table=table_obj)
+        p.delete()
+        return self.get(request, schema, table)
 
 
 @login_required(login_url='/login/')
@@ -791,7 +928,6 @@ def load_comments(schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
     except Exception as e:
-        print(e)
         comment_on_table = {'description': comment_on_table, 'fields': []}
         commented_cols = []
 

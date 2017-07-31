@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, Session
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from sqlalchemy import create_engine, MetaData
 import bibtexparser as btp
@@ -46,7 +47,7 @@ FORM_MAP = {'article': forms.ArticleForm,
             'unpublished': forms.UnpublishedForm}
 
 
-class LiteratureView(View):
+class LiteratureView(LoginRequiredMixin, View):
     def get(self, request, entries_id=None):
         if entries_id:
             engine = _get_engine()
@@ -121,7 +122,6 @@ def read_bibtexfile(bibtex_file):
         props['entry_types_id'] = get_bibtype_id(ent['ENTRYTYPE'])
 
         en = ref.Entry(**props)
-        print(en.entry_types_id.label)
         sess.add(en)
     sess.commit()
     sess.close()

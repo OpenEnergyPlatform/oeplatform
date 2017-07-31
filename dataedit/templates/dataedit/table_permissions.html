@@ -1,0 +1,77 @@
+{% extends "dataedit/base.html" %}
+{% block title %} - {{schema}}{% endblock %}
+{% block data_content %}
+{% load dataedit.taghandler %}
+<h3>Manage permissions on {{schema}}.{{table}}</h3>
+<div class="well">
+Now you are in the database schema you selected and see the list of all tables of this schema.
+You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
+</div>
+    <h4> Manage Group Permissions</h4>
+
+    <form action="permissions" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_group">
+        <input name="name" type="text" placeholder="Add a group" ><input type="submit" value="Add">
+    </form>
+
+    {% for perm in group_perms %}
+        <div class="panel-body">
+            <div>
+                <label for="group_level">{{ perm.holder.name }}</label>
+                {% if is_admin %}
+                    <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_group">
+                        <input type="hidden" name="group_id" value="{{perm.holder.id}}">
+                        <select class="form-control" id="group_level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_group">
+                        <input type="hidden" name="group_id" value="{{perm.holder.id}}">
+                        <input type="submit" class="btn btn-danger" value="Remove group">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <h4> Manage User Permissions</h4>
+    <form action="permissions" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="add_user">
+        <input name="name" type="text" placeholder="Add an user" ><input type="submit" value="Add">
+    </form>
+
+    {% for perm in user_perms %}
+        <div class="panel-body">
+            <div>
+                <label for="level">{{ perm.holder.name }}</label>
+                {% if is_admin %}
+                    <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="alter_user">
+                        <input type="hidden" name="user_id" value="{{perm.holder.id}}">
+                        <select class="form-control" id="level" name="level" onchange="this.form.submit()">
+                            {% for value, choice in choices %}
+                                <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                    <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="remove_user">
+                        <input type="hidden" name="user_id" value="{{perm.holder.id}}">
+                        <input type="submit" class="btn btn-danger" value="Remove user">
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}
