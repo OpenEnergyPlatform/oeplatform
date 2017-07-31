@@ -383,7 +383,7 @@ added anymore.
     >>> result.status_code
     500
     >>> result.json()['reason']
-    'ERROR:  null value in column "first_name" violates not-null constraint'
+    'Action violates not-null constraint on first_name. Failing row was (McPaul)'
 
 .. doctest::
 
