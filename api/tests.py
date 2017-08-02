@@ -95,7 +95,7 @@ class APITestCase(TestCase):
         response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/'.format(schema=self.test_schema, table=self.test_table))
 
-        body = json.loads(response.content.decode("utf-8"))
+        body = response.json()
 
         self.assertEqual(body, self.content_data)
 
@@ -107,6 +107,14 @@ class APITestCase(TestCase):
         actions.perform_sql("CREATE SCHEMA schema1")
         actions.perform_sql("CREATE SCHEMA schema2")
         actions.perform_sql("CREATE SCHEMA schema3")
+
+        actions.perform_sql("DROP SCHEMA IF EXISTS _schema1 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS _schema2 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS _schema3 CASCADE")
+
+        actions.perform_sql("CREATE SCHEMA _schema1")
+        actions.perform_sql("CREATE SCHEMA _schema2")
+        actions.perform_sql("CREATE SCHEMA _schema3")
 
     def step_create_table(self):
 
@@ -135,12 +143,12 @@ class APITestCase(TestCase):
 
         c_column_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_column, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            data=json.dumps(data_column), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
         c_constraint_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_constraint, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            data=json.dumps(data_constraint), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
         self.assertEqual(c_column_resp.status_code, 200, 'Status Code is not 200.')
@@ -168,8 +176,8 @@ class APITestCase(TestCase):
                 data=json.dumps(row), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
-            self.assertEqual(response.status_code, 200, "Status Code is not 200.")
-            self.content_data.append(row['columnData'])
+            self.assertEqual(response.status_code, 201, "Status Code is not 201.")
+            self.content_data.append(row['query'])
 
         self.checkContent()
 

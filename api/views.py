@@ -258,7 +258,7 @@ class Rows(APIView):
         if row_id and return_obj:
             return_obj = return_obj[0]
 
-        print([x for x in return_obj])
+
         # TODO: Figure out what JsonResponse does different.
         return JsonResponse(return_obj, safe=False)
 
@@ -348,7 +348,7 @@ class Rows(APIView):
         return where_clauses
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
-        if row.get('id', row_id) != row_id:
+        if row.get('id', int(row_id)) != int(row_id):
             return actions._response_error('The id given in the query does not '
                                            'match the id given in the url')
         if row_id:
