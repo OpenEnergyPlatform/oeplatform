@@ -36,7 +36,7 @@ def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema')
         table = kwargs.get('table')
-        if request.user.get_table_permission_level(
+        if request.user.is_anonymous or request.user.get_table_permission_level(
                 DBTable.load(schema, table)) < permission:
             raise PermissionDenied
         else:
@@ -134,6 +134,8 @@ class Table(APIView):
         :param request:
         :return:
         """
+        if request.user.is_anonymous:
+            raise PermissionDenied
         json_data = request.data['query']
         constraint_definitions = []
         column_definitions = []
