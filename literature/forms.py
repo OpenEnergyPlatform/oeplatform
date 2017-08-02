@@ -1,4 +1,4 @@
-from egoio.db_tables import references as ref
+from egoio.db_tables import reference as ref
 
 
 class ArticleForm:
