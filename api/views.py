@@ -159,7 +159,7 @@ class Table(APIView):
                                                     holder=request.user)
         perm.level = login_models.ADMIN_PERM
         perm.save()
-
+        request.user.save()
         return JsonResponse(result, status=status.HTTP_201_CREATED)
 
 

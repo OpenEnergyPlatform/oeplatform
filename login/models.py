@@ -129,7 +129,6 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     def get_table_permission_level(self, table):
         # Check admin permissions for user
-        permission_level = NO_PERM
         user_membership = self.table_permissions.filter(
             table=table).first()
 

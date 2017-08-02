@@ -49,6 +49,14 @@ class APITestCase(TestCase):
         ]
     }
 
+    def test(self):
+        self.step_a_initializationDatabase()
+        self.step_create_table()
+        self.step_modify_table()
+        self.step_insert_data()
+        self.step_modify_data()
+        self.step_remove_data()
+
     @classmethod
     def setUpClass(cls):
         super(APITestCase, cls).setUpClass()
@@ -91,7 +99,7 @@ class APITestCase(TestCase):
 
         self.assertEqual(body, self.content_data)
 
-    def test_a_initializationDatabase(self):
+    def step_a_initializationDatabase(self):
         actions.perform_sql("DROP SCHEMA IF EXISTS schema1 CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
@@ -100,7 +108,7 @@ class APITestCase(TestCase):
         actions.perform_sql("CREATE SCHEMA schema2")
         actions.perform_sql("CREATE SCHEMA schema3")
 
-    def test_create_table(self):
+    def step_create_table(self):
 
         c_basic_resp = self.__class__.client.put(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
@@ -111,7 +119,7 @@ class APITestCase(TestCase):
         self.assertEqual(c_basic_resp.status_code, 201, 'Status Code is not 201.')
         self.checkStructure()
 
-    def test_modify_table(self):
+    def step_modify_table(self):
 
 
 
@@ -127,24 +135,26 @@ class APITestCase(TestCase):
 
         c_column_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_column, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
+            data=data_column, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
 
         c_constraint_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_constraint, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
+            data=data_constraint, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
 
         self.assertEqual(c_column_resp.status_code, 200, 'Status Code is not 200.')
         self.assertEqual(c_constraint_resp.status_code, 200, 'Status Code is not 200.')
 
-    def test_insert_data(self):
+    def step_insert_data(self):
 
-        insert_data = [{"columnData":
+        insert_data = [{"query":
             {
                 "id": 1,
                 "name": "Random Name",
                 "address": "Random Address 1234"
             }
-        }, {"columnData":
+        }, {"query":
             {
                 "id": 2,
                 "name": "Paul Erik Sebasitian",
@@ -154,16 +164,17 @@ class APITestCase(TestCase):
 
         for row in insert_data:
             response = self.__class__.client.put(
-                '/api/v0/schema/{schema}/tables/{table}/rows/'.format(schema=self.test_schema, table=self.test_table),
-                data=json.dumps(row), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
+                '/api/v0/schema/{schema}/tables/{table}/rows/{rid}'.format(schema=self.test_schema, table=self.test_table, rid=row['query']['id']),
+                data=json.dumps(row), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
 
             self.assertEqual(response.status_code, 200, "Status Code is not 200.")
             self.content_data.append(row['columnData'])
 
         self.checkContent()
 
-    def test_modify_data(self):
+    def step_modify_data(self):
         pass
 
-    def test_remove_data(self):
+    def step_remove_data(self):
         pass
