@@ -200,12 +200,16 @@ def describe_constraints(schema, table):
     identified by their column names
     """
 
-
+    engine = _get_engine()
+    session = sessionmaker(bind=engine)()
+    query = 'select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name=\'{table}\' AND constraint_schema=\'{schema}\';'.format(
+        table=table, schema=schema)
+    response = session.execute(query)
+    session.close()
     return {column.constraint_name: {
         'constraint_type': column.constraint_type,
         'is_deferrable': column.is_deferrable,
         'initially_deferred': column.initially_deferred,
-        'conkey': column.conkey,
         'definition': column.definition
     } for column in response}
 
