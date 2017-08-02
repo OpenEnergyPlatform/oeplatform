@@ -5,6 +5,12 @@ from django.test import TestCase, Client
 # Create your tests here.
 from api import actions
 
+from login.models import myuser
+
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import get_user_model
+
+
 
 class APITestCase(TestCase):
     test_schema = 'schema1'
@@ -43,11 +49,20 @@ class APITestCase(TestCase):
         ]
     }
 
+    @classmethod
+    def setUpClass(cls):
+        super(APITestCase, cls).setUpClass()
+        cls.user = myuser.objects.create(name='MrTest')
+        cls.user.save()
+        cls.token = Token.objects.get(user=cls.user)
+        cls.client = Client()
+
     def setUp(self):
-        self.client = Client()
+        pass
+
 
     def checkStructure(self):
-        response = self.client.get(
+        response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table))
         body = json.loads(response.content.decode("utf-8"))
 
@@ -69,7 +84,7 @@ class APITestCase(TestCase):
 
     def checkContent(self):
 
-        response = self.client.get(
+        response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/'.format(schema=self.test_schema, table=self.test_table))
 
         body = json.loads(response.content.decode("utf-8"))
@@ -87,12 +102,13 @@ class APITestCase(TestCase):
 
     def test_create_table(self):
 
-        c_basic_resp = self.client.put(
+        c_basic_resp = self.__class__.client.put(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            json.dumps(self.structure_data),
-            format='json')
+            data=json.dumps({'query': self.structure_data}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
 
-        self.assertEqual(c_basic_resp.status_code, 200, 'Status Code is not 200.')
+        self.assertEqual(c_basic_resp.status_code, 201, 'Status Code is not 201.')
         self.checkStructure()
 
     def test_modify_table(self):
@@ -109,13 +125,13 @@ class APITestCase(TestCase):
 
         headerInfo = {'content-type': 'application/json'}
 
-        c_column_resp = self.client.post(
+        c_column_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_column)
+            data=data_column, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
 
-        c_constraint_resp = self.client.post(
+        c_constraint_resp = self.__class__.client.post(
             '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
-            data=data_constraint)
+            data=data_constraint, HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
 
         self.assertEqual(c_column_resp.status_code, 200, 'Status Code is not 200.')
         self.assertEqual(c_constraint_resp.status_code, 200, 'Status Code is not 200.')
@@ -137,9 +153,9 @@ class APITestCase(TestCase):
         }]
 
         for row in insert_data:
-            response = self.client.put(
+            response = self.__class__.client.put(
                 '/api/v0/schema/{schema}/tables/{table}/rows/'.format(schema=self.test_schema, table=self.test_table),
-                data=json.dumps(row))
+                data=json.dumps(row), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,)
 
             self.assertEqual(response.status_code, 200, "Status Code is not 200.")
             self.content_data.append(row['columnData'])
