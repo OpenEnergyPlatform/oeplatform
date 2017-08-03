@@ -293,6 +293,12 @@ class Rows(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
         column_data = request.data['query']
+
+        if row_id and column_data.get('id', int(row_id)) != int(row_id):
+            raise actions.APIError(
+                'Id in URL and query do not match. Ids may not change.',
+                status=status.HTTP_409_CONFLICT)
+
         engine = actions._get_engine()
         conn = engine.connect()
 
@@ -302,7 +308,7 @@ class Rows(APIView):
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
-        if exists > 0:
+        if exists:
             response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
             return JsonResponse(response)
