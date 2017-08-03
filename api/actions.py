@@ -865,7 +865,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     table = Table(table_name, meta, autoload=True, schema=request['schema'])
     pks = [c for c in table.columns if c.primary_key]
 
-    insert_strings = []
+    inserts = []
     cursor = __load_cursor(context['cursor_id'])
     if rows['data']:
         for row in rows['data']:
@@ -877,23 +877,27 @@ def __change_rows(request, context, target_table, setter, fields=None):
                     else:
                         raise InvalidRequest(
                             "Primary keys must remain unchanged.")
-                insert.append(process_value(value))
+                insert.append((key,value))
 
-            insert_strings.append('(' + (', '.join(insert)) + ')')
-        print(insert_strings)
+            inserts.append(dict(insert))
+        print(inserts)
         # Add metadata for insertions
         schema = request['schema']
         meta_schema = get_meta_schema_name(schema) if not schema.startswith(
             '_') else schema
 
-        s = "INSERT INTO {schema}.{table} ({fields}) VALUES {values};".format(
+        s = "INSERT INTO {schema}.{table} ({fields}) VALUES ({value_expression});".format(
             schema=api.parser.read_pgid(meta_schema),
             table=target_table,
             fields=', '.join(fields),
-            values=', '.join(insert_strings)
+            value_expression=', '.join('%%(%s)s'%c for c in fields),
         )
-        print(s)
-        cursor.execute(s)
+        print(s, inserts[0])
+        try:
+            cursor.execute(s, inserts[0])
+        except Exception as e:
+            print("ERROR!!!", e)
+            raise e
     return {'affected':len(rows['data'])}
 
 
@@ -1007,7 +1011,7 @@ def data_insert(request, context=None):
 
 def process_value(val):
     if isinstance(val, str):
-        return "'" + val + "'"
+        return "'" + val.replace('\'', '\\\'') + "'"
     if isinstance(val, datetime):
         return "'" + str(val) + "'"
     if val is None:
@@ -1603,12 +1607,8 @@ def apply_changes(schema, table):
                      'where _applied = FALSE;'.format(schema=meta_schema,
                                                       table=delete_table))))
 
-    print('select * '
-                     'from {schema}.{table} '
-                     'where _applied = FALSE;'.format(schema=meta_schema,
-                                                      table=delete_table))
+    conn.close()
     changes = list(changes)
-    print(changes)
     engine = _get_engine()
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
     session = sessionmaker(bind=engine)()
