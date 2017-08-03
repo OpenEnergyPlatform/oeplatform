@@ -16,9 +16,14 @@ class APITestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(APITestCase, cls).setUpClass()
-        cls.user = myuser.objects.create(name='MrTest')
+        cls.user = myuser.objects.create(name='MrTest', mail_address='mrtest@test.com')
         cls.user.save()
         cls.token = Token.objects.get(user=cls.user)
+
+        cls.other_user = myuser.objects.create(name='NotMrTest', mail_address='notmrtest@test.com')
+        cls.other_user.save()
+        cls.other_token = Token.objects.get(user=cls.other_user)
+
         cls.client = Client()
 
 
