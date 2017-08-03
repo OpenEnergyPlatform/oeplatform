@@ -871,6 +871,8 @@ def __change_rows(request, context, target_table, setter, fields=None):
         for row in rows['data']:
             insert = []
             for (key, value) in list(zip(fields, row)) + meta_fields:
+                if not parser.is_pg_qual(key):
+                    raise APIError('%s is not a PostgreSQL identifier'%key)
                 if key in setter:
                     if not (key in pks and value != setter[key]):
                         value = setter[key]
