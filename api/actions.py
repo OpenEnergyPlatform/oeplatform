@@ -88,6 +88,13 @@ class InvalidRequest(Exception):
     pass
 
 
+def _translate_sqla_type(t, el):
+    if t.lower() == 'array':
+        return el + '[]'
+    else:
+        return t
+
+
 def describe_columns(schema, table):
     """
     Loads the description of all columns of the specified table and return their
@@ -120,12 +127,15 @@ def describe_columns(schema, table):
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     query = 'select column_name, ' \
-            'ordinal_position, column_default, is_nullable, data_type, ' \
-            'character_maximum_length, character_octet_length, ' \
-            'numeric_precision, numeric_precision_radix, numeric_scale, ' \
-            'datetime_precision, interval_type, interval_precision, ' \
-            'maximum_cardinality, dtd_identifier, is_updatable ' \
-            'from INFORMATION_SCHEMA.COLUMNS where table_name = ' \
+            'c.ordinal_position, c.column_default, c.is_nullable, c.data_type, ' \
+            'c.character_maximum_length, c.character_octet_length, ' \
+            'c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, ' \
+            'c.datetime_precision, c.interval_type, c.interval_precision, ' \
+            'c.maximum_cardinality, c.dtd_identifier, c.is_updatable, e.data_type as element_type ' \
+            'from INFORMATION_SCHEMA.COLUMNS  c ' \
+            'LEFT JOIN information_schema.element_types e ' \
+            'ON ((c.table_catalog, c.table_schema, c.table_name, \'TABLE\', c.dtd_identifier) ' \
+            '= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = ' \
             '\'{table}\' and table_schema=\'{schema}\';'.format(
         table=table, schema=schema)
     response = session.execute(query)
@@ -133,8 +143,8 @@ def describe_columns(schema, table):
     return {column.column_name: {
         'ordinal_position': column.ordinal_position,
         'column_default': column.column_default,
-        'is_nullable': column.is_nullable,
-        'data_type': column.data_type,
+        'is_nullable': column.is_nullable == 'YES',
+        'data_type': _translate_sqla_type(column.data_type, column.element_type),
         'character_maximum_length': column.character_maximum_length,
         'character_octet_length': column.character_octet_length,
         'numeric_precision': column.numeric_precision,
@@ -145,7 +155,7 @@ def describe_columns(schema, table):
         'interval_precision': column.interval_precision,
         'maximum_cardinality': column.maximum_cardinality,
         'dtd_identifier': column.dtd_identifier,
-        'is_updatable': column.is_updatable
+        'is_updatable': column.is_updatable == 'YES'
     } for column in response}
 
 
@@ -514,7 +524,7 @@ def get_column_definition_query(c):
                     if c.get('character_maximum_length', False)
                     else '',
         not_null="NOT NULL"
-                    if "NO" in c.get('is_nullable', [])
+                    if not c.get('is_nullable', True)
                     else "",
         default= 'DEFAULT ' + parser.read_pgvalue(c['column_default'])
                     if 'column_default' in c

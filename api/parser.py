@@ -394,10 +394,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
     if size is not None and data_type is not None:
         data_type += "(" + str(size) + ")"
 
-    notnull = None
-    is_nullable = column_description.get('is_nullable')
-    if is_nullable is not None:
-        notnull = 'NO' in is_nullable
+    notnull = not column_description.get('is_nullable', True)
 
     return {'column_name': name,
             'not_null': notnull,

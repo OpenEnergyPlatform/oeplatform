@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
 
 from rest_framework import status
+from django.http import Http404
 
 import geoalchemy2  # Although this import seems unused is has to be here
 
@@ -76,6 +77,12 @@ class Table(APIView):
         :param request:
         :return:
         """
+        if not actions.has_schema(dict(schema=schema)):
+            raise Http404
+
+        if not actions.has_table(dict(schema=schema, table=table)):
+            raise Http404
+
         return JsonResponse({
             'schema': schema,
             'name': table,
