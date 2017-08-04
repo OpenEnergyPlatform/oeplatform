@@ -7,6 +7,8 @@ from datetime import datetime
 from api import actions
 from sqlalchemy import Table, MetaData, Column
 
+import geoalchemy2  # Although this import seems unused is has to be here
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -394,7 +396,7 @@ def parse_scolumnd_from_columnd(schema, table, name, column_description):
     if size is not None and data_type is not None:
         data_type += "(" + str(size) + ")"
 
-    notnull = not column_description.get('is_nullable', True)
+    notnull = column_description.get('is_nullable', False)
 
     return {'column_name': name,
             'not_null': notnull,
@@ -469,3 +471,18 @@ sql_operators = {'EQUALS': '=',
 
 def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
+
+def parse_sqla_operator(key, x, y):
+    if key in ['EQUALS','=']:
+        return x == y
+    if key in ['GREATER', '>']:
+        return x > y
+    if key in ['LOWER', '<']:
+        return x < y
+    if key in ['NOTEQUAL', '<>', '!=']:
+        return x != y
+    if key in ['NOTGREATER', '<=']:
+        return x <= y
+    if key in ['NOTLOWER', '>=']:
+        return x >= y
+    raise actions.APIError("Operator %s not supported"%key)

@@ -11,11 +11,15 @@ from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
+import geoalchemy2  # Although this import seems unused is has to be here
+
 import api
 import oeplatform.securitysettings as sec
 from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
+
+from shapely import wkb, wkt
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -64,10 +68,11 @@ def load_cursor(f):
         result = f(*args, **kwargs)
 
         if fetch_all:
-            try:
-               result['data'] = cursor.fetchall()
-            except Exception as e:
-               pass
+            if not result:
+                result = {}
+            if cursor.description:
+                result['description'] = cursor.description
+                result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
             close_cursor({}, {'cursor_id': cursor_id})
             connection.connection.commit()
             connection.close()
@@ -75,6 +80,14 @@ def load_cursor(f):
         return result
     return wrapper
 
+def __translate_fetched_cell(cell):
+    if isinstance(cell, geoalchemy2.WKBElement):
+        return _get_engine().execute(cell.ST_AsText()).scalar()
+    elif isinstance(cell, memoryview):
+        return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
+    else:
+        print(type(cell))
+        return cell
 
 def __response_success():
     return {'success': True}
@@ -736,68 +749,6 @@ def table_change_constraint(constraint_definition):
     return perform_sql(sql_string)
 
 
-def get_rows(request, data):
-    sql = ['SELECT']
-    params = {}
-    params_count = 0
-    columns = data.get('columns')
-
-    if not columns:
-        sql.append('*')
-    else:
-        sql.append(','.join(columns))
-
-    sql.append('FROM ONLY {schema}.{table}'.format(schema=data['schema'], table=data['table']))
-
-    where_clauses = data.get('where')
-
-
-    if where_clauses:
-        sql.append('WHERE')
-        for clause in where_clauses:
-            if not parser.is_pg_qual(clause['first']):
-                sql.append(':_%d' % params_count)
-                params['_%d' % params_count] = clause['first']
-                params_count += 1
-            else:
-                sql.append(clause['first'])
-            sql.append(parser.parse_sql_operator(clause['operator']))
-            if not parser.is_pg_qual(clause['second']):
-                sql.append(':_%d' % params_count)
-                params['_%d' % params_count] = clause['second']
-                params_count += 1
-            else:
-                sql.append(clause['second'])
-            if clause.get('connector') is not None:
-                sql.append(clause['connector'])
-
-    orderby = data.get('orderby')
-    if orderby:
-        sql.append('ORDER BY')
-        sql.append(','.join(orderby))
-
-    limit = data.get('limit')
-    if limit and limit.isdigit():
-        sql.append('LIMIT ' + limit)
-
-    offset = data.get('offset')
-    if offset and offset.isdigit():
-        sql.append('OFFSET ' + offset)
-
-    print(sql)
-    sql_command = ' '.join(sql)
-    print(sql_command)
-
-    resp_dict = perform_sql(sql_command, params)
-    result = resp_dict.get('result')
-
-    if result is None:
-        # Returning an empty list is equivalent to returning an empty result.
-        return []
-
-    return [dict(r) for r in result]
-
-
 def put_rows(schema, table, column_data):
     keys = list(column_data.keys())
     values = list(column_data.values())
@@ -818,7 +769,7 @@ ACTIONS FROM OLD API
 
 def _get_table(schema, table):
     engine = _get_engine()
-    metadata = MetaData()
+    metadata = MetaData(bind=_get_engine())
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
@@ -866,7 +817,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     pks = [c for c in table.columns if c.primary_key]
 
     inserts = []
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     if rows['data']:
         for row in rows['data']:
             insert = []
@@ -979,7 +930,7 @@ def data_insert_check(schema, table, values, context):
 
 
 def data_insert(request, context=None):
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     # If the insert request is not for a meta table, change the request to do so
     assert not request['table'].startswith('_') or request['table'].endswith('_cor'), "Insertions on meta tables are only allowed on comment tables"
     orig_schema = request['schema']
@@ -991,25 +942,23 @@ def data_insert(request, context=None):
         request['schema'] = '_' + request['schema']
 
     query, values = parser.parse_insert(request, context)
-    print(dir(query))
     data_insert_check(orig_schema, orig_table, values, context)
-    compiled = query.compile()
-    try:
-        result = cursor.execute(str(compiled), dict(compiled.params))
-    except psycopg2.IntegrityError as e:
-        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
-        raise APIError(str(e.pgerror.split('\n')[0]))
+    _execute_sqla(query, cursor)
     description = cursor.description
     response = {}
     if description:
         response['description'] = [[col.name, col.type_code, col.display_size,
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
-    if result:
-        response['data'] = [list(r) for r in result]
     return response
 
-
+def _execute_sqla(query, cursor):
+    compiled = query.compile()
+    try:
+        cursor.execute(str(compiled), dict(compiled.params))
+    except psycopg2.IntegrityError as e:
+        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
+        raise APIError(str(e.pgerror.split('\n')[0]))
 
 def process_value(val):
     if isinstance(val, str):
@@ -1026,7 +975,7 @@ def table_drop(request, context=None):
     raise PermissionDenied
     db = request["db"]
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
 
     # load schema name and check for sanity
     schema = request.pop("schema", "public")
@@ -1074,7 +1023,7 @@ def data_search(request, context=None):
     query = parser.parse_select(request)
     print(query)
 
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     cursor.execute(query)
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
@@ -1325,7 +1274,7 @@ def __get_connection(request):
 
 def get_isolation_level(request, context):
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     result = engine.dialect.get_isolation_level(cursor)
     return result
 
@@ -1333,7 +1282,7 @@ def get_isolation_level(request, context):
 def set_isolation_level(request, context):
     level = request.get('level', None)
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
@@ -1344,7 +1293,7 @@ def set_isolation_level(request, context):
 def do_begin_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     engine.dialect.do_begin_twophase(cursor, xid)
     return __response_success()
 
@@ -1352,7 +1301,7 @@ def do_begin_twophase(request, context):
 def do_prepare_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     engine.dialect.do_prepare_twophase(cursor, xid)
     return __response_success()
 
@@ -1362,7 +1311,7 @@ def do_rollback_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     engine.dialect.do_rollback_twophase(cursor, xid,
                                         is_prepared=is_prepared,
                                         recover=recover)
@@ -1374,7 +1323,7 @@ def do_commit_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     engine.dialect.do_commit_twophase(cursor, xid, is_prepared=is_prepared,
                                       recover=recover)
     return __response_success()
@@ -1382,7 +1331,7 @@ def do_commit_twophase(request, context):
 
 def do_recover_twophase(request, context):
     engine = _get_engine()
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     return engine.dialect.do_commit_twophase(cursor)
 
 
@@ -1421,7 +1370,7 @@ def open_cursor(request, context):
         return _response_error("Connection (%s) not found" % connection_id)
 
 
-def __load_cursor(cursor_id):
+def _load_cursor(cursor_id):
     try:
         return __CURSORS[cursor_id]
     except KeyError:
@@ -1441,17 +1390,17 @@ def close_cursor(request, context):
 
 
 def fetchone(request, context):
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     return cursor.fetchone()
 
 
 def fetchall(request, context):
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     return cursor.fetchall()
 
 
 def fetchmany(request, context):
-    cursor = __load_cursor(context['cursor_id'])
+    cursor = _load_cursor(context['cursor_id'])
     return cursor.fetchmany(request['size'])
 
 

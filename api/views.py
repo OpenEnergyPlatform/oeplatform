@@ -225,10 +225,22 @@ class Rows(APIView):
     @api_exception
     def get(self, request, schema, table, row_id=None):
         columns = request.GET.getlist('column')
+
         where = request.GET.get('where')
+        if row_id and where:
+            raise actions.APIError('Where clauses and row id are not allowed in the same query')
+
         orderby = request.GET.getlist('orderby')
+        if row_id and orderby:
+            raise actions.APIError('Order by clauses and row id are not allowed in the same query')
+
         limit = request.GET.get('limit')
+        if row_id and limit:
+            raise actions.APIError('Limit by clauses and row id are not allowed in the same query')
+
         offset = request.GET.get('offset')
+        if row_id and offset:
+            raise actions.APIError('Order by clauses and row id are not allowed in the same query')
 
         if offset is not None and not offset.isdigit():
             raise actions.APIError("Offset must be integer")
@@ -260,14 +272,20 @@ class Rows(APIView):
                 'offset': offset
                 }
 
-        return_obj = actions.get_rows(request, data)
+        return_obj = self.__get_rows(request, data)
 
-        if row_id and return_obj:
-            return_obj = return_obj[0]
+        # Extract column names from description
+        cols = [col[0] for col in return_obj['description']]
+        dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
 
+        if row_id:
+            if dict_list:
+                dict_list = dict_list[0]
+            else:
+                raise Http404
 
         # TODO: Figure out what JsonResponse does different.
-        return JsonResponse(return_obj, safe=False)
+        return JsonResponse(dict_list, safe=False)
 
     @api_exception
     @require_write_permission
@@ -410,6 +428,42 @@ class Rows(APIView):
                 'type': 'operator_binary'
             })
         return actions.data_update(query, context)
+
+    @actions.load_cursor
+    def __get_rows(self, request, data):
+        table = actions._get_table(data['schema'], table=data['table'])
+        params = {}
+        params_count = 0
+        columns = data.get('columns')
+
+        if not columns:
+            query = table.select()
+        else:
+            query = table.select(*columns)
+
+        where_clauses = data.get('where')
+
+        if where_clauses:
+            for clause in where_clauses:
+                first = getattr(table.c, clause['first'])
+                second = clause['second']
+                operator = parser.parse_sqla_operator(clause['operator'], first, second)
+                query = query.where(operator)
+
+        orderby = data.get('orderby')
+        if orderby:
+            query.order_by(orderby)
+
+        limit = data.get('limit')
+        if limit and limit.isdigit():
+            query.limit(orderby)
+
+        offset = data.get('offset')
+        if offset and offset.isdigit():
+            query.offset(orderby)
+
+        cursor = actions._load_cursor(request.data['cursor_id'])
+        actions._execute_sqla(query, cursor)
 
 class Session(APIView):
     def get(self, request, length=1):
