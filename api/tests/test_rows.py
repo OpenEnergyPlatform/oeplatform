@@ -2,6 +2,8 @@ from . import APITestCase
 from api import actions
 import json
 
+from shapely import wkt, wkb
+
 class TestRowsPut(APITestCase):
 
     def setUp(self):
@@ -33,6 +35,10 @@ class TestRowsPut(APITestCase):
                     "data_type": "character varying",
                     "is_nullable": True,
                     "character_maximum_length": 150
+                }, {
+                    "name": "geom",
+                    "data_type": "Geometry (Point)",
+                    "is_nullable": True,
                 }
             ]
         }
@@ -84,13 +90,13 @@ class TestRowsPut(APITestCase):
             content_type='application/json')
 
         self.assertEqual(response.status_code, 201, response.json().get('reason', 'No reason returned'))
-
+        row['geom'] = None
         response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
                 schema=self.test_schema, table=self.test_table))
 
         self.assertEqual(response.status_code, 200,
-                         response.json().get('reason', 'No reason returned'))
+                         response.json())
 
         self.assertDictEqualKeywise(response.json(), row)
 
@@ -126,4 +132,53 @@ class TestRowsPut(APITestCase):
         self.assertEqual(response.status_code, 200,
                          response.json().get('reason', 'No reason returned'))
 
+        another_row['geom'] = None
+
         self.assertDictEqualKeywise(response.json(), another_row)
+
+    def test_put_geometry(self):
+        row = {'id': 1, 'name': 'Mary Doe', 'address': "Mary's Street", 'geom': 'POINT(-71.160281 42.258729)'}
+
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 201, response.json().get('reason', 'No reason returned'))
+
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200,
+                         response.json().get('reason', 'No reason returned'))
+
+        row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
+        self.assertDictEqualKeywise(response.json(), row)
+
+    def test_put_geometry_wtb(self):
+        row = {'id': 1, 'name': 'Mary Doe', 'address': "Mary's Street",
+               'geom':  wkb.dumps(wkt.loads('POINT(-71.160281 42.258729)'), hex=True)}
+
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 201,
+                         response.json().get('reason',
+                                             'No reason returned'))
+
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200,
+                         response.json().get('reason',
+                                             'No reason returned'))
+
+        self.assertDictEqualKeywise(response.json(), row)
