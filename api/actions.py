@@ -27,7 +27,6 @@ pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 class APIError(Exception):
     def __init__(self, message, status=500):
-        print(message)
         self.message = message
         self.status = status
 
@@ -86,7 +85,6 @@ def __translate_fetched_cell(cell):
     elif isinstance(cell, memoryview):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
-        print(type(cell))
         return cell
 
 def __response_success():
@@ -614,7 +612,6 @@ def table_create(schema, table, columns, constraints):
 
     for res in results:
         if not res['success']:
-            print(res)
             return res
 
     return get_response_dict(success=True)
@@ -745,7 +742,6 @@ def table_change_constraint(constraint_definition):
 
     sql_string = ''.join(sql)
 
-    print(sql_string)
     return perform_sql(sql_string)
 
 
@@ -833,7 +829,6 @@ def __change_rows(request, context, target_table, setter, fields=None):
                 insert.append((key, value))
 
             inserts.append(dict(insert))
-        print(inserts)
         # Add metadata for insertions
         schema = request['schema']
         meta_schema = get_meta_schema_name(schema) if not schema.startswith(
@@ -862,21 +857,17 @@ def data_insert_check(schema, table, values, context):
     session = sessionmaker(bind=engine)()
     query = 'SELECT array_agg(column_name::text) as columns, conkeys.conname, contype AS type FROM pg_constraint AS conkeys JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = conkeys.conname WHERE table_name=\'{table}\' AND table_schema=\'{schema}\' AND conrelid=\'{schema}.{table}\'::regclass::oid GROUP BY (conkeys.conname,contype);'.format(
         table=table, schema=schema)
-    print(query)
     response = session.execute(query)
     session.close()
 
     for constraint in response:
-        print(constraint)
         columns = constraint.columns
         if constraint.type.lower() == 'c':
-            print(constraint)
+            pass
         elif constraint.type.lower() == 'f':
-            print(constraint['conkey'])
+            pass
         elif constraint.type.lower() in ['u', 'p']:
             for row in values:
-                print(row)
-                print(columns)
                 query = {
                     'from':
                         [{
@@ -902,7 +893,6 @@ def data_insert_check(schema, table, values, context):
                 }
                 rows =__internal_select(query, context)
                 if rows['data']:
-                    print(rows['data'])
                     raise APIError('Action violates constraint {cn}. Failing row was {row}'.format(cn=constraint.conname, row='(' + (', '.join(str(row[c]) for c in row if not c.startswith('_')))) + ')')
 
     for column_name, column in describe_columns(schema, table).items():
@@ -1013,7 +1003,6 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     query = parser.parse_select(request)
-    print(query)
 
     cursor = _load_cursor(context['cursor_id'])
     cursor.execute(query)
@@ -1366,7 +1355,6 @@ def _load_cursor(cursor_id):
     try:
         return __CURSORS[cursor_id]
     except KeyError:
-        print(__CURSORS)
         raise ResponsiveException("Cursor (%s) not found" % cursor_id)
 
 
@@ -1449,7 +1437,6 @@ def create_edit_table(schema, table, meta_schema=None):
         edit_table=get_edit_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    print(query)
     connection = engine.connect()
     connection.execute(query)
 
@@ -1465,7 +1452,6 @@ def create_delete_table(schema, table, meta_schema=None):
         edit_table=get_delete_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    print(query)
     connection = engine.connect()
     connection.execute(query)
 
@@ -1480,7 +1466,6 @@ def create_insert_table(schema, table, meta_schema=None):
         edit_table=get_insert_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    print(query)
     connection = engine.connect()
     connection.execute(query)
 
