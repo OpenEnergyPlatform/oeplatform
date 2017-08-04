@@ -379,7 +379,7 @@ class Rows(APIView):
         return where_clauses
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
-        if row.get('id', int(row_id)) != int(row_id):
+        if row_id and row.get('id', int(row_id)) != int(row_id):
             return actions._response_error('The id given in the query does not '
                                            'match the id given in the url')
         if row_id:

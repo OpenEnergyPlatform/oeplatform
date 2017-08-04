@@ -830,7 +830,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
                     else:
                         raise InvalidRequest(
                             "Primary keys must remain unchanged.")
-                insert.append((key,value))
+                insert.append((key, value))
 
             inserts.append(dict(insert))
         print(inserts)
@@ -839,18 +839,9 @@ def __change_rows(request, context, target_table, setter, fields=None):
         meta_schema = get_meta_schema_name(schema) if not schema.startswith(
             '_') else schema
 
-        s = "INSERT INTO {schema}.{table} ({fields}) VALUES ({value_expression});".format(
-            schema=api.parser.read_pgid(meta_schema),
-            table=target_table,
-            fields=', '.join(fields),
-            value_expression=', '.join('%%(%s)s'%c for c in fields),
-        )
-        print(s, inserts[0])
-        try:
-            cursor.execute(s, inserts[0])
-        except Exception as e:
-            print("ERROR!!!", e)
-            raise e
+        insert_table = _get_table(meta_schema, target_table)
+        query = insert_table.insert(values=inserts)
+        _execute_sqla(query, cursor)
     return {'affected':len(rows['data'])}
 
 
@@ -952,10 +943,11 @@ def data_insert(request, context=None):
             col.null_ok] for col in description]
     return response
 
-def _execute_sqla(query, cursor):
+def _execute_sqla(query, cursor, params=None):
     compiled = query.compile()
     try:
-        cursor.execute(str(compiled), dict(compiled.params))
+        params = params if params else dict(compiled.params)
+        cursor.execute(str(compiled), params)
     except psycopg2.IntegrityError as e:
         print("SQL Action failed. \n Error:\n" + str(e.pgerror))
         raise APIError(str(e.pgerror.split('\n')[0]))
