@@ -38,7 +38,6 @@ class IntegrationTestCase(APITestCase):
     }
 
     def test(self):
-        self.step_a_initializationDatabase()
         self.step_create_table()
         self.step_modify_table()
         self.step_insert_data()
@@ -79,23 +78,6 @@ class IntegrationTestCase(APITestCase):
 
         self.assertEqual(body, self.content_data)
 
-    def step_a_initializationDatabase(self):
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema1 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
-
-        actions.perform_sql("CREATE SCHEMA schema1")
-        actions.perform_sql("CREATE SCHEMA schema2")
-        actions.perform_sql("CREATE SCHEMA schema3")
-
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema1 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema2 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema3 CASCADE")
-
-        actions.perform_sql("CREATE SCHEMA _schema1")
-        actions.perform_sql("CREATE SCHEMA _schema2")
-        actions.perform_sql("CREATE SCHEMA _schema3")
-
     def step_create_table(self):
 
         c_basic_resp = self.__class__.client.put(
@@ -131,7 +113,7 @@ class IntegrationTestCase(APITestCase):
             data=json.dumps(data_constraint), HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
-        self.assertEqual(c_column_resp.status_code, 200, 'Status Code is not 200.')
+        self.assertEqual(c_column_resp.status_code, 200, c_column_resp.get('reason', 'No reason returned'))
         self.assertEqual(c_constraint_resp.status_code, 200, 'Status Code is not 200.')
 
     def step_insert_data(self):
