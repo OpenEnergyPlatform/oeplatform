@@ -780,6 +780,7 @@ def __internal_select(query, context):
     context2['cursor_id'] = cursor_id
     rows = data_search(query, context2)
     rows['data'] = [x for x in cursor.fetchall()]
+    cursor.close()
     conn.close()
     return rows
 
@@ -855,7 +856,15 @@ def data_insert_check(schema, table, values, context):
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    query = 'SELECT array_agg(column_name::text) as columns, conkeys.conname, contype AS type FROM pg_constraint AS conkeys JOIN information_schema.constraint_column_usage AS ccu ON ccu.constraint_name = conkeys.conname WHERE table_name=\'{table}\' AND table_schema=\'{schema}\' AND conrelid=\'{schema}.{table}\'::regclass::oid GROUP BY (conkeys.conname,contype);'.format(
+    query = 'SELECT array_agg(column_name::text) as columns, conname, ' \
+            '   contype AS type ' \
+            'FROM pg_constraint AS conkeys ' \
+            'JOIN information_schema.constraint_column_usage AS ccu ' \
+            '   ON ccu.constraint_name = conname ' \
+            'WHERE table_name=\'{table}\' ' \
+            '   AND table_schema=\'{schema}\' ' \
+            '   AND conrelid=\'{schema}.{table}\'::regclass::oid ' \
+            'GROUP BY conname, contype;'.format(
         table=table, schema=schema)
     response = session.execute(query)
     session.close()

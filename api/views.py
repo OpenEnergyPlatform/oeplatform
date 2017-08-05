@@ -326,6 +326,7 @@ class Rows(APIView):
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
+        conn.close()
         if exists:
             response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
