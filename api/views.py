@@ -77,11 +77,8 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if not actions.has_schema(dict(schema=schema)):
-            raise Http404
 
-        if not actions.has_table(dict(schema=schema, table=table)):
-            raise Http404
+        schema, table = actions.get_table_name(schema, table)
 
         return JsonResponse({
             'schema': schema,
@@ -100,7 +97,10 @@ class Table(APIView):
         :param table:
         :return:
         """
-
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
         json_data = request.data
 
         if 'column' in json_data['type']:
@@ -141,6 +141,10 @@ class Table(APIView):
         :param request:
         :return:
         """
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
         if request.user.is_anonymous:
             raise PermissionDenied
         json_data = request.data['query']
@@ -184,6 +188,7 @@ class Index(APIView):
 class Column(APIView):
     @api_exception
     def get(self, request, schema, table, column=None):
+        schema, table = actions.get_table_name(schema, table)
         response = actions.describe_columns(schema, table)
         if column:
             try:
@@ -195,18 +200,20 @@ class Column(APIView):
 
     @api_exception
     def post(self, request, schema, table, column):
+        schema, table = actions.get_table_name(schema, table)
         response = actions.column_alter(request.data, {}, schema, table, column)
         return JsonResponse(response)
 
     @api_exception
     def put(self, request, schema, table, column):
+        schema, table = actions.get_table_name(schema, table)
         actions.column_add(schema, table, column, request.data)
         return JsonResponse({}, status=201)
 
 
 class Fields(APIView):
     def get(self, request, schema, table, id, column=None):
-
+        schema, table = actions.get_table_name(schema, table)
         if not parser.is_pg_qual(table) or not  parser.is_pg_qual(schema) or not parser.is_pg_qual(id) or not parser.is_pg_qual(column):
             return ModHttpResponse({"error": "Bad Request", "http_status": 400})
 
@@ -224,6 +231,7 @@ class Fields(APIView):
 class Rows(APIView):
     @api_exception
     def get(self, request, schema, table, row_id=None):
+        schema, table = actions.get_table_name(schema, table)
         columns = request.GET.getlist('column')
 
         where = request.GET.get('where')
@@ -290,6 +298,7 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
+        schema, table = actions.get_table_name(schema, table)
         column_data = request.data['query']
         status_code = status.HTTP_200_OK
         if row_id:
@@ -306,6 +315,7 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, row_id=None):
+        schema, table = actions.get_table_name(schema, table)
         if not row_id:
             return JsonResponse(actions._response_error('This methods requires an id'),
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -338,6 +348,7 @@ class Rows(APIView):
 
 
     def delete(self, request, table, schema, row_id=None):
+        schema, table = actions.get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)
         actions.apply_changes(schema, table)
         return JsonResponse(result)

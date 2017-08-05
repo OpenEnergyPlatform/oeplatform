@@ -7,8 +7,6 @@ from shapely import wkt, wkb
 class TestRowsPut(APITestCase):
 
     def setUp(self):
-        self.test_table = 'test_table_rows'
-        self.test_schema = 'schema1'
         structure_data = {
             "constraints": [
                 {
@@ -300,7 +298,6 @@ class TestRowsPost(APITestCase):
     def setUp(self):
         self.rows = [{'id': 1, 'name': 'John Doe', 'address': None, 'geom': 'Point(-71.160281 42.258729)'}]
         self.test_table = 'test_table_rows'
-        self.test_schema = 'schema1'
         structure_data = {
             "constraints": [
                 {
@@ -342,7 +339,7 @@ class TestRowsPost(APITestCase):
             HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
-        assert c_basic_resp.status_code==201, c_basic_resp.json().get('reason','No reason returned')
+        assert c_basic_resp.status_code==201, c_basic_resp.json()
 
         self.rows = []
 

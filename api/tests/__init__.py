@@ -10,25 +10,25 @@ from rest_framework.authtoken.models import Token
 
 
 class APITestCase(TestCase):
-    test_schema = 'schema1'
+    test_schema = 'test'
     test_table = 'population2'
 
     @classmethod
     def setUpClass(cls):
 
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema1 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS test CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
 
-        actions.perform_sql("CREATE SCHEMA schema1")
+        actions.perform_sql("CREATE SCHEMA test")
         actions.perform_sql("CREATE SCHEMA schema2")
         actions.perform_sql("CREATE SCHEMA schema3")
 
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema1 CASCADE")
+        actions.perform_sql("DROP SCHEMA IF EXISTS _test CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS _schema2 CASCADE")
         actions.perform_sql("DROP SCHEMA IF EXISTS _schema3 CASCADE")
 
-        actions.perform_sql("CREATE SCHEMA _schema1")
+        actions.perform_sql("CREATE SCHEMA _test")
         actions.perform_sql("CREATE SCHEMA _schema2")
         actions.perform_sql("CREATE SCHEMA _schema3")
 

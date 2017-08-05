@@ -7,6 +7,7 @@ from datetime import datetime
 import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from sqlalchemy import func, MetaData, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
@@ -18,11 +19,20 @@ import oeplatform.securitysettings as sec
 from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
-
 from shapely import wkb, wkt
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
+def get_table_name(schema, table):
+    if not has_schema(dict(schema=schema)):
+        raise Http404
+    if not has_table(dict(schema=schema, table=table)):
+        raise Http404
+    if schema not in ['model_draft', 'sandbox', 'test']:
+        raise PermissionDenied
+    if schema.startswith('_'):
+        raise PermissionDenied
+    return schema, table
 
 
 class APIError(Exception):
