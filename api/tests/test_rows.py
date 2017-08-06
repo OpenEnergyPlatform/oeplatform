@@ -4,7 +4,7 @@ import json
 
 from shapely import wkt, wkb
 
-class TestRowsPut(APITestCase):
+class TestPut(APITestCase):
 
     def setUp(self):
         structure_data = {
@@ -181,7 +181,7 @@ class TestRowsPut(APITestCase):
 
         self.assertDictEqualKeywise(response.json(), row)
 
-class TestRowsPost(APITestCase):
+class TestPost(APITestCase):
     def setUp(self):
         self.rows = [{'id': 1, 'name': 'John Doe', 'address': None, 'geom': 'Point(-71.160281 42.258729)'}]
         self.test_table = 'test_table_rows'
@@ -294,7 +294,7 @@ class TestRowsPost(APITestCase):
         row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
         self.assertDictEqualKeywise(response.json(), row)
 
-class TestRowsPost(APITestCase):
+class TestGet(APITestCase):
     def setUp(self):
         self.rows = [{'id': 1, 'name': 'John Doe', 'address': None, 'geom': 'Point(-71.160281 42.258729)'}]
         self.test_table = 'test_table_rows'

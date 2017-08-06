@@ -20,8 +20,7 @@ _TYPEMAP = {
 }
 
 
-class TestPutTable(APITestCase):
-
+class TestPut(APITestCase):
 
     def checkStructure(self):
         response = self.__class__.client.get(
@@ -181,7 +180,6 @@ class TestPutTable(APITestCase):
             'numeric_precision_radix': None,
             'numeric_scale': None,
         },['ordinal_position'])
-
 
     def test_create_table_anonymous(self):
         self._structure_data = {
