@@ -207,7 +207,7 @@ class Column(APIView):
     @api_exception
     def put(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
-        actions.column_add(schema, table, column, request.data)
+        actions.column_add(schema, table, column, request.data['query'])
         return JsonResponse({}, status=201)
 
 

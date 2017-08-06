@@ -581,15 +581,17 @@ def column_add(schema, table, column, description):
     description['name'] = column
     settings = get_column_definition_query(description)
     s = 'ALTER TABLE {schema}.{table} ADD COLUMN ' + settings
+    edit_table = get_edit_table_name(schema, table)
+    insert_table = get_insert_table_name(schema, table)
     perform_sql(s.format(schema=schema, table=table))
     # Do the same for update and insert tables.
     meta_schema = get_meta_schema_name(schema)
     perform_sql(s.format(schema=meta_schema,
-                         table=get_edit_table_name(schema, table)))
+                         table=edit_table))
 
     meta_schema = get_meta_schema_name(schema)
     perform_sql(s.format(schema=meta_schema,
-                         table=get_insert_table_name(schema, table)))
+                         table=insert_table))
     return get_response_dict(success=True)
 
 
