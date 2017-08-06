@@ -6,8 +6,8 @@ How to work with the API - An example
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
-    connection.execute('CREATE SCHEMA IF NOT EXISTS example_schema;')
-    connection.execute('CREATE SCHEMA IF NOT EXISTS _example_schema;')
+    connection.execute('CREATE SCHEMA IF NOT EXISTS sandbox;')
+    connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
     connection.close()
 
     oep_url = 'http://localhost:8000'
@@ -39,7 +39,7 @@ We want to create the following table with primary key `id`:
 
 In order to do so, we send the following PUT request::
 
-    PUT oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/
+    PUT oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
     {
         "query": {
             "columns": [
@@ -101,7 +101,7 @@ tool **curl**::
                     ]
                 }
             }'
-        oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/
+        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
 
 
 or **python**:
@@ -110,7 +110,7 @@ or **python**:
 
     >>> import requests
     >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
-    >>> requests.put(oep_url+'/api/v0/schema/example_schema/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
 If everything went right, you will receive a 201-Resonse_ and the table has
@@ -118,15 +118,15 @@ been created.
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/columns')
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/columns')
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': 'NO', 'data_type': 'integer', 'numeric_precision': 32, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('example_schema.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
+    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'integer', 'numeric_precision': 32, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
     True
-    >>> json_result['geom'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': 'YES', 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['geom'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
     True
-    >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': 'YES', 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': 'YES', 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
 
 
@@ -162,7 +162,7 @@ In the following example, we want to add a row containing just the name
         -H "Content-Type: application/json"
         -H 'Authorization: Token <your-token>'
         -d '{"query": {"name": "John Doe"}}'
-        oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
+        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
 
 **python**:
 
@@ -170,7 +170,7 @@ In the following example, we want to add a row containing just the name
 
     >>> import requests
     >>> data = {"query": {"name": "John Doe"}}
-    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     201
     >>> json_result = result.json()
@@ -185,7 +185,7 @@ Alternatively, we can specify that the new row should be stored under id 12:
 
     >>> import requests
     >>> data = {"query": {"name": "Mary Doe XII"}}
-    >>> result = requests.put(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/12', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result = requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/12', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     201
 
@@ -210,7 +210,7 @@ No authorization is required to do so.
 
     curl
         -X GET
-        oep.iks.cs.ovgu.de/api/v0/schema/example_schema/tables/example_table/rows/
+        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
 
 The data will be returned as list of JSON-dictionaries similar to the ones used
 when adding new rows::
@@ -227,7 +227,7 @@ when adding new rows::
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/', )
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/', )
     >>> result.status_code
     200
     >>> json_result = result.json()
@@ -256,7 +256,7 @@ There are also optional parameters for these GET-queries:
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?where=name=John+Doe", )
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/rows/?where=name=John+Doe", )
     >>> result.status_code
     200
     >>> json_result = result.json()
@@ -265,7 +265,7 @@ There are also optional parameters for these GET-queries:
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/1", )
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/rows/1", )
     >>> result.status_code
     200
     >>> json_result = result.json()
@@ -274,7 +274,7 @@ There are also optional parameters for these GET-queries:
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?offset=1")
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/rows/?offset=1")
     >>> result.status_code
     200
     >>> json_result = result.json()
@@ -283,7 +283,7 @@ There are also optional parameters for these GET-queries:
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/rows/?column=name&column=id")
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/rows/?column=name&column=id")
     >>> result.status_code
     200
     >>> json_result = result.json()
@@ -295,17 +295,17 @@ Add columns table
 
 .. doctest::
 
-    >>> data = {'data_type': 'varchar', 'character_maximum_length': 30}
-    >>> result = requests.put(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token})
+    >>> data = {'query':{'data_type': 'varchar', 'character_maximum_length': 30}}
+    >>> result = requests.put(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token})
     >>> result.status_code
     201
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name")
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name")
     >>> result.status_code
     200
-    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': 'YES', 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': 'YES', 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
+    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': True, 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': True, 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
     True
 
 Alter data
@@ -325,13 +325,13 @@ Our next task is to distribute for and last name to the different columns:
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/') # Load the names via GET
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/') # Load the names via GET
     >>> result.status_code
     200
     >>> for row in result.json():
     ...     first_name, last_name = str(row['name']).split(' ', 1) # Split the names at the first space
     ...     data = {'query': {'name': last_name, 'first_name': first_name}} # Build the data dictionary and post it to /rows/<id>
-    ...     result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/{id}'.format(id=row['id']), json=data, headers={'Authorization': 'Token %s'%your_token})
+    ...     result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/{id}'.format(id=row['id']), json=data, headers={'Authorization': 'Token %s'%your_token})
     ...     result.status_code
     200
     200
@@ -356,8 +356,8 @@ values to the column's resource:
 
 .. doctest::
 
-    >>> data = {'is_nullable': 'NO'}
-    >>> result = requests.post(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> data = {'is_nullable': False}
+    >>> result = requests.post(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     200
 
@@ -365,12 +365,12 @@ We can check, whether your command worked by retrieving the corresponding resour
 
 .. doctest::
 
-    >>> result = requests.get(oep_url+"/api/v0/schema/example_schema/tables/example_table/columns/first_name")
+    >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name")
     >>> result.status_code
     200
     >>> json_result = result.json()
     >>> json_result['is_nullable']
-    'NO'
+    False
 
 After prohibiting null-values in the first name column, such rows can not be
 added anymore.
@@ -379,7 +379,7 @@ added anymore.
 
     >>> import requests
     >>> data = {"query": {"name": "McPaul"}}
-    >>> result = requests.post(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     500
     >>> result.json()['reason']
@@ -389,7 +389,7 @@ added anymore.
 
     >>> import requests
     >>> data = {"query": {"name": "McPaul"}}
-    >>> result = requests.delete(oep_url+'/api/v0/schema/example_schema/tables/example_table/rows/1', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     200
 
@@ -398,6 +398,6 @@ added anymore.
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
-    connection.execute('DROP SCHEMA example_schema CASCADE;')
-    connection.execute('DROP SCHEMA _example_schema CASCADE;')
+    connection.execute('DROP SCHEMA sandbox CASCADE;')
+    connection.execute('DROP SCHEMA _sandbox CASCADE;')
     connection.close()
