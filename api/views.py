@@ -379,9 +379,9 @@ class Rows(APIView):
         return actions.data_delete(query, context)
 
     def __read_where_clause(self, where):
-        where_expression = '^(?P<first>.+)(?P<operator>' \
+        where_expression = '^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
                            + '|'.join(parser.sql_operators) \
-                           + ')(?P<second>.+)$'
+                           + ')\s*(?P<second>(^]).+)$'
         where_clauses = []
         if where:
             where_splitted = re.findall(where_expression, where)
@@ -470,7 +470,7 @@ class Rows(APIView):
 
         limit = data.get('limit')
         if limit and limit.isdigit():
-            query = query.limit(orderby)
+            query = query.limit(int(limit))
 
         offset = data.get('offset')
         if offset and offset.isdigit():

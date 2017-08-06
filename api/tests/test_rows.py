@@ -441,3 +441,22 @@ class TestGet(APITestCase):
 
         for c in zip(response.json(), self.rows[50:]):
             self.assertDictEqualKeywise(*c)
+
+    def test_simple_limit(self):
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/?limit=50'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200,
+                         response.json())
+
+    def test_simple_where_geq(self):
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/?where=id>=50'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200,
+                         response.json())
+
+        for c in zip(response.json(), self.rows[:50]):
+            self.assertDictEqualKeywise(*c)
