@@ -23,15 +23,17 @@ from shapely import wkb, wkt
 from sqlalchemy.sql import column
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-def get_table_name(schema, table):
+
+def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
         raise Http404
     if not has_table(dict(schema=schema, table=table)):
         raise Http404
-    if schema not in ['model_draft', 'sandbox', 'test']:
+    if schema.startswith('_') or schema == 'public' or schema is None:
         raise PermissionDenied
-    if schema.startswith('_'):
-        raise PermissionDenied
+    if restrict_schemas:
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
     return schema, table
 
 

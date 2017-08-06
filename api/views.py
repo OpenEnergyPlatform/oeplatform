@@ -79,7 +79,7 @@ class Table(APIView):
         :return:
         """
 
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
 
         return JsonResponse({
             'schema': schema,
@@ -189,7 +189,7 @@ class Index(APIView):
 class Column(APIView):
     @api_exception
     def get(self, request, schema, table, column=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
         if column:
             try:
@@ -214,7 +214,7 @@ class Column(APIView):
 
 class Fields(APIView):
     def get(self, request, schema, table, id, column=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         if not parser.is_pg_qual(table) or not  parser.is_pg_qual(schema) or not parser.is_pg_qual(id) or not parser.is_pg_qual(column):
             return ModHttpResponse({"error": "Bad Request", "http_status": 400})
 
@@ -232,7 +232,7 @@ class Fields(APIView):
 class Rows(APIView):
     @api_exception
     def get(self, request, schema, table, row_id=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist('column')
 
         where = request.GET.get('where')
