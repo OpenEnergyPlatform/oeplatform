@@ -181,11 +181,12 @@ class TestPut(APITestCase):
 
         self.assertDictEqualKeywise(response.json(), row)
 
+
 class TestPost(APITestCase):
     def setUp(self):
         self.rows = [{'id': 1, 'name': 'John Doe', 'address': None, 'geom': 'Point(-71.160281 42.258729)'}]
         self.test_table = 'test_table_rows'
-        self.test_schema = 'schema1'
+        self.test_schema = 'test'
         structure_data = {
             "constraints": [
                 {
@@ -227,7 +228,35 @@ class TestPost(APITestCase):
             HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
-        assert c_basic_resp.status_code==201, c_basic_resp.json().get('reason','No reason returned')
+        assert c_basic_resp.status_code==201, 'Returned %d: %s'%(c_basic_resp.status_code, c_basic_resp.json().get('reason','No reason returned'))
+
+    def tearDown(self):
+        meta_schema = actions.get_meta_schema_name(self.test_schema)
+        if actions.has_table(
+                dict(table=self.test_table, schema=self.test_schema)):
+            actions.perform_sql(
+                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
+                    schema=meta_schema,
+                    table=actions.get_insert_table_name(self.test_schema,
+                                                        self.test_table)
+                ))
+            actions.perform_sql(
+                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
+                    schema=meta_schema,
+                    table=actions.get_edit_table_name(self.test_schema,
+                                                      self.test_table)
+                ))
+            actions.perform_sql(
+                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
+                    schema=meta_schema,
+                    table=actions.get_delete_table_name(self.test_schema,
+                                                        self.test_table)
+                ))
+            actions.perform_sql(
+                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
+                    schema=self.test_schema,
+                    table=self.test_table
+                ))
 
     def test_simple_post_new(self, rid=1):
         row = {'id': rid, 'name': 'Mary Doe', 'address': "Mary's Street",
