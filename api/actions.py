@@ -20,7 +20,7 @@ from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
 from shapely import wkb, wkt
-
+from sqlalchemy.sql import column
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 def get_table_name(schema, table):
@@ -917,7 +917,7 @@ def data_insert_check(schema, table, values, context):
                     raise APIError('Action violates constraint {cn}. Failing row was {row}'.format(cn=constraint.conname, row='(' + (', '.join(str(row[c]) for c in row if not c.startswith('_')))) + ')')
 
     for column_name, column in describe_columns(schema, table).items():
-        if column['is_nullable'] == 'NO':
+        if not column['is_nullable']:
             for row in values:
                 val = row.get(column_name, None)
                 if (val is None

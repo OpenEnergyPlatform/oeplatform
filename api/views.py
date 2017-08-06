@@ -20,6 +20,7 @@ from dataedit.models import Table as DBTable
 from rest_framework import status
 from django.http import Http404
 
+import sqlalchemy as sqla
 import geoalchemy2  # Although this import seems unused is has to be here
 
 
@@ -451,7 +452,8 @@ class Rows(APIView):
         if not columns:
             query = table.select()
         else:
-            query = table.select(*columns)
+            columns = [getattr(table.c, c) for c in columns]
+            query = sqla.select(columns=columns)
 
         where_clauses = data.get('where')
 
@@ -464,15 +466,15 @@ class Rows(APIView):
 
         orderby = data.get('orderby')
         if orderby:
-            query.order_by(orderby)
+            query = query.order_by(orderby)
 
         limit = data.get('limit')
         if limit and limit.isdigit():
-            query.limit(orderby)
+            query = query.limit(orderby)
 
         offset = data.get('offset')
         if offset and offset.isdigit():
-            query.offset(orderby)
+            query = query.offset(int(offset))
 
         cursor = actions._load_cursor(request.data['cursor_id'])
         actions._execute_sqla(query, cursor)
