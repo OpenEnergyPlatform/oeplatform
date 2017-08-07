@@ -146,7 +146,7 @@ class Table(APIView):
             raise PermissionDenied
         if schema.startswith('_'):
             raise PermissionDenied
-        if request.user.is_anonymous:
+        if request.user.is_anonymous():
             raise PermissionDenied
         json_data = request.data['query']
         constraint_definitions = []
