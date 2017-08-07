@@ -578,7 +578,7 @@ class DataView(View):
         display_items = api_changes.get('display_items')
 
         is_admin = False
-        if request.user:
+        if request.user and not request.user.is_anonymous():
             is_admin = request.user.has_admin_permissions(schema, table)
 
         return render(request,
