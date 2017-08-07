@@ -235,3 +235,30 @@ class TestPost(APITestCase):
                          'datetime_precision': None, 'dtd_identifier': '2',
                          'interval_precision': None}
         self.assertDictEqualKeywise(response.json(), new_structure)
+
+    def test_type_change(self):
+        self.structure_data = {'data_type': 'text'}
+        response = self.__class__.client.post(
+            '/api/v0/schema/{schema}/tables/{table}/columns/name'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': self.structure_data}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 200, response.json())
+
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/columns/name'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200, response.json())
+        new_structure = {'character_octet_length': 1073741824, 'ordinal_position': 2,
+                         'character_maximum_length': None, 'interval_type': None,
+                         'data_type': 'text',
+                         'column_default': None,
+                         'numeric_precision_radix': None, 'is_updatable': True,
+                         'numeric_scale': None, 'is_nullable': True,
+                         'maximum_cardinality': None, 'numeric_precision': None,
+                         'datetime_precision': None, 'dtd_identifier': '2',
+                         'interval_precision': None}
+        self.assertDictEqualKeywise(response.json(), new_structure)
