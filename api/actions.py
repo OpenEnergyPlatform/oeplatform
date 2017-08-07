@@ -18,6 +18,7 @@ import api
 import oeplatform.securitysettings as sec
 from api import references
 from api.parser import quote, read_pgid, read_bool
+from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -34,13 +35,6 @@ def get_table_name(schema, table, restrict_schemas=True):
         if schema not in ['model_draft', 'sandbox', 'test']:
             raise PermissionDenied
     return schema, table
-
-
-class APIError(Exception):
-    def __init__(self, message, status=500):
-        self.message = message
-        self.status = status
-
 
 __CONNECTIONS = {}
 __CURSORS = {}

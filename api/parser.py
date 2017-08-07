@@ -4,9 +4,9 @@
 import decimal
 import re
 from datetime import datetime
-from api import actions
 from sqlalchemy import Table, MetaData, Column
-
+from api.error import APIError
+from api.actions import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -52,13 +52,13 @@ def read_bool(s):
     elif s.lower() in ["yes", "no"]:
         return s.lower() == "true"
     else:
-        raise actions.APIError("Invalid value in binary field", s)
+        raise APIError("Invalid value in binary field", s)
 
 
 def read_pgid(s):
     if is_pg_qual(s):
         return s
-    raise actions.APIError("Invalid identifier", s)
+    raise APIError("Invalid identifier", s)
 
 
 def set_meta_info(method, user, message=None):
@@ -69,7 +69,7 @@ def set_meta_info(method, user, message=None):
 
 
 def parse_insert(d, context, message=None):
-    table = Table(read_pgid(d['table']), MetaData(bind=actions._get_engine())
+    table = Table(read_pgid(d['table']), MetaData(bind=_get_engine())
                   , autoload=True, schema=read_pgid(d['schema']))
 
     meta_cols = ['_message', '_user']
@@ -160,7 +160,7 @@ def parse_select(d):
         if sel['type'].lower() in ['union', 'intersect', 'except']:
             s += ' ' + sel['type']
         else:
-            raise actions.APIError('UNION/INTERSECT/EXCEPT expected')
+            raise APIError('UNION/INTERSECT/EXCEPT expected')
         if 'all' in sel and read_bool(sel['all']):
             s += ' ALL '
         elif 'distinct' in sel and read_bool(sel['distinct']):
@@ -182,7 +182,7 @@ def parse_select(d):
                 if ob['nulls'].lower() in ['first', 'last']:
                     ss += ob['nulls']
                 else:
-                    raise actions.APIError('Invalid NULLS option')
+                    raise APIError('Invalid NULLS option')
             L.append(ss)
         s += ', '.join(L)
 
@@ -193,7 +193,7 @@ def parse_select(d):
         elif isinstance(d['limit'], int) or d['limit'].is_digit():
             s += ' ' + str(d['limit'])
         else:
-            raise actions.APIError('Invalid LIMIT (expected ALL or a digit)')
+            raise APIError('Invalid LIMIT (expected ALL or a digit)')
 
     if 'offset' in d and (
                 isinstance(d['offset'], int) or d['offset'].is_digit()):
@@ -253,7 +253,7 @@ def parse_from_item(d):
                                           'full inner join', 'full outer join', 'cross join']:
                 s += ' ' + d['join_type']
             else:
-                raise actions.APIError('Invalid join type')
+                raise APIError('Invalid join type')
         else:
             s += ' JOIN '
 
@@ -485,4 +485,4 @@ def parse_sqla_operator(key, x, y):
         return x <= y
     if key in ['NOTLOWER', '>=']:
         return x >= y
-    raise actions.APIError("Operator %s not supported"%key)
+    raise APIError("Operator %s not supported"%key)
