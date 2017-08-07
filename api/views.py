@@ -200,12 +200,14 @@ class Column(APIView):
         return JsonResponse(response)
 
     @api_exception
+    @require_write_permission
     def post(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
         response = actions.column_alter(request.data, {}, schema, table, column)
         return JsonResponse(response)
 
     @api_exception
+    @require_write_permission
     def put(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
         actions.column_add(schema, table, column, request.data['query'])
