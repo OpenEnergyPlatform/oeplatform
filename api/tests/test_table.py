@@ -211,3 +211,46 @@ class TestPut(APITestCase):
                 schema=self.test_schema, table=self.test_table))
 
         self.assertEqual(response.status_code, 404, response.json())
+
+    def test_anonymous(self):
+        self._structure_data = {
+            "constraints": [
+                {
+                    "constraint_type": "PRIMARY KEY",
+                    "constraint_parameter": "id",
+                    "reference_table": None,
+                    "reference_column": None
+                }
+            ],
+            "columns": [
+                           {
+                               "name": "id",
+                               "data_type": "integer",
+                               "is_nullable": False,
+                               "character_maximum_length": None
+                           }, {
+                    "name": "col_varchar123",
+                    "data_type": 'character varying',
+                    "is_nullable": True,
+                    "character_maximum_length": 123
+                }, {
+                    "name": "col_intarr",
+                    "data_type": 'integer[]',
+                    "is_nullable": True,
+                }
+                       ] + [
+                           {
+                               "name": "col_{type}_{null}".format(
+                                   type=ctype.lower().replace(' ', '_'),
+                                   null='true' if null else 'false'),
+                               "data_type": ctype.lower(),
+                               "is_nullable": null,
+                           } for ctype in _TYPES for null in [True, False]]
+        }
+        self.test_table = 'table_all_columns'
+        c_basic_resp = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/'.format(schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': self._structure_data}),
+            content_type='application/json')
+
+        self.assertEqual(c_basic_resp.status_code, 403, c_basic_resp.json().get('reason', 'No reason returned'))
