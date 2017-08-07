@@ -181,6 +181,27 @@ class TestPut(APITestCase):
 
         self.assertDictEqualKeywise(response.json(), row)
 
+    def test_anonymous(self):
+        row = {'id': 1, 'name': 'John Doe', 'address': None}
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403, response.json())
+
+    def test_wrong_user(self):
+        row = {'id': 1, 'name': 'John Doe', 'address': None}
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.other_token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403, response.json())
+
 
 class TestPost(APITestCase):
     def setUp(self):
@@ -281,6 +302,33 @@ class TestPost(APITestCase):
 
         row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
         self.assertDictEqualKeywise(response.json(), row)
+
+    def test_anonymous(self, rid=1):
+        row = {'id': rid, 'name': 'Mary Doe', 'address': "Mary's Street",
+               'geom':'POINT(-71.160281 42.258729)'}
+
+        response = self.__class__.client.post(
+            '/api/v0/schema/{schema}/tables/{table}/rows/new'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403,
+                         response.json().get('reason', 'No reason returned'))
+
+    def test_wrong_user(self, rid=1):
+        row = {'id': rid, 'name': 'Mary Doe', 'address': "Mary's Street",
+               'geom':'POINT(-71.160281 42.258729)'}
+
+        response = self.__class__.client.post(
+            '/api/v0/schema/{schema}/tables/{table}/rows/new'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': row}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.other_token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403,
+                         response.json().get('reason', 'No reason returned'))
 
     def test_simple_post_existing(self):
         self.test_simple_post_new()
