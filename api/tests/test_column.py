@@ -109,3 +109,26 @@ class TestPut(APITestCase):
             'interval_type': None
          }
         self.assertEqual(response.json()['columns']['new_column'], new_structure)
+
+    def test_anonymous(self):
+        structure_data = {'data_type': 'varchar', 'character_maximum_length': 30}
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/columns/new_column'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': structure_data}),
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403,
+                         response.json())
+
+    def test_wrong_user(self):
+        structure_data = {'data_type': 'varchar', 'character_maximum_length': 30}
+        response = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/columns/new_column'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': structure_data}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.other_token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 403,
+                         response.json())
