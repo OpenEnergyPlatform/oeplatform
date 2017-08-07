@@ -203,7 +203,7 @@ class Column(APIView):
     @require_write_permission
     def post(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
-        response = actions.column_alter(request.data, {}, schema, table, column)
+        response = actions.column_alter(request.data['query'], {}, schema, table, column)
         return JsonResponse(response)
 
     @api_exception

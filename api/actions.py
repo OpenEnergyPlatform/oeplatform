@@ -548,7 +548,6 @@ def column_alter(query, context, schema, table, column):
         table=table,
         column=column
     )
-
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query['data_type'])
         if 'character_maximum_length' in query:
@@ -563,6 +562,13 @@ def column_alter(query, context, schema, table, column):
     if 'column_default' in query:
         value = api.parser.read_pgvalue(query['column_default'])
         sql = alter_preamble + 'SET DEFAULT ' + value
+        perform_sql(sql)
+    if 'name' in query:
+        sql = ("ALTER TABLE {schema}.{table} RENAME COLUMN {column} TO " + read_pgid(query['name'])).format(
+            schema=schema,
+            table=table,
+            column=column
+        )
         perform_sql(sql)
     return get_response_dict(success=True)
 
