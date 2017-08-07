@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 from sqlalchemy import Table, MetaData, Column
 from api.error import APIError
-from api.actions import _get_engine
+from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")

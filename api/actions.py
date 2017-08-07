@@ -15,12 +15,12 @@ from sqlalchemy.orm.session import sessionmaker
 import geoalchemy2  # Although this import seems unused is has to be here
 
 import api
-import oeplatform.securitysettings as sec
 from api import references
 from api.parser import quote, read_pgid, read_bool
 from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
+from api.connection import _get_engine
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -38,13 +38,7 @@ def get_table_name(schema, table, restrict_schemas=True):
 
 __CONNECTIONS = {}
 __CURSORS = {}
-__ENGINE = sqla.create_engine(
-    'postgresql://{0}:{1}@{2}:{3}/{4}'.format(
-        sec.dbuser,
-        sec.dbpasswd,
-        sec.dbhost,
-        sec.dbport,
-        sec.dbname))
+
 
 Base = declarative_base()
 
@@ -1131,10 +1125,6 @@ def connect():
     engine = _get_engine()
     insp = sqla.inspect(engine)
     return insp
-
-
-def _get_engine():
-    return __ENGINE
 
 
 def has_schema(request, context=None):
