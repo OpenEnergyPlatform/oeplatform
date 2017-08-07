@@ -16,7 +16,6 @@ import geoalchemy2  # Although this import seems unused is has to be here
 
 import api
 import oeplatform.securitysettings as sec
-from api import parser
 from api import references
 from api.parser import quote, read_pgid, read_bool
 from shapely import wkb, wkt
@@ -549,7 +548,7 @@ def get_column_definition_query(c):
         not_null="NOT NULL"
                     if not c.get('is_nullable', True)
                     else "",
-        default= 'DEFAULT ' + parser.read_pgvalue(c['column_default'])
+        default= 'DEFAULT ' + api.parser.read_pgvalue(c['column_default'])
                     if 'column_default' in c
                     else ""
         )
@@ -565,7 +564,7 @@ def column_alter(query, context, schema, table, column):
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query['data_type'])
         if 'character_maximum_length' in query:
-            sql += '(' +  parser.read_pgvalue(query['character_maximum_length']) + ')'
+            sql += '(' +  api.parser.read_pgvalue(query['character_maximum_length']) + ')'
         perform_sql(sql)
     if "is_nullable" in query:
         if read_bool(query['is_nullable']):
@@ -574,7 +573,7 @@ def column_alter(query, context, schema, table, column):
             sql = alter_preamble + ' SET NOT NULL'
         perform_sql(sql)
     if 'column_default' in query:
-        value = parser.read_pgvalue(query['column_default'])
+        value = api.parser.read_pgvalue(query['column_default'])
         sql = alter_preamble + 'SET DEFAULT ' + value
         perform_sql(sql)
     return get_response_dict(success=True)
@@ -817,7 +816,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     rows = __internal_select(query, context)
 
     message = request.get('message', None)
-    meta_fields = list(parser.set_meta_info('update', user, message).items())
+    meta_fields = list(api.parser.set_meta_info('update', user, message).items())
     if fields is None:
         fields = [field[0] for field in rows['description']]
     fields += [f[0] for f in meta_fields]
@@ -833,7 +832,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
         for row in rows['data']:
             insert = []
             for (key, value) in list(zip(fields, row)) + meta_fields:
-                if not parser.is_pg_qual(key):
+                if not api.parser.is_pg_qual(key):
                     raise APIError('%s is not a PostgreSQL identifier'%key)
                 if key in setter:
                     if not (key in pks and value != setter[key]):
@@ -945,7 +944,7 @@ def data_insert(request, context=None):
     if not request['schema'].startswith('_'):
         request['schema'] = '_' + request['schema']
 
-    query, values = parser.parse_insert(request, context)
+    query, values = api.parser.parse_insert(request, context)
     data_insert_check(orig_schema, orig_table, values, context)
     _execute_sqla(query, cursor)
     description = cursor.description
@@ -1025,7 +1024,7 @@ def table_drop(request, context=None):
 
 
 def data_search(request, context=None):
-    query = parser.parse_select(request)
+    query = api.parser.parse_select(request)
 
     cursor = _load_cursor(context['cursor_id'])
     cursor.execute(query)
