@@ -45,7 +45,8 @@ INSTALLED_APPS = (
     'django_ajax',
     'literature',
     'api',
-    'axes'
+    'axes',
+    'django.contrib.postgres'
 )
 
 MIDDLEWARE_CLASSES = (

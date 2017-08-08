@@ -1,4 +1,10 @@
 {% extends "dataedit/base.html" %}
+{% block before-header %}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css" rel="stylesheet"/>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.css" rel="stylesheet"/>
+{% endblock %}
 {% block title %} - {{schema}}{% endblock %}
 {% block data_content %}
 {% load dataedit.taghandler %}
@@ -45,8 +51,28 @@ You if you are logged in, you can add tags to this schema to improve the searcha
     <form action="permissions" method="post">
         {% csrf_token %}
         <input type="hidden" name="mode" value="add_user">
-        <input name="name" type="text" placeholder="Add an user" ><input type="submit" value="Add">
+        <input name="name" type="text" placeholder="Add an user" id="user_field"><input type="submit" value="Add">
     </form>
+
+    <script>
+        $('#user_field').bind('input', function() {
+            var dfd = new $.Deferred();
+            var request = $.ajax({type: 'GET',
+                url:'/api/usrprop/', dataType:'json',
+                data: {
+                    name: $(this).val()
+                }
+            });
+            request.done(function(users)
+            {
+                console.log(users);
+                $('#user_field').autocomplete({
+                    source: users
+                });
+                dfd.resolve({})
+            });
+        });
+    </script>
 
     {% for perm in user_perms %}
         <div class="panel-body">
