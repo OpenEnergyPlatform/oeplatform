@@ -4,7 +4,7 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import Table, MetaData, Column, select, column
+from sqlalchemy import Table, MetaData, Column, select, column, func
 from api.error import APIError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -242,7 +242,7 @@ def parse_expression(d):
             if 'value' in d:
                 return read_pgvalue(d['value'])
             else:
-                return 'null'
+                return None
     if isinstance(d, list):
         return [parse_expression(x) for x in d]
     return d
@@ -277,12 +277,12 @@ def parse_modifier_unary(d):
                       read_operator(d['operator'], d['operand']))
 
 def parse_function(d):
-    assert (read_pgid(d['function']))
+    function = getattr(func, read_pgid(d['function']))
     operand_struc = d['operands']
     if isinstance(operand_struc, list):
-        operands = '(' + (', '.join(map(parse_expression, d['operands']))) + ')'
+        operands=map(parse_expression, operand_struc)
     else:
-        operands = parse_expression(operand_struc)
+        operands = [parse_expression(operand_struc)]
 
     return '{f}{ops}'.format(f=d['function'], ops=operands)
 
