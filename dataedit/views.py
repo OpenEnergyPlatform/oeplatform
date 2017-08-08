@@ -781,7 +781,7 @@ class PermissionView(View):
 
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
-        if request.user.get_table_permission_level(
+        if request.user.is_anonymous() or request.user.get_table_permission_level(
                 table_obj) < login_models.ADMIN_PERM:
             raise PermissionDenied
         if request.POST['mode'] == 'add_user':
