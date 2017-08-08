@@ -174,6 +174,13 @@ class Table(APIView):
         request.user.save()
         return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @api_exception
+    @require_delete_permission
+    def delete(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table)
+        table = actions._get_table(schema, table)
+        table.drop()
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 class Index(APIView):
     def get(self, request):
