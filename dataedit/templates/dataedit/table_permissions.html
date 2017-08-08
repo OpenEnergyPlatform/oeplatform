@@ -13,102 +13,115 @@
 Now you are in the database schema you selected and see the list of all tables of this schema.
 You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
 </div>
-{% if can_add %}<b> You are allowed to:</b> Add users/groups{% endif %}{% if can_remove %}, Remove users/groups{% endif %}{% if is_admin %}, Do everything else{% endif %}
+{% if is_admin %}<b> You are allowed to administrate this table </b>{% endif %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
 
-    <h4>Group Permissions</h4>
-    {% if can_add %}
-        <form action="permissions" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="mode" value="add_group">
-            <input name="name" type="text" placeholder="Add a group" id="group_field"><input type="submit" value="Add">
-        </form>
-    {% endif %}
-    <script>
-        $('#group_field').bind('input', function() {
-            var dfd = new $.Deferred();
-            var request = $.ajax({type: 'GET',
-                url:'/api/grpprop/', dataType:'json',
-                data: {
-                    name: $(this).val()
-                }
-            });
-            request.done(function(users)
-            {
-                console.log(users);
-                $('#group_field').autocomplete({
-                    source: users
-                });
-                dfd.resolve({})
-            });
-        });
-    </script>
-
-    {% for perm in group_perms %}
-        <div class="panel-body">
+            {% if is_admin %}
+                <div style="position:relative;">
+                    <form style="position:absolute; right: 0%;" action="permissions" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="add_group">
+                        <input name="name" type="text" placeholder="Add a group" id="group_field"><input type="submit" value="Add">
+                    </form>
+                </div>
+            {% endif %}
             <div>
-                <label for="group_level">{{ perm.holder.name }}</label>
-                {% if own_level >= perm.level %}
-                    {% if can_add %}
+                <h4>Group Permissions</h4>
+            </div>
+        </div>
+        {% if is_admin %}
+        <script>
+            $('#group_field').bind('input', function() {
+                var dfd = new $.Deferred();
+                var request = $.ajax({type: 'GET',
+                    url:'/api/grpprop/', dataType:'json',
+                    data: {
+                        name: $(this).val()
+                    }
+                });
+                request.done(function(users)
+                {
+                    console.log(users);
+                    $('#group_field').autocomplete({
+                        source: users
+                    });
+                    dfd.resolve({})
+                });
+            });
+        </script>
+        {% endif %}
+        {% for perm in group_perms %}
+            <div class="panel-body">
+                <div>
+                    {% if is_admin %}
+                        <label for="group_level">{{ perm.holder.name }}</label>
+
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="alter_group">
                             <input type="hidden" name="group_id" value="{{perm.holder.id}}">
-                            <select class="form-control" id="group_level" name="level" onchange="this.form.submit()">
-                                {% for value, choice in choices %}
-                                    {% if own_level >= value %}
+                                <select class="form-control" id="group_level" name="level" onchange="this.form.submit()">
+                                    {% for value, choice in choices %}
                                         <option value="{{value}}" {% if perm.level == value %} selected="selected" {% endif %}>{{choice}}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
+                                    {% endfor %}
+                                </select>
                         </form>
-                    {% endif %}
-                    {% if can_remove %}
                         <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="remove_group">
                             <input type="hidden" name="group_id" value="{{perm.holder.id}}">
                             <input type="submit" class="btn btn-danger" value="Remove group">
                         </form>
+                    {% else %}
+                        {{ perm.holder.name }}: {% for value, choice in choices %}{% if perm.level == value %}{{choice}}{% endif %}{% endfor %}
                     {% endif %}
-                {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+
+            {% if is_admin %}
+                <div style="position:relative;">
+                    <form style="position:absolute; right: 0%;" action="permissions" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="mode" value="add_user">
+                        <input name="name" type="text" placeholder="Add an user" id="user_field"><input type="submit" value="Add">
+                    </form>
+                </div>
+            {% endif %}
+            <div>
+                <h4>User Permissions</h4>
             </div>
         </div>
-    {% endfor %}
-
-    <h4>User Permissions</h4>
-    {% if can_add %}
-        <form action="permissions" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="mode" value="add_user">
-            <input name="name" type="text" placeholder="Add an user" id="user_field"><input type="submit" value="Add">
-        </form>
-    {% endif %}
-    <script>
-        $('#user_field').bind('input', function() {
-            var dfd = new $.Deferred();
-            var request = $.ajax({type: 'GET',
-                url:'/api/usrprop/', dataType:'json',
-                data: {
-                    name: $(this).val()
-                }
-            });
-            request.done(function(users)
-            {
-                console.log(users);
-                $('#user_field').autocomplete({
-                    source: users
+        {% if is_admin %}
+            <script>
+                $('#user_field').bind('input', function() {
+                    var dfd = new $.Deferred();
+                    var request = $.ajax({type: 'GET',
+                        url:'/api/usrprop/', dataType:'json',
+                        data: {
+                            name: $(this).val()
+                        }
+                    });
+                    request.done(function(users)
+                    {
+                        console.log(users);
+                        $('#user_field').autocomplete({
+                            source: users
+                        });
+                        dfd.resolve({})
+                    });
                 });
-                dfd.resolve({})
-            });
-        });
-    </script>
-
-    {% for perm in user_perms %}
-        <div class="panel-body">
-            <div>
-                <label for="level">{{ perm.holder.name }}</label>
-                {% if own_level >= perm.level %}
-                    {% if can_add %}
+            </script>
+        {% endif %}
+        {% for perm in user_perms %}
+            <div class="panel-body">
+                <div>
+                    {% if is_admin %}
+                        <label for="level">{{ perm.holder.name }}</label>
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="alter_user">
@@ -121,18 +134,18 @@ You if you are logged in, you can add tags to this schema to improve the searcha
                                 {% endfor %}
                             </select>
                         </form>
-                    {% endif %}
-                    {% if can_remove %}
                         <form action="permissions" method="post" style="display:inline-block;float:right"  onsubmit="return confirm('Are you sure you want to remove {{perm.holder.name}} from {{schema.table}}.{{table}} and retract all permissions?')">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="remove_user">
                             <input type="hidden" name="user_id" value="{{perm.holder.id}}">
                             <input type="submit" class="btn btn-danger" value="Remove user">
                         </form>
+                    {% else %}
+                        {{ perm.holder.name }}: {% for value, choice in choices %}{% if perm.level == value %}{{choice}}{% endif %}{% endfor %}
                     {% endif %}
-                {% endif %}
+                </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 
 {% endblock %}
