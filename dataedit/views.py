@@ -765,9 +765,15 @@ class PermissionView(View):
         group_perms = login_models.GroupPermission.objects.filter(
             table=table_obj)
         is_admin = False
+        can_add = False
+        can_remove = False
+        level = login_models.NO_PERM
         if not request.user.is_anonymous():
-            is_admin = request.user.get_table_permission_level(
-                table_obj) >= login_models.ADMIN_PERM
+            level = request.user.get_table_permission_level(
+                table_obj)
+            is_admin = level >= login_models.ADMIN_PERM
+            can_add = level >= login_models.WRITE_PERM
+            can_remove = level >= login_models.DELETE_PERM
         return render(request,
                       'dataedit/table_permissions.html',
                       {
@@ -776,7 +782,10 @@ class PermissionView(View):
                           'user_perms': user_perms,
                           'group_perms': group_perms,
                           'choices': login_models.TablePermission.choices,
-                          'is_admin': is_admin
+                          'can_add': can_add,
+                          'can_remove': can_remove,
+                          'is_admin': is_admin,
+                          'own_level': level,
                       })
 
     def post(self, request, schema, table):
