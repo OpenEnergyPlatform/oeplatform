@@ -58,7 +58,7 @@ def read_bool(s):
 def read_pgid(s):
     if is_pg_qual(s):
         return s
-    raise APIError("Invalid identifier", s)
+    raise APIError("Invalid identifier: '%s'"%s)
 
 
 def set_meta_info(method, user, message=None):
@@ -194,7 +194,7 @@ def parse_from_item(d):
     if isinstance(d, str):
         d = {'type': 'table', 'table': d}
     if d['type'] == 'table':
-        schema_name = read_pgid(d.pop('schema', ''))
+        schema_name = read_pgid(d['schema']) if 'schema' in d else None
         only = d.get('only', False)
         table_name = read_pgid(d['table'])
         table = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
@@ -284,7 +284,7 @@ def parse_function(d):
     else:
         operands = [parse_expression(operand_struc)]
 
-    return '{f}{ops}'.format(f=d['function'], ops=operands)
+    return function(*operands)
 
 
 def cadd(d, key, string=None):
