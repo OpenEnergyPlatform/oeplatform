@@ -356,7 +356,7 @@ values to the column's resource:
 
 .. doctest::
 
-    >>> data = {'is_nullable': False}
+    >>> data = {'query': {'is_nullable': False}}
     >>> result = requests.post(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name", json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     200
