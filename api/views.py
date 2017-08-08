@@ -399,10 +399,6 @@ class Rows(APIView):
                                            'match the id given in the url')
         if row_id:
             row['id'] = row_id
-        if not all(map(parser.is_pg_qual, row.keys())):
-            return actions.get_response_dict(success=False,
-                                             http_status_code=400,
-                                             reason="Your request was malformed.")
 
         context = {'cursor_id': request.data['cursor_id'],
                    'user': request.user}
@@ -410,7 +406,7 @@ class Rows(APIView):
         query = {
             'schema': schema,
             'table': table,
-            'values': [row]
+            'values': [row] if isinstance(row, dict) else row
         }
 
         if not row_id:
