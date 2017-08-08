@@ -73,10 +73,10 @@ var typemap = {
 function show_comment(e, schema, table, id){
         e.stopPropagation();
         query = {
-            from:[{
+            from:{
                 type:'table',
                 table:'_'+table+'_cor',
-                schema:schema}],
+                schema:schema},
             where:[condition_query('_id',id)]
         }
         var request = $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {query: JSON.stringify(query)}});
@@ -267,7 +267,7 @@ function construct_field(dataset){
             if(!unchecked){
                 table_query.only = true;
             }
-
+            table_query.type = 'table';
             var field_query = [];
 
             if(queryObj.fields){
@@ -283,7 +283,7 @@ function construct_field(dataset){
                 field_query = table_fields.map(get_field_query)
             }
 
-            var query = {from : [table_query], fields: field_query};
+            var query = {from : table_query, fields: field_query};
 
 
 
