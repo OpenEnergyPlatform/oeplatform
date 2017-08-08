@@ -443,23 +443,19 @@ class TestGet(APITestCase):
 
         assert c_basic_resp.status_code==201, c_basic_resp.json()
 
-        cls.rows = []
 
-        for i in range(100):
-            row = {'id': i, 'name': 'Mary Doe', 'address': "Mary's Street",
-                   'geom': '0101000000E44A3D0B42CA51C06EC328081E214540'}
+        cls.rows = [{'id': i, 'name': 'Mary Doe', 'address': "Mary's Street",
+               'geom': '0101000000E44A3D0B42CA51C06EC328081E214540'} for i in range(100)]
 
-            response = cls.client.put(
-                '/api/v0/schema/{schema}/tables/{table}/rows/{rid}'.format(
-                    schema=cls.test_schema, table=cls.test_table, rid=i),
-                data=json.dumps({'query': row}),
-                HTTP_AUTHORIZATION='Token %s' % cls.token,
-                content_type='application/json')
+        response = cls.client.post(
+            '/api/v0/schema/{schema}/tables/{table}/rows/new'.format(
+                schema=cls.test_schema, table=cls.test_table),
+            data=json.dumps({'query': cls.rows}),
+            HTTP_AUTHORIZATION='Token %s' % cls.token,
+            content_type='application/json')
 
-            assert c_basic_resp.status_code == 201, c_basic_resp.json().get(
-                'reason', 'No reason returned')
-
-            cls.rows.append(row)
+        assert response.status_code == 201, response.json().get(
+            'reason', 'No reason returned')
 
     @classmethod
     def tearDownClass(self):
