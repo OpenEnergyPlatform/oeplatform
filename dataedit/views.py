@@ -810,7 +810,7 @@ class PermissionView(View):
         user = login_models.myuser.objects.filter(
             name=request.POST['name']).first()
         table_obj = Table.load(schema, table)
-        p = login_models.UserPermission.objects.create(holder=user,
+        p, _ = login_models.UserPermission.objects.get_or_create(holder=user,
                                                        table=table_obj)
         p.save()
         return self.get(request, schema, table)
@@ -838,7 +838,7 @@ class PermissionView(View):
         group = get_object_or_404(login_models.UserGroup,
                                   name=request.POST['name'])
         table_obj = Table.load(schema, table)
-        p = login_models.GroupPermission.objects.create(holder=group,
+        p, _ = login_models.GroupPermission.objects.get_or_create(holder=group,
                                                         table=table_obj)
         p.save()
         return self.get(request, schema, table)
