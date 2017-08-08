@@ -371,6 +371,29 @@ class TestPost(APITestCase):
         row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
         self.assertDictEqualKeywise(response.json(), row)
 
+    def test_bulk_insert(self):
+        rows = [{'id': rid, 'name': 'Mary Doe', 'address': "Mary's Street",
+               'geom': None} for rid in range(0,23)]
+
+        response = self.__class__.client.post(
+            '/api/v0/schema/{schema}/tables/{table}/rows/new'.format(
+                schema=self.test_schema, table=self.test_table),
+            data=json.dumps({'query': rows}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(response.status_code, 201,
+                         response.json().get('reason', 'No reason returned'))
+
+        response = self.__class__.client.get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
+                schema=self.test_schema, table=self.test_table))
+
+        self.assertEqual(response.status_code, 200,
+                         'Returned %d: %s'%(response.status_code, response.json()))
+
+        self.assertListEqual(response.json(), rows)
+
 class TestGet(APITestCase):
     @classmethod
     def setUpClass(cls):
