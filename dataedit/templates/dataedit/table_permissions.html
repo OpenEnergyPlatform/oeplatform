@@ -18,8 +18,28 @@ You if you are logged in, you can add tags to this schema to improve the searcha
     <form action="permissions" method="post">
         {% csrf_token %}
         <input type="hidden" name="mode" value="add_group">
-        <input name="name" type="text" placeholder="Add a group" ><input type="submit" value="Add">
+        <input name="name" type="text" placeholder="Add a group" id="group_field"><input type="submit" value="Add">
     </form>
+
+    <script>
+        $('#group_field').bind('input', function() {
+            var dfd = new $.Deferred();
+            var request = $.ajax({type: 'GET',
+                url:'/api/grpprop/', dataType:'json',
+                data: {
+                    name: $(this).val()
+                }
+            });
+            request.done(function(users)
+            {
+                console.log(users);
+                $('#group_field').autocomplete({
+                    source: users
+                });
+                dfd.resolve({})
+            });
+        });
+    </script>
 
     {% for perm in group_perms %}
         <div class="panel-body">
