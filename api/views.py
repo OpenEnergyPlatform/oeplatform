@@ -174,6 +174,13 @@ class Table(APIView):
         request.user.save()
         return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @api_exception
+    @require_delete_permission
+    def delete(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table)
+        table = actions._get_table(schema, table)
+        table.drop()
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 class Index(APIView):
     def get(self, request):
@@ -200,12 +207,14 @@ class Column(APIView):
         return JsonResponse(response)
 
     @api_exception
+    @require_write_permission
     def post(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
-        response = actions.column_alter(request.data, {}, schema, table, column)
+        response = actions.column_alter(request.data['query'], {}, schema, table, column)
         return JsonResponse(response)
 
     @api_exception
+    @require_write_permission
     def put(self, request, schema, table, column):
         schema, table = actions.get_table_name(schema, table)
         actions.column_add(schema, table, column, request.data['query'])
@@ -267,9 +276,11 @@ class Rows(APIView):
         where_clauses = self.__read_where_clause(where)
 
         if row_id:
-            where_clauses.append({'first': 'id',
+            where_clauses.append({'left': {'type': 'column',
+                                           'column': 'id'},
              'operator': 'EQUALS',
-             'second': row_id})
+             'right': row_id,
+             'type': 'operator_binary'})
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
@@ -381,13 +392,16 @@ class Rows(APIView):
     def __read_where_clause(self, where):
         where_expression = '^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
                            + '|'.join(parser.sql_operators) \
-                           + ')\s*(?P<second>(^]).+)$'
+                           + ')\s*(?P<second>(?![>=]).+)$'
         where_clauses = []
         if where:
             where_splitted = re.findall(where_expression, where)
-            where_clauses = [{'first': match[0],
+            where_clauses = [{'left': {
+                                'type': 'column',
+                                'column': match[0]},
                               'operator': match[1],
-                              'second': match[2]} for match in where_splitted]
+                              'type': 'operator_binary',
+                              'right': match[2]} for match in where_splitted]
 
         return where_clauses
     @actions.load_cursor
@@ -397,10 +411,6 @@ class Rows(APIView):
                                            'match the id given in the url')
         if row_id:
             row['id'] = row_id
-        if not all(map(parser.is_pg_qual, row.keys())):
-            return actions.get_response_dict(success=False,
-                                             http_status_code=400,
-                                             reason="Your request was malformed.")
 
         context = {'cursor_id': request.data['cursor_id'],
                    'user': request.user}
@@ -408,7 +418,7 @@ class Rows(APIView):
         query = {
             'schema': schema,
             'table': table,
-            'values': [row]
+            'values': [row] if isinstance(row, dict) else row
         }
 
         if not row_id:
@@ -437,7 +447,7 @@ class Rows(APIView):
                     'column': 'id'
                 },
                 'operator': '=',
-                'right': row_id,
+                'right': actions._load_value(row_id),
                 'type': 'operator_binary'
             })
         return actions.data_update(query, context)
@@ -459,8 +469,8 @@ class Rows(APIView):
 
         if where_clauses:
             for clause in where_clauses:
-                first = getattr(table.c, clause['first'])
-                second = clause['second']
+                first = getattr(table.c, clause['left']['column'])
+                second = clause['right']
                 operator = parser.parse_sqla_operator(clause['operator'], first, second)
                 query = query.where(operator)
 

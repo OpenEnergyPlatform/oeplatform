@@ -548,7 +548,6 @@ def column_alter(query, context, schema, table, column):
         table=table,
         column=column
     )
-
     if "data_type" in query:
         sql = alter_preamble + "SET DATA TYPE " + read_pgid(query['data_type'])
         if 'character_maximum_length' in query:
@@ -563,6 +562,13 @@ def column_alter(query, context, schema, table, column):
     if 'column_default' in query:
         value = api.parser.read_pgvalue(query['column_default'])
         sql = alter_preamble + 'SET DEFAULT ' + value
+        perform_sql(sql)
+    if 'name' in query:
+        sql = ("ALTER TABLE {schema}.{table} RENAME COLUMN {column} TO " + read_pgid(query['name'])).format(
+            schema=schema,
+            table=table,
+            column=column
+        )
         perform_sql(sql)
     return get_response_dict(success=True)
 
@@ -788,11 +794,11 @@ def __internal_select(query, context):
 
 def __change_rows(request, context, target_table, setter, fields=None):
     query = {
-        'from': [{
+        'from': {
             'type': 'table',
             'schema': request['schema'],
             'table': request['table']
-        }],
+        },
         'where': request['where']
     }
     if fields:
@@ -880,11 +886,11 @@ def data_insert_check(schema, table, values, context):
             for row in values:
                 query = {
                     'from':
-                        [{
+                        {
                             'type': 'table',
                             'schema': schema,
                             'table': table
-                        }],
+                        },
                     'where':
                         [
                             {
@@ -894,7 +900,7 @@ def data_insert_check(schema, table, values, context):
                                         'column': c
                                     },
                                 'operator': '=',
-                                'right': {'type': 'value', 'value': row[c]} if c in row else {'type': 'value'},
+                                'right': {'type': 'value', 'value': _load_value(row[c])} if c in row else {'type': 'value'},
                                 'type': 'operator_binary'
                             } for c in columns
                         ],
@@ -919,7 +925,11 @@ def data_insert_check(schema, table, values, context):
                                     str(row[c]) for c in row if
                                     not c.startswith('_')))) + ')')
 
-
+def _load_value(v):
+    if isinstance(v,str):
+        if v.isdigit():
+            return int(v)
+    return v
 def data_insert(request, context=None):
     cursor = _load_cursor(context['cursor_id'])
     # If the insert request is not for a meta table, change the request to do so
@@ -943,14 +953,16 @@ def data_insert(request, context=None):
             col.null_ok] for col in description]
     return response
 
-def _execute_sqla(query, cursor, params=None):
+
+def _execute_sqla(query, cursor):
     compiled = query.compile()
     try:
-        params = params if params else dict(compiled.params)
+        params = dict(compiled.params)
         cursor.execute(str(compiled), params)
     except psycopg2.IntegrityError as e:
         print("SQL Action failed. \n Error:\n" + str(e.pgerror))
         raise APIError(str(e.pgerror.split('\n')[0]))
+
 
 def process_value(val):
     if isinstance(val, str):
@@ -965,7 +977,6 @@ def process_value(val):
 
 def table_drop(request, context=None):
     raise PermissionDenied
-    db = request["db"]
     engine = _get_engine()
     cursor = _load_cursor(context['cursor_id'])
 
@@ -1013,9 +1024,8 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     query = api.parser.parse_select(request)
-
     cursor = _load_cursor(context['cursor_id'])
-    cursor.execute(query)
+    _execute_sqla(query, cursor)
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
                                  col.null_ok] for col in cursor.description]
