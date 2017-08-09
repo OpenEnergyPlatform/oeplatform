@@ -15,6 +15,7 @@ import api.parser
 from api import actions
 from api import parser
 from api.helpers.http import ModHttpResponse
+from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
 
@@ -149,6 +150,8 @@ class Table(APIView):
             raise PermissionDenied
         if request.user.is_anonymous():
             raise PermissionDenied
+        if actions.has_table(dict(schema=schema, table=table),{}):
+            return APIError('Table already exists')
         json_data = request.data['query']
         constraint_definitions = []
         column_definitions = []
@@ -179,8 +182,29 @@ class Table(APIView):
     @require_delete_permission
     def delete(self, request, schema, table):
         schema, table = actions.get_table_name(schema, table)
-        table = actions._get_table(schema, table)
-        table.drop()
+
+
+        meta_schema = actions.get_meta_schema_name(schema)
+
+        edit_table = actions.get_edit_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        edit_table = actions.get_insert_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        edit_table = actions.get_delete_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=schema,
+                                                          table=table))
+
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 class Index(APIView):
@@ -359,7 +383,7 @@ class Rows(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
-
+    @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
         schema, table = actions.get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)

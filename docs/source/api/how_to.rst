@@ -3,6 +3,7 @@ How to work with the API - An example
 
 .. testsetup::
 
+
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
@@ -13,6 +14,11 @@ How to work with the API - An example
     oep_url = 'http://localhost:8000'
     from oeplatform.securitysettings import token_test_user as your_token
 
+    #oep_url = 'http://localhost:8080'
+    #your_token = '667c1708d97599c17bc47f39680cc515ceef4bf5'
+
+    #oep_url = 'http://oep.iks.cs.ovgu.de'
+    #your_token = '3f1ec0807807b988eacd985d11c60f30203925f2'
 
 Authenticate
 ************
@@ -393,11 +399,17 @@ added anymore.
     >>> result.status_code
     200
 
+.. doctest::
+
+    >>> import requests
+    >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
+    <Response [200]>
+
 .. testcleanup::
 
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
-    connection.execute('DROP SCHEMA sandbox CASCADE;')
-    connection.execute('DROP SCHEMA _sandbox CASCADE;')
+    #connection.execute('DROP SCHEMA sandbox CASCADE;')
+    #connection.execute('DROP SCHEMA _sandbox CASCADE;')
     connection.close()
