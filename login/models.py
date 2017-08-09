@@ -78,8 +78,11 @@ class PermissionHolder():
 
 class UserGroup(Group, PermissionHolder):
     description = models.TextField(null=False, default='')
+    is_admin = models.BooleanField(null=False, default=False)
 
     def get_table_permission_level(self, table):
+        if self.is_admin:
+            return ADMIN_PERM
         return max(itertools.chain([NO_PERM], (perm.level for perm in self.table_permissions.filter(table=table))))
 
 class TablePermission(models.Model):
@@ -129,6 +132,9 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     def get_table_permission_level(self, table):
         # Check admin permissions for user
+        if self.is_admin:
+            return ADMIN_PERM
+
         user_membership = self.table_permissions.filter(
             table=table).first()
 

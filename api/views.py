@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from django.db.models import Q
 
 import login.models as login_models
 import api.parser
@@ -556,3 +557,15 @@ def stream(data):
     for i in range(size):
         yield json.loads(json.dumps(data[i], default=date_handler))
         time.sleep(1)
+
+
+def get_users(request):
+    string = request.GET['name']
+    users = login_models.myuser.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
+    return JsonResponse([user.name for user in users], safe=False)
+
+
+def get_groups(request):
+    string = request.GET['name']
+    users = login_models.Group.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
+    return JsonResponse([user.name for user in users], safe=False)

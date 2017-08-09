@@ -764,7 +764,16 @@ class PermissionView(View):
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(
             table=table_obj)
-
+        is_admin = False
+        can_add = False
+        can_remove = False
+        level = login_models.NO_PERM
+        if not request.user.is_anonymous():
+            level = request.user.get_table_permission_level(
+                table_obj)
+            is_admin = level >= login_models.ADMIN_PERM
+            can_add = level >= login_models.WRITE_PERM
+            can_remove = level >= login_models.DELETE_PERM
         return render(request,
                       'dataedit/table_permissions.html',
                       {
@@ -773,13 +782,15 @@ class PermissionView(View):
                           'user_perms': user_perms,
                           'group_perms': group_perms,
                           'choices': login_models.TablePermission.choices,
-                          'is_admin': request.user.get_table_permission_level(
-                              table_obj) >= login_models.ADMIN_PERM
+                          'can_add': can_add,
+                          'can_remove': can_remove,
+                          'is_admin': is_admin,
+                          'own_level': level,
                       })
 
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
-        if request.user.get_table_permission_level(
+        if request.user.is_anonymous() or request.user.get_table_permission_level(
                 table_obj) < login_models.ADMIN_PERM:
             raise PermissionDenied
         if request.POST['mode'] == 'add_user':
@@ -799,7 +810,7 @@ class PermissionView(View):
         user = login_models.myuser.objects.filter(
             name=request.POST['name']).first()
         table_obj = Table.load(schema, table)
-        p = login_models.UserPermission.objects.create(holder=user,
+        p, _ = login_models.UserPermission.objects.get_or_create(holder=user,
                                                        table=table_obj)
         p.save()
         return self.get(request, schema, table)
@@ -827,7 +838,7 @@ class PermissionView(View):
         group = get_object_or_404(login_models.UserGroup,
                                   name=request.POST['name'])
         table_obj = Table.load(schema, table)
-        p = login_models.GroupPermission.objects.create(holder=group,
+        p, _ = login_models.GroupPermission.objects.get_or_create(holder=group,
                                                         table=table_obj)
         p.save()
         return self.get(request, schema, table)
