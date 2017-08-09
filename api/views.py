@@ -151,7 +151,7 @@ class Table(APIView):
         if request.user.is_anonymous():
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table),{}):
-            return APIError('Table already exists')
+            raise APIError('Table already exists')
         json_data = request.data['query']
         constraint_definitions = []
         column_definitions = []
