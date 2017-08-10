@@ -1059,7 +1059,7 @@ def _get_header(results):
     return header
 
 
-def analyze_columns(db, schema, table):
+def analyze_columns(schema, table):
     engine = _get_engine()
     connection = engine.connect()
     result = connection.execute(
@@ -1106,7 +1106,7 @@ def create_meta(schema, table):
     get_insert_table_name(schema, table)
 
 
-def get_comment_table(db, schema, table):
+def get_comment_table(schema, table):
     engine = _get_engine()
     connection = engine.connect()
 

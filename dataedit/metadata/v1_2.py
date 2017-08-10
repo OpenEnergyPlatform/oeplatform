@@ -46,15 +46,10 @@ def from_v1_1(comment_on_table, schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
         else:
-            comment_on_table['fields'] = \
-            comment_on_table['resources'][0]['schema'][
-                'fields']
-
             if 'fields' not in comment_on_table['resources'][0]['schema']:
                 comment_on_table['fields'] = []
             else:
-                comment_on_table['fields'] = \
-                comment_on_table['resources'][0]['schema'][
+                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
                     'fields']
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]

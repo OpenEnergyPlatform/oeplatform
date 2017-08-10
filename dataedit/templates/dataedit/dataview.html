@@ -179,18 +179,12 @@
               </ul>
             </td>
         </tr>
-        <tr>
-            <th>Reference date</th>
-            <td class="metavalue">{{comment_on_table.reference_date}}</td>
-        </tr>
-        
         {% if comment_on_table.spatial %}
         <tr>
             <th>Spatial</th>
             <td>
-            {% for row in comment_on_table.spatial %}
-                {{row.extent}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
-            {% endfor %}</td>
+                {{comment_on_table.spatial.extent}} {% if comment_on_table.spatial.resolution %} ({{comment_on_table.spatial.resolution}}) {% endif %} <br/>
+            </td>
         </tr>
         {% endif %}
 
@@ -198,9 +192,8 @@
         <tr>
             <th>Temporal</th>
             <td>
-            {% for row in comment_on_table.temporal %}
-                {{row.start}} {% if row.end %} ({{row.end}}) {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
-            {% endfor %}</td>
+                {{comment_on_table.temporal.start}} {% if comment_on_table.temporal.end %} ({{comment_on_table.temporal.end}}) {% if comment_on_table.temporal.resolution %} ({{comment_on_table.temporal.resolution}}) {% endif %} {% endif %} <br/>
+            </td>
         </tr>
         {% endif %}
 		
@@ -230,20 +223,20 @@
         <tr>
             <th>License</th>
             <td>
-                {% for row in comment_on_table.license %}
                     <p class="metaproperty">
-                        {% if row.url %}
-                            <a href="{{row.url}}">{{row.name}} ({{row.id}})</a>
-                        {% else %}
-                            {{row.name}} ({{row.id}})
+                        {% if comment_on_table.license.url %}
+                            <a href="{{comment_on_table.license.url}}">
+                        {% endif %}
+                        {{comment_on_table.license.name}} ({{comment_on_table.license.id}})
+                        {% if comment_on_table.license.url %}
+                            </a>
                         {% endif %}
                     </p>
                     <ul>
-                        <li> Version: {{row.version }}</li>
-                        <li> Instruction: {{row.instruction }}</li>
-                        <li> Copyright: {{row.copyright }}</li>
+                        <li> Version: {{comment_on_table.license.version }}</li>
+                        <li> Instruction: {{comment_on_table.license.instruction }}</li>
+                        <li> Copyright: {{comment_on_table.license.copyright }}</li>
                     </ul>
-                {% endfor %}
             </td>
         </tr>
         {% endif %}

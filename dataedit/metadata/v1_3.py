@@ -1,5 +1,4 @@
 from api import actions
-from .v1_2 import load_meta
 from . import v1_2
 
 
@@ -40,6 +39,7 @@ def from_v1_2(comment_on_table):
         }
 
     comment_on_table['metadata_version'] = '1.3'
+
     return comment_on_table
 
 

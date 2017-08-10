@@ -16,22 +16,28 @@ def load_comment_from_db(schema, table):
             'meta_version' in x)
     if version[0] == 1:
         if version[1] == 1:
-            return __LATEST.from_v1_1(comment, schema, table)
+            comment_on_table = __LATEST.from_v1_1(comment, schema, table)
         elif version[1] == 2:
-            return __LATEST.from_v1_2(comment)
+            comment_on_table = __LATEST.from_v1_2(comment)
         elif version[1] == 3:
-            return comment
+            comment_on_table = comment
         else:
-            return comment
+            comment_on_table = comment
     else:
-        return __LATEST.from_v0(comment, schema, table)
+        comment_on_table = __LATEST.from_v0(comment, schema, table)
 
+    # This is not part of the actual metadata-schema. We move the fields to
+    # a higher level in order to avoid fetching the first resource in the
+    # templates.
+    comment_on_table['fields'] = comment_on_table['resources'][0][
+        'fields']
 
-def load_meta(c):
+    return comment_on_table
+
+def read_metadata_from_post(c, schema, table):
     d = {
         'title': c['title'],
         'description': c['description'],
-        'reference_date': c['reference_date'],
         'spatial':{
             'location': c['spatial_location'],
             'extent': c['spatial_extend'],
@@ -60,7 +66,7 @@ def load_meta(c):
 
     d['resources'] = [
         {
-            'name': c['resources_name'],
+            'name': '%s.%s'%(schema, table),
             'format': 'PostgreSQL',
             'fields':d['field']
         }
