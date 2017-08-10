@@ -275,17 +275,15 @@ def listtables(request, schema_name):
                   {'schema': schema_name, 'tables': tables})
 
 
-COMMENT_KEYS = [('Name', 'Name'),
-                ('Date of collection', 'Date_of_Collection'),
-                ('Spatial resolution', 'Spatial_Resolution'),
-                ('Description', 'Description'),
+COMMENT_KEYS = [('Title', 'Title'),
+				('Description', 'Description'),
+                ('Reference Date', 'Reference Date'),
+                ('Spatial', 'Spatial'),
+                ('Temporal', 'Temporal'),
+				('Source', 'Source'),
                 ('Licence', 'Licence'),
-                ('Column', 'Column'),
-                ('Instructions for proper use', 'Instructions_for_proper_use'),
-                ('Source', 'Source'),
-                ('Reference date', 'Reference_date'),
-                ('Original file', 'Original_file'),
-                ('Notes', 'Notes'), ]
+                ('Contributors', 'Contributors'),
+                ('Fields', 'Fields'), ]
 
 
 def _type_json(json_obj):
@@ -983,8 +981,7 @@ class SearchView(View):
 Metadata handler
 """
 
-
-def load_comments(schema, table):
+def load_comments_v_1_2(schema, table):
     comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
     columns = actions.analyze_columns(sec.dbname, schema, table)
     try:
@@ -1054,6 +1051,130 @@ def load_comments(schema, table):
 
     return comment_on_table
 
+def load_comments_v_1_3(schema, table):
+    comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
+    columns = actions.analyze_columns(sec.dbname, schema, table)
+    try:
+        if 'error' in comment_on_table:
+            comment_on_table = {'description': [comment_on_table['content']],
+                                'fields': []}
+            commented_cols = []
+        elif 'resources' not in comment_on_table:
+            comment_on_table = {
+                'title': comment_on_table['Name'],
+                'description': "; ".join(comment_on_table['Description']),
+                'language': [],
+                'reference_date': comment_on_table['Reference date'],
+				'spatial': [
+                    {'extent': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+				'temporal': [
+                    {'start': x, 'end': '', 'resolution': ''} for x in comment_on_table['Temporal resolution']],
+                'sources': [
+                    {'name': x['Name'], 'description': '', 'url': x['URL'], 'license': ' ', 'copyright': ' '} for x in comment_on_table['Source']],
+                'spatial': [
+                    {'extend': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+                'license': [
+                    {'id': '',
+                     'name': x,
+                     'version': '',
+                     'url': '',
+                     'instruction': '',
+                     'copyright': ''} for x in comment_on_table['Licence']],
+                'contributors': [
+                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'], 'comment': x['Comment']} for x in comment_on_table['Changes']],
+                'resources': [{
+                    'schema': {
+                        'fields': [
+                            {'name': x['Name'], 'description': x['Description'], 'unit': x['Unit'] } for x in comment_on_table['Column']]},
+                    'meta_version': '1.2' }] }
+
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema']['fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+        else:
+            comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                'fields']
+
+            if 'fields' not in comment_on_table['resources'][0]:
+                comment_on_table['fields'] = []
+            else:
+                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                    'fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+    except Exception as e:
+        comment_on_table = {'description': comment_on_table, 'fields': []}
+        commented_cols = []
+
+    for col in columns:
+        if not col['id'] in commented_cols:
+            comment_on_table['fields'].append({
+                'name': col['id'],
+                'description': '',
+                'unit': ''})
+
+    return comment_on_table
+
+def load_comments(schema, table):
+    comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
+    columns = actions.analyze_columns(sec.dbname, schema, table)
+    try:
+        if 'error' in comment_on_table:
+            comment_on_table = {'description': [comment_on_table['content']], 'fields': []}
+            commented_cols = []
+        elif 'resources' not in comment_on_table:
+            comment_on_table = {
+                'title': comment_on_table['Name'],
+                'description': "; ".join(comment_on_table['Description']),
+                'language': [],
+                'reference_date': comment_on_table['Reference date'],
+				'spatial': [
+                    {'extent': x, 'resolution': ''} for x in comment_on_table['Spatial resolution']],
+				'temporal': [
+                    {'start': x, 'end': '', 'resolution': ''} for x in comment_on_table['Temporal resolution']],
+                'sources': [
+                    {'name': x['Name'], 'description': '', 'url': x['URL'], 'license': ' ', 'copyright': ' '} for x in comment_on_table['Source']],
+                'license': [
+                    {'id': '',
+                    'name': x,
+                    'version': '',
+                    'url': '',
+                    'instruction': '',
+                    'copyright': ''} for x in comment_on_table['Licence']],
+                'contributors': [
+                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'], 'comment': x['Comment']} for x in comment_on_table['Changes']],
+                'resources': [
+					{'name': '',
+					'format': 'sql',
+					'fields': [
+						{'name': x['Name'], 'description': x['Description'], 'unit': x['Unit'] } for x in comment_on_table['Column']] }]
+				'meta_version': '1.3'  }
+
+            comment_on_table['fields'] = comment_on_table['resources'][0]['fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+        else:
+            comment_on_table['fields'] = comment_on_table['resources'][0]['fields']
+
+            if 'fields' not in comment_on_table['resources'][0]:
+                comment_on_table['fields'] = []
+            else:
+                comment_on_table['fields'] = comment_on_table['resources'][0]['fields']
+
+            commented_cols = [col['name'] for col in comment_on_table['fields']]
+    except Exception as e:
+        print(e)
+        comment_on_table = {'description': comment_on_table, 'fields': []}
+        commented_cols = []
+
+    for col in columns:
+        if not col['id'] in commented_cols:
+            comment_on_table['fields'].append({
+                'name': col['id'],
+                'description': '',
+                'unit': ''})
+
+    return comment_on_table
 
 def load_sources(x):
     return {"name": x['name'], "description": x['description'], "url": x['url'],
@@ -1065,13 +1186,14 @@ def load_language(x):
 
 
 def load_spatial(x):
-    return {"extend": x['extend'], "resolution": x['resolution']}
+    return {"extent": x['extent'], "resolution": x['resolution']}
 
+def load_temporal(x):
+    return {"start": x['start'], "end": x['end'], "resolution": x['resolution']}
 
 def load_contributors(x):
     return {"name": x['name'], "email": x['email'], "date": x['date'],
             "comment": x['comment']}
-
 
 def load_license(x):
     return {"id": x['id'],
@@ -1081,12 +1203,13 @@ def load_license(x):
             "instruction": x['instruction'],
             "copyright": x['copyright']}
 
-
 def load_field(x):
     return {"name": x['name'],
             "description": x['description'],
             "unit": x['unit']}
 
+def load_metaversion(x):
+    return x['']
 
 def load_meta(c):
     d = {
@@ -1095,18 +1218,11 @@ def load_meta(c):
         'reference_date': c['reference_date'],
     }
 
-    for prefix, f, props in [('language', load_language, 1),
-                             ('sources', load_sources, 5),
-                             ('spatial', load_spatial, 2),
-                             ('license', load_license, 6),
-                             ('contributors', load_contributors, 4),
-                             ('field', load_field, 3)]:
-        count = len([(k, c[k]) for k in c if k.startswith(prefix)]) // props
-        d[prefix] = [f(
-            {k[len('%s%d' % (prefix, i + 1)) + 1:]: c[k] for k in c if
-             k.startswith('%s%d' % (prefix, i + 1))}) for i in range(count)]
+    for prefix, f, props in [('language', load_language,1),('sources', load_sources,5), ('spatial', load_spatial,2), ('license', load_license,6), ('contributors', load_contributors,4), ('field', load_field, 3)]:
+        count = len([(k,c[k]) for k in c if k.startswith(prefix)])//props
+        d[prefix] = [f({k[len('%s%d'%(prefix,i+1))+1:]:c[k] for k in c if k.startswith('%s%d'%(prefix,i+1))}) for i in range(count)]
 
-    d['resources'] = [{'schema': {'fields': d['field']}, 'meta_version': '1.2'}]
+    d['resources'] = [{'name': '', 'format': 'sql', {'fields':d['field']}}]
     del d['field']
 
     return d

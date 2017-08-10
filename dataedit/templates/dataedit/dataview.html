@@ -183,7 +183,28 @@
             <th>Reference date</th>
             <td class="metavalue">{{comment_on_table.reference_date}}</td>
         </tr>
-        {% if comment_on_table.sources %}
+        
+        {% if comment_on_table.spatial %}
+        <tr>
+            <th>Spatial</th>
+            <td>
+            {% for row in comment_on_table.spatial %}
+                {{row.extent}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
+            {% endfor %}</td>
+        </tr>
+        {% endif %}
+
+		{% if comment_on_table.temporal %}
+        <tr>
+            <th>Temporal</th>
+            <td>
+            {% for row in comment_on_table.temporal %}
+                {{row.start}} {% if row.end %} ({{row.end}}) {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
+            {% endfor %}</td>
+        </tr>
+        {% endif %}
+		
+		{% if comment_on_table.sources %}
         <tr>
             <th>Sources</th>
             <td>
@@ -204,16 +225,7 @@
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.spatial %}
-        <tr>
-            <th>Spatial</th>
-            <td>
-            {% for row in comment_on_table.spatial %}
-                {{row.extend}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
-            {% endfor %}</td>
-        </tr>
-        {% endif %}
-
+		
         {% if comment_on_table.license %}
         <tr>
             <th>License</th>
