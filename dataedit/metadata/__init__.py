@@ -6,25 +6,25 @@ from dataedit.metadata import v1_3 as __LATEST
 def load_comment_from_db(schema, table):
     comment = actions.get_comment_table(schema, table)
     if not comment:
-        return __LATEST.get_empty(schema, table)
-
-    if 'metadata_version' in comment:
-        version = __parse_version(comment['metadata_version'])
+        comment_on_table = __LATEST.get_empty(schema, table)
     else:
-        version = min(
-            __parse_version(x['meta_version']) for x in comment['resources'] if
-            'meta_version' in x)
-    if version[0] == 1:
-        if version[1] == 1:
-            comment_on_table = __LATEST.from_v1_1(comment, schema, table)
-        elif version[1] == 2:
-            comment_on_table = __LATEST.from_v1_2(comment)
-        elif version[1] == 3:
-            comment_on_table = comment
+        if 'metadata_version' in comment:
+            version = __parse_version(comment['metadata_version'])
         else:
-            comment_on_table = comment
-    else:
-        comment_on_table = __LATEST.from_v0(comment, schema, table)
+            version = min(
+                __parse_version(x['meta_version']) for x in comment['resources'] if
+                'meta_version' in x)
+        if version[0] == 1:
+            if version[1] == 1:
+                comment_on_table = __LATEST.from_v1_1(comment, schema, table)
+            elif version[1] == 2:
+                comment_on_table = __LATEST.from_v1_2(comment)
+            elif version[1] == 3:
+                comment_on_table = comment
+            else:
+                comment_on_table = comment
+        else:
+            comment_on_table = __LATEST.from_v0(comment, schema, table)
 
     # This is not part of the actual metadata-schema. We move the fields to
     # a higher level in order to avoid fetching the first resource in the
