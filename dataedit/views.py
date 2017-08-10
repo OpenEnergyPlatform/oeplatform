@@ -33,6 +33,8 @@ from dataedit.structures import Table_tags, Tag
 from login import models as login_models
 from .models import TableRevision
 
+from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+
 from operator import add
 session = None
 
@@ -275,17 +277,15 @@ def listtables(request, schema_name):
                   {'schema': schema_name, 'tables': tables})
 
 
-COMMENT_KEYS = [('Name', 'Name'),
-                ('Date of collection', 'Date_of_Collection'),
-                ('Spatial resolution', 'Spatial_Resolution'),
-                ('Description', 'Description'),
+COMMENT_KEYS = [('Title', 'Title'),
+				('Description', 'Description'),
+                ('Reference Date', 'Reference Date'),
+                ('Spatial', 'Spatial'),
+                ('Temporal', 'Temporal'),
+				('Source', 'Source'),
                 ('Licence', 'Licence'),
-                ('Column', 'Column'),
-                ('Instructions for proper use', 'Instructions_for_proper_use'),
-                ('Source', 'Source'),
-                ('Reference date', 'Reference_date'),
-                ('Original file', 'Original_file'),
-                ('Notes', 'Notes'), ]
+                ('Contributors', 'Contributors'),
+                ('Fields', 'Fields'), ]
 
 
 def _type_json(json_obj):
@@ -553,7 +553,7 @@ class DataView(View):
         db = sec.dbname
         actions.create_meta(schema, table)
 
-        comment_on_table = load_comments(schema, table)
+        comment_on_table = load_comment_from_db(schema, table)
 
         revisions = []
         try:
@@ -635,7 +635,7 @@ class MetaView(LoginRequiredMixin, View):
         :return: Renders a form that contains a form with the tables metadata
         """
 
-        comment_on_table = load_comments(schema, table)
+        comment_on_table = load_comment_from_db(schema, table)
 
         return render(request, 'dataedit/meta_edit.html', {
             'schema': schema,
@@ -653,9 +653,9 @@ class MetaView(LoginRequiredMixin, View):
         :param table: Name of a table
         :return: Redirects to the view of the specified table
         """
-        columns = actions.analyze_columns(sec.dbname, schema, table)
+        columns = actions.analyze_columns(schema, table)
 
-        comment = load_meta(request.POST)
+        comment = read_metadata_from_post(request.POST, schema, table)
 
         engine = actions._get_engine()
         conn = engine.connect()
@@ -977,136 +977,3 @@ class SearchView(View):
         return render(request, 'dataedit/search.html',
                       {'results': ret, 'tags': get_all_tags(),
                        'selected': filter_tags})
-
-
-"""
-Metadata handler
-"""
-
-
-def load_comments(schema, table):
-    comment_on_table = actions.get_comment_table(sec.dbname, schema, table)
-    columns = actions.analyze_columns(sec.dbname, schema, table)
-    try:
-        if 'error' in comment_on_table:
-            comment_on_table = {'description': [comment_on_table['content']],
-                                'fields': []}
-            commented_cols = []
-        elif 'resources' not in comment_on_table:
-            comment_on_table = {
-                'title': comment_on_table['Name'],
-                'description': "; ".join(comment_on_table['Description']),
-                'language': [],
-                'reference_date': comment_on_table['Reference date'],
-                'sources': [
-                    {'name': x['Name'], 'description': '', 'url': x['URL'],
-                     'license': ' ', 'copyright': ' '} for x in
-                    comment_on_table['Source']],
-                'spatial': [
-                    {'extend': x, 'resolution': ''} for x in
-                    comment_on_table['Spatial resolution']],
-                'license': [
-                    {'id': '',
-                     'name': x,
-                     'version': '',
-                     'url': '',
-                     'instruction': '',
-                     'copyright': ''} for x in comment_on_table['Licence']],
-                'contributors': [
-                    {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'],
-                     'comment': x['Comment']} for x in
-                    comment_on_table['Changes']],
-                'resources': [{
-                    'schema': {
-                        'fields': [
-                            {'name': x['Name'], 'description': x['Description'],
-                             'unit': x['Unit']} for x in
-                            comment_on_table['Column']]},
-                    'meta_version': '1.2'}]}
-
-            comment_on_table['fields'] = \
-            comment_on_table['resources'][0]['schema']['fields']
-
-            commented_cols = [col['name'] for col in comment_on_table['fields']]
-        else:
-            comment_on_table['fields'] = \
-            comment_on_table['resources'][0]['schema'][
-                'fields']
-
-            if 'fields' not in comment_on_table['resources'][0]['schema']:
-                comment_on_table['fields'] = []
-            else:
-                comment_on_table['fields'] = \
-                comment_on_table['resources'][0]['schema'][
-                    'fields']
-
-            commented_cols = [col['name'] for col in comment_on_table['fields']]
-    except Exception as e:
-        comment_on_table = {'description': comment_on_table, 'fields': []}
-        commented_cols = []
-
-    for col in columns:
-        if not col['id'] in commented_cols:
-            comment_on_table['fields'].append({
-                'name': col['id'],
-                'description': '',
-                'unit': ''})
-
-    return comment_on_table
-
-
-def load_sources(x):
-    return {"name": x['name'], "description": x['description'], "url": x['url'],
-            "license": x['license'], "copyright": x['copyright']}
-
-
-def load_language(x):
-    return x['']
-
-
-def load_spatial(x):
-    return {"extend": x['extend'], "resolution": x['resolution']}
-
-
-def load_contributors(x):
-    return {"name": x['name'], "email": x['email'], "date": x['date'],
-            "comment": x['comment']}
-
-
-def load_license(x):
-    return {"id": x['id'],
-            "name": x['name'],
-            "version": x['version'],
-            "url": x['url'],
-            "instruction": x['instruction'],
-            "copyright": x['copyright']}
-
-
-def load_field(x):
-    return {"name": x['name'],
-            "description": x['description'],
-            "unit": x['unit']}
-
-
-def load_meta(c):
-    d = {
-        'title': c['title'],
-        'description': c['description'],
-        'reference_date': c['reference_date'],
-    }
-
-    for prefix, f, props in [('language', load_language, 1),
-                             ('sources', load_sources, 5),
-                             ('spatial', load_spatial, 2),
-                             ('license', load_license, 6),
-                             ('contributors', load_contributors, 4),
-                             ('field', load_field, 3)]:
-        count = len([(k, c[k]) for k in c if k.startswith(prefix)]) // props
-        d[prefix] = [f(
-            {k[len('%s%d' % (prefix, i + 1)) + 1:]: c[k] for k in c if
-             k.startswith('%s%d' % (prefix, i + 1))}) for i in range(count)]
-
-    d['resources'] = [{'schema': {'fields': d['field']}, 'meta_version': '1.2'}]
-    del d['field']
-
-    return d
