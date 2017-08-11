@@ -11,14 +11,8 @@ How to work with the API - An example
     #connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
     connection.close()
 
-    #oep_url = 'http://localhost:8000'
-    #from oeplatform.securitysettings import token_test_user as your_token
-
-    #oep_url = 'http://localhost:8080'
-    #your_token = '667c1708d97599c17bc47f39680cc515ceef4bf5'
-
-    oep_url = 'http://oep.iks.cs.ovgu.de'
-    your_token = '3f1ec0807807b988eacd985d11c60f30203925f2'
+    oep_url = 'http://localhost:8000'
+    from oeplatform.securitysettings import token_test_user as your_token
 
 Authenticate
 ************
