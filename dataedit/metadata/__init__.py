@@ -5,6 +5,8 @@ from .error import MetadataException
 
 def load_comment_from_db(schema, table):
     comment = actions.get_comment_table(schema, table)
+    if 'error' in comment:
+        return comment
     if not comment:
         comment_on_table = __LATEST.get_empty(schema, table)
     else:
