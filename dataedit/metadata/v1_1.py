@@ -1,5 +1,5 @@
 from api import actions
-
+from .error import MetadataException
 
 def from_v0(comment_on_table, schema, table):
     columns = actions.analyze_columns(schema, table)
@@ -59,9 +59,7 @@ def from_v0(comment_on_table, schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
     except Exception as e:
-        print(e)
-        comment_on_table = {'description': comment_on_table, 'fields': []}
-        commented_cols = []
+        raise MetadataException(comment_on_table, e)
 
     for col in columns:
         if not col['id'] in commented_cols:
