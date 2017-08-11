@@ -10,19 +10,29 @@ def load_comment_from_db(schema, table):
     else:
         if 'metadata_version' in comment:
             version = __parse_version(comment['metadata_version'])
-        else:
-            version = min(
-                __parse_version(x['meta_version']) for x in comment['resources'] if
-                'meta_version' in x)
-        if version[0] == 1:
-            if version[1] == 1:
-                comment_on_table = __LATEST.from_v1_1(comment, schema, table)
-            elif version[1] == 2:
-                comment_on_table = __LATEST.from_v1_2(comment)
-            elif version[1] == 3:
-                comment_on_table = comment
+        elif 'resources' in comment:
+            versions = [__parse_version(x['meta_version'])
+                        for x in comment['resources'] if 'meta_version' in x]
+            if not versions:
+                version = None
             else:
-                comment_on_table = comment
+                version = min(versions)
+        else:
+            version = (0,0)
+        if version:
+            if not isinstance(tuple, version):
+                version = (version,)
+            if len(version) < 2:
+                version = (version[0], 0)
+            if version[0] == 1:
+                if version[1] == 1:
+                    comment_on_table = __LATEST.from_v1_1(comment, schema, table)
+                elif version[1] == 2:
+                    comment_on_table = __LATEST.from_v1_2(comment)
+                elif version[1] == 3:
+                    comment_on_table = comment
+                else:
+                    comment_on_table = comment
         else:
             comment_on_table = __LATEST.from_v0(comment, schema, table)
 
