@@ -20,7 +20,7 @@ def load_comment_from_db(schema, table):
         else:
             version = (0,0)
         if version:
-            if not isinstance(tuple, version):
+            if not isinstance(version, tuple):
                 version = (version,)
             if len(version) < 2:
                 version = (version[0], 0)
