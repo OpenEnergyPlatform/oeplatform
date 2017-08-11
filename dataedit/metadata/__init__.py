@@ -36,6 +36,8 @@ def load_comment_from_db(schema, table):
                         comment_on_table = __LATEST.from_v1_2(comment)
                     elif version[1] == 3:
                         comment_on_table = comment
+                elif version[0] == 0:
+                    comment_on_table = __LATEST.from_v0(comment, schema, table)
                 else:
                     comment_on_table = comment
             else:
