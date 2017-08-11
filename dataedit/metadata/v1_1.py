@@ -15,22 +15,22 @@ def from_v0(comment_on_table, schema, table):
                     comment_on_table['Spatial resolution']],
                 'temporal': [
                     {'start': x, 'end': '', 'resolution': ''} for x in
-                    comment_on_table['Temporal resolution']],
+                    comment_on_table.get('Temporal resolution', [])],
                 'sources': [
                     {'name': x['Name'], 'description': '', 'url': x['URL'],
                      'license': ' ', 'copyright': ' '} for x in
-                    comment_on_table['Source']],
+                    comment_on_table.get('Source', [])],
                 'license': [
                     {'id': '',
                      'name': x,
                      'version': '',
                      'url': '',
                      'instruction': '',
-                     'copyright': ''} for x in comment_on_table['Licence']],
+                     'copyright': ''} for x in comment_on_table.get('Licence', [])],
                 'contributors': [
                     {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'],
                      'comment': x['Comment']} for x in
-                    comment_on_table['Changes']],
+                    comment_on_table.get('Changes', [])],
                 'resources': [
                     {'name': '',
                      'format': 'sql',
