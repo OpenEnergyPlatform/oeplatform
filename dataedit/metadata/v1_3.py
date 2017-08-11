@@ -13,15 +13,20 @@ def from_v1_2(comment_on_table):
          },
 
     comment_on_table['temporal'] = {
-        "reference_date": comment_on_table['reference_date'],
+        "reference_date": comment_on_table.get('reference_date', ''),
         "start": '',
         "end": '',
         "resolution": ''
     }
 
+    proper_license = False
     if comment_on_table.get('license', False):
-        comment_on_table['license'] = comment_on_table['license'][0]
-    else:
+        licenses = comment_on_table.get('license', [])
+        if licenses:
+            comment_on_table['license'] = licenses[0]
+            proper_license = True
+
+    if not proper_license:
         comment_on_table['license'] = {
             "id": "",
             "name": "",
