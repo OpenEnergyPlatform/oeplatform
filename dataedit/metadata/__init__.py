@@ -15,6 +15,8 @@ def load_comment_from_db(schema, table):
         try:
             if 'metadata_version' in comment:
                 version = __parse_version(comment['metadata_version'])
+            elif 'meta_version' in comment:
+                version = __parse_version(comment['meta_version'])
             elif 'resources' in comment:
                 versions = [__parse_version(x['meta_version'])
                             for x in comment['resources'] if 'meta_version' in x]
