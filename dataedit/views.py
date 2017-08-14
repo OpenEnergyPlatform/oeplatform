@@ -21,6 +21,7 @@ import oeplatform.securitysettings as sec
 from api import actions
 from .models import TableRevision
 from dataedit.models import View as DBView
+from dataedit.models import Filter as DBFilter
 from django.db.models import Q
 from functools import reduce
 import operator
@@ -391,9 +392,9 @@ def view_edit(request, schema, table):
     post_id = request.GET.get("id")
     if post_id:
         view = DBView.objects.get(id=post_id)
-        context = { "type": view.type, "view": view, "schema": schema, "table": table }
-        if view.data != '':
-            context.update(json.loads(view.data))
+        context = { "type": view.type, "view": view, "schema": schema, "table": table, "filter": view.filter.all()}
+        if view.options is not None:
+            context.update(view.options)
         return render(request, template_name='dataedit/view_editor.html', context=context)
     else:
         type = request.GET.get("type")
@@ -405,44 +406,68 @@ def view_save(request, schema, table):
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
-
-    post_table = request.POST.get("table")
-    post_schema = request.POST.get("schema")
-
-    post_data = {}
+    post_options = {}
 
     if post_type == 'graph':
+        # add x and y axis to post_options
         post_x_axis = request.POST.get('x-axis')
         y_axis_list = []
         for item in request.POST.items():
             item_name, item_value = item
             if item_name.startswith('y-axis-') and item_value == 'on':
                 y_axis_list.append(item_name['y-axis-'.__len__():])
-        post_data = { 'x_axis': post_x_axis, 'y_axis': y_axis_list }
+        post_options = { 'x_axis': post_x_axis, 'y_axis': y_axis_list }
     elif post_type == 'map':
+        # add location column info to options
         post_pos_type = request.POST.get('location_type')
         if post_pos_type == 'single-column':
             post_geo_column = request.POST.get('geo_data')
-            post_data = { 'geo_type': 'single-column', 'geo_column': post_geo_column }
+            post_options = { 'geo_type': 'single-column', 'geo_column': post_geo_column }
         elif post_pos_type == 'lat_long':
             post_geo_lat = request.POST.get('geo_lat')
             post_geo_long = request.POST.get('geo_long')
-            post_data = { 'geo_type': 'lat_long', 'geo_lat': post_geo_lat, 'geo_long': post_geo_long }
+            post_options = { 'geo_type': 'lat_long', 'geo_lat': post_geo_lat, 'geo_long': post_geo_long }
 
-    post_filter = request.POST.get("filter")
-    if (post_filter != ""):
-        post_data.update({ 'filter': json.loads(post_filter)})
-
+    # update or create corresponding view
     if post_id:
-        update_view = DBView.objects.filter(id = post_id).get()
+        update_view = DBView.objects.filter(id=post_id).get()
         update_view.name = post_name
-        update_view.data = json.dumps(post_data)
-        update_view.save()
-        return redirect('../../' + table + "?view=" + post_id)
+        update_view.options = post_options
     else:
-        new_view = DBView(name=post_name, type=post_type, data=json.dumps(post_data), table=table, schema=schema)
-        new_view.save()
-        return redirect('../../' + table + "?view=" + str(new_view.id))
+        update_view = DBView(name=post_name, type=post_type, options=post_options, table=table, schema=schema)
+
+    update_view.save()
+
+    # create and update filters
+    post_filter_json = request.POST.get("filter")
+    if post_filter_json != "":
+        post_filter = json.loads(post_filter_json)
+
+        for db_filter in update_view.filter.all():
+            # look for filters in the database, that aren't used anymore and delete them
+            db_filter_is_used = False
+            for defined_filter in post_filter:
+                if "id" in defined_filter:
+                    if db_filter.id == defined_filter["id"]:
+                        db_filter_is_used = True
+                        break
+            if not db_filter_is_used:
+                db_filter.delete()
+
+        for filter in post_filter:
+            if post_id and "id" in filter:
+                # filter is already defined and needs to be updated
+                curr_filter = DBFilter.objects.filter(id=filter["id"], view_id=post_id).get()
+                curr_filter.column = filter["column"]
+                curr_filter.type = filter["type"]
+                curr_filter.value = filter["value"]
+                curr_filter.save()
+            else:
+                # create new filter
+                curr_filter = DBFilter(view=update_view, column=filter["column"], type=filter["type"], value=filter["value"])
+                curr_filter.save()
+
+    return redirect('../../' + table + "?view=" + str(update_view.id))
 
 
 def view_set_default(request, schema, table):
@@ -510,19 +535,25 @@ class DataView(View):
             revisions = []
 
         is_admin = False
-        if request.user:
-            is_admin = request.user.has_admin_permissions(schema, table)
+        #if request.user:
+        #    is_admin = request.user.has_admin_permissions(schema, table)
+
+        table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
         try:
+            # at first, try to use the view, that is passed as get argument
             current_view = table_views.get(id = request.GET.get("view"))
         except:
             try:
+                # then use the first db-entry, where is_default is set
                 current_view = table_views.filter(is_default=True)[0]
             except:
                 try:
+                    # otherwise use the first db-entry
                     current_view = table_views[0]
                 except:
-                    current_view = DBView(name="default", type="table", data="", table=table, schema = schema)
+                    # if no views are defined, use a temporary default table view
+                    current_view = DBView(name="default", type="table", table=table, schema = schema)
 
         context_dict = {
             'comment_on_table': dict(comment_on_table),
@@ -532,13 +563,12 @@ class DataView(View):
             'schema': schema,
             'tags': tags,
             'views': table_views,
+            'filter': current_view.filter.all(),
             'current_view': current_view,
             'is_admin': is_admin
         }
 
-        if current_view.data != '':
-            json_data = json.loads(current_view.data)
-            context_dict.update(json_data)
+        context_dict.update(current_view.options)
 
         return render(request, 'dataedit/dataedit_overview.html', context=context_dict)
 

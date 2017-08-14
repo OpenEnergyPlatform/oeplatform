@@ -1,5 +1,6 @@
 from django.db import models
-from django.db.models import CharField, DateTimeField, BooleanField, IntegerField
+from django.db.models import CharField, DateTimeField, BooleanField, IntegerField, ForeignKey
+from django.contrib.postgres.fields import JSONField
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from colorfield.fields import ColorField
@@ -56,6 +57,22 @@ class View(models.Model):
     name = CharField(max_length=50, null=False)
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    type = CharField(max_length=10, null=False)
-    data = CharField(max_length=3000, null=False)
+    VIEW_TYPES = (
+        ("table", "table"),
+        ("map", "map"),
+        ("graph", "graph")
+    )
+    type = CharField(max_length=10, null=False, choices=VIEW_TYPES)
+    options = JSONField(null=False, default=dict)
     is_default = BooleanField(default=False)
+
+
+class Filter(models.Model):
+    column = CharField(max_length=100, null=False)
+    FILTER_TYPES = (
+        ("equal", "equal"),
+        ("range", "range")
+    )
+    type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
+    value = JSONField(null=False)
+    view = ForeignKey(View, on_delete=models.CASCADE, related_name='filter')

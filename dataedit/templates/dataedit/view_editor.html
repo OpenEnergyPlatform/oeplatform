@@ -77,7 +77,10 @@
     {% endif %}
 
 	{% for f in filter %}
-		filter.push({{ f|safe }});
+		filter.push({ id: {{ f.id }},
+		              column: "{{ f.column }}",
+		              type: "{{ f.type }}",
+		              value: {{ f.value|safe }} });
 	{% endfor %}
 
 	apply_filter();
@@ -282,15 +285,16 @@
     function add_filter()
     {
         var id_filter_columns = document.getElementById("id_filter_columns");
-        var id_filter_type_equals = document.getElementById("id_filter_type_equals");
+        var id_filter_type_equal = document.getElementById("id_filter_type_equal");
         var id_filter_type_range = document.getElementById("id_filter_type_range");
 
-        if (id_filter_type_equals.checked)
+        if (id_filter_type_equal.checked)
         {
             var id_filter_value = document.getElementById("id_filter_value");
             filter.push({ column: id_filter_columns.value,
-                           type:   "equals",
-                           value:  id_filter_value.value });
+                          type:   "equal",
+                          value:  {
+                              value: id_filter_value.value }});
             id_filter_value.value = "";
         }
         else if (id_filter_type_range.checked)
@@ -298,9 +302,10 @@
             var id_filter_start = document.getElementById("id_filter_start");
             var id_filter_end = document.getElementById("id_filter_end");
             filter.push({ column: id_filter_columns.value,
-                           type:   "range",
-                           start:  id_filter_start.value,
-                           end:    id_filter_end.value });
+                          type:   "range",
+                          value: {
+                              start:  id_filter_start.value,
+                              end:    id_filter_end.value }});
             id_filter_start.value = "";
             id_filter_end.value = "";
         }
@@ -329,7 +334,7 @@
         {
             var filter_type = filter[i].type;
 
-            if (filter_type === "equals")
+            if (filter_type === "equal")
             {
                 var p = document.createElement("p");
                 var a = document.createElement("a");
@@ -337,7 +342,7 @@
                 a.addEventListener('click', function(event) { event.preventDefault(); remove_filter(index); });
                 a.href = "#";
                 a.appendChild(document.createTextNode(" Remove"));
-                p.appendChild(document.createTextNode(filter[i].column + " = " + filter[i].value));
+                p.appendChild(document.createTextNode(filter[i].column + " = " + filter[i].value.value));
                 p.appendChild(a);
                 id_filter_list.appendChild(p);
             }
@@ -349,7 +354,7 @@
                 a.addEventListener('click', function(event) { event.preventDefault(); remove_filter(index); });
                 a.href = "#";
                 a.appendChild(document.createTextNode(" Remove"));
-                p.appendChild(document.createTextNode(filter[i].start + " ≤ " + filter[i].column + " ≤ " + filter[i].end));
+                p.appendChild(document.createTextNode(filter[i].value.start + " ≤ " + filter[i].column + " ≤ " + filter[i].value.end));
                 p.appendChild(a);
                 id_filter_list.appendChild(p);
             }
@@ -362,13 +367,13 @@
         var query = new recline.Model.Query();
         for (var i = 0; i < filter.length; i++)
         {
-            if (filter[i].type === "equals")
+            if (filter[i].type === "equal")
             {
                 query.addFilter(
                 {
                     type: 'term',
                     field: filter[i].column,
-                    term: filter[i].value
+                    term: filter[i].value.value
                 });
             }
             else if (filter[i].type === "range")
@@ -377,8 +382,8 @@
                 {
                     type: 'range',
                     field: filter[i].column,
-                    from: filter[i].start,
-                    to: filter[i].end
+                    from: filter[i].value.start,
+                    to: filter[i].value.end
                 });
             }
         }
@@ -549,8 +554,8 @@
                         <tr>
                             <td>
                                 <br>
-                                <input type="radio" name="filter_type" id="id_filter_type_equals">
-                                <label for="id_filter_type_equals"> Equals</label>
+                                <input type="radio" name="filter_type" id="id_filter_type_equal">
+                                <label for="id_filter_type_equal"> Equals</label>
                             </td>
                             <td colspan="3">
                                 <br>
