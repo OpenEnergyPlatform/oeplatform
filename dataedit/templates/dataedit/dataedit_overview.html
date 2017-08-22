@@ -115,8 +115,24 @@
                       }
                     }
                 });
+
                 grid.visible = true;
                 grid.render();
+
+                var columns = grid.grid.getColumns();
+
+                var fields = {{ comment_on_table.fields | safe }};
+
+                for (var i = 0; i < columns.length;i++)
+                    for (var j = 0; j < fields.length; j++)
+                    {
+                        alert(fields[j].name + "-" + fields[j].description);
+                        if (columns[i].name === fields[j].name)
+                            columns[i].toolTip = fields[j].description;
+                    }
+
+                grid.grid.setColumns(columns);
+
             {% elif current_view.type == "graph" %}
                 var graph = new recline.View.Graph({
                     model: dataset,
