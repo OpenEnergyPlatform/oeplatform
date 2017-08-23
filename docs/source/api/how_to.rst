@@ -135,11 +135,11 @@ been created.
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result['id'] == {'udt_name': 'int8', 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'bigint', 'numeric_precision': 64, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
+    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'bigint', 'numeric_precision': 64, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
     True
-    >>> json_result['geom'] == {'udt_name': 'geometry', 'column_default': None, 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['geom'] == {'column_default': None, 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
     True
-    >>> json_result['name'] == {'udt_name': 'varchar', 'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
 
 
@@ -324,7 +324,7 @@ Add columns table
     >>> result = requests.get(oep_url+"/api/v0/schema/sandbox/tables/example_table/columns/first_name")
     >>> result.status_code
     200
-    >>> result.json() == {'udt_name': 'varchar', 'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': True, 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': True, 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
+    >>> result.json() == {'numeric_scale': None, 'numeric_precision_radix': None, 'is_updatable': True, 'maximum_cardinality': None, 'character_maximum_length': 30, 'character_octet_length': 120, 'ordinal_position': 4, 'is_nullable': True, 'interval_type': None, 'data_type': 'character varying', 'dtd_identifier': '4', 'column_default': None, 'datetime_precision': None, 'interval_precision': None, 'numeric_precision': None}
     True
 
 Alter data
