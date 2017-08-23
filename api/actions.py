@@ -606,6 +606,9 @@ def table_create(schema, table, columns, constraints):
     id_columns = [c for c in columns if c['name'] == 'id']
     if not id_columns:
         raise APIError('Your table must have one column "id" of type "bigserial"')
+    cid = id_columns[0]
+    if not cid['data_type'].lower == 'bigserial':
+        raise APIError('Your column "id" must have type "bigserial"')
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
