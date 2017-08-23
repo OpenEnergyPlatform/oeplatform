@@ -137,7 +137,14 @@ class GroupEdit(View, LoginRequiredMixin):
             user = OepUser.objects.get(id=request.POST['user_id'])
             membership = GroupMembership.objects.get(group=group,
                                                      user=user)
-            membership.delete()
+            if membership.level >= ADMIN_PERM:
+                admins = GroupMembership.objects.all(group=group).exclude(user=user)
+                if not admins:
+                    errors['name'] = 'A group needs at least one admin'
+                else:
+                    membership.delete()
+            else:
+                membership.delete()
         elif mode == 'alter_user':
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
