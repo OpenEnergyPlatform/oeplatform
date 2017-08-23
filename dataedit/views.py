@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, \
-    Http404
+    Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -317,11 +317,14 @@ pending_dumps = {}
 class RevisionView(View):
     def get(self, request, schema, table):
         revisions = TableRevision.objects.filter(schema=schema, table=table)
+        pending = [(schema, table, date) for (schema, table, date) in pending_dumps if schema==schema and table==table]
         return render(request,
                       'dataedit/dataedit_revision.html', {
                           'schema': schema,
                           'table': table,
-                          'revisions': revisions})
+                          'revisions': revisions,
+                          'pending': pending
+                      })
 
     def post(self, request, schema, table, date=None):
         """
@@ -336,8 +339,13 @@ class RevisionView(View):
         :return:
         """
 
+        # date = time.strftime('%Y-%m-%d %H:%M:%S')
+        # fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
         date = time.strftime('%Y-%m-%d %H:%M:%S')
-        fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+        #fname = time.strftime(schema+'_' + table + '%Y%m%d_%H%M%S', time.gmtime())
+
+        fname = '20170814_000000'
 
         original = True  # marks whether this method initialised the revision creation
 
@@ -362,7 +370,7 @@ class RevisionView(View):
             rev = TableRevision(schema=schema, table=table, date=date,
                                 path='/media' + path, size=size)
             rev.save()
-        return self.get(request, schema, table)
+        return JsonResponse({})
 
 
 def get_dependencies(schema, table, found=None):

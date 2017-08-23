@@ -5,11 +5,7 @@ from . import v1_1
 def from_v1_1(comment_on_table, schema, table):
     columns = actions.analyze_columns(schema, table)
     try:
-        if 'error' in comment_on_table:
-            comment_on_table = {'description': [comment_on_table['content']],
-                                'fields': []}
-            commented_cols = []
-        elif 'resources' not in comment_on_table:
+        if 'resources' not in comment_on_table:
             comment_on_table = {
                 'title': comment_on_table['Name'],
                 'description': "; ".join(comment_on_table['Description']),
@@ -46,10 +42,11 @@ def from_v1_1(comment_on_table, schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
         else:
-            if 'fields' not in comment_on_table['resources'][0]['schema']:
+            comment_on_table['resources'] = [{'schema':x} for x in comment_on_table['resources']]
+            if 'fields' not in comment_on_table['resources'][0]:
                 comment_on_table['fields'] = []
             else:
-                comment_on_table['fields'] = comment_on_table['resources'][0]['schema'][
+                comment_on_table['fields'] = comment_on_table['resources'][0][
                     'fields']
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]

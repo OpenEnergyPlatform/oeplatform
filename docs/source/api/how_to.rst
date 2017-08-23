@@ -11,14 +11,16 @@ How to work with the API - An example
     #connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
     connection.close()
 
-    #oep_url = 'http://localhost:8000'
-    #from oeplatform.securitysettings import token_test_user as your_token
+    oep_url = 'http://localhost:8000'
+    from oeplatform.securitysettings import token_test_user as your_token
 
-    #oep_url = 'http://localhost:8080'
-    #your_token = '667c1708d97599c17bc47f39680cc515ceef4bf5'
+.. note::
 
-    oep_url = 'http://oep.iks.cs.ovgu.de'
-    your_token = '3f1ec0807807b988eacd985d11c60f30203925f2'
+    The API is enable for the following schmemas only:
+
+        * model_draft
+        * sandbox
+
 
 Authenticate
 ************
@@ -122,6 +124,11 @@ or **python**:
 If everything went right, you will receive a 201-Resonse_ and the table has
 been created.
 
+.. note::
+
+    The OEP will automatically grant the 'admin'-permissions on this
+    table to your user.
+
 .. doctest::
 
     >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/columns')
@@ -204,6 +211,12 @@ Our database should have the following structure now:
 +-----------+-------------------+-----------------------+
 |       12  | Mary Doe XII      | NULL                  |
 +-----------+-------------------+-----------------------+
+
+.. note::
+
+    In order to insert new data, or perfom any other actions that alter the data
+    state, you need the 'write'-permission for the respective table. Permissions can
+    be granted by a user with 'admin'-permissions in the OEP web interface.
 
 Select data
 ***********
@@ -391,6 +404,13 @@ added anymore.
     >>> result.json()['reason']
     'Action violates not-null constraint on first_name. Failing row was (McPaul)'
 
+
+Delete rows
+***********
+
+In order to delete rows, you need the 'delete'-permission on the respective
+table. The permissions can be granted by an admin in the OEP web interface.
+
 .. doctest::
 
     >>> import requests
@@ -398,12 +418,23 @@ added anymore.
     >>> result = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     200
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1')
+    >>> result.status_code
+    404
+
+Delete tables
+*************
+
+In order to delete rows, you need the 'admin'-permission on the respective
+table. The permissions can be granted by an admin in the OEP web interface.
 
 .. doctest::
 
     >>> import requests
     >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
     <Response [200]>
+    >>> requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table')
+    <Response [404]>
 
 .. testcleanup::
 

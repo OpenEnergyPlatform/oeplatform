@@ -1,30 +1,51 @@
 from api import actions
 
 from dataedit.metadata import v1_3 as __LATEST
-
+from .error import MetadataException
 
 def load_comment_from_db(schema, table):
     comment = actions.get_comment_table(schema, table)
+    if 'error' in comment:
+        return comment
     if not comment:
         comment_on_table = __LATEST.get_empty(schema, table)
     else:
-        if 'metadata_version' in comment:
-            version = __parse_version(comment['metadata_version'])
-        else:
-            version = min(
-                __parse_version(x['meta_version']) for x in comment['resources'] if
-                'meta_version' in x)
-        if version[0] == 1:
-            if version[1] == 1:
-                comment_on_table = __LATEST.from_v1_1(comment, schema, table)
-            elif version[1] == 2:
-                comment_on_table = __LATEST.from_v1_2(comment)
-            elif version[1] == 3:
-                comment_on_table = comment
+        if 'error' in comment:
+            return {'description': comment['content'], 'error': comment['error']}
+        try:
+            if 'metadata_version' in comment:
+                version = __parse_version(comment['metadata_version'])
+            elif 'meta_version' in comment:
+                version = __parse_version(comment['meta_version'])
+            elif 'resources' in comment:
+                versions = [__parse_version(x['meta_version'])
+                            for x in comment['resources'] if 'meta_version' in x]
+                if not versions:
+                    version = None
+                else:
+                    version = min(versions)
             else:
-                comment_on_table = comment
-        else:
-            comment_on_table = __LATEST.from_v0(comment, schema, table)
+                version = (0,0)
+            if version:
+                if not isinstance(version, tuple):
+                    version = (version,)
+                if len(version) < 2:
+                    version = (version[0], 0)
+                if version[0] == 1:
+                    if version[1] == 1:
+                        comment_on_table = __LATEST.from_v1_1(comment, schema, table)
+                    elif version[1] == 2:
+                        comment_on_table = __LATEST.from_v1_2(comment)
+                    elif version[1] == 3:
+                        comment_on_table = comment
+                elif version[0] == 0:
+                    comment_on_table = __LATEST.from_v0(comment, schema, table)
+                else:
+                    comment_on_table = comment
+            else:
+                comment_on_table = __LATEST.from_v0(comment, schema, table)
+        except MetadataException as me:
+            return {'description': comment, 'error': me.error.message}
 
     # This is not part of the actual metadata-schema. We move the fields to
     # a higher level in order to avoid fetching the first resource in the
@@ -103,3 +124,4 @@ def load_metaversion(x):
 
 def __parse_version(version_string):
     return tuple(map(int, version_string.split('.')))
+

@@ -1,14 +1,10 @@
 from api import actions
-
+from .error import MetadataException
 
 def from_v0(comment_on_table, schema, table):
     columns = actions.analyze_columns(schema, table)
     try:
-        if 'error' in comment_on_table:
-            comment_on_table = {'description': [comment_on_table['content']],
-                                'fields': []}
-            commented_cols = []
-        elif 'resources' not in comment_on_table:
+        if 'resources' not in comment_on_table:
             comment_on_table = {
                 'title': comment_on_table['Name'],
                 'description': "; ".join(comment_on_table['Description']),
@@ -19,22 +15,22 @@ def from_v0(comment_on_table, schema, table):
                     comment_on_table['Spatial resolution']],
                 'temporal': [
                     {'start': x, 'end': '', 'resolution': ''} for x in
-                    comment_on_table['Temporal resolution']],
+                    comment_on_table.get('Temporal resolution', [])],
                 'sources': [
                     {'name': x['Name'], 'description': '', 'url': x['URL'],
                      'license': ' ', 'copyright': ' '} for x in
-                    comment_on_table['Source']],
+                    comment_on_table.get('Source', [])],
                 'license': [
                     {'id': '',
                      'name': x,
                      'version': '',
                      'url': '',
                      'instruction': '',
-                     'copyright': ''} for x in comment_on_table['Licence']],
+                     'copyright': ''} for x in comment_on_table.get('Licence', [])],
                 'contributors': [
                     {'name': x['Name'], 'email': x['Mail'], 'date': x['Date'],
                      'comment': x['Comment']} for x in
-                    comment_on_table['Changes']],
+                    comment_on_table.get('Changes', [])],
                 'resources': [
                     {'name': '',
                      'format': 'sql',
@@ -59,9 +55,7 @@ def from_v0(comment_on_table, schema, table):
 
             commented_cols = [col['name'] for col in comment_on_table['fields']]
     except Exception as e:
-        print(e)
-        comment_on_table = {'description': comment_on_table, 'fields': []}
-        commented_cols = []
+        raise MetadataException(comment_on_table, e)
 
     for col in columns:
         if not col['id'] in commented_cols:

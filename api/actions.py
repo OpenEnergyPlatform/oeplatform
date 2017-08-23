@@ -1122,7 +1122,7 @@ def get_comment_table(schema, table):
         try:
             return json.loads(jsn)
         except ValueError:
-            return {'error': 'No json format', 'content': jsn}
+            return {'error': 'No json format', 'description': jsn}
     else:
         return {}
 
