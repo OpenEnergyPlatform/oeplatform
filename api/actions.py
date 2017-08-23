@@ -543,6 +543,8 @@ def get_column_definition_query(c):
 
 
 def column_alter(query, context, schema, table, column):
+    if column == 'id':
+        raise APIError('You cannot alter the id column')
     alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
         schema=schema,
         table=table,
@@ -603,6 +605,12 @@ def table_create(schema, table, columns, constraints):
     # Building and joining a string array seems to be more efficient than native string concats.
     # https://waymoot.org/home/python_string/
 
+    id_columns = [c for c in columns if c['name'] == 'id']
+    if not id_columns:
+        raise APIError('Your table must have one column "id" of type "bigserial"')
+    cid = id_columns[0]
+    if not cid['data_type'].lower() == 'bigserial':
+        raise APIError('Your column "id" must have type "bigserial"')
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
