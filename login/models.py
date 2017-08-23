@@ -170,6 +170,8 @@ class GroupMembership(models.Model):
     group = models.ForeignKey(UserGroup, related_name='memberships')
     level = models.IntegerField(choices=choices,
                                 default=WRITE_PERM)
+    class Meta:
+        unique_together = (('user', 'group'),)
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):

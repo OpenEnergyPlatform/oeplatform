@@ -126,9 +126,8 @@ class GroupEdit(View, LoginRequiredMixin):
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST['name'])
-                membership = GroupMembership.objects.create(group=group,
-                                                            user=user,
-                                                            level=ADMIN_PERM)
+                membership = GroupMembership.objects.get_or_create(group=group,
+                                                                   user=user)
                 membership.save()
             except OepUser.DoesNotExist:
                 errors['name'] = 'User does not exist'
