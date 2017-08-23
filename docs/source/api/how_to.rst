@@ -155,6 +155,16 @@ been created.
     >>> response.json()['reason']
     'Your table must have one column "id" of type "bigserial"'
 
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "integer"}]} }
+    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> response.status_code
+    500
+    >>> response.json()['reason']
+    'Your column "id" must have type "bigserial"'
+
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
