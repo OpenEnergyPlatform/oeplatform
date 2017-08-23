@@ -543,6 +543,8 @@ def get_column_definition_query(c):
 
 
 def column_alter(query, context, schema, table, column):
+    if column == 'id':
+        raise APIError('You cannot alter the id column')
     alter_preamble = "ALTER TABLE {schema}.{table} ALTER COLUMN {column} ".format(
         schema=schema,
         table=table,
