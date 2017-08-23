@@ -142,10 +142,13 @@ class GroupEdit(View, LoginRequiredMixin):
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST['user_id'])
-            membership = GroupMembership.objects.get(group=group,
-                                                     user=user)
-            membership.level = request.POST['level']
-            membership.save()
+            if user == request.user:
+                errors['name'] = 'You can not change your own permissions'
+            else:
+                membership = GroupMembership.objects.get(group=group,
+                                                         user=user)
+                membership.level = request.POST['level']
+                membership.save()
         elif mode == 'delete_group':
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
