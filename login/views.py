@@ -138,7 +138,7 @@ class GroupEdit(View, LoginRequiredMixin):
             membership = GroupMembership.objects.get(group=group,
                                                      user=user)
             if membership.level >= ADMIN_PERM:
-                admins = GroupMembership.objects.all(group=group).exclude(user=user)
+                admins = GroupMembership.objects.filter(group=group).exclude(user=user)
                 if not admins:
                     errors['name'] = 'A group needs at least one admin'
                 else:
