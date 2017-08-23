@@ -28,7 +28,7 @@ class ProfileView(View):
         return render(request, "login/profile.html", {'user': user,
                                                       'token': token})
 
-class GroupManagement(View):
+class GroupManagement(View, LoginRequiredMixin):
     def get(self, request):
         """
         Load and list the available groups by groupadmin. 
