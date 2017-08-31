@@ -1454,8 +1454,8 @@ def create_edit_table(schema, table, meta_schema=None):
     if not meta_schema:
         meta_schema = get_meta_schema_name(schema)
     engine = _get_engine()
-    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
-            '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
+    query = 'CREATE TABLE "{meta_schema}"."{edit_table}" ' \
+            '(LIKE "{schema}"."{table}" INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
             'INHERITS (_edit_base);'.format(
         meta_schema=meta_schema,
         edit_table=get_edit_table_name(schema, table, create=False),
