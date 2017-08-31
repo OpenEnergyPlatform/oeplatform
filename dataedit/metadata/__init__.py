@@ -45,7 +45,7 @@ def load_comment_from_db(schema, table):
             else:
                 comment_on_table = __LATEST.from_v0(comment, schema, table)
         except MetadataException as me:
-            return {'description': comment, 'error': me.error.message}
+            return {'description': comment, 'error': me.error.message if hasattr(me.error, 'message') else str(me.error)}
 
     # This is not part of the actual metadata-schema. We move the fields to
     # a higher level in order to avoid fetching the first resource in the
