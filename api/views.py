@@ -353,7 +353,10 @@ class Rows(APIView):
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, row_id=None):
+    def put(self, request, schema, table, row_id=None, action=None):
+        if action:
+            raise APIError('This request type (PUT) is not supported. The '
+                           '\'new\' statement is only possible in POST requests.')
         schema, table = actions.get_table_name(schema, table)
         if not row_id:
             return JsonResponse(actions._response_error('This methods requires an id'),
