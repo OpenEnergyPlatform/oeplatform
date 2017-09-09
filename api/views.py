@@ -33,6 +33,8 @@ def api_exception(f):
         except actions.APIError as e:
             return JsonResponse({'reason': e.message},
                                 status=e.status)
+        except KeyError as e:
+            return JsonResponse({'reason': e}, status=400)
     return wrapper
 
 
