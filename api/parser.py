@@ -5,11 +5,18 @@ import decimal
 import re
 from datetime import datetime
 from sqlalchemy import Table, MetaData, Column, select, column, func
-from api.error import APIError
+from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
+
+
+def get_or_403(dictionary, key):
+    try:
+        return dictionary[key]
+    except KeyError:
+        raise APIKeyError(dictionary, key)
 
 
 def is_pg_qual(x):
@@ -33,7 +40,7 @@ def read_pgvalue(x):
 
 def read_operator(x, right):
     # TODO: Implement check for valid operators
-    if isinstance(right, dict) and right['type'] == 'value' and ('value' not in right or right['value'] is None and x == '='):
+    if isinstance(right, dict) and get_or_403(right, 'type') == 'value' and ('value' not in right or get_or_403(right, 'value') is None and x == '='):
         return 'is'
     return x
 
@@ -69,8 +76,8 @@ def set_meta_info(method, user, message=None):
 
 
 def parse_insert(d, context, message=None):
-    table = Table(read_pgid(d['table']), MetaData(bind=_get_engine())
-                  , autoload=True, schema=read_pgid(d['schema']))
+    table = Table(read_pgid(get_or_403(d, 'table')), MetaData(bind=_get_engine())
+                  , autoload=True, schema=read_pgid(get_or_403(d, 'schema')))
 
     meta_cols = ['_message', '_user']
 
@@ -86,10 +93,11 @@ def parse_insert(d, context, message=None):
         d['method'] = 'values'
     if d['method'] == 'values':
         if field_strings:
-            assert (isinstance(d['values'], list))
-            values = map(lambda x: zip(field_strings, x), d['values'])
+            raw_values = get_or_403(d, 'values')
+            assert (isinstance(raw_values, list))
+            values = map(lambda x: zip(field_strings, x), raw_values)
         else:
-            values = d['values']
+            values = get_or_403(d, 'values')
 
         def clear_meta(vals):
             val_dict = vals
@@ -132,7 +140,7 @@ def parse_select(d):
             if 'as' in field:
                 col.label(read_pgid(field['as']))
             L.append(col)
-    from_clause = parse_from_item(d['from'])
+    from_clause = parse_from_item(get_or_403(d, 'from'))
     if not L:
         L = '*'
     query = select(columns=L, distinct=distinct, from_obj=from_clause)
@@ -148,7 +156,7 @@ def parse_select(d):
         query.having([parse_condition(f) for f in d['having']])
 
     if 'select' in d:
-        type = d.pop('type')
+        type = get_or_403(d, 'type')
         subquery = parse_select(d['select'])
         if type.lower() == 'union':
             query.union(subquery)
@@ -193,54 +201,56 @@ def parse_from_item(d):
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
         d = {'type': 'table', 'table': d}
-    if d['type'] == 'table':
+    dtype = get_or_403(d, 'type')
+    if dtype == 'table':
         schema_name = read_pgid(d['schema']) if 'schema' in d else None
         only = d.get('only', False)
-        table_name = read_pgid(d['table'])
+        table_name = read_pgid(get_or_403(d, 'table'))
         table = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
         if 'alias' in d:
             table = table.alias(read_pgid(d['alias']))
         return table
-    elif d['type'] == 'select':
+    elif dtype == 'select':
         return parse_select(d)
-    elif d['type'] == 'join':
-        left = parse_from_item(d['left'])
-        right = parse_from_item(d['right'])
-        is_outer = parse_from_item(d['is_outer'])
-        full = parse_from_item(d['is_full'])
+    elif dtype == 'join':
+        left = parse_from_item(get_or_403(d, 'left'))
+        right = parse_from_item(get_or_403(d, 'right'))
+        is_outer = parse_from_item(get_or_403(d, 'is_outer'))
+        full = parse_from_item(get_or_403(d, 'is_full'))
         on_clause = None
         if 'on' in d:
             on_clause = parse_condition(d['on'])
         return left.join(right,onclause=on_clause, isouter=is_outer, full=full)
     else:
-        raise APIError('Unknown from-item: ' +d['type'])
+        raise APIError('Unknown from-item: ' + dtype)
 
 
 def parse_expression(d):
     # TODO: Implement
     if isinstance(d, dict):
-        if d['type'] == 'column':
-            name = d['column']
+        dtype = get_or_403(d, 'type')
+        if dtype == 'column':
+            name = get_or_403(d, 'column')
             if 'table' in d:
                 name = d['table'] + '.' + name
                 if 'schema' in d:
                     name = d['schema'] + '.' + name
             return column(name)
-        if d['type'] == 'grouping':
-            return parse_expression(d['grouping'])
-        if d['type'] == 'operator':
+        if dtype == 'grouping':
+            return parse_expression(get_or_403(d, 'grouping'))
+        if dtype == 'operator':
             return parse_operator(d)
-        if d['type'] == 'operator_binary':
+        if dtype == 'operator_binary':
             return parse_operator(d)
-        if d['type'] == 'operator_unary':
+        if dtype == 'operator_unary':
             return parse_operator_unary(d)
-        if d['type'] == 'modifier_unary':
+        if dtype == 'modifier_unary':
             return parse_modifier_unary(d)
-        if d['type'] == 'function':
+        if dtype == 'function':
             return parse_function(d)
-        if d['type'] == 'value':
+        if dtype == 'value':
             if 'value' in d:
-                return read_pgvalue(d['value'])
+                return read_pgvalue(get_or_403(d, 'value'))
             else:
                 return None
     if isinstance(d, list):
@@ -259,9 +269,9 @@ def parse_condition(dl):
 
 
 def parse_operator(d):
-    query = parse_sqla_operator(d['operator'],
-                                parse_expression(d['left']),
-                                parse_expression(d['right']))
+    query = parse_sqla_operator(get_or_403(d, 'operator'),
+                                parse_expression(get_or_403(d, 'left')),
+                                parse_expression(get_or_403(d, 'right')))
     if 'as' in d:
         query = query.label(d['as'])
     return query
@@ -269,16 +279,18 @@ def parse_operator(d):
 
 
 def parse_operator_unary(d):
-    return "%s %s" % (read_operator(d['operator'], d['operand']),
-                      parse_expression(d['operand']))
+    return "%s %s" % (read_operator(get_or_403(d,'operator'),
+                                    get_or_403(d,'operand')),
+                      parse_expression(get_or_403(d,'operand')))
 
 def parse_modifier_unary(d):
-    return "%s %s" % (parse_expression(d['operand']),
-                      read_operator(d['operator'], d['operand']))
+    return "%s %s" % (parse_expression(get_or_403(d,'operand')),
+                      read_operator(get_or_403(d, 'operator'),
+                                    get_or_403(d,'operand')))
 
 def parse_function(d):
-    function = getattr(func, read_pgid(d['function']))
-    operand_struc = d['operands']
+    function = getattr(func, read_pgid(get_or_403(d, 'function')))
+    operand_struc = get_or_403(d, 'operands')
     if isinstance(operand_struc, list):
         operands=map(parse_expression, operand_struc)
     else:
@@ -307,23 +319,24 @@ def parse_create_table(d):
           + cadd(d, 'unlogged')
           + 'TABLE '
           + cadd(d, 'if_not_exists', 'IF NOT EXISTS ')
-          + read_pgid(d['name']))
+          + read_pgid(get_or_403(d,'name')))
 
     fieldstrings = []
 
     for field in d.pop('fields', []):
         fs = ''
-        if field['type'] == 'column':
-            fs += read_pgid(field['name']) + ' '
-            fs += read_pgid(field['data_type']) + ' '
+        ftype = get_or_403(field, 'type')
+        if ftype == 'column':
+            fs += read_pgid(get_or_403(field,'name')) + ' '
+            fs += read_pgid(get_or_403(field,'data_type')) + ' '
             collate = field.pop('collate', None)
             if collate:
                 fs += read_pgid(collate)
             fs += ', '.join([parse_column_constraint(cons)
                              for cons in field.pop('constraints', [])]) + ' '
-        elif field['type'] == 'table_constraint':
+        elif ftype == 'table_constraint':
             fs += parse_table_constraint(field)
-        elif field['type'] == 'like':
+        elif ftype == 'like':
             fs += 'LIKE '
 
 
