@@ -370,15 +370,12 @@ class Rows(APIView):
                 status=status.HTTP_409_CONFLICT)
 
         engine = actions._get_engine()
-        conn = engine.connect()
-
         # check whether id is already in use
-        exists = conn.execute('select count(*) '
+        exists = engine.execute('select count(*) '
                              'from {schema}.{table} '
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
-        conn.close()
         if exists:
             response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
