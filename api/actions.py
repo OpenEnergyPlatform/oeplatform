@@ -788,15 +788,17 @@ def _get_table(schema, table):
 def __internal_select(query, context):
     engine = _get_engine()
     conn = engine.connect()
-    cursor = conn.connection.cursor()
-    cursor_id = cursor.__hash__
-    __CURSORS[cursor_id] = cursor
-    context2 = dict(context)
-    context2['cursor_id'] = cursor_id
-    rows = data_search(query, context2)
-    rows['data'] = [x for x in cursor.fetchall()]
-    cursor.close()
-    conn.close()
+    try:
+        cursor = conn.connection.cursor()
+        cursor_id = cursor.__hash__
+        __CURSORS[cursor_id] = cursor
+        context2 = dict(context)
+        context2['cursor_id'] = cursor_id
+        rows = data_search(query, context2)
+        rows['data'] = [x for x in cursor.fetchall()]
+        cursor.close()
+    finally:
+        conn.close()
     return rows
 
 
@@ -1069,8 +1071,7 @@ def _get_header(results):
 
 def analyze_columns(schema, table):
     engine = _get_engine()
-    connection = engine.connect()
-    result = connection.execute(
+    result = engine.execute(
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(
             schema=schema, table=table))
     return [{'id': r['id'], 'type': r['type']} for r in result]
@@ -1083,8 +1084,7 @@ def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
     else:
         fields = ', '.join(map(quote(fields)))
     engine = _get_engine()
-    connection = engine.connect()
-    refs = connection.execute(references.Entry.__table__.select())
+    refs = engine.execute(references.Entry.__table__.select())
 
     sql_string = "select {fields} from {schema}.{table}".format(
         schema=schema, table=table, fields=fields)
@@ -1094,7 +1094,7 @@ def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
 
     sql_string += " limit {}".format(limit)
     sql_string += " offset {}".format(offset)
-    return connection.execute(sql_string, ), [dict(refs.first()).items()]
+    return engine.execute(sql_string, ), [dict(refs.first()).items()]
 
 
 def clear_dict(d):
@@ -1116,11 +1116,10 @@ def create_meta(schema, table):
 
 def get_comment_table(schema, table):
     engine = _get_engine()
-    connection = engine.connect()
 
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table)
-    res = connection.execute(sql_string)
+    res = engine.execute(sql_string)
     if res:
         jsn = res.first().obj_description
         if jsn:
@@ -1147,7 +1146,11 @@ def connect():
 
 def has_schema(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.has_schema(engine.connect(), request['schema'])
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_schema(conn, request['schema'])
+    finally:
+        conn.close()
     return result
 
 
@@ -1156,118 +1159,168 @@ def has_table(request, context=None):
     schema = request.pop('schema', None)
     table = request['table']
     conn = engine.connect()
-    result = engine.dialect.has_table(engine.connect(), table,
-                                      schema=schema)
-    conn.close()
+    try:
+        result = engine.dialect.has_table(conn, table,
+                                          schema=schema)
+    finally:
+        conn.close()
     return result
 
 
 def has_sequence(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.has_sequence(engine.connect(),
-                                         request['sequence_name'],
-                                         schema=request.pop('schema', None))
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_sequence(conn,
+                                             request['sequence_name'],
+                                             schema=request.pop('schema', None))
+    finally:
+        conn.close()
     return result
 
 
 def has_type(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.has_schema(engine.connect(),
-                                       request['sequence_name'],
-                                       schema=request.pop('schema', None))
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_schema(conn,
+                                           request['sequence_name'],
+                                           schema=request.pop('schema', None))
+    finally:
+        conn.close()
     return result
 
 
 def get_table_oid(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_table_oid(engine.connect(),
-                                          request['table'],
-                                          schema=request['schema'],
-                                          **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_table_oid(conn,
+                                              request['table'],
+                                              schema=request['schema'],
+                                              **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_schema_names(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_schema_names(engine.connect(), **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_schema_names(engine.connect(), **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_table_names(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_table_names(engine.connect(),
-                                            schema=request.pop('schema',
-                                                               None),
-                                            **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_table_names(conn,
+                                                schema=request.pop('schema',
+                                                                   None),
+                                                **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_view_names(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_view_names(engine.connect(),
-                                           schema=request.pop('schema', None),
-                                           **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_view_names(conn,
+                                               schema=request.pop('schema', None),
+                                               **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_view_definition(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_schema_names(engine.connect(),
-                                             request['view_name'],
-                                             schema=request.pop('schema',
-                                                                None),
-                                             **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_schema_names(conn,
+                                                 request['view_name'],
+                                                 schema=request.pop('schema',
+                                                                    None),
+                                                 **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_columns(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_columns(engine.connect(),
-                                        request['table'],
-                                        schema=request.pop('schema', None),
-                                        **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_columns(conn,
+                                            request['table'],
+                                            schema=request.pop('schema', None),
+                                            **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_pk_constraint(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_pk_constraint(engine.connect(),
-                                              request['table'],
-                                              schema=request.pop('schema',
-                                                                 None),
-                                              **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_pk_constraint(conn,
+                                                  request['table'],
+                                                  schema=request.pop('schema',
+                                                                     None),
+                                                  **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_foreign_keys(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_foreign_keys(engine.connect(),
-                                             request['table'],
-                                             schema=request.pop('schema',
-                                                                None),
-                                             postgresql_ignore_search_path=request.pop(
-                                                 'postgresql_ignore_search_path',
-                                                 False),
-                                             **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_foreign_keys(conn,
+                                                 request['table'],
+                                                 schema=request.pop('schema',
+                                                                    None),
+                                                 postgresql_ignore_search_path=request.pop(
+                                                     'postgresql_ignore_search_path',
+                                                     False),
+                                                 **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_indexes(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_indexes(engine.connect(),
-                                        request['table'],
-                                        request['schema'],
-                                        **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_indexes(conn,
+                                            request['table'],
+                                            request['schema'],
+                                            **request)
+    finally:
+        conn.close()
     return result
 
 
 def get_unique_constraints(request, context=None):
     engine = _get_engine()
-    result = engine.dialect.get_foreign_keys(engine.connect(),
-                                             request['table'],
-                                             schema=request.pop('schema',
-                                                                None),
-                                             **request)
+    conn = engine.connect()
+    try:
+        result = engine.dialect.get_foreign_keys(conn,
+                                                 request['table'],
+                                                 schema=request.pop('schema',
+                                                                    None),
+                                                 **request)
+    finally:
+        conn.close()
     return result
 
 
@@ -1461,8 +1514,7 @@ def create_edit_table(schema, table, meta_schema=None):
         edit_table=get_edit_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    connection = engine.connect()
-    connection.execute(query)
+    engine.execute(query)
 
 
 def create_delete_table(schema, table, meta_schema=None):
@@ -1476,8 +1528,7 @@ def create_delete_table(schema, table, meta_schema=None):
         edit_table=get_delete_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    connection = engine.connect()
-    connection.execute(query)
+    engine.execute(query)
 
 def create_insert_table(schema, table, meta_schema=None):
     if not meta_schema:
@@ -1490,8 +1541,7 @@ def create_insert_table(schema, table, meta_schema=None):
         edit_table=get_insert_table_name(schema, table, create=False),
         schema=schema,
         table=table)
-    connection = engine.connect()
-    connection.execute(query)
+    engine.execute(query)
 
 
 def create_comment_table(schema, table, meta_schema=None):
@@ -1502,8 +1552,7 @@ def create_comment_table(schema, table, meta_schema=None):
             'INHERITS (_comment_base); '.format(
         schema=meta_schema,
         table=get_comment_table_name(table))
-    connection = engine.connect()
-    connection.execute(query)
+    engine.execute(query)
 
 
 def getValue(schema, table, column, id):
@@ -1524,8 +1573,8 @@ def getValue(schema, table, column, id):
     except Exception as e:
         print("SQL Action failed. \n Error:\n" + str(e))
         session.rollback()
-
-    session.close()
+    finally:
+        session.close()
     return None
 
 
@@ -1535,44 +1584,50 @@ def apply_changes(schema, table):
         return d
     engine = _get_engine()
     conn = engine.connect()
-    meta_schema = get_meta_schema_name(schema)
+    try:
+        meta_schema = get_meta_schema_name(schema)
 
-    insert_table = get_insert_table_name(schema, table)
-    columns = list(describe_columns(schema, table).keys()) + ['_submitted', '_id']
-    changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
-                            'from {schema}.{table} '
-                            'where _applied = FALSE;'.format(schema=meta_schema,
-                                                             table=insert_table)))
+        insert_table = get_insert_table_name(schema, table)
+        columns = list(describe_columns(schema, table).keys()) + ['_submitted', '_id']
+        changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
+                                'from {schema}.{table} '
+                                'where _applied = FALSE;'.format(schema=meta_schema,
+                                                                 table=insert_table)))
 
 
-    update_table = get_edit_table_name(schema, table)
-    changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
-                            'from {schema}.{table} '
-                            'where _applied = FALSE;'.format(schema=meta_schema,
-                                                             table=update_table))))
+        update_table = get_edit_table_name(schema, table)
+        changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
+                                'from {schema}.{table} '
+                                'where _applied = FALSE;'.format(schema=meta_schema,
+                                                                 table=update_table))))
 
-    delete_table = get_delete_table_name(schema, table)
-    changes = itertools.chain(changes, (
-        add_type({c: getattr(row, c) for c in ['_id', 'id', '_submitted']}, 'delete') for row in
-        conn.execute('select * '
-                     'from {schema}.{table} '
-                     'where _applied = FALSE;'.format(schema=meta_schema,
-                                                      table=delete_table))))
+        delete_table = get_delete_table_name(schema, table)
+        changes = itertools.chain(changes, (
+            add_type({c: getattr(row, c) for c in ['_id', 'id', '_submitted']}, 'delete') for row in
+            conn.execute('select * '
+                         'from {schema}.{table} '
+                         'where _applied = FALSE;'.format(schema=meta_schema,
+                                                          table=delete_table))))
+    finally:
+        conn.close()
 
-    conn.close()
     changes = list(changes)
-    engine = _get_engine()
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
     session = sessionmaker(bind=engine)()
-    for change in sorted(changes, key=lambda x: x['_submitted']):
-        if change['_type'] == 'insert':
-            apply_insert(session, table_obj, change)
-        elif change['_type'] == 'update':
-            apply_update(session, table_obj, change)
-        elif change['_type'] == 'delete':
-            apply_deletion(session, table_obj, change)
-    session.commit()
-    session.close()
+    try:
+        for change in sorted(changes, key=lambda x: x['_submitted']):
+            if change['_type'] == 'insert':
+                apply_insert(session, table_obj, change)
+            elif change['_type'] == 'update':
+                apply_update(session, table_obj, change)
+            elif change['_type'] == 'delete':
+                apply_deletion(session, table_obj, change)
+    except Exception as e:
+        raise e
+    else:
+        session.commit()
+    finally:
+        session.close()
 
 
 def apply_insert(session, table, row):
