@@ -459,6 +459,8 @@ table. The permissions can be granted by an admin in the OEP web interface.
     >>> requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table')
     <Response [404]>
 
+For more advanced commands read :doc:`advanced`
+
 .. testcleanup::
 
     from api.actions import _get_engine
