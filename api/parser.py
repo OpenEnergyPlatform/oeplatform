@@ -207,19 +207,15 @@ def parse_from_item(d):
         schema_name = read_pgid(d['schema']) if 'schema' in d else None
         only = d.get('only', False)
         table_name = read_pgid(get_or_403(d, 'table'))
-        table = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
-        if 'alias' in d:
-            table = table.alias(read_pgid(d['alias']))
+        item = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
         engine = _get_engine()
         conn = engine.connect()
-        exists = engine.dialect.has_table(conn, table.name, table.schema)
+        exists = engine.dialect.has_table(conn, item.name, item.schema)
         conn.close()
         if not exists:
-            raise APIError('Table not found: ' + str(table))
-
-        return table
+            raise APIError('Table not found: ' + str(item))
     elif dtype == 'select':
-        return parse_select(d)
+        item = parse_select(d['query'])
     elif dtype == 'join':
         left = parse_from_item(get_or_403(d, 'left'))
         right = parse_from_item(get_or_403(d, 'right'))
@@ -228,9 +224,13 @@ def parse_from_item(d):
         on_clause = None
         if 'on' in d:
             on_clause = parse_condition(d['on'])
-        return left.join(right,onclause=on_clause, isouter=is_outer, full=full)
+        item = left.join(right,onclause=on_clause, isouter=is_outer, full=full)
     else:
         raise APIError('Unknown from-item: ' + dtype)
+
+    if 'alias' in d:
+        item = item.alias(read_pgid(d['alias']))
+    return item
 
 
 def parse_expression(d):
