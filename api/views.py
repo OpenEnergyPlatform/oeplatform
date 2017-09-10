@@ -561,10 +561,13 @@ def create_ajax_handler(func):
             context = {'user': request.user,
                        'cursor_id': request.data['cursor_id']}
             query = content.get('query', ['{}'])
-            if isinstance(query, list):
-                query = query[0]
-            if isinstance(query, str):
-                query = json.loads(query)
+            try:
+                if isinstance(query, list):
+                    query = query[0]
+                if isinstance(query, str):
+                    query = json.loads(query)
+            except:
+                raise APIError('Your query is not properly formated.')
             data = func(query, context)
 
             # This must be done in order to clean the structure of non-serializable
