@@ -560,8 +560,12 @@ def create_ajax_handler(func):
             content = request.data
             context = {'user': request.user,
                        'cursor_id': request.data['cursor_id']}
-            data = func(content.get('query', ['{}']),
-                        context)
+            query = content.get('query', ['{}'])
+            if isinstance(query, list):
+                query = query[0]
+            if isinstance(query, str):
+                query = json.loads(query)
+            data = func(query, context)
 
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
