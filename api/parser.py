@@ -209,6 +209,13 @@ def parse_from_item(d):
         table = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
         if 'alias' in d:
             table = table.alias(read_pgid(d['alias']))
+        engine = _get_engine()
+        conn = engine.connect()
+        exists = engine.dialect.has_table(conn, table.name, table.schema)
+        conn.close()
+        if not exists:
+            raise APIError('Table not found: ' + str(table))
+
         return table
     elif dtype == 'select':
         return parse_select(d)

@@ -547,10 +547,11 @@ def create_ajax_handler(func):
     """
     class AJAX_View(APIView):
 
+
         def get(self, request):
             return JsonResponse(self.execute(request))
 
-
+        @api_exception
         def post(self, request):
             return JsonResponse(self.execute(request))
 
@@ -559,7 +560,7 @@ def create_ajax_handler(func):
             content = request.data
             context = {'user': request.user,
                        'cursor_id': request.data['cursor_id']}
-            data = func(json.loads(content.get('query', ['{}'])[0]),
+            data = func(content.get('query', ['{}']),
                         context)
 
             # This must be done in order to clean the structure of non-serializable
