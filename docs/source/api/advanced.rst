@@ -59,10 +59,29 @@ replaced by the stated defaults:
         * :code:`ordering`: :code:`asc` | :code:`desc` (default: :code:`asc`)
     * :code:`limit`: Integer
     * :code:`offset`: Integer
+
+
 .. _expression-objects:
 
 Expressions
 -----------
+
+An expression object **MUST** contain:
+    * :code:`type`: A string as specified below
+
+The depending on the :code:`type` the dictionary may have a a different structure:
+    * :code:`column`: A column expression **MUST** contain the following fields:
+        * :code:`column`: Name of the column
+    * :code:`grouping`: A grouping expression **MUST** contain the following fields:
+        * :code:`grouping`: A list of :ref:`Expressions <expression-objects>`
+    * :code:`operator`: An operator expression **MUST** contain the following fields:
+        * :code:`operator`: :code:`EQUALS` | :code:`=` :code:`GREATER` | :code:`>` | :code:`LOWER` | :code:`<` | :code:`NOTEQUAL` | :code:`<>` | :code:`!=` | :code:`NOTGREATER` | :code:`<=` | :code:`NOTLOWER` | :code:`>=`
+        * :code:`left`: An :ref:`Expression <expression-objects>`
+        * :code:`right`: An :ref:`Expression <expression-objects>`
+    * :code:`function`: A function expression **MUST** contain the following fields:
+        * :code:`function`: The name of the function. All functions implemented in sqlalchemy and geoalchemy are available.
+        * :code:`operands`: A list of :ref:`Expressions <expression-objects>`
+    * :code:`value`: A constant value
 
 
 .. condition-objects:
