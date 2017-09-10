@@ -4,7 +4,7 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import Table, MetaData, Column, select, column, func
+from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -219,12 +219,12 @@ def parse_from_item(d):
     elif dtype == 'join':
         left = parse_from_item(get_or_403(d, 'left'))
         right = parse_from_item(get_or_403(d, 'right'))
-        is_outer = parse_from_item(get_or_403(d, 'is_outer'))
-        full = parse_from_item(get_or_403(d, 'is_full'))
+        is_outer = d.get('is_outer', False)
+        full = d.get('is_full', False)
         on_clause = None
         if 'on' in d:
             on_clause = parse_condition(d['on'])
-        item = left.join(right,onclause=on_clause, isouter=is_outer, full=full)
+        item = left.join(right, onclause=on_clause, isouter=is_outer, full=full)
     else:
         raise APIError('Unknown from-item: ' + dtype)
 
@@ -239,10 +239,12 @@ def parse_expression(d):
         dtype = get_or_403(d, 'type')
         if dtype == 'column':
             name = get_or_403(d, 'column')
+
             if 'table' in d:
                 name = d['table'] + '.' + name
                 if 'schema' in d:
                     name = d['schema'] + '.' + name
+                return literal_column(name)
             return column(name)
         if dtype == 'grouping':
             return list(map(parse_expression, get_or_403(d, 'grouping')))
@@ -263,17 +265,11 @@ def parse_expression(d):
 
 
 def parse_condition(dl):
-    if type(dl) == dict:
-        dl = [dl]
-    conditions = [parse_expression(d) for d in dl]
-    query = conditions[0]
-    for condition in conditions[1:]:
-        query=query._and(condition)
-    return query
+    return parse_expression(dl)
 
 
 def parse_operator(d):
-    query = parse_sqla_operator(get_or_403(d, 'operator'), *map(parse_expression(get_or_403(d, 'operands'))))
+    query = parse_sqla_operator(get_or_403(d, 'operator'), *list(map(parse_expression, get_or_403(d, 'operands'))))
     if 'as' in d:
         query = query.label(d['as'])
     return query

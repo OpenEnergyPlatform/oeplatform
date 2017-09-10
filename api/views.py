@@ -61,6 +61,12 @@ def require_delete_permission(f):
 def require_admin_permission(f):
     return permission_wrapper(login_models.ADMIN_PERM, f)
 
+def conjunction(clauses):
+    return {
+        'type': 'operator',
+        'operator': 'AND',
+        'operands': clauses,
+    }
 
 class Table(APIView):
     """
@@ -303,11 +309,17 @@ class Rows(APIView):
         where_clauses = self.__read_where_clause(where)
 
         if row_id:
-            where_clauses.append({'left': {'type': 'column',
-                                           'column': 'id'},
+            clause = {'operands': [
+                {'type': 'column',
+                 'column': 'id'},
+                row_id
+            ],
              'operator': 'EQUALS',
-             'right': row_id,
-             'type': 'operator_binary'})
+             'type': 'operator'}
+            if where_clauses:
+                where_clauses = conjunction(clause, where_clauses)
+            else:
+                where_clauses = clause
 
         # TODO: Validate where_clauses. Should not be vulnerable
         data = {'schema': schema,
@@ -405,15 +417,20 @@ class Rows(APIView):
                    'user': request.user}
 
         if row_id:
-            query['where'].append({
-                'left': {
-                    'type': 'column',
-                    'column': 'id'
-                },
+            clause = {
                 'operator': '=',
-                'right': row_id,
-                'type': 'operator_binary'
-            })
+                'operands': [
+                    actions._load_value(row_id),
+                    {
+                        'type': 'column',
+                        'column': 'id'
+                    }],
+                'type': 'operator'
+            }
+            if query['where']:
+                clause = conjunction([clause, query['where']])
+            query['where'] = clause
+
         return actions.data_delete(query, context)
 
     def __read_where_clause(self, where):
@@ -423,13 +440,11 @@ class Rows(APIView):
         where_clauses = []
         if where:
             where_splitted = re.findall(where_expression, where)
-            where_clauses = [{'left': {
+            where_clauses = conjunction([{'operands': [{
                                 'type': 'column',
-                                'column': match[0]},
+                                'column': match[0]},match[2]],
                               'operator': match[1],
-                              'type': 'operator_binary',
-                              'right': match[2]} for match in where_splitted]
-
+                              'type': 'operator'} for match in where_splitted])
         return where_clauses
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
@@ -468,15 +483,20 @@ class Rows(APIView):
             'values': row
         }
         if row_id:
-            query['where'].append({
-                'left': {
-                    'type': 'column',
-                    'column': 'id'
-                },
+            clause = {
                 'operator': '=',
-                'right': actions._load_value(row_id),
-                'type': 'operator_binary'
-            })
+                'operands': [
+                    actions._load_value(row_id),
+                    {
+                        'type': 'column',
+                        'column': 'id'
+                    }],
+                'type': 'operator'
+            }
+            if query['where']:
+                clause = conjunction([clause, query['where']])
+            query['where'] = clause
+
         return actions.data_update(query, context)
 
     @actions.load_cursor
@@ -495,11 +515,7 @@ class Rows(APIView):
         where_clauses = data.get('where')
 
         if where_clauses:
-            for clause in where_clauses:
-                first = getattr(table.c, clause['left']['column'])
-                second = clause['right']
-                operator = parser.parse_sqla_operator(clause['operator'], first, second)
-                query = query.where(operator)
+            query = query.where(parser.parse_condition(where_clauses))
 
         orderby = data.get('orderby')
         if orderby:
@@ -603,3 +619,5 @@ def get_groups(request):
     string = request.GET['name']
     users = login_models.Group.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
     return JsonResponse([user.name for user in users], safe=False)
+
+

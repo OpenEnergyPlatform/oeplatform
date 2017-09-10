@@ -906,18 +906,24 @@ def data_insert_check(schema, table, values, context):
                             'table': table
                         },
                     'where':
-                        [
-                            {
-                                'left':
-                                    {
-                                        'type': 'column',
-                                        'column': c
-                                    },
-                                'operator': '=',
-                                'right': {'type': 'value', 'value': _load_value(row[c])} if c in row else {'type': 'value'},
-                                'type': 'operator_binary'
-                            } for c in columns
-                        ],
+                        {
+                            'type': 'operator',
+                            'operator': 'AND',
+                            'operands':
+                                [{
+                                    'operands': [
+                                        {
+                                            'type': 'column',
+                                            'column': c
+                                        },
+                                        {
+                                            'type': 'value',
+                                            'value': _load_value(row[c])
+                                        } if c in row else {'type': 'value'}],
+                                    'operator': '=',
+                                    'type': 'operator'
+                                } for c in columns]
+                        },
                     'fields': [{'type': 'column',
                                     'column': f} for f in columns]
                 }
