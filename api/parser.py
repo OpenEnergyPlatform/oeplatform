@@ -245,15 +245,11 @@ def parse_expression(d):
                     name = d['schema'] + '.' + name
             return column(name)
         if dtype == 'grouping':
-            return parse_expression(get_or_403(d, 'grouping'))
+            return list(map(parse_expression, get_or_403(d, 'grouping')))
         if dtype == 'operator':
             return parse_operator(d)
-        if dtype == 'operator_binary':
-            return parse_operator(d)
-        if dtype == 'operator_unary':
-            return parse_operator_unary(d)
-        if dtype == 'modifier_unary':
-            return parse_modifier_unary(d)
+        if dtype == 'modifier':
+            return parse_modifier(d)
         if dtype == 'function':
             return parse_function(d)
         if dtype == 'value':
@@ -277,21 +273,12 @@ def parse_condition(dl):
 
 
 def parse_operator(d):
-    query = parse_sqla_operator(get_or_403(d, 'operator'),
-                                parse_expression(get_or_403(d, 'left')),
-                                parse_expression(get_or_403(d, 'right')))
+    query = parse_sqla_operator(get_or_403(d, 'operator'), *map(parse_expression(get_or_403(d, 'operands'))))
     if 'as' in d:
         query = query.label(d['as'])
     return query
 
-
-
-def parse_operator_unary(d):
-    return "%s %s" % (read_operator(get_or_403(d,'operator'),
-                                    get_or_403(d,'operand')),
-                      parse_expression(get_or_403(d,'operand')))
-
-def parse_modifier_unary(d):
+def parse_modifier(d):
     return "%s %s" % (parse_expression(get_or_403(d,'operand')),
                       read_operator(get_or_403(d, 'operator'),
                                     get_or_403(d,'operand')))
@@ -441,17 +428,38 @@ sql_operators = {'EQUALS': '=',
 def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
 
-def parse_sqla_operator(key, x, y):
-    if key in ['EQUALS','=']:
-        return x == y
-    if key in ['GREATER', '>']:
-        return x > y
-    if key in ['LOWER', '<']:
-        return x < y
-    if key in ['NOTEQUAL', '<>', '!=']:
-        return x != y
-    if key in ['NOTGREATER', '<=']:
-        return x <= y
-    if key in ['NOTLOWER', '>=']:
-        return x >= y
+def parse_sqla_operator(key, *operands):
+    if not operands:
+        raise APIError('Missing arguments for \'%s\'.' % (key))
+    if key in ['AND']:
+        query = operands[0]
+        for condition in operands[1:]:
+            query = query._and(condition)
+        return query
+    elif key in ['OR']:
+        query = operands[0]
+        for condition in operands[1:]:
+            query = query._or(condition)
+        return query
+    elif key in ['NOT']:
+        x = operands[0]
+        return parse_condition(x)._not()
+    else:
+        if len(operands) != 2:
+            raise APIError('Wrong number of arguments for \'%s\'. Expected: 2 Got: %s'%(key, len(operands)))
+        x, y = operands
+        if key in ['EQUALS','=']:
+            return x == y
+        if key in ['GREATER', '>']:
+            return x > y
+        if key in ['LOWER', '<']:
+            return x < y
+        if key in ['NOTEQUAL', '<>', '!=']:
+            return x != y
+        if key in ['NOTGREATER', '<=']:
+            return x <= y
+        if key in ['NOTLOWER', '>=']:
+            return x >= y
+
+
     raise APIError("Operator %s not supported"%key)
