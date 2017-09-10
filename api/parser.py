@@ -156,14 +156,15 @@ def parse_select(d):
         query.having([parse_condition(f) for f in d['having']])
 
     if 'select' in d:
-        type = get_or_403(d, 'type')
-        subquery = parse_select(d['select'])
-        if type.lower() == 'union':
-            query.union(subquery)
-        elif type.lower() == 'intersect':
-            query.intersect(subquery)
-        elif type.lower() == 'except':
-            query.except_(subquery)
+        for constraint in d['select']:
+            type = get_or_403(constraint, 'type')
+            subquery = parse_select(constraint['select'])
+            if type.lower() == 'union':
+                query.union(subquery)
+            elif type.lower() == 'intersect':
+                query.intersect(subquery)
+            elif type.lower() == 'except':
+                query.except_(subquery)
     if 'order_by' in d:
         for ob in d['order_by']:
             expr = parse_expression(ob)
