@@ -158,7 +158,7 @@ def parse_select(d):
     if 'select' in d:
         for constraint in d['select']:
             type = get_or_403(constraint, 'type')
-            subquery = parse_select(constraint['select'])
+            subquery = parse_select(get_or_403(constraint, 'query'))
             if type.lower() == 'union':
                 query.union(subquery)
             elif type.lower() == 'intersect':
