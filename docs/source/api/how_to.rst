@@ -1,5 +1,6 @@
+*************************************
 How to work with the API - An example
-=====================================
+*************************************
 
 .. testsetup::
 
@@ -15,7 +16,7 @@ How to work with the API - An example
 
 
 Authenticate
-************
+============
 
 The OpenEnergy Platform API uses token authentication. Each user has a unique
 token assigned to it that will be used as an authentication password. You can
@@ -27,7 +28,7 @@ your request:
 
 
 Create table
-************
+============
 
 We want to create the following table with primary key `id`:
 
@@ -134,7 +135,7 @@ been created.
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
 Insert data
-***********
+===========
 
 You can insert data into a specific table by sending a request to its
 `/rows` subresource. The `query` part of the sent data contians the row you want
@@ -200,7 +201,7 @@ Our database should have the following structure now:
 +-----------+-------------------+-----------------------+
 
 Select data
-***********
+===========
 
 You can insert data into a specific table by sending a GET-request to its
 `/rows` subresource.
@@ -291,7 +292,7 @@ There are also optional parameters for these GET-queries:
     True
 
 Add columns table
-*****************
+=================
 
 .. doctest::
 
@@ -309,7 +310,7 @@ Add columns table
     True
 
 Alter data
-**********
+==========
 
 Our current table looks as follows:
 
@@ -347,7 +348,7 @@ Now, our table looks as follows:
 +-----------+-------------------+-----------------------+------------------------+
 
 Alter tables
-************
+============
 
 Currently, rows are allowed that contain no first name. In order to prohibit
 such behaviour, we have to set column `first_name` to `NOT NULL`. Such `ALTER
