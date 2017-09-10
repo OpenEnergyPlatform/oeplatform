@@ -17,7 +17,8 @@ _TYPEMAP = {
     'timestamp': 'timestamp without time zone',
     'time': 'time without time zone',
     'varchar': 'character varying',
-    'character varying': 'character varying'
+    'character varying': 'character varying',
+    'bigserial': 'bigint'
 }
 
 
@@ -59,7 +60,7 @@ class TestPut(APITestCase):
             "columns": [
                            {
                                "name": "id",
-                               "data_type": "integer",
+                               "data_type": "bigserial",
                                "is_nullable": False,
                                "character_maximum_length": None
                            }, {
@@ -102,7 +103,7 @@ class TestPut(APITestCase):
             "columns": [
                 {
                     "name": "id",
-                    "data_type": "integer",
+                    "data_type": "bigserial",
                 }, {
                     "name": "id2",
                     "data_type": "integer",
@@ -136,8 +137,7 @@ class TestPut(APITestCase):
         self.assertDictEqualKeywise(body['columns']['id'],{
             'character_maximum_length': None,
             'character_octet_length': None,
-            'column_default': None,
-            'data_type': 'integer',
+            'data_type': 'bigint',
             'datetime_precision': None,
             'dtd_identifier': '1',
             'interval_precision': None,
@@ -145,10 +145,10 @@ class TestPut(APITestCase):
             'is_nullable': False,
             'is_updatable': True,
             'maximum_cardinality': None,
-            'numeric_precision': 32,
+            'numeric_precision': 64,
             'numeric_precision_radix': 2,
             'numeric_scale': 0,
-        },['ordinal_position'])
+        },['ordinal_position', 'column_default'])
         self.assertDictEqualKeywise(body['columns']['id2'],{
             'character_maximum_length': None,
             'character_octet_length': None,
@@ -187,13 +187,13 @@ class TestPut(APITestCase):
             "constraints": [
                 {
                     "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
+                    "constraint_parameter": "bigserial",
                 }
             ],
             "columns": [
                 {
                     "name": "id",
-                    "data_type": "integer",
+                    "data_type": "bigserial",
                 }
             ]
         }
@@ -226,7 +226,7 @@ class TestPut(APITestCase):
             "columns": [
                            {
                                "name": "id",
-                               "data_type": "integer",
+                               "data_type": "bigserial",
                                "is_nullable": False,
                                "character_maximum_length": None
                            }, {
@@ -274,7 +274,7 @@ class TestDelete(APITestCase):
             "columns": [
                 {
                     "name": "id",
-                    "data_type": "integer",
+                    "data_type": "bigserial",
                     "is_nullable": False,
                     "character_maximum_length": None
                 },

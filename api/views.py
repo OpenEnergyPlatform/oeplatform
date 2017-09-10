@@ -33,6 +33,8 @@ def api_exception(f):
         except actions.APIError as e:
             return JsonResponse({'reason': e.message},
                                 status=e.status)
+        except KeyError as e:
+            return JsonResponse({'reason': e}, status=400)
     return wrapper
 
 
@@ -351,7 +353,10 @@ class Rows(APIView):
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, row_id=None):
+    def put(self, request, schema, table, row_id=None, action=None):
+        if action:
+            raise APIError('This request type (PUT) is not supported. The '
+                           '\'new\' statement is only possible in POST requests.')
         schema, table = actions.get_table_name(schema, table)
         if not row_id:
             return JsonResponse(actions._response_error('This methods requires an id'),
@@ -365,15 +370,12 @@ class Rows(APIView):
                 status=status.HTTP_409_CONFLICT)
 
         engine = actions._get_engine()
-        conn = engine.connect()
-
         # check whether id is already in use
-        exists = conn.execute('select count(*) '
+        exists = engine.execute('select count(*) '
                              'from {schema}.{table} '
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
-        conn.close()
         if exists:
             response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)

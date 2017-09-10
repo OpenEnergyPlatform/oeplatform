@@ -21,7 +21,7 @@ class TestPut(APITestCase):
             "columns": [
                 {
                     "name": "id",
-                    "data_type": "integer",
+                    "data_type": "bigserial",
                     "is_nullable": False,
                     "character_maximum_length": None
                 },
@@ -150,7 +150,7 @@ class TestPost(APITestCase):
             "columns": [
                 {
                     "name": "id",
-                    "data_type": "integer",
+                    "data_type": "bigserial",
                     "is_nullable": False,
                     "character_maximum_length": None
                 },
