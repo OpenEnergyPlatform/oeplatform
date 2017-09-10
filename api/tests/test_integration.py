@@ -19,7 +19,7 @@ class IntegrationTestCase(APITestCase):
         "columns": [
             {
                 "name": "id",
-                "data_type": "integer",
+                "data_type": "bigserial",
                 "is_nullable": False,
                 "character_maximum_length": None
             },
@@ -62,7 +62,8 @@ class IntegrationTestCase(APITestCase):
                 # We are able to use a list instead of a dictonary to get better iteration possibilities.
                 if key == 'name':
                     continue
-
+                if key == 'data_type' and column[key] == 'bigserial':
+                    column[key] = 'bigint'
                 value = column[key]
                 self.assertEqual(value, body['columns'][column['name']][key],
                                  "Key '{key}' does not match.".format(key=key))
@@ -86,7 +87,7 @@ class IntegrationTestCase(APITestCase):
             HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
             content_type='application/json')
 
-        self.assertEqual(c_basic_resp.status_code, 201, 'Status Code is not 201.')
+        self.assertEqual(c_basic_resp.status_code, 201, 'Status Code is not 201: ' + c_basic_resp.json().get('reason', 'No reason returned') )
         self.checkStructure()
 
     def step_modify_table(self):
