@@ -4,15 +4,23 @@ How to work with the API - An example
 
 .. testsetup::
 
+
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
-    connection.execute('CREATE SCHEMA IF NOT EXISTS sandbox;')
-    connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
+    #connection.execute('CREATE SCHEMA IF NOT EXISTS sandbox;')
+    #connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
     connection.close()
 
     oep_url = 'http://localhost:8000'
     from oeplatform.securitysettings import token_test_user as your_token
+
+.. note::
+
+    The API is enable for the following schmemas only:
+
+        * model_draft
+        * sandbox
 
 
 Authenticate
@@ -32,11 +40,11 @@ Create table
 
 We want to create the following table with primary key `id`:
 
-+-----------+-------------------+-----------------------+
-| *id*: int | name: varchar(50) | geom: geometry(Point) |
++-----------------+-------------------+-----------------------+
+| *id*: bigserial | name: varchar(50) | geom: geometry(Point) |
 +===========+===================+=======================+
-|           |                   |                       |
-+-----------+-------------------+-----------------------+
+|                 |                   |                       |
++-----------------+-------------------+-----------------------+
 
 In order to do so, we send the following PUT request::
 
@@ -46,7 +54,7 @@ In order to do so, we send the following PUT request::
             "columns": [
                 {
                     "name":"id",
-                    "data_type": "Integer",
+                    "data_type": "Bigserial",
                     "is_nullable": "NO"
                 },{
                     "name":"name",
@@ -83,7 +91,7 @@ tool **curl**::
                     "columns": [
                         {
                             "name":"id",
-                            "data_type": "Integer",
+                            "data_type": "bigsersial",
                             "is_nullable": "NO"
                         },{
                             "name":"name",
@@ -110,12 +118,17 @@ or **python**:
 .. doctest::
 
     >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "serial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
 If everything went right, you will receive a 201-Resonse_ and the table has
 been created.
+
+.. note::
+
+    The OEP will automatically grant the 'admin'-permissions on this
+    table to your user.
 
 .. doctest::
 
@@ -123,13 +136,35 @@ been created.
     >>> result.status_code
     200
     >>> json_result = result.json()
-    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'integer', 'numeric_precision': 32, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
+    >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'bigint', 'numeric_precision': 64, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
     True
-    >>> json_result['geom'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['geom'] == {'column_default': None, 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
     True
     >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
 
+.. note::
+    A table **must** have a column 'id' of type 'bigserial'.
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": { "columns": [ { "name":"name", "data_type": "varchar", "character_maximum_length": "50" }]} }
+    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> response.status_code
+    500
+    >>> response.json()['reason']
+    'Your table must have one column "id" of type "bigserial"'
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "integer"}]} }
+    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> response.status_code
+    500
+    >>> response.json()['reason']
+    'Your column "id" must have type "bigserial"'
 
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -199,6 +234,12 @@ Our database should have the following structure now:
 +-----------+-------------------+-----------------------+
 |       12  | Mary Doe XII      | NULL                  |
 +-----------+-------------------+-----------------------+
+
+.. note::
+
+    In order to insert new data, or perfom any other actions that alter the data
+    state, you need the 'write'-permission for the respective table. Permissions can
+    be granted by a user with 'admin'-permissions in the OEP web interface.
 
 Select data
 ===========
@@ -314,13 +355,13 @@ Alter data
 
 Our current table looks as follows:
 
-+-----------+-------------------+-----------------------+------------------------+
-| *id*: int | name: varchar(50) | geom: geometry(Point) | first_name: varchar(30)|
-+===========+===================+=======================+========================+
-|       1   | John Doe          | NULL                  | NULL                   |
-+-----------+-------------------+-----------------------+------------------------+
-|       12  | Mary Doe XII      | NULL                  | NULL                   |
-+-----------+-------------------+-----------------------+------------------------+
++-----------------+-------------------+-----------------------+------------------------+
+| *id*: bigserial | name: varchar(50) | geom: geometry(Point) | first_name: varchar(30)|
++=================+===================+=======================+========================+
+|             1   | John Doe          | NULL                  | NULL                   |
++-----------------+-------------------+-----------------------+------------------------+
+|             12  | Mary Doe XII      | NULL                  | NULL                   |
++-----------------+-------------------+-----------------------+------------------------+
 
 Our next task is to distribute for and last name to the different columns:
 
@@ -386,6 +427,13 @@ added anymore.
     >>> result.json()['reason']
     'Action violates not-null constraint on first_name. Failing row was (McPaul)'
 
+
+Delete rows
+***********
+
+In order to delete rows, you need the 'delete'-permission on the respective
+table. The permissions can be granted by an admin in the OEP web interface.
+
 .. doctest::
 
     >>> import requests
@@ -393,12 +441,29 @@ added anymore.
     >>> result = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     200
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1')
+    >>> result.status_code
+    404
+
+Delete tables
+*************
+
+In order to delete rows, you need the 'admin'-permission on the respective
+table. The permissions can be granted by an admin in the OEP web interface.
+
+.. doctest::
+
+    >>> import requests
+    >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
+    <Response [200]>
+    >>> requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table')
+    <Response [404]>
 
 .. testcleanup::
 
     from api.actions import _get_engine
     engine = _get_engine()
     connection = engine.connect()
-    connection.execute('DROP SCHEMA sandbox CASCADE;')
-    connection.execute('DROP SCHEMA _sandbox CASCADE;')
+    #connection.execute('DROP SCHEMA sandbox CASCADE;')
+    #connection.execute('DROP SCHEMA _sandbox CASCADE;')
     connection.close()

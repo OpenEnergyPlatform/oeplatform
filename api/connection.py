@@ -7,7 +7,7 @@ __ENGINE = sqla.create_engine(
         sec.dbpasswd,
         sec.dbhost,
         sec.dbport,
-        sec.dbname))
+        sec.dbname), pool_size=0)
 
 def _get_engine():
     return __ENGINE

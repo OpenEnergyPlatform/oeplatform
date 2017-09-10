@@ -8,12 +8,14 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from django.db.models import Q
 
 import login.models as login_models
 import api.parser
 from api import actions
 from api import parser
 from api.helpers.http import ModHttpResponse
+from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
 
@@ -31,6 +33,8 @@ def api_exception(f):
         except actions.APIError as e:
             return JsonResponse({'reason': e.message},
                                 status=e.status)
+        except KeyError as e:
+            return JsonResponse({'reason': e}, status=400)
     return wrapper
 
 
@@ -148,6 +152,8 @@ class Table(APIView):
             raise PermissionDenied
         if request.user.is_anonymous():
             raise PermissionDenied
+        if actions.has_table(dict(schema=schema, table=table),{}):
+            raise APIError('Table already exists')
         json_data = request.data['query']
         constraint_definitions = []
         column_definitions = []
@@ -178,8 +184,29 @@ class Table(APIView):
     @require_delete_permission
     def delete(self, request, schema, table):
         schema, table = actions.get_table_name(schema, table)
-        table = actions._get_table(schema, table)
-        table.drop()
+
+
+        meta_schema = actions.get_meta_schema_name(schema)
+
+        edit_table = actions.get_edit_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        edit_table = actions.get_insert_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        edit_table = actions.get_delete_table_name(schema, table)
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=meta_schema,
+                                                          table=edit_table))
+
+        actions._get_engine().execute(
+            'DROP TABLE {schema}.{table} CASCADE;'.format(schema=schema,
+                                                          table=table))
+
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 class Index(APIView):
@@ -326,7 +353,10 @@ class Rows(APIView):
 
     @api_exception
     @require_write_permission
-    def put(self, request, schema, table, row_id=None):
+    def put(self, request, schema, table, row_id=None, action=None):
+        if action:
+            raise APIError('This request type (PUT) is not supported. The '
+                           '\'new\' statement is only possible in POST requests.')
         schema, table = actions.get_table_name(schema, table)
         if not row_id:
             return JsonResponse(actions._response_error('This methods requires an id'),
@@ -340,15 +370,12 @@ class Rows(APIView):
                 status=status.HTTP_409_CONFLICT)
 
         engine = actions._get_engine()
-        conn = engine.connect()
-
         # check whether id is already in use
-        exists = conn.execute('select count(*) '
+        exists = engine.execute('select count(*) '
                              'from {schema}.{table} '
                              'where id = {id};'.format(schema=schema,
                                                      table=table,
                                                      id=row_id)).first()[0] > 0 if row_id else False
-        conn.close()
         if exists:
             response = self.__update_rows(request, schema, table, column_data, row_id)
             actions.apply_changes(schema, table)
@@ -358,7 +385,7 @@ class Rows(APIView):
             actions.apply_changes(schema, table)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
-
+    @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
         schema, table = actions.get_table_name(schema, table)
         result = self.__delete_rows(request, schema, table, row_id)
@@ -556,3 +583,15 @@ def stream(data):
     for i in range(size):
         yield json.loads(json.dumps(data[i], default=date_handler))
         time.sleep(1)
+
+
+def get_users(request):
+    string = request.GET['name']
+    users = login_models.myuser.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
+    return JsonResponse([user.name for user in users], safe=False)
+
+
+def get_groups(request):
+    string = request.GET['name']
+    users = login_models.Group.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
+    return JsonResponse([user.name for user in users], safe=False)

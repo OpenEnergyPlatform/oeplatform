@@ -28,7 +28,7 @@ class ProfileView(View):
         return render(request, "login/profile.html", {'user': user,
                                                       'token': token})
 
-class GroupManagement(View):
+class GroupManagement(View, LoginRequiredMixin):
     def get(self, request):
         """
         Load and list the available groups by groupadmin. 
@@ -126,9 +126,8 @@ class GroupEdit(View, LoginRequiredMixin):
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST['name'])
-                membership = GroupMembership.objects.create(group=group,
-                                                            user=user,
-                                                            level=ADMIN_PERM)
+                membership, _ = GroupMembership.objects.get_or_create(group=group,
+                                                                      user=user)
                 membership.save()
             except OepUser.DoesNotExist:
                 errors['name'] = 'User does not exist'
@@ -138,15 +137,25 @@ class GroupEdit(View, LoginRequiredMixin):
             user = OepUser.objects.get(id=request.POST['user_id'])
             membership = GroupMembership.objects.get(group=group,
                                                      user=user)
-            membership.delete()
+            if membership.level >= ADMIN_PERM:
+                admins = GroupMembership.objects.filter(group=group).exclude(user=user)
+                if not admins:
+                    errors['name'] = 'A group needs at least one admin'
+                else:
+                    membership.delete()
+            else:
+                membership.delete()
         elif mode == 'alter_user':
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST['user_id'])
-            membership = GroupMembership.objects.get(group=group,
-                                                     user=user)
-            membership.level = request.POST['level']
-            membership.save()
+            if user == request.user:
+                errors['name'] = 'You can not change your own permissions'
+            else:
+                membership = GroupMembership.objects.get(group=group,
+                                                         user=user)
+                membership.level = request.POST['level']
+                membership.save()
         elif mode == 'delete_group':
             if membership.level < models.ADMIN_PERM:
                 raise PermissionDenied

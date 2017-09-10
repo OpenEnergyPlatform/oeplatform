@@ -51,4 +51,7 @@ urlpatterns = [
 
 
     url(r'^v0/advanced/show_revisions', views.create_ajax_handler(actions.get_unique_constraints)),
+
+    url(r'usrprop/', views.get_users),
+    url(r'grpprop/', views.get_groups),
 ]
