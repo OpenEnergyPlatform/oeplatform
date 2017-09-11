@@ -280,14 +280,22 @@ def parse_modifier(d):
                                     get_or_403(d,'operand')))
 
 def parse_function(d):
-    function = getattr(func, read_pgid(get_or_403(d, 'function')))
+    fname = get_or_403(d, 'function')
+
     operand_struc = get_or_403(d, 'operands')
     if isinstance(operand_struc, list):
-        operands=map(parse_expression, operand_struc)
+        operands = list(map(parse_expression, operand_struc))
     else:
         operands = [parse_expression(operand_struc)]
 
-    return function(*operands)
+    if fname == '+':
+        if len(operands) != 2:
+            raise APIError('Wrong number of arguments for function %s. Expected 2. Got %d'%(fname, len(operands)))
+        x, y = operands
+        return x + y
+    else:
+        function = getattr(func, fname)
+        return function(*operands)
 
 
 def cadd(d, key, string=None):
