@@ -167,7 +167,9 @@ by a where clause::
 Functions
 ---------
 
-
+You can also alter all functions that are implemented in sqlalchemy and
+geoalchemy2 to alter the results of your query. In the following example we
+simply add two to every id:
 
 .. doctest::
 
@@ -176,6 +178,22 @@ Functions
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> response.json()['data']
     [[0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6, 8], [7, 9], [8, 10], [9, 11]]
+
+Functions are especially usefull if you want to return geodata in a specific
+format. In the following we obtain the WKT representation of our data:
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': 'ST_AsText', 'operands':[{'type': 'column', 'column': 'geom'}]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
+    >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> data = response.json()['data']
+    >>> data[0]
+    [0, 'POINT(0 0)']
+    >>> all(geom == 'POINT(0 %d)'%pid for pid, geom in data)
+    True
+
+... or the geoJSON representation ...
 
 .. doctest::
 
@@ -191,14 +209,42 @@ Functions
 Joins
 -----
 
-{"from":{'type': 'join','left': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"a"},'right': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"b"},'on': {'operands': [{'type': 'column', 'column':'id', 'table': 'a'}, {'type': 'column', 'column':'id', 'table': 'b'}], 'operator': '<', 'type': 'operator'}}}
+Joins can be queried by using the corresponding from-item::
+
+    {
+     "from":{
+      'type': 'join',
+      'left': {
+       'type': 'table',
+       'table': 'example_table',
+       'schema':"sandbox",
+       "alias":"a"
+       },
+      'right': {
+       'type': 'table',
+       'table': 'example_table',
+       'schema':"sandbox",
+       "alias":"b"
+       },
+      'on': {
+       'operands': [
+        {'type': 'column', 'column':'id', 'table': 'a'},
+        {'type': 'column', 'column':'id', 'table': 'b'}
+        ],
+       'operator': '<',
+       'type': 'operator'
+       }
+      }
+     }
+
+
 .. doctest::
 
     >>> import requests
     >>> data = { "query": {"from":{'type': 'join','left': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"a"},'right': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"b"},'on': {'operands': [{'type': 'column', 'column':'id', 'table': 'a'}, {'type': 'column', 'column':'id', 'table': 'b'}], 'operator': '<', 'type': 'operator'}}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> response.json()['data']
-    [[0, 'John Doe0', None, 1, 'John Doe1', None], [0, 'John Doe0', None, 2, 'John Doe2', None], [0, 'John Doe0', None, 3, 'John Doe3', None], [0, 'John Doe0', None, 4, 'John Doe4', None], [0, 'John Doe0', None, 5, 'John Doe5', None], [0, 'John Doe0', None, 6, 'John Doe6', None], [0, 'John Doe0', None, 7, 'John Doe7', None], [0, 'John Doe0', None, 8, 'John Doe8', None], [0, 'John Doe0', None, 9, 'John Doe9', None], [1, 'John Doe1', None, 2, 'John Doe2', None], [1, 'John Doe1', None, 3, 'John Doe3', None], [1, 'John Doe1', None, 4, 'John Doe4', None], [1, 'John Doe1', None, 5, 'John Doe5', None], [1, 'John Doe1', None, 6, 'John Doe6', None], [1, 'John Doe1', None, 7, 'John Doe7', None], [1, 'John Doe1', None, 8, 'John Doe8', None], [1, 'John Doe1', None, 9, 'John Doe9', None], [2, 'John Doe2', None, 3, 'John Doe3', None], [2, 'John Doe2', None, 4, 'John Doe4', None], [2, 'John Doe2', None, 5, 'John Doe5', None], [2, 'John Doe2', None, 6, 'John Doe6', None], [2, 'John Doe2', None, 7, 'John Doe7', None], [2, 'John Doe2', None, 8, 'John Doe8', None], [2, 'John Doe2', None, 9, 'John Doe9', None], [3, 'John Doe3', None, 4, 'John Doe4', None], [3, 'John Doe3', None, 5, 'John Doe5', None], [3, 'John Doe3', None, 6, 'John Doe6', None], [3, 'John Doe3', None, 7, 'John Doe7', None], [3, 'John Doe3', None, 8, 'John Doe8', None], [3, 'John Doe3', None, 9, 'John Doe9', None], [4, 'John Doe4', None, 5, 'John Doe5', None], [4, 'John Doe4', None, 6, 'John Doe6', None], [4, 'John Doe4', None, 7, 'John Doe7', None], [4, 'John Doe4', None, 8, 'John Doe8', None], [4, 'John Doe4', None, 9, 'John Doe9', None], [5, 'John Doe5', None, 6, 'John Doe6', None], [5, 'John Doe5', None, 7, 'John Doe7', None], [5, 'John Doe5', None, 8, 'John Doe8', None], [5, 'John Doe5', None, 9, 'John Doe9', None], [6, 'John Doe6', None, 7, 'John Doe7', None], [6, 'John Doe6', None, 8, 'John Doe8', None], [6, 'John Doe6', None, 9, 'John Doe9', None], [7, 'John Doe7', None, 8, 'John Doe8', None], [7, 'John Doe7', None, 9, 'John Doe9', None], [8, 'John Doe8', None, 9, 'John Doe9', None]]
+    [[0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240']]
 
 
 .. doctest::
