@@ -62,18 +62,20 @@ def load_cursor(f):
             # Thus, we have to replace the data dictionary by one we can mutate.
             args[1]._full_data = dict(args[1].data)
             args[1].data['cursor_id'] = cursor_id
+        try:
+            result = f(*args, **kwargs)
 
-        result = f(*args, **kwargs)
-
-        if fetch_all:
-            if not result:
-                result = {}
-            if cursor.description:
-                result['description'] = cursor.description
-                result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
-            close_cursor({}, {'cursor_id': cursor_id})
-            connection.connection.commit()
-            connection.close()
+            if fetch_all:
+                if not result:
+                    result = {}
+                if cursor.description:
+                    result['description'] = cursor.description
+                    result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
+        finally:
+            if fetch_all:
+                close_cursor({}, {'cursor_id': cursor_id})
+                connection.connection.commit()
+                connection.close()
 
         return result
     return wrapper
