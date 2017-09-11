@@ -6,7 +6,9 @@ Advanced API features
 
     oep_url = 'http://localhost:8000'
     from oeplatform.securitysettings import token_test_user as your_token
-
+    from shapely import wkt
+    from django.contrib.gis.geos import Point
+    import json
 
 .. doctest::
 
@@ -14,7 +16,7 @@ Advanced API features
     >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
-    >>> data = {"query": [{"id": i, "name": "John Doe"+str(i)} for i in range(10)]}
+    >>> data = {"query": [{"id": i, "name": "John Doe"+str(i), "geom":str(Point(0,i,srid=32140))} for i in range(10)]}
     >>> requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
@@ -162,6 +164,30 @@ by a where clause::
     >>> response.json()['data']
     [[0, 'John Doe0'], [1, 'John Doe1'], [2, 'John Doe2']]
 
+Functions
+---------
+
+
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': '+', 'operands':[{'type': 'column', 'column': 'id'}, 2]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
+    >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> response.json()['data']
+    [[0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6, 8], [7, 9], [8, 10], [9, 11]]
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': 'ST_AsGeoJSON', 'operands':[{'type': 'column', 'column': 'geom'}, 4236]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
+    >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> data = response.json()['data']
+    >>> data[0]
+    [0, '{"type":"Point","coordinates":[0,0]}']
+    >>> all(pid == json.loads(geom)['coordinates'][1] for pid, geom in data)
+    True
+
 Joins
 -----
 
@@ -180,3 +206,4 @@ Joins
     >>> import requests
     >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
     <Response [200]>
+
