@@ -240,6 +240,7 @@ function construct_field(dataset){
         var request = $.ajax({url:'/api/v0/schema/' + dataset.schema + '/tables/' + dataset.table + '/columns/', type: "GET"});
         var dfd = new $.Deferred();
         request.done(function(fields) {
+            $('#loading-indicator').show()
 
             if (fields.error) {
                 dfd.reject(fields.error);
@@ -326,6 +327,7 @@ function construct_field(dataset){
                 $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(count_query)}})
             )
             request.done(function(results, counts) {
+                $('#loading-indicator').hide();
                 results = results[0];
                 counts = counts[0];
                 if (results.error) {
