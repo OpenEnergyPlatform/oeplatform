@@ -986,8 +986,10 @@ def _execute_sqla(query, cursor):
         cursor.execute(str(compiled), params)
     except psycopg2.IntegrityError as e:
         print("SQL Action failed. \n Error:\n" + str(e.pgerror))
-        raise APIError(str(e.pgerror.split('\n')[0]))
-
+        raise APIError(str(e.diag.message_primary))
+    except psycopg2.DataError as e:
+        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
+        raise APIError(str(e.diag.message_primary))
 
 def process_value(val):
     if isinstance(val, str):
