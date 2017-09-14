@@ -164,6 +164,16 @@ by a where clause::
     >>> response.json()['data']
     [[0, 'John Doe0'], [1, 'John Doe1'], [2, 'John Doe2']]
 
+You can add several conditons as a list. Those will be interpreted as a conjunction:
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": {"fields": ["id", "name"], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}, 'where': [{'operands': [{'type': 'column', 'column':'id'}, 3], 'operator': '<', 'type': 'operator'}, {'operands': [{'type': 'column', 'column':'id'}, 1], 'operator': '>', 'type': 'operator'} ] }}
+    >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> response.json()['data']
+    [[2, 'John Doe2']]
+
 Functions
 ---------
 

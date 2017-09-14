@@ -4,7 +4,7 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column
+from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -265,6 +265,10 @@ def parse_expression(d):
 
 
 def parse_condition(dl):
+    if isinstance(dl, list):
+        dl = {'type':'operator',
+              'operator': 'AND',
+              'operands': list(dl)}
     return parse_expression(dl)
 
 
@@ -436,14 +440,10 @@ def parse_sqla_operator(key, *operands):
     if not operands:
         raise APIError('Missing arguments for \'%s\'.' % (key))
     if key in ['AND']:
-        query = operands[0]
-        for condition in operands[1:]:
-            query = query._and(condition)
+        query = and_(*operands)
         return query
     elif key in ['OR']:
-        query = operands[0]
-        for condition in operands[1:]:
-            query = query._or(condition)
+        query = or_(*operands)
         return query
     elif key in ['NOT']:
         x = operands[0]
