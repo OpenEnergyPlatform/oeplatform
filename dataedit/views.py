@@ -213,7 +213,7 @@ def listschemas(request):
 
 
 def overview(request):
-    return render(request, 'dataedit/dataedit_overview.html', {})
+    return render(request, 'dataedit/dataedit_choices.html', {})
 
 
 def read_label(table, comment):
