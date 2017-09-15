@@ -554,7 +554,7 @@ def date_handler(obj):
 # Create your views here.
 
 
-def create_ajax_handler(func):
+def create_ajax_handler(func, allow_cors=False):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
@@ -563,13 +563,12 @@ def create_ajax_handler(func):
     """
     class AJAX_View(APIView):
 
-
-        def get(self, request):
-            return JsonResponse(self.execute(request))
-
         @api_exception
         def post(self, request):
-            return JsonResponse(self.execute(request))
+            response = JsonResponse(self.execute(request))
+            if allow_cors and request.user.is_anonymous:
+                response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         @actions.load_cursor
         def execute(self, request):
