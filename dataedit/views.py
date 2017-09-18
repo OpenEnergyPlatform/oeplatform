@@ -564,20 +564,6 @@ class DataView(View):
         comment_on_table = load_comment_from_db(schema, table)
 
         revisions = []
-        try:
-            repo = svn.local.LocalClient(sec.datarepowc)
-            TableRevision.objects.all().delete()
-            available_revisions = TableRevision.objects.filter(table=table,
-                                                               schema=schema)
-
-            for rev in repo.log_default():
-                try:
-                    rev_obj = available_revisions.get(revision=rev.revision)
-                except TableRevision.DoesNotExist:
-                    rev_obj = None
-                revisions.append((rev, rev_obj))
-        except:
-            revisions = []
 
         api_changes = change_requests(schema, table)
 
