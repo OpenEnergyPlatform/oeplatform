@@ -21,6 +21,7 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
+from sqlalchemy import exc
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -980,15 +981,19 @@ def data_insert(request, context=None):
 
 
 def _execute_sqla(query, cursor):
-    compiled = query.compile()
+    try:
+        compiled = query.compile()
+    except (exc.DataError, exc.IdentifierError, exc.IntegrityError) as e:
+        raise APIError(repr(e))
+    except exc.DBAPIError:
+        # Other DBAPIErrors should not be reflected to the client.
+        raise
+    except exc.SQLAlchemyError as e:
+        raise APIError(repr(e))
     try:
         params = dict(compiled.params)
         cursor.execute(str(compiled), params)
-    except psycopg2.IntegrityError as e:
-        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
-        raise APIError(str(e.diag.message_primary))
-    except psycopg2.DataError as e:
-        print("SQL Action failed. \n Error:\n" + str(e.pgerror))
+    except (psycopg2.IntegrityError, psycopg2.DataError) as e:
         raise APIError(str(e.diag.message_primary))
 
 def process_value(val):
