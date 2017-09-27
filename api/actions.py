@@ -988,9 +988,9 @@ def _execute_sqla(query, cursor):
     try:
         params = dict(compiled.params)
         cursor.execute(str(compiled), params)
-    except (psycopg2.DataError, exc.IdentifierError, exc.IntegrityError) as e:
+    except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
-    except exc.InternalError as e:
+    except psycopg2.InternalError as e:
         if re.match(r'Input geometry has unknown \(\d+\) SRID', repr(e)):
             # Return only SRID errors
             raise APIError(repr(e))
@@ -999,8 +999,6 @@ def _execute_sqla(query, cursor):
     except psycopg2.DatabaseError as e:
         # Other DBAPIErrors should not be reflected to the client.
         raise e
-    except (psycopg2.IntegrityError, psycopg2.DataError) as e:
-        raise APIError(str(e.diag.message_primary))
 
 def process_value(val):
     if isinstance(val, str):
