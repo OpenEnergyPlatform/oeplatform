@@ -992,6 +992,7 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     except exc.InternalError as e:
         if re.match(r'Input geometry has unknown \(\d+\) SRID', repr(e)):
+            # Return only SRID errors
             raise APIError(repr(e))
         else:
             raise e
