@@ -983,16 +983,21 @@ def data_insert(request, context=None):
 def _execute_sqla(query, cursor):
     try:
         compiled = query.compile()
-    except (exc.DataError, exc.IdentifierError, exc.IntegrityError) as e:
-        raise APIError(repr(e))
-    except exc.DBAPIError:
-        # Other DBAPIErrors should not be reflected to the client.
-        raise
     except exc.SQLAlchemyError as e:
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
         cursor.execute(str(compiled), params)
+    except (psycopg2.DataError, exc.IdentifierError, exc.IntegrityError) as e:
+        raise APIError(repr(e))
+    except exc.InternalError as e:
+        if re.match(r'Input geometry has unknown \(\d+\) SRID', repr(e)):
+            raise APIError(repr(e))
+        else:
+            raise e
+    except psycopg2.DatabaseError as e:
+        # Other DBAPIErrors should not be reflected to the client.
+        raise e
     except (psycopg2.IntegrityError, psycopg2.DataError) as e:
         raise APIError(str(e.diag.message_primary))
 
