@@ -20,3 +20,4 @@ before_script:
   - psql -c 'create database django;' -U postgres
   - psql -U postgres -c "create extension postgis;" test
   - python manage.py migrate
+  - alembic upgrade head
