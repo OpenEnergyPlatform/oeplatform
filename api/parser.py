@@ -259,6 +259,8 @@ def parse_expression(d):
                 return read_pgvalue(get_or_403(d, 'value'))
             else:
                 return None
+        else:
+            raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
         return [parse_expression(x) for x in d]
     return d
