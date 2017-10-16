@@ -6,7 +6,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
-from api import actions
+
 import requests
 import itertools
 import json
@@ -71,15 +71,18 @@ class PermissionHolder():
         perm = self.table_permissions.filter(table__name=table,
                                    table__schema__name=schema).first()
         if perm:
-            return perm.permission
+            return perm.level
         else:
             return NO_PERM
 
 
 class UserGroup(Group, PermissionHolder):
     description = models.TextField(null=False, default='')
+    is_admin = models.BooleanField(null=False, default=False)
 
     def get_table_permission_level(self, table):
+        if self.is_admin:
+            return ADMIN_PERM
         return max(itertools.chain([NO_PERM], (perm.level for perm in self.table_permissions.filter(table=table))))
 
 class TablePermission(models.Model):
@@ -129,7 +132,9 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     def get_table_permission_level(self, table):
         # Check admin permissions for user
-        permission_level = NO_PERM
+        if self.is_admin:
+            return ADMIN_PERM
+
         user_membership = self.table_permissions.filter(
             table=table).first()
 
@@ -165,6 +170,8 @@ class GroupMembership(models.Model):
     group = models.ForeignKey(UserGroup, related_name='memberships')
     level = models.IntegerField(choices=choices,
                                 default=WRITE_PERM)
+    class Meta:
+        unique_together = (('user', 'group'),)
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):

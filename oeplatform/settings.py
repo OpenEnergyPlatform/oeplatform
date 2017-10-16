@@ -44,7 +44,9 @@ INSTALLED_APPS = (
     'colorfield',
     'django_ajax',
     'literature',
-    'axes'
+    'api',
+    'axes',
+    'django.contrib.postgres'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -95,6 +97,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-
 AUTH_USER_MODEL = 'login.myuser'
 LOGIN_REDIRECT_URL = '/'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}

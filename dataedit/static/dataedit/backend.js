@@ -73,13 +73,13 @@ var typemap = {
 function show_comment(e, schema, table, id){
         e.stopPropagation();
         query = {
-            from:[{
+            from:{
                 type:'table',
                 table:'_'+table+'_cor',
-                schema:schema}],
+                schema:schema},
             where:[condition_query('_id',id)]
         }
-        var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}});
+        var request = $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {query: JSON.stringify(query)}});
         var dfd = new $.Deferred();
 
          request.done(function(results) {
@@ -201,20 +201,25 @@ function construct_field(dataset){
     // Initial load of dataset including initial set of records
     my.fetch = function(dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.when($.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"}),
-                             $.ajax({type: 'POST', url:'/api/get_pk_constraint', dataType:'json', data: {query: JSON.stringify(query)}}));
+        var request = $.ajax({url:'/api/v0/schema/' + dataset.schema + '/tables/' + dataset.table, type: "GET"});
         var dfd = new $.Deferred();
 
 
 
-        request.done(function(results, pks) {
+        request.done(function(results) {
             if (results.error) {
                 dfd.reject(results.error);
             }
-            pks = pks[0];
-            results = results[0];
-            var table_fields = results.content.map(construct_field(dataset));
-            var pk_fields = pks.content.constrained_columns;
+            var table_fields = [];
+            var pk_fields = [];
+            for(col in results.columns){
+                table_fields.push(col)
+            };
+            for(con in results.constraints){
+                if(con.constraint_type=='PRIMARY KEY') {
+                    pk_fields.push(con)
+                }
+            };
             dfd.resolve({
                 fields: table_fields,
                 useMemoryStore: false,
@@ -232,14 +237,21 @@ function construct_field(dataset){
     // for records, retrieving the results in bulk.
     my.query = function(queryObj, dataset){
         var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:"/api/get_columns/", data: {'query':JSON.stringify(query)}, dataType:'json', type: "POST"});
+        var request = $.ajax({url:'/api/v0/schema/' + dataset.schema + '/tables/' + dataset.table + '/columns/', type: "GET"});
         var dfd = new $.Deferred();
         request.done(function(fields) {
+            $('#loading-indicator').show()
 
             if (fields.error) {
-                    dfd.reject(results.error);
-                }
-            var table_fields = fields.content.map(construct_field(dataset));
+                dfd.reject(fields.error);
+            }
+            var table_fields = [];
+
+            for(col in fields){
+                fields[col].id = col
+                table_fields.push(fields[col])
+            };
+
             var field_map = {};
 
             for(i=0; i<table_fields.length; ++i)
@@ -256,7 +268,7 @@ function construct_field(dataset){
             if(!unchecked){
                 table_query.only = true;
             }
-
+            table_query.type = 'table';
             var field_query = [];
 
             if(queryObj.fields){
@@ -272,7 +284,7 @@ function construct_field(dataset){
                 field_query = table_fields.map(get_field_query)
             }
 
-            var query = {from : [table_query], fields: field_query};
+            var query = {from : table_query, fields: field_query};
 
 
 
@@ -307,16 +319,15 @@ function construct_field(dataset){
             query.limit = queryObj.size;
             query.offset = queryObj.from;
 
-            /*if (id != null)
-                query.order_by = [{
-                    type:'column',
-                    column: id}];*/
-
+            // This must be a POST-Request for now, even thought no changes should happen.
+            // Reason is, that geo-data must be transformed to geo-JSON and function calls
+            // are not available via get, yet.
             var request = $.when(
-                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}}),
-                $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(count_query)}})
+                $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(query)}}),
+                $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(count_query)}})
             )
             request.done(function(results, counts) {
+                $('#loading-indicator').hide();
                 results = results[0];
                 counts = counts[0];
                 if (results.error) {
@@ -326,24 +337,16 @@ function construct_field(dataset){
                 else
                 {
                     var response = {
-                        hits: results.content.data.map(function(raw_row){
+                        hits: results.data.map(function(raw_row){
                             var row = {};
                             for(i=0; i<raw_row.length; ++i)
                             {
                                 var key = results.content.description[i][0];
                                 row[key] = raw_row[i];
                             }
-                            /*if(dataset.has_row_comments){
-                                row['_comment']={
-                                    _id: row['_comment'],
-                                    origin: row['origin'],
-                                    method: row['method'],
-                                    assumption: row['assumption']
-                                };
-                            }*/
                             return row;
                         }),
-                        total: counts.content.data[0][0],
+                        total: counts.data[0][0],
                     }
                     dfd.resolve(response);
                 }
@@ -411,14 +414,13 @@ function construct_field(dataset){
             query['message'] = message
 
             return $.ajax({type: 'POST',
-                url:'/api/insert', dataType:'json',
+                url:'/api/v0/advanced/insert', dataType:'json',
                 data: {
                     query: JSON.stringify(query)
                 }
             });
         }
     };
-
 
     function update_query(schema, table, message)
     {
@@ -438,7 +440,7 @@ function construct_field(dataset){
             query['message'] = message
 
             return $.ajax({type: 'POST',
-                url:'/api/update', dataType:'json',
+                url:'/api/v0/advanced/update', dataType:'json',
                 data: {
                     query: JSON.stringify(query)
                 }

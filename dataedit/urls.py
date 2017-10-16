@@ -5,7 +5,11 @@ from dataedit import views
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
-    url(r'^$', views.listschemas, name='index'),
+    url(r'^schemas$', views.listschemas, name='index'),
+    url(r'^$', views.overview, name='index'),
+    # url(r'^admin/$', views.admin, name='index'),
+    url(r'^admin/columns/', views.admin_columns, name='input'),
+    url(r'^admin/constraints/', views.admin_constraints, name='input'),
     url(r'^view/$', views.listschemas, name='index'),
     url(r'^view/(?P<schema_name>{qual})$'.format(qual=pgsql_qualifier), views.listtables, name='input'),
     url(r'^view/(?P<schema>{qual})/(?P<table>{qual})$'.format(qual=pgsql_qualifier), views.DataView.as_view(), name='input'),

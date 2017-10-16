@@ -91,7 +91,7 @@
 
 </script>
 
-<div class="container">
+<div>
   <style type="text/css">
     .recline-slickgrid {
       min-height: 700px;
@@ -114,7 +114,23 @@
                 </h4>
             </div>
             <div>
-                <div class="data-explorer-here"></div>
+
+                <div class="data-explorer-here">
+                    <div id="loading-indicator" class="sk-fading-circle">
+                        <div class="sk-circle1 sk-circle"></div>
+                        <div class="sk-circle2 sk-circle"></div>
+                        <div class="sk-circle3 sk-circle"></div>
+                        <div class="sk-circle4 sk-circle"></div>
+                        <div class="sk-circle5 sk-circle"></div>
+                        <div class="sk-circle6 sk-circle"></div>
+                        <div class="sk-circle7 sk-circle"></div>
+                        <div class="sk-circle8 sk-circle"></div>
+                        <div class="sk-circle9 sk-circle"></div>
+                        <div class="sk-circle10 sk-circle"></div>
+                        <div class="sk-circle11 sk-circle"></div>
+                        <div class="sk-circle12 sk-circle"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <hr>
@@ -152,13 +168,6 @@
         </div>
     </div>
     {% endif %}
-
-    {% if is_admin %}
-        ADMIN
-    {% else %}
-        NO ADMIN
-    {% endif %}
-
   <div style="clear: both;"></div>
     Data is displayed using <a href="http://okfnlabs.org/recline/">recline.js</a>
 </div>
@@ -186,11 +195,25 @@
               </ul>
             </td>
         </tr>
+        {% if comment_on_table.spatial %}
         <tr>
-            <th>Reference date</th>
-            <td class="metavalue">{{comment_on_table.reference_date}}</td>
+            <th>Spatial</th>
+            <td>
+                {{comment_on_table.spatial.extent}} {% if comment_on_table.spatial.resolution %} ({{comment_on_table.spatial.resolution}}) {% endif %} <br/>
+            </td>
         </tr>
-        {% if comment_on_table.sources %}
+        {% endif %}
+
+		{% if comment_on_table.temporal %}
+        <tr>
+            <th>Temporal</th>
+            <td>
+                {{comment_on_table.temporal.start}} {% if comment_on_table.temporal.end %} ({{comment_on_table.temporal.end}}) {% if comment_on_table.temporal.resolution %} ({{comment_on_table.temporal.resolution}}) {% endif %} {% endif %} <br/>
+            </td>
+        </tr>
+        {% endif %}
+		
+		{% if comment_on_table.sources %}
         <tr>
             <th>Sources</th>
             <td>
@@ -211,34 +234,25 @@
             </td>
         </tr>
         {% endif %}
-        {% if comment_on_table.spatial %}
-        <tr>
-            <th>Spatial</th>
-            <td>
-            {% for row in comment_on_table.spatial %}
-                {{row.extend}} {% if row.resolution %} ({{row.resolution}}) {% endif %} <br/>
-            {% endfor %}</td>
-        </tr>
-        {% endif %}
-
+		
         {% if comment_on_table.license %}
         <tr>
             <th>License</th>
             <td>
-                {% for row in comment_on_table.license %}
                     <p class="metaproperty">
-                        {% if row.url %}
-                            <a href="{{row.url}}">{{row.name}} ({{row.id}})</a>
-                        {% else %}
-                            {{row.name}} ({{row.id}})
+                        {% if comment_on_table.license.url %}
+                            <a href="{{comment_on_table.license.url}}">
+                        {% endif %}
+                        {{comment_on_table.license.name}} ({{comment_on_table.license.id}})
+                        {% if comment_on_table.license.url %}
+                            </a>
                         {% endif %}
                     </p>
                     <ul>
-                        <li> Version: {{row.version }}</li>
-                        <li> Instruction: {{row.instruction }}</li>
-                        <li> Copyright: {{row.copyright }}</li>
+                        <li> Version: {{comment_on_table.license.version }}</li>
+                        <li> Instruction: {{comment_on_table.license.instruction }}</li>
+                        <li> Copyright: {{comment_on_table.license.copyright }}</li>
                     </ul>
-                {% endfor %}
             </td>
         </tr>
         {% endif %}

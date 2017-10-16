@@ -18,10 +18,15 @@
     {% endfor %}
     </ul>
     </div>
+    <hr>
+    {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
+    <hr>
     <h3>Manage Tags</h3>
     <div style="overflow: hidden;">
         <a href="/dataedit/tags" class="btn btn-default">Manage Tags</a>
     </div>
+    <hr>
+    {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
 {% endblock %}
 {% block content %}
 {% block data_search %}

@@ -1,0 +1,36 @@
+{% extends 'dataedit/dataview.html' %}
+{% load staticfiles %}
+{% block title %} How to access our data {% endblock %}
+
+{% block data_content %}
+    <h3> How to access the database? </h3>
+    <div style="clear: left; float: left; position: relative; left: 50%;">
+        <table style="float: left; position: relative; right: 50%;">
+            <tr>
+                <td style="width:440px;padding-right:50px">
+                    <a href="/dataedit/schemas">
+                        <img src="{% static 'dataedit/dataview.png' %}"/>
+                    </a>
+                </td>
+                <td>
+                    <a href="http://oep-data-interface.readthedocs.io/en/latest/api/how_to.html">
+                        <img src="{% static 'dataedit/api.png' %}"/>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td style="width:440px;padding-right:50px;vertical-align: text-top;" >
+                    Use the OEP-Dataview if you want to browse data and get an
+                    overview on what kind of datasets are available on the OEP and
+                    how they are structured. The OEP features functionalities for
+                    different views on datasets, such as graphs and maps.
+                </td>
+                <td style="width:440px;vertical-align: text-top;">
+                    Use the OEP-API if you want to use the data published on this
+                    platform for your own purpose. You may also add new datasets to
+                    the platform, create new tables and much more.
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

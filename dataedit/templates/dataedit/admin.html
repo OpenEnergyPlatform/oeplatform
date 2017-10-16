@@ -1,0 +1,117 @@
+{% block content %}
+{% load dict_handler %}
+{% load bootstrap3   %}
+{% csrf_token %}
+
+<h2>API Changes</h2>
+    {% if data.api_constraints|empty and data.api_columns|empty     %}
+        <h5>There are no requested changes.</h5>
+    {% endif %}
+
+    {% if not data.api_columns|empty %}
+    <h4>Column Changes</h4>
+        <ul class="list-group">
+            {% for key, value in data.api_columns.items%}
+                <li class="list-group-item" >
+                <table class="table">
+                    <div class="alert alert-danger">
+                      <strong>SQL Exception!</strong> On last call a sql exception occurred! <br>
+                        {{  value.new|get_item:'exception' }}
+                    </div>
+                    <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Old Value</th>
+                      <th>New Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for k, v in value.new.items%}
+                        {% if k in display_items %}
+                        <tr>
+                            <th scope="row">{{ k }}</th>
+                            <td>
+
+                                    {{ value.old|get_item:k }}
+
+                            </td>
+                            <td>{{ value.new|get_item:k }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+
+                </table>
+                    <div class="text-center">
+                    <div class="btn-group" style="display: inline-flex">
+                    <form action="/dataedit/admin/columns/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
+                        <input type="hidden" name="action" value="apply">
+                        <input type="hidden" name="schema" value="{{ value.new|get_item:'c_schema'}}">
+                        <input type="hidden" name="table" value="{{ value.new|get_item:'c_table'}}">
+                        <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
+                    </form>
+                    <form action="/dataedit/admin/columns/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}">
+                        <input type="hidden" name="action" value="deny">
+                        <input type="hidden" name="schema" value="{{ value.new|get_item:'c_schema'}}">
+                        <input type="hidden" name="table" value="{{ value.new|get_item:'c_table'}}">
+                        <button type="submit" value="deny" class="btn btn-danger">Deny</button>
+                    </form>
+                    </div>
+                    </div>
+                </li>
+            {% endfor%}
+        </ul>
+    {% endif %}
+    {% if not data.api_constraints|empty %}
+        <h4>Constraint Changes</h4>
+            <ul class="list-group">
+            {% for key, value in data.api_constraints.items%}
+                <li class="list-group-item" >
+                <table class="table">
+                    <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for k, v in value.items%}
+                        {% if k in display_items %}
+                        <tr>
+                            <th scope="row">{{ k }}</th>
+                            <td>{{ value|get_item:k }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div class="text-center">
+                <div class="btn-group" style="display: inline-flex">
+                    <form action="/dataedit/admin/constraints/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ value.id }}">
+                        <input type="hidden" name="action" value="apply">
+                        <input type="hidden" name="schema" value="{{ value.c_schema}}">
+                        <input type="hidden" name="table" value="{{ value.c_table}}">
+                        <button type="submit" value="apply" class="btn btn-success pull-left" style="margin-right: 20px">Apply</button>
+                    </form>
+                    <form action="/dataedit/admin/constraints/" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{ value.id }}">
+                        <input type="hidden" name="action" value="deny">
+                        <input type="hidden" name="schema" value="{{ value.c_schema}}">
+                        <input type="hidden" name="table" value="{{ value.c_table}}">
+                        <button type="submit" value="deny" class="btn btn-danger pull-right">Deny</button>
+                    </form>
+                </div>
+                </div>
+                </li>
+            {% endfor%}
+        </ul>
+
+    {% endif %}
+{% endblock %}

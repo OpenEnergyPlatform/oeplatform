@@ -9,6 +9,9 @@ DEBUG = True
 # Runs on localhost only
 URL = '127.0.0.1'
 
+# This token is the token the test user is identified with during API-tests
+token_test_user = '0'
+
 # Database to your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {

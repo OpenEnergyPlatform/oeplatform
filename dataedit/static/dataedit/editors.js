@@ -65,7 +65,7 @@ function buildCommentEditor(schema, table){
 
             query.where = [condition_query('_id', state)]
 
-          var request = $.ajax({type: 'POST', url:'/api/search', dataType:'json', data: {query: JSON.stringify(query)}})
+          var request = $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {query: JSON.stringify(query)}})
 
           var dfd = new $.Deferred();
           request.done(function(results) {
@@ -318,7 +318,7 @@ function get_field_query(field){
         column: field.id
     };
 
-    if (field.attributes.type.startsWith('geometry')) {
+    if (field.data_type.startsWith('geometry')) {
        // transform coordinates from whatever format they're in
        //   into epsg 4326, i.e. latitude and longitude
         column_query = {

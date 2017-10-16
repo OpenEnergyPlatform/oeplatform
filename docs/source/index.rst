@@ -52,6 +52,7 @@ the **api** app:
    :maxdepth: 2
 
    api
+   api/how_to
 
 
 App: modelview
