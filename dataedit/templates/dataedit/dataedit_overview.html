@@ -112,6 +112,7 @@
                       gridOptions: {
                         enableCellNavigation: true,
                         forceFitColumns: true
+                        fullWidthRows: true
                       }
                     }
                 });
@@ -119,18 +120,22 @@
                 grid.visible = true;
                 grid.render();
 
+                // add comment tooltip for columns
                 var columns = grid.grid.getColumns();
 
                 var fields = {{ comment_on_table.fields | safe }};
 
                 for (var i = 0; i < columns.length;i++)
+                {
                     for (var j = 0; j < fields.length; j++)
                     {
                         if (columns[i].name === fields[j].name)
                             columns[i].toolTip = fields[j].description;
                     }
+                }
 
                 grid.grid.setColumns(columns);
+                grid.render();
 
             {% elif current_view.type == "graph" %}
                 var graph = new recline.View.Graph({
@@ -146,6 +151,7 @@
                 graph.render();
                 graph.redraw();
             {% elif current_view.type == "map" %}
+
                 var map = new recline.View.Map({
                     model: dataset,
                     el: visualization_container,
@@ -160,6 +166,58 @@
                     }
                 });
                 map.render();
+
+                var geoJSON;
+
+                var left = map.map.getBounds().getEast();
+                var right = map.map.getBounds().getWest();
+                var top = map.map.getBounds().getNorth();
+                var bottom = map.map.getBounds().getSouth();
+
+                $.ajax({
+                    url: "/api/get_map_polygons",
+                    data:
+                        {
+                            'schema': '{{ schema }}',
+                            'table': '{{ table }}',
+                            'bounds': '{ "type": "Polygon", "coordinates":[[[' +
+                                      left  + ',' + top    + '],' +
+                                '[' + right + ',' + top    + '],' +
+                                '[' + right + ',' + bottom + '],' +
+                                '[' + left  + ',' + bottom + '],' +
+                                '[' + left  + ',' + top    + ']]] }'
+                        },
+                    success: function(result){
+                        geoJSON = L.geoJson(result["geom"]).addTo(map.map);
+                }});
+
+                // reload map data when view is moved via dragging
+                map.map.on('dragend', function onDragEnd(){
+
+                    left = map.map.getBounds().getEast();
+                    right = map.map.getBounds().getWest();
+                    top = map.map.getBounds().getNorth();
+                    bottom = map.map.getBounds().getSouth();
+
+                    $.ajax({
+                        url: "/api/get_map_polygons",
+                        data:
+                            {
+                                'schema': '{{ schema }}',
+                                'table': '{{ table }}',
+                                'bounds': '{ "type": "Polygon", "coordinates":[[[' +
+                                    left + ',' + top + '],' +
+                                    '[' + right + ',' + top + '],' +
+                                    '[' + right + ',' + bottom + '],' +
+                                    '[' + left + ',' + bottom + '],' +
+                                    '[' + left + ',' + top + ']]] }'
+                            },
+                        success: function(result){
+                            geoJSON.clearLayers();
+                            geoJSON = L.geoJson(result["geom"]).addTo(map.map);
+                    }});
+
+                });
             {% endif %}
         });
 

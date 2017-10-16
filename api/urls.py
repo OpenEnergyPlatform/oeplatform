@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^get_unique_constraints', views.create_ajax_handler(actions.get_unique_constraints)),
     url(r'^request_dump', views.create_ajax_handler(actions.get_unique_constraints)),
     url(r'^show_revisions', views.create_ajax_handler(actions.get_unique_constraints)),
+    url(r'^get_map_polygons', actions.get_map_polygons)
 ]

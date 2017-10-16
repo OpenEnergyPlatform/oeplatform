@@ -15,6 +15,8 @@ from sqlalchemy import func, MetaData, Table
 from datetime import datetime
 import oeplatform.securitysettings as sec
 
+from django.http import JsonResponse
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 _ENGINES = {}
 
@@ -662,3 +664,31 @@ def create_comment_table(schema, table, meta_schema=None):
                 table=get_comment_table_name(table))
     connection = engine.connect()
     connection.execute(query)
+
+
+def get_map_polygons(request):
+    content = request.POST if request.POST else request.GET
+    engine = _get_engine()
+    query = 'SELECT ST_AsGeoJSON(ST_Collect(ST_Transform(geom, 4326))) ' \
+            'FROM ( ' \
+            'SELECT * ' \
+            'FROM {schema}.{table} ' \
+            'WHERE ST_IsValid(geom) ' \
+            'AND ST_Intersects(ST_Transform(geom, 4326), ST_SetSRID(ST_GeomFromGeoJSON({bounds}), 4326)) ' \
+            'LIMIT 100 ' \
+            ') AS stuff'\
+        .format(schema = content["schema"],
+                table = content["table"],
+                bounds = "'" + content["bounds"] + "'")
+    connection = engine.connect()
+    result = connection.execute(query)
+
+    returnval = { 'success': True }
+
+    for row in result:
+        for col in row:
+            returnval["geom"] = json.loads(col)
+            break;
+        break
+
+    return JsonResponse(returnval)
