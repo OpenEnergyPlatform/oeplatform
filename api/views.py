@@ -532,7 +532,12 @@ class Rows(APIView):
 
         orderby = data.get('orderby')
         if orderby:
-            query = query.order_by(orderby)
+            if isinstance(orderby, list):
+                query = query.order_by(*map(parser.parse_expression, orderby))
+            elif isinstance(orderby, str):
+                query = query.order_by(orderby)
+            else:
+                raise APIError('Unknown order_by clause: ' + orderby)
 
         limit = data.get('limit')
         if limit and limit.isdigit():
