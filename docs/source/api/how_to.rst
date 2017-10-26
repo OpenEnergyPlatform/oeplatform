@@ -461,6 +461,38 @@ table. The permissions can be granted by an admin in the OEP web interface.
 
 For more advanced commands read :doc:`advanced`
 
+Handling Arrays
+***************
+
+The underlying OpenEnergy Database is a Postgres database. Thus, it supports
+Array-typed fields.
+
+.. doctest::
+
+    >>> import requests
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"arr", "data_type": "int[]"},{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    <Response [201]>
+
+.. doctest::arrays
+
+    >>> import requests
+    >>> data = {"query": {"arr": [1,2,3]}}
+    >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    >>> result.status_code
+    201
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1')
+    >>> json_result = result.json()
+    >>> json_result['arr']
+    [1, 2, 3]
+
+.. testcleanup::arrays
+
+    >>> import requests
+    >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    <Response [200]>
+
+
 .. testcleanup::
 
     from api.actions import _get_engine
