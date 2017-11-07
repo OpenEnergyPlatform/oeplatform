@@ -1474,7 +1474,12 @@ def close_cursor(request, context):
 
 def fetchone(request, context):
     cursor = _load_cursor(context['cursor_id'])
-    return cursor.fetchone()
+    row = cursor.fetchone()
+    if row:
+        row = [__translate_fetched_cell(cell) for cell in row]
+        return row
+    else:
+        return row
 
 
 def fetchall(request, context):
