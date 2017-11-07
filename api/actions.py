@@ -1456,7 +1456,7 @@ def open_cursor(request, context):
 
 def _load_cursor(cursor_id):
     try:
-        return __CURSORS[cursor_id]
+        return __CURSORS[int(cursor_id)]
     except KeyError:
         raise ResponsiveException("Cursor (%s) not found" % cursor_id)
 
