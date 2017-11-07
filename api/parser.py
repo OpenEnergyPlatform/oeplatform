@@ -202,6 +202,8 @@ def parse_from_item(d):
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
         d = {'type': 'table', 'table': d}
+    if isinstance(d, list):
+        return [parse_from_item(f) for f in d]
     dtype = get_or_403(d, 'type')
     if dtype == 'table':
         schema_name = read_pgid(d['schema']) if 'schema' in d else None
