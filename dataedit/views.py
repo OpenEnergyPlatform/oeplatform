@@ -248,7 +248,7 @@ def get_readable_table_names(schema):
     conn = engine.connect()
     try:
         res = conn.execute(
-            'SELECT table_name as TABLE, obj_description(((\'{table_schema}.\' || table_name ))::regclass) as COMMENT ' \
+            'SELECT table_name as TABLE, obj_description(((\'"{table_schema}"."\' || table_name || \'"\' ))::regclass) as COMMENT ' \
             'FROM information_schema.tables where table_schema=\'{table_schema}\';'.format(
                 table_schema=schema))
     except Exception as e:

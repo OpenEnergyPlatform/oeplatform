@@ -26,6 +26,19 @@ import sqlalchemy as sqla
 import geoalchemy2  # Although this import seems unused is has to be here
 
 
+def cors(allow):
+    def doublewrapper(f):
+        def wrapper(*args, **kwargs):
+            response = f(*args, **kwargs)
+            if allow:
+                response['Access-Control-Allow-Origin'] = '*'
+                response["Access-Control-Allow-Methods"] = 'POST'
+                response["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
+        return wrapper
+    return doublewrapper
+
+
 def api_exception(f):
     def wrapper(*args, **kwargs):
         try:
@@ -559,7 +572,7 @@ def date_handler(obj):
 # Create your views here.
 
 
-def create_ajax_handler(func):
+def create_ajax_handler(func, allow_cors=False):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
@@ -568,13 +581,20 @@ def create_ajax_handler(func):
     """
     class AJAX_View(APIView):
 
+        @cors(allow_cors)
+        @api_exception
+        def options(self, request, *args, **kwargs):
+            response = HttpResponse()
 
-        def get(self, request):
-            return JsonResponse(self.execute(request))
+            return response
 
+        @cors(allow_cors)
         @api_exception
         def post(self, request):
-            return JsonResponse(self.execute(request))
+            response = JsonResponse(self.execute(request))
+            if allow_cors and request.user.is_anonymous:
+                response['Access-Control-Allow-Origin'] = '*'
+            return response
 
         @actions.load_cursor
         def execute(self, request):
