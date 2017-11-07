@@ -278,8 +278,6 @@ def parse_condition(dl):
 
 def parse_operator(d):
     query = parse_sqla_operator(get_or_403(d, 'operator'), *list(map(parse_expression, get_or_403(d, 'operands'))))
-    if 'as' in d:
-        query = query.label(d['as'])
     return query
 
 def parse_modifier(d):
@@ -468,6 +466,8 @@ def parse_sqla_operator(key, *operands):
             return x <= y
         if key in ['NOTLOWER', '>=']:
             return x >= y
+        if key in ['as']:
+            return x.label(y)
 
 
     raise APIError("Operator %s not supported"%key)
