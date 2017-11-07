@@ -294,7 +294,10 @@ def parse_function(d):
     if isinstance(operand_struc, list):
         operands = list(map(parse_expression, operand_struc))
     else:
-        operands = [parse_expression(operand_struc)]
+        if isinstance(operand_struc, dict) and operand_struc.get('type',None) == 'grouping':
+            operands = parse_expression(operand_struc)
+        else:
+            operands = [parse_expression(operand_struc)]
 
     if fname == '+':
         if len(operands) != 2:
