@@ -174,13 +174,13 @@ def parse_select(d):
             query = query.order_by(expr)
 
     if 'limit' in d:
-        if isinstance(d['limit'], int) or d['limit'].is_digit():
+        if isinstance(d['limit'], int) or d['limit'].isdigit():
             query = query.limit(int(d['limit']))
         else:
             raise APIError('Invalid LIMIT: Expected a digit')
 
     if 'offset' in d:
-        if isinstance(d['offset'], int) or d['offset'].is_digit():
+        if isinstance(d['offset'], int) or d['offset'].isdigit():
             query = query.offset(int(d['offset']))
         else:
             raise APIError('Invalid LIMIT: Expected a digit')
