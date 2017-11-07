@@ -1443,7 +1443,7 @@ def close_raw_connection(request, context):
 
 
 def open_cursor(request, context):
-    connection_id = context['connection_id']
+    connection_id = request['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
