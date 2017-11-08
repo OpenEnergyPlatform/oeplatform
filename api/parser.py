@@ -215,7 +215,7 @@ def parse_from_item(d):
         exists = engine.dialect.has_table(conn, item.name, item.schema)
         conn.close()
         if not exists:
-            raise APIError('Table not found: ' + str(item))
+            raise APIError('Table not found: ' + str(item), status=400)
     elif dtype == 'select':
         item = parse_select(d['query'])
     elif dtype == 'join':
