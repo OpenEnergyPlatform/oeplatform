@@ -443,33 +443,34 @@ sql_operators = {'EQUALS': '=',
 def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
 
-def parse_sqla_operator(key, *operands):
+def parse_sqla_operator(raw_key, *operands):
+    key = raw_key.lower().strip()
     if not operands:
         raise APIError('Missing arguments for \'%s\'.' % (key))
-    if key in ['AND']:
+    if key in ['and']:
         query = and_(*operands)
         return query
-    elif key in ['OR']:
+    elif key in ['or']:
         query = or_(*operands)
         return query
-    elif key in ['NOT']:
+    elif key in ['not']:
         x = operands[0]
         return parse_condition(x)._not()
     else:
         if len(operands) != 2:
             raise APIError('Wrong number of arguments for \'%s\'. Expected: 2 Got: %s'%(key, len(operands)))
         x, y = operands
-        if key in ['EQUALS','=']:
+        if key in ['equals','=']:
             return x == y
-        if key in ['GREATER', '>']:
+        if key in ['greater', '>']:
             return x > y
-        if key in ['LOWER', '<']:
+        if key in ['lower', '<']:
             return x < y
-        if key in ['NOTEQUAL', '<>', '!=']:
+        if key in ['notequal', '<>', '!=']:
             return x != y
-        if key in ['NOTGREATER', '<=']:
+        if key in ['notgreater', '<=']:
             return x <= y
-        if key in ['NOTLOWER', '>=']:
+        if key in ['notlower', '>=']:
             return x >= y
         if key in ['as']:
             return x.label(y)
