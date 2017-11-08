@@ -1462,7 +1462,7 @@ def _load_cursor(cursor_id):
 
 
 def close_cursor(request, context):
-    cursor_id = context['cursor_id']
+    cursor_id = int(context['cursor_id'])
     if cursor_id in __CURSORS:
         cursor = __CURSORS[cursor_id]
         del __CURSORS[cursor_id]
