@@ -83,8 +83,8 @@ def parse_insert(d, context, message=None):
 
     field_strings = []
     for field in d.get('fields', []):
-        assert ('type' in field and field['type'] == 'column'), 'Only pure column expressions are allowed in insert'
-
+        if not ((isinstance(field, dict) and 'type' in field and field['type'] == 'column') or isinstance(field, str)):
+            raise APIError('Only pure column expressions are allowed in insert')
         field_strings.append(parse_expression(field))
 
     query = table.insert()
@@ -100,7 +100,7 @@ def parse_insert(d, context, message=None):
             values = get_or_403(d, 'values')
 
         def clear_meta(vals):
-            val_dict = vals
+            val_dict = dict(vals)
             # make sure meta fields are not compromised
             if context['user'].is_anonymous:
                 username = 'Anonymous'
