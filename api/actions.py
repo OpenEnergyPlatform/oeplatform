@@ -618,8 +618,8 @@ def table_create(schema, table, columns, constraints):
     if not id_columns:
         raise APIError('Your table must have one column "id" of type "bigserial"')
     cid = id_columns[0]
-    if not get_or_403(cid, 'data_type').lower() == 'bigserial':
-        raise APIError('Your column "id" must have type "bigserial"')
+    #if not get_or_403(cid, 'data_type').lower() == 'bigserial':
+    #    raise APIError('Your column "id" must have type "bigserial"')
     str_list = []
     str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
@@ -963,6 +963,8 @@ def data_insert(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = get_or_403(request, 'schema')
 
+    schema, table = get_table_name(orig_schema, orig_table)
+
     request['table'] = get_insert_table_name(orig_schema,
                                              orig_table)
     if not orig_schema.startswith('_'):
@@ -977,6 +979,9 @@ def data_insert(request, context=None):
         response['description'] = [[col.name, col.type_code, col.display_size,
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
+
+    apply_changes(schema, table)
+
     return response
 
 
