@@ -57,7 +57,6 @@ def load_cursor(f):
             cursor = connection.connection.cursor()
             cursor_id = cursor.__hash__()
             __CURSORS[cursor_id] = cursor
-
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
@@ -74,8 +73,8 @@ def load_cursor(f):
                     result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
         finally:
             if fetch_all:
-                close_cursor({}, {'cursor_id': cursor_id})
                 connection.connection.commit()
+                close_cursor({}, {'cursor_id': cursor_id})
                 connection.close()
 
         return result
@@ -794,18 +793,17 @@ def _get_table(schema, table):
 
 def __internal_select(query, context):
     engine = _get_engine()
-    conn = engine.connect()
+    context2 = open_raw_connection({}, {})
     try:
-        cursor = conn.connection.cursor()
-        cursor_id = cursor.__hash__()
-        __CURSORS[cursor_id] = cursor
-        context2 = dict(context)
-        context2['cursor_id'] = cursor_id
-        rows = data_search(query, context2)
-        rows['data'] = [x for x in cursor.fetchall()]
-        cursor.close()
+        context2.update(open_cursor(context2, {}))
+        try:
+            rows = data_search(query, context2)
+            cursor = __CURSORS[context2['cursor_id']]
+            rows['data'] = [x for x in cursor.fetchall()]
+        finally:
+            close_cursor({}, context2)
     finally:
-        conn.close()
+        close_raw_connection(context2, {})
     return rows
 
 
@@ -1464,6 +1462,7 @@ def open_cursor(request, context):
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
         cursor_id = cursor.__hash__()
+        print('Open cursor via request:', cursor_id)
         __CURSORS[cursor_id] = cursor
         return {'cursor_id': cursor_id}
     else:
@@ -1479,10 +1478,12 @@ def _load_cursor(cursor_id):
 
 def close_cursor(request, context):
     cursor_id = int(context['cursor_id'])
+    print('Close cursor(%d)'%cursor_id)
     if cursor_id in __CURSORS:
         cursor = __CURSORS[cursor_id]
         del __CURSORS[cursor_id]
         cursor.close()
+        print('Remaining cursors: ', __CURSORS)
         return {'cursor_id': cursor_id}
     else:
         return _response_error("Cursor (%s) not found" % cursor_id)
