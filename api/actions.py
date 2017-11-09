@@ -797,7 +797,7 @@ def __internal_select(query, context):
     conn = engine.connect()
     try:
         cursor = conn.connection.cursor()
-        cursor_id = cursor.__hash__
+        cursor_id = cursor.__hash__()
         __CURSORS[cursor_id] = cursor
         context2 = dict(context)
         context2['cursor_id'] = cursor_id
@@ -816,8 +816,11 @@ def __change_rows(request, context, target_table, setter, fields=None):
             'schema': request['schema'],
             'table': request['table']
         },
-        'where': request['where']
     }
+
+    if 'where' in request:
+        query['where'] = request['where']
+
     if fields:
         query['fields'] = [{'type': 'column',
                              'column': f} for f in fields]
