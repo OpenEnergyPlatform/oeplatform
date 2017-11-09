@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
 
     url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True)),
+    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert, allow_cors=True)),
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),
     url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update)),
     url(r'^v0/advanced/has_schema', views.create_ajax_handler(actions.has_schema)),
