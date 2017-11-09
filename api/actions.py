@@ -24,6 +24,9 @@ from api.connection import _get_engine
 from sqlalchemy import exc
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
+from random import randrange
+
+import sys
 
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
@@ -36,6 +39,7 @@ def get_table_name(schema, table, restrict_schemas=True):
         if schema not in ['model_draft', 'sandbox', 'test']:
             raise PermissionDenied
     return schema, table
+
 
 __CONNECTIONS = {}
 __CURSORS = {}
@@ -53,19 +57,18 @@ def load_cursor(f):
         fetch_all = 'cursor_id' not in args[1].data
         if fetch_all:
             engine = _get_engine()
-            connection = engine.connect()
-            cursor = connection.connection.cursor()
-            cursor_id = cursor.__hash__()
-            __CURSORS[cursor_id] = cursor
+            context = open_raw_connection({}, {})
+            context.update(open_cursor(context, {}))
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
             args[1]._full_data = dict(args[1].data)
-            args[1].data['cursor_id'] = cursor_id
+            args[1].data['cursor_id'] = context['cursor_id']
         try:
             result = f(*args, **kwargs)
 
             if fetch_all:
+                cursor = __CURSORS[context['cursor_id']]
                 if not result:
                     result = {}
                 if cursor.description:
@@ -73,10 +76,8 @@ def load_cursor(f):
                     result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
         finally:
             if fetch_all:
-                connection.connection.commit()
-                close_cursor({}, {'cursor_id': cursor_id})
-                connection.close()
-
+                close_cursor({}, context)
+                close_raw_connection(context, {})
         return result
     return wrapper
 
@@ -1432,9 +1433,7 @@ def _get_default_schema_name(self, connection):
 def open_raw_connection(request, context):
     engine = _get_engine()
     connection = engine.connect().connection
-    connection_id = connection.__hash__()
-    if connection_id not in __CONNECTIONS:
-        __CONNECTIONS[connection_id]=connection
+    connection_id = __add_entry(connection, __CONNECTIONS)
     return {'connection_id': connection_id}
 
 def commit_raw_connection(request, context):
@@ -1450,10 +1449,20 @@ def close_raw_connection(request, context):
     connection_id = request['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
+        parent = connection.connection
         connection.close()
+        del __CONNECTIONS[connection_id]
         return __response_success()
     else:
         return _response_error("Connection (%s) not found" % connection_id)
+
+
+def __add_entry(value, dictionary):
+    key = randrange(0, sys.maxsize)
+    while key in dictionary:
+        key = randrange(0, sys.maxsize)
+    dictionary[key] = value
+    return key
 
 
 def open_cursor(request, context):
@@ -1461,9 +1470,8 @@ def open_cursor(request, context):
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
-        cursor_id = cursor.__hash__()
+        cursor_id = __add_entry(cursor, __CURSORS)
         print('Open cursor via request:', cursor_id)
-        __CURSORS[cursor_id] = cursor
         return {'cursor_id': cursor_id}
     else:
         return _response_error("Connection (%s) not found" % connection_id)
