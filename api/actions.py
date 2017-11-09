@@ -1436,6 +1436,14 @@ def open_raw_connection(request, context):
         __CONNECTIONS[connection_id]=connection
     return {'connection_id': connection_id}
 
+def commit_raw_connection(request, context):
+    connection_id = request['connection_id']
+    if connection_id in __CONNECTIONS:
+        connection = __CONNECTIONS[connection_id]
+        connection.commit()
+        return __response_success()
+    else:
+        return _response_error("Connection (%s) not found" % connection_id)
 
 def close_raw_connection(request, context):
     connection_id = request['connection_id']

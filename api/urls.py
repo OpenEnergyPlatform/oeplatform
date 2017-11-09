@@ -35,6 +35,8 @@ urlpatterns = [
 
     url(r'^v0/advanced/connection/open', views.create_ajax_handler(actions.open_raw_connection)),
     url(r'^v0/advanced/connection/close', views.create_ajax_handler(actions.close_raw_connection)),
+    url(r'^v0/advanced/connection/commit', views.create_ajax_handler(actions.commit_raw_connection)),
+
     url(r'^v0/advanced/cursor/open', views.create_ajax_handler(actions.open_cursor)),
     url(r'^v0/advanced/cursor/close', views.create_ajax_handler(actions.close_cursor)),
     url(r'^v0/advanced/cursor/fetch_one', views.create_ajax_handler(actions.fetchone)),
