@@ -26,6 +26,19 @@ import sqlalchemy as sqla
 import geoalchemy2  # Although this import seems unused is has to be here
 
 
+def cors(allow):
+    def doublewrapper(f):
+        def wrapper(*args, **kwargs):
+            response = f(*args, **kwargs)
+            if allow:
+                response['Access-Control-Allow-Origin'] = '*'
+                response["Access-Control-Allow-Methods"] = 'POST'
+                response["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
+        return wrapper
+    return doublewrapper
+
+
 def api_exception(f):
     def wrapper(*args, **kwargs):
         try:
@@ -563,6 +576,14 @@ def create_ajax_handler(func, allow_cors=False):
     """
     class AJAX_View(APIView):
 
+        @cors(allow_cors)
+        @api_exception
+        def options(self, request, *args, **kwargs):
+            response = HttpResponse()
+
+            return response
+
+        @cors(allow_cors)
         @api_exception
         def post(self, request):
             response = JsonResponse(self.execute(request))
