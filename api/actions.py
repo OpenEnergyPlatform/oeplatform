@@ -826,7 +826,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
     user = context['user'].name
 
-    rows = __internal_select(query, context)
+    rows = __internal_select(query, dict(context))
 
     message = request.get('message', None)
     meta_fields = list(api.parser.set_meta_info('update', user, message).items())
@@ -1445,6 +1445,15 @@ def commit_raw_connection(request, context):
     else:
         return _response_error("Connection (%s) not found" % connection_id)
 
+def rollback_raw_connection(request, context):
+    connection_id = request['connection_id']
+    if connection_id in __CONNECTIONS:
+        connection = __CONNECTIONS[connection_id]
+        connection.rollback()
+        return __response_success()
+    else:
+        return _response_error("Connection (%s) not found" % connection_id)
+
 def close_raw_connection(request, context):
     connection_id = request['connection_id']
     if connection_id in __CONNECTIONS:
@@ -1679,6 +1688,7 @@ def apply_changes(schema, table):
             elif change['_type'] == 'delete':
                 apply_deletion(session, table_obj, change)
     except Exception as e:
+        session.rollback()
         raise e
     else:
         session.commit()
