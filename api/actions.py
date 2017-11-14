@@ -73,6 +73,7 @@ def load_cursor(f):
                     result = {}
                 if cursor.description:
                     result['description'] = cursor.description
+                    result['rowcount'] = cursor.rowcount
                     result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
         finally:
             if fetch_all:
@@ -864,7 +865,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
         insert_table = _get_table(meta_schema, target_table)
         query = insert_table.insert(values=inserts)
         _execute_sqla(query, cursor)
-    return {'affected':len(rows['data'])}
+    return {'rowcount': rows['rowcount'], 'description': rows['description']}
 
 
 def data_delete(request, context=None):
@@ -981,7 +982,7 @@ def data_insert(request, context=None):
         response['description'] = [[col.name, col.type_code, col.display_size,
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
-
+    response['rowcount'] = cursor.rowcount
     apply_changes(schema, table)
 
     return response
@@ -1072,7 +1073,7 @@ def data_search(request, context=None):
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
                                  col.null_ok] for col in cursor.description]
-    result = {'description': description}
+    result = {'description': description, 'rowcount': cursor.rowcount}
     return result
 
 
