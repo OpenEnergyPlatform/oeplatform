@@ -69,6 +69,23 @@ class Test271(APITestCase):
 
         self.assertListEqual(json_resp['data'], [['Hans']])
 
+    def test_271_column_does_not_exist(self):
+        data = {"query": {"fields": ['does_not_exist'],
+                          "from": {'type': 'table',
+                                   'table': self.test_table,
+                                   'schema': self.test_schema}}}
+        resp = self.__class__.client.post('/api/v0/advanced/search',
+                                          data=json.dumps(data),
+                                          HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+                                          content_type='application/json')
+
+        self.assertEqual(resp.status_code, 400,
+                         resp.json().get('reason', 'No reason returned'))
+
+        json_resp = resp.json()
+
+        self.assertEqual(json_resp['reason'], 'column "does_not_exist" does not exist')
+
     def tearDown(self):
         resp = self.__class__.client.delete(
             '/api/v0/schema/{schema}/tables/{table}/'.format(

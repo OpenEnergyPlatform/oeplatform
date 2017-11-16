@@ -1001,9 +1001,15 @@ def _execute_sqla(query, cursor):
         else:
             raise e
     except psycopg2.ProgrammingError as e:
-        if re.match(r'^function (?P<function>.*) does not exist$', repr(e)):
+        if e.pgcode in [
+            '42703',    # undefined_column
+            '42883',    # undefined_function
+            '42P01',    # undefined_table
+            '42P02',    # undefined_parameter
+            '42704',    # undefined_object
+        ]:
             # Return only `function does not exists` errors
-            raise APIError(repr(e))
+            raise APIError(e.diag.message_primary)
         else:
             raise e
     except psycopg2.DatabaseError as e:

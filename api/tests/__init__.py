@@ -56,3 +56,74 @@ class APITestCase(TestCase):
                 covalue = d2[key]
                 self.assertEqual(value, covalue,
                                  "Key '{key}' does not match.".format(key=key))
+
+    def create_table(self, structure, data=None, schema=None, table=None):
+
+        if not schema:
+            schema = self.test_schema
+        if not table:
+            table = self.test_table
+
+        resp = self.__class__.client.put(
+            '/api/v0/schema/{schema}/tables/{table}/'.format(
+                schema=schema, table=table),
+            data=json.dumps({'query': structure}),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(resp.status_code, 201,
+                         resp.json().get('reason', 'No reason returned'))
+
+        if data:
+            resp = self.__class__.client.post(
+                '/api/v0/schema/{schema}/tables/{table}/rows/new'.format(
+                    schema=self.test_schema, table=self.test_table),
+                data=json.dumps({'query': data}),
+                HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+                content_type='application/json')
+
+            self.assertEqual(resp.status_code, 201,
+                             resp.json().get('reason', 'No reason returned'))
+
+    def check_api_send(self, request, url, data=None, expected_result=None):
+
+        params = dict(HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+                      content_type='application/json')
+        if data:
+            params['data'] = json.dumps(data)
+
+
+        resp = request(url,**params)
+
+
+        self.assertEqual(resp.status_code, 200,
+                         resp.json().get('reason', 'No reason returned') if isinstance(resp.json(), dict) else resp.json())
+
+        json_resp = resp.json()
+
+        if json_resp is dict:
+            self.assertTrue('data' in json_resp, '%s does not contain a "data"-entry'%str(json_resp))
+            json_resp = json_resp['data']
+
+        self.assertListEqual(json_resp, expected_result)
+
+    def check_api_post(self, *args, **kwargs):
+        self.check_api_send(self.__class__.client.post, *args, **kwargs)
+
+    def check_api_get(self, *args, **kwargs):
+        self.check_api_send(self.__class__.client.get, *args, **kwargs)
+
+    def drop_table(self, schema=None, table=None):
+        if not schema:
+            schema = self.test_schema
+        if not table:
+            table = self.test_table
+
+        resp = self.__class__.client.delete(
+            '/api/v0/schema/{schema}/tables/{table}/'.format(
+                schema=self.test_schema, table=self.test_table),
+            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
+            content_type='application/json')
+
+        self.assertEqual(resp.status_code, 200,
+                         resp.json().get('reason', 'No reason returned'))
