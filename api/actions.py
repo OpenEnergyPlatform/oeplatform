@@ -1001,7 +1001,8 @@ def _execute_sqla(query, cursor):
         else:
             raise e
     except psycopg2.ProgrammingError as e:
-        if re.match(r'^function (?P<function>.*) does not exist$', repr(e)):
+        if re.match(r'^function (?P<function>.*) does not exist$', repr(e)) \
+           or re.match(r'^column ".*" does not exist$', repr(e)):
             # Return only `function does not exists` errors
             raise APIError(repr(e))
         else:
