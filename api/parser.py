@@ -145,7 +145,9 @@ def parse_select(d):
 
     # [ WHERE condition ]
     if d.get('where', False):
-        query = query.where(parse_condition(d['where']))
+        where = d['where']
+        if where:
+            query = query.where(parse_condition(where))
 
     if 'group_by' in d:
         query = query.group_by([parse_expression(f) for f in d['group_by']])
