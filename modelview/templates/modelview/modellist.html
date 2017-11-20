@@ -1,5 +1,11 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
+
+{% block after-header %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
 {% block content-right %}
     {% if label == 'Model' %}
 
@@ -21,10 +27,62 @@
 
 {% endif %}
 
-<div class="list-group">
-{% for id, name in models %}
-    <a class="list-group-item" href="{{id}}">{{ name }}</a>
-{% endfor %}
-</div>
+
+<table id="overview" class="display">
+    <thead>
+        <tr>
+             <th>Name</th>
+             <th>License</th>
+             <th>Programming Language</th>
+             <th>Time Resolution (1 min)</th>
+             <th>Time Resolution (15 min)</th>
+             <th>Time Resolution (1 hour)</th>
+             <th>Time Resolution (1 year></th>
+             <th>Energy Sectors (Electricity)</th>
+             <th>Energy Sectors (Heat)</th>
+             <th>Energy Sectors (Liquid Fuels)</th>
+             <th>Energy Sectors (Gas)</th>
+             <th>Energy Sectors (Other)</th>
+             <th>Geographical Coverage</th>
+             <th>Purpose</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for model in models %}
+            <tr>
+                <td><a href="{{model.id}}">{{model.model_name}}</a></td>
+                <td>{{model.license}}</td>
+                <td><ul>{% for lang in model.modelling_software %} <li>{{lang}}</li> {%endfor%}</ul></td>
+                {% for sec in model.time_resolution %}
+                    {% if sec %}
+                        <td><span class="glyphicon glyphicon-ok"></span>Yes</td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-remove"></span>No</td>
+                    {% endif %}
+                {% endfor %}
+                {% for sec in model.energy_sectors %}
+                    {% if sec %}
+                        <td><span class="glyphicon glyphicon-ok"></span>Yes</td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-remove"></span>No</td>
+                    {% endif %}
+                {% endfor %}
+                {% if model.energy_sectors_others %}
+                    <td>{{ model.energy_sectors_others_text }}</td>
+                {% else %}
+                    <td><span class="glyphicon glyphicon-remove"></span>No</td>
+                {% endif %}
+                <td><ul>{% for cov in model.geographical_coverage %} <li>{{cov}}</li> {%endfor%}</ul></td>
+                <td>{{model.primary_purpose}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    $(document).ready( function () {
+    $('#overview').DataTable();
+} );
+</script>
 <br><a class="btn btn-info" href="add">New</a>
 {% endblock %}

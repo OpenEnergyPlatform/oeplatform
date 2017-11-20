@@ -59,7 +59,11 @@ class Energymodel(BasicFactsheet):
     energy_sectors_gas = BooleanField(default=False,verbose_name='gas') 
     energy_sectors_others = BooleanField(default=False,verbose_name='others')
     energy_sectors_others_text = CharField(max_length=200,null=True)
-     
+
+    def energy_sectors(self):
+        return [self.energy_sectors_electricity, self.energy_sectors_heat,
+                 self.energy_sectors_liquid_fuels, self.energy_sectors_gas]
+
     demand_sectors_households = BooleanField(default=False,verbose_name='Households') 
     demand_sectors_industry = BooleanField(default=False,verbose_name='Industry') 
     demand_sectors_commercial_sector = BooleanField(default=False,verbose_name='Commercial sector') 
@@ -148,6 +152,13 @@ class Energymodel(BasicFactsheet):
     geo_resolution_others_text = CharField(max_length=200,null=True)
 
     comment_on_geo_resolution = TextField(verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
+
+    @property
+    def time_resolution(self):
+        return [self.time_resolution_1_min, self.time_resolution_15_min,
+                self.time_resolution_hour, self.time_resolution_anual]
+
+
 
     time_resolution_anual = BooleanField(default=False,verbose_name='anual') 
     time_resolution_hour = BooleanField(default=False,verbose_name='hour') 

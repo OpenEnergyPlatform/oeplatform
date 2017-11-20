@@ -58,7 +58,7 @@ def listsheets(request,sheettype):
     elif sheettype == "studie":
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
-        models = [(m.pk, m.model_name) for m in c.objects.all()]
+        models = c.objects.all()
     if sheettype == 'scenario':
         label='Scenario'
     elif sheettype == 'studie':
