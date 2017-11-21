@@ -3,7 +3,7 @@
 {% bootstrap_javascript_url %}
 {% load staticfiles %}
 {% load modelview_extras %}
-
+{% load dataedit.taghandler %}
 {% block content %}
 <script type="text/javascript">
     <!--
@@ -17,6 +17,9 @@
 <div class="container">
     <div style="float: left;">
         <h1> {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+        {% for t in model.tags %}
+            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
+        {% endfor %}
     </div>
     <div>
         <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>

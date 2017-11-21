@@ -52,6 +52,15 @@ def getClasses(sheettype):
 def overview(request):
     return render(request, "modelview/overview.html",)
 
+def load_tags():
+    engine = _get_engine()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    tags = list(session.query(Tag))
+    d = {tag.id: tag for tag in tags}
+    session.close()
+    return d
+
 def listsheets(request,sheettype):
     """
     Lists all available model, framework or scenario factsheet objects.
@@ -63,12 +72,7 @@ def listsheets(request,sheettype):
     elif sheettype == "studie":
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
-        engine = _get_engine()
-        Session = sessionmaker(bind=engine)
-        session = Session()
-        tags = list(session.query(Tag))
-        d = {tag.id:tag for tag in tags}
-        session.close()
+        d = load_tags()
         models = []
         for model in c.objects.all():
             model.tags = [d[tag_id] for tag_id in model.tags]
@@ -93,6 +97,10 @@ def show(request, sheettype, model_name):
     if sheettype == "scenario":
         c_study,_ = getClasses("studie")
         model_study = get_object_or_404(c_study, pk=model.study.pk)
+    else:
+        d = load_tags()
+        model.tags = [{'id': d[tag_id].id, 'name': d[tag_id].name, 'color': "#" + format(d[tag_id].color, '06X')} for tag_id in model.tags]
+
     user_agent = {'user-agent': 'oeplatform'}
     http = urllib3.PoolManager(headers=user_agent)
     org = None
@@ -109,6 +117,24 @@ def show(request, sheettype, model_name):
                 repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'model_study':model_study,'gh_org':org,'gh_repo':repo})
     
+
+def set_tags(request, sheettype, model_name, ):
+    """
+    Loads the requested factsheet
+    """
+    c,_ = getClasses(sheettype)
+    model = get_object_or_404(c, pk=model_name)
+
+    ids = {int(field[len('tag_'):]) for field in request.POST if
+           field.startswith('tag_')}
+
+    if sheettype == "scenario":
+        raise NotImplementedError
+    else:
+        model.tags = sorted(list(ids))
+        model.save()
+
+    return redirect(request.META['HTTP_REFERER'])
 
 def processPost(post, c, f, files=None, pk=None, key=None):
     """
@@ -145,9 +171,17 @@ def editModel(request,model_name, sheettype):
     c,f = getClasses(sheettype) 
         
     model = get_object_or_404(c, pk=model_name)
+
+    tags = []
+    if sheettype == "scenario":
+        pass
+    else:
+        d = load_tags()
+        tags = [{'id': d[tag_id].id, 'name': d[tag_id].name, 'color': "#" + format(d[tag_id].color, '06X')} for tag_id in model.tags]
+
     form = f(instance=model)
     
-    return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update'}) 
+    return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':model_name, 'method':'update', 'tags': tags})
 
 class FSAdd(LoginRequiredMixin, View):
     def get(self,request, sheettype, method='add'):
