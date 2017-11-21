@@ -4,6 +4,8 @@ from django.db.models import fields
 from django.db import models
 import django.forms as forms
 from oeplatform import settings
+from dataedit.structures import Tag
+from api.actions import _get_engine
 from django.contrib.staticfiles.templatetags.staticfiles import static
 # Create your views here.
 import matplotlib.pyplot as plt
@@ -25,7 +27,9 @@ from django.contrib.postgres.fields import ArrayField
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
+from sqlalchemy.orm import sessionmaker
 
+from sqlalchemy.dialects.postgresql import array_agg
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
@@ -53,12 +57,22 @@ def listsheets(request,sheettype):
     Lists all available model, framework or scenario factsheet objects.
     """
     c,_ = getClasses(sheettype)
+    tags = []
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
     elif sheettype == "studie":
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
-        models = c.objects.all()
+        engine = _get_engine()
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        tags = list(session.query(Tag))
+        d = {tag.id:tag for tag in tags}
+        session.close()
+        models = []
+        for model in c.objects.all():
+            model.tags = [d[tag_id] for tag_id in model.tags]
+            models.append(model)
     if sheettype == 'scenario':
         label='Scenario'
     elif sheettype == 'studie':
@@ -67,7 +81,7 @@ def listsheets(request,sheettype):
         label='Framework'
     else:
         label='Model'
-    return render(request, "modelview/modellist.html", {'models':models, 'label':label})
+    return render(request, "modelview/modellist.html", {'models':models, 'label':label, 'tags':tags})
 
 def show(request, sheettype, model_name):
     """

@@ -51,6 +51,7 @@ class BasicFactsheet(models.Model):
     references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='References to reports produced using the model', help_text='Which studies have been calculated with this model?', null=True) 
     larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used on a larger scale? If so, who uses it?', null=True) 
 
+    tags = ArrayField(IntegerField(),default=list)
 
 class Energymodel(BasicFactsheet):
     energy_sectors_electricity = BooleanField(default=False,verbose_name='electricity') 
