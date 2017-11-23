@@ -16,3 +16,4 @@ djangoajax
 webcolors
 djangorestframework
 django-axes
+alembic
