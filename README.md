@@ -42,7 +42,11 @@ Make sure that both databases has the following extensions installed:
 Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
-  
+
+And create all tables that are needed in the second database:
+
+    python manage.py alembic upgrade head
+
 Finally, you can run your local copy of this platform:
 
     python manage.py runserver
