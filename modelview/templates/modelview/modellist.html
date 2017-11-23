@@ -50,7 +50,7 @@
     <tbody>
         {% for model in models %}
             <tr>
-                <td><a href="{{model.id}}">{{model.model_name}}</a></td>
+                <td><a href="{{model.id}}">{{model.model_name}}</a> {% include 'dataedit/tagged_field.html' with label='' tags=model.tags %}</td>
                 <td>{{model.license}}</td>
                 <td><ul>{% for lang in model.modelling_software %} <li>{{lang}}</li> {%endfor%}</ul></td>
                 {% for sec in model.time_resolution %}

@@ -18,7 +18,7 @@
     <div style="float: left;">
         <h1> {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
         {% for t in model.tags %}
-            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
+            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
         {% endfor %}
     </div>
     <div>

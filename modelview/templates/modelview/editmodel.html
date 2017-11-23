@@ -1,8 +1,19 @@
 {% extends "base/base.html" %}
 {% load modelview_extras %}
 {% block content %}
-
+{% load bootstrap3 %}
 {% load staticfiles %}
+
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
 
 <script type="text/javascript">
     $(document).ready(function(){

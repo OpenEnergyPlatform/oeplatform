@@ -57,7 +57,7 @@ def load_tags():
     Session = sessionmaker(bind=engine)
     session = Session()
     tags = list(session.query(Tag))
-    d = {tag.id: tag for tag in tags}
+    d = {tag.id: {'id': tag.id, 'name': tag.name, 'color': "#" + format(tag.color, '06X')} for tag in tags}
     session.close()
     return d
 
@@ -73,6 +73,7 @@ def listsheets(request,sheettype):
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
         d = load_tags()
+        tags = d.values()
         models = []
         for model in c.objects.all():
             model.tags = [d[tag_id] for tag_id in model.tags]
@@ -99,7 +100,7 @@ def show(request, sheettype, model_name):
         model_study = get_object_or_404(c_study, pk=model.study.pk)
     else:
         d = load_tags()
-        model.tags = [{'id': d[tag_id].id, 'name': d[tag_id].name, 'color': "#" + format(d[tag_id].color, '06X')} for tag_id in model.tags]
+        model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {'user-agent': 'oeplatform'}
     http = urllib3.PoolManager(headers=user_agent)
@@ -177,7 +178,7 @@ def editModel(request,model_name, sheettype):
         pass
     else:
         d = load_tags()
-        tags = [{'id': d[tag_id].id, 'name': d[tag_id].name, 'color': "#" + format(d[tag_id].color, '06X')} for tag_id in model.tags]
+        tags = [d[tag_id] for tag_id in model.tags]
 
     form = f(instance=model)
     
