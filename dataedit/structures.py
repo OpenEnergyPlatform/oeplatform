@@ -12,7 +12,7 @@ class Tag(Base):
     __tablename__ = 'tags'
     __table_args__ = {'schema': 'public'}
 
-    id = Column(BigInteger, primary_key=True, server_default=text("nextval('\"public\".tags_id_seq'::regclass)"))
+    id = Column(BigInteger, primary_key=True)
     name = Column(String(40))
     color = Column(Integer)
 
