@@ -38,7 +38,7 @@ class BasicFactsheet(models.Model):
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
     modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name='Modelling software ', default=list, null=False)
-    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name='Internal data processing software',default=list, null=True)
+    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required? Please list all software (packages) that are used for internal data processing'),verbose_name='Internal data processing software',default=list, null=True)
 
     external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
     external_optimizer_yes_text = ArrayField(models.CharField(max_length=1000),default=list, null=True)
@@ -46,9 +46,9 @@ class BasicFactsheet(models.Model):
     additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name='Additional software',default=list,null=True)
     gui = BooleanField(default=False,verbose_name='GUI', help_text='Is a graphical user interface available?', null=False) 
 
-    citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='publications about the model', null=True)
-    citation_DOI = CharField(max_length=10000,verbose_name='Citation DOI', help_text='publications about the model', null=True) 
-    references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='References to reports produced using the model', help_text='Which studies have been calculated with this model?', null=True) 
+    citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='Please list publications about the model', null=True)
+    citation_DOI = CharField(max_length=10000,verbose_name='Citation DOI', help_text='If  there are publications about the model that have a DOI please liste the DOIs', null=True) 
+    references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='Please list references to reports produced using the model', help_text='Which studies have been calculated with this model?', null=True) 
     larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used on a larger scale? If so, who uses it?', null=True) 
 
 
@@ -205,7 +205,7 @@ class Energymodel(BasicFactsheet):
     typical_computation_hardware = CharField(max_length=10000,verbose_name='Typical computation hardware', help_text='Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).', null=True) 
     technical_data_anchored_in_the_model = CharField(max_length=10000,verbose_name='Technical data anchored in the model', help_text='If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.', null=True) 
     
-    example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be a good research question that could be answered with the model?', null=True) 
+    example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be good research questions that could be answered with the model?', null=True) 
 
     validation_models = BooleanField(verbose_name='cross-checked with other models', default=False)
     validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)', default=False)
