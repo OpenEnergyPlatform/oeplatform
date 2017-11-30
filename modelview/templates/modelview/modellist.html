@@ -2,6 +2,7 @@
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load modelview_extras %}
+{% load dataedit.taghandler %}
 {% block after-header %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
@@ -21,9 +22,16 @@
 {% block content %}
 <h3>{{label}} Factsheets</h3>
 
-<script type="text/javascript">
-
-</script>
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
 
 <div>
     <div class="checkbox-container">
@@ -51,6 +59,17 @@
 </div>
 
 {% if label == 'Model' %}
+    <div class="well">
+            <h4>Select tag filter:</h4>
+            <div>
+                {% for t in tags %}
+                <span>
+                    <input onchange="apply_tag_filter(event.target)" type="checkbox" class="hidden" name="select_{{t.id}}" id="select_{{t.id}}">
+                    <label style="background:{{ t.color }}; color:{% readable_text_color t.color %}" class="btn tag" for="select_{{t.id}}">{{t.name}}</label>
+                </span>
+                {% endfor %}
+            </div>
+        </div>
     <table id="overview" class="display">
     </table>
 
@@ -69,9 +88,20 @@
                     {% endfor %}
 
                 {% endfor %}
+               tags: [ {% for tag in model.tags %} {name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'} {%endfor%} ]
             },
         {% endfor %}
     ]
+
+    var render_tag = function (data, type, row){
+        var s = '';
+        for(var i in data){
+            var tag = data[i];
+            s += '<a href="" class="btn tag" style="background:'+tag.color + ';color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+        }
+        console.log(s)
+        return s;
+    }
 
     var all_columns = [
         {% for d in fields.values %}
@@ -81,6 +111,7 @@
                     {% endfor %}
             {% endfor %}
         {% endfor %}
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
     ];
 
     var fields = {
@@ -107,9 +138,22 @@
 
     }
 
+
+
+
+    var apply_tag_filter = function (sender){
+        for (var i in fields[sender.id]) {
+            var property = fields[sender.id][i]
+            var column = dt.column(property+':name')
+            column.visible( sender.checked );
+        }
+    }
+
     $(document).ready( function () {
         dt = $('#overview').DataTable( {data: full_data, columns: all_columns});
     } );
+
+
     </script>
 {% elif label == 'Framework'  %}
 
