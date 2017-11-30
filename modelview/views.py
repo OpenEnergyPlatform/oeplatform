@@ -68,7 +68,9 @@ def listsheets(request,sheettype):
     elif sheettype == "studie":
         models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
     else:
-        fields = MODEL_VIEW_PROPS
+
+
+        fields = FRAMEWORK_VIEW_PROPS if sheettype == 'framework' else MODEL_VIEW_PROPS
         d = load_tags()
         tags = d.values()
         models = []
@@ -299,7 +301,7 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         return url
 
 
-MODEL_VIEW_PROPS = OrderedDict([
+BASE_VIEW_PROPS = OrderedDict([
     ('Basic Information', OrderedDict([
         ('acronym', [
             'acronym',
@@ -390,33 +392,10 @@ MODEL_VIEW_PROPS = OrderedDict([
         ('gui', [
             'gui',
         ]),
-    ])),
-    ('References', OrderedDict([
-        ('citation reference', [
-            'citation_reference',
-        ]),
-        ('citation DOI', [
-            'citation_DOI',
-        ]),
-        ('reports produced', [
-            'references_to_reports_produced_using_the_model',
-        ]),
-        ('larger scale usage', [
-            'larger_scale_usage',
-        ]),
-        ('example research questions', [
-            'example_research_questions',
-        ]),
-        ('model validation', [
-            'validation_models',
-            'validation_measurements',
-            'validation_others',
-            'validation_others_text',
-        ]),
-        ('model specific properties', [
-            'model_specific_properties',
-        ]),
-    ])),
+    ]))
+])
+
+MODEL_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
     ('Coverage', OrderedDict([
         ('energy sectors', [
             'energy_sectors_electricity',
@@ -621,8 +600,57 @@ MODEL_VIEW_PROPS = OrderedDict([
         ('integrated models', [
             'integrated_models',
         ]),
+    ])),
+    ('References', OrderedDict([
+        ('citation reference', [
+            'citation_reference',
+        ]),
+        ('citation DOI', [
+            'citation_DOI',
+        ]),
+        ('reports produced', [
+            'references_to_reports_produced_using_the_model',
+        ]),
+        ('larger scale usage', [
+            'larger_scale_usage',
+        ]),
+        ('example research questions', [
+            'example_research_questions',
+        ]),
+        ('model validation', [
+            'validation_models',
+            'validation_measurements',
+            'validation_others',
+            'validation_others_text',
+        ]),
+        ('model specific properties', [
+            'model_specific_properties',
+        ]),
     ]))
-])
+])}
+
+FRAMEWORK_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
+    ('Framework', OrderedDict([
+        ('model types', [
+            'model_types_grid', 'model_types_demand_simulation',
+            'model_types_feed_in_simulation', 'model_types_other',
+            'model_types_other_text'
+        ]),
+        ('api doc', [
+            'api_doc'
+        ]),
+        ('data api', [
+            'data_api',
+        ]),
+        ('abstraction', [
+            'abstraction',
+        ]),
+        ('used', [
+            'used',
+        ]),
+    ]))
+])}
+
 
 DEFAULT_COLUMNS = {
     'model_name', 'license', 'modelling_software',
