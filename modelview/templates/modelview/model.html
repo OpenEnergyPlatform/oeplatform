@@ -153,7 +153,9 @@
 				  </table>
 			      </td>
 			    </tr>
-                            
+
+                            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='properties_missed'  %}
                             {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties'  %}
                         </table>
                     </div>
@@ -408,7 +410,7 @@
                         Model class (simulation)
                     </td>
                     <td>
-                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model" %}
+                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
 
                     </td>
                 </tr>

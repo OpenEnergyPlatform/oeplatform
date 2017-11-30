@@ -51,7 +51,7 @@ class BasicFactsheet(models.Model):
     references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='Please list references to reports and studies which were produced using the model', help_text='Which studies have been calculated with this model?', null=True)
     larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used from various (maybe well known) institutions? If so, who uses it?', null=True)
 
-    tags = ArrayField(IntegerField(),default=list)
+    tags = ArrayField(IntegerField(),default=list, null=True)
 
 class Energymodel(BasicFactsheet):
     energy_sectors_electricity = BooleanField(default=False,verbose_name='electricity') 
@@ -225,7 +225,7 @@ class Energymodel(BasicFactsheet):
     
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
     example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='Which would be good research questions that could be answered with the model?', null=True)
-    properties_missed = CharField(max_length=10000,verbose_name='further properties', help_text='Which properties of your model have not been mentioned on this factsheet? Please nite them.', null=True)
+    properties_missed = TextField(verbose_name='further properties', help_text='Which properties of your model have not been mentioned on this factsheet? Please nite them.', null=True)
 
     interfaces = TextField(verbose_name='Interfaces', help_text='Which APIs does the model have?', null=True)
     model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default='other', null=True)

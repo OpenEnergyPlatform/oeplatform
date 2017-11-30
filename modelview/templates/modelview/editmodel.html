@@ -443,6 +443,8 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_System_Dynamics %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_Accounting_Framework %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_Game_Theoretic_Model %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_bottom_up %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_top_down %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_other add=form.model_class_other_text%}
                 </table>
             </td>
@@ -484,7 +486,6 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
             {% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
             {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.example_research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
             
             <tr><th> Model Validation </th><td>
@@ -493,8 +494,9 @@ confirmOnLeave();
 		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_measurements %}
 		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_others add=form.validation_others_text%}
 		</table></td></tr>
-            
+            {% include 'modelview/editmodel_snippet.html' with field=form.example_research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.model_specific_properties %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.properties_missed %}
         </table>
     </div>
     <div id="Integration" class="tab-pane fade">
