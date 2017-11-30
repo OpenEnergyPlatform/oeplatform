@@ -80,6 +80,8 @@
         {% for model in models %}
             {
                 {% for d in fields.values %}
+                    model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
+                    tags: [ {% for tag in model.tags %} {id:'{{tag.id}}', name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'}, {%endfor%} ],
 
                     {% for group in d.values %}
                         {% for field in group %}
@@ -88,7 +90,6 @@
                     {% endfor %}
 
                 {% endfor %}
-               tags: [ {% for tag in model.tags %} {id:'{{tag.id}}', name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'} {%endfor%} ]
             },
         {% endfor %}
     ]
@@ -103,6 +104,8 @@
     }
 
     var all_columns = [
+        {data: 'model_name', name: 'Name', title: 'Name', visible: true},
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
@@ -110,7 +113,7 @@
                     {% endfor %}
             {% endfor %}
         {% endfor %}
-        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
+
     ];
 
     var fields = {

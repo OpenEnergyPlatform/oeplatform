@@ -301,9 +301,6 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
 
 MODEL_VIEW_PROPS = OrderedDict([
     ('Basic Information', OrderedDict([
-        ('model name', [
-            'model_name',
-        ]),
         ('acronym', [
             'acronym',
         ]),
