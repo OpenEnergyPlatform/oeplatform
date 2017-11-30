@@ -1,7 +1,9 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
-
+{% load staticfiles %}
+{% load modelview_extras %}
 {% block after-header %}
+<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 {% endblock %}
@@ -19,8 +21,99 @@
 {% block content %}
 <h3>{{label}} Factsheets</h3>
 
-{% if label == 'Model' %}
+<script type="text/javascript">
 
+</script>
+
+<div>
+    <div class="checkbox-container">
+    {% for heading,d in fields.items %}
+        <div class="checkbox-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
+              </h4>
+            </div>
+
+            <div id="{{heading.split|join:'_'}}" class="panel-collapse collapse">
+                <table class="table">
+                    {% for key,value in d.items %}
+                        <tr>
+                            <th><label for="{{key}}">{{key}}</label></th>
+                            <td><input type="checkbox" onchange="apply_filter(event)" id="{{key}}"></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+{% if label == 'Model' %}
+    <table id="overview" class="display">
+    </table>
+
+    <script>
+    var dt;
+
+    var full_data = [
+        {% for model in models %}
+            {
+                {% for d in fields.values %}
+
+                    {% for group in d.values %}
+                        {% for field in group %}
+                            {{ field }}: {{model|get_model_value:field}},
+                        {% endfor %}
+                    {% endfor %}
+
+                {% endfor %}
+            },
+        {% endfor %}
+    ]
+
+    var all_columns = [
+        {% for d in fields.values %}
+            {% for l, group in d.items %}
+                    {% for field in group %}
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}'},
+                    {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    ];
+
+    var fields = {
+        {% for d in fields.values %}
+            {% for l, group in d.items %}
+                '{{ l }}' : [
+                    {% for field in group %}
+                        '{{ field }}',
+                    {% endfor %}
+                ],
+            {% endfor %}
+        {% endfor %}
+    };
+
+    var active_columns = [];
+
+    var apply_filter = function (event){
+        var sender = event.target;
+        for (var i in fields[sender.id]) {
+            var property = fields[sender.id][i]
+            console.log(property);
+            var column = dt.column(property+':name')
+            debugger;
+            column.visible( ! column.visible() );
+        }
+
+
+    }
+
+    $(document).ready( function () {
+        dt = $('#overview').DataTable( {data: full_data, columns: all_columns});
+    } );
+    </script>
 {% elif label == 'Framework'  %}
 
 {% elif label == 'Scenario' %}
@@ -28,61 +121,6 @@
 {% endif %}
 
 
-<table id="overview" class="display">
-    <thead>
-        <tr>
-             <th>Name</th>
-             <th>License</th>
-             <th>Programming Language</th>
-             <th>Time Resolution (1 min)</th>
-             <th>Time Resolution (15 min)</th>
-             <th>Time Resolution (1 hour)</th>
-             <th>Time Resolution (1 year></th>
-             <th>Energy Sectors (Electricity)</th>
-             <th>Energy Sectors (Heat)</th>
-             <th>Energy Sectors (Liquid Fuels)</th>
-             <th>Energy Sectors (Gas)</th>
-             <th>Energy Sectors (Other)</th>
-             <th>Geographical Coverage</th>
-             <th>Purpose</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for model in models %}
-            <tr>
-                <td><a href="{{model.id}}">{{model.model_name}}</a> {% include 'dataedit/tagged_field.html' with label='' tags=model.tags %}</td>
-                <td>{{model.license}}</td>
-                <td><ul>{% for lang in model.modelling_software %} <li>{{lang}}</li> {%endfor%}</ul></td>
-                {% for sec in model.time_resolution %}
-                    {% if sec %}
-                        <td><span class="glyphicon glyphicon-ok"></span>Yes</td>
-                    {% else %}
-                        <td><span class="glyphicon glyphicon-remove"></span>No</td>
-                    {% endif %}
-                {% endfor %}
-                {% for sec in model.energy_sectors %}
-                    {% if sec %}
-                        <td><span class="glyphicon glyphicon-ok"></span>Yes</td>
-                    {% else %}
-                        <td><span class="glyphicon glyphicon-remove"></span>No</td>
-                    {% endif %}
-                {% endfor %}
-                {% if model.energy_sectors_others %}
-                    <td>{{ model.energy_sectors_others_text }}</td>
-                {% else %}
-                    <td><span class="glyphicon glyphicon-remove"></span>No</td>
-                {% endif %}
-                <td><ul>{% for cov in model.geographical_coverage %} <li>{{cov}}</li> {%endfor%}</ul></td>
-                <td>{{model.primary_purpose}}</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
-<script>
-    $(document).ready( function () {
-    $('#overview').DataTable();
-} );
-</script>
 <br><a class="btn btn-info" href="add">New</a>
 {% endblock %}
