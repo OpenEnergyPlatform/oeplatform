@@ -8,8 +8,8 @@ from django.db.models import CharField, ImageField, BooleanField, IntegerField, 
 class BasicFactsheet(models.Model):
     model_name = CharField(max_length=1000,verbose_name='Name', help_text='What is the full model name?', null=False, unique=True) 
     acronym = CharField(max_length=20,verbose_name='Acronym', help_text='What is the abbreviation?', null=False) 
-    institutions = ArrayField(CharField(max_length=1000, help_text='Which institutions develop(ed) the model?') ,default=list, null=True, verbose_name='Institution(s)')
-    authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period)') 
+    institutions = ArrayField(CharField(max_length=1000), help_text='Which institutions develop(ed) the model?' ,default=list, null=True, verbose_name='Institution(s)')
+    authors = ArrayField(CharField(max_length=300), help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?',default=list, null=True,verbose_name='Author(s) (institution, working field, active time period)')
     current_contact_person = CharField(max_length=1000, verbose_name='Current contact person', help_text='Who is the main contact person?', null=True) 
     contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
     website = CharField(max_length=200,verbose_name='Website', null=True) 
@@ -37,13 +37,13 @@ class BasicFactsheet(models.Model):
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
-    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name='Modelling software ', default=list, null=False)
-    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name='Internal data processing software',default=list, null=True)
+    modelling_software = ArrayField(models.CharField(max_length=1000), help_text='What modelling software and which version is used?',verbose_name='Modelling software ', default=list, null=False)
+    interal_data_processing_software = ArrayField(models.CharField(max_length=1000), help_text='Which data processing software is required?',verbose_name='Internal data processing software',default=list, null=True)
 
     external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
     external_optimizer_yes_text = ArrayField(models.CharField(max_length=1000),default=list, null=True)
 
-    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name='Additional software',default=list,null=True)
+    additional_software = ArrayField(models.CharField( max_length=1000),help_text='Which additional software is required to run the model?',verbose_name='Additional software',default=list,null=True)
     gui = BooleanField(default=False,verbose_name='GUI', help_text='Is a graphical user interface available?', null=False) 
 
     citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='publications about the model', null=True)
