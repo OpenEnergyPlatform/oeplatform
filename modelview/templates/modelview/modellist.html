@@ -40,7 +40,7 @@
                     {% for key,value in d.items %}
                         <tr>
                             <th><label for="{{key}}">{{key}}</label></th>
-                            <td><input type="checkbox" onchange="apply_filter(event)" id="{{key}}"></td>
+                            <td><input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}></td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -77,7 +77,7 @@
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
-                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}'},
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}},
                     {% endfor %}
             {% endfor %}
         {% endfor %}
@@ -97,14 +97,11 @@
 
     var active_columns = [];
 
-    var apply_filter = function (event){
-        var sender = event.target;
+    var apply_filter = function (sender){
         for (var i in fields[sender.id]) {
             var property = fields[sender.id][i]
-            console.log(property);
             var column = dt.column(property+':name')
-            debugger;
-            column.visible( ! column.visible() );
+            column.visible( sender.checked );
         }
 
 

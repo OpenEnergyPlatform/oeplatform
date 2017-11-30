@@ -1,35 +1,29 @@
+import datetime
+import json
+import os
+import re
+from collections import OrderedDict
+
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy
+import urllib3
+from django.conf import settings as djangoSettings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
-from django.db.models import fields
-from django.db import models
-import django.forms as forms
-from oeplatform import settings
-from dataedit.structures import Tag
-from api.actions import _get_engine
-from django.contrib.staticfiles.templatetags.staticfiles import static
-# Create your views here.
-import matplotlib.pyplot as plt
-import urllib3
-import json
-import datetime
 from scipy import stats
-import numpy 
-import os
-from django.conf import settings as djangoSettings
-from matplotlib.lines import Line2D
-import matplotlib
-import time
-import re
-from .models import Energymodel, Energyframework, Energyscenario, Energystudy
-from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm, EnergystudyForm
-from django.contrib.postgres.fields import ArrayField
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-
 from sqlalchemy.orm import sessionmaker
 
-from sqlalchemy.dialects.postgresql import array_agg
+from api.actions import _get_engine
+from dataedit.structures import Tag
+from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm, EnergystudyForm
+from .models import Energymodel, Energyframework, Energyscenario, Energystudy
+
+
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
@@ -90,7 +84,7 @@ def listsheets(request,sheettype):
         label='Framework'
     else:
         label='Model'
-    return render(request, "modelview/modellist.html", {'models':models, 'label':label, 'tags':tags, 'fields': fields})
+    return render(request, "modelview/modellist.html", {'models':models, 'label':label, 'tags':tags, 'fields': fields, 'default': DEFAULT_COLUMNS})
 
 def show(request, sheettype, model_name):
     """
@@ -304,144 +298,144 @@ def _handle_github_contributions(org,repo, timedelta=3600, weeks_back=8):
         url = static(path)
         return url
 
-MODEL_VIEW_PROPS = {
-    'Basic Information': {
-        'model name':[
+
+MODEL_VIEW_PROPS = OrderedDict([
+    ('Basic Information', OrderedDict([
+        ('model name', [
             'model_name',
-        ],
-        'acronym':[
+        ]),
+        ('acronym', [
             'acronym',
-        ],
-        'institutions':[
+        ]),
+        ('institutions', [
             'institutions',
-        ],
-        'authors':[
+        ]),
+        ('authors', [
             'authors',
-        ],
-        'current contact person':[
+        ]),
+        ('current contact person', [
             'current_contact_person',
-        ],
-        'contact email':[
+        ]),
+        ('contact email', [
             'contact_email',
-        ],
-        'website':[
+        ]),
+        ('website', [
             'website',
-        ],
-        'logo':[
+        ]),
+        ('logo', [
             'logo',
-        ],
-        'primary purpose':[
+        ]),
+        ('primary purpose', [
             'primary_purpose',
-        ],
-        'primary outputs':[
+        ]),
+        ('primary outputs', [
             'primary_outputs',
-        ],
-        'support':[
+        ]),
+        ('support', [
             'support',
-        ],
-        'framework':[
+        ]),
+        ('framework', [
             'framework',
             'framework_yes_text',
-        ],
-        'user documentation':[
+        ]),
+        ('user documentation', [
             'user_documentation',
-        ],
-        'code documentation':[
+        ]),
+        ('code documentation', [
             'code_documentation',
-        ],
-        'documentation quality':[
+        ]),
+        ('documentation quality', [
             'documentation_quality',
-        ],
-        'source of funding':[
+        ]),
+        ('source of funding', [
             'source_of_funding',
-        ],
-            'number of': [
-                'number_of_devolopers',
-                'number_of_users',
-            ],
-        },
+        ]),
+        ('number of', [
+            'number_of_devolopers',
+            'number_of_users',
+        ]),
+    ])),
 
-
-    'Openness':{
-        'open source':[
+    ('Openness', OrderedDict([(
+        'open source', [
             'open_source',
-        ],
-        'open up':[
+        ]),
+        ('open up', [
             'open_up',
-        ],
-        'costs':[
+        ]),
+        ('costs', [
             'costs',
-        ],
-        'license':[
+        ]),
+        ('license', [
             'license',
             'license_other_text',
-        ],
-        'source code available': [
+        ]),
+        ('source code available', [
             'source_code_available',
             'gitHub',
             'link_to_source_code',
-        ],
-    },
-    'Software': {
-        'modelling software':[
+        ]),
+    ])),
+    ('Software', OrderedDict([
+        ('modelling software', [
             'modelling_software',
-        ],
-        'interal data processing software':[
+        ]),
+        ('interal data processing software', [
             'interal_data_processing_software',
-        ],
-        'external optimizer':[
+        ]),
+        ('external optimizer', [
             'external_optimizer',
             'external_optimizer_yes_text',
-        ],
-        'additional software':[
+        ]),
+        ('additional software', [
             'additional_software',
-        ],
-        'gui':[
+        ]),
+        ('gui', [
             'gui',
-        ],
-    },
-    'References':{
-        'citation reference':[
+        ]),
+    ])),
+    ('References', OrderedDict([
+        ('citation reference', [
             'citation_reference',
-        ],
-        'citation DOI':[
+        ]),
+        ('citation DOI', [
             'citation_DOI',
-        ],
-        'reports produced':[
+        ]),
+        ('reports produced', [
             'references_to_reports_produced_using_the_model',
-        ],
-        'larger scale usage':[
+        ]),
+        ('larger scale usage', [
             'larger_scale_usage',
-        ],
-        'example research questions': [
+        ]),
+        ('example research questions', [
             'example_research_questions',
-        ],
-        'model validation': [
+        ]),
+        ('model validation', [
             'validation_models',
             'validation_measurements',
             'validation_others',
             'validation_others_text',
-        ],
-        'model specific properties': [
+        ]),
+        ('model specific properties', [
             'model_specific_properties',
-        ],
-    },
-    'Coverage': {
-        'energy sectors':[
+        ]),
+    ])),
+    ('Coverage', OrderedDict([
+        ('energy sectors', [
             'energy_sectors_electricity',
             'energy_sectors_heat',
             'energy_sectors_liquid_fuels',
             'energy_sectors_gas',
             'energy_sectors_others',
             'energy_sectors_others_text',
-        ],
-        'demand sectors':[
+        ]),
+        ('demand sectors', [
             'demand_sectors_households',
             'demand_sectors_industry',
             'demand_sectors_commercial_sector',
             'demand_sectors_transport',
-        ],
-        'energy carrier':[
+        ]),
+        ('energy carrier', [
             'energy_carrier_gas_natural_gas',
             'energy_carrier_gas_biogas',
             'energy_carrier_gas_hydrogen',
@@ -456,8 +450,8 @@ MODEL_VIEW_PROPS = {
             'energy_carrier_renewables_wind',
             'energy_carrier_renewables_hydro',
             'energy_carrier_renewables_geothermal_heat',
-        ],
-        'generation renewables':[
+        ]),
+        ('generation renewables', [
             'generation_renewables_PV',
             'generation_renewables_wind',
             'generation_renewables_hydro',
@@ -466,64 +460,64 @@ MODEL_VIEW_PROPS = {
             'generation_renewables_solar_thermal',
             'generation_renewables_others',
             'generation_renewables_others_text',
-        ],
-        'generation conventional':[
+        ]),
+        ('generation conventional', [
             'generation_conventional_gas',
             'generation_conventional_coal',
             'generation_conventional_oil',
             'generation_conventional_liquid_fuels',
             'generation_conventional_nuclear',
-        ],
-        'generation CHP':[
+        ]),
+        ('generation CHP', [
             'generation_CHP',
-        ],
-        'transfer electricity':[
+        ]),
+        ('transfer electricity', [
             'transfer_electricity',
             'transfer_electricity_distribution',
             'transfer_electricity_transition',
-        ],
-        'transfer gas':[
+        ]),
+        ('transfer gas', [
             'transfer_gas',
             'transfer_gas_distribution',
             'transfer_gas_transition',
-        ],
-        'transfer heat':[
+        ]),
+        ('transfer heat', [
             'transfer_heat',
             'transfer_heat_distribution',
             'transfer_heat_transition',
-        ],
-        'network coverage':[
+        ]),
+        ('network coverage', [
             'network_coverage_AC',
             'network_coverage_DC',
             'network_coverage_NT',
-        ],
-        'storage electricity':[
+        ]),
+        ('storage electricity', [
             'storage_electricity_battery',
             'storage_electricity_kinetic',
             'storage_electricity_CAES',
             'storage_electricity_PHS',
             'storage_electricity_chemical',
-        ],
-        'storage heat':[
+        ]),
+        ('storage heat', [
             'storage_heat',
-        ],
-        'storage gas':[
+        ]),
+        ('storage gas', [
             'storage_gas',
-        ],
-        'user behaviour':[
+        ]),
+        ('user behaviour', [
             'user_behaviour',
             'user_behaviour_yes_text',
-        ],
-        'changes in efficiency':[
+        ]),
+        ('changes in efficiency', [
             'changes_in_efficiency',
-        ],
-        'market models':[
+        ]),
+        ('market models', [
             'market_models',
-        ],
-        'geographical coverage':[
+        ]),
+        ('geographical coverage', [
             'geographical_coverage',
-        ],
-        'geo resolution':[
+        ]),
+        ('geo resolution', [
             'geo_resolution_global',
             'geo_resolution_continents',
             'geo_resolution_national_states',
@@ -538,23 +532,23 @@ MODEL_VIEW_PROPS = {
             'geo_resolution_others',
             'geo_resolution_others_text',
             'comment_on_geo_resolution',
-        ],
-        'time resolution':[
+        ]),
+        ('time resolution', [
             'time_resolution_anual',
             'time_resolution_hour',
             'time_resolution_15_min',
             'time_resolution_1_min',
             'time_resolution_other',
             'time_resolution_other_text',
-        ],
-        'observation period':[
+        ]),
+        ('observation period', [
             'observation_period_more_1_year',
             'observation_period_less_1_year',
             'observation_period_1_year',
             'observation_period_other',
             'observation_period_other_text',
-        ],
-        'additional dimensions':[
+        ]),
+        ('additional dimensions', [
             'additional_dimensions_sector_ecological',
             'additional_dimensions_sector_ecological_text',
             'additional_dimensions_sector_economic',
@@ -563,10 +557,10 @@ MODEL_VIEW_PROPS = {
             'additional_dimensions_sector_social_text',
             'additional_dimensions_sector_others',
             'additional_dimensions_sector_others_text',
-        ],
-    },
-    'Mathematical Properties': {
-        'model class':[
+        ]),
+    ])),
+    ('Mathematical Properties', OrderedDict([
+        ('model class', [
             'model_class_optimization_LP',
             'model_class_optimization_MILP',
             'model_class_optimization_Nonlinear',
@@ -578,57 +572,66 @@ MODEL_VIEW_PROPS = {
             'model_class_other',
             'model_class_other_text',
             'short_description_of_mathematical_model_class',
-        ],
-        'mathematical objective':[
+        ]),
+        ('mathematical objective', [
             'mathematical_objective_cO2',
             'mathematical_objective_costs',
             'mathematical_objective_rEshare',
             'mathematical_objective_other',
             'mathematical_objective_other_text',
-        ],
-        'uncertainty deterministic':[
+        ]),
+        ('uncertainty deterministic', [
             'uncertainty_deterministic',
-        ],
-        'uncertainty Stochastic':[
+        ]),
+        ('uncertainty Stochastic', [
             'uncertainty_Stochastic',
-        ],
-        'uncertainty Other':[
+        ]),
+        ('uncertainty Other', [
             'uncertainty_Other',
             'uncertainty_Other_text',
-        ],
-        'montecarlo':[
+        ]),
+        ('montecarlo', [
             'montecarlo',
-        ],
-        'typical computation':[
+        ]),
+        ('typical computation', [
             'typical_computation_time',
             'typical_computation_hardware',
-        ],
-        'technical data anchored in the model':[
+        ]),
+        ('technical data anchored in the model', [
             'technical_data_anchored_in_the_model',
-        ],
-    },
+        ]),
+    ])),
 
-    'Model Integration': {
-        'interfaces':[
+    ('Model Integration', OrderedDict([
+        ('interfaces', [
             'interfaces',
-        ],
-        'model file':[
+        ]),
+        ('model file', [
             'model_file_format',
             'model_file_format_other_text',
-        ],
-        'model input':[
+        ]),
+        ('model input', [
             'model_input',
             'model_input_other_text',
-        ],
-        'model output':[
+        ]),
+        ('model output', [
             'model_output',
             'model_output_other_text',
-        ],
-        'integrating models':[
+        ]),
+        ('integrating models', [
             'integrating_models',
-        ],
-        'integrated models':[
+        ]),
+        ('integrated models', [
             'integrated_models',
-        ],
-    }
+        ]),
+    ]))
+])
+
+DEFAULT_COLUMNS = {
+    'model_name', 'license', 'modelling_software',
+    'energy_sectors_electricity', 'energy_sectors_heat',
+    'energy_sectors_liquid_fuels', 'energy_sectors_gas',
+    'energy_sectors_others', 'energy_sectors_others_text',
+    'geographical_coverage',
+    'primary_purpose'
 }
