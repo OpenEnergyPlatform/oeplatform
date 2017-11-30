@@ -88,7 +88,7 @@
                     {% endfor %}
 
                 {% endfor %}
-               tags: [ {% for tag in model.tags %} {name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'} {%endfor%} ]
+               tags: [ {% for tag in model.tags %} {id:'{{tag.id}}', name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'} {%endfor%} ]
             },
         {% endfor %}
     ]
@@ -97,9 +97,8 @@
         var s = '';
         for(var i in data){
             var tag = data[i];
-            s += '<a href="" class="btn tag" style="background:'+tag.color + ';color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+            s += '<a href="" class="btn tag" style="background:'+tag.color + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
         }
-        console.log(s)
         return s;
     }
 
@@ -126,7 +125,7 @@
         {% endfor %}
     };
 
-    var active_columns = [];
+    var active_tags = [];
 
     var apply_filter = function (sender){
         for (var i in fields[sender.id]) {
@@ -142,15 +141,41 @@
 
 
     var apply_tag_filter = function (sender){
-        for (var i in fields[sender.id]) {
-            var property = fields[sender.id][i]
-            var column = dt.column(property+':name')
-            column.visible( sender.checked );
+        if(sender.checked && active_tags.indexOf(sender.id) <0){
+            active_tags.push(sender.id);
+        } else {
+            var id = active_tags.indexOf(sender.id);
+            if(id>=0){
+                active_tags.splice(id, 1);
+            }
         }
+        dt.draw();
     }
 
     $(document).ready( function () {
         dt = $('#overview').DataTable( {data: full_data, columns: all_columns});
+        var tags_col = dt.column('tags:name').index();
+        $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            for (var required of active_tags) {
+                var matches = false;
+                var tags = dt.row(dataIndex).data().tags
+                if(tags === undefined){
+                    return false;
+                }
+                for (var tag of tags) {
+                    if (required === 'select_'+tag.id) {
+                        matches=true
+                    }
+                }
+                if(!matches){
+                    return false;
+                }
+            }
+            return true;
+        }
+);
+
     } );
 
 
