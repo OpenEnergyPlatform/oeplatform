@@ -49,7 +49,7 @@ class BasicFactsheet(models.Model):
     citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='Please list publications about the model', null=True)
     citation_DOI = CharField(max_length=10000,verbose_name='Citation DOI', help_text='If  there are publications about the model that have a DOI please liste the DOIs', null=True) 
     references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='Please list references to reports and studies which were produced using the model', help_text='Which studies have been calculated with this model?', null=True) 
-    larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used on a larger scale? If so, who uses it?', null=True) 
+    larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used from various (maybe well known) institutions? If so, who uses it?', null=True) 
 
 
 class Energymodel(BasicFactsheet):
@@ -187,7 +187,7 @@ class Energymodel(BasicFactsheet):
     model_class_other = BooleanField(default=False,verbose_name='Other') 
     model_class_other_text = CharField(max_length=1000,null=True) 
 
-    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', null=True) 
+    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', help_text='Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.', null=True) 
 
     mathematical_objective_cO2 = BooleanField(default=False,verbose_name='CO2') 
     mathematical_objective_costs = BooleanField(default=False,verbose_name='costs') 
