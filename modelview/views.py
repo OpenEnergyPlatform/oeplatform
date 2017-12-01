@@ -629,7 +629,7 @@ MODEL_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
     ]))
 ])}
 
-FRAMEWORK_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
+FRAMEWORK_VIEW_PROPS = dict(list(BASE_VIEW_PROPS.items()) + [
     ('Framework', OrderedDict([
         ('model types', [
             'model_types_grid', 'model_types_demand_simulation',
@@ -649,7 +649,7 @@ FRAMEWORK_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
             'used',
         ]),
     ]))
-])}
+])
 
 
 DEFAULT_COLUMNS = {
