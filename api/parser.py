@@ -254,6 +254,8 @@ def parse_expression(d):
             return parse_modifier(d)
         if dtype == 'function':
             return parse_function(d)
+        if dtype == 'star':
+            return '*'
         if dtype == 'value':
             if 'value' in d:
                 return read_pgvalue(get_or_403(d, 'value'))

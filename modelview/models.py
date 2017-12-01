@@ -8,23 +8,23 @@ from django.db.models import CharField, ImageField, BooleanField, IntegerField, 
 class BasicFactsheet(models.Model):
     model_name = CharField(max_length=1000,verbose_name='Name', help_text='What is the full model name?', null=False, unique=True) 
     acronym = CharField(max_length=20,verbose_name='Acronym', help_text='What is the abbreviation?', null=False) 
-    institutions = ArrayField(CharField(max_length=1000, help_text='Which institutions develop(ed) the model?') ,default=list, null=True, verbose_name='Institution(s)')
-    authors = ArrayField(CharField(max_length=300, help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?'),default=list, null=True,verbose_name='Author(s) (institution, working field, active time period)') 
+    institutions = ArrayField(CharField(max_length=1000), help_text='Which institutions develop(ed) the model?' ,default=list, null=True, verbose_name='Institution(s)')
+    authors = ArrayField(CharField(max_length=300), help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?',default=list, null=True,verbose_name='Author(s) (institution, working field, active time period)')
     current_contact_person = CharField(max_length=1000, verbose_name='Current contact person', help_text='Who is the main contact person?', null=True) 
-    contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please, fill in an e-mail address.', null=False) 
-    website = CharField(max_length=200,verbose_name='Website', null=True) 
-    logo = ImageField(upload_to='logos',verbose_name='Logo', null=True)
-    primary_purpose = TextField(verbose_name='Primary Purpose', help_text='What is the primary purpose the model?', null=True) 
+    contact_email = EmailField(verbose_name='Contact (e-mail)', help_text='Please provide the mailadress of the contact person.', null=False)
+    website = CharField(max_length=200,verbose_name='Website', help_text='If a website for the model exists please put the link here', null=True)
+    logo = ImageField(upload_to='logos',verbose_name='Logo', help_text='If a logo for the model exists load it up', null=True)
+    primary_purpose = TextField(verbose_name='Primary Purpose', help_text='What is the primary purpose of the model?', null=True)
     primary_outputs = TextField(verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
-    support = BooleanField(default=False,verbose_name='Support / Community / Forum') 
+    support = BooleanField(default=False,verbose_name='Support / Community / Forum', help_text='Click the check box if there is a support or Q and A Forum for the Model')
 
     framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?') 
     framework_yes_text = CharField(max_length=1000,null=True) 
 
-    user_documentation = CharField(max_length=200,verbose_name='Link to User Documentation', help_text='Where is the user documentation publicly available?', null=True) 
-    code_documentation = CharField(max_length=200,verbose_name='Link to Developer/Code Documentation', help_text='Where is the code documentation publicly available?', null=True)
-    documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How is the quality of the documentations?', choices=((x,x) for x in ['not available', 'expandable', 'good', 'excellent']), default='expandable') 
-    source_of_funding = CharField(max_length=200,verbose_name='Source of funding', help_text='What is the main source of funding?', null=True)
+    user_documentation = CharField(max_length=200,verbose_name='Link to User Documentation', help_text='If an user documentation is publicly available please insert the link', null=True)
+    code_documentation = CharField(max_length=200,verbose_name='Link to Developer/Code Documentation', help_text='If a code documentation and or a developer documentation is publicly available please insert the link', null=True)
+    documentation_quality = CharField(max_length=1000,verbose_name='Documentation quality', help_text='How do you rate the quality of the documentations?', choices=((x,x) for x in ['not available', 'expandable', 'good', 'excellent']), default='expandable')
+    source_of_funding = CharField(max_length=200,verbose_name='Source of funding', help_text='What is the main source of funding for the development of the model?', null=True)
     open_source = BooleanField(default=False,verbose_name='Open Source') 
     open_up = BooleanField(default=False,verbose_name='Planned to open up in the future', help_text='Will the source code be available in future?') 
     costs = CharField(max_length=1000,verbose_name='Costs', null=True) 
@@ -37,20 +37,21 @@ class BasicFactsheet(models.Model):
     cooperative_programming = BooleanField(default=False,verbose_name='Cooperative programming', help_text='Is it possible to join the coding group?') 
     number_of_devolopers = CharField(max_length=1000,verbose_name='Number of devolopers', help_text='How many people are involved in the model development?', choices=(('less than 10', 'less than 10'), (' less than 20', ' less than 20'), (' less than 50', ' less than 50'), (' more than 50', ' more than 50')), null=True) 
     number_of_users = CharField(max_length=1000,verbose_name='Number of users ', help_text='How many people approximately use the model?', choices=(('less than 10', 'less than 10'), (' less than 100', ' less than 100'), (' less than 1000', ' less than 1000'), (' more than 1000', ' more than 1000')), null=True) 
-    modelling_software = ArrayField(models.CharField(max_length=1000, help_text='What modelling software and which version is used?'),verbose_name='Modelling software ', default=list, null=False)
-    interal_data_processing_software = ArrayField(models.CharField(max_length=1000, help_text='Which data processing software is required?'),verbose_name='Internal data processing software',default=list, null=True)
+    modelling_software = ArrayField(models.CharField(max_length=1000), help_text='Which modelling software and which version is used?',verbose_name='Modelling software ', default=list, null=False)
+    interal_data_processing_software = ArrayField(models.CharField(max_length=1000), help_text='Which data processing software is required? Please list all software (packages) that are used for internal data processing',verbose_name='Internal data processing software',default=list, null=True)
 
-    external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer can the model apply?', null=False) 
+    external_optimizer = BooleanField(default=False,verbose_name='External optimizer', help_text='Which external optimizer(s) can the model apply? Please list them.', null=False)
     external_optimizer_yes_text = ArrayField(models.CharField(max_length=1000),default=list, null=True)
 
-    additional_software = ArrayField(models.CharField( max_length=1000,help_text='Which additional software is required to run the model?'),verbose_name='Additional software',default=list,null=True)
+    additional_software = ArrayField(models.CharField( max_length=1000),help_text='Which additional software is required to run the model?',verbose_name='Additional software',default=list,null=True)
     gui = BooleanField(default=False,verbose_name='GUI', help_text='Is a graphical user interface available?', null=False) 
 
-    citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='publications about the model', null=True)
-    citation_DOI = CharField(max_length=10000,verbose_name='Citation DOI', help_text='publications about the model', null=True) 
-    references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='References to reports produced using the model', help_text='Which studies have been calculated with this model?', null=True) 
-    larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used on a larger scale? If so, who uses it?', null=True) 
+    citation_reference = CharField(max_length=10000,verbose_name='Citation reference', help_text='Please list publications about the model', null=True)
+    citation_DOI = CharField(max_length=10000,verbose_name='Citation DOI', help_text='If  there are publications about the model that have a DOI please liste the DOIs', null=True)
+    references_to_reports_produced_using_the_model = CharField(max_length=10000,verbose_name='Please list references to reports and studies which were produced using the model', help_text='Which studies have been calculated with this model?', null=True)
+    larger_scale_usage = CharField(max_length=10000,verbose_name='Larger scale usage', help_text='Is this model used from various (maybe well known) institutions? If so, who uses it?', null=True)
 
+    tags = ArrayField(IntegerField(),default=list, null=True)
 
 class Energymodel(BasicFactsheet):
     energy_sectors_electricity = BooleanField(default=False,verbose_name='electricity') 
@@ -59,7 +60,11 @@ class Energymodel(BasicFactsheet):
     energy_sectors_gas = BooleanField(default=False,verbose_name='gas') 
     energy_sectors_others = BooleanField(default=False,verbose_name='others')
     energy_sectors_others_text = CharField(max_length=200,null=True)
-     
+
+    def energy_sectors(self):
+        return [self.energy_sectors_electricity, self.energy_sectors_heat,
+                 self.energy_sectors_liquid_fuels, self.energy_sectors_gas]
+
     demand_sectors_households = BooleanField(default=False,verbose_name='Households') 
     demand_sectors_industry = BooleanField(default=False,verbose_name='Industry') 
     demand_sectors_commercial_sector = BooleanField(default=False,verbose_name='Commercial sector') 
@@ -125,11 +130,11 @@ class Energymodel(BasicFactsheet):
     storage_heat = BooleanField(default=False,verbose_name='heat') 
     storage_gas = BooleanField(default=False,verbose_name='gas') 
 
-    user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='How can user behaviour changes and demand side management be considered?') 
+    user_behaviour = BooleanField(default=False,verbose_name='User behaviour and demand side management', help_text='Can user behaviour and demand side management be considered in the model? If yes please shortly explain how that is realised.')
     user_behaviour_yes_text = TextField(null=True) 
-    changes_in_efficiency = TextField(null=True, verbose_name='Changes in efficiency')
+    changes_in_efficiency = TextField(null=True, verbose_name='Changes in efficiency', help_text='Can changes in efficiency be considered in the model? If yes please shortly explain how that is realised.')
     
-    market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ['fundamental model', 'stochastic model']), null=True, help_text='Which / Is a market models are included?') 
+    market_models = CharField(max_length=20, verbose_name='Market models', choices=((x,x) for x in ['fundamental model', 'stochastic model']), null=True, help_text='If the described model is not a market model itself please indicate if a market model is included - if yes,  which one?')
 
     geographical_coverage = ArrayField(models.CharField(max_length=1000), help_text='What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico' ,verbose_name='Geographical coverage', default=list, null=True)
 
@@ -149,7 +154,13 @@ class Energymodel(BasicFactsheet):
 
     comment_on_geo_resolution = TextField(verbose_name='Comment on geographic (spatial) resolution', help_text='Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.', null=True) 
 
-    time_resolution_anual = BooleanField(default=False,verbose_name='anual') 
+    @property
+    def time_resolution(self):
+        return [self.time_resolution_1_min, self.time_resolution_15_min,
+                self.time_resolution_hour, self.time_resolution_anual]
+
+
+    time_resolution_anual = BooleanField(default=False,verbose_name='annual')
     time_resolution_hour = BooleanField(default=False,verbose_name='hour') 
     time_resolution_15_min = BooleanField(default=False,verbose_name='15 min') 
     time_resolution_1_min = BooleanField(default=False,verbose_name='1 min') 
@@ -181,11 +192,13 @@ class Energymodel(BasicFactsheet):
     model_class_simulation_System_Dynamics = BooleanField(default=False,verbose_name='System Dynamics') 
     model_class_simulation_Accounting_Framework = BooleanField(default=False,verbose_name='Accounting Framework') 
     model_class_simulation_Game_Theoretic_Model = BooleanField(default=False,verbose_name='Game Theoretic Model')
+    model_class_simulation_bottom_up = BooleanField(default=False,verbose_name='Bottom up')
+    model_class_simulation_top_down = BooleanField(default=False,verbose_name='Top down')
 
     model_class_other = BooleanField(default=False,verbose_name='Other') 
     model_class_other_text = CharField(max_length=1000,null=True) 
 
-    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', null=True) 
+    short_description_of_mathematical_model_class = TextField(verbose_name='Short description of mathematical model class', help_text='Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.', null=True)
 
     mathematical_objective_cO2 = BooleanField(default=False,verbose_name='CO2') 
     mathematical_objective_costs = BooleanField(default=False,verbose_name='costs') 
@@ -203,9 +216,7 @@ class Energymodel(BasicFactsheet):
     typical_computation_time = CharField(max_length=30, choices=((x,x) for x in ['less than a second','less than a minute','less than an hour','less than a day','more than a day'])) 
 
     typical_computation_hardware = CharField(max_length=10000,verbose_name='Typical computation hardware', help_text='Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).', null=True) 
-    technical_data_anchored_in_the_model = CharField(max_length=10000,verbose_name='Technical data anchored in the model', help_text='If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.', null=True) 
-    
-    example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='What would be a good research question that could be answered with the model?', null=True) 
+    technical_data_anchored_in_the_model = CharField(max_length=10000,verbose_name='Technical data anchored in the model', help_text='If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.', null=True)
 
     validation_models = BooleanField(verbose_name='cross-checked with other models', default=False)
     validation_measurements = BooleanField(verbose_name='checked with measurements (measured data)', default=False)
@@ -213,7 +224,8 @@ class Energymodel(BasicFactsheet):
     validation_others_text = CharField(max_length=1000, null=True)
     
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
-    
+    example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='Which would be good research questions that could be answered with the model?', null=True)
+    properties_missed = TextField(verbose_name='further properties', help_text='Which properties of your model have not been mentioned on this factsheet? Please nite them.', null=True)
 
     interfaces = TextField(verbose_name='Interfaces', help_text='Which APIs does the model have?', null=True)
     model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default='other', null=True)

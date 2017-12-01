@@ -3,7 +3,7 @@
 {% bootstrap_javascript_url %}
 {% load staticfiles %}
 {% load modelview_extras %}
-
+{% load dataedit.taghandler %}
 {% block content %}
 <script type="text/javascript">
     <!--
@@ -17,6 +17,9 @@
 <div class="container">
     <div style="float: left;">
         <h1> {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+        {% for t in model.tags %}
+            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
+        {% endfor %}
     </div>
     <div>
         <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
@@ -150,7 +153,9 @@
 				  </table>
 			      </td>
 			    </tr>
-                            
+
+                            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='properties_missed'  %}
                             {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties'  %}
                         </table>
                     </div>
@@ -405,7 +410,7 @@
                         Model class (simulation)
                     </td>
                     <td>
-                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model" %}
+                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
 
                     </td>
                 </tr>

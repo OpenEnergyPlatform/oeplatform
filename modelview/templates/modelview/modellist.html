@@ -1,5 +1,14 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
+{% load staticfiles %}
+{% load modelview_extras %}
+{% load dataedit.taghandler %}
+{% block after-header %}
+<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
 {% block content-right %}
     {% if label == 'Model' %}
 
@@ -11,20 +20,180 @@
 {% endblock %}
 
 {% block content %}
-<h3>{{label}} Factsheets</h3>
+<h3>{{label}} Factsheets <a class="btn btn-add btn-circle glyphicon glyphicon-plus" style="padding:0" href="add"></a> </h3> <br>
 
-{% if label == 'Model' %}
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
 
-{% elif label == 'Framework'  %}
+<div>
+    <div class="checkbox-container">
+    {% for heading,d in fields.items %}
+        <div class="checkbox-item">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
+              </h4>
+            </div>
 
+            <div id="{{heading.split|join:'_'}}" class="panel-collapse collapse">
+                <table class="table">
+                    {% for key,value in d.items %}
+                        <tr>
+                            <th><label for="{{key}}">{{key}}</label></th>
+                            <td><input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+{% if label == 'Model' or label == 'Framework' %}
+    <div class="well">
+            <h4>Select tag filter:</h4>
+            <div>
+                {% for t in tags %}
+                <span>
+                    <input onchange="apply_tag_filter(event.target)" type="checkbox" class="hidden" name="select_{{t.id}}" id="select_{{t.id}}">
+                    <label style="background:{{ t.color }}; color:{% readable_text_color t.color %}" class="btn tag" for="select_{{t.id}}">{{t.name}}</label>
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+    <table id="overview" class="display">
+    </table>
+
+    <script>
+    var dt;
+
+    var full_data = [
+        {% for model in models %}
+            {
+                {% for d in fields.values %}
+                    model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
+                    tags: [ {% for tag in model.tags %} {id:'{{tag.id}}', name:'{{tag.name}}', color:'{{tag.color}}',  textcolor:'{% readable_text_color tag.color %}'}, {%endfor%} ],
+
+                    {% for group in d.values %}
+                        {% for field in group %}
+                            {{ field }}: {{model|get_model_value:field}},
+                        {% endfor %}
+                    {% endfor %}
+
+                {% endfor %}
+            },
+        {% endfor %}
+    ]
+
+    var render_tag = function (data, type, row){
+        var s = '';
+        for(var i in data){
+            var tag = data[i];
+            s += '<a href="" class="btn tag" style="background:'+tag.color + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+        }
+        return s;
+    }
+
+    var all_columns = [
+        {data: 'model_name', name: 'Name', title: 'Name', visible: true},
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
+        {% for d in fields.values %}
+            {% for l, group in d.items %}
+                    {% for field in group %}
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}},
+                    {% endfor %}
+            {% endfor %}
+        {% endfor %}
+
+    ];
+
+    var fields = {
+        {% for d in fields.values %}
+            {% for l, group in d.items %}
+                '{{ l }}' : [
+                    {% for field in group %}
+                        '{{ field }}',
+                    {% endfor %}
+                ],
+            {% endfor %}
+        {% endfor %}
+    };
+
+    var active_tags = [];
+
+    var apply_filter = function (sender){
+        for (var i in fields[sender.id]) {
+            var property = fields[sender.id][i]
+            var column = dt.column(property+':name')
+            column.visible( sender.checked );
+        }
+
+
+    }
+
+
+
+
+    var apply_tag_filter = function (sender){
+        if(sender.checked && active_tags.indexOf(sender.id) <0){
+            active_tags.push(sender.id);
+        } else {
+            var id = active_tags.indexOf(sender.id);
+            if(id>=0){
+                active_tags.splice(id, 1);
+            }
+        }
+        dt.draw();
+    }
+
+    $(document).ready( function () {
+        dt = $('#overview').DataTable( {data: full_data, columns: all_columns});
+        var tags_col = dt.column('tags:name').index();
+        $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+            for (var required of active_tags) {
+                var matches = false;
+                var tags = dt.row(dataIndex).data().tags
+                if(tags === undefined){
+                    return false;
+                }
+                for (var tag of tags) {
+                    if (required === 'select_'+tag.id) {
+                        matches=true
+                    }
+                }
+                if(!matches){
+                    return false;
+                }
+            }
+            return true;
+        }
+);
+
+    } );
+
+
+    </script>
 {% elif label == 'Scenario' %}
+
+    <div class="list-group">
+        {% for id, name in models %}
+            <a class="list-group-item" href="{{id}}">{{ name }}</a>
+        {% endfor %}
+    </div>
 
 {% endif %}
 
-<div class="list-group">
-{% for id, name in models %}
-    <a class="list-group-item" href="{{id}}">{{ name }}</a>
-{% endfor %}
-</div>
-<br><a class="btn btn-info" href="add">New</a>
+
+
+
 {% endblock %}
