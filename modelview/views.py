@@ -62,7 +62,7 @@ def listsheets(request,sheettype):
     c,_ = getClasses(sheettype)
     tags = []
     fields = {}
-
+    defaults = set()
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
     elif sheettype == "studie":
@@ -71,6 +71,7 @@ def listsheets(request,sheettype):
 
 
         fields = FRAMEWORK_VIEW_PROPS if sheettype == 'framework' else MODEL_VIEW_PROPS
+        defaults = FRAMEWORK_DEFAULT_COLUMNS if sheettype == 'framework' else MODEL_DEFAULT_COLUMNS
         d = load_tags()
         tags = d.values()
         models = []
@@ -86,7 +87,7 @@ def listsheets(request,sheettype):
         label='Framework'
     else:
         label='Model'
-    return render(request, "modelview/modellist.html", {'models':models, 'label':label, 'tags':tags, 'fields': fields, 'default': DEFAULT_COLUMNS})
+    return render(request, "modelview/modellist.html", {'models':models, 'label':label, 'tags':tags, 'fields': fields, 'default': defaults})
 
 def show(request, sheettype, model_name):
     """
@@ -652,11 +653,32 @@ FRAMEWORK_VIEW_PROPS = OrderedDict(list(BASE_VIEW_PROPS.items()) + [
 ])
 
 
-DEFAULT_COLUMNS = {
-    'model_name', 'license', 'modelling_software',
+MODEL_DEFAULT_COLUMNS = {
+    'model_name',
+    'tags'
+    'primary_purpose'
+    'license',
+    'model_class_optimization_LP',
+    'model_class_optimization_MILP',
+    'model_class_optimization_Nonlinear',
+    'model_class_optimization_LP_MILP_Nonlinear_text',
+    'model_class_simulation_Agentbased',
+    'model_class_simulation_System_Dynamics',
+    'model_class_simulation_Accounting_Framework',
+    'model_class_simulation_Game_Theoretic_Model',
+    'model_class_other',
+    'model_class_other_text',
+    'short_description_of_mathematical_model_class',
     'energy_sectors_electricity', 'energy_sectors_heat',
     'energy_sectors_liquid_fuels', 'energy_sectors_gas',
     'energy_sectors_others', 'energy_sectors_others_text',
-    'geographical_coverage',
-    'primary_purpose'
+    'comment_on_geo_resolution',
+}
+
+FRAMEWORK_DEFAULT_COLUMNS = {
+    'model_name',
+    'tags',
+    'license',
+    'support',
+    'number_of_devolopers'
 }
