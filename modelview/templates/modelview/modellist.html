@@ -1,4 +1,4 @@
-{% extends "base/base.html" %}
+{% extends "modelview/base.html" %}
 {% load bootstrap3 %}
 {% load staticfiles %}
 {% load modelview_extras %}
@@ -9,17 +9,7 @@
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 {% endblock %}
 
-{% block content-right %}
-    {% if label == 'Model' %}
-
-    {% elif label == 'Framework'  %}
-
-    {% elif label == 'Scenario' %}
-
-    {% endif %}
-{% endblock %}
-
-{% block content %}
+{% block factsheets_content %}
 <h3>{{label}} Factsheets <a class="btn btn-add btn-circle glyphicon glyphicon-plus" style="padding:0" href="add"></a> </h3> <br>
 
 <style>
