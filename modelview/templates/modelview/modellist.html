@@ -185,6 +185,12 @@
     </script>
 {% elif label == 'Scenario' %}
 
+    <div class="list-group">
+        {% for id, name in models %}
+            <a class="list-group-item" href="{{id}}">{{ name }}</a>
+        {% endfor %}
+    </div>
+
 {% endif %}
 
 
