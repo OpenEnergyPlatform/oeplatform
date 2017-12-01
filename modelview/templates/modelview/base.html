@@ -1,11 +1,18 @@
 {% extends "base/base.html" %}
 {% load staticfiles %}
 {% block content-right %}
+<hr>
+<b>Use case example model Fact Sheet:</b> For a European pathway simulation (EPS) we
+want to choose the models that best meet our requirements. All partners include
+their models in the Model Fact Sheets and tag them with “EPS”. To compare the
+models we filter all “EPS” models and choose different characteristics that we
+want to compare. OEP will give us tables (views) that facilitate the comparison.
+<hr>
 <h3>Manage Tags</h3>
     <div style="overflow: hidden;">
         <a href="/dataedit/tags" class="btn btn-default">Manage Tags</a>
     </div>
-<hr>
+
 {% endblock %}
 {% block content %}
 {% block factsheets_content %}
