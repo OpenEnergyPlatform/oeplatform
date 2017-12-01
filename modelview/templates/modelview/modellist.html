@@ -23,7 +23,11 @@
 }
 </style>
 
-<div>
+<div class="well">
+    <h4>Filter</h4>
+    <div class="well">
+    You can filter the attributes to compare the models by clicking the categories below. If you only want to compare a selection of models you can filter them by using the colored tags below.
+    </div>
     <div class="checkbox-container">
     {% for heading,d in fields.items %}
         <div class="checkbox-item">
@@ -51,6 +55,9 @@
 {% if label == 'Model' or label == 'Framework' %}
     <div class="well">
             <h4>Select tag filter:</h4>
+            <div class="well">
+                You can select models by chosing one or more tags. If you want to tag models you can set tags by editing the model. You can also define a new tag and add that to the group of models that you want to compare.
+            </div>
             <div>
                 {% for t in tags %}
                 <span>

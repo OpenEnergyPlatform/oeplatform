@@ -3,6 +3,18 @@
 {% block factsheets_content %}
 {% load staticfiles %}
 
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
+
+
 <script type="text/javascript">
     $(document).ready(function(){
     $('[data-toggle="popover"]').popover();
@@ -28,6 +40,37 @@ confirmOnLeave();
 </script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Framework </h1>
+
+<div class="tagcontainer">
+    {% load dataedit.taghandler %}
+    {% get_tags as all_tags %}
+    {% if not tags %}
+        No tags were added, yet.
+    {% endif %}
+    {% for t in tags %}
+        <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}">{{ t.name }}</a>
+    {% endfor %}
+    <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
+    </button>
+    <div id="tag_handler" class="collapse">
+        <form action="/factsheets/frameworks/{{name}}/tags/add/" method="post">
+            {% csrf_token %}
+            <h4>Choose tags to attach:</h4>
+            {% for t in all_tags %}
+                <span  >
+                    <input type="checkbox" class="hidden" name="tag_{{t.id}}" id="select_{{t.id}}" {% if t in tags %} checked {% endif %}>
+                    <label style="background:{{t.color}};color:{% readable_text_color t.color %}" class="btn tag" for="select_{{t.id}}">{{t.name}}</label>
+                </span>
+            {% endfor %}
+            <input type="hidden" name="schema" value="{{schema}}"/>
+            {% if table %}
+                <input type="hidden" name="table" value="{{table}}"/>
+            {% endif %}
+            <input type="submit" class="btn btn-success" value="Apply">
+        </form>
+    </div>
+</div>
+
 {% if method == "update"%}
     <form action="/factsheets/frameworks/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
 {% else %}
