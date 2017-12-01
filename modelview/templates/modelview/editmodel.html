@@ -53,7 +53,7 @@ confirmOnLeave();
     <button data-toggle="collapse"  data-target="#tag_handler" class="btn btn-add btn-circle glyphicon glyphicon-plus">
     </button>
     <div id="tag_handler" class="collapse">
-        <form action="/factsheets/models/2/tags/add/" method="post">
+        <form action="/factsheets/models/{{name}}/tags/add/" method="post">
             {% csrf_token %}
             <h4>Choose tags to attach:</h4>
             {% for t in all_tags %}
