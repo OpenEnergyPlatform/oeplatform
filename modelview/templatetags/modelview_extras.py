@@ -107,7 +107,7 @@ def get_model_value(value, arg):
 
 def stringify(v):
     if isinstance(v, str):
-        return mark_safe("'%s'"%escape(v))
+        return mark_safe("'%s'"%escape(v.replace('\n','\\n')))
     elif  isinstance(v, list):
         return mark_safe("[%s]"%(', '.join(map(stringify, v))))
     elif v is None:
