@@ -107,6 +107,11 @@ def get_model_value(value, arg):
 
 def stringify(v):
     if isinstance(v, str):
+        parts = v.split(' ')
+        max_length = 20
+        if len(parts) > max_length:
+            parts = parts[:max_length] + ['...']
+        v = ' '.join(parts)
         return mark_safe("'%s'"%escape(v.replace('\n','').replace('\r','')))
     elif  isinstance(v, list):
         return mark_safe("[%s]"%(', '.join(map(stringify, v))))
