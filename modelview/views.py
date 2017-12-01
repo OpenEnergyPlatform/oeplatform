@@ -395,7 +395,7 @@ BASE_VIEW_PROPS = OrderedDict([
     ]))
 ])
 
-MODEL_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
+MODEL_VIEW_PROPS = OrderedDict(list(BASE_VIEW_PROPS.items()) + [
     ('Coverage', OrderedDict([
         ('energy sectors', [
             'energy_sectors_electricity',
@@ -627,9 +627,9 @@ MODEL_VIEW_PROPS = {**BASE_VIEW_PROPS, **OrderedDict([
             'model_specific_properties',
         ]),
     ]))
-])}
+])
 
-FRAMEWORK_VIEW_PROPS = dict(list(BASE_VIEW_PROPS.items()) + [
+FRAMEWORK_VIEW_PROPS = OrderedDict(list(BASE_VIEW_PROPS.items()) + [
     ('Framework', OrderedDict([
         ('model types', [
             'model_types_grid', 'model_types_demand_simulation',
