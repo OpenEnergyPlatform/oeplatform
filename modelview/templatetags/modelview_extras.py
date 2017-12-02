@@ -108,7 +108,7 @@ def get_model_value(value, arg):
 def stringify(v):
     if isinstance(v, str):
         parts = v.split(' ')
-        max_length = 20
+        max_length = 12
         if len(parts) > max_length:
             parts = parts[:max_length] + ['...']
         v = ' '.join(parts)

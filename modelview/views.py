@@ -655,9 +655,11 @@ FRAMEWORK_VIEW_PROPS = OrderedDict(list(BASE_VIEW_PROPS.items()) + [
 
 MODEL_DEFAULT_COLUMNS = {
     'model_name',
-    'tags'
-    'primary_purpose'
+    'acronym',
+    'tags',
+    'primary_purpose',
     'license',
+    'open_source',
     'model_class_optimization_LP',
     'model_class_optimization_MILP',
     'model_class_optimization_Nonlinear',
@@ -666,12 +668,7 @@ MODEL_DEFAULT_COLUMNS = {
     'model_class_simulation_System_Dynamics',
     'model_class_simulation_Accounting_Framework',
     'model_class_simulation_Game_Theoretic_Model',
-    'model_class_other',
-    'model_class_other_text',
     'short_description_of_mathematical_model_class',
-    'energy_sectors_electricity', 'energy_sectors_heat',
-    'energy_sectors_liquid_fuels', 'energy_sectors_gas',
-    'energy_sectors_others', 'energy_sectors_others_text',
     'comment_on_geo_resolution',
 }
 
