@@ -225,7 +225,7 @@ class Energymodel(BasicFactsheet):
     
     model_specific_properties = CharField(max_length=10000,verbose_name='Model specific properties', help_text='What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?', null=True)
     example_research_questions = CharField(max_length=10000,verbose_name='Example research questions', help_text='Which would be good research questions that could be answered with the model?', null=True)
-    properties_missed = TextField(verbose_name='further properties', help_text='Which properties of your model have not been mentioned on this factsheet? Please nite them.', null=True)
+    properties_missed = TextField(verbose_name='further properties', help_text='Which properties of your model have not been mentioned on this factsheet? Please note them.', null=True)
 
     interfaces = TextField(verbose_name='Interfaces', help_text='Which APIs does the model have?', null=True)
     model_file_format = CharField(max_length=5, choices=map(lambda x:(x,x),('.exe','.gms','.py','.xls','Other')), verbose_name='Model file format', help_text='In which format is the model saved?', default='other', null=True)
