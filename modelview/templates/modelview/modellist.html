@@ -103,7 +103,6 @@
 
     var all_columns = [
         {data: 'model_name', name: 'Name', title: 'Name', visible: true},
-        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
@@ -111,7 +110,7 @@
                     {% endfor %}
             {% endfor %}
         {% endfor %}
-
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
     ];
 
     var fields = {
