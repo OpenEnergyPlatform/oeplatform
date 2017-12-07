@@ -73,7 +73,7 @@ def listsheets(request,sheettype):
         fields = FRAMEWORK_VIEW_PROPS if sheettype == 'framework' else MODEL_VIEW_PROPS
         defaults = FRAMEWORK_DEFAULT_COLUMNS if sheettype == 'framework' else MODEL_DEFAULT_COLUMNS
         d = load_tags()
-        tags = d.values()
+        tags = sorted(d.values(), key=lambda d:d['name'])
         models = []
 
         for model in c.objects.all():
