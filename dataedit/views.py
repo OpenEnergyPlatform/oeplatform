@@ -668,6 +668,12 @@ class DataView(View):
 
         tags = []  # TODO: Unused - Remove
         db = sec.dbname
+
+        engine = actions._get_engine()
+
+        if not engine.dialect.has_table(engine, table, schema=schema):
+            raise Http404
+
         actions.create_meta(schema, table)
 
         comment_on_table = load_comment_from_db(schema, table)

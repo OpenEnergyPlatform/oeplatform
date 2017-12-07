@@ -107,6 +107,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
     mail_address = models.EmailField(verbose_name='email address',
                                      max_length=255, unique=True, )
 
+    did_agree = models.BooleanField(default=False)
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
