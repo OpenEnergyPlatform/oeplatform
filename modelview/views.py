@@ -119,25 +119,6 @@ def show(request, sheettype, model_name):
                 repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'model_study':model_study,'gh_org':org,'gh_repo':repo})
     
-
-def set_tags(request, sheettype, model_name, ):
-    """
-    Loads the requested factsheet
-    """
-    c,_ = getClasses(sheettype)
-    model = get_object_or_404(c, pk=model_name)
-
-    ids = {int(field[len('tag_'):]) for field in request.POST if
-           field.startswith('tag_')}
-
-    if sheettype == "scenario":
-        raise NotImplementedError
-    else:
-        model.tags = sorted(list(ids))
-        model.save()
-
-    return redirect(request.META['HTTP_REFERER'])
-
 def processPost(post, c, f, files=None, pk=None, key=None):
     """
     Returns the form according to a post request
@@ -222,8 +203,17 @@ class FSAdd(LoginRequiredMixin, View):
                 return render(request,"modelview/new{}.html".format(sheettype),{'form':form, 'formstudy':formstudy, 'name':pk, 'method':method, 'errors':errors})
         else:
             if form.is_valid():
-                m = form.save()
-                return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=m.pk))
+
+                model = form.save()
+                ids = {int(field[len('tag_'):]) for field in request.POST if
+                       field.startswith('tag_')}
+
+                if sheettype == "scenario":
+                    raise NotImplementedError
+                else:
+                    model.tags = sorted(list(ids))
+                    model.save()
+                return redirect("/factsheets/{sheettype}s/{model}".format(sheettype=sheettype,model=model.pk))
             else:
                 errors = [(field.label, str(field.errors.data[0].message)) for field in form if field.errors]
                 return render(request,"modelview/edit{}.html".format(sheettype),{'form':form, 'name':pk, 'method':method, 'errors':errors})
