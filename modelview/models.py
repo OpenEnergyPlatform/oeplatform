@@ -18,7 +18,11 @@ class BasicFactsheet(models.Model):
     primary_outputs = TextField(verbose_name='Primary Outputs', help_text='What are the main outputs of the model?', null=True) 
     support = BooleanField(default=False,verbose_name='Support / Community / Forum', help_text='Click the check box if there is a support or Q and A Forum for the Model')
 
-    framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?') 
+    methodical_focus_1 = CharField(max_length=50,verbose_name='Methodical Focus', help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"', null=False)
+    methodical_focus_2 = CharField(max_length=50, null=True, blank=True)
+    methodical_focus_3 = CharField(max_length=50, null=True, blank=True)
+
+    framework = BooleanField(default=False,verbose_name='Framework', help_text='Is the model based on a framework? If yes, which?')
     framework_yes_text = CharField(max_length=1000,null=True) 
 
     user_documentation = CharField(max_length=200,verbose_name='Link to User Documentation', help_text='If an user documentation is publicly available please insert the link', null=True)

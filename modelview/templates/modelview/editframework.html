@@ -1,6 +1,7 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
+{% load bootstrap3 %}
 {% load staticfiles %}
 
 <style>
@@ -73,6 +74,28 @@ confirmOnLeave();
         <table class="formtable">
         {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
         {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
+        <tr>
+            <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
+                {% if form.methodical_focus_1.help_text != "" %}
+                    <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ form.methodical_focus_1.help_text }}">
+                        <span class='glyphicon glyphicon-question-sign'></span>
+                    </a>
+                {% endif %}
+            </th>
+            <td>
+                <table>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_1 show_label=False show_help=False set_required=True %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_2 show_label=False show_help=False set_required=False %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_3 show_label=False show_help=False set_required=False %}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
         {% include 'modelview/editmodel_snippet.html' with field=form.institutions %}
         {% include 'modelview/editmodel_snippet.html' with field=form.authors %}
         {% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
