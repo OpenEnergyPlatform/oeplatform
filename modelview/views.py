@@ -135,7 +135,7 @@ def model_to_csv(request, sheettype):
 
     writer = csv.writer(response)
     writer.writerow(header)
-    for model in c.objects.all():
+    for model in c.objects.all().order_by('id'):
         writer.writerow(
         [getattr(model, col) for col in header])
     return response
