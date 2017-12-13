@@ -10,7 +10,8 @@
 {% endblock %}
 
 {% block factsheets_content %}
-<h3>{{label}} Factsheets <a class="btn btn-add btn-circle glyphicon glyphicon-plus" style="padding:0" href="add"></a> </h3> <br>
+<h3>{{label}} Factsheets <a class="btn btn-add btn-circle glyphicon glyphicon-plus" style="padding:0" href="add"></a>  <a class="btn btn-info" style="float:right;bottom: 5;right: 0;" href="download"><span name="icon"></span>Download CSV</a>
+</h3>  <br>
 
 <style>
     .btn-add{
@@ -22,7 +23,6 @@
     border: 3px solid;
 }
 </style>
-<a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="download"><span name="icon"></span>Download CSV</a>
 {% if label == 'Model' or label == 'Framework' %}
 <div>
     <h4>Filter</h4>
