@@ -131,7 +131,9 @@ def model_to_csv(request, sheettype):
     header = list(field.attname for field in c._meta.get_fields() if hasattr(field, 'attname'))
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    response['Content-Disposition'] = 'attachment; filename="{filename}s.csv"'.format(
+        filename=c.__name__
+    )
 
     writer = csv.writer(response)
     writer.writerow(header)
