@@ -53,18 +53,23 @@ def checktable(model, label, prefix ,suffixes, separator="_"):
 def checklist(model,labels):
     s = ""
     first = True
+    is_other = False
     for name in labels.split(","):
         decider = name
         text = name 
         if "=" in name:
             decider,text = name.split("=")
+            is_other = True
         
         if model.__dict__[decider]:
             if first:
                 first=False
             else:
                 s+=", "
-            s+= str(model._meta.get_field(text).verbose_name)
+            if is_other:
+                s += str(getattr(model, text))
+            else:
+                s += str(model._meta.get_field(text).verbose_name)
     if s == "":
         s = "-"
     return s
