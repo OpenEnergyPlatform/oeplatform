@@ -32,7 +32,7 @@ class BasicFactsheet(models.Model):
     open_source = BooleanField(default=False,verbose_name='Open Source') 
     open_up = BooleanField(default=False,verbose_name='Planned to open up in the future', help_text='Will the source code be available in future?') 
     costs = CharField(max_length=1000,verbose_name='Costs', null=True) 
-    license = CharField(max_length=20,verbose_name='License', choices=((x,x) for x in ['MIT Licence', 'Apache Licence', 'GNU GPL Licence', 'Other']), default='Apache Licence') 
+    license = CharField(max_length=20,verbose_name='License', choices=((x,x) for x in ['MIT Licence', 'Apache Licence', 'GNU GPL Licence', 'Other', 'Unknown']), default='Unknown')
     license_other_text = CharField(max_length=1000,null=True)
     source_code_available = BooleanField(default=False,verbose_name='Source code available', help_text='Is the source code directly downloadable?') 
     gitHub = BooleanField(default=False,verbose_name='GitHub', help_text='Is the model available on GitHub?') 

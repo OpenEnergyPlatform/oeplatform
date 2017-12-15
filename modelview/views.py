@@ -83,7 +83,7 @@ def listsheets(request,sheettype):
         models = []
 
         for model in c.objects.all():
-            model.tags = [d[tag_id] for tag_id in model.tags[:4]]
+            model.tags = [d[tag_id] for tag_id in model.tags]
             models.append(model)
     if sheettype == 'scenario':
         label='Scenario'
