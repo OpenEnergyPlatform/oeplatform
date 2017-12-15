@@ -3,25 +3,31 @@ import json
 import os
 import re
 from collections import OrderedDict
-
+import csv
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import urllib3
+
+from scipy import stats
+from sqlalchemy.orm import sessionmaker
+
 from django.conf import settings as djangoSettings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
-from scipy import stats
-from sqlalchemy.orm import sessionmaker
+
+
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
 from .forms import EnergymodelForm, EnergyframeworkForm, EnergyscenarioForm, EnergystudyForm
 from .models import Energymodel, Energyframework, Energyscenario, Energystudy
+
 
 
 def getClasses(sheettype):
@@ -118,7 +124,24 @@ def show(request, sheettype, model_name):
                 org = None
                 repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'model_study':model_study,'gh_org':org,'gh_repo':repo})
-    
+
+
+def model_to_csv(request, sheettype):
+    c, f = getClasses(sheettype)
+    header = list(field.attname for field in c._meta.get_fields() if hasattr(field, 'attname'))
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{filename}s.csv"'.format(
+        filename=c.__name__
+    )
+
+    writer = csv.writer(response)
+    writer.writerow(header)
+    for model in c.objects.all().order_by('id'):
+        writer.writerow(
+        [getattr(model, col) for col in header])
+    return response
+
 def processPost(post, c, f, files=None, pk=None, key=None):
     """
     Returns the form according to a post request
