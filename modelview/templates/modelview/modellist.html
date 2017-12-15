@@ -95,8 +95,10 @@
     var render_tag = function (data, type, row){
         var s = '';
         for(var i in data){
-            var tag = data[i];
-            s += '<a href="" class="btn tag" style="background:'+tag.color + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+            if(i <= 4) {
+                var tag = data[i];
+                s += '<a href="" class="btn tag" style="background:' + tag.color + '; color:' + tag.textcolor + '; display:inline-block;">' + tag.name + '</a>'
+            }
         }
         return s;
     }
