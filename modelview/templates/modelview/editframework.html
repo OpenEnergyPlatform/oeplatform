@@ -44,9 +44,9 @@ confirmOnLeave();
 <sup color="light grey">* required field</sup>
 
 {% if method == "update"%}
-    <form action="/factsheets/frameworks/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
+    <form action="/factsheets/frameworks/{{ name }}/update/" novalidate="novalidate" method="post" role="form" enctype="multipart/form-data">
 {% else %}
-    <form action="/factsheets/frameworks/add/" method="post" role="form">
+    <form action="/factsheets/frameworks/add/" method="post" novalidate="novalidate" role="form">
 {% endif %}
 {% csrf_token %}
 
