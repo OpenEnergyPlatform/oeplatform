@@ -157,7 +157,7 @@ def model_to_csv(request, sheettype):
     writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
     for model in c.objects.all().order_by('id'):
-        if all(tid in model.tags for tid in tag_ids):
+        if all(tid in model.tags for tid in tags):
             writer.writerow([printable(model, col) for col in header])
     return response
 
