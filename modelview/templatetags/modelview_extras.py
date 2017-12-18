@@ -6,7 +6,7 @@ import datetime
 from scipy import stats
 import numpy 
 from django.utils.safestring import mark_safe
-from django.utils.html import format_html
+from django.utils.html import format_html, escape
 from django.contrib.postgres.forms.array import SimpleArrayField
 
 register = template.Library()
@@ -53,18 +53,23 @@ def checktable(model, label, prefix ,suffixes, separator="_"):
 def checklist(model,labels):
     s = ""
     first = True
+    is_other = False
     for name in labels.split(","):
         decider = name
         text = name 
         if "=" in name:
             decider,text = name.split("=")
+            is_other = True
         
         if model.__dict__[decider]:
             if first:
                 first=False
             else:
                 s+=", "
-            s+= str(model._meta.get_field(text).verbose_name)
+            if is_other:
+                s += str(getattr(model, text))
+            else:
+                s += str(model._meta.get_field(text).verbose_name)
     if s == "":
         s = "-"
     return s
@@ -94,9 +99,37 @@ def get_field(instance, field_name):
         field = ", ".join(field)
     return field
 
+
 @register.assignment_tag
 def assign_field(instance, field_name):
     return instance.__dict__[field_name]
+
+
+@register.filter
+def get_model_value(value, arg):
+    return stringify(value.__dict__[arg])
+
+
+def stringify(v):
+    if isinstance(v, str):
+        parts = v.split(' ')
+        max_length = 12
+        if len(parts) > max_length:
+            parts = parts[:max_length] + ['...']
+        v = ' '.join(parts)
+        return mark_safe("'%s'"%escape(v.replace('\n','').replace('\r','')))
+    elif  isinstance(v, list):
+        return mark_safe("[%s]"%(', '.join(map(stringify, v))))
+    elif v is None:
+        return 'null'
+    elif isinstance(v, bool):
+        return 'true' if v else 'false'
+    return v
+
+
+@register.filter
+def white_out(value, arg):
+    return ' '.join(value.split(arg))
 
 
 @register.simple_tag

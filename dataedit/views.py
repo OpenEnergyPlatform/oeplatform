@@ -11,7 +11,6 @@ from subprocess import call
 from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
-import svn.local
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -679,20 +678,6 @@ class DataView(View):
         comment_on_table = load_comment_from_db(schema, table)
 
         revisions = []
-        try:
-            repo = svn.local.LocalClient(sec.datarepowc)
-            TableRevision.objects.all().delete()
-            available_revisions = TableRevision.objects.filter(table=table,
-                                                               schema=schema)
-
-            for rev in repo.log_default():
-                try:
-                    rev_obj = available_revisions.get(revision=rev.revision)
-                except TableRevision.DoesNotExist:
-                    rev_obj = None
-                revisions.append((rev, rev_obj))
-        except:
-            revisions = []
 
         api_changes = change_requests(schema, table)
 
@@ -1050,27 +1035,29 @@ def get_all_tags(schema=None, table=None):
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
+    try:
+        if table == None:
+            # Neither table, not schema are defined
+            result = session.execute(sqla.select([Tag]).order_by('name'))
+            session.commit()
+            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+                 for r in result]
+            return r
 
-    if table == None:
-        # Neither table, not schema are defined
-        result = session.execute(sqla.select([Tag]))
+        if schema == None:
+            # default schema is the public schema
+            schema = 'public'
+
+        result = session.execute(
+            session.query(Tag.name.label('name'), Tag.id.label('id'),
+                          Tag.color.label('color'),
+                          Table_tags.table_name).filter(
+                Table_tags.tag == Tag.id).filter(
+                Table_tags.table_name == table).filter(
+                Table_tags.schema_name == schema).order_by('name'))
         session.commit()
-        r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
-             for r in result]
-        return r
-
-    if schema == None:
-        # default schema is the public schema
-        schema = 'public'
-
-    result = session.execute(
-        session.query(Tag.name.label('name'), Tag.id.label('id'),
-                      Tag.color.label('color'),
-                      Table_tags.table_name).filter(
-            Table_tags.tag == Tag.id).filter(
-            Table_tags.table_name == table).filter(
-            Table_tags.schema_name == schema))
-    session.commit()
+    finally:
+        session.close()
     return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
             for r in result]
 

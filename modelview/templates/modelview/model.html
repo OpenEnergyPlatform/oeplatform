@@ -1,10 +1,10 @@
-{% extends "base/base.html" %}
+{% extends "modelview/base.html" %}
 {% load bootstrap3 %}
 {% bootstrap_javascript_url %}
 {% load staticfiles %}
 {% load modelview_extras %}
-
-{% block content %}
+{% load dataedit.taghandler %}
+{% block factsheets_content %}
 <script type="text/javascript">
     <!--
     $(document).ready(function(){
@@ -17,6 +17,9 @@
 <div class="container">
     <div style="float: left;">
         <h1> {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
+        {% for t in model.tags %}
+            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
+        {% endfor %}
     </div>
     <div>
         <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
@@ -37,6 +40,19 @@
                     <!-- <tr><td class="rowlabel"> id_name</td><td> {{ model.id_name }}</td></tr> -->
                     {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
                     {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
+                    <tr>
+                        <td class="sheetlabel">
+                            {% get_field_attr model 'methodical_focus_1' 'verbose_name'%}
+                            <a href='javascript://' data-toggle='popover' data-trigger="focus" title="" data-content="{{ model.methodical_focus_1.help_text }}">
+                                <span class='glyphicon glyphicon-question-sign'></span>
+                            </a>
+                        </td>
+                        <td>
+                            {{ model.methodical_focus_1 }}
+                            {% if model.methodical_focus_2 %}, {{ model.methodical_focus_2 }} {% endif %}
+                            {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }} {% endif %}
+                        </td>
+                    </tr>
                     {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
                     {% include 'modelview/model_snippet.html' with model=model field='authors' %}
                     {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
@@ -150,7 +166,9 @@
 				  </table>
 			      </td>
 			    </tr>
-                            
+
+                            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
+                            {% include 'modelview/model_snippet.html' with model=model field='properties_missed'  %}
                             {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties'  %}
                         </table>
                     </div>
@@ -405,7 +423,7 @@
                         Model class (simulation)
                     </td>
                     <td>
-                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model" %}
+                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
 
                     </td>
                 </tr>
