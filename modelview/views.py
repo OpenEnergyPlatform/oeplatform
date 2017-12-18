@@ -125,8 +125,27 @@ def show(request, sheettype, model_name):
                 repo = None
     return render(request,("modelview/{0}.html".format(sheettype)),{'model':model,'model_study':model_study,'gh_org':org,'gh_repo':repo})
 
+def printable(model, field):
+    if field == 'tags':
+        tags = []
+        engine = _get_engine()
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        for tag_id in getattr(model, field):
+            tag = session.query(Tag).get(tag_id)
+            tags.append(tag.name)
+        session.close()
+        return tags
+    else:
+        return getattr(model, field)
 
 def model_to_csv(request, sheettype):
+    tags = []
+    tag_ids = request.GET.get('tags')
+    if tag_ids:
+        for label in tag_ids.split(','):
+            match = re.match('^select_(?P<tid>\d+)$',label)
+            tags.append(int(match.group('tid')))
     c, f = getClasses(sheettype)
     header = list(field.attname for field in c._meta.get_fields() if hasattr(field, 'attname'))
 
@@ -135,11 +154,11 @@ def model_to_csv(request, sheettype):
         filename=c.__name__
     )
 
-    writer = csv.writer(response)
+    writer = csv.writer(response, quoting=csv.QUOTE_ALL)
     writer.writerow(header)
     for model in c.objects.all().order_by('id'):
-        writer.writerow(
-        [getattr(model, col) for col in header])
+        if all(tid in model.tags for tid in tag_ids):
+            writer.writerow([printable(model, col) for col in header])
     return response
 
 def processPost(post, c, f, files=None, pk=None, key=None):
