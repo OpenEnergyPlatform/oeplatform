@@ -615,10 +615,10 @@ def table_create(schema, table, columns, constraints):
     # Building and joining a string array seems to be more efficient than native string concats.
     # https://waymoot.org/home/python_string/
 
-    id_columns = [c for c in columns if c['name'] == 'id']
-    if not id_columns:
-        raise APIError('Your table must have one column "id" of type "bigserial"')
-    cid = id_columns[0]
+    #id_columns = [c for c in columns if c['name'] == 'id']
+    #if not id_columns:
+    #   raise APIError('Your table must have one column "id" of type "bigserial"')
+    #cid = id_columns[0]
     #if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
     str_list = []
