@@ -983,7 +983,8 @@ def data_insert(request, context=None):
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
     response['rowcount'] = cursor.rowcount
-    apply_changes(schema, table)
+    if schema == 'sandbox':
+        apply_changes(schema, table)
 
     return response
 
@@ -1680,6 +1681,7 @@ def apply_changes(schema, table):
     changes = list(changes)
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
     session = sessionmaker(bind=engine)()
+    # ToDo: This may require some kind of dependency tree resolution
     try:
         for change in sorted(changes, key=lambda x: x['_submitted']):
             if change['_type'] == 'insert':
@@ -1700,10 +1702,10 @@ def apply_changes(schema, table):
 def apply_insert(session, table, row):
     print("apply insert", row)
     session.execute(table.insert(), row)
-    session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE id={id};'.format(
+    session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),
-        id=row['id']
+        id=row['_id']
     ))
 
 
