@@ -1482,7 +1482,6 @@ def open_cursor(request, context):
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
         cursor_id = __add_entry(cursor, __CURSORS)
-        print('Open cursor via request:', cursor_id)
         return {'cursor_id': cursor_id}
     else:
         return _response_error("Connection (%s) not found" % connection_id)
@@ -1497,7 +1496,6 @@ def _load_cursor(cursor_id):
 
 def close_cursor(request, context):
     cursor_id = int(context['cursor_id'])
-    print('Close cursor(%d)'%cursor_id)
     if cursor_id in __CURSORS:
         cursor = __CURSORS[cursor_id]
         del __CURSORS[cursor_id]
@@ -1658,36 +1656,35 @@ def apply_changes(schema, table, cursor=None):
 
     meta_schema = get_meta_schema_name(schema)
 
+    columns = list(describe_columns(schema, table).keys())
+    extended_columns = columns + ['_submitted', '_id']
+
     insert_table = get_insert_table_name(schema, table)
     cursor.execute('select * '
                    'from {schema}.{table} '
                    'where _applied = FALSE;'.format(schema=meta_schema,
                                                     table=insert_table))
-
-    columns = list(describe_columns(schema, table).keys())
-    extended_columns = columns + ['_submitted', '_id']
-    changes = (add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in extended_columns}, 'insert') for row in cursor.fetchall())
-
+    changes = [add_type({c.name: v for c, v in zip(cursor.description, row)
+                         if c.name in extended_columns}, 'insert')
+               for row in cursor.fetchall()]
 
     update_table = get_edit_table_name(schema, table)
-
     cursor.execute('select * '
                    'from {schema}.{table} '
                    'where _applied = FALSE;'.format(schema=meta_schema,
                                                     table=update_table))
-
-    changes = itertools.chain(changes, (add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in extended_columns}, 'update') for row in cursor.fetchall()))
+    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                          if c.name in extended_columns}, 'update')
+                for row in cursor.fetchall()]
 
     delete_table = get_delete_table_name(schema, table)
-
     cursor.execute('select * '
                    'from {schema}.{table} '
                    'where _applied = FALSE;'.format(schema=meta_schema,
                                                     table=delete_table))
-
-    changes = itertools.chain(changes, (
-        add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in ['_id', 'id', '_submitted']}, 'delete') for row in cursor.fetchall()
-        ))
+    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                          if c.name in ['_id', 'id', '_submitted']}, 'delete')
+                for row in cursor.fetchall()]
 
     changes = list(changes)
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
@@ -1710,7 +1707,7 @@ def apply_changes(schema, table, cursor=None):
 def apply_insert(session, table, row, rid):
     print("apply insert", row)
     query = table.insert(row).compile()
-    session.execute(str(query)%query.params)
+    session.execute(str(query)%{k: v if v is not None else 'NULL' for k,v in query.params.items()})
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),
