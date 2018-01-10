@@ -984,7 +984,7 @@ def data_insert(request, context=None):
             col.null_ok] for col in description]
     response['rowcount'] = cursor.rowcount
     if schema == 'sandbox':
-        apply_changes(schema, table)
+        apply_changes(schema, table, cursor)
 
     return response
 
@@ -1645,86 +1645,97 @@ def getValue(schema, table, column, id):
     return None
 
 
-def apply_changes(schema, table):
+def apply_changes(schema, table, cursor=None):
     def add_type(d, type):
         d['_type'] = type
         return d
+
     engine = _get_engine()
-    conn = engine.connect()
-    try:
-        meta_schema = get_meta_schema_name(schema)
 
-        insert_table = get_insert_table_name(schema, table)
-        columns = list(describe_columns(schema, table).keys()) + ['_submitted', '_id']
-        changes = (add_type({c: getattr(row, c) for c in columns}, 'insert') for row in conn.execute('select * '
-                                'from {schema}.{table} '
-                                'where _applied = FALSE;'.format(schema=meta_schema,
-                                                                 table=insert_table)))
+    if cursor is None:
+
+        cursor = engine.connect().cursor()
+
+    meta_schema = get_meta_schema_name(schema)
+
+    insert_table = get_insert_table_name(schema, table)
+    cursor.execute('select * '
+                   'from {schema}.{table} '
+                   'where _applied = FALSE;'.format(schema=meta_schema,
+                                                    table=insert_table))
+
+    columns = list(describe_columns(schema, table).keys())
+    extended_columns = columns + ['_submitted', '_id']
+    changes = (add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in extended_columns}, 'insert') for row in cursor.fetchall())
 
 
-        update_table = get_edit_table_name(schema, table)
-        changes = itertools.chain(changes, (add_type({c: getattr(row, c) for c in columns}, 'update') for row in conn.execute('select * '
-                                'from {schema}.{table} '
-                                'where _applied = FALSE;'.format(schema=meta_schema,
-                                                                 table=update_table))))
+    update_table = get_edit_table_name(schema, table)
 
-        delete_table = get_delete_table_name(schema, table)
-        changes = itertools.chain(changes, (
-            add_type({c: getattr(row, c) for c in ['_id', 'id', '_submitted']}, 'delete') for row in
-            conn.execute('select * '
-                         'from {schema}.{table} '
-                         'where _applied = FALSE;'.format(schema=meta_schema,
-                                                          table=delete_table))))
-    finally:
-        conn.close()
+    cursor.execute('select * '
+                   'from {schema}.{table} '
+                   'where _applied = FALSE;'.format(schema=meta_schema,
+                                                    table=update_table))
+
+    changes = itertools.chain(changes, (add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in extended_columns}, 'update') for row in cursor.fetchall()))
+
+    delete_table = get_delete_table_name(schema, table)
+
+    cursor.execute('select * '
+                   'from {schema}.{table} '
+                   'where _applied = FALSE;'.format(schema=meta_schema,
+                                                    table=delete_table))
+
+    changes = itertools.chain(changes, (
+        add_type({c.name: v for c, v in zip(cursor.description, row) if c.name in ['_id', 'id', '_submitted']}, 'delete') for row in cursor.fetchall()
+        ))
 
     changes = list(changes)
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
-    session = sessionmaker(bind=engine)()
+
     # ToDo: This may require some kind of dependency tree resolution
     try:
         for change in sorted(changes, key=lambda x: x['_submitted']):
+            distilled_change = {k:v for k,v in change.items() if k in columns}
             if change['_type'] == 'insert':
-                apply_insert(session, table_obj, change)
+                apply_insert(cursor, table_obj, distilled_change, change['_id'])
             elif change['_type'] == 'update':
-                apply_update(session, table_obj, change)
+                apply_update(cursor, table_obj, distilled_change, change['_id'])
             elif change['_type'] == 'delete':
-                apply_deletion(session, table_obj, change)
+                apply_deletion(cursor, table_obj, distilled_change, change['_id'])
     except Exception as e:
-        session.rollback()
         raise e
-    else:
-        session.commit()
-    finally:
-        session.close()
 
 
-def apply_insert(session, table, row):
+
+def apply_insert(session, table, row, rid):
     print("apply insert", row)
-    session.execute(table.insert(), row)
+    query = table.insert(row).compile()
+    session.execute(str(query)%query.params)
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),
-        id=row['_id']
+        id=rid
     ))
 
 
-def apply_update(session, table, row):
+def apply_update(session, table, row, rid):
     print("apply update", row)
-    session.execute(table.update(table.c.id==row['id']), row)
+    query = table.update(table.c.id == row['id']).compile()
+    session.execute(str(query)%query.params)
     session.execute(
         'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
             schema=get_meta_schema_name(table.schema),
             table=get_edit_table_name(table.schema, table.name),
-            id=row['_id']
+            id=rid
         ))
 
-def apply_deletion(session, table, row):
+def apply_deletion(session, table, row, rid):
     print("apply deletion", row)
-    session.execute(table.delete(table.c.id==row['id']), row)
+    query = table.delete(table.c.id==row['id']).compile()
+    session.execute(str(query)%query.params)
     session.execute(
         'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
             schema=get_meta_schema_name(table.schema),
             table=get_delete_table_name(table.schema, table.name),
-            id=row['_id']
+            id=rid
         ))
