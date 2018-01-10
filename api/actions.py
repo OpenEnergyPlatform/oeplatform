@@ -15,7 +15,7 @@ from sqlalchemy.orm.session import sessionmaker
 import geoalchemy2  # Although this import seems unused is has to be here
 
 import api
-from api import references
+from api import references, DEFAULT_SCHEMA
 from api.parser import quote, read_pgid, read_bool, get_or_403
 from api.error import APIError
 from shapely import wkb, wkt
@@ -1191,7 +1191,7 @@ def has_schema(request, context=None):
 
 def has_table(request, context=None):
     engine = _get_engine()
-    schema = request.pop('schema', None)
+    schema = request.pop('schema', DEFAULT_SCHEMA)
     table = get_or_403(request, 'table')
     conn = engine.connect()
     try:
@@ -1267,7 +1267,7 @@ def get_view_names(request, context=None):
     conn = engine.connect()
     try:
         result = engine.dialect.get_view_names(conn,
-                                               schema=request.pop('schema', None),
+                                               schema=request.pop('schema', DEFAULT_SCHEMA),
                                                **request)
     finally:
         conn.close()
@@ -1280,8 +1280,7 @@ def get_view_definition(request, context=None):
     try:
         result = engine.dialect.get_schema_names(conn,
                                                  get_or_403(request, 'view_name'),
-                                                 schema=request.pop('schema',
-                                                                    None),
+                                                 schema=request.pop('schema', DEFAULT_SCHEMA),
                                                  **request)
     finally:
         conn.close()
@@ -1294,7 +1293,7 @@ def get_columns(request, context=None):
     try:
         result = engine.dialect.get_columns(conn,
                                             get_or_403(request, 'table'),
-                                            schema=request.pop('schema', None),
+                                            schema=request.pop('schema', DEFAULT_SCHEMA),
                                             **request)
     finally:
         conn.close()
@@ -1308,7 +1307,7 @@ def get_pk_constraint(request, context=None):
         result = engine.dialect.get_pk_constraint(conn,
                                                   get_or_403(request, 'table'),
                                                   schema=request.pop('schema',
-                                                                     None),
+                                                                     DEFAULT_SCHEMA),
                                                   **request)
     finally:
         conn.close()
@@ -1321,8 +1320,7 @@ def get_foreign_keys(request, context=None):
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema',
-                                                                    None),
+                                                 schema=request.pop('schema', DEFAULT_SCHEMA),
                                                  postgresql_ignore_search_path=request.pop(
                                                      'postgresql_ignore_search_path',
                                                      False),
@@ -1351,8 +1349,7 @@ def get_unique_constraints(request, context=None):
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema',
-                                                                    None),
+                                                 schema=request.pop('schema', DEFAULT_SCHEMA),
                                                  **request)
     finally:
         conn.close()
