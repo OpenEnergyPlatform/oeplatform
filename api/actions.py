@@ -8,7 +8,7 @@ import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from sqlalchemy import func, MetaData, Table
+from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
@@ -21,7 +21,7 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
-from sqlalchemy import exc
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 from random import randrange
@@ -1289,15 +1289,57 @@ def get_view_definition(request, context=None):
 
 def get_columns(request, context=None):
     engine = _get_engine()
-    conn = engine.connect()
-    try:
-        result = engine.dialect.get_columns(conn,
-                                            get_or_403(request, 'table'),
-                                            schema=request.pop('schema', DEFAULT_SCHEMA),
-                                            **request)
-    finally:
-        conn.close()
-    return result
+    connection = engine.connect()
+
+    table_name = get_or_403(request, 'table')
+    schema = request.pop('schema', DEFAULT_SCHEMA)
+
+
+    # We need to translate the info_cache from a json-friendly format to the
+    # conventional one
+    info_cache = None
+    if request.get('info_cache'):
+        info_cache = {('get_columns',tuple(k.split('+')),tuple()):v for k,v in request.get('info_cache', {}).items()}
+
+    table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
+                                   info_cache=info_cache)
+    SQL_COLS = """
+                SELECT a.attname,
+                  pg_catalog.format_type(a.atttypid, a.atttypmod),
+                  (SELECT pg_catalog.pg_get_expr(d.adbin, d.adrelid)
+                    FROM pg_catalog.pg_attrdef d
+                   WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum
+                   AND a.atthasdef)
+                  AS DEFAULT,
+                  a.attnotnull, a.attnum, a.attrelid as table_oid
+                FROM pg_catalog.pg_attribute a
+                WHERE a.attrelid = :table_oid
+                AND a.attnum > 0 AND NOT a.attisdropped
+                ORDER BY a.attnum
+            """
+    s = sql.text(SQL_COLS,
+                 bindparams=[
+                     sql.bindparam('table_oid', type_=sqltypes.Integer)],
+                 typemap={
+                     'attname': sqltypes.Unicode,
+                     'default': sqltypes.Unicode}
+                 )
+    c = connection.execute(s, table_oid=table_oid)
+    rows = c.fetchall()
+
+    domains = engine.dialect._load_domains(connection)
+    enums = dict(
+        (
+            "%s.%s" % (rec['schema'], rec['name'])
+            if not rec['visible'] else rec['name'], rec) for rec in
+        engine.dialect._load_enums(connection, schema='*')
+    )
+
+    columns = [(name, format_type, default, notnull, attnum, table_oid)
+            for name, format_type, default, notnull, attnum, table_oid in rows]
+
+    # format columns
+    return {'columns': columns, 'domains': domains, 'enums': enums}
 
 
 def get_pk_constraint(request, context=None):
@@ -1320,7 +1362,8 @@ def get_foreign_keys(request, context=None):
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema', DEFAULT_SCHEMA),
+                                                 schema=request.pop('schema',
+                                                                    None),
                                                  postgresql_ignore_search_path=request.pop(
                                                      'postgresql_ignore_search_path',
                                                      False),
@@ -1349,7 +1392,7 @@ def get_unique_constraints(request, context=None):
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema', DEFAULT_SCHEMA),
+                                                 schema=request.pop('schema', None),
                                                  **request)
     finally:
         conn.close()
