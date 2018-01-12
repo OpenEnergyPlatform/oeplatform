@@ -8,7 +8,7 @@ import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes
+from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes, util
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
@@ -537,7 +537,7 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column_definition_query(c):
-    return "{name} {data_type} {length} {not_null} {default}".format(
+    return "{name} {data_type} {length} {not_null} {default} {primary_key}".format(
         name=get_or_403(c, 'name'),
         data_type=get_or_403(c, 'data_type'),
         length=('(' + str(c['character_maximum_length']) + ')')
@@ -548,7 +548,8 @@ def get_column_definition_query(c):
                     else "",
         default= 'DEFAULT ' + api.parser.read_pgvalue(c['column_default'])
                     if 'column_default' in c
-                    else ""
+                    else "",
+        primary_key='primary key' if c.get('primary_key', False) else ''
         )
 
 
@@ -869,9 +870,20 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
 
 def data_delete(request, context=None):
-    target_table = get_delete_table_name(request['schema'],request['table'])
+    orig_table = get_or_403(request, 'table')
+    if orig_table.startswith('_') or orig_table.endswith('_cor'):
+        raise APIError("Insertions on meta tables is not allowed", status=403)
+    orig_schema = get_or_403(request, 'schema')
+
+    schema, table = get_table_name(orig_schema, orig_table)
+
+    target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
-    return __change_rows(request, context, target_table, setter, ['id'])
+    cursor = _load_cursor(context['cursor_id'])
+    result = __change_rows(request, context, target_table, setter, ['id'])
+    if request['schema'] == 'sandbox':
+        apply_changes(schema, table, cursor)
+    return result
 
 
 def data_update(request, context=None):
@@ -1746,8 +1758,8 @@ def apply_changes(schema, table, cursor=None):
 
 def apply_insert(session, table, row, rid):
     print("apply insert", row)
-    query = table.insert(row).compile()
-    session.execute(str(query)%{k: v if v is not None else 'NULL' for k,v in query.params.items()})
+    query = table.insert().values(row).compile()
+    session.execute(str(query), {k: v if v is not None else 'NULL' for k,v in query.params.items()})
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),
@@ -1758,7 +1770,7 @@ def apply_insert(session, table, row, rid):
 def apply_update(session, table, row, rid):
     print("apply update", row)
     query = table.update(table.c.id == row['id']).compile()
-    session.execute(str(query)%query.params)
+    session.execute(str(query), query.params)
     session.execute(
         'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
             schema=get_meta_schema_name(table.schema),
@@ -1769,7 +1781,7 @@ def apply_update(session, table, row, rid):
 def apply_deletion(session, table, row, rid):
     print("apply deletion", row)
     query = table.delete(table.c.id==row['id']).compile()
-    session.execute(str(query)%query.params)
+    session.execute(str(query), query.params)
     session.execute(
         'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
             schema=get_meta_schema_name(table.schema),

@@ -4,7 +4,8 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_
+from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_, util
+from sqlalchemy.sql.expression import CompoundSelect
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -133,21 +134,28 @@ def parse_select(d):
 
     L = None
 
-    if 'fields' in d and d['fields']:
-        L = []
-        for field in d['fields']:
-            col = parse_expression(field)
-            if 'as' in field:
-                col.label(read_pgid(field['as']))
-            L.append(col)
-    from_clause = parse_from_item(get_or_403(d, 'from'))
-    if not L:
-        L = '*'
-    query = select(columns=L, distinct=distinct, from_obj=from_clause)
+    kind = d.get('type')
 
-    # [ WHERE condition ]
-    if d.get('where', False):
-        query = query.where(parse_condition(d['where']))
+    if kind and kind.lower() in ['union', 'except', 'intersect']:
+        query = CompoundSelect(util.symbol(kind), *[parse_select(part_sel) for part_sel in d.get('selects',[])])
+
+
+    else:
+        if 'fields' in d and d['fields']:
+            L = []
+            for field in d['fields']:
+                col = parse_expression(field)
+                if 'as' in field:
+                    col.label(read_pgid(field['as']))
+                L.append(col)
+        from_clause = parse_from_item(get_or_403(d, 'from'))
+        if not L:
+            L = '*'
+        query = select(columns=L, distinct=distinct, from_obj=from_clause)
+
+        # [ WHERE condition ]
+        if d.get('where', False):
+            query = query.where(parse_condition(d['where']))
 
     if 'group_by' in d:
         query = query.group_by([parse_expression(f) for f in d['group_by']])
@@ -185,7 +193,6 @@ def parse_select(d):
         else:
             raise APIError('Invalid LIMIT: Expected a digit')
     return query
-
 
 def parse_from_item(d):
     """
