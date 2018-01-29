@@ -172,7 +172,7 @@ def parse_select(d):
             query = query.where(parse_condition(d['where']))
 
     if 'group_by' in d:
-        query = query.group_by([parse_expression(f) for f in d['group_by']])
+        query = query.group_by(*[parse_expression(f) for f in d['group_by']])
 
     if 'having' in d:
         query.having([parse_condition(f) for f in d['having']])
