@@ -39,11 +39,11 @@ def read_pgvalue(x):
     return x
 
 
-def read_operator(x, right):
+"""def read_operator(x, right):
     # TODO: Implement check for valid operators
     if isinstance(right, dict) and get_or_403(right, 'type') == 'value' and ('value' not in right or get_or_403(right, 'value') is None and x == '='):
         return 'is'
-    return x
+    return x"""
 
 
 class ValidationError(Exception):
@@ -189,9 +189,10 @@ def parse_select(d):
     if 'order_by' in d:
         for ob in d['order_by']:
             expr = parse_expression(ob)
-            desc = ob.get('ordering', 'asc').lower() == 'desc'
-            if desc:
-                expr = expr.desc()
+            if isinstance(ob, dict):
+                desc = ob.get('ordering', 'asc').lower() == 'desc'
+                if desc:
+                    expr = expr.desc()
             query = query.order_by(expr)
 
     if 'limit' in d:
@@ -303,9 +304,10 @@ def parse_operator(d):
     return query
 
 def parse_modifier(d):
-    return "%s %s" % (parse_expression(get_or_403(d,'operand')),
-                      read_operator(get_or_403(d, 'operator'),
-                                    get_or_403(d,'operand')))
+    query = parse_sqla_modifier(get_or_403(d, 'operator'),
+                                *list(map(parse_expression,
+                                          get_or_403(d, 'operands'))))
+    return query
 
 def parse_function(d):
     fname = get_or_403(d, 'function')
@@ -494,6 +496,30 @@ def parse_sqla_operator(raw_key, *operands):
             return x >= y
         if key in ['as']:
             return x.label(y)
+        if key in ['add', '+']:
+            return x+y
+        if key in ['substract', '-']:
+            return x-y
+        if key in ['multiply', '*']:
+            return x*y
+        if key in ['divide', '/']:
+            return x/y
+
+    raise APIError("Operator %s not supported" % key)
 
 
+def parse_sqla_modifier(raw_key, *operands):
+    key = raw_key.lower().strip()
+    if not operands:
+        raise APIError('Missing arguments for \'%s\'.' % (key))
+
+    if len(operands) != 1:
+        raise APIError(
+            'Wrong number of arguments for \'%s\'. Expected: 1 Got: %s' % (
+            key, len(operands)))
+    x = operands[0]
+    if key in ['asc']:
+        return x.asc()
+    if key in ['desc']:
+        return x.desc
     raise APIError("Operator %s not supported"%key)
