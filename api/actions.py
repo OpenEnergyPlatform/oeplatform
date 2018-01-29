@@ -1003,7 +1003,7 @@ def data_insert(request, context=None):
 
 def _execute_sqla(query, cursor):
     try:
-        compiled = query.compile()
+        compiled = query.compile(dialect=_get_engine().dialect)
     except exc.SQLAlchemyError as e:
         raise APIError(repr(e))
     try:
