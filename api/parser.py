@@ -134,12 +134,25 @@ def parse_select(d):
 
     L = None
 
-    kind = d.get('type')
+    keyword = d.get('keyword')
 
-    if kind and kind.lower() in ['union', 'except', 'intersect']:
-        query = CompoundSelect(util.symbol(kind), *[parse_select(part_sel) for part_sel in d.get('selects',[])])
-
-
+    if keyword and keyword.lower() in ['union', 'except', 'intersect']:
+        partials = []
+        for part_sel in d.get('selects', []):
+            t = part_sel.get('type')
+            if t == 'grouping':
+                grouping = get_or_403(part_sel,'grouping')
+                if isinstance(grouping, dict):
+                    partials.append(parse_select(grouping))
+                elif isinstance(grouping, list):
+                    partials = map(parse_select, grouping)
+                else:
+                    APIError('Cannot handle grouping type. Dictionary or list expected.')
+            elif t == 'select':
+                partials.append(parse_select(part_sel))
+            else:
+                raise APIError('Unknown select type: ' + t)
+        query = CompoundSelect(util.symbol(keyword), *partials)
     else:
         if 'fields' in d and d['fields']:
             L = []
@@ -224,7 +237,7 @@ def parse_from_item(d):
         if not exists:
             raise APIError('Table not found: ' + str(item), status=400)
     elif dtype == 'select':
-        item = parse_select(d['query'])
+        item = parse_select(d)
     elif dtype == 'join':
         left = parse_from_item(get_or_403(d, 'left'))
         right = parse_from_item(get_or_403(d, 'right'))
