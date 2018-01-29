@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_, util
 from sqlalchemy.sql.expression import CompoundSelect
+from sqlalchemy.sql import functions as fun
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -509,6 +510,8 @@ def parse_sqla_operator(raw_key, *operands):
             return x*y
         if key in ['divide', '/']:
             return x/y
+        if key in ['concatenate', '||']:
+            return fun.concat(x,y)
 
     raise APIError("Operator %s not supported" % key)
 
