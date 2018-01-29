@@ -284,11 +284,18 @@ def parse_expression(d):
                 return read_pgvalue(get_or_403(d, 'value'))
             else:
                 return None
+        if dtype == 'label':
+            return parse_label(d)
         else:
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
         return [parse_expression(x) for x in d]
     return d
+
+
+def parse_label(d):
+    return parse_expression(
+        get_or_403(d,'element')).label(get_or_403(d,'label'))
 
 
 def parse_condition(dl):
@@ -494,8 +501,6 @@ def parse_sqla_operator(raw_key, *operands):
             return x <= y
         if key in ['notlower', '>=']:
             return x >= y
-        if key in ['as']:
-            return x.label(y)
         if key in ['add', '+']:
             return x+y
         if key in ['substract', '-']:
@@ -521,5 +526,5 @@ def parse_sqla_modifier(raw_key, *operands):
     if key in ['asc']:
         return x.asc()
     if key in ['desc']:
-        return x.desc
+        return x.desc()
     raise APIError("Operator %s not supported"%key)
