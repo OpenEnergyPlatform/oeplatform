@@ -1267,7 +1267,7 @@ def get_table_names(request, context=None):
     try:
         result = engine.dialect.get_table_names(conn,
                                                 schema=request.pop('schema',
-                                                                   None),
+                                                                   DEFAULT_SCHEMA),
                                                 **request)
     finally:
         conn.close()
@@ -1388,10 +1388,11 @@ def get_foreign_keys(request, context=None):
 def get_indexes(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
+    if not request.get('schema', None):
+        request['schema'] = DEFAULT_SCHEMA
     try:
         result = engine.dialect.get_indexes(conn,
                                             get_or_403(request, 'table'),
-                                            get_or_403(request, 'schema'),
                                             **request)
     finally:
         conn.close()
@@ -1401,10 +1402,11 @@ def get_indexes(request, context=None):
 def get_unique_constraints(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
+    if not request.get('schema', None):
+        request['schema'] = DEFAULT_SCHEMA
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema', None),
                                                  **request)
     finally:
         conn.close()
