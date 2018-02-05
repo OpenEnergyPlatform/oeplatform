@@ -537,9 +537,27 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
 
 
 def get_column_definition_query(c):
+    dt = get_or_403(c, 'data_type')
+    autoinc = c.get('autoincrement', False)
+    if autoinc:
+        if autoinc == 'auto':
+            if c.get('primary_key', False):
+                if dt.lower() == 'integer':
+                    dt = 'SERIAL'
+                if dt.lower() == 'bigint':
+                    dt = 'BIGSERIAL'
+        elif autoinc is True:
+            if dt.lower() == 'integer':
+                dt = 'SERIAL'
+            if dt.lower() == 'bigint':
+                dt = 'BIGSERIAL'
+        else:
+            raise APIError('Unknown autoincrement value: %s'%autoinc)
+
+
     return "{name} {data_type} {length} {not_null} {default} {primary_key}".format(
         name=get_or_403(c, 'name'),
-        data_type=get_or_403(c, 'data_type'),
+        data_type=dt,
         length=('(' + str(c['character_maximum_length']) + ')')
                     if c.get('character_maximum_length', False)
                     else '',
@@ -1020,6 +1038,8 @@ def _execute_sqla(query, cursor):
     except psycopg2.DatabaseError as e:
         # Other DBAPIErrors should not be reflected to the client.
         raise e
+    except:
+        raise
 
 def process_value(val):
     if isinstance(val, str):
@@ -1371,11 +1391,11 @@ def get_pk_constraint(request, context=None):
 def get_foreign_keys(request, context=None):
     engine = _get_engine()
     conn = engine.connect()
+    if not request.get('schema', None):
+        request['schema'] = DEFAULT_SCHEMA
     try:
         result = engine.dialect.get_foreign_keys(conn,
                                                  get_or_403(request, 'table'),
-                                                 schema=request.pop('schema',
-                                                                    None),
                                                  postgresql_ignore_search_path=request.pop(
                                                      'postgresql_ignore_search_path',
                                                      False),
@@ -1761,7 +1781,7 @@ def apply_changes(schema, table, cursor=None):
 def apply_insert(session, table, row, rid):
     print("apply insert", row)
     query = table.insert().values(row).compile()
-    session.execute(str(query), {k: v if v is not None else 'NULL' for k,v in query.params.items()})
+    session.execute(str(query), {k: v if v is not None else None for k,v in query.params.items()})
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),
