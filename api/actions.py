@@ -8,7 +8,9 @@ import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes, util
+from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes, util,\
+    Column, ForeignKey
+import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
@@ -89,6 +91,11 @@ def __translate_fetched_cell(cell):
         return wkb.dumps(wkb.loads(cell.tobytes()), hex=True)
     else:
         return cell
+
+
+def _get_cursor(cursor_id):
+    return __CURSORS[cursor_id]
+
 
 def __response_success():
     return {'success': True}
@@ -536,39 +543,71 @@ def get_constraints_changes(reviewed=None, changed=None, schema=None, table=None
              } for column in response]
 
 
-def get_column_definition_query(c):
-    dt = get_or_403(c, 'data_type')
-    autoinc = c.get('autoincrement', False)
-    if autoinc:
-        if autoinc == 'auto':
-            if c.get('primary_key', False):
-                if dt.lower() == 'integer':
-                    dt = 'SERIAL'
-                if dt.lower() == 'bigint':
-                    dt = 'BIGSERIAL'
-        elif autoinc is True:
-            if dt.lower() == 'integer':
-                dt = 'SERIAL'
-            if dt.lower() == 'bigint':
-                dt = 'BIGSERIAL'
-        else:
-            raise APIError('Unknown autoincrement value: %s'%autoinc)
+def get_column(d):
+    schema = d.get('schema', DEFAULT_SCHEMA)
+    table = get_or_403(d, 'table')
+    name = get_or_403(d, 'column')
+    return Column('%s.%s'%(table, name), schema=schema)
+
+def get_column_definition_query(d):
+    name = get_or_403(d, 'name')
+    args = []
+    kwargs = {}
+    dt_string = get_or_403(d, 'data_type')
+
+    dt_expression = r'(?P<dtname>[A-z_]+)\((?P<cardinality>\d*)\)'
+    dt_cardinality = None
+
+    match = re.match(dt_expression, dt_string)
 
 
-    return "{name} {data_type} {length} {not_null} {default} {primary_key}".format(
-        name=get_or_403(c, 'name'),
-        data_type=dt,
-        length=('(' + str(c['character_maximum_length']) + ')')
-                    if c.get('character_maximum_length', False)
-                    else '',
-        not_null="NOT NULL"
-                    if not c.get('is_nullable', True)
-                    else "",
-        default= 'DEFAULT ' + api.parser.read_pgvalue(c['column_default'])
-                    if 'column_default' in c
-                    else "",
-        primary_key='primary key' if c.get('primary_key', False) else ''
-        )
+
+    if match:
+        dt_string = match.groups()[0]
+        dt_cardinality = int(match.groups()[1])
+
+    if hasattr(geoalchemy2, dt_string):
+        dt = getattr(geoalchemy2, dt_string)
+    elif hasattr(sqltypes, dt_string):
+        dt = getattr(sqltypes, dt_string)
+    else:
+        raise APIError('Unknown type (%s).'%dt_string)
+
+    if dt_cardinality:
+        dt = dt(dt_cardinality)
+
+    for fk in d.get('foreign_key', []):
+        fkschema = fk.get('schema', DEFAULT_SCHEMA)
+        if fkschema is None:
+            fkschema = DEFAULT_SCHEMA
+
+        fktable = Table(get_or_403(fk, 'table'), MetaData(), schema=fkschema)
+
+        fkcolumn = Column(get_or_403(fk, 'column'))
+
+        fkcolumn.table = fktable
+
+        args.append(ForeignKey(fkcolumn))
+
+    if 'autoincrement' in d:
+        kwargs['autoincrement'] = d['autoincrement']
+
+    if d.get('is_nullable', False):
+        kwargs['nullable'] = True
+
+    if d.get('primary_key', False):
+        kwargs['primary_key'] = True
+
+    if 'column_default' in d:
+        kwargs['default'] = api.parser.read_pgvalue(d['column_default'])
+
+    if d.get('character_maximum_length', False):
+        dt += '(' + str(d['character_maximum_length']) + ')'
+
+    c = Column(name, dt, *args, **kwargs)
+
+    return c
+
 
 
 def column_alter(query, context, schema, table, column):
@@ -621,7 +660,7 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 
-def table_create(schema, table, columns, constraints):
+def table_create(schema, table, columns, constraints_definitions, cursor):
     """
     Creates a new table.
     :param schema: schema
@@ -640,23 +679,33 @@ def table_create(schema, table, columns, constraints):
     #cid = id_columns[0]
     #if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
-    str_list = []
-    str_list.append("CREATE TABLE {schema}.\"{table}\" (".format(schema=schema, table=table))
 
-    str_list.append(', '.join(get_column_definition_query(c) for c in columns))
+    metadata = MetaData()
 
-    str_list.append(");")
-    sql_string = ''.join(str_list)
+    columns = [get_column_definition_query(c) for c in columns]
 
+    constraints = []
 
-    results = [perform_sql(sql_string)]
+    for constraint in constraints_definitions:
+        if constraint['type'] == 'primary_key':
+            kwargs = {}
+            cname = constraint.get('name')
+            if cname:
+                kwargs['name'] = cname
+            ccolumns = constraint['columns']
+            constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
+                                                              **kwargs))
+        elif constraint['type'] == 'unique':
+            kwargs = {}
+            cname = constraint.get('name')
+            if cname:
+                kwargs['name'] = cname
+            ccolumns = constraint['columns']
+            constraints.append(sa.schema.UniqueConstraint(*ccolumns,
+                                                          **kwargs))
 
-    for constraint_definition in constraints:
-        results.append(table_change_constraint(constraint_definition))
-
-    for res in results:
-        if not res.get('success', True):
-            return res
+    t = Table(table, metadata, *columns, *constraints, schema=schema)
+    t.create(_get_engine())
 
     return get_response_dict(success=True)
 
@@ -739,7 +788,7 @@ def table_change_column(column_definition):
     return perform_sql(sql_string)
 
 
-def table_change_constraint(constraint_definition):
+def table_change_constraint(table, constraint_definition):
     """
     Changes constraint of table
     :param schema: schema
@@ -760,22 +809,29 @@ def table_change_constraint(constraint_definition):
     sql = []
 
     if 'ADD' in get_or_403(constraint_definition, 'action'):
-        sql.append(
-            'ALTER TABLE {schema}.{table} {action} {constraint_name} {constraint_type} ({constraint_parameter})'.format(
-                schema=schema, table=table,
-                action=get_or_403(constraint_definition, 'action'),
-                constraint_name = 'CONSTRAINT ' + constraint_definition['constraint_name'] if 'constraint_name' in constraint_definition else '',
-                constraint_parameter = get_or_403(constraint_definition, 'constraint_parameter'),
-                constraint_type = get_or_403(constraint_definition, 'constraint_type')))
+        ctype = get_or_403(constraint_definition, 'constraint_type').lower()
+        if ctype == 'foreign key':
+            columns = [get_column(c) for c in get_or_403(constraint_definition,
+                                                         'columns')]
 
-        if 'FOREIGN KEY' in get_or_403(constraint_definition, 'constraint_type'):
-            if get_or_403(constraint_definition, 'reference_table') is None or get_or_403(constraint_definition, 'reference_column') is None:
-                raise APIError('references are not defined correctly')
-            sql.append(' REFERENCES {reference_table}({reference_column})'.format(
-                reference_column=constraint_definition['reference_column'],
-                reference_table=constraint_definition['reference_table']))
+            refcolumns = [get_column(c) for c in
+                            get_or_403(constraint_definition, 'refcolumns')]
 
-        sql.append(';')
+            constraint = sa.ForeignKeyConstraint(columns, refcolumns)
+            constraint.create(_get_engine())
+        elif ctype == 'primary key':
+            columns = [get_column(c) for c in get_or_403(constraint_definition,
+                                                         'columns')]
+            constraint = sa.PrimaryKeyConstraint(columns)
+            constraint.create(_get_engine())
+        elif ctype == 'unique':
+            columns = [get_column(c) for c in get_or_403(constraint_definition,
+                                                         'columns')]
+            constraint = sa.UniqueConstraint(*columns)
+            constraint.create(_get_engine())
+        elif ctype == 'check':
+            raise APIError('Not supported')
+            constraint_class = sa.CheckConstraint
     elif 'DROP' in constraint_definition['action']:
         sql.append('ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}'.format(schema=schema, table=table,
                                                                                            constraint_name=
