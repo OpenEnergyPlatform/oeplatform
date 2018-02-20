@@ -7,8 +7,12 @@ from datetime import datetime
 from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_, util
 from sqlalchemy.sql.expression import CompoundSelect
 from sqlalchemy.sql import functions as fun
+from sqlalchemy.schema import Sequence
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
+
+from . import DEFAULT_SCHEMA
+
 import geoalchemy2  # Although this import seems unused is has to be here
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -155,6 +159,7 @@ def parse_select(d):
                 raise APIError('Unknown select type: ' + t)
         query = CompoundSelect(util.symbol(keyword), *partials)
     else:
+        kwargs=dict(distinct=distinct)
         if 'fields' in d and d['fields']:
             L = []
             for field in d['fields']:
@@ -162,10 +167,14 @@ def parse_select(d):
                 if 'as' in field:
                     col.label(read_pgid(field['as']))
                 L.append(col)
-        from_clause = parse_from_item(get_or_403(d, 'from'))
+        if 'from' in d:
+            kwargs['from_obj'] = parse_from_item(get_or_403(d, 'from'))
+        else:
+            kwargs['from_obj'] = []
         if not L:
             L = '*'
-        query = select(columns=L, distinct=distinct, from_obj=from_clause)
+        kwargs['columns'] = L
+        query = select(**kwargs)
 
         # [ WHERE condition ]
         if d.get('where', False):
@@ -287,6 +296,10 @@ def parse_expression(d):
                 return None
         if dtype == 'label':
             return parse_label(d)
+        if dtype == 'sequence':
+            schema = read_pgid(d['schema']) if 'schema' in d else DEFAULT_SCHEMA
+            s = '"%s"."%s"'%(schema, get_or_403(d, 'sequence'))
+            return Sequence(get_or_403(d, 'sequence'), schema=schema)
         else:
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
@@ -335,8 +348,11 @@ def parse_function(d):
         x, y = operands
         return x + y
     else:
-        function = getattr(func, fname)
-        return function(*operands)
+        if fname == 'nextval':
+            return func.next_value(*operands)
+        else:
+            function = getattr(func, fname)
+            return function(*operands)
 
 
 def cadd(d, key, string=None):
