@@ -528,8 +528,10 @@ def parse_sqla_operator(raw_key, *operands):
             return x/y
         if key in ['concatenate', '||']:
             return fun.concat(x,y)
+        if key in ['is not']:
+            return x.isnot(y)
 
-    raise APIError("Operator %s not supported" % key)
+    raise APIError("Operator '%s' not supported" % key)
 
 
 def parse_sqla_modifier(raw_key, *operands):
