@@ -138,6 +138,7 @@
                 grid.render();
 
                 // add comment tooltip for columns
+                {% if comment_on_table %}
                 var columns = grid.grid.getColumns();
 
                 var fields = {{ comment_on_table.fields | safe }};
@@ -152,6 +153,7 @@
                 }
 
                 grid.grid.setColumns(columns);
+                {% endif %}
                 grid.render();
 
             {% elif current_view.type == "graph" %}
@@ -184,33 +186,15 @@
                 });
                 map.render();
 
+                // reload map data when view is moved via dragging
+                {% if geo_type == "single-column" %}
+
                 var geoJSON;
 
-                var left = map.map.getBounds().getEast();
-                var right = map.map.getBounds().getWest();
-                var top = map.map.getBounds().getNorth();
-                var bottom = map.map.getBounds().getSouth();
+                var left, right, top, bottom;
 
-                $.ajax({
-                    url: "/api/get_map_polygons",
-                    data:
-                        {
-                            'schema': '{{ schema }}',
-                            'table': '{{ table }}',
-                            'bounds': '{ "type": "Polygon", "coordinates":[[[' +
-                                      left  + ',' + top    + '],' +
-                                '[' + right + ',' + top    + '],' +
-                                '[' + right + ',' + bottom + '],' +
-                                '[' + left  + ',' + bottom + '],' +
-                                '[' + left  + ',' + top    + ']]] }'
-                        },
-                    success: function(result){
-                        geoJSON = L.geoJson(result["geom"]).addTo(map.map);
-                }});
-
-                // reload map data when view is moved via dragging
-                map.map.on('dragend', function onDragEnd(){
-
+                var updateFunction = function()
+                {
                     left = map.map.getBounds().getEast();
                     right = map.map.getBounds().getWest();
                     top = map.map.getBounds().getNorth();
@@ -222,6 +206,7 @@
                             {
                                 'schema': '{{ schema }}',
                                 'table': '{{ table }}',
+                                'geomField': '{{ geo_column }}',
                                 'bounds': '{ "type": "Polygon", "coordinates":[[[' +
                                     left + ',' + top + '],' +
                                     '[' + right + ',' + top + '],' +
@@ -230,11 +215,21 @@
                                     '[' + left + ',' + top + ']]] }'
                             },
                         success: function(result){
-                            geoJSON.clearLayers();
+                            if (typeof geoJSON !== 'undefined') {
+                                geoJSON.clearLayers();
+                            }
                             geoJSON = L.geoJson(result["geom"]).addTo(map.map);
                     }});
+                };
 
-                });
+                updateFunction();
+
+                map.map.on('moveend', updateFunction);
+                map.map.on('zoomend', updateFunction);
+
+                {% elif geo_type == "lat_long" %}
+                {% endif %}
+
             {% endif %}
         });
 

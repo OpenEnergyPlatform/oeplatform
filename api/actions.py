@@ -1706,7 +1706,7 @@ def apply_deletion(session, table, row):
 def get_map_polygons(request):
     content = request.POST if request.POST else request.GET
     engine = _get_engine()
-    query = 'SELECT ST_AsGeoJSON(ST_Collect(ST_Transform(geom, 4326))) ' \
+    query = 'SELECT ST_AsGeoJSON(ST_Collect(ST_Transform({column}, 4326))) ' \
             'FROM ( ' \
             'SELECT * ' \
             'FROM {schema}.{table} ' \
@@ -1716,6 +1716,7 @@ def get_map_polygons(request):
             ') AS stuff'\
         .format(schema = content["schema"],
                 table = content["table"],
+                column = content["geomField"],
                 bounds = "'" + content["bounds"] + "'")
     connection = engine.connect()
     result = connection.execute(query)
@@ -1724,7 +1725,8 @@ def get_map_polygons(request):
 
     for row in result:
         for col in row:
-            returnval["geom"] = json.loads(col)
+            if (col):
+                returnval["geom"] = json.loads(col)
             break;
         break
 
