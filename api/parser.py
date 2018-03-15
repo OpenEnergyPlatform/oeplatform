@@ -312,7 +312,10 @@ def parse_expression(d):
                     table = __PARSER_META.tables[ext_name]
                 else:
                     table = Table(d['table'], __PARSER_META, **tkwargs)
-                return getattr(table.c, name)
+                if hasattr(table.c, name):
+                    return getattr(table.c, name)
+                else:
+                    return column(name)
             return column(name)
         if dtype == 'grouping':
             return list(map(parse_expression, get_or_403(d, 'grouping')))
