@@ -44,8 +44,8 @@ urlpatterns = [
     url(r'^v0/advanced/cursor/open', views.create_ajax_handler(actions.open_cursor)),
     url(r'^v0/advanced/cursor/close', views.create_ajax_handler(actions.close_cursor)),
     url(r'^v0/advanced/cursor/fetch_one', views.create_ajax_handler(actions.fetchone)),
-    url(r'^v0/advanced/cursor/fetch_many', views.create_ajax_handler(actions.fetchmany)),
-    url(r'^v0/advanced/cursor/fetch_all', views.FetchView.as_view()),
+    url(r'^v0/advanced/cursor/fetch_many', views.FetchView.as_view(), dict(fetchtype='all')),
+    url(r'^v0/advanced/cursor/fetch_all', views.FetchView.as_view(), dict(fetchtype='all')),
 
     url(r'^v0/advanced/set_isolation_level', views.create_ajax_handler(actions.set_isolation_level)),
     url(r'^v0/advanced/get_isolation_level', views.create_ajax_handler(actions.get_isolation_level)),

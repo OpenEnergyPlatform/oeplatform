@@ -643,15 +643,19 @@ def create_ajax_handler(func, allow_cors=False):
 
 class FetchView(APIView):
     @api_exception
-    def post(self, request):
-        return self.do_fetchall(request)
+    def post(self, request, fetchtype):
+        if fetchtype == 'all':
+            return self.do_fetch(request, actions.fetchall)
+        elif fetchtype=='many':
+            return self.do_fetch(request, actions.fetchmany)
+        else:
+            raise APIError('Unknown fetchtype: %s'%fetchtype)
 
-    def do_fetchall(self, request):
+    def do_fetch(self, request, fetch):
         return StreamingHttpResponse((part
-             for row in actions.fetchall(actions.get_or_403(request.data,
-                                                            'cursor_id'))
+             for row in fetch(actions.get_or_403(request.data,
+                                                 'cursor_id'))
              for part in (self.transform_row(row), '\n')), content_type = 'application/json')
-
 
     def transform_row(self, row):
         return \
