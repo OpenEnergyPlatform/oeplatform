@@ -5,9 +5,12 @@ import decimal
 import re
 from datetime import datetime
 from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_, util
-from sqlalchemy.sql.expression import CompoundSelect
+from sqlalchemy.sql.expression import CompoundSelect, ColumnClause
+from sqlalchemy.sql.elements import Slice
+from sqlalchemy.sql.annotation import Annotated
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.schema import Sequence
+import sqlalchemy as sa
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 
@@ -15,8 +18,18 @@ from . import DEFAULT_SCHEMA
 
 import geoalchemy2  # Although this import seems unused is has to be here
 
+__KNOWN_TABLES = {}
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
+def get_table_obj(name, *args, **kwargs):
+    schema = kwargs.get('schema')
+    if (schema, name) in __KNOWN_TABLES:
+        return __KNOWN_TABLES[schema, name]
+    else:
+        t = Table(name, *args, **kwargs)
+        __KNOWN_TABLES[schema, name] = t
+        return t
 
 def get_or_403(dictionary, key):
     try:
@@ -100,7 +113,8 @@ def parse_insert(d, context, message=None):
     if d['method'] == 'values':
         if field_strings:
             raw_values = get_or_403(d, 'values')
-            assert (isinstance(raw_values, list))
+            if not isinstance(raw_values, list):
+                raise APIError('{} is not a list'.format(raw_values))
             values = map(lambda x: zip(field_strings, x), raw_values)
         else:
             values = get_or_403(d, 'values')
@@ -118,6 +132,11 @@ def parse_insert(d, context, message=None):
         values = list(map(clear_meta, values))
 
         query = query.values(values)
+    elif d['method'] == 'select':
+        values = parse_select(d['values'])
+        query = query.from_select(values)
+    else:
+        raise APIError('Unknown insert method: ' + str(d['method']))
 
     if 'returning' in d:
         query = query.returning(*map(Column, d['returning']))
@@ -239,8 +258,16 @@ def parse_from_item(d):
     if dtype == 'table':
         schema_name = read_pgid(d['schema']) if 'schema' in d else None
         only = d.get('only', False)
-        table_name = read_pgid(get_or_403(d, 'table'))
-        item = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
+        ext_name = table_name = read_pgid(get_or_403(d, 'table'))
+        tkwargs = dict(autoload=True)
+        if schema_name:
+            ext_name = schema_name + '.' + ext_name
+            tkwargs['schema'] = d['schema']
+        if ext_name in __PARSER_META.tables:
+            item = __PARSER_META.tables[ext_name]
+        else:
+            item = Table(d['table'], __PARSER_META, **tkwargs)
+
         engine = _get_engine()
         conn = engine.connect()
         exists = engine.dialect.has_table(conn, item.name, item.schema)
@@ -265,6 +292,7 @@ def parse_from_item(d):
         item = item.alias(read_pgid(d['alias']))
     return item
 
+__PARSER_META = MetaData(bind=_get_engine())
 
 def parse_expression(d):
     # TODO: Implement
@@ -274,10 +302,17 @@ def parse_expression(d):
             name = get_or_403(d, 'column')
 
             if 'table' in d:
-                name = d['table'] + '.' + name
+                tkwargs = dict(autoload=True)
+                tname = d['table']
+                ext_name = tname
                 if 'schema' in d:
-                    name = d['schema'] + '.' + name
-                return literal_column(name)
+                    tkwargs['schema'] = d['schema']
+                    ext_name = d['schema'] + '.' + tname
+                if ext_name and ext_name in __PARSER_META.tables:
+                    table = __PARSER_META.tables[ext_name]
+                else:
+                    table = Table(d['table'], __PARSER_META, **tkwargs)
+                return getattr(table.c, name)
             return column(name)
         if dtype == 'grouping':
             return list(map(parse_expression, get_or_403(d, 'grouping')))
@@ -287,6 +322,8 @@ def parse_expression(d):
             return parse_modifier(d)
         if dtype == 'function':
             return parse_function(d)
+        if dtype == 'slice':
+            return parse_slice(d)
         if dtype == 'star':
             return '*'
         if dtype == 'value':
@@ -310,6 +347,15 @@ def parse_expression(d):
 def parse_label(d):
     return parse_expression(
         get_or_403(d,'element')).label(get_or_403(d,'label'))
+
+
+def parse_slice(d):
+    kwargs = {'step': 1}
+    if 'start' in d:
+        kwargs['start'] = d['start']
+    if 'stop' in d:
+        kwargs['stop'] = d['stop']
+    return Slice(**kwargs)
 
 
 def parse_condition(dl):
@@ -530,6 +576,11 @@ def parse_sqla_operator(raw_key, *operands):
             return fun.concat(x,y)
         if key in ['is not']:
             return x.isnot(y)
+        if key in ['getitem']:
+            if isinstance(y, Slice):
+                return x[y.start:y.stop]
+            else:
+                return x[y]
 
     raise APIError("Operator '%s' not supported" % key)
 

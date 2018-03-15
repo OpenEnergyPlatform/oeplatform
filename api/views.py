@@ -4,7 +4,7 @@ import time
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -80,6 +80,27 @@ def conjunction(clauses):
         'operator': 'AND',
         'operands': clauses,
     }
+
+class Sequence(APIView):
+    @api_exception
+    def put(self, request, schema, sequence):
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
+        if request.user.is_anonymous():
+            raise PermissionDenied
+        if actions.has_sequence(dict(schema=schema, table=sequence),{}):
+            raise APIError('Sequence already exists')
+
+        self.__create_sequence(request, schema, sequence, request.data)
+
+    @actions.load_cursor
+    def __create_sequence(self, request, schema, sequence, jsn):
+        seq = Sequence(sequence, schema=schema, **jsn)
+        cursor = actions._load_cursor(request.data['cursor_id'])
+        actions._execute_sqla(seq.create(), cursor)
+
 
 class Table(APIView):
     """
@@ -190,14 +211,20 @@ class Table(APIView):
                                       "c_schema": schema})
             column_definitions.append(column_definition)
 
-        result = actions.table_create(schema, table, column_definitions, constraint_definitions)
+        result = self.__create_table(request, schema, table, column_definitions, constraint_definitions)
 
         perm, _ = login_models.UserPermission.objects.get_or_create(table=DBTable.load(schema, table),
                                                     holder=request.user)
         perm.level = login_models.ADMIN_PERM
         perm.save()
         request.user.save()
-        return JsonResponse(result, status=status.HTTP_201_CREATED)
+        return JsonResponse({}, status=status.HTTP_201_CREATED)
+
+    @actions.load_cursor
+    def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
+        cursor = actions._get_cursor(request.data['cursor_id'])
+        actions.table_create(schema, table, column_definitions,
+                             constraint_definitions, cursor)
 
     @api_exception
     @require_delete_permission
@@ -614,6 +641,22 @@ def create_ajax_handler(func, allow_cors=False):
 
     return AJAX_View.as_view()
 
+class FetchView(APIView):
+    @api_exception
+    def post(self, request):
+        return self.do_fetchall(request)
+
+    def do_fetchall(self, request):
+        return StreamingHttpResponse((part
+             for row in actions.fetchall(actions.get_or_403(request.data,
+                                                            'cursor_id'))
+             for part in (self.transform_row(row), '\n')), content_type = 'application/json')
+
+
+    def transform_row(self, row):
+        return \
+                json.dumps([actions._translate_fetched_cell(cell) for cell in row],
+                           default=date_handler)
 
 def stream(data):
     """

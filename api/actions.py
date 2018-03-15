@@ -76,7 +76,7 @@ def load_cursor(f):
                 if cursor.description:
                     result['description'] = cursor.description
                     result['rowcount'] = cursor.rowcount
-                    result['data'] = [list(map(__translate_fetched_cell, row)) for row in cursor.fetchall()]
+                    result['data'] = [list(map(_translate_fetched_cell, row)) for row in cursor.fetchall()]
         finally:
             if fetch_all:
                 close_cursor({}, context)
@@ -84,7 +84,7 @@ def load_cursor(f):
         return result
     return wrapper
 
-def __translate_fetched_cell(cell):
+def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
         return _get_engine().execute(cell.ST_AsText()).scalar()
     elif isinstance(cell, memoryview):
@@ -555,7 +555,7 @@ def get_column_definition_query(d):
     kwargs = {}
     dt_string = get_or_403(d, 'data_type')
 
-    dt_expression = r'(?P<dtname>[A-z_]+)\((?P<cardinality>\d*)\)'
+    dt_expression = r'(?P<dtname>[A-z_]+)\((?P<cardinality>\d*(,\s*\d*)?)\)'
     dt_cardinality = None
 
     match = re.match(dt_expression, dt_string)
@@ -564,17 +564,29 @@ def get_column_definition_query(d):
 
     if match:
         dt_string = match.groups()[0]
-        dt_cardinality = int(match.groups()[1])
-
-    if hasattr(geoalchemy2, dt_string):
-        dt = getattr(geoalchemy2, dt_string)
-    elif hasattr(sqltypes, dt_string):
-        dt = getattr(sqltypes, dt_string)
+        if dt_string.lower() == 'integer':
+            dt = int
+        elif dt_string.lower() == 'numerical':
+            dt = sa.types.Numeric
+        elif hasattr(sqltypes, dt_string):
+            dt = getattr(sqltypes, dt_string)
+        elif dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
+            dt = sqltypes.DateTime
+        else:
+            raise APIError('Unknown type (%s).' % dt_string)
+        dt_cardinality = map(int, match.groups()[1].replace(' ','').split(','))
     else:
-        raise APIError('Unknown type (%s).'%dt_string)
+        if dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
+            dt = sqltypes.DateTime
+        elif hasattr(geoalchemy2, dt_string):
+            dt = getattr(geoalchemy2, dt_string)
+        elif hasattr(sqltypes, dt_string):
+            dt = getattr(sqltypes, dt_string)
+        else:
+            raise APIError('Unknown type (%s).'%dt_string)
 
     if dt_cardinality:
-        dt = dt(dt_cardinality)
+        dt = dt(*dt_cardinality)
 
     for fk in d.get('foreign_key', []):
         fkschema = fk.get('schema', DEFAULT_SCHEMA)
@@ -1082,6 +1094,7 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
+        print(str(compiled), params)
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
@@ -1164,7 +1177,6 @@ def data_search(request, context=None):
                                  col.null_ok] for col in cursor.description]
     result = {'description': description, 'rowcount': cursor.rowcount}
     return result
-
 
 
 def _get_count(q):
@@ -1640,14 +1652,14 @@ def fetchone(request, context):
     cursor = _load_cursor(context['cursor_id'])
     row = cursor.fetchone()
     if row:
-        row = [__translate_fetched_cell(cell) for cell in row]
+        row = [_translate_fetched_cell(cell) for cell in row]
         return row
     else:
         return row
 
 
-def fetchall(request, context):
-    cursor = _load_cursor(context['cursor_id'])
+def fetchall(cursor_id):
+    cursor = _load_cursor(cursor_id)
     return cursor.fetchall()
 
 
