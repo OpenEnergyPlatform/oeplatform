@@ -584,6 +584,8 @@ def parse_sqla_operator(raw_key, *operands):
                 return x[y.start:y.stop]
             else:
                 return x[y]
+        if key in ['in']:
+            return x in y
 
     raise APIError("Operator '%s' not supported" % key)
 
