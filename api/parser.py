@@ -116,7 +116,7 @@ def parse_insert(d, context, message=None, mapper=None):
             raw_values = get_or_403(d, 'values')
             if not isinstance(raw_values, list):
                 raise APIError('{} is not a list'.format(raw_values))
-            values = map(lambda x: zip(field_strings, x), raw_values)
+            values = (zip(field_strings, parse_expression(x)) for x in raw_values)
         else:
             values = get_or_403(d, 'values')
 
@@ -296,36 +296,49 @@ def parse_from_item(d):
 
 __PARSER_META = MetaData(bind=_get_engine())
 
-def parse_expression(d, mapper=None):
+def parse_column(d, mapper):
     if mapper is None:
         mapper = dict()
-    do_map = lambda x: mapper.get(x,x)
+    do_map = lambda x: mapper.get(x, x)
+    name = get_or_403(d, 'column')
+    is_literal = d.get('is_literal', False)
+    if 'table' in d:
+        tkwargs = dict(autoload=True)
+        tname = do_map(d['table'])
+        ext_name = tname
+        if 'schema' in d:
+            tschema = do_map(d['schema'])
+            tkwargs['schema'] = tschema
+            ext_name = tschema + '.' + tname
+        if ext_name and ext_name in __PARSER_META.tables:
+            table = __PARSER_META.tables[ext_name]
+        else:
+            table = Table(tname, __PARSER_META, **tkwargs)
+        if hasattr(table.c, name):
+            return getattr(table.c, name)
+        else:
+            if is_literal:
+                return literal_column(name)
+            else:
+                return column(name)
 
+    if is_literal:
+        return literal_column(name)
+    else:
+        return column(name)
+
+def parse_expression(d, mapper=None):
     # TODO: Implement
     if isinstance(d, dict):
         dtype = get_or_403(d, 'type')
         if dtype == 'column':
-            name = get_or_403(d, 'column')
-
-            if 'table' in d:
-                tkwargs = dict(autoload=True)
-                tname = do_map(d['table'])
-                ext_name = tname
-                if 'schema' in d:
-                    tschema = do_map(d['schema'])
-                    tkwargs['schema'] = tschema
-                    ext_name = tschema + '.' + tname
-                if ext_name and ext_name in __PARSER_META.tables:
-                    table = __PARSER_META.tables[ext_name]
-                else:
-                    table = Table(tname, __PARSER_META, **tkwargs)
-                if hasattr(table.c, name):
-                    return getattr(table.c, name)
-                else:
-                    return column(name)
-            return column(name)
+            return parse_column(d, mapper)
         if dtype == 'grouping':
-            return list(map(parse_expression, get_or_403(d, 'grouping')))
+            grouping = get_or_403(d, 'grouping')
+            if isinstance(grouping, list):
+                return [parse_expression(e) for e in grouping]
+            else:
+                return parse_expression(grouping)
         if dtype == 'operator':
             return parse_operator(d)
         if dtype == 'modifier':
@@ -355,8 +368,10 @@ def parse_expression(d, mapper=None):
 
 
 def parse_label(d):
-    return parse_expression(
-        get_or_403(d,'element')).label(get_or_403(d,'label'))
+    element = parse_expression(get_or_403(d,'element'))
+    if not isinstance(element, sa.sql.expression.ClauseElement):
+        element = sa.literal(element)
+    return element.label(get_or_403(d,'label'))
 
 
 def parse_slice(d):
