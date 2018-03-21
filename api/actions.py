@@ -1001,7 +1001,14 @@ def data_insert_check(schema, table, values, context):
         elif constraint.type.lower() == 'f':
             pass
         elif constraint.type.lower() in ['u', 'p']:
+            # Load data selected by the from_select-clause
+            # TODO: I guess this should not be done this way.
+            #       Use joins instead to avoid piping your results through
+            #       python.
+            if isinstance(values, sa.sql.expression.Select):
+                values = engine.execute(values)
             for row in values:
+                # TODO: This is horribly inefficient!
                 query = {
                     'from':
                         {
@@ -1065,6 +1072,8 @@ def data_insert(request, context=None):
     orig_schema = get_or_403(request, 'schema')
 
     schema, table = get_table_name(orig_schema, orig_table)
+
+    mapper = {orig_schema: schema, orig_table: table}
 
     request['table'] = get_insert_table_name(orig_schema,
                                              orig_table)

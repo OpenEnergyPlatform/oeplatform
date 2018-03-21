@@ -94,7 +94,8 @@ def set_meta_info(method, user, message=None):
     return val_dict
 
 
-def parse_insert(d, context, message=None):
+def parse_insert(d, context, message=None, mapper=None):
+
     table = Table(read_pgid(get_or_403(d, 'table')), MetaData(bind=_get_engine())
                   , autoload=True, schema=read_pgid(get_or_403(d, 'schema')))
 
@@ -134,12 +135,13 @@ def parse_insert(d, context, message=None):
         query = query.values(values)
     elif d['method'] == 'select':
         values = parse_select(d['values'])
-        query = query.from_select(values)
+        query = query.from_select(field_strings, values)
     else:
         raise APIError('Unknown insert method: ' + str(d['method']))
 
     if 'returning' in d:
-        query = query.returning(*map(Column, d['returning']))
+        return_clauses = [parse_expression(x,mapper) for x in d['returning']]
+        query = query.returning(return_clauses)
 
     return query, values
 
@@ -294,7 +296,11 @@ def parse_from_item(d):
 
 __PARSER_META = MetaData(bind=_get_engine())
 
-def parse_expression(d):
+def parse_expression(d, mapper=None):
+    if mapper is None:
+        mapper = dict()
+    do_map = lambda x: mapper.get(x,x)
+
     # TODO: Implement
     if isinstance(d, dict):
         dtype = get_or_403(d, 'type')
@@ -303,15 +309,16 @@ def parse_expression(d):
 
             if 'table' in d:
                 tkwargs = dict(autoload=True)
-                tname = d['table']
+                tname = do_map(d['table'])
                 ext_name = tname
                 if 'schema' in d:
-                    tkwargs['schema'] = d['schema']
-                    ext_name = d['schema'] + '.' + tname
+                    tschema = do_map(d['schema'])
+                    tkwargs['schema'] = tschema
+                    ext_name = tschema + '.' + tname
                 if ext_name and ext_name in __PARSER_META.tables:
                     table = __PARSER_META.tables[ext_name]
                 else:
-                    table = Table(d['table'], __PARSER_META, **tkwargs)
+                    table = Table(tname, __PARSER_META, **tkwargs)
                 if hasattr(table.c, name):
                     return getattr(table.c, name)
                 else:
@@ -585,7 +592,7 @@ def parse_sqla_operator(raw_key, *operands):
             else:
                 return x[y]
         if key in ['in']:
-            return x in y
+            return x.in_(y)
 
     raise APIError("Operator '%s' not supported" % key)
 
