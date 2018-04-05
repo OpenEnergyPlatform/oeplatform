@@ -310,11 +310,15 @@ def parse_column(d, mapper):
             tschema = do_map(d['schema'])
             tkwargs['schema'] = tschema
             ext_name = tschema + '.' + tname
+        table = None
         if ext_name and ext_name in __PARSER_META.tables:
             table = __PARSER_META.tables[ext_name]
         else:
-            table = Table(tname, __PARSER_META, **tkwargs)
-        if hasattr(table.c, name):
+            if _get_engine().dialect.has_table(_get_engine().connect(), tname):
+                table = Table(tname, __PARSER_META, **tkwargs)
+
+
+        if table is not None and hasattr(table.c, name):
             return getattr(table.c, name)
         else:
             if is_literal:
@@ -360,6 +364,8 @@ def parse_expression(d, mapper=None):
             schema = read_pgid(d['schema']) if 'schema' in d else DEFAULT_SCHEMA
             s = '"%s"."%s"'%(schema, get_or_403(d, 'sequence'))
             return Sequence(get_or_403(d, 'sequence'), schema=schema)
+        if dtype == 'select':
+            return parse_select(d)
         else:
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
