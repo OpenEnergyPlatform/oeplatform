@@ -60,7 +60,7 @@ def load_cursor(f):
         if fetch_all:
             engine = _get_engine()
             context = open_raw_connection({}, {})
-            context.update(open_cursor(context, {}))
+            context.update(open_cursor({}, context))
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
@@ -80,7 +80,7 @@ def load_cursor(f):
         finally:
             if fetch_all:
                 close_cursor({}, context)
-                close_raw_connection(context, {})
+                close_raw_connection({}, context)
         return result
     return wrapper
 
@@ -605,7 +605,7 @@ def get_column_definition_query(d):
         kwargs['autoincrement'] = d['autoincrement']
 
     if d.get('is_nullable', False):
-        kwargs['nullable'] = True
+        kwargs['nullable'] = d['is_nullable'] # True
 
     if d.get('primary_key', False):
         kwargs['primary_key'] = True
@@ -884,7 +884,7 @@ def __internal_select(query, context):
     engine = _get_engine()
     context2 = open_raw_connection({}, {})
     try:
-        context2.update(open_cursor(context2, {}))
+        context2.update(open_cursor({}, context2))
         try:
             rows = data_search(query, context2)
             cursor = __CURSORS[context2['cursor_id']]
@@ -892,7 +892,7 @@ def __internal_select(query, context):
         finally:
             close_cursor({}, context2)
     finally:
-        close_raw_connection(context2, {})
+        close_raw_connection({}, context2)
     return rows
 
 
@@ -1317,7 +1317,7 @@ def has_sequence(request, context=None):
     try:
         result = engine.dialect.has_sequence(conn,
                                              get_or_403(request, 'sequence_name'),
-                                             schema=request.get('schema', None))
+                                             schema=request.get('schema', DEFAULT_SCHEMA))
     finally:
         conn.close()
     return result
@@ -1329,7 +1329,7 @@ def has_type(request, context=None):
     try:
         result = engine.dialect.has_schema(conn,
                                            get_or_403(request, 'sequence_name'),
-                                           schema=request.get('schema', None))
+                                           schema=request.get('schema', DEFAULT_SCHEMA))
     finally:
         conn.close()
     return result
@@ -1341,7 +1341,7 @@ def get_table_oid(request, context=None):
     try:
         result = engine.dialect.get_table_oid(conn,
                                               get_or_403(request, 'table'),
-                                              schema=request.get('schema', None),
+                                              schema=request.get('schema', DEFAULT_SCHEMA),
                                               **request)
     finally:
         conn.close()
@@ -1590,7 +1590,7 @@ def open_raw_connection(request, context):
     return {'connection_id': connection_id}
 
 def commit_raw_connection(request, context):
-    connection_id = request['connection_id']
+    connection_id = context['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         connection.commit()
@@ -1599,7 +1599,7 @@ def commit_raw_connection(request, context):
         return _response_error("Connection (%s) not found" % connection_id)
 
 def rollback_raw_connection(request, context):
-    connection_id = request['connection_id']
+    connection_id = context['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         connection.rollback()
@@ -1608,7 +1608,7 @@ def rollback_raw_connection(request, context):
         return _response_error("Connection (%s) not found" % connection_id)
 
 def close_raw_connection(request, context):
-    connection_id = request['connection_id']
+    connection_id = context['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         parent = connection.connection
@@ -1628,7 +1628,7 @@ def __add_entry(value, dictionary):
 
 
 def open_cursor(request, context):
-    connection_id = request['connection_id']
+    connection_id = context['connection_id']
     if connection_id in __CONNECTIONS:
         connection = __CONNECTIONS[connection_id]
         cursor = connection.cursor()
@@ -1644,6 +1644,11 @@ def _load_cursor(cursor_id):
     except KeyError:
         raise ResponsiveException("Cursor (%s) not found" % cursor_id)
 
+def _load_connection(connection_id):
+    try:
+        return __CONNECTIONS[int(connection_id)]
+    except KeyError:
+        raise ResponsiveException("Connection (%s) not found" % connection_id)
 
 def close_cursor(request, context):
     cursor_id = int(context['cursor_id'])

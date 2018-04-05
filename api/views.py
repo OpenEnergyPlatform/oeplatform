@@ -53,8 +53,8 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get('schema')
-        table = kwargs.get('table')
+        schema = kwargs.get('schema', actions.DEFAULT_SCHEMA)
+        table = kwargs.get('table') or kwargs.get('sequence')
         if request.user.is_anonymous or request.user.get_table_permission_level(
                 DBTable.load(schema, table)) < permission:
             raise PermissionDenied
@@ -82,6 +82,7 @@ def conjunction(clauses):
     }
 
 class Sequence(APIView):
+
     @api_exception
     def put(self, request, schema, sequence):
         if schema not in ['model_draft', 'sandbox', 'test']:
@@ -90,17 +91,32 @@ class Sequence(APIView):
             raise PermissionDenied
         if request.user.is_anonymous():
             raise PermissionDenied
-        if actions.has_sequence(dict(schema=schema, table=sequence),{}):
+        if actions.has_sequence(dict(schema=schema, sequence_name=sequence),{}):
             raise APIError('Sequence already exists')
+        return self.__create_sequence(request, schema, sequence, request.data)
 
-        self.__create_sequence(request, schema, sequence, request.data)
+    @api_exception
+    @require_delete_permission
+    def delete(self, request, schema, sequence):
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
+        if request.user.is_anonymous():
+            raise PermissionDenied
+        return self.__delete_sequence(request, schema, sequence, request.data)
+
+    @actions.load_cursor
+    def __delete_sequence(self, request, schema, sequence, jsn):
+        seq = sqla.schema.Sequence(sequence, schema=schema)
+        seq.drop(bind=actions._get_engine())
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
     @actions.load_cursor
     def __create_sequence(self, request, schema, sequence, jsn):
-        seq = Sequence(sequence, schema=schema, **jsn)
-        cursor = actions._load_cursor(request.data['cursor_id'])
-        actions._execute_sqla(seq.create(), cursor)
-
+        seq = sqla.schema.Sequence(sequence, schema=schema)
+        seq.create(bind=actions._get_engine())
+        return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 class Table(APIView):
     """
@@ -623,6 +639,8 @@ def create_ajax_handler(func, allow_cors=False):
             content = request.data
             context = {'user': request.user,
                        'cursor_id': request.data['cursor_id']}
+            if 'connection_id' in request.data:
+                context['connection_id'] = request.data['connection_id']
             query = content.get('query', ['{}'])
             try:
                 if isinstance(query, list):
