@@ -93,10 +93,6 @@ def _translate_fetched_cell(cell):
         return cell
 
 
-def _get_cursor(cursor_id):
-    return __CURSORS[cursor_id]
-
-
 def __response_success():
     return {'success': True}
 
