@@ -84,7 +84,58 @@
     var data_record = {}
     var unchecked_record = {}
 
-    function build_views(){
+    function build_views_leaflet() {
+
+        var map = L.map('main-visualization-container');
+
+        /* center map on germany */
+        map.setView([51.4546, 10.1532], 5)
+
+        /* load map tiles from openstreetmap */
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '©<a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(map);
+
+        // leaflet geoJson layer
+        var geoJSON;
+
+        var updateFunction = function()
+        {
+            let left = map.getBounds().getEast();
+            let right = map.getBounds().getWest();
+            let top = map.getBounds().getNorth();
+            let bottom = map.getBounds().getSouth();
+
+            $.ajax({
+                url: "/api/get_map_polygons",
+                data:
+                    {
+                        'schema': '{{ schema }}',
+                        'table': '{{ table }}',
+                        'geomField': '{{ geo_column }}',
+                        'bounds': '{ "type": "Polygon", "coordinates":[[[' +
+                            left + ',' + top + '],' +
+                            '[' + right + ',' + top + '],' +
+                            '[' + right + ',' + bottom + '],' +
+                            '[' + left + ',' + bottom + '],' +
+                            '[' + left + ',' + top + ']]] }'
+                    },
+                success: function(result){
+                    if (typeof geoJSON !== 'undefined') {
+                        geoJSON.clearLayers();
+                    }
+                    geoJSON = L.geoJson(result["geom"]).addTo(map);
+            }});
+        };
+
+        updateFunction();
+
+        map.on('moveend', updateFunction);
+        map.on('zoomend', updateFunction);
+    }
+
+    function build_views_recline(){
         var dataset_main = new recline.Model.Dataset({
                 table: '{{table}}',
                 schema: '{{schema}}',
@@ -266,7 +317,15 @@
         });
     }
 
-    build_views(false);
+    function build_views() {
+        {% if current_view.type == "map" %}
+        build_views_leaflet();
+        {% else %}
+        build_views_recline();
+        {% endif %}
+    }
+
+    build_views(/*false*/);
 
 
 
