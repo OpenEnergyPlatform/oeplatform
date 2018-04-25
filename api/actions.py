@@ -23,12 +23,10 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
+from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-from random import randrange
-
-import sys
 
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
@@ -41,11 +39,6 @@ def get_table_name(schema, table, restrict_schemas=True):
         if schema not in ['model_draft', 'sandbox', 'test']:
             raise PermissionDenied
     return schema, table
-
-
-__CONNECTIONS = {}
-__CURSORS = {}
-
 
 Base = declarative_base()
 
@@ -70,7 +63,7 @@ def load_cursor(f):
             result = f(*args, **kwargs)
 
             if fetch_all:
-                cursor = __CURSORS[context['cursor_id']]
+                cursor = load_cursor_from_context(context)
                 if not result:
                     result = {}
                 if cursor.description:
@@ -883,7 +876,7 @@ def __internal_select(query, context):
         context2.update(open_cursor({}, context2))
         try:
             rows = data_search(query, context2)
-            cursor = __CURSORS[context2['cursor_id']]
+            cursor = load_cursor_from_context(context2)
             rows['data'] = [x for x in cursor.fetchall()]
         finally:
             close_cursor({}, context2)
@@ -924,7 +917,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     pks = [c for c in table.columns if c.primary_key]
 
     inserts = []
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     if rows['data']:
         for row in rows['data']:
             insert = []
@@ -961,7 +954,7 @@ def data_delete(request, context=None):
 
     target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ['id'])
     if request['schema'] == 'sandbox':
         apply_changes(schema, table, cursor)
@@ -1060,7 +1053,7 @@ def _load_value(v):
 
 
 def data_insert(request, context=None):
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     # If the insert request is not for a meta table, change the request to do so
     orig_table = get_or_403(request, 'table')
     if orig_table.startswith('_') or orig_table.endswith('_cor'):
@@ -1175,7 +1168,7 @@ def table_drop(request, context=None):
 
 def data_search(request, context=None):
     query = api.parser.parse_select(request)
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     _execute_sqla(query, cursor)
     description = [[col.name, col.type_code, col.display_size,
                                  col.internal_size, col.precision, col.scale,
@@ -1514,7 +1507,7 @@ def __get_connection(request):
 
 def get_isolation_level(request, context):
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     result = engine.dialect.get_isolation_level(cursor)
     return result
 
@@ -1522,7 +1515,7 @@ def get_isolation_level(request, context):
 def set_isolation_level(request, context):
     level = request.get('level', None)
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     try:
         engine.dialect.set_isolation_level(cursor, level)
     except exc.ArgumentError as ae:
@@ -1533,7 +1526,7 @@ def set_isolation_level(request, context):
 def do_begin_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     engine.dialect.do_begin_twophase(cursor, xid)
     return __response_success()
 
@@ -1541,7 +1534,7 @@ def do_begin_twophase(request, context):
 def do_prepare_twophase(request, context):
     xid = request.get('xid', None)
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     engine.dialect.do_prepare_twophase(cursor, xid)
     return __response_success()
 
@@ -1551,7 +1544,7 @@ def do_rollback_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     engine.dialect.do_rollback_twophase(cursor, xid,
                                         is_prepared=is_prepared,
                                         recover=recover)
@@ -1563,7 +1556,7 @@ def do_commit_twophase(request, context):
     is_prepared = request.get('is_prepared', True)
     recover = request.get('recover', False)
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     engine.dialect.do_commit_twophase(cursor, xid, is_prepared=is_prepared,
                                       recover=recover)
     return __response_success()
@@ -1571,7 +1564,7 @@ def do_commit_twophase(request, context):
 
 def do_recover_twophase(request, context):
     engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     return engine.dialect.do_commit_twophase(cursor)
 
 
@@ -1580,86 +1573,41 @@ def _get_default_schema_name(self, connection):
 
 
 def open_raw_connection(request, context):
-    engine = _get_engine()
-    connection = engine.connect().connection
-    connection_id = __add_entry(connection, __CONNECTIONS)
-    return {'connection_id': connection_id}
+    session_context = SessionContext()
+    return {'connection_id': session_context.connection._id}
+
 
 def commit_raw_connection(request, context):
-    connection_id = context['connection_id']
-    if connection_id in __CONNECTIONS:
-        connection = __CONNECTIONS[connection_id]
-        connection.commit()
-        return __response_success()
-    else:
-        return _response_error("Connection (%s) not found" % connection_id)
+    connection = load_session_from_context(context).connection
+    connection.commit()
+    return __response_success()
+
 
 def rollback_raw_connection(request, context):
-    connection_id = context['connection_id']
-    if connection_id in __CONNECTIONS:
-        connection = __CONNECTIONS[connection_id]
-        connection.rollback()
-        return __response_success()
-    else:
-        return _response_error("Connection (%s) not found" % connection_id)
+    connection = load_session_from_context(context).connection
+    connection.rollback()
+    return __response_success()
+
 
 def close_raw_connection(request, context):
-    connection_id = context['connection_id']
-    if connection_id in __CONNECTIONS:
-        connection = __CONNECTIONS[connection_id]
-        parent = connection.connection
-        connection.close()
-        del __CONNECTIONS[connection_id]
-        return __response_success()
-    else:
-        return _response_error("Connection (%s) not found" % connection_id)
-
-
-def __add_entry(value, dictionary):
-    key = randrange(0, sys.maxsize)
-    while key in dictionary:
-        key = randrange(0, sys.maxsize)
-    dictionary[key] = value
-    return key
+    load_session_from_context(context).close()
+    return __response_success()
 
 
 def open_cursor(request, context):
-    connection_id = context['connection_id']
-    if connection_id in __CONNECTIONS:
-        connection = __CONNECTIONS[connection_id]
-        cursor = connection.cursor()
-        cursor_id = __add_entry(cursor, __CURSORS)
-        return {'cursor_id': cursor_id}
-    else:
-        return _response_error("Connection (%s) not found" % connection_id)
+    session_context = load_session_from_context(context)
+    cursor_id = session_context.open_cursor()
+    return {'cursor_id': cursor_id}
 
-
-def _load_cursor(cursor_id):
-    try:
-        return __CURSORS[int(cursor_id)]
-    except KeyError:
-        raise ResponsiveException("Cursor (%s) not found" % cursor_id)
-
-def _load_connection(connection_id):
-    try:
-        return __CONNECTIONS[int(connection_id)]
-    except KeyError:
-        raise ResponsiveException("Connection (%s) not found" % connection_id)
 
 def close_cursor(request, context):
+    session_context = load_session_from_context(context)
     cursor_id = int(context['cursor_id'])
-    if cursor_id in __CURSORS:
-        cursor = __CURSORS[cursor_id]
-        del __CURSORS[cursor_id]
-        cursor.close()
-        print('Remaining cursors: ', __CURSORS)
-        return {'cursor_id': cursor_id}
-    else:
-        return _response_error("Cursor (%s) not found" % cursor_id)
+    return {'cursor_id': cursor_id}
 
 
 def fetchone(request, context):
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     row = cursor.fetchone()
     if row:
         row = [_translate_fetched_cell(cell) for cell in row]
@@ -1668,13 +1616,13 @@ def fetchone(request, context):
         return row
 
 
-def fetchall(cursor_id):
-    cursor = _load_cursor(cursor_id)
+def fetchall(context):
+    cursor = load_cursor_from_context(context)
     return cursor.fetchall()
 
 
 def fetchmany(request, context):
-    cursor = _load_cursor(context['cursor_id'])
+    cursor = load_cursor_from_context(context)
     return cursor.fetchmany(request['size'])
 
 
@@ -1842,24 +1790,25 @@ def apply_changes(schema, table, cursor=None):
     table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
 
     # ToDo: This may require some kind of dependency tree resolution
-    try:
-        for change in sorted(changes, key=lambda x: x['_submitted']):
-            distilled_change = {k:v for k,v in change.items() if k in columns}
-            if change['_type'] == 'insert':
-                apply_insert(cursor, table_obj, distilled_change, change['_id'])
-            elif change['_type'] == 'update':
-                apply_update(cursor, table_obj, distilled_change, change['_id'])
-            elif change['_type'] == 'delete':
-                apply_deletion(cursor, table_obj, distilled_change, change['_id'])
-    except Exception as e:
-        raise e
+    for change in sorted(changes, key=lambda x: x['_submitted']):
+        distilled_change = {k:v for k,v in change.items() if k in columns}
+        if change['_type'] == 'insert':
+            apply_insert(cursor, table_obj, distilled_change, change['_id'])
+        elif change['_type'] == 'update':
+            apply_update(cursor, table_obj, distilled_change, change['_id'])
+        elif change['_type'] == 'delete':
+            apply_deletion(cursor, table_obj, distilled_change, change['_id'])
+
 
 
 
 def apply_insert(session, table, row, rid):
     print("apply insert", row)
-    query = table.insert().values(row).compile()
-    session.execute(str(query), {k: v if v is not None else None for k,v in query.params.items()})
+    query = table.insert().values(row)
+    meta_table = Table(get_insert_table_name(table.schema, table.name),
+                         schema=get_meta_schema_name(table.schema))
+    session.execute(query, row)
+    meta_table.update().where(meta_table._id)
     session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
         schema=get_meta_schema_name(table.schema),
         table=get_insert_table_name(table.schema, table.name),

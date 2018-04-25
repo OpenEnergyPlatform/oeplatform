@@ -12,8 +12,7 @@ from django.db.models import Q
 
 import login.models as login_models
 import api.parser
-from api import actions
-from api import parser
+from api import actions, parser, sessions
 from api.helpers.http import ModHttpResponse
 from api.error import APIError
 from rest_framework.views import APIView
@@ -238,7 +237,11 @@ class Table(APIView):
 
     @actions.load_cursor
     def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
-        cursor = actions._get_cursor(request.data['cursor_id'])
+        context = {'connection_id': actions.get_or_403(request.data,
+                                                       'connection_id'),
+                   'cursor_id': actions.get_or_403(request.data,
+                                                   'cursor_id')}
+        cursor = sessions.load_cursor_from_context(context)
         actions.table_create(schema, table, column_definitions,
                              constraint_definitions, cursor)
 
@@ -670,9 +673,12 @@ class FetchView(APIView):
             raise APIError('Unknown fetchtype: %s'%fetchtype)
 
     def do_fetch(self, request, fetch):
+        context = {'connection_id': actions.get_or_403(request.data,
+                                                 'connection_id'),
+                   'cursor_id': actions.get_or_403(request.data,
+                                                       'cursor_id')}
         return StreamingHttpResponse((part
-             for row in fetch(actions.get_or_403(request.data,
-                                                 'cursor_id'))
+             for row in fetch(context)
              for part in (self.transform_row(row), '\n')), content_type = 'application/json')
 
     def transform_row(self, row):
