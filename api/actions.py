@@ -1800,40 +1800,33 @@ def apply_changes(schema, table, cursor=None):
             apply_deletion(cursor, table_obj, distilled_change, change['_id'])
 
 
+def set_applied(session, table, rid):
+    meta_table = Table(get_insert_table_name(table.schema, table.name),
+                       MetaData(bind=_get_engine()),
+                       autoload=True,
+                       schema=get_meta_schema_name(table.schema))
+    update_query = meta_table.update().where(
+        meta_table.c._id == rid).values(_applied=True).compile()
+    session.execute(str(update_query), update_query.params)
 
 
 def apply_insert(session, table, row, rid):
     print("apply insert", row)
     query = table.insert().values(row)
-    meta_table = Table(get_insert_table_name(table.schema, table.name),
-                         schema=get_meta_schema_name(table.schema))
-    session.execute(query, row)
-    meta_table.update().where(meta_table._id)
-    session.execute('UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
-        schema=get_meta_schema_name(table.schema),
-        table=get_insert_table_name(table.schema, table.name),
-        id=rid
-    ))
+    query = query.compile()
+    session.execute(str(query), query.params)
+    set_applied(session, table, rid)
 
 
 def apply_update(session, table, row, rid):
     print("apply update", row)
     query = table.update(table.c.id == row['id']).compile()
     session.execute(str(query), query.params)
-    session.execute(
-        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
-            schema=get_meta_schema_name(table.schema),
-            table=get_edit_table_name(table.schema, table.name),
-            id=rid
-        ))
+    set_applied(session, table, rid)
+
 
 def apply_deletion(session, table, row, rid):
     print("apply deletion", row)
     query = table.delete(table.c.id==row['id']).compile()
     session.execute(str(query), query.params)
-    session.execute(
-        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
-            schema=get_meta_schema_name(table.schema),
-            table=get_delete_table_name(table.schema, table.name),
-            id=rid
-        ))
+    set_applied(session, table, rid)
