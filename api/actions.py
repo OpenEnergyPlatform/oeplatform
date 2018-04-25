@@ -1119,53 +1119,6 @@ def process_value(val):
         return str(val)
 
 
-def table_drop(request, context=None):
-    raise PermissionDenied
-    engine = _get_engine()
-    cursor = _load_cursor(context['cursor_id'])
-
-    # load schema name and check for sanity
-    schema = request.pop("schema", "public")
-    if not api.parser.is_pg_qual(schema):
-        return {'success': False, 'reason': 'Invalid schema name: %s' % schema}
-        # Check whether schema exists
-
-    # load table name and check for sanity
-    table = request.pop("table", None)
-
-    if not api.parser.is_pg_qual(table):
-        return {'success': False, 'reason': 'Invalid table name: %s' % table}
-
-    try:
-        exists = bool(request.pop("exists", False))
-    except:
-        return {'success': False,
-                'reason': 'Invalid exists clause: %s' % exists}
-
-    option = request.pop("option", None)
-    if option and option.lower() not in ["cascade", "restrict"]:
-        return {'success': False, 'reason': 'Invalid option clause name: %s' % option}
-
-    sql_string = "drop table {exists} {schema}.{table} {option} ".format(
-        schema=schema,
-        table=table,
-        option=option if option else "",
-        exists="IF EXISTS" if exists else "")
-
-    session = sessionmaker(bind=engine)()
-    try:
-        session.execute(sql_string.replace('%', '%%'))
-    except Exception as e:
-        traceback.print_exc()
-        session.rollback()
-        raise e
-    else:
-        session.commit()
-    finally:
-        session.close()
-    return {}
-
-
 def data_search(request, context=None):
     query = api.parser.parse_select(request)
     cursor = load_cursor_from_context(context)
