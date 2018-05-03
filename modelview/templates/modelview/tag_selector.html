@@ -1,0 +1,33 @@
+<div id="Tags" class="tagcontainer tab-pane fade">
+    {% load dataedit.taghandler %}
+    <h4>Current tags</h4>
+    {% get_tags as all_tags %}
+    {% if not tags %}
+    No tags were added, yet.
+    {% endif %}
+    {% for t in tags %}
+    <a href="" class="btn tag"
+       style="background:{{t.color}};color:{% readable_text_color t.color %}">
+        {{ t.name }}</a>
+    {% endfor %}
+    <div id="tag_handler">
+        {% csrf_token %}
+        <h4>Choose tags to attach:</h4>
+        {% for t in all_tags %}
+        <span>
+                    <input type="checkbox" class="hidden" name="tag_{{t.id}}"
+                           id="select_{{t.id}}"
+                           {% if t in tags %} checked {% endif %}>
+                    <label style="background:{{t.color}};color:{% readable_text_color t.color %}"
+                           class="btn tag"
+                           for="select_{{t.id}}">{{t.name}}</label>
+                </span>
+        {% endfor %}
+        <input type="hidden" name="schema" value="{{schema}}"/>
+        {% if table %}
+        <input type="hidden" name="table" value="{{table}}"/>
+        {% endif %}
+    </div>
+    <hr>
+    You can also <a href="/dataedit/tags">add new tags</a>
+</div>

@@ -563,6 +563,12 @@ class DataView(View):
 
         tags = []  # TODO: Unused - Remove
         db = sec.dbname
+
+        engine = actions._get_engine()
+
+        if not engine.dialect.has_table(engine, table, schema=schema):
+            raise Http404
+
         actions.create_meta(schema, table)
 
         comment_on_table = load_comment_from_db(schema, table)
@@ -917,27 +923,29 @@ def get_all_tags(schema=None, table=None):
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
+    try:
+        if table == None:
+            # Neither table, not schema are defined
+            result = session.execute(sqla.select([Tag]).order_by('name'))
+            session.commit()
+            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+                 for r in result]
+            return r
 
-    if table == None:
-        # Neither table, not schema are defined
-        result = session.execute(sqla.select([Tag]))
+        if schema == None:
+            # default schema is the public schema
+            schema = 'public'
+
+        result = session.execute(
+            session.query(Tag.name.label('name'), Tag.id.label('id'),
+                          Tag.color.label('color'),
+                          Table_tags.table_name).filter(
+                Table_tags.tag == Tag.id).filter(
+                Table_tags.table_name == table).filter(
+                Table_tags.schema_name == schema).order_by('name'))
         session.commit()
-        r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
-             for r in result]
-        return r
-
-    if schema == None:
-        # default schema is the public schema
-        schema = 'public'
-
-    result = session.execute(
-        session.query(Tag.name.label('name'), Tag.id.label('id'),
-                      Tag.color.label('color'),
-                      Table_tags.table_name).filter(
-            Table_tags.tag == Tag.id).filter(
-            Table_tags.table_name == table).filter(
-            Table_tags.schema_name == schema))
-    session.commit()
+    finally:
+        session.close()
     return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
             for r in result]
 

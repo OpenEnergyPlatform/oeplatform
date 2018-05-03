@@ -27,6 +27,9 @@ from api.sessions import load_cursor_from_context, load_session_from_context, Se
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
+import logging
+
+logger = logging.getLogger('oeplatform')
 
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
@@ -250,7 +253,7 @@ def perform_sql(sql_statement, parameter=None):
     session = sessionmaker(bind=engine)()
 
     # Statement built and no changes required, so statement is empty.
-    print("SQL STATEMENT: |" + sql_statement + "|", parameter)
+    logger.debug("SQL STATEMENT: |" + sql_statement + "| \t " + str(parameter))
     if not sql_statement or sql_statement.isspace():
         return get_response_dict(success=True)
 
@@ -1092,7 +1095,7 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
-        print(str(compiled), params)
+        logger.debug('Executed %s with parameters %s'%(str(compiled), params))
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
@@ -1100,6 +1103,18 @@ def _execute_sqla(query, cursor):
         if re.match(r'Input geometry has unknown \(\d+\) SRID', repr(e)):
             # Return only SRID errors
             raise APIError(repr(e))
+        else:
+            raise e
+    except psycopg2.ProgrammingError as e:
+        if e.pgcode in [
+            '42703',    # undefined_column
+            '42883',    # undefined_function
+            '42P01',    # undefined_table
+            '42P02',    # undefined_parameter
+            '42704',    # undefined_object
+        ]:
+            # Return only `function does not exists` errors
+            raise APIError(e.diag.message_primary)
         else:
             raise e
     except psycopg2.DatabaseError as e:
@@ -1764,22 +1779,29 @@ def set_applied(session, table, rid):
 
 
 def apply_insert(session, table, row, rid):
-    print("apply insert", row)
+    logger.info("apply insert", row)
     query = table.insert().values(row)
     query = query.compile()
     session.execute(str(query), query.params)
     set_applied(session, table, rid)
 
 
-def apply_update(session, table, row, rid):
-    print("apply update", row)
-    query = table.update(table.c.id == row['id']).compile()
-    session.execute(str(query), query.params)
-    set_applied(session, table, rid)
+def apply_update(session, table, row):
+    logger.info("apply update", row)
+    session.execute(table.update(table.c.id==row['id']), row)
+    session.execute(
+        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
+            schema=get_meta_schema_name(table.schema),
+            table=get_edit_table_name(table.schema, table.name),
+            id=row['_id']
+        ))
 
-
-def apply_deletion(session, table, row, rid):
-    print("apply deletion", row)
-    query = table.delete(table.c.id==row['id']).compile()
-    session.execute(str(query), query.params)
-    set_applied(session, table, rid)
+def apply_deletion(session, table, row):
+    logger.info("apply deletion", row)
+    session.execute(table.delete(table.c.id==row['id']), row)
+    session.execute(
+        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
+            schema=get_meta_schema_name(table.schema),
+            table=get_delete_table_name(table.schema, table.name),
+            id=row['_id']
+        ))

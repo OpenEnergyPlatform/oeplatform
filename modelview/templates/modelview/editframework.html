@@ -1,7 +1,20 @@
-{% extends "base/base.html" %}
+{% extends "modelview/base.html" %}
 {% load modelview_extras %}
-{% block content %}
+{% block factsheets_content %}
+{% load bootstrap3 %}
 {% load staticfiles %}
+
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
+
 
 <script type="text/javascript">
     $(document).ready(function(){
@@ -28,6 +41,8 @@ confirmOnLeave();
 </script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Framework </h1>
+<sup color="light grey">* required field</sup>
+
 {% if method == "update"%}
     <form action="/factsheets/frameworks/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
 {% else %}
@@ -41,7 +56,7 @@ confirmOnLeave();
   <li><a data-toggle="tab" href="#Software">Software</a></li>
   <li><a data-toggle="tab" href="#Design">Design and Interfaces</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
-  
+  <li><a data-toggle="tab" href="#Tags">Tags</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -59,6 +74,28 @@ confirmOnLeave();
         <table class="formtable">
         {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
         {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
+        <tr>
+            <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
+                {% if form.methodical_focus_1.help_text != "" %}
+                    <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ form.methodical_focus_1.help_text }}">
+                        <span class='glyphicon glyphicon-question-sign'></span>
+                    </a>
+                {% endif %}
+            </th>
+            <td>
+                <table>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_1 show_label=False show_help=False set_required=True %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_2 show_label=False show_help=False set_required=False %}</td>
+                    </tr>
+                    <tr>
+                        <td>{% bootstrap_field form.methodical_focus_3 show_label=False show_help=False set_required=False %}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
         {% include 'modelview/editmodel_snippet.html' with field=form.institutions %}
         {% include 'modelview/editmodel_snippet.html' with field=form.authors %}
         {% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
@@ -147,6 +184,7 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
         </table>
     </div>
+    {%include 'modelview/tag_selector.html'%}
 </div>
 
 </form>

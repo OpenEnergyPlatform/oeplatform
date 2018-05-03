@@ -1,5 +1,5 @@
 class APIError(Exception):
-    def __init__(self, message, status=500):
+    def __init__(self, message, status=400):
         self.message = message
         self.status = status
 

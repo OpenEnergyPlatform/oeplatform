@@ -50,8 +50,6 @@ def quote(x):
 
 def read_pgvalue(x):
     # TODO: Implement check for valid values
-    if isinstance(x, str):
-        return "'" + x + "'"
     if x is None:
         return 'null'
     return x
@@ -393,7 +391,7 @@ def parse_condition(dl):
     if isinstance(dl, list):
         dl = {'type':'operator',
               'operator': 'AND',
-              'operands': list(dl)}
+              'operands': list(map(parse_expression, dl))}
     return parse_expression(dl)
 
 

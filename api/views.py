@@ -25,6 +25,10 @@ import sqlalchemy as sqla
 import geoalchemy2  # Although this import seems unused is has to be here
 
 
+WHERE_EXPRESSION = re.compile('^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
+                              + '|'.join(parser.sql_operators) \
+                              + ')\s*(?P<second>(?![>=]).+)$')
+
 def cors(allow):
     def doublewrapper(f):
         def wrapper(*args, **kwargs):
@@ -336,7 +340,7 @@ class Rows(APIView):
         schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
         columns = request.GET.getlist('column')
 
-        where = request.GET.get('where')
+        where = request.GET.getlist('where')
         if row_id and where:
             raise actions.APIError('Where clauses and row id are not allowed in the same query')
 
@@ -465,13 +469,14 @@ class Rows(APIView):
 
     @actions.load_cursor
     def __delete_rows(self, request, schema, table, row_id=None):
-        where = request.GET.get('where')
+        where = request.GET.getlist('where')
         query = {
             'schema': schema,
             'table': table,
-            'where': self.__read_where_clause(where),
-        }
 
+        }
+        if where:
+            query['where'] = self.__read_where_clause(where)
         context = {'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
@@ -486,24 +491,24 @@ class Rows(APIView):
                     }],
                 'type': 'operator'
             }
-            if query['where']:
-                clause = conjunction([clause, query['where']])
+            where = query.get('where')
+            if where: # If there is already a where clause take the conjunction
+                clause = conjunction([clause, where])
             query['where'] = clause
 
         return actions.data_delete(query, context)
 
-    def __read_where_clause(self, where):
-        where_expression = '^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
-                           + '|'.join(parser.sql_operators) \
-                           + ')\s*(?P<second>(?![>=]).+)$'
+    def __read_where_clause(self, wheres):
         where_clauses = []
-        if where:
-            where_splitted = re.findall(where_expression, where)
-            where_clauses = conjunction([{'operands': [{
-                                'type': 'column',
-                                'column': match[0]},match[2]],
-                              'operator': match[1],
-                              'type': 'operator'} for match in where_splitted])
+        if wheres:
+            for where in wheres:
+                if where:
+                    where_splitted = re.findall(WHERE_EXPRESSION, where)
+                    where_clauses.append(conjunction([{'operands': [{
+                                        'type': 'column',
+                                        'column': match[0]},match[2]],
+                                      'operator': match[1],
+                                      'type': 'operator'} for match in where_splitted]))
         return where_clauses
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
@@ -533,14 +538,17 @@ class Rows(APIView):
         context = {'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
-        where = request.GET.get('where')
+        where = request.GET.getlist('where')
 
         query = {
             'schema': schema,
             'table': table,
-            'where': self.__read_where_clause(where),
             'values': row
         }
+
+        if where:
+            query['where'] = self.__read_where_clause(where)
+
         if row_id:
             clause = {
                 'operator': '=',
@@ -552,8 +560,9 @@ class Rows(APIView):
                     }],
                 'type': 'operator'
             }
-            if query['where']:
-                clause = conjunction([clause, query['where']])
+            where = query.get('where')
+            if where:
+                clause = conjunction([clause, where])
             query['where'] = clause
 
         return actions.data_update(query, context)
@@ -578,7 +587,12 @@ class Rows(APIView):
 
         orderby = data.get('orderby')
         if orderby:
-            query = query.order_by(orderby)
+            if isinstance(orderby, list):
+                query = query.order_by(*map(parser.parse_expression, orderby))
+            elif isinstance(orderby, str):
+                query = query.order_by(orderby)
+            else:
+                raise APIError('Unknown order_by clause: ' + orderby)
 
         limit = data.get('limit')
         if limit and limit.isdigit():
