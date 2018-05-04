@@ -1786,22 +1786,12 @@ def apply_insert(session, table, row, rid):
     set_applied(session, table, rid)
 
 
-def apply_update(session, table, row):
+def apply_update(session, table, row, rid):
     logger.info("apply update", row)
-    session.execute(table.update(table.c.id==row['id']), row)
-    session.execute(
-        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
-            schema=get_meta_schema_name(table.schema),
-            table=get_edit_table_name(table.schema, table.name),
-            id=row['_id']
-        ))
+    session.execute(table.update(table.c.id==rid), row)
+    set_applied(session, table, rid)
 
-def apply_deletion(session, table, row):
+def apply_deletion(session, table, row, rid):
     logger.info("apply deletion", row)
-    session.execute(table.delete(table.c.id==row['id']), row)
-    session.execute(
-        'UPDATE {schema}.{table} SET _applied=TRUE WHERE _id={id};'.format(
-            schema=get_meta_schema_name(table.schema),
-            table=get_delete_table_name(table.schema, table.name),
-            id=row['_id']
-        ))
+    session.execute(table.delete(table.c.id==rid), row)
+    set_applied(session, table, rid)
