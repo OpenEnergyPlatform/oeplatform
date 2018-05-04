@@ -708,7 +708,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
             constraints.append(sa.schema.UniqueConstraint(*ccolumns,
                                                           **kwargs))
 
-    t = Table(table, metadata, *columns, *constraints, schema=schema)
+    t = Table(table, metadata, *(columns + constraints), schema=schema)
     t.create(_get_engine())
 
     return get_response_dict(success=True)
