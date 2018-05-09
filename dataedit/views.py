@@ -611,7 +611,8 @@ class DataView(View):
                           'data': data,
                           'display_message': display_message,
                           'display_items': display_items,
-                          'is_admin': is_admin
+                          'is_admin': is_admin,
+                          'host': request.get_host()
                       })
 
     def post(self, request, schema, table):

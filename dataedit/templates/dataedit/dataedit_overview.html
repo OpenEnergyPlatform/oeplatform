@@ -10,7 +10,12 @@
                     <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
                 </td>
                 <td style="padding:5px">
-                    <a href="{{table}}/download" class="glyphicon glyphicon-download-alt"> </a>
+                    <div>
+                        <div >
+                            <button id="fetch_overlay_open" class="glyphicon glyphicon-download-alt"></button>
+                        </div>
+
+                    </div>
                 </td>
                 <td>
                     <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
@@ -24,10 +29,52 @@
     If this table contains geometrical data, the data backend translates this cells
     to human-readable geoJSON. You can plot these datapoints in a designated map view.
     </div>
+
+<div id="fetch_overlay" class="modal">
+                          <!-- Modal content -->
+                          <div class="modal-content">
+                            <span id="fetch_overlay_close" class="close">&times;</span>
+                            <div>
+                                <textarea rows="4" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+from requests import get
+
+result = get('https://{{host}}/api/v0/schema/{{schema}}/tables/{{table}}/rows')
+for row in result.json():
+    # Process the row
+                                </textarea>
+                            </div>
+                          </div>
+
+                        </div>
 {% endblock %}
 
 {% block script %}
+<script type="text/javascript">
+    // Get the modal
+    var modal = document.getElementById('fetch_overlay');
 
+    // Get the button that opens the modal
+    var btn = document.getElementById("fetch_overlay_open");
+
+    var cls = document.getElementById("fetch_overlay_close");
+
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    cls.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 <script type="text/javascript">
 
     // using jQuery
