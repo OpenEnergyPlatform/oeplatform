@@ -12,7 +12,7 @@
                 <td style="padding:5px">
                     <div>
                         <div >
-                            <button id="fetch_overlay_open" class="glyphicon glyphicon-download-alt"></button>
+                            <a id="fetch_overlay_open" class="glyphicon glyphicon-download-alt"></a>
                         </div>
 
                     </div>
@@ -30,23 +30,22 @@
     to human-readable geoJSON. You can plot these datapoints in a designated map view.
     </div>
 
-<div id="fetch_overlay" class="modal">
-                          <!-- Modal content -->
-                          <div class="modal-content">
-                            <span id="fetch_overlay_close" class="close">&times;</span>
-                            <div>
-                                <textarea rows="4" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+    <div id="fetch_overlay" class="modal">
+      <div class="modal-content">
+        <span id="fetch_overlay_close" class="close">&times;</span>
+        <div>
+            Use below snippet to fetch data from this dataset.
+          <textarea class="form-control" rows="6" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
 from requests import get
 
 result = get('https://{{host}}/api/v0/schema/{{schema}}/tables/{{table}}/rows')
 for row in result.json():
-    # Process the row
-                                </textarea>
-                            </div>
-                          </div>
+    # Process the row</textarea>
+        </div>
+      </div>
 
-                        </div>
-{% endblock %}
+    </div>
+    {% endblock %}
 
 {% block script %}
 <script type="text/javascript">
