@@ -103,7 +103,7 @@ class TablePermission(models.Model):
 
 class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
-    affiliation = models.CharField(max_length=50, null=True)
+    affiliation = models.CharField(max_length=50, blank=True)
     mail_address = models.EmailField(verbose_name='email address',
                                      max_length=255, unique=True, )
 
