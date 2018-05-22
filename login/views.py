@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect,\
 from django.views.generic import View
 from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import GroupUserForm
+from .forms import CreateUserForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 import login.models as models
@@ -183,12 +183,20 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     template_name_suffix = '_update_form'
 
 
-def create_user(request):
-    """
-    We use the user management implemented in the wiki of the openMod-community.
-    New users must be created there.
-    :param request: A HTTP-request object sent by the Django framework.
-    :return: Redirect to AccountRequest-form on wiki.openmod-initiative.org
-    """
-    return redirect(request, "http://wiki.openmod-initiative.org/wiki/Special:RequestAccount")
+class CreateUserView(View):
+    def get(self, request):
+        form = CreateUserForm()
+        return render(request, 'login/oepuser_create_form.html', {'form': form})
 
+    def post(self, request):
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+
+            # Mark that the user does not use any external means of authentication
+            user.is_native = True
+            user.save()
+            return redirect('/user/profile/{id}'.format(id=user.id))
+        else:
+            return render(request, 'login/oepuser_create_form.html',
+                          {'form': form})

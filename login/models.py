@@ -112,6 +112,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
+    is_native = models.BooleanField(default=False)
+
     USERNAME_FIELD = 'name'
 
     REQUIRED_FIELDS = [name]
@@ -154,6 +156,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         return permission_level
 
+
 class UserPermission(TablePermission):
     holder = models.ForeignKey(myuser,
                                related_name='table_permissions')
@@ -177,21 +180,43 @@ class GroupMembership(models.Model):
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
-        url = 'https://wiki.openmod-initiative.org/api.php?action=login'
-        data = {'format':'json', 'lgname':username}
+        """
+        There are two possible means of authentication:
 
-        #A first request to receive the required token
-        token_req = requests.post(url, data)
-        data['lgpassword'] = password
-        data['lgtoken'] = token_req.json()['login']['token']
-
-        # A second request for the actual authentication
-        login_req = requests.post(url, data, cookies=token_req.cookies)
-
-        if login_req.json()['login']['result'] == 'Success':
-            return myuser.objects.get_or_create(name=username)[0]
-        else:
+        1. If the user has registered via the OEP he can log in via his password
+           and username.
+        2. If the user is still connected to the openmod-wiki, the
+           authentication falls back to this method.
+        :param username:
+        :param password:
+        :return:
+        """
+        try:
+            user = myuser.objects.get(name=username)
+        except models.ObjectDoesNotExist:
             return None
+
+        if user.is_native:
+            if user.check_password(password):
+                return user
+            else:
+                return None
+        else:
+            url = 'https://wiki.openmod-initiative.org/api.php?action=login'
+            data = {'format':'json', 'lgname':username}
+
+            #A first request to receive the required token
+            token_req = requests.post(url, data)
+            data['lgpassword'] = password
+            data['lgtoken'] = token_req.json()['login']['token']
+
+            # A second request for the actual authentication
+            login_req = requests.post(url, data, cookies=token_req.cookies)
+
+            if login_req.json()['login']['result'] == 'Success':
+                return myuser.objects.get_or_create(name=username)[0]
+            else:
+                return None
 
 
     def get_user(self, user_id):

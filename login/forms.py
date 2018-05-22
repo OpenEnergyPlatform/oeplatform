@@ -2,8 +2,22 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser, UserPermission
+from django.contrib.auth.forms import UserCreationForm
 
 
+class CreateUserForm(UserCreationForm):
+    class Meta:
+        model = OepUser
+        fields = ('name', 'affiliation', 'mail_address', 'password1', 'password2')
+
+    def __init__(self, *args, **kwargs):
+        super(CreateUserForm, self).__init__(*args, **kwargs)
+        for key in self.Meta.fields:
+            field = self.fields[key]
+            cstring = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = cstring + 'form-control'
+            if field.required:
+                field.label_suffix = '*'
 
 class UserChangeForm(forms.ModelForm):
     """A form for updating users. Includes all the fields on
