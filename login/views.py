@@ -3,12 +3,14 @@ from django.shortcuts import get_object_or_404, render, redirect,\
 from django.views.generic import View
 from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import CreateUserForm
+from .forms import CreateUserForm, EditUserForm
 from django.contrib.auth.models import Group
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.http import Http404
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -182,6 +184,25 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     fields = ['name','affiliation','mail_address']
     template_name_suffix = '_update_form'
 
+
+class EditUserView(View):
+    def get(self, request, user_id):
+        if not request.user.id == int(user_id):
+            raise PermissionDenied
+        form = EditUserForm(instance=request.user)
+        del form.fields['password']
+        return render(request, 'login/oepuser_edit_form.html', {'form': form})
+
+    def post(self, request, user_id):
+        if not request.user.id == int(user_id):
+            raise PermissionDenied
+        form = EditUserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save()
+            return redirect('/user/profile/{id}'.format(id=user.id))
+        else:
+            return render(request, 'login/oepuser_edit_form.html',
+                          {'form': form})
 
 class CreateUserView(View):
     def get(self, request):

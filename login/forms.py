@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser, UserPermission
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
 
 class CreateUserForm(UserCreationForm):
@@ -19,22 +19,32 @@ class CreateUserForm(UserCreationForm):
             if field.required:
                 field.label_suffix = '*'
 
-class UserChangeForm(forms.ModelForm):
+class EditUserForm(UserChangeForm):
     """A form for updating users. Includes all the fields on
     the user, but replaces the password field with admin's
     password hash display field.
     """
-    password = ReadOnlyPasswordHashField()
 
     class Meta:
         model = OepUser
-        fields = ('name', 'affiliation', 'mail_address')
+        fields = ('name', 'mail_address', 'affiliation', 'description')
+        exclude = ('password',)
+
+    def __init__(self, *args, **kwargs):
+        super(UserChangeForm, self).__init__(*args, **kwargs)
+        for key in self.Meta.fields:
+            field = self.fields[key]
+            cstring = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = cstring + 'form-control'
+            if field.required:
+                field.label_suffix = '*'
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
         return self.initial["password"]
+
 
 class GroupUserForm(forms.ModelForm):
     """

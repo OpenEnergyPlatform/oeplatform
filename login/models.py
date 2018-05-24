@@ -114,6 +114,9 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     is_native = models.BooleanField(default=False)
 
+    description = models.TextField(blank=True)
+
+
     USERNAME_FIELD = 'name'
 
     REQUIRED_FIELDS = [name]

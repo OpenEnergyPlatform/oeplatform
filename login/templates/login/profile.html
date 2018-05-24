@@ -2,9 +2,44 @@
 {% load bootstrap3 %}
 {% block content %}
 <h1> {{ user.name }} </h1>
-{% if user == request.user and token%}
-    <h3>Your authorization token:</h3> {{ token }}
-{% endif %}
+
+<table class="table">
+    {% if user == request.user %}
+        <tr>
+            <th> E-Mail: </th>
+            <td> {{ user.mail_address }} </td>
+        </tr>
+    {% endif %}
+    <tr>
+        <th> Affiliation: </th>
+        <td>
+            {% if user.affiliation %}
+                {{ user.affiliation }}
+            {% else %}
+                <a href="{{user.id}}/edit">Add your affiliation</a>
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th> Description: </th>
+        <td> {% if user.desctiption %}
+                {{ user.description }}
+            {% else %}
+                <a href="{{user.id}}/edit">Add a description</a>
+            {% endif %} </td>
+    </tr>
+    {% if user == request.user %}
+        <tr>
+            <th> API-Token: </th>
+            <td>
+                {% if token %}
+                     {{ token }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+</table>
+
 {% endblock %}
 {% block content-right %}
 <hr>
