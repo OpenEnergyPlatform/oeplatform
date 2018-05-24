@@ -190,7 +190,6 @@ class EditUserView(View):
         if not request.user.id == int(user_id):
             raise PermissionDenied
         form = EditUserForm(instance=request.user)
-        del form.fields['password']
         return render(request, 'login/oepuser_edit_form.html', {'form': form})
 
     def post(self, request, user_id):
@@ -198,8 +197,8 @@ class EditUserView(View):
             raise PermissionDenied
         form = EditUserForm(request.POST, instance=request.user)
         if form.is_valid():
-            user = form.save()
-            return redirect('/user/profile/{id}'.format(id=user.id))
+            form.save()
+            return redirect('/user/profile/{id}'.format(id=request.user.id))
         else:
             return render(request, 'login/oepuser_edit_form.html',
                           {'form': form})

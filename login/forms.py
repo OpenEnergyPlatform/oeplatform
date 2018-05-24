@@ -28,7 +28,6 @@ class EditUserForm(UserChangeForm):
     class Meta:
         model = OepUser
         fields = ('name', 'mail_address', 'affiliation', 'description')
-        exclude = ('password',)
 
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)
@@ -40,11 +39,7 @@ class EditUserForm(UserChangeForm):
                 field.label_suffix = '*'
 
     def clean_password(self):
-        # Regardless of what the user provides, return the initial value.
-        # This is done here, rather than on the field, because the
-        # field does not have access to the initial value
-        return self.initial["password"]
-
+        return None
 
 class GroupUserForm(forms.ModelForm):
     """
