@@ -8,6 +8,7 @@ equal_qualifier = r"[\w\d\s\'\=]"
 structures = r'table|sequence'
 urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$', views.Table.as_view()),
+    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$', views.Sequence.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$', views.Column.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/id/(?P<id>[\d]+)/column/(?P<column>[\w\d_\s]+)/$', views.Fields.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
@@ -15,6 +16,9 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
 
     url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True)),
+    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert)),
+    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete)),
+
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),
     url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update)),
     url(r'^v0/advanced/has_schema', views.create_ajax_handler(actions.has_schema)),
@@ -32,13 +36,16 @@ urlpatterns = [
     url(r'^v0/advanced/get_unique_constraints', views.create_ajax_handler(actions.get_unique_constraints)),
     url(r'^v0/advanced/request_dump', views.create_ajax_handler(actions.get_unique_constraints)),
 
-    url(r'^v0/advanced/open_raw_connection', views.create_ajax_handler(actions.open_raw_connection)),
-    url(r'^v0/advanced/close_raw_connection', views.create_ajax_handler(actions.close_raw_connection)),
-    url(r'^v0/advanced/open_cursor', views.create_ajax_handler(actions.open_cursor)),
-    url(r'^v0/advanced/close_cursor', views.create_ajax_handler(actions.close_cursor)),
-    url(r'^v0/advanced/fetch_one', views.create_ajax_handler(actions.fetchone)),
-    url(r'^v0/advanced/fetch_many', views.create_ajax_handler(actions.fetchmany)),
-    url(r'^v0/advanced/fetch_all', views.create_ajax_handler(actions.fetchall)),
+    url(r'^v0/advanced/connection/open', views.create_ajax_handler(actions.open_raw_connection)),
+    url(r'^v0/advanced/connection/close', views.create_ajax_handler(actions.close_raw_connection)),
+    url(r'^v0/advanced/connection/commit', views.create_ajax_handler(actions.commit_raw_connection)),
+    url(r'^v0/advanced/connection/rollback', views.create_ajax_handler(actions.rollback_raw_connection)),
+
+    url(r'^v0/advanced/cursor/open', views.create_ajax_handler(actions.open_cursor)),
+    url(r'^v0/advanced/cursor/close', views.create_ajax_handler(actions.close_cursor)),
+    url(r'^v0/advanced/cursor/fetch_one', views.create_ajax_handler(actions.fetchone)),
+    url(r'^v0/advanced/cursor/fetch_many', views.FetchView.as_view(), dict(fetchtype='all')),
+    url(r'^v0/advanced/cursor/fetch_all', views.FetchView.as_view(), dict(fetchtype='all')),
 
     url(r'^v0/advanced/set_isolation_level', views.create_ajax_handler(actions.set_isolation_level)),
     url(r'^v0/advanced/get_isolation_level', views.create_ajax_handler(actions.get_isolation_level)),
