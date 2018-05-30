@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'modelview.templatetags.modelview_extras',
     'login',
     'base',
+    'base.templatetags.base_tags',
     'widget_tweaks',
     'dataedit',
     'colorfield',
