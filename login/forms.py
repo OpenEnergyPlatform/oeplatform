@@ -2,7 +2,8 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser, UserPermission
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
+    PasswordChangeForm
 
 
 class CreateUserForm(UserCreationForm):
@@ -41,6 +42,7 @@ class EditUserForm(UserChangeForm):
     def clean_password(self):
         return None
 
+
 class GroupUserForm(forms.ModelForm):
     """
      A form for setting members of a group.     
@@ -58,4 +60,3 @@ class GroupUserForm(forms.ModelForm):
         super(GroupUserForm, self).__init__(*args,**kwargs)
         if group_id != "":
             self.fields['groupmembers'].initial = OepUser.objects.filter(groups__id=group_id)
-

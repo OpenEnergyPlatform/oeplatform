@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth import update_session_auth_hash
 
 class ProfileView(View):
@@ -220,3 +220,6 @@ class CreateUserView(View):
         else:
             return render(request, 'login/oepuser_create_form.html',
                           {'form': form})
+
+class OEPPasswordChangeView(PasswordChangeView):
+    template_name = 'login/generic_form.html'
