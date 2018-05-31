@@ -44,9 +44,9 @@ confirmOnLeave();
 
 
 {% if method == "update"%}
-    <form action="/factsheets/models/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
+    <form action="/factsheets/models/{{ name }}/update/" method="post" novalidate="novalidate" role="form" enctype="multipart/form-data">
 {% else %}
-    <form action="/factsheets/models/add/" method="post" role="form" enctype="multipart/form-data">
+    <form action="/factsheets/models/add/" method="post" role="form" novalidate="novalidate" enctype="multipart/form-data">
 {% endif %}
 {% csrf_token %}
 <div style="width:100%">
