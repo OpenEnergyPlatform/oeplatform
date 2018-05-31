@@ -266,7 +266,10 @@ def parse_from_item(d):
         if ext_name in __PARSER_META.tables:
             item = __PARSER_META.tables[ext_name]
         else:
-            item = Table(d['table'], __PARSER_META, **tkwargs)
+            try:
+                item = Table(d['table'], __PARSER_META, **tkwargs)
+            except sa.exc.NoSuchTableError as e:
+                raise APIError('Table not found: ' +  d['table'])
 
         engine = _get_engine()
         conn = engine.connect()
