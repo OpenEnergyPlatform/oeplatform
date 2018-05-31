@@ -31,6 +31,10 @@ import logging
 
 logger = logging.getLogger('oeplatform')
 
+__INSERT = 0
+__UPDATE = 1
+__DELETE = 2
+
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
         raise Http404
@@ -1719,7 +1723,6 @@ def apply_changes(schema, table, cursor=None):
     engine = _get_engine()
 
     if cursor is None:
-
         cursor = engine.connect().cursor()
 
     meta_schema = get_meta_schema_name(schema)
@@ -1768,8 +1771,16 @@ def apply_changes(schema, table, cursor=None):
             apply_deletion(cursor, table_obj, distilled_change, change['_id'])
 
 
-def set_applied(session, table, rid):
-    meta_table = Table(get_insert_table_name(table.schema, table.name),
+def set_applied(session, table, rid, mode):
+    if mode == __INSERT:
+        name_map = get_insert_table_name
+    elif mode == __DELETE:
+        name_map = get_delete_table_name
+    elif mode == __UPDATE:
+        name_map = get_edit_table_name
+    else:
+        raise NotImplementedError
+    meta_table = Table(name_map(table.schema, table.name),
                        MetaData(bind=_get_engine()),
                        autoload=True,
                        schema=get_meta_schema_name(table.schema))
@@ -1779,19 +1790,22 @@ def set_applied(session, table, rid):
 
 
 def apply_insert(session, table, row, rid):
-    logger.info("apply insert", row)
+    logger.info("apply insert " + str(row))
     query = table.insert().values(row)
     query = query.compile()
     session.execute(str(query), query.params)
-    set_applied(session, table, rid)
+    set_applied(session, table, rid, __INSERT)
 
 
 def apply_update(session, table, row, rid):
-    logger.info("apply update", row)
-    session.execute(table.update(table.c.id==rid), row)
-    set_applied(session, table, rid)
+    logger.info("apply update " + str(row))
+    query = table.update(table.c.id == rid).values(row).compile()
+    session.execute(str(query), query.params)
+    set_applied(session, table, rid, __UPDATE)
+
 
 def apply_deletion(session, table, row, rid):
-    logger.info("apply deletion", row)
-    session.execute(table.delete(table.c.id==rid), row)
-    set_applied(session, table, rid)
+    logger.info("apply deletion " + str(row))
+    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row]).compile()
+    session.execute(str(query), query.params)
+    set_applied(session, table, rid, __DELETE)
