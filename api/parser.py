@@ -393,9 +393,15 @@ def parse_slice(d):
 
 def parse_condition(dl):
     if isinstance(dl, list):
+        clauses = []
+        for clause in dl:
+            if isinstance(clause, list):
+                clauses += clause
+            else:
+                clauses.append(clause)
         dl = {'type':'operator',
               'operator': 'AND',
-              'operands': list(map(parse_expression, dl))}
+              'operands': list(map(parse_expression, clauses))}
     return parse_expression(dl)
 
 
