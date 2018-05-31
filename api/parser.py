@@ -269,7 +269,7 @@ def parse_from_item(d):
             try:
                 item = Table(d['table'], __PARSER_META, **tkwargs)
             except sa.exc.NoSuchTableError as e:
-                raise APIError('Table not found: ' +  d['table'])
+                raise APIError('Table {table} not found'.format(table=ext_name))
 
         engine = _get_engine()
         conn = engine.connect()
@@ -307,6 +307,7 @@ def parse_column(d, mapper):
         tkwargs = dict(autoload=True)
         tname = do_map(d['table'])
         ext_name = tname
+        tschema = None
         if 'schema' in d:
             tschema = do_map(d['schema'])
             tkwargs['schema'] = tschema
@@ -315,7 +316,7 @@ def parse_column(d, mapper):
         if ext_name and ext_name in __PARSER_META.tables:
             table = __PARSER_META.tables[ext_name]
         else:
-            if _get_engine().dialect.has_table(_get_engine().connect(), tname):
+            if _get_engine().dialect.has_table(_get_engine().connect(), tname, schema=tschema):
                 table = Table(tname, __PARSER_META, **tkwargs)
 
 
