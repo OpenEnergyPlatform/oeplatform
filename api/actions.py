@@ -896,7 +896,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     query = {
         'from': {
             'type': 'table',
-            'schema': request['schema'],
+            'schema': request.get('schema', DEFAULT_SCHEMA),
             'table': request['table']
         },
     }
@@ -920,7 +920,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
     table_name = request['table']
     meta = MetaData(bind=_get_engine())
-    table = Table(table_name, meta, autoload=True, schema=request['schema'])
+    table = Table(table_name, meta, autoload=True, schema=request.get('schema', DEFAULT_SCHEMA))
     pks = [c for c in table.columns if c.primary_key]
 
     inserts = []
@@ -941,7 +941,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
             inserts.append(dict(insert))
         # Add metadata for insertions
-        schema = request['schema']
+        schema = request.get('schema', DEFAULT_SCHEMA)
         meta_schema = get_meta_schema_name(schema) if not schema.startswith(
             '_') else schema
 
@@ -969,7 +969,8 @@ def data_delete(request, context=None):
 
 
 def data_update(request, context=None):
-    target_table = get_edit_table_name(request['schema'],request['table'])
+    schema = request.get('schema', DEFAULT_SCHEMA)
+    target_table = get_edit_table_name(schema,request['table'])
     setter = get_or_403(request, 'values')
     return __change_rows(request, context, target_table, setter)
 
