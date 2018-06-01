@@ -29,6 +29,12 @@ def get_or_403(dictionary, key):
     except KeyError:
         raise APIKeyError(dictionary, key)
 
+def parse_single(x, caster):
+    try:
+        return caster(x)
+    except ValueError:
+        raise APIError('Could not parse %s as %s' % (x, caster))
+
 
 def is_pg_qual(x):
     return pgsql_qualifier.search(x)
@@ -272,42 +278,41 @@ def parse_from_item(d):
 
 __PARSER_META = MetaData(bind=_get_engine())
 
+
+def load_table_from_metadata(table_name, schema_name=None):
+    ext_name = table_name
+    if schema_name:
+        ext_name = schema_name + '.' + ext_name
+    if ext_name and ext_name in __PARSER_META.tables:
+        return __PARSER_META.tables[ext_name]
+    else:
+        if _get_engine().dialect.has_table(_get_engine().connect(), table_name,
+                                           schema=schema_name):
+            return Table(table_name, __PARSER_META, autoload=True,
+                         schema=schema_name)
+
+
 def parse_column(d, mapper):
-    if mapper is None:
-        mapper = dict()
-    do_map = lambda x: mapper.get(x, x)
     name = get_or_403(d, 'column')
     is_literal = d.get('is_literal', False)
-    if 'table' in d:
-        tkwargs = dict(autoload=True)
-        tname = do_map(d['table'])
-        ext_name = tname
-        tschema = None
+    table_name = d.get('table')
+    table = None
+    if table_name:
+        if mapper is None:
+            mapper = dict()
+        do_map = lambda x: mapper.get(x, x)
         if 'schema' in d:
-            tschema = do_map(d['schema'])
-            tkwargs['schema'] = tschema
-            ext_name = tschema + '.' + tname
-        table = None
-        if ext_name and ext_name in __PARSER_META.tables:
-            table = __PARSER_META.tables[ext_name]
+            schema_name = do_map(d['schema'])
         else:
-            if _get_engine().dialect.has_table(_get_engine().connect(), tname, schema=tschema):
-                table = Table(tname, __PARSER_META, **tkwargs)
-
-
-        if table is not None and hasattr(table.c, name):
-            return getattr(table.c, name)
-        else:
-            if is_literal:
-                return literal_column(name)
-            else:
-                return column(name)
-
-    if is_literal:
-        return literal_column(name)
+            schema_name = None
+        table = load_table_from_metadata(table_name, schema_name=schema_name)
+    if table is not None and hasattr(table.c, name):
+        return getattr(table.c, name)
     else:
-        return column(name)
-
+        if is_literal:
+            return literal_column(name)
+        else:
+            return column(name)
 
 def parse_expression(d, mapper=None):
     # TODO: Implement
@@ -348,6 +353,8 @@ def parse_expression(d, mapper=None):
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
         return [parse_expression(x) for x in d]
+    if isinstance(d, str):
+        return d.replace('"','')
     return d
 
 
@@ -545,9 +552,9 @@ def parse_sqla_operator(raw_key, *operands):
             return x.isnot(y)
         if key in ['getitem']:
             if isinstance(y, Slice):
-                return x[y.start:y.stop]
+                return x[parse_single(y.start, int):parse_single(y.stop, int)]
             else:
-                return x[y]
+                return x[read_pgid(y)]
         if key in ['in']:
             return x.in_(y)
 
