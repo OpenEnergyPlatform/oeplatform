@@ -294,15 +294,15 @@ def load_table_from_metadata(table_name, schema_name=None):
 
 def parse_column(d, mapper):
     name = get_or_403(d, 'column')
-    is_literal = d.get('is_literal', False)
-    table_name = d.get('table')
+    is_literal = parse_single(d.get('is_literal', False), bool)
+    table_name = read_pgid(d.get('table'))
     table = None
     if table_name:
         if mapper is None:
             mapper = dict()
         do_map = lambda x: mapper.get(x, x)
         if 'schema' in d:
-            schema_name = do_map(d['schema'])
+            schema_name = read_pgid(do_map(d['schema']))
         else:
             schema_name = None
         table = load_table_from_metadata(table_name, schema_name=schema_name)

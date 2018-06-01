@@ -893,11 +893,12 @@ def __internal_select(query, context):
 
 
 def __change_rows(request, context, target_table, setter, fields=None):
+    orig_table = read_pgid(request['table'])
     query = {
         'from': {
             'type': 'table',
-            'schema': request.get('schema', DEFAULT_SCHEMA),
-            'table': request['table']
+            'schema': read_pgid(request.get('schema', DEFAULT_SCHEMA)),
+            'table': orig_table
         },
     }
 
@@ -906,7 +907,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
 
     if fields:
         query['fields'] = [{'type': 'column',
-                             'column': f} for f in fields]
+                             'column': read_pgid(f)} for f in fields]
 
     user = context['user'].name
 
@@ -918,7 +919,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
         fields = [field[0] for field in rows['description']]
     fields += [f[0] for f in meta_fields]
 
-    table_name = request['table']
+    table_name = orig_table
     meta = MetaData(bind=_get_engine())
     table = Table(table_name, meta, autoload=True, schema=request.get('schema', DEFAULT_SCHEMA))
     pks = [c for c in table.columns if c.primary_key]
@@ -969,17 +970,17 @@ def data_delete(request, context=None):
 
 
 def data_update(request, context=None):
-    orig_table = get_or_403(request, 'table')
+    orig_table = read_pgid(get_or_403(request, 'table'))
     if orig_table.startswith('_') or orig_table.endswith('_cor'):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = request.get('schema',DEFAULT_SCHEMA)
+    orig_schema = read_pgid(request.get('schema',DEFAULT_SCHEMA))
     schema, table = get_table_name(orig_schema, orig_table)
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
     if isinstance(setter, list):
         if 'fields' not in request:
             raise APIError("values passed in list format without field info")
-        field_names = [d['column'] for d in request['fields']]
+        field_names = [read_pgid(d['column']) for d in request['fields']]
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
