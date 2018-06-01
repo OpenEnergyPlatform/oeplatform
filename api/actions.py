@@ -948,7 +948,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
         insert_table = _get_table(meta_schema, target_table)
         query = insert_table.insert(values=inserts)
         _execute_sqla(query, cursor)
-    return {'rowcount': rows['rowcount'], 'description': rows['description']}
+    return {'rowcount': rows['rowcount']}
 
 
 def data_delete(request, context=None):
@@ -1601,7 +1601,6 @@ def get_edit_table_name(schema, table, create=True):
                                  'table': table_name}):
         create_edit_table(schema, table)
     return table_name
-
 
 def get_insert_table_name(schema, table, create=True):
     table_name = '_' + table + '_insert'
