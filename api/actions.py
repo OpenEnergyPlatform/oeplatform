@@ -955,7 +955,7 @@ def data_delete(request, context=None):
     orig_table = get_or_403(request, 'table')
     if orig_table.startswith('_') or orig_table.endswith('_cor'):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = get_or_403(request, 'schema')
+    orig_schema = request.get('schema', DEFAULT_SCHEMA)
 
     schema, table = get_table_name(orig_schema, orig_table)
 
@@ -963,16 +963,29 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ['id'])
-    if request['schema'] == 'sandbox':
+    if orig_schema == 'sandbox':
         apply_changes(schema, table, cursor)
     return result
 
 
 def data_update(request, context=None):
-    schema = request.get('schema', DEFAULT_SCHEMA)
-    target_table = get_edit_table_name(schema,request['table'])
+    orig_table = get_or_403(request, 'table')
+    if orig_table.startswith('_') or orig_table.endswith('_cor'):
+        raise APIError("Insertions on meta tables is not allowed", status=403)
+    orig_schema = request.get('schema',DEFAULT_SCHEMA)
+    schema, table = get_table_name(orig_schema, orig_table)
+    target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
-    return __change_rows(request, context, target_table, setter)
+    if isinstance(setter, list):
+        if 'fields' not in request:
+            raise APIError("values passed in list format without field info")
+        field_names = [d['column'] for d in request['fields']]
+        setter = dict(zip(field_names, setter))
+    cursor = load_cursor_from_context(context)
+    result = __change_rows(request, context, target_table, setter)
+    if orig_schema == 'sandbox':
+        apply_changes(schema, table, cursor)
+    return result
 
 def data_insert_check(schema, table, values, context):
 
@@ -1779,7 +1792,8 @@ def apply_insert(session, table, row, rid):
 
 def apply_update(session, table, row, rid):
     logger.info("apply update " + str(row))
-    query = table.update(table.c.id == rid).values(row).compile()
+    pks = [c.name for c in table.columns if c.primary_key]
+    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row).compile()
     session.execute(str(query), query.params)
     set_applied(session, table, rid, __UPDATE)
 
