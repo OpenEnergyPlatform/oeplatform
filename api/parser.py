@@ -22,14 +22,6 @@ __KNOWN_TABLES = {}
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-def get_table_obj(name, *args, **kwargs):
-    schema = kwargs.get('schema')
-    if (schema, name) in __KNOWN_TABLES:
-        return __KNOWN_TABLES[schema, name]
-    else:
-        t = Table(name, *args, **kwargs)
-        __KNOWN_TABLES[schema, name] = t
-        return t
 
 def get_or_403(dictionary, key):
     try:
@@ -42,24 +34,11 @@ def is_pg_qual(x):
     return pgsql_qualifier.search(x)
 
 
-def quote(x):
-    if not x.startswith('"') and '(' not in x:
-        return '"' + x + '"'
-    else:
-        return x
-
 def read_pgvalue(x):
     # TODO: Implement check for valid values
     if x is None:
         return 'null'
     return x
-
-
-"""def read_operator(x, right):
-    # TODO: Implement check for valid operators
-    if isinstance(right, dict) and get_or_403(right, 'type') == 'value' and ('value' not in right or get_or_403(right, 'value') is None and x == '='):
-        return 'is'
-    return x"""
 
 
 class ValidationError(Exception):
@@ -93,12 +72,8 @@ def set_meta_info(method, user, message=None):
 
 
 def parse_insert(d, context, message=None, mapper=None):
-
     table = Table(read_pgid(get_or_403(d, 'table')), MetaData(bind=_get_engine())
                   , autoload=True, schema=read_pgid(get_or_403(d, 'schema')))
-
-    meta_cols = ['_message', '_user']
-
     field_strings = []
     for field in d.get('fields', []):
         if not ((isinstance(field, dict) and 'type' in field and field['type'] == 'column') or isinstance(field, str)):
@@ -333,6 +308,7 @@ def parse_column(d, mapper):
     else:
         return column(name)
 
+
 def parse_expression(d, mapper=None):
     # TODO: Implement
     if isinstance(d, dict):
@@ -409,11 +385,13 @@ def parse_operator(d):
     query = parse_sqla_operator(get_or_403(d, 'operator'), *list(map(parse_expression, get_or_403(d, 'operands'))))
     return query
 
+
 def parse_modifier(d):
     query = parse_sqla_modifier(get_or_403(d, 'operator'),
                                 *list(map(parse_expression,
                                           get_or_403(d, 'operands'))))
     return query
+
 
 def parse_function(d):
     fname = get_or_403(d, 'function')
@@ -438,57 +416,6 @@ def parse_function(d):
         else:
             function = getattr(func, fname)
             return function(*operands)
-
-
-def cadd(d, key, string=None):
-    if not string:
-        string = key.upper() + ' '
-    if d.pop(key, None):
-        return string
-    else:
-        return ''
-
-
-def parse_create_table(d):
-    s = 'CREATE '
-    if d.pop('global', None):
-        s += 'GLOBAL '
-    elif d.pop('local', None):
-        s += 'LOCAL '
-
-    s += (cadd(d, 'temp')
-          + cadd(d, 'unlogged')
-          + 'TABLE '
-          + cadd(d, 'if_not_exists', 'IF NOT EXISTS ')
-          + read_pgid(get_or_403(d,'name')))
-
-    fieldstrings = []
-
-    for field in d.pop('fields', []):
-        fs = ''
-        ftype = get_or_403(field, 'type')
-        if ftype == 'column':
-            fs += read_pgid(get_or_403(field,'name')) + ' '
-            fs += read_pgid(get_or_403(field,'data_type')) + ' '
-            collate = field.pop('collate', None)
-            if collate:
-                fs += read_pgid(collate)
-            fs += ', '.join([parse_column_constraint(cons)
-                             for cons in field.pop('constraints', [])]) + ' '
-        elif ftype == 'table_constraint':
-            fs += parse_table_constraint(field)
-        elif ftype == 'like':
-            fs += 'LIKE '
-
-
-def parse_column_constraint(d):
-    raise NotImplementedError
-    # TODO: Implement
-
-
-def parse_table_constraint(d):
-    raise NotImplementedError
-    # TODO: Implement
 
 
 def parse_scolumnd_from_columnd(schema, table, name, column_description):
@@ -574,6 +501,7 @@ sql_operators = {'EQUALS': '=',
 def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
 
+
 def parse_sqla_operator(raw_key, *operands):
     key = raw_key.lower().strip()
     if not operands:
@@ -629,7 +557,7 @@ def parse_sqla_operator(raw_key, *operands):
 def parse_sqla_modifier(raw_key, *operands):
     key = raw_key.lower().strip()
     if not operands:
-        raise APIError('Missing arguments for \'%s\'.' % (key))
+        raise APIError('Missing arguments for \'%s\'.' % key)
 
     if len(operands) != 1:
         raise APIError(
@@ -640,4 +568,4 @@ def parse_sqla_modifier(raw_key, *operands):
         return x.asc()
     if key in ['desc']:
         return x.desc()
-    raise APIError("Operator %s not supported"%key)
+    raise APIError("Operator %s not supported" % key)

@@ -18,7 +18,7 @@ import geoalchemy2  # Although this import seems unused is has to be here
 
 import api
 from api import references, DEFAULT_SCHEMA
-from api.parser import quote, read_pgid, read_bool, get_or_403
+from api.parser import read_pgid, read_bool, get_or_403
 from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
@@ -1180,26 +1180,6 @@ def analyze_columns(schema, table):
         "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(
             schema=schema, table=table))
     return [{'id': get_or_403(r, 'id'), 'type': get_or_403(r, 'type')} for r in result]
-
-
-def search(db, schema, table, fields=None, pk = None, offset = 0, limit = 100):
-
-    if not fields:
-        fields = '*'
-    else:
-        fields = ', '.join(map(quote(fields)))
-    engine = _get_engine()
-    refs = engine.execute(references.Entry.__table__.select())
-
-    sql_string = "select {fields} from {schema}.{table}".format(
-        schema=schema, table=table, fields=fields)
-
-    if pk:
-        sql_string += " where {} = {}".format(pk[0], pk[1])
-
-    sql_string += " limit {}".format(limit)
-    sql_string += " offset {}".format(offset)
-    return engine.execute(sql_string, ), [dict(refs.first()).items()]
 
 
 def clear_dict(d):
