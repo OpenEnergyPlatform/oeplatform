@@ -24,6 +24,9 @@ from django.http import Http404
 import sqlalchemy as sqla
 import geoalchemy2  # Although this import seems unused is has to be here
 
+import logging
+
+logger = logging.getLogger('oeplatform')
 
 WHERE_EXPRESSION = re.compile('^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
                               + '|'.join(parser.sql_operators) \
@@ -646,6 +649,8 @@ def create_ajax_handler(func, allow_cors=False):
         @cors(allow_cors)
         @api_exception
         def post(self, request):
+            logger.debug(
+                'got request' % (request))
             response = JsonResponse(self.execute(request))
             if allow_cors and request.user.is_anonymous:
                 response['Access-Control-Allow-Origin'] = '*'
