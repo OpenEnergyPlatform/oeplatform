@@ -37,6 +37,8 @@ def parse_single(x, caster):
 
 
 def is_pg_qual(x):
+    if not isinstance(x, str):
+        return False
     return pgsql_qualifier.search(x)
 
 
