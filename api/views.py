@@ -650,7 +650,7 @@ def create_ajax_handler(func, allow_cors=False):
         @api_exception
         def post(self, request):
             logger.debug(
-                'got request' % (request))
+                'got request: ' + str(request))
             response = JsonResponse(self.execute(request))
             if allow_cors and request.user.is_anonymous:
                 response['Access-Control-Allow-Origin'] = '*'
