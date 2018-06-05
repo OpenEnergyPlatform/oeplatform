@@ -60,23 +60,6 @@ replaced by the stated defaults:
     * :code:`offset`: Integer
 
 
-Compound selects
-----------------
-
-    It is also possible to query compound selects (i.e. UNION, EXCEPT,
-    INTERSECT) via the API
-
-    * :code:`keyword`: Specifies wheter the respective command should be added
-        to the query. Possible Values: :code:`union`, :code:`except`, :code:`intersect`
-    * :code:`selects`: A list of sub-queries used in the compound of one of two
-        types, identified by their type:
-        * :code:`type`: Possible values: :code:`grouping` | :code:`select`
-        Depending on this type this impies an additional mandatory field:
-        * :code:`grouping`: A list of :ref:`Select object <select-objects>`
-            that are grouped together
-        * :code:`select`: A single :ref:`Select object <select-objects>`
-
-
 .. _expression-objects:
 
 Expressions
@@ -127,6 +110,24 @@ The depending on the :code:`type` the dictionary may have a a different structur
 
 Each from item **MAY** contain the following fields regardless of its type:
     * :code:`alias`: An alias for this item
+
+
+Compound selects
+----------------
+
+    It is also possible to query compound selects (i.e. UNION, EXCEPT,
+    INTERSECT) via the API
+
+    * :code:`keyword`: Specifies wheter the respective command should be added
+        to the query. Possible Values: :code:`union`, :code:`except`, :code:`intersect`
+    * :code:`selects`: A list of sub-queries used in the compound of one of two
+        types, identified by their type:
+        * :code:`type`: Possible values: :code:`grouping` | :code:`select`
+        Depending on this type this impies an additional mandatory field:
+        * :code:`grouping`: A list of :ref:`Select object <select-objects>`
+            that are grouped together
+        * :code:`select`: A single :ref:`Select object <select-objects>`
+
 
 Examples
 ========
