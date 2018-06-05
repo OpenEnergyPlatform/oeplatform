@@ -66,19 +66,22 @@ def assert_permission(user, table, permission, schema=None):
 
 def load_cursor(f):
     def wrapper(*args, **kwargs):
+        artificial_connection = 'connection_id' not in args[1].data
         fetch_all = 'cursor_id' not in args[1].data
         if fetch_all:
-            context = open_raw_connection({}, {})
-            context.update(open_cursor({}, context))
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
-            args[1].data = dict(args[1].data)
             args[1]._full_data = dict(args[1].data)
+            if artificial_connection:
+                context = open_raw_connection({}, {})
+                args[1].data['connection_id'] = context['connection_id']
+            else:
+                context = {'connection_id': args[1].data['connection_id']}
+            context.update(open_cursor({}, context))
             args[1].data['cursor_id'] = context['cursor_id']
         try:
             result = f(*args, **kwargs)
-
             if fetch_all:
                 cursor = load_cursor_from_context(context)
                 if not result:
@@ -90,7 +93,8 @@ def load_cursor(f):
         finally:
             if fetch_all:
                 close_cursor({}, context)
-                close_raw_connection({}, context)
+                if artificial_connection:
+                    close_raw_connection({}, context)
         return result
     return wrapper
 
