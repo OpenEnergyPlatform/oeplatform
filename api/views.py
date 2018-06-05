@@ -61,11 +61,8 @@ def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
         schema = kwargs.get('schema', actions.DEFAULT_SCHEMA)
         table = kwargs.get('table') or kwargs.get('sequence')
-        if request.user.is_anonymous or request.user.get_table_permission_level(
-                DBTable.load(schema, table)) < permission:
-            raise PermissionDenied
-        else:
-            return f(caller, request,*args, **kwargs)
+        actions.assert_permission(request.user, table, permission, schema=schema)
+        return f(caller, request, *args, **kwargs)
     return wrapper
 
 

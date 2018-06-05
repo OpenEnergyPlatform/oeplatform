@@ -24,6 +24,8 @@ from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
 from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
+from dataedit.models import Table as DBTable
+import login.models as login_models
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -52,6 +54,12 @@ Base = declarative_base()
 
 class ResponsiveException(Exception):
     pass
+
+
+def assert_permission(user, table, permission, schema=None):
+    if user.is_anonymous or user.get_table_permission_level(
+            DBTable.load(schema, table)) < permission:
+        raise PermissionDenied
 
 
 def load_cursor(f):
@@ -84,6 +92,7 @@ def load_cursor(f):
                 close_raw_connection({}, context)
         return result
     return wrapper
+
 
 def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
@@ -961,6 +970,8 @@ def data_delete(request, context=None):
 
     schema, table = get_table_name(orig_schema, orig_table)
 
+    assert_permission(request.user, table, login_models.DELETE_PERM)
+
     target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
@@ -976,6 +987,9 @@ def data_update(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = read_pgid(request.get('schema',DEFAULT_SCHEMA))
     schema, table = get_table_name(orig_schema, orig_table)
+
+    assert_permission(request.user, table, login_models.WRITE_PERM)
+
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
     if isinstance(setter, list):
@@ -1084,6 +1098,8 @@ def data_insert(request, context=None):
     orig_schema = get_or_403(request, 'schema')
 
     schema, table = get_table_name(orig_schema, orig_table)
+
+    assert_permission(request.user, table, login_models.WRITE_PERM)
 
     mapper = {orig_schema: schema, orig_table: table}
 

@@ -24,7 +24,7 @@ class SessionContext:
         try:
             return self.cursors[cursor_id]
         except KeyError:
-            raise APIError()
+            raise APIError('Cursor not found %s'%cursor_id)
 
     def open_cursor(self):
             cursor = self.connection.cursor()
