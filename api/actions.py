@@ -57,8 +57,10 @@ class ResponsiveException(Exception):
 
 
 def assert_permission(user, table, permission, schema=None):
-    if user.is_anonymous or user.get_table_permission_level(
-            DBTable.load(schema, table)) < permission:
+    if schema is None:
+        schema = DEFAULT_SCHEMA
+    if user.is_anonymous or \
+       user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
 
 
@@ -968,7 +970,10 @@ def data_delete(request, context=None):
 
     schema, table = get_table_name(orig_schema, orig_table)
 
-    assert_permission(request.user, table, login_models.DELETE_PERM)
+    if schema is None:
+        schema = DEFAULT_SCHEMA
+
+    assert_permission(context['user'], table, login_models.DELETE_PERM)
 
     target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
@@ -986,7 +991,10 @@ def data_update(request, context=None):
     orig_schema = read_pgid(request.get('schema',DEFAULT_SCHEMA))
     schema, table = get_table_name(orig_schema, orig_table)
 
-    assert_permission(request.user, table, login_models.WRITE_PERM)
+    if schema is None:
+        schema = DEFAULT_SCHEMA
+
+    assert_permission(context['user'], table, login_models.WRITE_PERM)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
@@ -1093,11 +1101,14 @@ def data_insert(request, context=None):
     orig_table = get_or_403(request, 'table')
     if orig_table.startswith('_') or orig_table.endswith('_cor'):
         raise APIError("Insertions on meta tables is not allowed", status=403)
-    orig_schema = get_or_403(request, 'schema')
+    orig_schema = request.get('schema', DEFAULT_SCHEMA)
 
     schema, table = get_table_name(orig_schema, orig_table)
 
-    assert_permission(request.user, table, login_models.WRITE_PERM)
+    if schema is None:
+        schema = DEFAULT_SCHEMA
+
+    assert_permission(context['user'], table, login_models.WRITE_PERM)
 
     mapper = {orig_schema: schema, orig_table: table}
 
