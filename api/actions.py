@@ -73,6 +73,7 @@ def load_cursor(f):
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
+            args[1].data = dict(args[1].data)
             args[1]._full_data = dict(args[1].data)
             args[1].data['cursor_id'] = context['cursor_id']
         try:
