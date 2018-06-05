@@ -111,6 +111,16 @@ The depending on the :code:`type` the dictionary may have a a different structur
 Each from item **MAY** contain the following fields regardless of its type:
     * :code:`alias`: An alias for this item
 
+.. _condition-objects:
+
+Condition items
+---------------
+
+Condition can come in two different fashions:
+
+1. A single :ref:`Expression <expression-objects>`
+2. A list of :ref:`Expression <expression-objects>`
+
 
 Compound selects
 ----------------
