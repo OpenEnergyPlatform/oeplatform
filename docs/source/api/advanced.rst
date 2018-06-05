@@ -35,8 +35,8 @@ Syntax Specification
 
 .. _select-objects:
 
-Select
-------
+Select with from
+----------------
 
 A query object **MUST** contain
 
@@ -45,7 +45,7 @@ A query object **MUST** contain
 It **MAY** contain the folowing directives. If not present, they will be
 replaced by the stated defaults:
 
-    * :code:`distrinct`: :code:`true` | :code:`false` (default: :code:`false`)
+    * :code:`distrinct`: A boolean specifying wheter a *SELECT DISTINCT* (see https://www.postgresql.org/docs/9.5/static/sql-select.html#SQL-DISTINCT ). (Possible values: :code:`true` | :code:`false`, default: :code:`false`)
     * :code:`fields`: List of :ref:`Expressions <expression-objects>` (If not present, will be interpreted as :code:`*`), that **MAY** contain the following additional fields:
         * :code:`as`: A string
     * :code:`where`: A list of :ref:`Expressions <expression-objects>` that return a truth value (default: [])
@@ -58,6 +58,23 @@ replaced by the stated defaults:
         * :code:`ordering`: :code:`asc` | :code:`desc` (default: :code:`asc`)
     * :code:`limit`: Integer
     * :code:`offset`: Integer
+
+
+Compound selects
+----------------
+
+    It is also possible to query compound selects (i.e. UNION, EXCEPT,
+    INTERSECT) via the API
+
+    * :code:`keyword`: Specifies wheter the respective command should be added
+        to the query. Possible Values: :code:`union`, :code:`except`, :code:`intersect`
+    * :code:`selects`: A list of sub-queries used in the compound of one of two
+        types, identified by their type:
+        * :code:`type`: Possible values: :code:`grouping` | :code:`select`
+        Depending on this type this impies an additional mandatory field:
+        * :code:`grouping`: A list of :ref:`Select object <select-objects>`
+            that are grouped together
+        * :code:`select`: A single :ref:`Select object <select-objects>`
 
 
 .. _expression-objects:
