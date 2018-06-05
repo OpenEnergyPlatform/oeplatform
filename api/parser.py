@@ -129,9 +129,9 @@ def parse_insert(d, context, message=None, mapper=None):
 
 def parse_select(d):
     """
-        Defintion of a select query according to 
+        Defintion of a select query according to
         http://www.postgresql.org/docs/9.3/static/sql-select.html
-        
+
         not implemented:
             [ WITH [ RECURSIVE ] with_query [, ...] ]
             [ WINDOW window_name AS ( window_definition ) [, ...] ]
@@ -376,19 +376,22 @@ def parse_slice(d):
         kwargs['stop'] = d['stop']
     return Slice(**kwargs)
 
+def _unpack_clauses(clauses):
+    if isinstance(clauses, list):
+        clean_clauses = []
+        for clause in clauses:
+            if isinstance(clause, list):
+                clean_clauses += list(map(_unpack_clauses, clause))
+            else:
+                clean_clauses.append(clause)
+        clauses = {'type':'operator',
+              'operator': 'AND',
+              'operands': list(map(parse_expression, clean_clauses))}
+    return clauses
 
 def parse_condition(dl):
-    if isinstance(dl, list):
-        clauses = []
-        for clause in dl:
-            if isinstance(clause, list):
-                clauses += clause
-            else:
-                clauses.append(clause)
-        dl = {'type':'operator',
-              'operator': 'AND',
-              'operands': list(map(parse_expression, clauses))}
-    return parse_expression(dl)
+    clean_dl = _unpack_clauses(dl)
+    return parse_expression(clean_dl)
 
 
 def parse_operator(d):
