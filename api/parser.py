@@ -4,10 +4,21 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_
+from sqlalchemy import Table, MetaData, Column, select, column, func, literal_column, and_, or_, util
+from sqlalchemy.sql.expression import CompoundSelect, ColumnClause
+from sqlalchemy.sql.elements import Slice
+from sqlalchemy.sql.annotation import Annotated
+from sqlalchemy.sql import functions as fun
+from sqlalchemy.schema import Sequence
+import sqlalchemy as sa
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
+
+from . import DEFAULT_SCHEMA
+
 import geoalchemy2  # Although this import seems unused is has to be here
+
+__KNOWN_TABLES = {}
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -18,28 +29,23 @@ def get_or_403(dictionary, key):
     except KeyError:
         raise APIKeyError(dictionary, key)
 
+def parse_single(x, caster):
+    try:
+        return caster(x)
+    except ValueError:
+        raise APIError('Could not parse %s as %s' % (x, caster))
+
 
 def is_pg_qual(x):
+    if not isinstance(x, str):
+        return False
     return pgsql_qualifier.search(x)
 
-
-def quote(x):
-    if not x.startswith('"') and '(' not in x:
-        return '"' + x + '"'
-    else:
-        return x
 
 def read_pgvalue(x):
     # TODO: Implement check for valid values
     if x is None:
         return 'null'
-    return x
-
-
-def read_operator(x, right):
-    # TODO: Implement check for valid operators
-    if isinstance(right, dict) and get_or_403(right, 'type') == 'value' and ('value' not in right or get_or_403(right, 'value') is None and x == '='):
-        return 'is'
     return x
 
 
@@ -73,16 +79,13 @@ def set_meta_info(method, user, message=None):
     return val_dict
 
 
-def parse_insert(d, context, message=None):
+def parse_insert(d, context, message=None, mapper=None):
     table = Table(read_pgid(get_or_403(d, 'table')), MetaData(bind=_get_engine())
                   , autoload=True, schema=read_pgid(get_or_403(d, 'schema')))
-
-    meta_cols = ['_message', '_user']
-
     field_strings = []
     for field in d.get('fields', []):
-        assert ('type' in field and field['type'] == 'column'), 'Only pure column expressions are allowed in insert'
-
+        if not ((isinstance(field, dict) and 'type' in field and field['type'] == 'column') or isinstance(field, str)):
+            raise APIError('Only pure column expressions are allowed in insert')
         field_strings.append(parse_expression(field))
 
     query = table.insert()
@@ -92,13 +95,14 @@ def parse_insert(d, context, message=None):
     if d['method'] == 'values':
         if field_strings:
             raw_values = get_or_403(d, 'values')
-            assert (isinstance(raw_values, list))
-            values = map(lambda x: zip(field_strings, x), raw_values)
+            if not isinstance(raw_values, list):
+                raise APIError('{} is not a list'.format(raw_values))
+            values = (zip(field_strings, parse_expression(x)) for x in raw_values)
         else:
             values = get_or_403(d, 'values')
 
         def clear_meta(vals):
-            val_dict = vals
+            val_dict = dict(vals)
             # make sure meta fields are not compromised
             if context['user'].is_anonymous:
                 username = 'Anonymous'
@@ -110,18 +114,24 @@ def parse_insert(d, context, message=None):
         values = list(map(clear_meta, values))
 
         query = query.values(values)
+    elif d['method'] == 'select':
+        values = parse_select(d['values'])
+        query = query.from_select(field_strings, values)
+    else:
+        raise APIError('Unknown insert method: ' + str(d['method']))
 
     if 'returning' in d:
-        query = query.returning(*map(Column, d['returning']))
+        return_clauses = [parse_expression(x,mapper) for x in d['returning']]
+        query = query.returning(return_clauses)
 
     return query, values
 
 
 def parse_select(d):
     """
-        Defintion of a select query according to 
+        Defintion of a select query according to
         http://www.postgresql.org/docs/9.3/static/sql-select.html
-        
+
         not implemented:
             [ WITH [ RECURSIVE ] with_query [, ...] ]
             [ WINDOW window_name AS ( window_definition ) [, ...] ]
@@ -131,26 +141,49 @@ def parse_select(d):
 
     L = None
 
-    if 'fields' in d and d['fields']:
-        L = []
-        for field in d['fields']:
-            col = parse_expression(field)
-            if 'as' in field:
-                col.label(read_pgid(field['as']))
-            L.append(col)
-    from_clause = parse_from_item(get_or_403(d, 'from'))
-    if not L:
-        L = '*'
-    query = select(columns=L, distinct=distinct, from_obj=from_clause)
+    keyword = d.get('keyword')
 
-    # [ WHERE condition ]
-    if d.get('where', False):
-        where = d['where']
-        if where:
-            query = query.where(parse_condition(where))
+    if keyword and keyword.lower() in ['union', 'except', 'intersect']:
+        partials = []
+        for part_sel in d.get('selects', []):
+            t = part_sel.get('type')
+            if t == 'grouping':
+                grouping = get_or_403(part_sel,'grouping')
+                if isinstance(grouping, dict):
+                    partials.append(parse_select(grouping))
+                elif isinstance(grouping, list):
+                    partials = map(parse_select, grouping)
+                else:
+                    APIError('Cannot handle grouping type. Dictionary or list expected.')
+            elif t == 'select':
+                partials.append(parse_select(part_sel))
+            else:
+                raise APIError('Unknown select type: ' + t)
+        query = CompoundSelect(util.symbol(keyword), *partials)
+    else:
+        kwargs=dict(distinct=distinct)
+        if 'fields' in d and d['fields']:
+            L = []
+            for field in d['fields']:
+                col = parse_expression(field)
+                if 'as' in field:
+                    col.label(read_pgid(field['as']))
+                L.append(col)
+        if 'from' in d:
+            kwargs['from_obj'] = parse_from_item(get_or_403(d, 'from'))
+        else:
+            kwargs['from_obj'] = []
+        if not L:
+            L = '*'
+        kwargs['columns'] = L
+        query = select(**kwargs)
+
+        # [ WHERE condition ]
+        if d.get('where', False):
+            query = query.where(parse_condition(d['where']))
 
     if 'group_by' in d:
-        query = query.group_by([parse_expression(f) for f in d['group_by']])
+        query = query.group_by(*[parse_expression(f) for f in d['group_by']])
 
     if 'having' in d:
         query.having([parse_condition(f) for f in d['having']])
@@ -168,24 +201,24 @@ def parse_select(d):
     if 'order_by' in d:
         for ob in d['order_by']:
             expr = parse_expression(ob)
-            desc = ob.get('ordering', 'asc').lower() == 'desc'
-            if desc:
-                expr = expr.desc()
+            if isinstance(ob, dict):
+                desc = ob.get('ordering', 'asc').lower() == 'desc'
+                if desc:
+                    expr = expr.desc()
             query = query.order_by(expr)
 
     if 'limit' in d:
-        if isinstance(d['limit'], int) or d['limit'].is_digit():
+        if isinstance(d['limit'], int) or d['limit'].isdigit():
             query = query.limit(int(d['limit']))
         else:
             raise APIError('Invalid LIMIT: Expected a digit')
 
     if 'offset' in d:
-        if isinstance(d['offset'], int) or d['offset'].is_digit():
+        if isinstance(d['offset'], int) or d['offset'].isdigit():
             query = query.offset(int(d['offset']))
         else:
             raise APIError('Invalid LIMIT: Expected a digit')
     return query
-
 
 def parse_from_item(d):
     """
@@ -202,20 +235,33 @@ def parse_from_item(d):
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
         d = {'type': 'table', 'table': d}
+    if isinstance(d, list):
+        return [parse_from_item(f) for f in d]
     dtype = get_or_403(d, 'type')
     if dtype == 'table':
         schema_name = read_pgid(d['schema']) if 'schema' in d else None
         only = d.get('only', False)
-        table_name = read_pgid(get_or_403(d, 'table'))
-        item = Table(table_name, MetaData(bind=_get_engine()), schema=schema_name)
+        ext_name = table_name = read_pgid(get_or_403(d, 'table'))
+        tkwargs = dict(autoload=True)
+        if schema_name:
+            ext_name = schema_name + '.' + ext_name
+            tkwargs['schema'] = d['schema']
+        if ext_name in __PARSER_META.tables:
+            item = __PARSER_META.tables[ext_name]
+        else:
+            try:
+                item = Table(d['table'], __PARSER_META, **tkwargs)
+            except sa.exc.NoSuchTableError as e:
+                raise APIError('Table {table} not found'.format(table=ext_name))
+
         engine = _get_engine()
         conn = engine.connect()
         exists = engine.dialect.has_table(conn, item.name, item.schema)
         conn.close()
         if not exists:
-            raise APIError('Table not found: ' + str(item))
+            raise APIError('Table not found: ' + str(item), status=400)
     elif dtype == 'select':
-        item = parse_select(d['query'])
+        item = parse_select(d)
     elif dtype == 'join':
         left = parse_from_item(get_or_403(d, 'left'))
         right = parse_from_item(get_or_403(d, 'right'))
@@ -232,28 +278,65 @@ def parse_from_item(d):
         item = item.alias(read_pgid(d['alias']))
     return item
 
+__PARSER_META = MetaData(bind=_get_engine())
 
-def parse_expression(d):
+
+def load_table_from_metadata(table_name, schema_name=None):
+    ext_name = table_name
+    if schema_name:
+        ext_name = schema_name + '.' + ext_name
+    if ext_name and ext_name in __PARSER_META.tables:
+        return __PARSER_META.tables[ext_name]
+    else:
+        if _get_engine().dialect.has_table(_get_engine().connect(), table_name,
+                                           schema=schema_name):
+            return Table(table_name, __PARSER_META, autoload=True,
+                         schema=schema_name)
+
+
+def parse_column(d, mapper):
+    name = get_or_403(d, 'column')
+    is_literal = parse_single(d.get('is_literal', False), bool)
+    table_name = d.get('table')
+    table = None
+    if table_name:
+        table_name = read_pgid(table_name)
+        if mapper is None:
+            mapper = dict()
+        do_map = lambda x: mapper.get(x, x)
+        if 'schema' in d:
+            schema_name = read_pgid(do_map(d['schema']))
+        else:
+            schema_name = None
+        table = load_table_from_metadata(table_name, schema_name=schema_name)
+    if table is not None and hasattr(table.c, name):
+        return getattr(table.c, name)
+    else:
+        if is_literal:
+            return literal_column(name)
+        else:
+            return column(name)
+
+def parse_expression(d, mapper=None):
     # TODO: Implement
     if isinstance(d, dict):
         dtype = get_or_403(d, 'type')
         if dtype == 'column':
-            name = get_or_403(d, 'column')
-
-            if 'table' in d:
-                name = d['table'] + '.' + name
-                if 'schema' in d:
-                    name = d['schema'] + '.' + name
-                return literal_column(name)
-            return column(name)
+            return parse_column(d, mapper)
         if dtype == 'grouping':
-            return list(map(parse_expression, get_or_403(d, 'grouping')))
+            grouping = get_or_403(d, 'grouping')
+            if isinstance(grouping, list):
+                return [parse_expression(e) for e in grouping]
+            else:
+                return parse_expression(grouping)
         if dtype == 'operator':
             return parse_operator(d)
         if dtype == 'modifier':
             return parse_modifier(d)
         if dtype == 'function':
             return parse_function(d)
+        if dtype == 'slice':
+            return parse_slice(d)
         if dtype == 'star':
             return '*'
         if dtype == 'value':
@@ -261,31 +344,67 @@ def parse_expression(d):
                 return read_pgvalue(get_or_403(d, 'value'))
             else:
                 return None
+        if dtype == 'label':
+            return parse_label(d)
+        if dtype == 'sequence':
+            schema = read_pgid(d['schema']) if 'schema' in d else DEFAULT_SCHEMA
+            s = '"%s"."%s"'%(schema, get_or_403(d, 'sequence'))
+            return Sequence(get_or_403(d, 'sequence'), schema=schema)
+        if dtype == 'select':
+            return parse_select(d)
         else:
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
         return [parse_expression(x) for x in d]
+    if isinstance(d, str):
+        return d.replace('"','')
     return d
 
 
-def parse_condition(dl):
-    if isinstance(dl, list):
-        dl = {'type':'operator',
+def parse_label(d):
+    element = parse_expression(get_or_403(d,'element'))
+    if not isinstance(element, sa.sql.expression.ClauseElement):
+        element = sa.literal(element)
+    return element.label(get_or_403(d,'label'))
+
+
+def parse_slice(d):
+    kwargs = {'step': 1}
+    if 'start' in d:
+        kwargs['start'] = d['start']
+    if 'stop' in d:
+        kwargs['stop'] = d['stop']
+    return Slice(**kwargs)
+
+def _unpack_clauses(clauses):
+    if isinstance(clauses, list):
+        clean_clauses = []
+        for clause in clauses:
+            if isinstance(clause, list):
+                clean_clauses += list(map(_unpack_clauses, clause))
+            else:
+                clean_clauses.append(clause)
+        clauses = {'type':'operator',
               'operator': 'AND',
-              'operands': list(map(parse_expression, dl))}
-    return parse_expression(dl)
+              'operands': list(map(parse_expression, clean_clauses))}
+    return clauses
+
+def parse_condition(dl):
+    clean_dl = _unpack_clauses(dl)
+    return parse_expression(clean_dl)
 
 
 def parse_operator(d):
     query = parse_sqla_operator(get_or_403(d, 'operator'), *list(map(parse_expression, get_or_403(d, 'operands'))))
-    if 'as' in d:
-        query = query.label(d['as'])
     return query
 
+
 def parse_modifier(d):
-    return "%s %s" % (parse_expression(get_or_403(d,'operand')),
-                      read_operator(get_or_403(d, 'operator'),
-                                    get_or_403(d,'operand')))
+    query = parse_sqla_modifier(get_or_403(d, 'operator'),
+                                *list(map(parse_expression,
+                                          get_or_403(d, 'operands'))))
+    return query
+
 
 def parse_function(d):
     fname = get_or_403(d, 'function')
@@ -294,7 +413,10 @@ def parse_function(d):
     if isinstance(operand_struc, list):
         operands = list(map(parse_expression, operand_struc))
     else:
-        operands = [parse_expression(operand_struc)]
+        if isinstance(operand_struc, dict) and operand_struc.get('type',None) == 'grouping':
+            operands = parse_expression(operand_struc)
+        else:
+            operands = [parse_expression(operand_struc)]
 
     if fname == '+':
         if len(operands) != 2:
@@ -302,59 +424,11 @@ def parse_function(d):
         x, y = operands
         return x + y
     else:
-        function = getattr(func, fname)
-        return function(*operands)
-
-
-def cadd(d, key, string=None):
-    if not string:
-        string = key.upper() + ' '
-    if d.pop(key, None):
-        return string
-    else:
-        return ''
-
-
-def parse_create_table(d):
-    s = 'CREATE '
-    if d.pop('global', None):
-        s += 'GLOBAL '
-    elif d.pop('local', None):
-        s += 'LOCAL '
-
-    s += (cadd(d, 'temp')
-          + cadd(d, 'unlogged')
-          + 'TABLE '
-          + cadd(d, 'if_not_exists', 'IF NOT EXISTS ')
-          + read_pgid(get_or_403(d,'name')))
-
-    fieldstrings = []
-
-    for field in d.pop('fields', []):
-        fs = ''
-        ftype = get_or_403(field, 'type')
-        if ftype == 'column':
-            fs += read_pgid(get_or_403(field,'name')) + ' '
-            fs += read_pgid(get_or_403(field,'data_type')) + ' '
-            collate = field.pop('collate', None)
-            if collate:
-                fs += read_pgid(collate)
-            fs += ', '.join([parse_column_constraint(cons)
-                             for cons in field.pop('constraints', [])]) + ' '
-        elif ftype == 'table_constraint':
-            fs += parse_table_constraint(field)
-        elif ftype == 'like':
-            fs += 'LIKE '
-
-
-def parse_column_constraint(d):
-    raise NotImplementedError
-    # TODO: Implement
-
-
-def parse_table_constraint(d):
-    raise NotImplementedError
-    # TODO: Implement
+        if fname == 'nextval':
+            return func.next_value(*operands)
+        else:
+            function = getattr(func, fname)
+            return function(*operands)
 
 
 def parse_scolumnd_from_columnd(schema, table, name, column_description):
@@ -440,34 +514,71 @@ sql_operators = {'EQUALS': '=',
 def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
 
-def parse_sqla_operator(key, *operands):
+
+def parse_sqla_operator(raw_key, *operands):
+    key = raw_key.lower().strip()
     if not operands:
         raise APIError('Missing arguments for \'%s\'.' % (key))
-    if key in ['AND']:
+    if key in ['and']:
         query = and_(*operands)
         return query
-    elif key in ['OR']:
+    elif key in ['or']:
         query = or_(*operands)
         return query
-    elif key in ['NOT']:
+    elif key in ['not']:
         x = operands[0]
         return parse_condition(x)._not()
     else:
         if len(operands) != 2:
             raise APIError('Wrong number of arguments for \'%s\'. Expected: 2 Got: %s'%(key, len(operands)))
         x, y = operands
-        if key in ['EQUALS','=']:
+        if key in ['equals','=']:
             return x == y
-        if key in ['GREATER', '>']:
+        if key in ['greater', '>']:
             return x > y
-        if key in ['LOWER', '<']:
+        if key in ['lower', '<']:
             return x < y
-        if key in ['NOTEQUAL', '<>', '!=']:
+        if key in ['notequal', '<>', '!=']:
             return x != y
-        if key in ['NOTGREATER', '<=']:
+        if key in ['notgreater', '<=']:
             return x <= y
-        if key in ['NOTLOWER', '>=']:
+        if key in ['notlower', '>=']:
             return x >= y
+        if key in ['add', '+']:
+            return x+y
+        if key in ['substract', '-']:
+            return x-y
+        if key in ['multiply', '*']:
+            return x*y
+        if key in ['divide', '/']:
+            return x/y
+        if key in ['concatenate', '||']:
+            return fun.concat(x,y)
+        if key in ['is not']:
+            return x.isnot(y)
+        if key in ['getitem']:
+            if isinstance(y, Slice):
+                return x[parse_single(y.start, int):parse_single(y.stop, int)]
+            else:
+                return x[read_pgid(y)]
+        if key in ['in']:
+            return x.in_(y)
+
+    raise APIError("Operator '%s' not supported" % key)
 
 
-    raise APIError("Operator %s not supported"%key)
+def parse_sqla_modifier(raw_key, *operands):
+    key = raw_key.lower().strip()
+    if not operands:
+        raise APIError('Missing arguments for \'%s\'.' % key)
+
+    if len(operands) != 1:
+        raise APIError(
+            'Wrong number of arguments for \'%s\'. Expected: 1 Got: %s' % (
+            key, len(operands)))
+    x = operands[0]
+    if key in ['asc']:
+        return x.asc()
+    if key in ['desc']:
+        return x.desc()
+    raise APIError("Operator %s not supported" % key)
