@@ -589,7 +589,7 @@ def get_column_definition_query(d):
     else:
         if dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
             dt = sqltypes.DateTime
-        elif dt_string.lower() == 'character varying':
+        elif dt_string.lower() in ['varchar', 'character varying']:
             dt = sqltypes.VARCHAR
         elif hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
@@ -673,7 +673,12 @@ def column_alter(query, context, schema, table, column):
 def column_add(schema, table, column, description):
     description['name'] = column
     settings = get_column_definition_query(description)
-    s = 'ALTER TABLE {schema}.{table} ADD COLUMN ' + settings
+    name = settings.name
+    s = 'ALTER TABLE {schema}.{table} ADD COLUMN {name} {type}'.format(
+        schema='{schema}',
+        table='{table}',
+        name=name,
+        type=str(settings.type))
     edit_table = get_edit_table_name(schema, table)
     insert_table = get_insert_table_name(schema, table)
     perform_sql(s.format(schema=schema, table=table))
