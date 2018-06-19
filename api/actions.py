@@ -70,6 +70,7 @@ def load_cursor(f):
         if fetch_all:
             context = open_raw_connection({}, {})
             context.update(open_cursor({}, context))
+            args[1].data['connection_id'] = context['connection_id']
             args[1].data['cursor_id'] = context['cursor_id']
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
@@ -561,33 +562,42 @@ def get_column_definition_query(d):
     kwargs = {}
     dt_string = get_or_403(d, 'data_type')
 
-    dt_expression = r'(?P<dtname>[A-z_]+)\((?P<cardinality>\d*(,\s*\d*)?)\)'
+    dt_expression = r'(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)'
     dt_cardinality = None
 
     match = re.match(dt_expression, dt_string)
 
-
+    card_map = int
 
     if match:
         dt_string = match.groups()[0]
-        if dt_string.lower() == 'integer':
-            dt = int
-        elif dt_string.lower() == 'numerical':
-            dt = sa.types.Numeric
-        elif hasattr(sqltypes, dt_string):
-            dt = getattr(sqltypes, dt_string)
-        elif dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
-            dt = sqltypes.DateTime
+        if dt_string.lower() == 'geometry':
+            dt = geoalchemy2.Geometry(geometry_type=match.groups()[1])
+            card_map = id
         else:
-            raise APIError('Unknown type (%s).' % dt_string)
-        dt_cardinality = map(int, match.groups()[1].replace(' ','').split(','))
+            if dt_string.lower() == 'integer':
+                dt = sa.types.INTEGER
+            elif dt_string.lower() == 'numerical':
+                dt = sa.types.Numeric
+            elif hasattr(sqltypes, dt_string):
+                dt = getattr(sqltypes, dt_string)
+            elif dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
+                dt = sqltypes.DateTime
+            else:
+                raise APIError('Unknown type (%s).' % dt_string)
+            dt_cardinality = map(card_map, match.groups()[1].replace(' ','').split(','))
     else:
         if dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
             dt = sqltypes.DateTime
+        elif dt_string.lower() == 'character varying':
+            dt = sqltypes.VARCHAR
         elif hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
         elif hasattr(sqltypes, dt_string):
             dt = getattr(sqltypes, dt_string)
+        elif dt_string == 'bigserial':
+            dt = sa.types.INTEGER
+            d['autoincrement'] = True
         else:
             raise APIError('Unknown type (%s).'%dt_string)
 
@@ -620,7 +630,7 @@ def get_column_definition_query(d):
         kwargs['default'] = api.parser.read_pgvalue(d['column_default'])
 
     if d.get('character_maximum_length', False):
-        dt += '(' + str(d['character_maximum_length']) + ')'
+        dt = dt(d['character_maximum_length'])
 
     c = Column(name, dt, *args, **kwargs)
 
@@ -705,7 +715,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['type'] == 'primary_key':
+        if constraint['constraint_type'] == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
@@ -713,7 +723,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
             ccolumns = constraint['columns']
             constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
                                                               **kwargs))
-        elif constraint['type'] == 'unique':
+        elif constraint['constraint_type'] == 'unique':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
