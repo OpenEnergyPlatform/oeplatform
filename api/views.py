@@ -531,7 +531,7 @@ class Rows(APIView):
         }
 
         if not row_id:
-            query['returning'] = ['id']
+            query['returning'] = [{'type':'column', 'column':'id'}]
         result = actions.data_insert(query, context)
 
         return result
@@ -606,7 +606,7 @@ class Rows(APIView):
         if offset and offset.isdigit():
             query = query.offset(int(offset))
 
-        cursor = actions._load_cursor(request.data['cursor_id'])
+        cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
 
 class Session(APIView):
