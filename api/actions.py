@@ -596,7 +596,7 @@ def get_column_definition_query(d):
         elif hasattr(sqltypes, dt_string):
             dt = getattr(sqltypes, dt_string)
         elif dt_string == 'bigserial':
-            dt = sa.types.INTEGER
+            dt = sa.types.BigInteger
             d['autoincrement'] = True
         else:
             raise APIError('Unknown type (%s).'%dt_string)
