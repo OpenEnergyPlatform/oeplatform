@@ -720,12 +720,15 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['constraint_type'] == 'primary_key':
+        if constraint['constraint_type'].lower().replace(' ', '_') == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
                 kwargs['name'] = cname
-            ccolumns = constraint['columns']
+            if 'columns' in constraint:
+                ccolumns = constraint['columns']
+            else:
+                ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
                                                               **kwargs))
         elif constraint['constraint_type'] == 'unique':
@@ -733,7 +736,10 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
             cname = constraint.get('name')
             if cname:
                 kwargs['name'] = cname
-            ccolumns = constraint['columns']
+            if 'columns' in constraint:
+                ccolumns = constraint['columns']
+            else:
+                ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns,
                                                           **kwargs))
 
