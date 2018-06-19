@@ -988,7 +988,7 @@ def data_delete(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.DELETE_PERM)
+    assert_permission(context['user'], table, login_models.DELETE_PERM, schema=schema)
 
     target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
@@ -1009,7 +1009,7 @@ def data_update(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.WRITE_PERM)
+    assert_permission(context['user'], table, login_models.WRITE_PERM, schema=schema)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
@@ -1123,7 +1123,7 @@ def data_insert(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.WRITE_PERM)
+    assert_permission(context['user'], table, login_models.WRITE_PERM, schema=schema)
 
     mapper = {orig_schema: schema, orig_table: table}
 
@@ -1758,7 +1758,7 @@ def apply_changes(schema, table, cursor=None):
     engine = _get_engine()
 
     if cursor is None:
-        cursor = engine.connect().cursor()
+        cursor = engine.connect().connection.cursor()
 
     meta_schema = get_meta_schema_name(schema)
 
