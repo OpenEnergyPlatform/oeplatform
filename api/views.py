@@ -477,7 +477,8 @@ class Rows(APIView):
         }
         if where:
             query['where'] = self.__read_where_clause(where)
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         if row_id:
@@ -510,6 +511,7 @@ class Rows(APIView):
                                       'operator': match[1],
                                       'type': 'operator'} for match in where_splitted]))
         return where_clauses
+
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row_id and row.get('id', int(row_id)) != int(row_id):
@@ -518,7 +520,8 @@ class Rows(APIView):
         if row_id:
             row['id'] = row_id
 
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         query = {
@@ -535,7 +538,8 @@ class Rows(APIView):
 
     @actions.load_cursor
     def __update_rows(self, request, schema, table, row, row_id=None):
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         where = request.GET.getlist('where')
