@@ -122,7 +122,7 @@ def parse_insert(d, context, message=None, mapper=None):
 
     if 'returning' in d:
         return_clauses = [parse_expression(x,mapper) for x in d['returning']]
-        query = query.returning(return_clauses)
+        query = query.returning(*return_clauses)
 
     return query, values
 
