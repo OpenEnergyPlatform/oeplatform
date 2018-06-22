@@ -1773,53 +1773,64 @@ def apply_changes(schema, table, cursor=None):
 
     engine = _get_engine()
 
+    artificial_connection=False
+
     if cursor is None:
-        cursor = engine.connect().connection.cursor()
+        artificial_connection = True
+        connection = engine.raw_connection()
+        cursor = connection.cursor()
 
-    meta_schema = get_meta_schema_name(schema)
+    try:
+        meta_schema = get_meta_schema_name(schema)
 
-    columns = list(describe_columns(schema, table).keys())
-    extended_columns = columns + ['_submitted', '_id']
+        columns = list(describe_columns(schema, table).keys())
+        extended_columns = columns + ['_submitted', '_id']
 
-    insert_table = get_insert_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=insert_table))
-    changes = [add_type({c.name: v for c, v in zip(cursor.description, row)
-                         if c.name in extended_columns}, 'insert')
-               for row in cursor.fetchall()]
+        insert_table = get_insert_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=insert_table))
+        changes = [add_type({c.name: v for c, v in zip(cursor.description, row)
+                             if c.name in extended_columns}, 'insert')
+                   for row in cursor.fetchall()]
 
-    update_table = get_edit_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=update_table))
-    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
-                          if c.name in extended_columns}, 'update')
-                for row in cursor.fetchall()]
+        update_table = get_edit_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=update_table))
+        changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                              if c.name in extended_columns}, 'update')
+                    for row in cursor.fetchall()]
 
-    delete_table = get_delete_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=delete_table))
-    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
-                          if c.name in ['_id', 'id', '_submitted']}, 'delete')
-                for row in cursor.fetchall()]
+        delete_table = get_delete_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=delete_table))
+        changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                              if c.name in ['_id', 'id', '_submitted']}, 'delete')
+                    for row in cursor.fetchall()]
 
-    changes = list(changes)
-    table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
+        changes = list(changes)
+        table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
 
-    # ToDo: This may require some kind of dependency tree resolution
-    for change in sorted(changes, key=lambda x: x['_submitted']):
-        distilled_change = {k:v for k,v in change.items() if k in columns}
-        if change['_type'] == 'insert':
-            apply_insert(cursor, table_obj, distilled_change, change['_id'])
-        elif change['_type'] == 'update':
-            apply_update(cursor, table_obj, distilled_change, change['_id'])
-        elif change['_type'] == 'delete':
-            apply_deletion(cursor, table_obj, distilled_change, change['_id'])
+        # ToDo: This may require some kind of dependency tree resolution
+        for change in sorted(changes, key=lambda x: x['_submitted']):
+            distilled_change = {k:v for k,v in change.items() if k in columns}
+            if change['_type'] == 'insert':
+                apply_insert(cursor, table_obj, distilled_change, change['_id'])
+            elif change['_type'] == 'update':
+                apply_update(cursor, table_obj, distilled_change, change['_id'])
+            elif change['_type'] == 'delete':
+                apply_deletion(cursor, table_obj, distilled_change, change['_id'])
+
+        if artificial_connection:
+            connection.commit()
+    finally:
+        if artificial_connection:
+            connection.close()
 
 
 def set_applied(session, table, rid, mode):
