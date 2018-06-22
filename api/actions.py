@@ -92,12 +92,15 @@ def load_cursor(f):
 
             if fetch_all:
                 cursor = load_cursor_from_context(context)
+                session = load_session_from_context(context)
                 if not result:
                     result = {}
                 if cursor.description:
                     result['description'] = cursor.description
                     result['rowcount'] = cursor.rowcount
                     result['data'] = (list(map(_translate_fetched_cell, row)) for row in cursor.fetchall())
+                if artificial_connection:
+                    session.connection.commit()
         finally:
             if fetch_all:
                 close_cursor({}, context)
@@ -1828,8 +1831,13 @@ def apply_changes(schema, table, cursor=None):
 
         if artificial_connection:
             connection.commit()
+    except:
+        if artificial_connection:
+            connection.rollback()
+        raise
     finally:
         if artificial_connection:
+            cursor.close()
             connection.close()
 
 
