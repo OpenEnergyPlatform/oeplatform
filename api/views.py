@@ -653,8 +653,6 @@ def create_ajax_handler(func, allow_cors=False):
         @cors(allow_cors)
         @api_exception
         def post(self, request):
-            logger.debug(
-                'got request: ' + str(request))
             result = self.execute(request)
             return stream(
                 result,
