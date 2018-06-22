@@ -14,5 +14,5 @@ geoalchemy2>=0.4.0
 djangoajax>=2.3.7
 webcolors>=1.7
 djangorestframework>=3.5.4
-django-axes>=2.3.7
+django-axes==2.3.3
 shapely>=1.5.17
