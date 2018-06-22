@@ -428,7 +428,7 @@ class Rows(APIView):
             else:
                 response = self.__update_rows(request, schema, table, column_data, None)
         actions.apply_changes(schema, table)
-        return JsonResponse(response, status=status_code)
+        return stream(response, status_code=status_code)
 
     @api_exception
     @require_write_permission
@@ -655,13 +655,10 @@ def create_ajax_handler(func, allow_cors=False):
         def post(self, request):
             logger.debug(
                 'got request: ' + str(request))
-            result = self.execute(request)
-            encoder = GeneratorJSONEncoder()
-            response = StreamingHttpResponse(encoder.iterencode(result),
-                                             content_type='application/json')
-            if allow_cors and request.user.is_anonymous:
-                response['Access-Control-Allow-Origin'] = '*'
-            return response
+            result = self.execute(request,
+                                  allow_cors=allow_cors and request.user.is_anonymous)
+            return stream(result)
+
 
         @actions.load_cursor
         def execute(self, request):
@@ -712,18 +709,15 @@ class FetchView(APIView):
                 json.dumps([actions._translate_fetched_cell(cell) for cell in row],
                            default=date_handler)
 
-def stream(data):
-    """
-    TODO: Implement streaming of large datasets
-    :param data:
-    :return:
-    """
-    size = len(data)
-    chunck = 100
 
-    for i in range(size):
-        yield json.loads(json.dumps(data[i], default=date_handler))
-        time.sleep(1)
+def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
+    encoder = GeneratorJSONEncoder()
+    response = StreamingHttpResponse(encoder.iterencode(data),
+                                     content_type='application/json',
+                                     status=status_code)
+    if allow_cors:
+        response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 def get_users(request):
