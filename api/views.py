@@ -409,9 +409,7 @@ class Rows(APIView):
             # TODO: Figure out what JsonResponse does different.
             return JsonResponse(dict_list, safe=False)
 
-        return StreamingHttpResponse(
-            (dict(zip(cols,row)) for row in return_obj['data']),
-            content_type='application/json')
+        return stream((dict(zip(cols,row)) for row in return_obj['data']))
 
     @api_exception
     @require_write_permission
