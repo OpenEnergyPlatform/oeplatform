@@ -655,9 +655,10 @@ def create_ajax_handler(func, allow_cors=False):
         def post(self, request):
             logger.debug(
                 'got request: ' + str(request))
-            result = self.execute(request,
-                                  allow_cors=allow_cors and request.user.is_anonymous)
-            return stream(result)
+            result = self.execute(request)
+            return stream(
+                result,
+                allow_cors=allow_cors and request.user.is_anonymous)
 
 
         @actions.load_cursor
