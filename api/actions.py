@@ -26,6 +26,7 @@ from api.connection import _get_engine
 from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
 from dataedit.models import Table as DBTable
 import login.models as login_models
+from oeplatform.securitysettings import PLAYGROUNDS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -1010,7 +1011,7 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ['id'])
-    if orig_schema == 'sandbox':
+    if orig_schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1036,7 +1037,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema == 'sandbox':
+    if orig_schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1158,7 +1159,7 @@ def data_insert(request, context=None):
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
     response['rowcount'] = cursor.rowcount
-    if schema == 'sandbox':
+    if schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
 
     return response
