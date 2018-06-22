@@ -70,12 +70,14 @@ def load_cursor(f):
         if fetch_all:
             context = open_raw_connection({}, {})
             context.update(open_cursor({}, context))
-            args[1].data['connection_id'] = context['connection_id']
-            args[1].data['cursor_id'] = context['cursor_id']
+
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
-            args[1]._full_data = dict(args[1].data)
+            if hasattr(args[1].data, '_mutable'):
+                args[1].data._mutable = True
+            args[1].data['cursor_id'] = context['cursor_id']
+            args[1].data['connection_id'] = context['connection_id']
         try:
             result = f(*args, **kwargs)
 
