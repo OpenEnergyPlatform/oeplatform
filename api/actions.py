@@ -88,7 +88,7 @@ def load_cursor(f):
                 if cursor.description:
                     result['description'] = cursor.description
                     result['rowcount'] = cursor.rowcount
-                    result['data'] = [list(map(_translate_fetched_cell, row)) for row in cursor.fetchall()]
+                    result['data'] = (list(map(_translate_fetched_cell, row)) for row in cursor.fetchall())
         finally:
             if fetch_all:
                 close_cursor({}, context)

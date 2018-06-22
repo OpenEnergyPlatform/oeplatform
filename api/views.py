@@ -14,6 +14,7 @@ import login.models as login_models
 import api.parser
 from api import actions, parser, sessions
 from api.helpers.http import ModHttpResponse
+from api.encode import GeneratorJSONEncoder
 from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
@@ -398,16 +399,19 @@ class Rows(APIView):
 
         # Extract column names from description
         cols = [col[0] for col in return_obj['description']]
-        dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
 
         if row_id:
+            dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
             if dict_list:
                 dict_list = dict_list[0]
             else:
                 raise Http404
+            # TODO: Figure out what JsonResponse does different.
+            return JsonResponse(dict_list, safe=False)
 
-        # TODO: Figure out what JsonResponse does different.
-        return JsonResponse(dict_list, safe=False)
+        return StreamingHttpResponse(
+            (dict(zip(cols,row)) for row in return_obj['data']),
+            content_type='application/json')
 
     @api_exception
     @require_write_permission
@@ -630,7 +634,6 @@ def date_handler(obj):
 
 # Create your views here.
 
-
 def create_ajax_handler(func, allow_cors=False):
     """
     Implements a mapper from api pages to the corresponding functions in
@@ -652,7 +655,10 @@ def create_ajax_handler(func, allow_cors=False):
         def post(self, request):
             logger.debug(
                 'got request: ' + str(request))
-            response = JsonResponse(self.execute(request))
+            result = self.execute(request)
+            encoder = GeneratorJSONEncoder()
+            response = StreamingHttpResponse(encoder.iterencode(result),
+                                             content_type='application/json')
             if allow_cors and request.user.is_anonymous:
                 response['Access-Control-Allow-Origin'] = '*'
             return response
