@@ -270,7 +270,6 @@ def perform_sql(sql_statement, parameter=None):
     session = sessionmaker(bind=engine)()
 
     # Statement built and no changes required, so statement is empty.
-    logger.debug("SQL STATEMENT: |" + sql_statement + "| \t " + str(parameter))
     if not sql_statement or sql_statement.isspace():
         return get_response_dict(success=True)
 
@@ -1163,7 +1162,6 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
-        logger.debug('Executed %s with parameters %s'%(str(compiled), params))
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
