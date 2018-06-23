@@ -1,4 +1,5 @@
 from . import APITestCase
+from .util import load_content, load_content_as_json, content2json
 from api import actions
 import json
 
@@ -291,7 +292,7 @@ class TestPost(APITestCase):
             content_type='application/json')
 
         self.assertEqual(response.status_code, 201,
-                         response.json().get('reason', 'No reason returned'))
+                         load_content_as_json(response).get('reason', 'No reason returned'))
 
         response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/{rid}'.format(
@@ -336,40 +337,25 @@ class TestPost(APITestCase):
         row = {'id': 2, 'name': 'John Doe', 'address': "John's Street",
                'geom':'POINT(42.258729 -71.160281)'}
 
-        response = self.__class__.client.post(
+        self.check_api_post(
             '/api/v0/schema/{schema}/tables/{table}/rows/2'.format(
                 schema=self.test_schema, table=self.test_table),
-            data=json.dumps({'query': row}),
-            HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
-            content_type='application/json')
-
-        self.assertEqual(response.status_code, 200,
-                         response.json().get('reason', 'No reason returned'))
-
-        response = self.__class__.client.get(
-            '/api/v0/schema/{schema}/tables/{table}/rows/2'.format(
-                schema=self.test_schema, table=self.test_table))
-
-        self.assertEqual(response.status_code, 200,
-                         response.json().get('reason', 'No reason returned'))
+            data={'query': row}
+        )
 
         row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
-        self.assertDictEqualKeywise(response.json(), row)
+
+        self.check_api_get('/api/v0/schema/{schema}/tables/{table}/rows/2'.format(
+                schema=self.test_schema, table=self.test_table), expected_result=row)
 
         # Check whether other rows remained unchanged
-
         row = {'id': 1, 'name': 'Mary Doe', 'address': "Mary's Street",
                'geom': 'POINT(-71.160281 42.258729)'}
-
-        response = self.__class__.client.get(
-            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
-                schema=self.test_schema, table=self.test_table))
-
-        self.assertEqual(response.status_code, 200,
-                         response.json().get('reason', 'No reason returned'))
-
         row['geom'] = wkb.dumps(wkt.loads(row['geom']), hex=True)
-        self.assertDictEqualKeywise(response.json(), row)
+        self.check_api_get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/1'.format(
+                schema=self.test_schema, table=self.test_table),
+            expected_result=row)
 
     def test_bulk_insert(self):
         rows = [{'id': rid, 'name': 'Mary Doe', 'address': "Mary's Street",
@@ -383,16 +369,19 @@ class TestPost(APITestCase):
             content_type='application/json')
 
         self.assertEqual(response.status_code, 201,
-                         response.json().get('reason', 'No reason returned'))
+                         load_content_as_json(response).get('reason', 'No reason returned'))
 
         response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
                 schema=self.test_schema, table=self.test_table))
 
-        self.assertEqual(response.status_code, 200,
-                         'Returned %d: %s'%(response.status_code, response.json()))
+        content = load_content(response)
 
-        self.assertListEqual(response.json(), rows)
+        self.assertEqual(response.status_code, 200,
+                         'Returned %d: %s'%(response.status_code, content))
+
+        content = content2json(content)
+        self.assertListEqual(content, rows)
 
 class TestGet(APITestCase):
     @classmethod
@@ -492,10 +481,11 @@ class TestGet(APITestCase):
             '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
                 schema=self.test_schema, table=self.test_table))
 
-        self.assertEqual(response.status_code, 200,
-                         response.json())
+        content = load_content_as_json(response)
 
-        for c in zip(response.json(), self.rows):
+        self.assertEqual(response.status_code, 200, content)
+
+        for c in zip(content, self.rows):
             self.assertDictEqualKeywise(*c)
 
     def test_simple_offset(self):
@@ -503,10 +493,11 @@ class TestGet(APITestCase):
             '/api/v0/schema/{schema}/tables/{table}/rows/?offset=50'.format(
                 schema=self.test_schema, table=self.test_table))
 
-        self.assertEqual(response.status_code, 200,
-                         response.json())
+        content = load_content_as_json(response)
 
-        for c in zip(response.json(), self.rows[50:]):
+        self.assertEqual(response.status_code, 200, content)
+
+        for c in zip(content, self.rows[50:]):
             self.assertDictEqualKeywise(*c)
 
     def test_simple_limit(self):
@@ -515,17 +506,15 @@ class TestGet(APITestCase):
                 schema=self.test_schema, table=self.test_table))
 
         self.assertEqual(response.status_code, 200,
-                         response.json())
+                         load_content_as_json(response))
 
     def test_simple_where_geq(self):
         response = self.__class__.client.get(
             '/api/v0/schema/{schema}/tables/{table}/rows/?where=id>=50'.format(
                 schema=self.test_schema, table=self.test_table))
-
-        self.assertEqual(response.status_code, 200,
-                         response.json())
-
-        for c in zip(response.json(), [row for row in self.rows if row['id']>=50]):
+        content = load_content_as_json(response)
+        self.assertEqual(response.status_code, 200, content)
+        for c in zip(content, [row for row in self.rows if row['id']>=50]):
             self.assertDictEqualKeywise(*c)
 
 
@@ -534,10 +523,11 @@ class TestGet(APITestCase):
             '/api/v0/schema/{schema}/tables/{table}/rows/?orderby=id'.format(
                 schema=self.test_schema, table=self.test_table))
 
-        self.assertEqual(response.status_code, 200,
-                         response.json())
+        content = load_content(response)
+        self.assertEqual(response.status_code, 200, content)
 
-        for c in zip(response.json(), sorted([row for row in self.rows], key=lambda x: x['id'])):
+        content = content2json(content)
+        for c in zip(content, sorted([row for row in self.rows], key=lambda x: x['id'])):
             self.assertDictEqualKeywise(*c)
 
 class TestDelete(APITestCase):
@@ -650,13 +640,10 @@ class TestDelete(APITestCase):
         self.assertEqual(response.status_code, 404,
                          response.json())
 
-        response = self.__class__.client.get(
-            '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
+        self.check_api_get('/api/v0/schema/{schema}/tables/{table}/rows/'.format(
                 schema=self.test_schema, table=self.test_table),
-            content_type='application/json')
-        self.assertEqual(response.status_code, 200,
-                         response.json())
-        self.assertListEqual(response.json(), self.rows)
+            expected_result=self.rows
+        )
 
     def test_where(self):
         row = self.rows[10]
@@ -681,6 +668,8 @@ class TestDelete(APITestCase):
             '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
                 schema=self.test_schema, table=self.test_table),
             content_type='application/json')
-        self.assertEqual(response.status_code, 200,
-                         response.json())
-        self.assertListEqual(response.json(), self.rows)
+
+        content = load_content(response)
+        self.assertEqual(response.status_code, 200, content)
+        content = content2json(content)
+        self.assertListEqual(content, self.rows)
