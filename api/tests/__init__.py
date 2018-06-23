@@ -1,5 +1,6 @@
 import json
 
+from .util import load_content, load_content_as_json, content2json
 from django.test import TestCase, Client
 from api import actions
 # Create your tests here.
@@ -83,9 +84,9 @@ class APITestCase(TestCase):
                 content_type='application/json')
 
             self.assertEqual(resp.status_code, 201,
-                             resp.json().get('reason', 'No reason returned'))
+                             load_content_as_json(resp).get('reason', 'No reason returned'))
 
-    def check_api_send(self, request, url, data=None, expected_result=None):
+    def check_api_send(self, request, url, data=None, expected_result=None, expected_code=200):
 
         params = dict(HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
                       content_type='application/json')
@@ -95,17 +96,26 @@ class APITestCase(TestCase):
 
         resp = request(url,**params)
 
+        content = load_content(resp)
 
-        self.assertEqual(resp.status_code, 200,
-                         resp.json().get('reason', 'No reason returned') if isinstance(resp.json(), dict) else resp.json())
+        self.assertEqual(resp.status_code, expected_code,
+                         content.get('reason', 'No reason returned') if isinstance(content, dict) else content)
 
-        json_resp = resp.json()
+        json_resp = content2json(content)
 
-        if json_resp is dict:
-            self.assertTrue('data' in json_resp, '%s does not contain a "data"-entry'%str(json_resp))
-            json_resp = json_resp['data']
+        if 'data' in json_resp or expected_result:
+            if isinstance(json_resp, dict):
+                if 'data' in json_resp:
+                    self.assertTrue('data' in json_resp, '%s does not contain a "data"-entry'%str(json_resp))
+                    json_resp = json_resp['data']
 
-        self.assertListEqual(json_resp, expected_result)
+            if expected_result :
+                if isinstance(expected_result, list):
+                    self.assertListEqual(json_resp, expected_result)
+                elif isinstance(expected_result, dict):
+                    self.assertDictEqual(json_resp, expected_result)
+                else:
+                    self.assertEqual(json_resp, expected_result)
 
     def check_api_post(self, *args, **kwargs):
         self.check_api_send(self.__class__.client.post, *args, **kwargs)

@@ -26,6 +26,7 @@ from api.connection import _get_engine
 from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
 from dataedit.models import Table as DBTable
 import login.models as login_models
+from oeplatform.securitysettings import PLAYGROUNDS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -69,32 +70,41 @@ def load_cursor(f):
         artificial_connection = 'connection_id' not in args[1].data
         fetch_all = 'cursor_id' not in args[1].data
         if fetch_all:
+
             # django_restframework passes different data dictionaries depending
             # on the request type: PUT -> Mutable, POST -> Immutable
             # Thus, we have to replace the data dictionary by one we can mutate.
-            args[1]._full_data = dict(args[1].data)
-            if artificial_connection:
+            if hasattr(args[1].data, '_mutable'):
+                args[1].data._mutable = True
+
+            if not artificial_connection:
+                context = {'connection_id': args[1].data['connection_id']}
+            else:
                 context = open_raw_connection({}, {})
                 args[1].data['connection_id'] = context['connection_id']
+            if 'cursor_id' in args[1].data:
+                context['cursor_id'] = args[1].data['cursor_id']
             else:
-                context = {'connection_id': args[1].data['connection_id']}
-            context.update(open_cursor({}, context))
-            args[1].data['cursor_id'] = context['cursor_id']
+                context.update(open_cursor({}, context))
+                args[1].data['cursor_id'] = context['cursor_id']
         try:
             result = f(*args, **kwargs)
             if fetch_all:
                 cursor = load_cursor_from_context(context)
+                session = load_session_from_context(context)
                 if not result:
                     result = {}
                 if cursor.description:
                     result['description'] = cursor.description
                     result['rowcount'] = cursor.rowcount
-                    result['data'] = [list(map(_translate_fetched_cell, row)) for row in cursor.fetchall()]
+                    result['data'] = (list(map(_translate_fetched_cell, row)) for row in cursor.fetchall())
+                if artificial_connection:
+                    session.connection.commit()
         finally:
             if fetch_all:
                 close_cursor({}, context)
-                if artificial_connection:
-                    close_raw_connection({}, context)
+            if artificial_connection:
+                close_raw_connection({}, context)
         return result
     return wrapper
 
@@ -272,7 +282,6 @@ def perform_sql(sql_statement, parameter=None):
     session = sessionmaker(bind=engine)()
 
     # Statement built and no changes required, so statement is empty.
-    logger.debug("SQL STATEMENT: |" + sql_statement + "| \t " + str(parameter))
     if not sql_statement or sql_statement.isspace():
         return get_response_dict(success=True)
 
@@ -560,44 +569,84 @@ def get_column(d):
     name = get_or_403(d, 'column')
     return Column('%s.%s'%(table, name), schema=schema)
 
+def parse_type(dt_string):
+
+    # Are you an array?
+    dtarr_expression = r'(?P<dtname>[A-z_]+)\s*\[\]'
+    arr_match = re.match(dtarr_expression, dt_string)
+    if arr_match:
+        is_array = True
+        dt_string = arr_match.groups()[0]
+        dt, autoincrement = parse_type(dt_string)
+        return sqla.ARRAY(dt), autoincrement
+
+    # Is the datatypestring of form NAME(NUMBER)?
+    dt_expression = r'(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)'
+    match = re.match(dt_expression, dt_string)
+    if match:
+        dt_string = match.groups()[0]
+        if dt_string.lower() == 'geometry':
+            return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
+        else:
+            dt_cardinality = map(int, match.groups()[1].replace(' ','').split(','))
+        dt, autoincrement = parse_type(dt_string)
+        return dt(*dt_cardinality), autoincrement
+
+    # So it's a plain type
+    autoincrement = False
+
+    dt_string = dt_string.lower()
+
+    if dt_string in ('int', 'integer'):
+        dt = sa.types.INTEGER
+    elif dt_string in ('bigint', 'biginteger'):
+        dt = sa.types.BigInteger
+    elif dt_string in ('bit',):
+        dt = sa.types.Binary
+    elif dt_string in ('boolean', 'bool'):
+        dt = sa.types.Boolean
+    elif dt_string in ('char',):
+        dt = sqltypes.CHAR
+    elif dt_string in ('date',):
+        dt = sqltypes.Date
+    elif dt_string in ('datetime', 'TIMESTAMP WITHOUT TIME ZONE', 'timestamp'):
+        dt = sqltypes.DateTime
+    elif dt_string in ('decimal','float'):
+        dt = sqltypes.DECIMAL
+    elif dt_string in ('interval',):
+        dt = sqltypes.Interval
+    elif dt_string in ('json',):
+        dt = sqltypes.JSON
+    elif dt_string in ('nchar',):
+        dt = sqltypes.NCHAR
+    elif dt_string in ('numerical', 'numeric'):
+        dt = sa.types.Numeric
+    elif dt_string in ['varchar', 'character varying']:
+        dt = sqltypes.VARCHAR
+    elif dt_string in ('real',):
+        dt = sqltypes.REAL
+    elif dt_string in ('smallint',):
+        dt = sqltypes.SMALLINT
+    elif hasattr(geoalchemy2, dt_string):
+        dt = getattr(geoalchemy2, dt_string)
+    elif hasattr(sqltypes, dt_string.upper()):
+        dt = getattr(sqltypes, dt_string.upper())
+    elif dt_string == 'bigserial':
+        dt = sa.types.BigInteger
+        autoincrement = True
+    else:
+        raise APIError('Unknown type (%s).' % dt_string)
+    return dt, autoincrement
+
 def get_column_definition_query(d):
     name = get_or_403(d, 'name')
     args = []
     kwargs = {}
     dt_string = get_or_403(d, 'data_type')
+    dt, autoincrement = parse_type(dt_string)
 
-    dt_expression = r'(?P<dtname>[A-z_]+)\((?P<cardinality>\d*(,\s*\d*)?)\)'
-    dt_cardinality = None
-
-    match = re.match(dt_expression, dt_string)
-
-
-
-    if match:
-        dt_string = match.groups()[0]
-        if dt_string.lower() == 'integer':
-            dt = int
-        elif dt_string.lower() == 'numerical':
-            dt = sa.types.Numeric
-        elif hasattr(sqltypes, dt_string):
-            dt = getattr(sqltypes, dt_string)
-        elif dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
-            dt = sqltypes.DateTime
-        else:
-            raise APIError('Unknown type (%s).' % dt_string)
-        dt_cardinality = map(int, match.groups()[1].replace(' ','').split(','))
-    else:
-        if dt_string == 'TIMESTAMP WITHOUT TIME ZONE':
-            dt = sqltypes.DateTime
-        elif hasattr(geoalchemy2, dt_string):
-            dt = getattr(geoalchemy2, dt_string)
-        elif hasattr(sqltypes, dt_string):
-            dt = getattr(sqltypes, dt_string)
-        else:
-            raise APIError('Unknown type (%s).'%dt_string)
-
-    if dt_cardinality:
-        dt = dt(*dt_cardinality)
+    if autoincrement:
+        d['autoincrement'] = True
 
     for fk in d.get('foreign_key', []):
         fkschema = fk.get('schema', DEFAULT_SCHEMA)
@@ -625,7 +674,7 @@ def get_column_definition_query(d):
         kwargs['default'] = api.parser.read_pgvalue(d['column_default'])
 
     if d.get('character_maximum_length', False):
-        dt += '(' + str(d['character_maximum_length']) + ')'
+        dt = dt(d['character_maximum_length'])
 
     c = Column(name, dt, *args, **kwargs)
 
@@ -668,7 +717,12 @@ def column_alter(query, context, schema, table, column):
 def column_add(schema, table, column, description):
     description['name'] = column
     settings = get_column_definition_query(description)
-    s = 'ALTER TABLE {schema}.{table} ADD COLUMN ' + settings
+    name = settings.name
+    s = 'ALTER TABLE {schema}.{table} ADD COLUMN {name} {type}'.format(
+        schema='{schema}',
+        table='{table}',
+        name=name,
+        type=str(settings.type))
     edit_table = get_edit_table_name(schema, table)
     insert_table = get_insert_table_name(schema, table)
     perform_sql(s.format(schema=schema, table=table))
@@ -710,20 +764,26 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['type'] == 'primary_key':
+        if constraint['constraint_type'].lower().replace(' ', '_') == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
                 kwargs['name'] = cname
-            ccolumns = constraint['columns']
+            if 'columns' in constraint:
+                ccolumns = constraint['columns']
+            else:
+                ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
                                                               **kwargs))
-        elif constraint['type'] == 'unique':
+        elif constraint['constraint_type'] == 'unique':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
                 kwargs['name'] = cname
-            ccolumns = constraint['columns']
+            if 'columns' in constraint:
+                ccolumns = constraint['columns']
+            else:
+                ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns,
                                                           **kwargs))
 
@@ -978,13 +1038,13 @@ def data_delete(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.DELETE_PERM)
+    assert_permission(context['user'], table, login_models.DELETE_PERM, schema=schema)
 
     target_table = get_delete_table_name(orig_schema,orig_table)
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ['id'])
-    if orig_schema == 'sandbox':
+    if orig_schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -999,7 +1059,7 @@ def data_update(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.WRITE_PERM)
+    assert_permission(context['user'], table, login_models.WRITE_PERM, schema=schema)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, 'values')
@@ -1010,7 +1070,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema == 'sandbox':
+    if orig_schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1113,7 +1173,7 @@ def data_insert(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context['user'], table, login_models.WRITE_PERM)
+    assert_permission(context['user'], table, login_models.WRITE_PERM, schema=schema)
 
     mapper = {orig_schema: schema, orig_table: table}
 
@@ -1132,7 +1192,7 @@ def data_insert(request, context=None):
             col.internal_size, col.precision, col.scale,
             col.null_ok] for col in description]
     response['rowcount'] = cursor.rowcount
-    if schema == 'sandbox':
+    if schema in PLAYGROUNDS:
         apply_changes(schema, table, cursor)
 
     return response
@@ -1145,7 +1205,6 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
-        logger.debug('Executed %s with parameters %s'%(str(compiled), params))
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
@@ -1747,53 +1806,69 @@ def apply_changes(schema, table, cursor=None):
 
     engine = _get_engine()
 
+    artificial_connection=False
+
     if cursor is None:
-        cursor = engine.connect().cursor()
+        artificial_connection = True
+        connection = engine.raw_connection()
+        cursor = connection.cursor()
 
-    meta_schema = get_meta_schema_name(schema)
+    try:
+        meta_schema = get_meta_schema_name(schema)
 
-    columns = list(describe_columns(schema, table).keys())
-    extended_columns = columns + ['_submitted', '_id']
+        columns = list(describe_columns(schema, table).keys())
+        extended_columns = columns + ['_submitted', '_id']
 
-    insert_table = get_insert_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=insert_table))
-    changes = [add_type({c.name: v for c, v in zip(cursor.description, row)
-                         if c.name in extended_columns}, 'insert')
-               for row in cursor.fetchall()]
+        insert_table = get_insert_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=insert_table))
+        changes = [add_type({c.name: v for c, v in zip(cursor.description, row)
+                             if c.name in extended_columns}, 'insert')
+                   for row in cursor.fetchall()]
 
-    update_table = get_edit_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=update_table))
-    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
-                          if c.name in extended_columns}, 'update')
-                for row in cursor.fetchall()]
+        update_table = get_edit_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=update_table))
+        changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                              if c.name in extended_columns}, 'update')
+                    for row in cursor.fetchall()]
 
-    delete_table = get_delete_table_name(schema, table)
-    cursor.execute('select * '
-                   'from {schema}.{table} '
-                   'where _applied = FALSE;'.format(schema=meta_schema,
-                                                    table=delete_table))
-    changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
-                          if c.name in ['_id', 'id', '_submitted']}, 'delete')
-                for row in cursor.fetchall()]
+        delete_table = get_delete_table_name(schema, table)
+        cursor.execute('select * '
+                       'from {schema}.{table} '
+                       'where _applied = FALSE;'.format(schema=meta_schema,
+                                                        table=delete_table))
+        changes += [add_type({c.name: v for c, v in zip(cursor.description, row)
+                              if c.name in ['_id', 'id', '_submitted']}, 'delete')
+                    for row in cursor.fetchall()]
 
-    changes = list(changes)
-    table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
+        changes = list(changes)
+        table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
 
-    # ToDo: This may require some kind of dependency tree resolution
-    for change in sorted(changes, key=lambda x: x['_submitted']):
-        distilled_change = {k:v for k,v in change.items() if k in columns}
-        if change['_type'] == 'insert':
-            apply_insert(cursor, table_obj, distilled_change, change['_id'])
-        elif change['_type'] == 'update':
-            apply_update(cursor, table_obj, distilled_change, change['_id'])
-        elif change['_type'] == 'delete':
-            apply_deletion(cursor, table_obj, distilled_change, change['_id'])
+        # ToDo: This may require some kind of dependency tree resolution
+        for change in sorted(changes, key=lambda x: x['_submitted']):
+            distilled_change = {k:v for k,v in change.items() if k in columns}
+            if change['_type'] == 'insert':
+                apply_insert(cursor, table_obj, distilled_change, change['_id'])
+            elif change['_type'] == 'update':
+                apply_update(cursor, table_obj, distilled_change, change['_id'])
+            elif change['_type'] == 'delete':
+                apply_deletion(cursor, table_obj, distilled_change, change['_id'])
+
+        if artificial_connection:
+            connection.commit()
+    except:
+        if artificial_connection:
+            connection.rollback()
+        raise
+    finally:
+        if artificial_connection:
+            cursor.close()
+            connection.close()
 
 
 def set_applied(session, table, rid, mode):

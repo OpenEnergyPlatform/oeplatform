@@ -14,6 +14,7 @@ import login.models as login_models
 import api.parser
 from api import actions, parser, sessions
 from api.helpers.http import ModHttpResponse
+from api.encode import GeneratorJSONEncoder
 from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
@@ -398,16 +399,17 @@ class Rows(APIView):
 
         # Extract column names from description
         cols = [col[0] for col in return_obj['description']]
-        dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
 
         if row_id:
+            dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
             if dict_list:
                 dict_list = dict_list[0]
             else:
                 raise Http404
+            # TODO: Figure out what JsonResponse does different.
+            return JsonResponse(dict_list, safe=False)
 
-        # TODO: Figure out what JsonResponse does different.
-        return JsonResponse(dict_list, safe=False)
+        return stream((dict(zip(cols,row)) for row in return_obj['data']))
 
     @api_exception
     @require_write_permission
@@ -424,7 +426,7 @@ class Rows(APIView):
             else:
                 response = self.__update_rows(request, schema, table, column_data, None)
         actions.apply_changes(schema, table)
-        return JsonResponse(response, status=status_code)
+        return stream(response, status_code=status_code)
 
     @api_exception
     @require_write_permission
@@ -477,7 +479,8 @@ class Rows(APIView):
         }
         if where:
             query['where'] = self.__read_where_clause(where)
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         if row_id:
@@ -510,6 +513,7 @@ class Rows(APIView):
                                       'operator': match[1],
                                       'type': 'operator'} for match in where_splitted]))
         return where_clauses
+
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row_id and row.get('id', int(row_id)) != int(row_id):
@@ -518,7 +522,8 @@ class Rows(APIView):
         if row_id:
             row['id'] = row_id
 
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         query = {
@@ -528,14 +533,15 @@ class Rows(APIView):
         }
 
         if not row_id:
-            query['returning'] = ['id']
+            query['returning'] = [{'type':'column', 'column':'id'}]
         result = actions.data_insert(query, context)
 
         return result
 
     @actions.load_cursor
     def __update_rows(self, request, schema, table, row, row_id=None):
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         where = request.GET.getlist('where')
@@ -602,7 +608,7 @@ class Rows(APIView):
         if offset and offset.isdigit():
             query = query.offset(int(offset))
 
-        cursor = actions._load_cursor(request.data['cursor_id'])
+        cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
 
 class Session(APIView):
@@ -626,7 +632,6 @@ def date_handler(obj):
 
 # Create your views here.
 
-
 def create_ajax_handler(func, allow_cors=False):
     """
     Implements a mapper from api pages to the corresponding functions in
@@ -646,12 +651,11 @@ def create_ajax_handler(func, allow_cors=False):
         @cors(allow_cors)
         @api_exception
         def post(self, request):
-            logger.debug(
-                'got request: ' + str(request))
-            response = JsonResponse(self.execute(request))
-            if allow_cors and request.user.is_anonymous:
-                response['Access-Control-Allow-Origin'] = '*'
-            return response
+            result = self.execute(request)
+            return stream(
+                result,
+                allow_cors=allow_cors and request.user.is_anonymous)
+
 
         @actions.load_cursor
         def execute(self, request):
@@ -702,18 +706,15 @@ class FetchView(APIView):
                 json.dumps([actions._translate_fetched_cell(cell) for cell in row],
                            default=date_handler)
 
-def stream(data):
-    """
-    TODO: Implement streaming of large datasets
-    :param data:
-    :return:
-    """
-    size = len(data)
-    chunck = 100
 
-    for i in range(size):
-        yield json.loads(json.dumps(data[i], default=date_handler))
-        time.sleep(1)
+def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
+    encoder = GeneratorJSONEncoder()
+    response = StreamingHttpResponse(encoder.iterencode(data),
+                                     content_type='application/json',
+                                     status=status_code)
+    if allow_cors:
+        response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 def get_users(request):
