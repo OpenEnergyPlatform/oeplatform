@@ -223,3 +223,11 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr,
             if markers is not None:
                 del markers[markerid]
     return _iterencode
+
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value

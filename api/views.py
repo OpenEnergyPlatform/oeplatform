@@ -14,7 +14,7 @@ import login.models as login_models
 import api.parser
 from api import actions, parser, sessions
 from api.helpers.http import ModHttpResponse
-from api.encode import GeneratorJSONEncoder
+from api.encode import GeneratorJSONEncoder, Echo
 from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
@@ -23,10 +23,11 @@ from rest_framework import status
 from django.http import Http404
 
 import sqlalchemy as sqla
+import csv
 import geoalchemy2  # Although this import seems unused is has to be here
 
 import logging
-
+import itertools
 logger = logging.getLogger('oeplatform')
 
 WHERE_EXPRESSION = re.compile('^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
@@ -334,6 +335,12 @@ class Fields(APIView):
     def put(self, request):
         pass
 
+def build_csv(header, result_iterator):
+    yield b','.join(header)
+    yield b'\n'
+    for row in result_iterator:
+        yield b','.join(b'"' + bytes(cell) + b'"'  for cell in row ).replace(b'"',b'""')
+        yield b'\n'
 
 class Rows(APIView):
     @api_exception
@@ -356,6 +363,8 @@ class Rows(APIView):
         offset = request.GET.get('offset')
         if row_id and offset:
             raise actions.APIError('Order by clauses and row id are not allowed in the same query')
+
+        format = request.GET.get('form')
 
         if offset is not None and not offset.isdigit():
             raise actions.APIError("Offset must be integer")
@@ -396,20 +405,31 @@ class Rows(APIView):
                 }
 
         return_obj = self.__get_rows(request, data)
-
         # Extract column names from description
         cols = [col[0] for col in return_obj['description']]
 
-        if row_id:
-            dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
-            if dict_list:
-                dict_list = dict_list[0]
-            else:
-                raise Http404
-            # TODO: Figure out what JsonResponse does different.
-            return JsonResponse(dict_list, safe=False)
+        if format == 'csv':
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer)
+            response = StreamingHttpResponse(
+                (writer.writerow(x)
+                 for x in itertools.chain([cols],return_obj['data'])),
+                content_type="text/csv")
+            response[
+                'Content-Disposition'] = 'attachment; filename="{schema}__{table}.csv"'.format(schema=schema, table=table)
+            return response
 
-        return stream((dict(zip(cols,row)) for row in return_obj['data']))
+        else:
+            if row_id:
+                dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
+                if dict_list:
+                    dict_list = dict_list[0]
+                else:
+                    raise Http404
+                # TODO: Figure out what JsonResponse does different.
+                return JsonResponse(dict_list, safe=False)
+
+            return stream((dict(zip(cols,row)) for row in return_obj['data']))
 
     @api_exception
     @require_write_permission
