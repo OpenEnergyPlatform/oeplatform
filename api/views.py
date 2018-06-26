@@ -410,7 +410,7 @@ class Rows(APIView):
 
         if format == 'csv':
             pseudo_buffer = Echo()
-            writer = csv.writer(pseudo_buffer)
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
             response = StreamingHttpResponse(
                 (writer.writerow(x)
                  for x in itertools.chain([cols],return_obj['data'])),
