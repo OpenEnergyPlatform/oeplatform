@@ -675,7 +675,7 @@ def get_column_definition_query(d):
         kwargs['default'] = api.parser.read_pgvalue(d['column_default'])
 
     if d.get('character_maximum_length', False):
-        dt = dt(d['character_maximum_length'])
+        dt = dt(int(d['character_maximum_length']))
 
     c = Column(name, dt, *args, **kwargs)
 
