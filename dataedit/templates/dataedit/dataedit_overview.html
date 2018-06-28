@@ -30,20 +30,33 @@
     to human-readable geoJSON. You can plot these datapoints in a designated map view.
     </div>
 
-    <div id="fetch_overlay" class="modal">
+    <div id="fetch_overlay" class="modal" style="z-index:3">
       <div class="modal-content">
         <span id="fetch_overlay_close" class="close">&times;</span>
-        <div>
-            Use below snippet to fetch data from this dataset.
-          <textarea class="form-control" rows="6" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#csv">CSV</a></li>
+            <li><a data-toggle="tab" href="#python">Python</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="csv" class="tab-pane fade in active">
+              <p> <br>
+                Here you can download this dataset in csv format. Mind that the textbased csv format tends to be costly regarding the file size. Thus, this download might take some time.
+              </p>
+              <a class="btn btn-default" style="margin-left:50%" href="/api/v0/schema/{{schema}}/tables/{{table}}/rows?form=csv" >Download CSV</a>
+          </div>
+          <div id="python" class="tab-pane fade">
+            <div>
+                Use below snippet to fetch data from this dataset.
+              <textarea class="form-control" rows="6" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
 from requests import get
 
 result = get('https://{{host}}/api/v0/schema/{{schema}}/tables/{{table}}/rows')
 for row in result.json():
     # Process the row</textarea>
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
     {% endblock %}
 

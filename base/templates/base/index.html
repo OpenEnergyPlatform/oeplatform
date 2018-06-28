@@ -1,5 +1,11 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
+
+{% block content-right %}
+<h2>Changes in version {{version}}</h2>
+{{changes|safe}}
+{% endblock %}
+
 {% block content %}
 {% load staticfiles %}
 
