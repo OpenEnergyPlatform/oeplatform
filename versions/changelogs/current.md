@@ -1,5 +1,6 @@
 ### Features
 
+* Show changelogs
 * Add 'form=csv' option for /rows-API-requests
 * Add button for CSV download
 
