@@ -1,10 +1,3 @@
 ### Features
 
-* Show changelogs
-* Add 'form=csv' option for /rows-API-requests
-* Add button for CSV download
-
-### Bugfixes
-
-* Parse integer valued `character_maximum_length` in put-requests for tables
-
+### Bugs
