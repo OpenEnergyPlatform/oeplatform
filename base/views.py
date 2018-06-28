@@ -8,15 +8,19 @@ import os
 import re
 # Create your views here.
 
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
 class Welcome(View):
    
     def get(self, request):
+        os.path.dirname(os.path.realpath(__file__))
         version_expr = r'^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$'
         markdowner = markdown2.Markdown()
-        with open('VERSION') as version_file:
+        with open(os.path.join(SITE_ROOT,'..', 'VERSION')) as version_file:
             match = re.match(version_expr, version_file.read())
             major, minor, patch = match.groups()
-        with open('versions/changelogs/%s_%s_%s.md'%(major, minor, patch)) as change_file:
+        with open(os.path.join(SITE_ROOT, '..',
+                               'versions/changelogs/%s_%s_%s.md'%(major, minor, patch))) as change_file:
             changes = markdowner.convert(
                 '\n'.join(line for line in change_file.readlines()))
         return render(request,
