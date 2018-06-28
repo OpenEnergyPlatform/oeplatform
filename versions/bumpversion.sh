@@ -25,6 +25,7 @@ if [ -f changelogs/$CLEAN_VERSION.md ]
     echo -e "${RED}Fatal: File changelogs/$CLEAN_VERSION.md already exists${NC}"
     exit 1
   else
+    git stash
     mv changelogs/current.md changelogs/$CLEAN_VERSION.md
     rm changelogs/latest.md
     ln -s changelogs/$CLEAN_VERSION changelogs/latest.md
@@ -32,3 +33,6 @@ if [ -f changelogs/$CLEAN_VERSION.md ]
 fi
 
 echo "$major.$minor.$patch" > ../VERSION
+
+git commit -m "Bump version to $major.$minor.$patch" changelogs/current.md changelogs/$CLEAN_VERSION.md changelogs/latest.md
+git stash apply
