@@ -1199,8 +1199,9 @@ def data_insert(request, context=None):
 
 
 def _execute_sqla(query, cursor):
+    dialect = _get_engine().dialect
     try:
-        compiled = query.compile(dialect=_get_engine().dialect)
+        compiled = query.compile(dialect=dialect)
     except exc.SQLAlchemyError as e:
         raise APIError(repr(e))
     try:
@@ -1892,21 +1893,20 @@ def set_applied(session, table, rid, mode):
 def apply_insert(session, table, row, rid):
     logger.info("apply insert " + str(row))
     query = table.insert().values(row)
-    query = query.compile()
-    session.execute(str(query), query.params)
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __INSERT)
 
 
 def apply_update(session, table, row, rid):
     logger.info("apply update " + str(row))
     pks = [c.name for c in table.columns if c.primary_key]
-    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row).compile()
-    session.execute(str(query), query.params)
+    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row)
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __UPDATE)
 
 
 def apply_deletion(session, table, row, rid):
     logger.info("apply deletion " + str(row))
-    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row]).compile()
-    session.execute(str(query), query.params)
+    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __DELETE)
