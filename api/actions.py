@@ -1206,6 +1206,12 @@ def _execute_sqla(query, cursor):
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
+        for key, value in params.items():
+            if isinstance(value, dict):
+                if dialect._json_serializer is None:
+                    params[key] = json.dumps(value)
+                else:
+                    params[key] = dialect._json_serializer(value)
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
