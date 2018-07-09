@@ -677,11 +677,11 @@ def create_ajax_handler(func, allow_cors=False):
                 allow_cors=allow_cors and request.user.is_anonymous)
 
 
-        @actions.load_cursor
         def execute(self, request):
             content = request.data
-            context = {'user': request.user,
-                       'cursor_id': request.data['cursor_id']}
+            context = {'user': request.user}
+            if 'cursor_id' in request.data:
+                context['cursor_id'] = request.data['cursor_id']
             if 'connection_id' in request.data:
                 context['connection_id'] = request.data['connection_id']
             query = content.get('query', ['{}'])
@@ -697,8 +697,13 @@ def create_ajax_handler(func, allow_cors=False):
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
             response_data = json.loads(json.dumps(data, default=date_handler))
-            return {'content': response_data,
-                    'cursor_id': context['cursor_id']}
+
+            result = {'content': response_data}
+
+            if 'cursor_id' in context:
+                result['cursor_id'] = context['cursor_id']
+
+            return result
 
     return AJAX_View.as_view()
 
