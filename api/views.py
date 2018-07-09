@@ -111,13 +111,13 @@ class Sequence(APIView):
             raise PermissionDenied
         return self.__delete_sequence(request, schema, sequence, request.data)
 
-    @actions.load_cursor
+    @load_cursor
     def __delete_sequence(self, request, schema, sequence, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.drop(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_200_OK)
 
-    @actions.load_cursor
+    @load_cursor
     def __create_sequence(self, request, schema, sequence, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.create(bind=actions._get_engine())
@@ -241,7 +241,7 @@ class Table(APIView):
         request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-    @actions.load_cursor
+    @load_cursor
     def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
         context = {'connection_id': actions.get_or_403(request.data,
                                                        'connection_id'),
@@ -489,7 +489,7 @@ class Rows(APIView):
         actions.apply_changes(schema, table)
         return JsonResponse(result)
 
-    @actions.load_cursor
+    @load_cursor
     def __delete_rows(self, request, schema, table, row_id=None):
         where = request.GET.getlist('where')
         query = {
@@ -534,7 +534,7 @@ class Rows(APIView):
                                       'type': 'operator'} for match in where_splitted]))
         return where_clauses
 
-    @actions.load_cursor
+    @load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row_id and row.get('id', int(row_id)) != int(row_id):
             return actions._response_error('The id given in the query does not '
@@ -558,7 +558,7 @@ class Rows(APIView):
 
         return result
 
-    @actions.load_cursor
+    @load_cursor
     def __update_rows(self, request, schema, table, row, row_id=None):
         context = {'connection_id': request.data['connection_id'],
                    'cursor_id': request.data['cursor_id'],
@@ -593,7 +593,7 @@ class Rows(APIView):
 
         return actions.data_update(query, context)
 
-    @actions.load_cursor
+    @load_cursor
     def __get_rows(self, request, data):
         table = actions._get_table(data['schema'], table=data['table'])
         params = {}
@@ -753,4 +753,45 @@ def get_groups(request):
     users = login_models.Group.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))
     return JsonResponse([user.name for user in users], safe=False)
 
+def load_cursor(f):
+    def wrapper(*args, **kwargs):
+        artificial_connection = 'connection_id' not in args[1].data
+        fetch_all = 'cursor_id' not in args[1].data
+        if fetch_all:
 
+            # django_restframework passes different data dictionaries depending
+            # on the request type: PUT -> Mutable, POST -> Immutable
+            # Thus, we have to replace the data dictionary by one we can mutate.
+            if hasattr(args[1].data, '_mutable'):
+                args[1].data._mutable = True
+
+            if not artificial_connection:
+                context = {'connection_id': args[1].data['connection_id']}
+            else:
+                context = actions.open_raw_connection({}, {})
+                args[1].data['connection_id'] = context['connection_id']
+            if 'cursor_id' in args[1].data:
+                context['cursor_id'] = args[1].data['cursor_id']
+            else:
+                context.update(actions.open_cursor({}, context))
+                args[1].data['cursor_id'] = context['cursor_id']
+        try:
+            result = f(*args, **kwargs)
+            if fetch_all:
+                cursor = actions.load_cursor_from_context(context)
+                session = actions.load_session_from_context(context)
+                if not result:
+                    result = {}
+                if cursor.description:
+                    result['description'] = cursor.description
+                    result['rowcount'] = cursor.rowcount
+                    result['data'] = (list(map(actions._translate_fetched_cell, row)) for row in cursor.fetchall())
+                if artificial_connection:
+                    session.connection.commit()
+        finally:
+            if fetch_all:
+                actions.close_cursor({}, context)
+            if artificial_connection:
+                actions.close_raw_connection({}, context)
+        return result
+    return wrapper

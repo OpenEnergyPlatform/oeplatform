@@ -65,50 +65,6 @@ def assert_permission(user, table, permission, schema=None):
         raise PermissionDenied
 
 
-def load_cursor(f):
-    def wrapper(*args, **kwargs):
-        artificial_connection = 'connection_id' not in args[1].data
-        fetch_all = 'cursor_id' not in args[1].data
-        if fetch_all:
-
-            # django_restframework passes different data dictionaries depending
-            # on the request type: PUT -> Mutable, POST -> Immutable
-            # Thus, we have to replace the data dictionary by one we can mutate.
-            if hasattr(args[1].data, '_mutable'):
-                args[1].data._mutable = True
-
-            if not artificial_connection:
-                context = {'connection_id': args[1].data['connection_id']}
-            else:
-                context = open_raw_connection({}, {})
-                args[1].data['connection_id'] = context['connection_id']
-            if 'cursor_id' in args[1].data:
-                context['cursor_id'] = args[1].data['cursor_id']
-            else:
-                context.update(open_cursor({}, context))
-                args[1].data['cursor_id'] = context['cursor_id']
-        try:
-            result = f(*args, **kwargs)
-            if fetch_all:
-                cursor = load_cursor_from_context(context)
-                session = load_session_from_context(context)
-                if not result:
-                    result = {}
-                if cursor.description:
-                    result['description'] = cursor.description
-                    result['rowcount'] = cursor.rowcount
-                    result['data'] = (list(map(_translate_fetched_cell, row)) for row in cursor.fetchall())
-                if artificial_connection:
-                    session.connection.commit()
-        finally:
-            if fetch_all:
-                close_cursor({}, context)
-            if artificial_connection:
-                close_raw_connection({}, context)
-        return result
-    return wrapper
-
-
 def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
         return _get_engine().execute(cell.ST_AsText()).scalar()
