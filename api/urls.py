@@ -15,10 +15,10 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$', views.Rows.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
 
-    url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True)),
-    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert)),
-    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete)),
-    url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update)),
+    url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True, requires_cursor=True)),
+    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert, requires_cursor=True)),
+    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete, requires_cursor=True)),
+    url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update, requires_cursor=True)),
 
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),
     url(r'^v0/advanced/has_schema', views.create_ajax_handler(actions.has_schema)),

@@ -697,7 +697,7 @@ def date_handler(obj):
 
 # Create your views here.
 
-def create_ajax_handler(func, allow_cors=False):
+def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
@@ -721,8 +721,14 @@ def create_ajax_handler(func, allow_cors=False):
                 result,
                 allow_cors=allow_cors and request.user.is_anonymous)
 
-
         def execute(self, request):
+            if requires_cursor:
+                return load_cursor(self._internal_execute)(self, request)
+            else:
+                self._internal_execute(request)
+
+        def _internal_execute(self, *args):
+            request = args[1]
             content = request.data
             context = {'user': request.user}
             if 'cursor_id' in request.data:
