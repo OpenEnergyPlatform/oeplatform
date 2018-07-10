@@ -725,7 +725,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
             if requires_cursor:
                 return load_cursor(self._internal_execute)(self, request)
             else:
-                self._internal_execute(request)
+                return self._internal_execute(request, request)
 
         def _internal_execute(self, *args):
             request = args[1]
