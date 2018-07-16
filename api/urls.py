@@ -61,6 +61,4 @@ urlpatterns = [
 
     url(r'usrprop/', views.get_users),
     url(r'grpprop/', views.get_groups),
-
-    url(r'^get_map_polygons', actions.get_map_polygons)
 ]

@@ -145,48 +145,33 @@ for row in result.json():
 
         var map = L.map('main-visualization-container');
 
-        /* center map on germany */
-        map.setView([51.4546, 10.1532], 5)
-
-        /* load map tiles from openstreetmap */
-        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '©<a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors',
-            maxZoom: 18,
-        }).addTo(map);
+        // set map center, will be overwritten on polygon load
+        map.setView([0, 0], 0);
 
         // leaflet geoJson layer
         var geoJSON;
 
-        var updateFunction = function()
-        {
-            let left = map.getBounds().getEast();
-            let right = map.getBounds().getWest();
-            let top = map.getBounds().getNorth();
-            let bottom = map.getBounds().getSouth();
+        getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
 
-            $.ajax({
-                url: "/api/get_map_polygons",
-                data:
-                    {
-                        'schema': '{{ schema }}',
-                        'table': '{{ table }}',
-                        'geomField': '{{ geo_column }}',
-                        'bounds': '{ "type": "Polygon", "coordinates":[[[' +
-                            left + ',' + top + '],' +
-                            '[' + right + ',' + top + '],' +
-                            '[' + right + ',' + bottom + '],' +
-                            '[' + left + ',' + bottom + '],' +
-                            '[' + left + ',' + top + ']]] }'
-                    },
-                success: function(result){
-                    if (typeof geoJSON !== 'undefined') {
-                        geoJSON.clearLayers();
-                    }
-                    geoJSON = L.geoJson(result["geom"]).addTo(map);
-            }});
-        };
+            // add geoJSON layer to map
+            geoJSON = L.geoJson(JSON.parse(result["data"][0])).addTo(map);
 
-        updateFunction();
+            // center map on geoJSON
+            map.fitBounds(geoJSON.getBounds());
+
+            // load map tiles from openstreetmap
+            L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '©<a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+            }).addTo(map);
+        });
+
+        function updateFunction() {
+            getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
+                geoJSON.clearLayers(); // remove old polygons
+                geoJSON.addData(JSON.parse(result["data"][0]))
+            });
+        }
 
         map.on('moveend', updateFunction);
         map.on('zoomend', updateFunction);
@@ -256,67 +241,6 @@ for row in result.json():
                 });
                 graph.render();
                 graph.redraw();
-            {% elif current_view.type == "map" %}
-
-                var map = new recline.View.Map({
-                    model: dataset,
-                    el: visualization_container,
-                    state:
-                    {
-                        {% if geo_type == "single-column" %}
-                        geomField: "{{ geo_column }}"
-                        {% elif geo_type == "lat_long" %}
-                        lonField: "{{ geo_long }}",
-                        latField: "{{ geo_lat }}"
-                        {% endif %}
-                    }
-                });
-                map.render();
-
-                // reload map data when view is moved via dragging
-                {% if geo_type == "single-column" %}
-
-                var geoJSON;
-
-                var left, right, top, bottom;
-
-                var updateFunction = function()
-                {
-                    left = map.map.getBounds().getEast();
-                    right = map.map.getBounds().getWest();
-                    top = map.map.getBounds().getNorth();
-                    bottom = map.map.getBounds().getSouth();
-
-                    $.ajax({
-                        url: "/api/get_map_polygons",
-                        data:
-                            {
-                                'schema': '{{ schema }}',
-                                'table': '{{ table }}',
-                                'geomField': '{{ geo_column }}',
-                                'bounds': '{ "type": "Polygon", "coordinates":[[[' +
-                                    left + ',' + top + '],' +
-                                    '[' + right + ',' + top + '],' +
-                                    '[' + right + ',' + bottom + '],' +
-                                    '[' + left + ',' + bottom + '],' +
-                                    '[' + left + ',' + top + ']]] }'
-                            },
-                        success: function(result){
-                            if (typeof geoJSON !== 'undefined') {
-                                geoJSON.clearLayers();
-                            }
-                            geoJSON = L.geoJson(result["geom"]).addTo(map.map);
-                    }});
-                };
-
-                updateFunction();
-
-                map.map.on('moveend', updateFunction);
-                map.map.on('zoomend', updateFunction);
-
-                {% elif geo_type == "lat_long" %}
-                {% endif %}
-
             {% endif %}
         });
 

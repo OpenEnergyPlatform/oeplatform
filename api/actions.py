@@ -1910,33 +1910,3 @@ def apply_deletion(session, table, row, rid):
     query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row]).compile()
     session.execute(str(query), query.params)
     set_applied(session, table, rid, __DELETE)
-
-
-def get_map_polygons(request):
-    content = request.POST if request.POST else request.GET
-    engine = _get_engine()
-    query = 'SELECT ST_AsGeoJSON(ST_Collect(ST_Transform({column}, 4326))) ' \
-            'FROM ( ' \
-            'SELECT * ' \
-            'FROM {schema}.{table} ' \
-            'WHERE ST_IsValid(geom) ' \
-            'AND ST_Intersects(ST_Transform(geom, 4326), ST_SetSRID(ST_GeomFromGeoJSON({bounds}), 4326)) ' \
-            'LIMIT 100 ' \
-            ') AS stuff'\
-        .format(schema = content["schema"],
-                table = content["table"],
-                column = content["geomField"],
-                bounds = "'" + content["bounds"] + "'")
-    connection = engine.connect()
-    result = connection.execute(query)
-
-    returnval = { 'success': True }
-
-    for row in result:
-        for col in row:
-            if (col):
-                returnval["geom"] = json.loads(col)
-            break;
-        break
-
-    return JsonResponse(returnval)
