@@ -2,6 +2,7 @@ from api import actions
 from django.contrib.auth import get_user_model
 from api.tests import APITestCase
 import json
+from .util import load_content_as_json
 
 class IntegrationTestCase(APITestCase):
     content_data = []
@@ -71,13 +72,10 @@ class IntegrationTestCase(APITestCase):
         self.assertEqual(response.status_code, 200, "Status Code is not 200.")
 
     def checkContent(self):
-
-        response = self.__class__.client.get(
-            '/api/v0/schema/{schema}/tables/{table}/rows/'.format(schema=self.test_schema, table=self.test_table))
-
-        body = response.json()
-
-        self.assertEqual(body, self.content_data)
+        self.check_api_get(
+            '/api/v0/schema/{schema}/tables/{table}/rows/'.format(
+                schema=self.test_schema, table=self.test_table),
+            expected_result=self.content_data)
 
     def step_create_table(self):
 

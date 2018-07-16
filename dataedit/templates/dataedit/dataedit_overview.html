@@ -10,7 +10,12 @@
                     <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
                 </td>
                 <td style="padding:5px">
-                    <a href="{{table}}/download" class="glyphicon glyphicon-download-alt"> </a>
+                    <div>
+                        <div >
+                            <a id="fetch_overlay_open" class="glyphicon glyphicon-download-alt"></a>
+                        </div>
+
+                    </div>
                 </td>
                 <td>
                     <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
@@ -23,6 +28,35 @@
     data view interface. <br>
     If this table contains geometrical data, the data backend translates this cells
     to human-readable geoJSON. You can plot these datapoints in a designated map view.
+    </div>
+
+    <div id="fetch_overlay" class="modal" style="z-index:3">
+      <div class="modal-content">
+        <span id="fetch_overlay_close" class="close">&times;</span>
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#csv">CSV</a></li>
+            <li><a data-toggle="tab" href="#python">Python</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="csv" class="tab-pane fade in active">
+              <p> <br>
+                Here you can download this dataset in csv format. Mind that the textbased csv format tends to be costly regarding the file size. Thus, this download might take some time.
+              </p>
+              <a class="btn btn-default" style="margin-left:50%" href="/api/v0/schema/{{schema}}/tables/{{table}}/rows?form=csv" >Download CSV</a>
+          </div>
+          <div id="python" class="tab-pane fade">
+            <div>
+                Use below snippet to fetch data from this dataset.
+              <textarea class="form-control" rows="6" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+from requests import get
+
+result = get('https://{{host}}/api/v0/schema/{{schema}}/tables/{{table}}/rows')
+for row in result.json():
+    # Process the row</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="well">
@@ -56,11 +90,35 @@
 
     <div id="main-visualization-container" style="min-height: 500px">
     </div>
-
 {% endblock %}
 
 {% block script %}
+<script type="text/javascript">
+    // Get the modal
+    var modal = document.getElementById('fetch_overlay');
 
+    // Get the button that opens the modal
+    var btn = document.getElementById("fetch_overlay_open");
+
+    var cls = document.getElementById("fetch_overlay_close");
+
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    cls.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 <script type="text/javascript">
 
     // using jQuery
@@ -80,7 +138,6 @@
         return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
-
     var data_record = {}
     var unchecked_record = {}
 
@@ -143,33 +200,12 @@
                 has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
-        {% if filter %}
-            var query = new recline.Model.Query();
-            {% for f in filter %}
-
-            {% if f.type == "equal" %}
-                query.addFilter(
-                {
-                    type: 'term',
-                    field: "{{ f.column }}",
-                    term: "{{ f.value.value }}"
-                });
-            {% elif f.type == "range" %}
-                query.addFilter(
-                {
-                    type: 'range',
-                    field: "{{ f.column }}",
-                    from: "{{ f.value.start }}",
-                    to: "{{ f.value.end }}"
-                });
-            {% endif %}
-
-            {% endfor %}
-            dataset_main.query(query);
-        {% endif %}
 
         dataset_main.fetch().done(function(dataset) {
 
+            /*plot_view(dataset,
+                true,
+                $('.data-explorer-here'), data_record)*/
 
             var visualization_container = $('#main-visualization-container');
             {% if current_view.type == "table" %}

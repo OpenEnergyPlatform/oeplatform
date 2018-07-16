@@ -24,6 +24,8 @@ DATABASES = {
 	}
 }
 
+PLAYGROUNDS = ('sandbox')
+
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 

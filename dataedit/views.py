@@ -719,7 +719,8 @@ class DataView(View):
             'views': table_views,
             'filter': current_view.filter.all(),
             'current_view': current_view,
-            'is_admin': is_admin
+            'is_admin': is_admin,
+            'host': request.get_host()
         }
 
         context_dict.update(current_view.options)

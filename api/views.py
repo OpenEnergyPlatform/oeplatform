@@ -4,7 +4,7 @@ import time
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -12,9 +12,9 @@ from django.db.models import Q
 
 import login.models as login_models
 import api.parser
-from api import actions
-from api import parser
+from api import actions, parser, sessions
 from api.helpers.http import ModHttpResponse
+from api.encode import GeneratorJSONEncoder, Echo
 from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
@@ -23,8 +23,12 @@ from rest_framework import status
 from django.http import Http404
 
 import sqlalchemy as sqla
+import csv
 import geoalchemy2  # Although this import seems unused is has to be here
 
+import logging
+import itertools
+logger = logging.getLogger('oeplatform')
 
 WHERE_EXPRESSION = re.compile('^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
                               + '|'.join(parser.sql_operators) \
@@ -57,13 +61,10 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get('schema')
-        table = kwargs.get('table')
-        if request.user.is_anonymous or request.user.get_table_permission_level(
-                DBTable.load(schema, table)) < permission:
-            raise PermissionDenied
-        else:
-            return f(caller, request,*args, **kwargs)
+        schema = kwargs.get('schema', actions.DEFAULT_SCHEMA)
+        table = kwargs.get('table') or kwargs.get('sequence')
+        actions.assert_permission(request.user, table, permission, schema=schema)
+        return f(caller, request, *args, **kwargs)
     return wrapper
 
 
@@ -84,6 +85,43 @@ def conjunction(clauses):
         'operator': 'AND',
         'operands': clauses,
     }
+
+class Sequence(APIView):
+
+    @api_exception
+    def put(self, request, schema, sequence):
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
+        if request.user.is_anonymous():
+            raise PermissionDenied
+        if actions.has_sequence(dict(schema=schema, sequence_name=sequence),{}):
+            raise APIError('Sequence already exists')
+        return self.__create_sequence(request, schema, sequence, request.data)
+
+    @api_exception
+    @require_delete_permission
+    def delete(self, request, schema, sequence):
+        if schema not in ['model_draft', 'sandbox', 'test']:
+            raise PermissionDenied
+        if schema.startswith('_'):
+            raise PermissionDenied
+        if request.user.is_anonymous():
+            raise PermissionDenied
+        return self.__delete_sequence(request, schema, sequence, request.data)
+
+    @actions.load_cursor
+    def __delete_sequence(self, request, schema, sequence, jsn):
+        seq = sqla.schema.Sequence(sequence, schema=schema)
+        seq.drop(bind=actions._get_engine())
+        return JsonResponse({}, status=status.HTTP_200_OK)
+
+    @actions.load_cursor
+    def __create_sequence(self, request, schema, sequence, jsn):
+        seq = sqla.schema.Sequence(sequence, schema=schema)
+        seq.create(bind=actions._get_engine())
+        return JsonResponse({}, status=status.HTTP_201_CREATED)
 
 class Table(APIView):
     """
@@ -194,14 +232,24 @@ class Table(APIView):
                                       "c_schema": schema})
             column_definitions.append(column_definition)
 
-        result = actions.table_create(schema, table, column_definitions, constraint_definitions)
+        result = self.__create_table(request, schema, table, column_definitions, constraint_definitions)
 
         perm, _ = login_models.UserPermission.objects.get_or_create(table=DBTable.load(schema, table),
                                                     holder=request.user)
         perm.level = login_models.ADMIN_PERM
         perm.save()
         request.user.save()
-        return JsonResponse(result, status=status.HTTP_201_CREATED)
+        return JsonResponse({}, status=status.HTTP_201_CREATED)
+
+    @actions.load_cursor
+    def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
+        context = {'connection_id': actions.get_or_403(request.data,
+                                                       'connection_id'),
+                   'cursor_id': actions.get_or_403(request.data,
+                                                   'cursor_id')}
+        cursor = sessions.load_cursor_from_context(context)
+        actions.table_create(schema, table, column_definitions,
+                             constraint_definitions, cursor)
 
     @api_exception
     @require_delete_permission
@@ -287,6 +335,12 @@ class Fields(APIView):
     def put(self, request):
         pass
 
+def build_csv(header, result_iterator):
+    yield b','.join(header)
+    yield b'\n'
+    for row in result_iterator:
+        yield b','.join(b'"' + bytes(cell) + b'"'  for cell in row ).replace(b'"',b'""')
+        yield b'\n'
 
 class Rows(APIView):
     @api_exception
@@ -309,6 +363,8 @@ class Rows(APIView):
         offset = request.GET.get('offset')
         if row_id and offset:
             raise actions.APIError('Order by clauses and row id are not allowed in the same query')
+
+        format = request.GET.get('form')
 
         if offset is not None and not offset.isdigit():
             raise actions.APIError("Offset must be integer")
@@ -349,19 +405,31 @@ class Rows(APIView):
                 }
 
         return_obj = self.__get_rows(request, data)
-
         # Extract column names from description
         cols = [col[0] for col in return_obj['description']]
-        dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
 
-        if row_id:
-            if dict_list:
-                dict_list = dict_list[0]
-            else:
-                raise Http404
+        if format == 'csv':
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
+            response = StreamingHttpResponse(
+                (writer.writerow(x)
+                 for x in itertools.chain([cols],return_obj['data'])),
+                content_type="text/csv")
+            response[
+                'Content-Disposition'] = 'attachment; filename="{schema}__{table}.csv"'.format(schema=schema, table=table)
+            return response
 
-        # TODO: Figure out what JsonResponse does different.
-        return JsonResponse(dict_list, safe=False)
+        else:
+            if row_id:
+                dict_list = [dict(zip(cols,row)) for row in return_obj['data']]
+                if dict_list:
+                    dict_list = dict_list[0]
+                else:
+                    raise Http404
+                # TODO: Figure out what JsonResponse does different.
+                return JsonResponse(dict_list, safe=False)
+
+            return stream((dict(zip(cols,row)) for row in return_obj['data']))
 
     @api_exception
     @require_write_permission
@@ -378,7 +446,7 @@ class Rows(APIView):
             else:
                 response = self.__update_rows(request, schema, table, column_data, None)
         actions.apply_changes(schema, table)
-        return JsonResponse(response, status=status_code)
+        return stream(response, status_code=status_code)
 
     @api_exception
     @require_write_permission
@@ -431,7 +499,8 @@ class Rows(APIView):
         }
         if where:
             query['where'] = self.__read_where_clause(where)
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         if row_id:
@@ -464,6 +533,7 @@ class Rows(APIView):
                                       'operator': match[1],
                                       'type': 'operator'} for match in where_splitted]))
         return where_clauses
+
     @actions.load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row_id and row.get('id', int(row_id)) != int(row_id):
@@ -472,7 +542,8 @@ class Rows(APIView):
         if row_id:
             row['id'] = row_id
 
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         query = {
@@ -482,14 +553,15 @@ class Rows(APIView):
         }
 
         if not row_id:
-            query['returning'] = ['id']
+            query['returning'] = [{'type':'column', 'column':'id'}]
         result = actions.data_insert(query, context)
 
         return result
 
     @actions.load_cursor
     def __update_rows(self, request, schema, table, row, row_id=None):
-        context = {'cursor_id': request.data['cursor_id'],
+        context = {'connection_id': request.data['connection_id'],
+                   'cursor_id': request.data['cursor_id'],
                    'user': request.user}
 
         where = request.GET.getlist('where')
@@ -556,7 +628,7 @@ class Rows(APIView):
         if offset and offset.isdigit():
             query = query.offset(int(offset))
 
-        cursor = actions._load_cursor(request.data['cursor_id'])
+        cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
 
 class Session(APIView):
@@ -580,7 +652,6 @@ def date_handler(obj):
 
 # Create your views here.
 
-
 def create_ajax_handler(func, allow_cors=False):
     """
     Implements a mapper from api pages to the corresponding functions in
@@ -600,16 +671,19 @@ def create_ajax_handler(func, allow_cors=False):
         @cors(allow_cors)
         @api_exception
         def post(self, request):
-            response = JsonResponse(self.execute(request))
-            if allow_cors and request.user.is_anonymous:
-                response['Access-Control-Allow-Origin'] = '*'
-            return response
+            result = self.execute(request)
+            return stream(
+                result,
+                allow_cors=allow_cors and request.user.is_anonymous)
+
 
         @actions.load_cursor
         def execute(self, request):
             content = request.data
             context = {'user': request.user,
                        'cursor_id': request.data['cursor_id']}
+            if 'connection_id' in request.data:
+                context['connection_id'] = request.data['connection_id']
             query = content.get('query', ['{}'])
             try:
                 if isinstance(query, list):
@@ -628,19 +702,39 @@ def create_ajax_handler(func, allow_cors=False):
 
     return AJAX_View.as_view()
 
+class FetchView(APIView):
+    @api_exception
+    def post(self, request, fetchtype):
+        if fetchtype == 'all':
+            return self.do_fetch(request, actions.fetchall)
+        elif fetchtype=='many':
+            return self.do_fetch(request, actions.fetchmany)
+        else:
+            raise APIError('Unknown fetchtype: %s'%fetchtype)
 
-def stream(data):
-    """
-    TODO: Implement streaming of large datasets
-    :param data:
-    :return:
-    """
-    size = len(data)
-    chunck = 100
+    def do_fetch(self, request, fetch):
+        context = {'connection_id': actions.get_or_403(request.data,
+                                                 'connection_id'),
+                   'cursor_id': actions.get_or_403(request.data,
+                                                       'cursor_id')}
+        return StreamingHttpResponse((part
+             for row in fetch(context)
+             for part in (self.transform_row(row), '\n')), content_type = 'application/json')
 
-    for i in range(size):
-        yield json.loads(json.dumps(data[i], default=date_handler))
-        time.sleep(1)
+    def transform_row(self, row):
+        return \
+                json.dumps([actions._translate_fetched_cell(cell) for cell in row],
+                           default=date_handler)
+
+
+def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
+    encoder = GeneratorJSONEncoder()
+    response = StreamingHttpResponse(encoder.iterencode(data),
+                                     content_type='application/json',
+                                     status=status_code)
+    if allow_cors:
+        response['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 def get_users(request):
