@@ -1100,7 +1100,8 @@ class SearchView(View):
         search_view.c.table == Table_tags.table_name) and (
                                                      search_view.c.table == Table_tags.table_name))
         if filter_tags:
-            query = query.having(tag_agg.contains(filter_tags))
+            query = query.having(tag_agg.contains(
+                sqla.cast(filter_tags, sqla.ARRAY(sqla.BigInteger))))
 
         query = query.group_by(search_view.c.schema, search_view.c.table)
         results = session.execute(query)
