@@ -56,5 +56,21 @@
     width:30%;
 }
 
+.checkbox-container{
+    display: -webkit-flex; /* Safari */
+    -webkit-flex-wrap: wrap; /* Safari 6.1+ */
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.checkbox-item{
+    width:200px;
+    margin: 10 px;
+    padding: 10 px;
+}
+
+.checkbox-item div{
+    margin: 10 px;
+}
 
 

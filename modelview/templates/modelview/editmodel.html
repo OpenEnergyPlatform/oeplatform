@@ -1,8 +1,19 @@
-{% extends "base/base.html" %}
+{% extends "modelview/base.html" %}
 {% load modelview_extras %}
-{% block content %}
-
+{% block factsheets_content %}
+{% load bootstrap3 %}
 {% load staticfiles %}
+
+<style>
+    .btn-add{
+    background: transparent;
+    color: green;
+}
+    input[type="checkbox"]:checked+label{
+    font-weight: bold;
+    border: 3px solid;
+}
+</style>
 
 <script type="text/javascript">
     $(document).ready(function(){
@@ -29,10 +40,13 @@ confirmOnLeave();
 </script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Model </h1>
+<sup color="light grey">* required field</sup>
+
+
 {% if method == "update"%}
-    <form action="/factsheets/models/{{ name }}/update/" method="post" role="form" enctype="multipart/form-data">
+    <form action="/factsheets/models/{{ name }}/update/" method="post" novalidate="novalidate" role="form" enctype="multipart/form-data">
 {% else %}
-    <form action="/factsheets/models/add/" method="post" role="form" enctype="multipart/form-data">
+    <form action="/factsheets/models/add/" method="post" role="form" novalidate="novalidate" enctype="multipart/form-data">
 {% endif %}
 {% csrf_token %}
 <div style="width:100%">
@@ -45,7 +59,7 @@ confirmOnLeave();
   <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>  
   <li><a data-toggle="tab" href="#Integration">Model Integration</a></li>
   <li><a data-toggle="tab" href="#References">References</a></li>
-  
+  <li><a data-toggle="tab" href="#Tags">Tags</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -64,6 +78,29 @@ confirmOnLeave();
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
             {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}
+            <tr>
+                <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
+                    {% if form.methodical_focus_1.help_text != "" %}
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ form.methodical_focus_1.help_text }}">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                    {% endif %}
+                </th>
+                <td>
+                    <table>
+                        <tr>
+                            <td>{% bootstrap_field form.methodical_focus_1 show_label=False show_help=False set_required=True %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% bootstrap_field form.methodical_focus_2 show_label=False show_help=False set_required=False %}</td>
+                        </tr>
+                        <tr>
+                            <td>{% bootstrap_field form.methodical_focus_3 show_label=False show_help=False set_required=False %}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            {% include 'modelview/editmodel_snippet.html' with field=form.institutions%}
             {% include 'modelview/editmodel_snippet.html' with field=form.institutions%}
             {% include 'modelview/editmodel_snippet.html' with field=form.authors %}
             {% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
@@ -401,6 +438,8 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_System_Dynamics %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_Accounting_Framework %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_Game_Theoretic_Model %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_bottom_up %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.model_class_simulation_top_down %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_other add=form.model_class_other_text%}
                 </table>
             </td>
@@ -442,7 +481,6 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
             {% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
             {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.example_research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
             
             <tr><th> Model Validation </th><td>
@@ -451,8 +489,9 @@ confirmOnLeave();
 		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_measurements %}
 		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_others add=form.validation_others_text%}
 		</table></td></tr>
-            
+            {% include 'modelview/editmodel_snippet.html' with field=form.example_research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.model_specific_properties %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.properties_missed %}
         </table>
     </div>
     <div id="Integration" class="tab-pane fade">
@@ -465,6 +504,7 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.integrated_models %}
         </table>
     </div>
+    {%include 'modelview/tag_selector.html'%}
 </div>
 </form>
 {% endblock %}

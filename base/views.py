@@ -3,13 +3,41 @@ from django.views.generic import View
 import oeplatform.securitysettings as sec
 from django.core.mail import send_mail
 from base.forms import ContactForm
-
+import markdown2
+import os
+import re
 # Create your views here.
+
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 class Welcome(View):
    
     def get(self, request):
-        return render(request,'base/index.html',{}) 
+        os.path.dirname(os.path.realpath(__file__))
+        version_expr = r'^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$'
+        markdowner = markdown2.Markdown()
+        with open(os.path.join(SITE_ROOT,'..', 'VERSION')) as version_file:
+            match = re.match(version_expr, version_file.read())
+            major, minor, patch = match.groups()
+        with open(os.path.join(SITE_ROOT, '..',
+                               'versions/changelogs/%s_%s_%s.md'%(major, minor, patch))) as change_file:
+            changes = markdowner.convert(
+                '\n'.join(line for line in change_file.readlines()))
+        return render(request,
+                      'base/index.html',
+                      {'version': '%s.%s.%s'%(major, minor, patch),
+                       'changes': changes})
+
+def get_logs(request):
+    version_expr = r'^(?P<major>\d+)_(?P<major>\d+)+_(?P<major>\d+)\.md$'
+    for file in os.listdir("../versions/changelogs"):
+        match = re.match(version_expr, file)
+        markdowner = markdown2.Markdown()
+        if match:
+            major, minor, patch = match.groups()
+            with open('versions/changelogs' + file) as f:
+                logs[(major, minor, patch)] = markdowner.convert(
+                    '\n'.join(line for line in f.readlines()))
 
 
 def redir(request, target):
