@@ -720,7 +720,13 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['constraint_type'].lower().replace(' ', '_') == 'primary_key':
+        constraint_type = constraint.get('constraint_type')
+        if constraint_type is None:
+            constraint_type = constraint.get('type')
+        if constraint_type is None:
+            raise APIError('constraint_type required in %s' % str(constraint))
+
+        if constraint_type.lower().replace(' ', '_') == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
