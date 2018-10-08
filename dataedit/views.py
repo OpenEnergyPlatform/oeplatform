@@ -1041,7 +1041,9 @@ def get_all_tags(schema=None, table=None):
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by('name'))
             session.commit()
-            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
+                  'usage_count': r.usage_count,
+                  'usage_tracked_since': r.usage_tracked_since }
                  for r in result]
             return r
 
@@ -1050,8 +1052,11 @@ def get_all_tags(schema=None, table=None):
             schema = 'public'
 
         result = session.execute(
-            session.query(Tag.name.label('name'), Tag.id.label('id'),
+            session.query(Tag.name.label('name'),
+                          Tag.id.label('id'),
                           Tag.color.label('color'),
+                          Tag.usage_count.label('usage_count'),
+                          Tag.usage_tracked_since.label('usage_tracked_since'),
                           Table_tags.table_name).filter(
                 Table_tags.tag == Tag.id).filter(
                 Table_tags.table_name == table).filter(
@@ -1059,8 +1064,29 @@ def get_all_tags(schema=None, table=None):
         session.commit()
     finally:
         session.close()
-    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
+             'usage_count': r.usage_count,
+             'usage_tracked_since': r.usage_tracked_since }
             for r in result]
+
+def increment_usage_count(tag_id):
+    """
+    Increment usage count of a specific tag
+    :param tag_id: ID of the tag which usage count should be incremented
+    :return:
+    """
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    try:
+        result = session.query(Tag).filter_by(id=tag_id).first()
+
+        result.usage_count += 1
+
+        session.commit()
+    finally:
+        session.close()
 
 
 class SearchView(View):
@@ -1092,6 +1118,9 @@ class SearchView(View):
 
         filter_tags = [int(key[len('select_'):]) for key in request.POST if
                        key.startswith('select_')]
+
+        for tag_id in filter_tags:
+            increment_usage_count(tag_id)
 
         tag_agg = array_agg(Table_tags.tag)
         query = session.query(search_view.c.schema.label('schema'),

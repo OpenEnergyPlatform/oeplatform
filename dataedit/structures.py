@@ -1,4 +1,5 @@
 from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Table, Text, text
+from sqlalchemy.sql import func;
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.schema import PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
@@ -15,6 +16,8 @@ class Tag(Base):
     id = Column(BigInteger, primary_key=True, server_default=text("nextval('\"public\".tags_id_seq'::regclass)"))
     name = Column(String(40))
     color = Column(Integer)
+    usage_count = Column(BigInteger, server_default="0")
+    usage_tracked_since = Column(DateTime(), server_default=func.now())
 
 class Table_tags(Base):
     __table_args__ = {'schema': 'public'}
