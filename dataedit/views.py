@@ -1045,7 +1045,7 @@ def get_all_tags(schema=None, table=None):
                   'usage_count': r.usage_count,
                   'usage_tracked_since': r.usage_tracked_since }
                  for r in result]
-            return r
+            return sort_tags_by_popularity(r)
 
         if schema == None:
             # default schema is the public schema
@@ -1064,10 +1064,27 @@ def get_all_tags(schema=None, table=None):
         session.commit()
     finally:
         session.close()
-    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
+    r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
              'usage_count': r.usage_count,
              'usage_tracked_since': r.usage_tracked_since }
             for r in result]
+    return sort_tags_by_popularity(r)
+
+
+def sort_tags_by_popularity(tags):
+
+    tags.sort(reverse=True, key=lambda tag:
+        tag["usage_count"])
+
+    return tags
+
+
+def get_popular_tags(schema=None, table=None, limit=10):
+    tags = get_all_tags(schema, table)
+    sort_tags_by_popularity(tags)
+
+    return tags[:limit]
+
 
 def increment_usage_count(tag_id):
     """
