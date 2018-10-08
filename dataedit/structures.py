@@ -10,6 +10,8 @@ class Tag(Base):
     id = Column(BigInteger, primary_key=True)
     name = Column(String(40))
     color = Column(Integer)
+    usage_count = Column(BigInteger, server_default="0")
+    usage_tracked_since = Column(DateTime(), server_default=func.now())
 
 
 class TableTags(Base):
