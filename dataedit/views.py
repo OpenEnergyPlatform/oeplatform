@@ -3,7 +3,7 @@ import json
 import os
 import re
 import threading
-import time
+import datetime, time
 from functools import reduce
 from io import TextIOWrapper
 from operator import add
@@ -1078,9 +1078,12 @@ def get_all_tags(schema=None, table=None):
 
 def sort_tags_by_popularity(tags):
 
-    tags.sort(reverse=True, key=lambda tag:
-        tag["usage_count"])
+    def key_func(tag):
+        track_time = datetime.datetime.utcnow() - tag["usage_tracked_since"]
+        print(str(tag["usage_count"]) + " / " + str(track_time.total_seconds()) + " = " + str(tag["usage_count"] / track_time.total_seconds()))
+        return tag["usage_count"] / track_time.total_seconds()
 
+    tags.sort(reverse=True, key=key_func)
     return tags
 
 
