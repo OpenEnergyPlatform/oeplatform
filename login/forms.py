@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, SetPasswordForm
+from django.core.exceptions import ValidationError
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from .models import myuser as OepUser, UserPermission
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
@@ -41,6 +42,26 @@ class EditUserForm(UserChangeForm):
 
     def clean_password(self):
         return None
+
+class DetachForm(SetPasswordForm):
+    email = forms.EmailField()
+
+    def is_valid(self):
+        valid = super(DetachForm, self).is_valid()
+        if OepUser.objects.filter(mail_address=self.data['email']).first():
+            raise ValidationError('This mail address is already in use.')
+        return valid
+
+
+    def save(self, commit=True):
+        super(DetachForm, self).save(commit=commit)
+        self.user.mail_address = self.data['email']
+        self.user.is_native = True
+        if commit:
+            self.user.save()
+
+
+
 
 
 class GroupUserForm(forms.ModelForm):

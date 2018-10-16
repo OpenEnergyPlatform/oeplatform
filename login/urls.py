@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^groups/(?P<group_id>[\w\d_\s]+)/members$', views.GroupEdit.as_view(), name='input'),
     url(r'^groups/new/$', views.GroupCreate.as_view(), name='input'),
     url(r'^register$', views.CreateUserView.as_view()),
+    url(r'^detach$', views.DetachView.as_view()),
 ]

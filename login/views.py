@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect,\
 from django.views.generic import View
 from django.views.generic.edit import UpdateView
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import CreateUserForm, EditUserForm
+from .forms import CreateUserForm, EditUserForm, DetachForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
@@ -220,6 +220,25 @@ class CreateUserView(View):
         else:
             return render(request, 'login/oepuser_create_form.html',
                           {'form': form})
+
+
+class DetachView(LoginRequiredMixin, View):
+    def get(self, request):
+        if request.user.is_native:
+            raise PermissionDenied
+        form = DetachForm(request.user)
+        return render(request, 'login/detach.html', {'form': form})
+
+    def post(self, request):
+        if request.user.is_native:
+            raise PermissionDenied
+        form = DetachForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+        else:
+            print(form.errors)
+            return render(request, 'login/detach.html', {'form': form})
 
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = 'login/generic_form.html'
