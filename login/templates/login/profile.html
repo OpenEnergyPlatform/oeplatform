@@ -2,7 +2,11 @@
 {% load bootstrap3 %}
 {% block content %}
 <h1> {{ user.name }} </h1>
-
+<script>
+    function toggler(divId) {
+        $("#" + divId).toggle();
+    }
+</script>
 <table class="table">
     {% if user == request.user %}
         <tr>
@@ -11,7 +15,7 @@
         </tr>
     {% endif %}
     <tr>
-        <th> Affiliation: </th>
+        <th style="width:20%"> Affiliation: </th>
         <td>
             {% if user.affiliation %}
                 {{ user.affiliation }}
@@ -32,9 +36,18 @@
         <tr>
             <th> API-Token: </th>
             <td>
+                <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
+                <div id="token">
                 {% if token %}
                      {{ token }}
                 {% endif %}
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th> Password </th>
+            <td>
+                <a href="{{user.id}}/passwd">Change your password</a>
             </td>
         </tr>
     {% endif %}
