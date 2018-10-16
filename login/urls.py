@@ -3,6 +3,8 @@ from django.conf.urls import url
 from login import views
 
 urlpatterns = [
+    url(r'^profile/(?P<user_id>[\d]+)$',
+            views.ProfileView.as_view(), name='input'),
     url(r'^profile/(?P<user_id>[\d]+)/passwd$',
         views.OEPPasswordChangeView.as_view(), name='input'),
     url(r'^profile/(?P<user_id>[\d]+)/edit$', views.EditUserView.as_view(), name='input'),
