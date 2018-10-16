@@ -27,7 +27,7 @@ class ProfileView(View):
         token = None
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
-        return render(request, "login/profile.html", {'user': user,
+        return render(request, "login/profile.html", {'profile_user': user,
                                                       'token': token})
 
 class GroupManagement(View, LoginRequiredMixin):

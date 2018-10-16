@@ -1,26 +1,26 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
-<h1> {{ user.name }} </h1>
+<h1> {{ profile_user.name }} </h1>
 <script>
     function toggler(divId) {
         $("#" + divId).toggle();
     }
 </script>
 <table class="table">
-    {% if user == request.user %}
+    {% if profile_user == request.user %}
         <tr>
             <th> E-Mail: </th>
-            <td> {{ user.mail_address }} </td>
+            <td> {{ profile_user.mail_address }} </td>
         </tr>
     {% endif %}
     <tr>
         <th style="width:20%"> Affiliation: </th>
         <td>
-            {% if user.affiliation %}
-                {{ user.affiliation }}
-            {% elif user == request.user %}
-                <a href="{{user.id}}/edit">Add your affiliation</a>
+            {% if profile_user.affiliation %}
+                {{ profile_user.affiliation }}
+            {% elif profile_user == request.user %}
+                <a href="{{profile_user.id}}/edit">Add your affiliation</a>
             {% else %}
                 -
             {% endif %}
@@ -28,15 +28,15 @@
     </tr>
     <tr>
         <th> Description: </th>
-        <td> {% if user.desctiption %}
-                {{ user.description }}
-            {% elif user == request.user %}
-                <a href="{{user.id}}/edit">Add a description</a>
+        <td> {% if profile_user.desctiption %}
+                {{ profile_user.description }}
+            {% elif profile_user == request.user %}
+                <a href="{{profile_user.id}}/edit">Add a description</a>
             {% else %}
                 -
             {% endif %} </td>
     </tr>
-    {% if user == request.user %}
+    {% if profile_user == request.user %}
         <tr>
             <th> API-Token: </th>
             <td>
@@ -51,7 +51,7 @@
         <tr>
             <th> Password </th>
             <td>
-                <a href="{{user.id}}/passwd">Change your password</a>
+                <a href="{{profile_user.id}}/passwd">Change your password</a>
             </td>
         </tr>
     {% endif %}
