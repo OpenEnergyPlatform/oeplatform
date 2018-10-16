@@ -19,8 +19,10 @@
         <td>
             {% if user.affiliation %}
                 {{ user.affiliation }}
-            {% else %}
+            {% elif user == request.user %}
                 <a href="{{user.id}}/edit">Add your affiliation</a>
+            {% else %}
+                -
             {% endif %}
         </td>
     </tr>
@@ -28,8 +30,10 @@
         <th> Description: </th>
         <td> {% if user.desctiption %}
                 {{ user.description }}
-            {% else %}
+            {% elif user == request.user %}
                 <a href="{{user.id}}/edit">Add a description</a>
+            {% else %}
+                -
             {% endif %} </td>
     </tr>
     {% if user == request.user %}
