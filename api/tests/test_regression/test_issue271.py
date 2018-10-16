@@ -1,7 +1,7 @@
 import requests
 import json
 from api.tests import APITestCase
-
+from ..util import load_content_as_json
 class Test271(APITestCase):
 
     def setUp(self):
@@ -47,7 +47,7 @@ class Test271(APITestCase):
             content_type='application/json')
 
         self.assertEqual(resp.status_code, 201,
-                         resp.json().get('reason', 'No reason returned'))
+                         load_content_as_json(resp).get('reason', 'No reason returned'))
 
     def test_271(self):
         data = {"query": {"fields": ['name'],
@@ -57,17 +57,13 @@ class Test271(APITestCase):
                                          {'type': 'value', 'value': 'Hans'}]}],
                           "from": {'type': 'table', 'table': self.test_table,
                                    'schema': self.test_schema}}}
+
         resp = self.__class__.client.post('/api/v0/advanced/search',
                                           data=json.dumps(data),
                                           HTTP_AUTHORIZATION='Token %s' % self.__class__.token,
                                           content_type='application/json')
 
-        self.assertEqual(resp.status_code, 200,
-                         resp.json().get('reason', 'No reason returned'))
-
-        json_resp = resp.json()
-
-        self.assertListEqual(json_resp['data'], [['Hans']])
+        self.check_api_post('/api/v0/advanced/search', data=data, expected_result=[['Hans']])
 
     def test_271_column_does_not_exist(self):
         data = {"query": {"fields": ['does_not_exist'],

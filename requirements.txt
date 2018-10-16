@@ -1,18 +1,20 @@
-django >= 1.11
-django-bootstrap3
-matplotlib
-urllib3
-scipy
-django-widget_tweaks
-psycopg2
-sqlalchemy
+django>=1.10
+django-bootstrap3>=8.2
+matplotlib>=2.0
+urllib3>=1.20
+scipy>=0.18.1
+django-widget_tweaks>=1.4.1
+psycopg2>=2.6.0
+sqlalchemy>=1.2.0
 Pillow
-bibtexparser
-django-colorfield
-requests
-geoalchemy2
+bibtexparser>=0.6.2
+django-colorfield>=0.1.12
+requests>=2.13.0
+geoalchemy2>=0.4.0
 -e git+https://github.com/openego/ego.io.git#egg=Package
-djangoajax
-webcolors
-djangorestframework
-django-axes
+djangoajax>=2.3.7
+webcolors>=1.7
+djangorestframework>=3.5.4
+django-axes==2.3.3
+shapely>=1.5.17
+markdown2
