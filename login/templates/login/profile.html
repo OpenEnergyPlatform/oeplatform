@@ -37,7 +37,7 @@
             <th> API-Token: </th>
             <td>
                 <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
-                <div id="token">
+                <div style="display:none" id="token">
                 {% if token %}
                      {{ token }}
                 {% endif %}
