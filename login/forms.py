@@ -44,18 +44,18 @@ class EditUserForm(UserChangeForm):
         return None
 
 class DetachForm(SetPasswordForm):
-    email = forms.EmailField()
+    email = forms.EmailField(label='Mail')
+    email2 = forms.EmailField(label='Mail confirmation')
 
-    def is_valid(self):
-        valid = super(DetachForm, self).is_valid()
-        if OepUser.objects.filter(mail_address=self.data['email']).first():
+    def clean_email(self):
+        if not self.data['email'] == self.data['email2']:
+            raise ValidationError('The two email fields didn\'t match.')
+        if OepUser.objects.filter(mail_address=self.cleaned_data['email']).first():
             raise ValidationError('This mail address is already in use.')
-        return valid
-
 
     def save(self, commit=True):
         super(DetachForm, self).save(commit=commit)
-        self.user.mail_address = self.data['email']
+        self.user.mail_address = self.cleaned_data['email']
         self.user.is_native = True
         if commit:
             self.user.save()

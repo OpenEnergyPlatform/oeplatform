@@ -212,10 +212,6 @@ class CreateUserView(View):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-
-            # Mark that the user does not use any external means of authentication
-            user.is_native = True
-            user.save()
             return redirect('/user/profile/{id}'.format(id=user.id))
         else:
             return render(request, 'login/oepuser_create_form.html',
