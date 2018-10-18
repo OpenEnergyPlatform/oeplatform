@@ -11,7 +11,6 @@ def send_verification_mail(recipient, token):
     )
     html_content = render_to_string('mails/verification_mail.html',
                                     {'url': veri_url})
-    recipient = 'glauer@localhost'
     send_mail(
         'OEP account - E-Mail validation',
         strip_tags(html_content),
