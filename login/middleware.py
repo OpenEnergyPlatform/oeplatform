@@ -7,14 +7,12 @@ ACTIVATE_PATH = '/user/activate'
 class DetachMiddleware(object):
     def process_request(self, request):
         if not request.path == '/login/' \
-                and not request.path.startswith('/api'):
+                and not request.path.startswith('/api')  \
+                and not request.user.is_anonymous:
 
-            if not request.user.is_anonymous \
-                    and not request.user.is_native \
-                    and not request.path == DETACH_PATH:
-                return HttpResponseRedirect(DETACH_PATH)
-
-            if not request.user.is_anonymous \
-                    and not request.user.is_mail_verified \
+            if not request.user.is_native:
+                if not request.path == DETACH_PATH:
+                    return HttpResponseRedirect(DETACH_PATH)
+            elif not request.user.is_mail_verified \
                     and not request.path.startswith(ACTIVATE_PATH):
                 return HttpResponseRedirect(ACTIVATE_PATH)
