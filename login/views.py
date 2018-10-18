@@ -211,7 +211,7 @@ class CreateUserView(View):
     def post(self, request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+            user = form.save()
             return redirect('/user/profile/{id}'.format(id=user.id))
         else:
             return render(request, 'login/oepuser_create_form.html',
