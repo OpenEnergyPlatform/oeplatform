@@ -5,7 +5,7 @@ from login import views
 urlpatterns = [
     url(r'^profile/(?P<user_id>[\d]+)$',
             views.ProfileView.as_view(), name='input'),
-    url(r'^profile/(?P<user_id>[\d]+)/passwd$',
+    url(r'^profile/password_change$',
         views.OEPPasswordChangeView.as_view(), name='input'),
     url(r'^profile/(?P<user_id>[\d]+)/edit$', views.EditUserView.as_view(), name='input'),
     url(r'^groups/$', views.GroupManagement.as_view(), name='input'),

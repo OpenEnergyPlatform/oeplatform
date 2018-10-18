@@ -8,12 +8,7 @@
     }
 </script>
 <table class="table">
-    {% if profile_user == request.user %}
-        <tr>
-            <th> E-Mail: </th>
-            <td> {{ profile_user.mail_address }} </td>
-        </tr>
-    {% endif %}
+
     <tr>
         <th style="width:20%"> Affiliation: </th>
         <td>
@@ -36,7 +31,15 @@
                 -
             {% endif %} </td>
     </tr>
-    {% if profile_user == request.user %}
+</table>
+{% if profile_user == request.user %}
+<h2>Your Security Information</h2>
+<table class="table">
+
+        <tr>
+            <th style="width:20%"> E-Mail: </th>
+            <td> {{ profile_user.mail_address }} </td>
+        </tr>
         <tr>
             <th> API-Token: </th>
             <td>
@@ -51,12 +54,11 @@
         <tr>
             <th> Password </th>
             <td>
-                <a href="{{profile_user.id}}/passwd">Change your password</a>
+                <a href="password_change">Change your password</a>
             </td>
         </tr>
-    {% endif %}
 </table>
-
+{% endif %}
 {% endblock %}
 {% block content-right %}
 <hr>
