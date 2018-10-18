@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import ReadOnlyPasswordHashField, SetPasswordForm
 from django.core.exceptions import ValidationError
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from .models import myuser as OepUser, UserPermission
+from .models import myuser as OepUser, ActivationToken
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
     PasswordChangeForm
 
@@ -50,15 +50,19 @@ class DetachForm(SetPasswordForm):
     def clean_email(self):
         if not self.data['email'] == self.data['email2']:
             raise ValidationError('The two email fields didn\'t match.')
-        if OepUser.objects.filter(mail_address=self.cleaned_data['email']).first():
+        mail_user = OepUser.objects.filter(mail_address=self.data['email']).first()
+        if mail_user and mail_user != self.user:
             raise ValidationError('This mail address is already in use.')
 
     def save(self, commit=True):
         super(DetachForm, self).save(commit=commit)
-        self.user.mail_address = self.cleaned_data['email']
+        self.user.mail_address = self.data['email']
         self.user.is_native = True
+        self.user.is_mail_verified = False
+
         if commit:
             self.user.save()
+            self.user.send_activation_mail()
 
 
 

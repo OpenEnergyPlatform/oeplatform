@@ -238,3 +238,17 @@ class DetachView(LoginRequiredMixin, View):
 
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = 'login/generic_form.html'
+
+
+def activation_note(request):
+    return render(request, 'login/activate.html')
+
+def activate(request, token):
+    token_obj = models.ActivationToken.objects.filter(value=token).first()
+    if not token_obj:
+        raise PermissionDenied
+    else:
+        token_obj.user.is_mail_verified = True
+        token_obj.user.save()
+        token_obj.delete()
+    return redirect('/user/profile/{id}'.format(id=token_obj.user.id))

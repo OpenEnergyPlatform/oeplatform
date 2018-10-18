@@ -14,4 +14,6 @@ urlpatterns = [
     url(r'^groups/new/$', views.GroupCreate.as_view(), name='input'),
     url(r'^register$', views.CreateUserView.as_view()),
     url(r'^detach$', views.DetachView.as_view()),
+    url(r'^activate/(?P<token>[\w\d\-\s]+)$', views.activate),
+    url(r'^activate$', views.activation_note),
 ]
