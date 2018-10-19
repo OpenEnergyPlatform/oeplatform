@@ -115,7 +115,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     is_admin = models.BooleanField(default=False)
 
-    is_native = models.BooleanField(default=False)
+    is_native = models.BooleanField(default=True)
 
     description = models.TextField(blank=True)
 

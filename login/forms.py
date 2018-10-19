@@ -12,6 +12,11 @@ class CreateUserForm(UserCreationForm):
         model = OepUser
         fields = ('name', 'affiliation', 'mail_address', 'password1', 'password2')
 
+    def save(self, commit=True):
+        user = super(CreateUserForm, self).save(commit=commit)
+        user.send_activation_mail()
+        return user
+
     def __init__(self, *args, **kwargs):
         super(CreateUserForm, self).__init__(*args, **kwargs)
         for key in self.Meta.fields:
