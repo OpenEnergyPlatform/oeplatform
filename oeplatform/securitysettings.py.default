@@ -29,11 +29,6 @@ PLAYGROUNDS = ('sandbox')
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
-# This is the path to the folders that contains the repositories that manage
-# data versioning
-datarepowc = '/path/to/working/repos/root'
-datarepo = '/path/to/repo/origin/root'
-
 # This database connection is used for the actual data interfaces (App: dataedit)
 dbuser = ""
 dbpasswd = ""
