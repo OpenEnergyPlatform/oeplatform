@@ -11,8 +11,10 @@ class DetachMiddleware(object):
                 and not request.user.is_anonymous:
 
             if not request.user.is_native:
-                if not request.path == DETACH_PATH:
+                if not (request.path == DETACH_PATH
+                        or request.path.startswith('/logout')):
                     return HttpResponseRedirect(DETACH_PATH)
             elif not request.user.is_mail_verified \
-                    and not request.path.startswith(ACTIVATE_PATH):
+                    and not (request.path.startswith(ACTIVATE_PATH)
+                             or request.path.startswith('/logout')):
                 return HttpResponseRedirect(ACTIVATE_PATH)
