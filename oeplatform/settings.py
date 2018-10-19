@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'modelview.templatetags.modelview_extras',
     'login',
     'base',
+    'base.templatetags.base_tags',
     'widget_tweaks',
     'dataedit',
     'colorfield',
@@ -58,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'login.middleware.DetachMiddleware'
 )
 
 ROOT_URLCONF = 'oeplatform.urls'
