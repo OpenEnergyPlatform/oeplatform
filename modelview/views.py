@@ -57,7 +57,13 @@ def load_tags():
     Session = sessionmaker(bind=engine)
     session = Session()
     tags = list(session.query(Tag))
-    d = {tag.id: {'id': tag.id, 'name': tag.name, 'color': "#" + format(tag.color, '06X')} for tag in tags}
+    d = {tag.id: {
+            'id': tag.id,
+            'name': tag.name,
+            'color': "#" + format(tag.color, '06X'),
+            'usage_count': tag.usage_count,
+            'usage_tracked_since': tag.usage_tracked_since,
+        } for tag in tags}
     session.close()
     return d
 
