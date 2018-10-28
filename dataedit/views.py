@@ -1080,7 +1080,6 @@ def sort_tags_by_popularity(tags):
 
     def key_func(tag):
         track_time = datetime.datetime.utcnow() - tag["usage_tracked_since"]
-        print(str(tag["usage_count"]) + " / " + str(track_time.total_seconds()) + " = " + str(tag["usage_count"] / track_time.total_seconds()))
         return tag["usage_count"] / track_time.total_seconds()
 
     tags.sort(reverse=True, key=key_func)
