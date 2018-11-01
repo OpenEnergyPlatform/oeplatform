@@ -1662,23 +1662,20 @@ def get_comment_table_name(schema, table, create=True):
 
 def get_delete_table_name(schema, table, create=True):
     table_name = '_' + table + '_delete'
-    if create and not has_table({'schema': get_meta_schema_name(schema),
-                                 'table': table_name}):
+    if create:
         create_delete_table(schema, table)
     return table_name
 
 
 def get_edit_table_name(schema, table, create=True):
     table_name = '_' + table + '_edit'
-    if create and not has_table({'schema': get_meta_schema_name(schema),
-                                 'table': table_name}):
+    if create:
         create_edit_table(schema, table)
     return table_name
 
 def get_insert_table_name(schema, table, create=True):
     table_name = '_' + table + '_insert'
-    if create and not has_table({'schema': get_meta_schema_name(schema),
-                                 'table': table_name}):
+    if create:
         create_insert_table(schema, table)
     return table_name
 
@@ -1693,45 +1690,37 @@ def create_meta_schema(schema):
     connection.execute(query)
 
 
-def create_edit_table(schema, table, meta_schema=None):
+def create_meta_table(schema, table, meta_table, meta_schema=None, include_indexes=True):
     if not meta_schema:
         meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = 'CREATE TABLE "{meta_schema}"."{edit_table}" ' \
-            '(LIKE "{schema}"."{table}" INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
-            'INHERITS (_edit_base);'.format(
-        meta_schema=meta_schema,
-        edit_table=get_edit_table_name(schema, table, create=False),
-        schema=schema,
-        table=table)
-    engine.execute(query)
+    if not has_table(dict(schema=meta_schema, table=meta_table)):
+        query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
+                '(LIKE {schema}.{table}'
+        if include_indexes:
+            query += 'INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) '
+        query += ') INHERITS (_edit_base);'
+        query = query.format(
+            meta_schema=meta_schema,
+            edit_table=meta_table,
+            schema=schema,
+            table=table)
+        engine = _get_engine()
+        engine.execute(query)
 
 
 def create_delete_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
-            '(id bigint) ' \
-            'INHERITS (_edit_base);'.format(
-        meta_schema=meta_schema,
-        edit_table=get_delete_table_name(schema, table, create=False),
-        schema=schema,
-        table=table)
-    engine.execute(query)
+    meta_table = get_delete_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema, include_indexes=False)
+
+
+def create_edit_table(schema, table, meta_schema=None):
+    meta_table = get_edit_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema)
+
 
 def create_insert_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = 'CREATE TABLE {meta_schema}.{edit_table} ' \
-            '(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) ' \
-            'INHERITS (_edit_base);'.format(
-        meta_schema=meta_schema,
-        edit_table=get_insert_table_name(schema, table, create=False),
-        schema=schema,
-        table=table)
-    engine.execute(query)
+    meta_table = get_insert_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema)
 
 
 def create_comment_table(schema, table, meta_schema=None):
