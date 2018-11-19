@@ -45,7 +45,7 @@ App: api
 ********
 
 The data stored in the OEDB is also used in several projects. In order to ease
-the access to required datasets the OEP provides a REST-full HTTP-interface in
+the access to required datasets the OEP provides a RESTful HTTP-interface in
 the **api** app:
 
 .. toctree::
