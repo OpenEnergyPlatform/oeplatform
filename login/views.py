@@ -236,9 +236,10 @@ class DetachView(LoginRequiredMixin, View):
             print(form.errors)
             return render(request, 'login/detach.html', {'form': form})
 
+
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = 'login/generic_form.html'
-
+    success_url = '/'
 
 def activation_note(request):
     return render(request, 'login/activate.html')
