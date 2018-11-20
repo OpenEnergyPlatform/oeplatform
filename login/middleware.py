@@ -15,6 +15,6 @@ class DetachMiddleware(object):
                         or request.path.startswith('/logout')):
                     return HttpResponseRedirect(DETACH_PATH)
             elif not request.user.is_mail_verified \
-                    and not (ACTIVATE_PATH in request.path
+                    and not (request.path.startswith(ACTIVATE_PATH)
                              or request.path.startswith('/logout')):
                 return HttpResponseRedirect(ACTIVATE_PATH)
