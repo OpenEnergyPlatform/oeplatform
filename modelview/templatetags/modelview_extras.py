@@ -100,7 +100,7 @@ def get_field(instance, field_name):
     return field
 
 
-@register.assignment_tag
+@register.simple_tag
 def assign_field(instance, field_name):
     return instance.__dict__[field_name]
 
@@ -139,11 +139,11 @@ def get_field_attr(instance, field_name, attr, cut=None):
         val = val.replace(cut,"")
     return val
     
-@register.assignment_tag
+@register.simple_tag
 def set_val(val):
     return val    
     
-@register.assignment_tag
+@register.simple_tag
 def assign_field_attr(instance, field_name, attr):
     return instance._meta.get_field(field_name).__dict__[attr]
 
@@ -164,7 +164,7 @@ def addEvent(value, arg):
     value.field.widget.attrs[arg] = value.name+"_click(this)"
     return value #value.as_widget(attrs={arg: value.name+"_click(this)"})
 
-@register.assignment_tag
+@register.simple_tag
 def assignClass(field, css):
     class_old = field.field.widget.attrs.get('class', None)
     class_new = class_old + ' ' + css if class_old else css
