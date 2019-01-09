@@ -38,6 +38,21 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
+def get_column_obj(table, column):
+    """
+
+    :param talbe: A sqla-table object
+    :param column: A column name
+    :return: Basically `getattr(table.c, column)` but throws an exception of the
+        column does not exists
+    """
+    tc = table.c
+    try:
+        return getattr(tc, column)
+    except AttributeError:
+        raise APIError('Column \'%s\' does not exist.'%column)
+
+
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
         raise Http404
