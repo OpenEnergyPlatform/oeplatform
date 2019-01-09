@@ -1623,6 +1623,7 @@ def open_cursor(request, context):
 def close_cursor(request, context):
     session_context = load_session_from_context(context)
     cursor_id = int(context['cursor_id'])
+    session_context.close_cursor(cursor_id)
     return {'cursor_id': cursor_id}
 
 
