@@ -648,7 +648,7 @@ class Rows(APIView):
         if not columns:
             query = table.select()
         else:
-            columns = [getattr(table.c, c) for c in columns]
+            columns = [actions.get_column_obj(table, c) for c in columns]
             query = sqla.select(columns=columns)
 
         where_clauses = data.get('where')
