@@ -7,18 +7,33 @@ from .actions import _get_engine, get_or_403
 
 from random import randrange
 import sys
+import time
+from oeplatform.securitysettings import TIME_OUT
 
 _SESSION_CONTEXTS = {}
 
 
 class SessionContext:
 
-    def __init__(self, connection=None):
+    def __init__(self, connection_id=None):
         engine = _get_engine()
         self.connection = engine.connect().connection
-        self.connection._id = _add_entry(self, _SESSION_CONTEXTS)
+        if connection_id is None:
+            connection_id = _add_entry(self, _SESSION_CONTEXTS)
+        elif connection_id not in _SESSION_CONTEXTS:
+            _SESSION_CONTEXTS[connection_id] = self
+        else:
+            raise Exception('Tried to open existing')
+        self.connection._id = connection_id
         self.session_context = self
+        current_time = time.time()
+        self.last_activity = current_time
+        print('Open connection:', self.connection._id)
         self.cursors = {}
+        for sid in dict(_SESSION_CONTEXTS):
+            sess = _SESSION_CONTEXTS[sid]
+            if current_time - sess.last_activity > TIME_OUT and not sess.cursors:
+                sess.close()
 
     def get_cursor(self, cursor_id):
         try:
@@ -35,7 +50,6 @@ class SessionContext:
         cursor = self.get_cursor(cursor_id)
         cursor.close()
         del self.cursors[cursor_id]
-        print('Remaining cursors: ', self.cursors)
 
     def close(self):
         self.connection.close()
@@ -51,9 +65,11 @@ def load_cursor_from_context(context):
 def load_session_from_context(context):
     connection_id = get_or_403(context, 'connection_id')
     try:
-        return _SESSION_CONTEXTS[connection_id]
+        sess = _SESSION_CONTEXTS[connection_id]
+        sess.last_activity = time.time()
+        return sess
     except KeyError:
-        raise APIError("Connection (%s) not found" % connection_id)
+        return SessionContext(connection_id=connection_id)
 
 
 def _add_entry(value, dictionary):

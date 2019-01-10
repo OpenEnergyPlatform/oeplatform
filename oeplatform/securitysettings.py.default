@@ -29,6 +29,8 @@ PLAYGROUNDS = ('sandbox')
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
+TIME_OUT = 30
+
 # This is the path to the folders that contains the repositories that manage
 # data versioning
 datarepowc = '/path/to/working/repos/root'
