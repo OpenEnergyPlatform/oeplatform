@@ -29,6 +29,8 @@ PLAYGROUNDS = ('sandbox')
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
+TIME_OUT = 30
+
 # This database connection is used for the actual data interfaces (App: dataedit)
 dbuser = ""
 dbpasswd = ""
