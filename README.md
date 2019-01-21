@@ -58,8 +58,10 @@ Per default, you should be able to connect to this copy by visiting [localhost:8
 
 ## User Management
 
-If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running: 
+If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running in your project directory: `DJANGO_SETTINGS_MODULE="oeplatform.settings" python` and paste the following code.
 
+    import django
+    django.setup()
     from login.models import myuser
     u = myuser.objects.create_user('test','test@mail.com')
     u.set_password('pass')
