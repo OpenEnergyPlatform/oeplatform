@@ -15,7 +15,7 @@ _SESSION_CONTEXTS = {}
 
 class SessionContext:
 
-    def __init__(self, connection_id=None):
+    def __init__(self, connection_id=None, owner=None):
         engine = _get_engine()
         self.connection = engine.connect().connection
         if connection_id is None:
@@ -24,11 +24,12 @@ class SessionContext:
             _SESSION_CONTEXTS[connection_id] = self
         else:
             raise Exception('Tried to open existing')
+
+        self.owner = owner
         self.connection._id = connection_id
         self.session_context = self
         current_time = time.time()
         self.last_activity = current_time
-        print('Open connection:', self.connection._id)
         self.cursors = {}
         for sid in dict(_SESSION_CONTEXTS):
             sess = _SESSION_CONTEXTS[sid]
@@ -64,12 +65,15 @@ def load_cursor_from_context(context):
 
 def load_session_from_context(context):
     connection_id = get_or_403(context, 'connection_id')
+    user = context.get('user')
     try:
         sess = _SESSION_CONTEXTS[connection_id]
         sess.last_activity = time.time()
+        if user and sess.owner != user:
+            raise PermissionError
         return sess
     except KeyError:
-        return SessionContext(connection_id=connection_id)
+        return SessionContext(connection_id=connection_id, owner=user)
 
 
 def _add_entry(value, dictionary):

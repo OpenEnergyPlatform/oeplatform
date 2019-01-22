@@ -57,6 +57,10 @@ def load_cursor(f):
             else:
                 context.update(actions.open_cursor({}, context))
                 args[1].data['cursor_id'] = context['cursor_id']
+            if args[1].is_authenticated:
+                context['user'] = args[1].user
+            else:
+                context['user'] = None
         try:
             result = f(*args, **kwargs)
             if fetch_all:

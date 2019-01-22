@@ -1593,7 +1593,7 @@ def _get_default_schema_name(self, connection):
 
 
 def open_raw_connection(request, context):
-    session_context = SessionContext()
+    session_context = SessionContext(owner=context.get('user'))
     return {'connection_id': session_context.connection._id}
 
 
