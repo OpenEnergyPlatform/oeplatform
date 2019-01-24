@@ -909,7 +909,8 @@ def _get_table(schema, table):
 
 def __internal_select(query, context):
     engine = _get_engine()
-    context2 = open_raw_connection({}, {})
+    context2 = dict(user=context.get('user'))
+    context2.update(open_raw_connection({}, context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
