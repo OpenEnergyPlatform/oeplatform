@@ -47,14 +47,11 @@ def load_cursor(f):
             if hasattr(args[1].data, '_mutable'):
                 args[1].data._mutable = True
             context = {}
-            if args[1].user.is_authenticated:
-                context['user'] = args[1].user
-            else:
-                context['user'] = None
+            context['user'] = args[1].user
             if not artificial_connection:
                 context['connection_id'] = args[1].data['connection_id']
             else:
-                context.update(actions.open_raw_connection({}, {}))
+                context.update(actions.open_raw_connection({}, context))
                 args[1].data['connection_id'] = context['connection_id']
             if 'cursor_id' in args[1].data:
                 context['cursor_id'] = args[1].data['cursor_id']
