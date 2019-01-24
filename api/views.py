@@ -46,21 +46,21 @@ def load_cursor(f):
             # Thus, we have to replace the data dictionary by one we can mutate.
             if hasattr(args[1].data, '_mutable'):
                 args[1].data._mutable = True
-
-            if not artificial_connection:
-                context = {'connection_id': args[1].data['connection_id']}
+            context = {}
+            if args[1].user.is_authenticated:
+                context['user'] = args[1].user
             else:
-                context = actions.open_raw_connection({}, {})
+                context['user'] = None
+            if not artificial_connection:
+                context['connection_id'] = args[1].data['connection_id']
+            else:
+                context.update(actions.open_raw_connection({}, {}))
                 args[1].data['connection_id'] = context['connection_id']
             if 'cursor_id' in args[1].data:
                 context['cursor_id'] = args[1].data['cursor_id']
             else:
                 context.update(actions.open_cursor({}, context))
                 args[1].data['cursor_id'] = context['cursor_id']
-            if args[1].is_authenticated:
-                context['user'] = args[1].user
-            else:
-                context['user'] = None
         try:
             result = f(*args, **kwargs)
             if fetch_all:
@@ -734,7 +734,9 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
         def _internal_execute(self, *args):
             request = args[1]
             content = request.data
-            context = {'user': request.user}
+            context = {}
+            if not request.user.is_anonymous:
+                context = {'user': request.user}
             if 'cursor_id' in request.data:
                 context['cursor_id'] = request.data['cursor_id']
             if 'connection_id' in request.data:
