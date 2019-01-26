@@ -68,7 +68,8 @@ class SessionContext:
 
     def close(self):
         self.connection.close()
-        del _SESSION_CONTEXTS[self.connection._id]
+        if self.connection._id in _SESSION_CONTEXTS:
+            del _SESSION_CONTEXTS[self.connection._id]
 
 
 def load_cursor_from_context(context):
