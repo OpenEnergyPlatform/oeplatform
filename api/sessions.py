@@ -49,7 +49,6 @@ class SessionContext:
         self.session_context = self
         self.cursors = {}
 
-
     def get_cursor(self, cursor_id):
         try:
             return self.cursors[cursor_id]
