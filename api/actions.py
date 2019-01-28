@@ -930,7 +930,8 @@ def _get_table(schema, table):
 
 def __internal_select(query, context):
     engine = _get_engine()
-    context2 = open_raw_connection({}, {})
+    context2 = dict(user=context.get('user'))
+    context2.update(open_raw_connection({}, context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
@@ -1614,7 +1615,7 @@ def _get_default_schema_name(self, connection):
 
 
 def open_raw_connection(request, context):
-    session_context = SessionContext()
+    session_context = SessionContext(owner=context.get('user'))
     return {'connection_id': session_context.connection._id}
 
 

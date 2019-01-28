@@ -30,6 +30,8 @@ PLAYGROUNDS = ('sandbox')
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
+USER_CONNECTION_LIMIT = 4
+ANON_CONNECTION_LIMIT = 40
 
 # This database connection is used for the actual data interfaces (App: dataedit)
 dbuser = ""
