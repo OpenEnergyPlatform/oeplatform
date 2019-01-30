@@ -74,6 +74,20 @@ class SessionContext:
             del _SESSION_CONTEXTS[self.connection._id]
 
 
+def close_all_for_user(owner):
+    if owner.is_anonymous:
+        raise PermissionError
+    for sid in dict(_SESSION_CONTEXTS):
+        try:
+            sess = _SESSION_CONTEXTS[sid]
+            if sess.owner == owner:
+                for cursor in sess:
+                    cursor.close()
+                sess.close()
+        except KeyError:
+            pass
+
+
 def load_cursor_from_context(context):
     session = load_session_from_context(context)
     cursor_id = get_or_403(context, 'cursor_id')

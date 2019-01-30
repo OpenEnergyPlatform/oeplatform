@@ -796,6 +796,12 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
     return response
 
 
+class CloseAll(APIView):
+    def get(self, request):
+        sessions.close_all_for_user(request.user)
+        return HttpResponse('All connections closed')
+
+
 def get_users(request):
     string = request.GET['name']
     users = login_models.myuser.objects.filter(Q(name__trigram_similar=string) | Q(name__istartswith=string))

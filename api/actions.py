@@ -23,7 +23,7 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
-from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
+from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext, close_all_for_user
 from dataedit.models import Table as DBTable
 import login.models as login_models
 from oeplatform.securitysettings import PLAYGROUNDS
@@ -1612,6 +1612,11 @@ def rollback_raw_connection(request, context):
 
 def close_raw_connection(request, context):
     load_session_from_context(context).close()
+    return __response_success()
+
+
+def close_all_connections(request, context):
+    close_all_for_user(request, context)
     return __response_success()
 
 
