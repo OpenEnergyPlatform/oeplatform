@@ -21,12 +21,15 @@ class SessionContext:
         current_time = time.time()
         self.last_activity = current_time
         for sid in dict(_SESSION_CONTEXTS):
-            sess = _SESSION_CONTEXTS[sid]
-            if current_time - sess.last_activity > TIME_OUT and not sess.cursors:
-                sess.close()
-            else:
-                if sess.owner == owner:
-                    user_connections += 1
+            try:
+                sess = _SESSION_CONTEXTS[sid]
+                if current_time - sess.last_activity > TIME_OUT and not sess.cursors:
+                    sess.close()
+                else:
+                    if sess.owner == owner:
+                        user_connections += 1
+            except KeyError:
+                pass
 
         if owner.is_anonymous:
             if user_connections >= ANON_CONNECTION_LIMIT:
