@@ -1605,8 +1605,7 @@ def commit_raw_connection(request, context):
 
 
 def rollback_raw_connection(request, context):
-    connection = load_session_from_context(context).connection
-    connection.rollback()
+    load_session_from_context(context).rollback()
     return __response_success()
 
 

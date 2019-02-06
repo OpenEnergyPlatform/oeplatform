@@ -19,6 +19,7 @@ class SessionContext:
     def __init__(self, connection_id=None, owner=None):
         user_connections = 0
         current_time = time.time()
+
         self.last_activity = current_time
         for sid in dict(_SESSION_CONTEXTS):
             try:
@@ -72,6 +73,12 @@ class SessionContext:
         self.connection.close()
         if self.connection._id in _SESSION_CONTEXTS:
             del _SESSION_CONTEXTS[self.connection._id]
+
+
+    def rollback(self):
+        self.connection.rollback()
+        if not self.cursors:
+            self.close()
 
 
 def close_all_for_user(owner):
