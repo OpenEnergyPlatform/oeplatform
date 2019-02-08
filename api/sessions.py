@@ -38,7 +38,11 @@ class SessionContext:
                                '. Please login to get your own connection pool.')
         else:
             if user_connections >= USER_CONNECTION_LIMIT:
-                raise APIError('This user exceeded the connection limit.')
+                raise APIError('This user exceeded the connection limit.'
+                               'If you are using the oedialect, this may be '
+                               'caused by a known bug that has been fixed in'
+                               'v0.0.5.dev0. You can close al your connections'
+                               'manually at https://openenergy-platform.org/api/v0/advanced/connection/close_all')
 
         engine = _get_engine()
         self.connection = engine.connect().connection
