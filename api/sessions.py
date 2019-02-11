@@ -92,8 +92,9 @@ def close_all_for_user(owner):
         try:
             sess = _SESSION_CONTEXTS[sid]
             if sess.owner == owner:
-                for cursor in sess:
-                    cursor.close()
+                for cursor_id in dict(sess.cursors):
+                    if cursor_id in sess.cursors:
+                        sess.cursors[cursor_id].close()
                 sess.close()
         except KeyError:
             pass
