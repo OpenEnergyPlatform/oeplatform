@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, StreamingHttpResponse
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.db.models import Q
@@ -794,6 +795,12 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
     if allow_cors:
         response['Access-Control-Allow-Origin'] = '*'
     return response
+
+
+class CloseAll(LoginRequiredMixin, APIView):
+    def get(self, request):
+        sessions.close_all_for_user(request.user)
+        return HttpResponse('All connections closed')
 
 
 def get_users(request):

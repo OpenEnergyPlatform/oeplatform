@@ -19,14 +19,18 @@ class SessionContext:
     def __init__(self, connection_id=None, owner=None):
         user_connections = 0
         current_time = time.time()
+
         self.last_activity = current_time
         for sid in dict(_SESSION_CONTEXTS):
-            sess = _SESSION_CONTEXTS[sid]
-            if current_time - sess.last_activity > TIME_OUT and not sess.cursors:
-                sess.close()
-            else:
-                if sess.owner == owner:
-                    user_connections += 1
+            try:
+                sess = _SESSION_CONTEXTS[sid]
+                if current_time - sess.last_activity > TIME_OUT and not sess.cursors:
+                    sess.close()
+                else:
+                    if sess.owner == owner:
+                        user_connections += 1
+            except KeyError:
+                pass
 
         if owner.is_anonymous:
             if user_connections >= ANON_CONNECTION_LIMIT:
@@ -34,7 +38,11 @@ class SessionContext:
                                '. Please login to get your own connection pool.')
         else:
             if user_connections >= USER_CONNECTION_LIMIT:
-                raise APIError('This user exceeded the connection limit.')
+                raise APIError('This user exceeded the connection limit.'
+                               'If you are using the oedialect, this may be '
+                               'caused by a known bug that has been fixed in'
+                               'v0.0.5.dev0. You can close al your connections'
+                               'manually at https://openenergy-platform.org/api/v0/advanced/connection/close_all')
 
         engine = _get_engine()
         self.connection = engine.connect().connection
@@ -69,6 +77,26 @@ class SessionContext:
         self.connection.close()
         if self.connection._id in _SESSION_CONTEXTS:
             del _SESSION_CONTEXTS[self.connection._id]
+
+
+    def rollback(self):
+        self.connection.rollback()
+        if not self.cursors:
+            self.close()
+
+
+def close_all_for_user(owner):
+    if owner.is_anonymous:
+        raise PermissionError
+    for sid in dict(_SESSION_CONTEXTS):
+        try:
+            sess = _SESSION_CONTEXTS[sid]
+            if sess.owner == owner:
+                for cursor in sess:
+                    cursor.close()
+                sess.close()
+        except KeyError:
+            pass
 
 
 def load_cursor_from_context(context):

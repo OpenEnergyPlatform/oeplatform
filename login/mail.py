@@ -10,7 +10,7 @@ def send_verification_mail(recipient, token):
         token=token
     )
     html_content = render_to_string('mails/verification_mail.html',
-                                    {'url': veri_url})
+                                    {'url': veri_url, 'base_url': URL})
     send_mail(
         'OEP account - E-Mail validation',
         strip_tags(html_content),
