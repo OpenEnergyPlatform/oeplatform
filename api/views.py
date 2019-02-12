@@ -776,7 +776,8 @@ class FetchView(APIView):
         context = {'connection_id': actions.get_or_403(request.data,
                                                  'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
-                                                       'cursor_id')}
+                                                       'cursor_id'),
+                   'user': request.user}
         return StreamingHttpResponse((part
              for row in fetch(context)
              for part in (self.transform_row(row), '\n')), content_type = 'application/json')
