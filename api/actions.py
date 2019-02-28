@@ -1374,6 +1374,8 @@ def get_table_oid(request, context=None):
                                               get_or_403(request, 'table'),
                                               schema=request.get('schema', DEFAULT_SCHEMA),
                                               **request)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     finally:
         conn.close()
     return result
@@ -1441,8 +1443,11 @@ def get_columns(request, context=None):
     if request.get('info_cache'):
         info_cache = {('get_columns',tuple(k.split('+')),tuple()):v for k,v in request.get('info_cache', {}).items()}
 
-    table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
-                                   info_cache=info_cache)
+    try:
+        table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
+                                                 info_cache=info_cache)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
                   pg_catalog.format_type(a.atttypid, a.atttypmod),
