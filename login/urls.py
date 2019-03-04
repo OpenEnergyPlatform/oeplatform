@@ -1,8 +1,9 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 from login import views
 
 urlpatterns = [
+    url('^', include('django.contrib.auth.urls')),
     url(r'^profile/(?P<user_id>[\d]+)$',
             views.ProfileView.as_view(), name='input'),
     url(r'^profile/password_change$',
@@ -14,7 +15,6 @@ urlpatterns = [
     url(r'^groups/new/$', views.GroupCreate.as_view(), name='input'),
     url(r'^register$', views.CreateUserView.as_view()),
     url(r'^detach$', views.DetachView.as_view()),
-    url(r'^reset_password$', views.OEPPasswordResetView.as_view()),
     url(r'^activate/(?P<token>[\w\d\-\s]+)$', views.activate),
     url(r'^activate$', views.activation_note),
 ]

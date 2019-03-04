@@ -241,10 +241,6 @@ class OEPPasswordChangeView(PasswordChangeView):
     template_name = 'login/generic_form.html'
     success_url = '/'
 
-class OEPPasswordResetView(PasswordResetView):
-    template_name = 'login/generic_form.html'
-    success_url = '/'
-
 def activation_note(request):
     return render(request, 'login/activate.html')
 

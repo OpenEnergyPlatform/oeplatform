@@ -69,11 +69,11 @@
 
             <div class="btn profile-bar">
                 <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
-                <a class="btn-logout" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+                <a class="btn-logout" href="/user/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
 
           {% else %}
-             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+             <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
         </nav>
         
