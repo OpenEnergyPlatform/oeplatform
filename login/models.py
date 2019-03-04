@@ -105,8 +105,8 @@ class TablePermission(models.Model):
 class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50, blank=True)
-    mail_address = models.EmailField(verbose_name='email address',
-                                     max_length=255, unique=True, )
+    email = models.EmailField(verbose_name='email address',
+                              max_length=255, unique=True, )
 
     did_agree = models.BooleanField(default=False)
 
@@ -163,7 +163,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     def send_activation_mail(self):
         token = self._generate_activation_code()
-        send_verification_mail(self.mail_address, token.value)
+        send_verification_mail(self.email, token.value)
 
     def _generate_activation_code(self):
         token = ActivationToken.objects.filter(user=self).first()
