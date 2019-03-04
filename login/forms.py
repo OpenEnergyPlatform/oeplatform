@@ -70,7 +70,13 @@ class DetachForm(SetPasswordForm):
             self.user.send_activation_mail()
 
 
+class ChangeEmailForm(forms.Form):
+    email = forms.EmailField()
 
+    def save(self, user):
+        user.email = self.cleaned_data['email']
+        user.save()
+        user.send_activation_mail(reset_token=True)
 
 
 class GroupUserForm(forms.ModelForm):

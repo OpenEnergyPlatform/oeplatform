@@ -161,16 +161,19 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         return permission_level
 
-    def send_activation_mail(self):
-        token = self._generate_activation_code()
+    def send_activation_mail(self, reset_token=False):
+        token = self._generate_activation_code(reset_token=reset_token)
         send_verification_mail(self.email, token.value)
 
-    def _generate_activation_code(self):
-        token = ActivationToken.objects.filter(user=self).first()
+    def _generate_activation_code(self, reset_token=False):
+        token = None
+        if reset_token:
+            ActivationToken.objects.filter(user=self).delete()
+        else:
+            token = ActivationToken.objects.filter(user=self).first()
         if not token:
             token = ActivationToken(user=self)
             candidate = PasswordResetTokenGenerator().make_token(self)
-            print(candidate)
             # Make sure the token is unique
             while ActivationToken.objects.filter(value=candidate).first():
                 candidate = PasswordResetTokenGenerator().make_token(self)

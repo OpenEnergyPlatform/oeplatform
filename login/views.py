@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, render, redirect,\
     render_to_response
-from django.views.generic import View
+from django.views.generic import View, FormView
 from django.views.generic.edit import UpdateView
+from django import forms
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import CreateUserForm, EditUserForm, DetachForm
+from .forms import CreateUserForm, EditUserForm, DetachForm, ChangeEmailForm
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
@@ -241,13 +242,27 @@ class OEPPasswordChangeView(PasswordChangeView):
     template_name = 'login/generic_form.html'
     success_url = '/'
 
-def activation_note(request):
-    return render(request, 'login/activate.html')
+
+class ActivationNoteView(FormView):
+    template_name = 'login/activate.html'
+    form_class = ChangeEmailForm
+    success_url = 'user/activate'
+
+    def form_valid(self, form):
+        if self.request.user.is_anonymous or self.request.user.is_mail_verified:
+            raise PermissionError
+        form.save(self.request.user)
+        return super(ActivationNoteView, self).form_valid(form)
+
 
 def activate(request, token):
     token_obj = models.ActivationToken.objects.filter(value=token).first()
     if not token_obj:
-        raise PermissionDenied
+        form = ChangeEmailForm()
+        form._errors = {
+            forms.forms.NON_FIELD_ERRORS:
+                form.error_class(['Your token was invalid or expired'])}
+        return render(request, 'login/activate.html', {'form': form})
     else:
         token_obj.user.is_mail_verified = True
         token_obj.user.save()

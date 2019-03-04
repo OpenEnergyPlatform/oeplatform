@@ -16,5 +16,5 @@ urlpatterns = [
     url(r'^register$', views.CreateUserView.as_view()),
     url(r'^detach$', views.DetachView.as_view()),
     url(r'^activate/(?P<token>[\w\d\-\s]+)$', views.activate),
-    url(r'^activate$', views.activation_note),
+    url(r'^activate$', views.ActivationNoteView.as_view()),
 ]
