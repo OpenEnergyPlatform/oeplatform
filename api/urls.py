@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/indexes/(?P<index>[\w\d_\s]+)$', views.Index.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$', views.Rows.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
+    url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/metadata/$', views.Metadata.as_view()),
 
     url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True, requires_cursor=True)),
     url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert, requires_cursor=True)),

@@ -32,7 +32,7 @@ from dataedit.structures import Table_tags, Tag
 from login import models as login_models
 from .models import TableRevision
 
-from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+from dataedit.metadata import load_comment_from_db, read_metadata_from_post, write_comment_to_db
 
 from operator import add
 session = None
@@ -658,26 +658,8 @@ class MetaView(LoginRequiredMixin, View):
         :return: Redirects to the view of the specified table
         """
         columns = actions.analyze_columns(schema, table)
-
         comment = read_metadata_from_post(request.POST, schema, table)
-
-        engine = actions._get_engine()
-        conn = engine.connect()
-        trans = conn.begin()
-        try:
-            conn.execute(
-                sqla.text(
-                    "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                        schema=schema,
-                        table=table)),
-                comment=json.dumps(comment)
-            )
-        except Exception as e:
-            raise e
-        else:
-            trans.commit()
-        finally:
-            conn.close()
+        write_comment_to_db(schema=schema, table=table, comment=comment)
         return redirect('/dataedit/view/{schema}/{table}'.format(schema=schema,
                                                                  table=table))
 

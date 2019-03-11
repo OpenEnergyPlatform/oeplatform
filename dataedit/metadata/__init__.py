@@ -1,5 +1,6 @@
+import json
 from api import actions
-
+import sqlalchemy as sqla
 from dataedit.metadata import v1_3 as __LATEST
 from .error import MetadataException
 
@@ -54,6 +55,32 @@ def load_comment_from_db(schema, table):
         'fields']
 
     return comment_on_table
+
+
+def write_comment_to_db(schema, table, comment):
+    """Write metadata (json comment) back into the database."""
+    engine = actions._get_engine()
+    conn = engine.connect()
+    trans = conn.begin()
+    print('WRITING')
+    print(comment)
+    try:
+        conn.execute(
+            sqla.text(
+                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema,
+                    table=table)),
+            comment=json.dumps(comment)
+        )
+    except Exception as e:
+        print('ERROR')
+        raise e
+    else:
+        print('OK')
+        trans.commit()
+    finally:
+        conn.close()
+
 
 def read_metadata_from_post(c, schema, table):
     d = {

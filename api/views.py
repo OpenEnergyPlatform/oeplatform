@@ -19,7 +19,7 @@ from api.encode import GeneratorJSONEncoder, Echo
 from api.error import APIError
 from rest_framework.views import APIView
 from dataedit.models import Table as DBTable
-
+from dataedit.metadata import load_comment_from_db, write_comment_to_db
 from rest_framework import status
 from django.http import Http404
 
@@ -815,3 +815,18 @@ def get_groups(request):
     return JsonResponse([user.name for user in users], safe=False)
 
 
+class Metadata(APIView):
+    @api_exception
+    def get(self, request, schema, table):
+        data = load_comment_from_db(schema=schema, table=table)
+        return JsonResponse(data)
+
+    @api_exception
+    @require_write_permission
+    def post(self, request, schema, table):
+        data = request.POST
+        data = data['data']
+        data = json.loads(data)
+        # FIXME: validate data adhers to metadata standard
+        write_comment_to_db(schema=schema, table=table, comment=data)
+        return JsonResponse({}, status=201)
