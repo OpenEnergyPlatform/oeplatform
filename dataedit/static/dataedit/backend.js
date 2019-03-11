@@ -354,7 +354,7 @@ function construct_field(dataset){
 
             request.fail(function( jqXHR, textStatus ) {
                 // fail occurs if table has no data
-                $('#loading-indicator').replaceWidth('<div>No Data</div>');
+                $('#loading-indicator').replaceWith('<div>No Data</div>');
                 //alert( "Request failed: " + textStatus );
             });
 
