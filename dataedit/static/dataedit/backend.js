@@ -353,7 +353,9 @@ function construct_field(dataset){
             });
 
             request.fail(function( jqXHR, textStatus ) {
-                alert( "Request failed: " + textStatus );
+                // fail occurs if table has no data
+                $('#loading-indicator').replaceWidth('<div>No Data</div>');
+                //alert( "Request failed: " + textStatus );
             });
 
         });
