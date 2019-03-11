@@ -68,3 +68,6 @@ target/
 # Logos for legal reasons
 base/static/logos/
 
+
+# Pycharm
+.idea/

@@ -4,15 +4,15 @@ matplotlib>=2.0
 urllib3>=1.20
 scipy>=0.18.1
 django-widget_tweaks>=1.4.1
-psycopg2>=2.6.0
-sqlalchemy>=1.2.0
+psycopg2-binary>=2.6.0
+sqlalchemy<=1.2.0,>=1.0.11  # because egoio
 Pillow
 bibtexparser>=0.6.2
 django-colorfield>=0.1.12
 requests>=2.13.0
-geoalchemy2>=0.4.0
+geoalchemy2<=0.4.1,>=0.3.0  # because egoio
 -e git+https://github.com/openego/ego.io.git#egg=Package
-djangoajax>=2.3.7
+djangoajax>=2.3.7,<3.0
 webcolors>=1.7
 djangorestframework>=3.5.4
 django-axes==2.3.3
