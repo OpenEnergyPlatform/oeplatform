@@ -87,6 +87,7 @@ for row in result.json():
         }
     }
 </script>
+
 <script type="text/javascript">
 
     // using jQuery
@@ -109,6 +110,29 @@ for row in result.json():
     var data_record = {}
     var unchecked_record = {}
 
+
+
+    function addTooltips() {
+
+        var colname2tooltip = {}
+        // get description from metadata
+        {% for res in comment_on_table.resources %}
+            {% for field in res.fields %}
+                colname2tooltip["{{ field.name }}"] = "{{ field.description }}";
+            {% endfor %}
+        {% endfor %}
+
+        // don't use $, it's different version
+        jQuery(".slick-header-column").each(function(i, e){
+            var colDiv = jQuery(e);
+            var colName = colDiv.text();
+            var tooltipHTML = colname2tooltip[colName];
+            // TODO: html does not work
+            colDiv.attr('data-html', "true").attr('data-toggle', 'tooltip').attr('title', tooltipHTML);
+        });
+    };
+
+
     function build_views(){
         var dataset_main = new recline.Model.Dataset({
                 table: '{{table}}',
@@ -119,10 +143,11 @@ for row in result.json():
 
 
         dataset_main.fetch().done(function(dataset) {
-
             plot_view(dataset,
                 true,
-                $('.data-explorer-here'), data_record)
+                $('.data-explorer-here'), data_record);
+            // now the table has been generated: add tooltips now
+            addTooltips();
         });
 
         if(unchecked){
