@@ -39,20 +39,20 @@ session = None
 
 """ This is the initial view that initialises the database connection """
 schema_whitelist = [
+    "boundaries",
+    "climate",
     "demand",
     "economy",
     "emission",
     "environment",
     "grid",
-    "boundaries",
-    "society",
-    "supply",
-    "scenario",
-    "climate",
     "model_draft",
     "openstreetmap",
+    "policy",
     "reference",
-    "workshop"
+    "scenario",
+    "society",
+    "supply"
 ]
 
 
