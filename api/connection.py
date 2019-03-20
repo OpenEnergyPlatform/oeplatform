@@ -11,7 +11,7 @@ def get_connection_string():
         sec.dbname)
 
 __ENGINE = sqla.create_engine(get_connection_string(),
-                              pool_size=0, pool_recycle=600, max_overflow=200))
+                              pool_size=0, pool_recycle=600, max_overflow=200)
 
 def _get_engine():
     return __ENGINE
