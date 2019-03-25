@@ -25,7 +25,6 @@ except:
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -100,7 +99,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 AUTH_USER_MODEL = 'login.myuser'
-LOGIN_URL = '/login'
+LOGIN_URL = '/user/login'
 LOGIN_REDIRECT_URL = '/'
 
 REST_FRAMEWORK = {
