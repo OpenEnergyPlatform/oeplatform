@@ -635,7 +635,7 @@ def get_column_definition_query(d):
     if 'autoincrement' in d:
         kwargs['autoincrement'] = d['autoincrement']
 
-    if d.get('is_nullable', False):
+    if not d.get('is_nullable', True):
         kwargs['nullable'] = d['is_nullable'] # True
 
     if d.get('primary_key', False):
