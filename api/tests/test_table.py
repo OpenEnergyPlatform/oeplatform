@@ -11,14 +11,16 @@ _TYPES = ['bigint', 'bit', 'boolean', 'char', 'date', 'decimal', 'float',
 _TYPEMAP = {
     'char': 'character',
     'decimal': 'numeric',
-    'float': 'double precision',
+    'float': 'numeric',
     'int': 'integer',
     'nchar': 'character',
     'timestamp': 'timestamp without time zone',
     'time': 'time without time zone',
     'varchar': 'character varying',
     'character varying': 'character varying',
-    'bigserial': 'bigint'
+    'bigserial': 'bigint',
+    'bit': 'bytea',
+    'double precision': 'numeric'
 }
 
 
