@@ -18,8 +18,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'django',
-	'USER': 'databaseuser',
-	'PASSWORD': 'databasepassword',
+	'USER': os.environ.get("OEP_DB_USER"),
+	'PASSWORD': os.environ.get("OEP_DB_PASSWORD"),
 	'HOST': 'localhost'                      
 	}
 }
@@ -33,17 +33,12 @@ TIME_OUT = 30
 USER_CONNECTION_LIMIT = 4
 ANON_CONNECTION_LIMIT = 40
 
-# This is the path to the folders that contains the repositories that manage
-# data versioning
-datarepowc = '/path/to/working/repos/root'
-datarepo = '/path/to/repo/origin/root'
-
 # This database connection is used for the actual data interfaces (App: dataedit)
-dbuser = ""
-dbpasswd = ""
-dbport = 5432
-dbhost = ""
-dbname = ""
+dbuser = os.environ.get("OEDB_USER")
+dbpasswd = os.environ.get("OEDB_PASSWORD")
+dbport = os.environ.get("OEDB_PORT", 5432)
+dbhost = os.environ.get("OEDB_HOST", "localhost")
+dbname = os.environ.get("OEDB_NAME", "oedb")
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -54,10 +49,8 @@ CONTACT_ADDRESSES = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = 'oep@localhost'
+EMAIL_PORT = 25
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')

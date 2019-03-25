@@ -38,6 +38,21 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
+def get_column_obj(table, column):
+    """
+
+    :param talbe: A sqla-table object
+    :param column: A column name
+    :return: Basically `getattr(table.c, column)` but throws an exception of the
+        column does not exists
+    """
+    tc = table.c
+    try:
+        return getattr(tc, column)
+    except AttributeError:
+        raise APIError('Column \'%s\' does not exist.'%column)
+
+
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
         raise Http404
@@ -720,7 +735,13 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['constraint_type'].lower().replace(' ', '_') == 'primary_key':
+        constraint_type = constraint.get('constraint_type') or \
+                          constraint.get('type')
+        if constraint_type is None:
+            raise APIError('constraint_type required in %s' % str(constraint))
+
+        constraint_type = constraint_type.lower().replace(' ', '_')
+        if constraint_type == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
@@ -731,7 +752,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
                 ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
                                                               **kwargs))
-        elif constraint['constraint_type'] == 'unique':
+        elif constraint_type == 'unique':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
@@ -1353,6 +1374,8 @@ def get_table_oid(request, context=None):
                                               get_or_403(request, 'table'),
                                               schema=request.get('schema', DEFAULT_SCHEMA),
                                               **request)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     finally:
         conn.close()
     return result
@@ -1420,8 +1443,11 @@ def get_columns(request, context=None):
     if request.get('info_cache'):
         info_cache = {('get_columns',tuple(k.split('+')),tuple()):v for k,v in request.get('info_cache', {}).items()}
 
-    table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
-                                   info_cache=info_cache)
+    try:
+        table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
+                                                 info_cache=info_cache)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
                   pg_catalog.format_type(a.atttypid, a.atttypmod),
