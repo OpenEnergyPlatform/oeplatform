@@ -23,7 +23,7 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
-from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
+from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext, close_all_for_user
 from dataedit.models import Table as DBTable
 import login.models as login_models
 from oeplatform.securitysettings import PLAYGROUNDS
@@ -37,6 +37,21 @@ logger = logging.getLogger('oeplatform')
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
+
+def get_column_obj(table, column):
+    """
+
+    :param talbe: A sqla-table object
+    :param column: A column name
+    :return: Basically `getattr(table.c, column)` but throws an exception of the
+        column does not exists
+    """
+    tc = table.c
+    try:
+        return getattr(tc, column)
+    except AttributeError:
+        raise APIError('Column \'%s\' does not exist.'%column)
+
 
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
@@ -915,7 +930,8 @@ def _get_table(schema, table):
 
 def __internal_select(query, context):
     engine = _get_engine()
-    context2 = open_raw_connection({}, {})
+    context2 = dict(user=context.get('user'))
+    context2.update(open_raw_connection({}, context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
@@ -1358,6 +1374,8 @@ def get_table_oid(request, context=None):
                                               get_or_403(request, 'table'),
                                               schema=request.get('schema', DEFAULT_SCHEMA),
                                               **request)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     finally:
         conn.close()
     return result
@@ -1425,8 +1443,11 @@ def get_columns(request, context=None):
     if request.get('info_cache'):
         info_cache = {('get_columns',tuple(k.split('+')),tuple()):v for k,v in request.get('info_cache', {}).items()}
 
-    table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
-                                   info_cache=info_cache)
+    try:
+        table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
+                                                 info_cache=info_cache)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
                   pg_catalog.format_type(a.atttypid, a.atttypmod),
@@ -1599,7 +1620,7 @@ def _get_default_schema_name(self, connection):
 
 
 def open_raw_connection(request, context):
-    session_context = SessionContext()
+    session_context = SessionContext(owner=context.get('user'))
     return {'connection_id': session_context.connection._id}
 
 
@@ -1610,13 +1631,17 @@ def commit_raw_connection(request, context):
 
 
 def rollback_raw_connection(request, context):
-    connection = load_session_from_context(context).connection
-    connection.rollback()
+    load_session_from_context(context).rollback()
     return __response_success()
 
 
 def close_raw_connection(request, context):
     load_session_from_context(context).close()
+    return __response_success()
+
+
+def close_all_connections(request, context):
+    close_all_for_user(request, context)
     return __response_success()
 
 
@@ -1629,6 +1654,7 @@ def open_cursor(request, context):
 def close_cursor(request, context):
     session_context = load_session_from_context(context)
     cursor_id = int(context['cursor_id'])
+    session_context.close_cursor(cursor_id)
     return {'cursor_id': cursor_id}
 
 

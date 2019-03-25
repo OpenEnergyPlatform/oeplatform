@@ -10,7 +10,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
 class CreateUserForm(UserCreationForm):
     class Meta:
         model = OepUser
-        fields = ('name', 'affiliation', 'mail_address', 'password1', 'password2')
+        fields = ('name', 'affiliation', 'email', 'password1', 'password2')
 
     def save(self, commit=True):
         user = super(CreateUserForm, self).save(commit=commit)
@@ -34,7 +34,7 @@ class EditUserForm(UserChangeForm):
 
     class Meta:
         model = OepUser
-        fields = ('name', 'mail_address', 'affiliation', 'description')
+        fields = ('name', 'email', 'affiliation', 'description')
 
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)

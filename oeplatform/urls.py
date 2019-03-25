@@ -23,7 +23,6 @@ handler500 = 'base.views.handler500'
 
 urlpatterns = [
     url(r'^api/', include('api.urls')),
-    url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('base.urls')),
     url(r'^user/', include('login.urls')),
     url(r'^factsheets/', include('modelview.urls')),
