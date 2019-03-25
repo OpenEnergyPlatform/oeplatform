@@ -1,8 +1,9 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 
 from login import views
 
 urlpatterns = [
+    url('^', include('django.contrib.auth.urls')),
     url(r'^profile/(?P<user_id>[\d]+)$',
             views.ProfileView.as_view(), name='input'),
     url(r'^profile/password_change$',

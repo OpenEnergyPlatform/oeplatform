@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
-from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from django.contrib.auth import update_session_auth_hash
 
 class ProfileView(View):
@@ -181,7 +181,7 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     Autogenerate a update form for users.
     """
     model = OepUser
-    fields = ['name','affiliation','mail_address']
+    fields = ['name','affiliation','email']
     template_name_suffix = '_update_form'
 
 

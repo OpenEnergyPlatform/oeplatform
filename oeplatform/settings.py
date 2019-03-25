@@ -17,15 +17,12 @@ try:
 except:
     raise Exception("No securitysettings found")
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -82,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'oeplatform.wsgi.application'
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -100,8 +96,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 AUTH_USER_MODEL = 'login.myuser'
-LOGIN_URL = '/login'
+LOGIN_URL = '/user/login'
 LOGIN_REDIRECT_URL = '/'
+
+DEFAULT_FROM_EMAIL = "test@foo.com"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

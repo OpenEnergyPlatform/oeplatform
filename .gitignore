@@ -68,6 +68,11 @@ target/
 # Logos for legal reasons
 base/static/logos/
 
+# IntelliJ
 
-# pycharm
 .idea
+
+# Other generated files
+
+venv
+src
