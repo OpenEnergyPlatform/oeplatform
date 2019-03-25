@@ -288,8 +288,16 @@ class Table(APIView):
         request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
+    def validate_column_names(self, column_definitions):
+        """Raise APIError if any column name is invalid"""
+        for c in column_definitions:
+            colname = c['name']
+            if not colname.isidentifier():
+                raise APIError('Invalid column name: %s' % colname)
+
     @load_cursor
     def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
+        self.validate_column_names(column_definitions)
         context = {'connection_id': actions.get_or_403(request.data,
                                                        'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
