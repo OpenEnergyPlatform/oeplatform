@@ -99,8 +99,6 @@ AUTH_USER_MODEL = 'login.myuser'
 LOGIN_URL = '/user/login'
 LOGIN_REDIRECT_URL = '/'
 
-DEFAULT_FROM_EMAIL = "test@foo.com"
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
