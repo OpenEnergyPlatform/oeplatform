@@ -1472,7 +1472,9 @@ def get_columns(request, context=None):
     c = connection.execute(s, table_oid=table_oid)
     rows = c.fetchall()
 
-    domains = engine.dialect._load_domains(connection)
+    domains = {
+            "%s.%s" % (rec[0],rec[1]):
+                value for rec, value in engine.dialect._load_domains(connection)}
     enums = dict(
         (
             "%s.%s" % (rec['schema'], rec['name'])
