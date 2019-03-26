@@ -740,9 +740,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
         def _internal_execute(self, *args):
             request = args[1]
             content = request.data
-            context = {}
-            if not request.user.is_anonymous:
-                context = {'user': request.user}
+            context = {'user': request.user}
             if 'cursor_id' in request.data:
                 context['cursor_id'] = request.data['cursor_id']
             if 'connection_id' in request.data:
