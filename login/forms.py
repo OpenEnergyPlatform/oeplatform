@@ -61,7 +61,7 @@ class DetachForm(SetPasswordForm):
 
     def save(self, commit=True):
         super(DetachForm, self).save(commit=commit)
-        self.user.mail_address = self.data['email']
+        self.user.email = self.data['email']
         self.user.is_native = True
         self.user.is_mail_verified = False
 
