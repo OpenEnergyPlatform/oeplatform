@@ -55,7 +55,7 @@ class DetachForm(SetPasswordForm):
     def clean_email(self):
         if not self.data['email'] == self.data['email2']:
             raise ValidationError('The two email fields didn\'t match.')
-        mail_user = OepUser.objects.filter(mail_address=self.data['email']).first()
+        mail_user = OepUser.objects.filter(email=self.data['email']).first()
         if mail_user and mail_user != self.user:
             raise ValidationError('This mail address is already in use.')
 
