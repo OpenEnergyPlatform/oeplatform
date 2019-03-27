@@ -26,22 +26,22 @@ ADMIN_PERM = 12
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, name, mail_address, affiliation=None):
-        if not mail_address:
+    def create_user(self, name, email, affiliation=None):
+        if not email:
             raise ValueError('An email address must be entered')
         if not name:
             raise ValueError('A name must be entered')
 
-        user = self.model(name=name, mail_address=self.normalize_email(mail_address),
+        user = self.model(name=name, email=self.normalize_email(email),
                           affiliation=affiliation, )
 
         user.save(using=self._db)
         user.send_activation_mail()
         return user
 
-    def create_superuser(self, name, mail_address, affiliation):
+    def create_superuser(self, name, email, affiliation):
 
-        user = self.create_user(name, mail_address,
+        user = self.create_user(name, email,
                                 affiliation=affiliation)
         user.is_admin = True
         user.save(using=self._db)
