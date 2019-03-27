@@ -1,0 +1,84 @@
+{% extends "tutorial/base.html" %}
+
+{% block content %}
+{% load staticfiles %}
+<h3>
+    Tutorial on database conform data
+</h3>
+{% if error %}
+    <div style="color:red">
+        {{error}}
+    </div>
+{% endif %}
+
+    <p> The following checklist will help you to prepare your data in a way that you will have less trouble uploading it into the OEP.
+    The main purpose is to have your data machine-readable and simultaneously for humans easy to understand. <p/>
+
+    <ol>
+        <li>Only work with tables</li>
+        <li>If you work with Excel: use only ONE table per excel worksheet (see figure poor example and good example on how to split one table into multiple tables).</li>
+        <li>Use English table names</li>
+        <li>Use consistent file names. This will facilitate the upload.
+            <ol type="a">
+               <li> Good example: energy_load_germany_pv, energy_load_germany_wind, hence: energy_load_germany_* </li>
+               <li> Poor example: energy_pv_load, wind_energie_Deutschland_version3 </li>
+            </ol>
+        </li>
+        <li>Try to keep all files in one folder or in folders with consistent names as described in 4. to be easily machine readable</li>
+        <li>Follow the conventions for columns:
+            <ol type="a">
+               <li> Each column has only one entry per cell (see figure good example) </li>
+               <li> Speaking names (see figure good example) or: good example: engery_load_germany_pv vs. poor example: lpv_vs4 </li>
+               <li> Follow naming conventions e.g. SI units if possible </li>
+               <li> Check if it is possible to transpose your file (e.g. in case of years as columns, in case of parameters
+                   as columns), see figure poor example and good example. A tool helping you with this can be found on GitHub
+                   <a href="https://github.com/OpenEnergyPlatform/examples/blob/master/api/df_normalize_denormalize.ipynb">Normalizing/Denormilizing data</a></li>
+               <li> Never start column names with a number (will not work during upload), figure good example </li>
+               <li> Use English column names </li>
+               <li> Make sure each column contains only specific datatypes: string (e.g. “this is a string”), integer (e.g. 1,2,-5), float (e.g. 1.544) … see figure good example </li>
+            </ol>
+        </li>
+        <li> Think about the decimal seperator and deliminator you are using. Compare with the delimiter at <a href="https://github.com/OpenEnergyPlatform/examples/wiki/Metadata-Description">Metadata-Description</a> </li>
+        <li> Think about what you mean by missing values: if you implicit mean zero enter ‘0’. If you mean there were no
+            data available leave it empty or set 'NULL'. Empty fields will be changed to NULL during upload. </li>
+        <li> Make sure you have one or more primary keys so that each entry is unique. A primary key is a unique identifier.
+            <ol type="a">
+                <li> Example: first name, surname, passport_nr </li>
+                The passport_nr is a primariy key, because it is unique and identifies each person
+            </ol>
+        <li>In case of dates
+            <ol type="a">
+               <li> Always use the same format. Always use ISO 8601 <a href="https://en.wikipedia.org/wiki/ISO_8601" >Wikipedia ISO 8601</a> </li>
+               <li> Think about your time zone </li>
+               <li> In case of time intervals, do you have a left stamp, right stamp or middle stamp? </li>
+            </ol>
+        </li>
+        <li> Implement your model that the result has always the same format: that will make your life easier to work
+            with the OEP but also for your own post-processing </li>
+        <li> If you have multiple tables, make sure they can be linked to one another. Ideally you should link tables to
+            other tables via their id column. Otherwise you might collect double entries in the database.
+            <ol type="a">
+                <li> e.g. Person with first and surname and table with cars and car owners surname. And see figure: good example </li>
+            </ol>
+        </li>
+    </ol>
+
+    <p>This is a poor and a good example. This gives an Idea how to solve these problems, there are many good ways to solve it and two possibilities are show here.</p>
+
+    <h4>poor example</h4>
+
+        <img src="{% static 'img/database_conform_poor_example.jpg' %}" alt="poor example of data that is not database conform" width="700em">
+
+
+     <h4>good example</h4>
+        In the good example there are two options how to split the timer series.
+
+        <ol>
+            <li>This option is used in case of many wind turbine and solar park data:</li>
+                <img src="{% static 'img/database_conform_good_example_1.jpg' %}" alt="good example of data that is database conform, option 1" width="800em">
+            <li>This option is used if there are not as many wind turbines and solar parks</li>
+                <img src="{% static 'img/database_conform_good_example_2.jpg' %}" alt="good example of data that is database conform, option 2" width="800em">
+        </ol>
+
+
+{% endblock %}

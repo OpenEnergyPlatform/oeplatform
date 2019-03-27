@@ -44,7 +44,8 @@ INSTALLED_APPS = (
     'literature',
     'api',
     'axes',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
+    'tutorial',
 )
 
 MIDDLEWARE_CLASSES = (
