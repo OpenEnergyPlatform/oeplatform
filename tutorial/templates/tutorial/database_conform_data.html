@@ -28,7 +28,7 @@
         <li>Follow the conventions for columns:
             <ol type="a">
                <li> Each column has only one entry per cell (see figure good example) </li>
-               <li> Speaking names (see figure good example) or: good example: engery_load_germany_pv vs. poor example: lpv_vs4 </li>
+               <li> Expressive names (see figure good example) or: good example: engery_load_germany_pv vs. poor example: lpv_vs4 </li>
                <li> Follow naming conventions e.g. SI units if possible </li>
                <li> Check if it is possible to transpose your file (e.g. in case of years as columns, in case of parameters
                    as columns), see figure poor example and good example. A tool helping you with this can be found on GitHub
@@ -38,7 +38,7 @@
                <li> Make sure each column contains only specific datatypes: string (e.g. “this is a string”), integer (e.g. 1,2,-5), float (e.g. 1.544) … see figure good example </li>
             </ol>
         </li>
-        <li> Think about the decimal seperator and deliminator you are using. Compare with the delimiter at <a href="https://github.com/OpenEnergyPlatform/examples/wiki/Metadata-Description">Metadata-Description</a> </li>
+        <li> Think about the decimal seperator and delimiter you are using. Compare with the delimiter at <a href="https://github.com/OpenEnergyPlatform/examples/wiki/Metadata-Description">Metadata-Description</a> </li>
         <li> Think about what you mean by missing values: if you implicit mean zero enter ‘0’. If you mean there were no
             data available leave it empty or set 'NULL'. Empty fields will be changed to NULL during upload. </li>
         <li> Make sure you have one or more primary keys so that each entry is unique. A primary key is a unique identifier.
