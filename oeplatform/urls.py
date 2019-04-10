@@ -20,6 +20,7 @@ from oeplatform import settings
 from django.conf.urls.static import static
 
 handler500 = 'base.views.handler500'
+handler404 = 'base.views.handler404'
 
 urlpatterns = [
     url(r'^api/', include('api.urls')),
