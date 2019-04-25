@@ -58,7 +58,39 @@ for row in result.json():
         </div>
       </div>
     </div>
-    {% endblock %}
+
+    <div class="well">
+        <h4>Currently defined views:</h4>
+
+        {% for view in views %}
+        <a href="{{ request.path }}?view={{ view.id }}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
+        {% endfor %}
+        {% if not views %}
+        No views were created yet.
+        {% endif %}
+
+        <br><br>
+
+        <div>
+                {% if current_view.id %}
+            <span style="float: left">
+                <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-default">Edit active view</a>
+                <a href="{{ request.path }}/view/set-default?id={{ current_view.id }}" class="btn btn-default">Set as default</a>
+                <a href="{{ request.path }}/view/delete?id={{ current_view.id }}" class="btn btn-danger">Delete active view</a>
+            </span>
+                {% endif %}
+            <span style="float: right">
+                <a href="{{ request.path }}/view?type=table" class="btn btn-default">New table</a>
+                <a href="{{ request.path }}/view?type=graph" class="btn btn-default">New graph</a>
+                <a href="{{ request.path }}/view?type=map" class="btn btn-default">New map</a>
+            </span>
+            <br clear="all">
+        </div>
+    </div>
+
+    <div id="main-visualization-container" style="min-height: 500px">
+    </div>
+{% endblock %}
 
 {% block script %}
 <script type="text/javascript">
@@ -109,7 +141,43 @@ for row in result.json():
     var data_record = {}
     var unchecked_record = {}
 
-    function build_views(){
+    function build_views_leaflet() {
+
+        var map = L.map('main-visualization-container');
+
+        // set map center, will be overwritten on polygon load
+        map.setView([0, 0], 0);
+
+        // leaflet geoJson layer
+        var geoJSON;
+
+        getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
+
+            // add geoJSON layer to map
+            geoJSON = L.geoJson(JSON.parse(result["data"][0])).addTo(map);
+
+            // center map on geoJSON
+            map.fitBounds(geoJSON.getBounds());
+
+            // load map tiles from openstreetmap
+            L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '©<a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+            }).addTo(map);
+        });
+
+        function updateFunction() {
+            getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
+                geoJSON.clearLayers(); // remove old polygons
+                geoJSON.addData(JSON.parse(result["data"][0]))
+            });
+        }
+
+        map.on('moveend', updateFunction);
+        map.on('zoomend', updateFunction);
+    }
+
+    function build_views_recline(){
         var dataset_main = new recline.Model.Dataset({
                 table: '{{table}}',
                 schema: '{{schema}}',
@@ -120,9 +188,60 @@ for row in result.json():
 
         dataset_main.fetch().done(function(dataset) {
 
-            plot_view(dataset,
+            /*plot_view(dataset,
                 true,
-                $('.data-explorer-here'), data_record)
+                $('.data-explorer-here'), data_record)*/
+
+            var visualization_container = $('#main-visualization-container');
+            {% if current_view.type == "table" %}
+                var grid = new recline.View.SlickGrid({
+                    model: dataset,
+                    el: visualization_container,
+                    state: {
+                      gridOptions: {
+                        enableCellNavigation: true,
+                        forceFitColumns: true,
+                        fullWidthRows: true
+                      }
+                    }
+                });
+
+                grid.visible = true;
+                grid.render();
+
+                // add comment tooltip for columns
+                {% if comment_on_table %}
+                var columns = grid.grid.getColumns();
+
+                var fields = {{ comment_on_table.fields | safe }};
+
+                for (var i = 0; i < columns.length;i++)
+                {
+                    for (var j = 0; j < fields.length; j++)
+                    {
+                        if (columns[i].name === fields[j].name)
+                            columns[i].toolTip = fields[j].description;
+                    }
+                }
+
+                grid.grid.setColumns(columns);
+                {% endif %}
+                grid.render();
+
+            {% elif current_view.type == "graph" %}
+                var graph = new recline.View.Graph({
+                    model: dataset,
+                    el: visualization_container,
+                    state:
+                    {
+                        graphType: "lines-and-points",
+                        group: "{{ x_axis }}",
+                        series: {{ y_axis|safe }}
+                    }
+                });
+                graph.render();
+                graph.redraw();
+            {% endif %}
         });
 
         if(unchecked){
@@ -158,7 +277,15 @@ for row in result.json():
         });
     }
 
-    build_views(false);
+    function build_views() {
+        {% if current_view.type == "map" %}
+        build_views_leaflet();
+        {% else %}
+        build_views_recline();
+        {% endif %}
+    }
+
+    build_views(/*false*/);
 
 
 

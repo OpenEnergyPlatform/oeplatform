@@ -1,14 +1,14 @@
 from django import template
 from dataedit import models
 import webcolors
-from dataedit.views import get_all_tags
+from dataedit.views import get_all_tags, get_popular_tags
 register = template.Library()
 
 
 @register.assignment_tag
 def get_tags(schema=None, table=None, limit=None):
     if limit:
-        return get_all_tags(schema=schema, table=table)[:limit]
+        return get_popular_tags(schema=schema, table=table, limit=limit)
     else:
         return get_all_tags(schema=schema, table=table)
 

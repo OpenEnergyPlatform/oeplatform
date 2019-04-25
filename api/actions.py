@@ -7,7 +7,7 @@ from datetime import datetime
 import psycopg2
 import sqlalchemy as sqla
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes, util,\
     Column, ForeignKey
 import sqlalchemy as sa

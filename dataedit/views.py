@@ -3,7 +3,7 @@ import json
 import os
 import re
 import threading
-import time
+import datetime, time
 from functools import reduce
 from io import TextIOWrapper
 from operator import add
@@ -28,6 +28,8 @@ import api.parser
 import oeplatform.securitysettings as sec
 from api import actions
 from dataedit.models import Table
+from dataedit.models import View as DBView
+from dataedit.models import Filter as DBFilter
 from dataedit.structures import Table_tags, Tag
 from login import models as login_models
 from .models import TableRevision
@@ -540,6 +542,109 @@ def add_tag(name, color):
     session.commit()
 
 
+def view_edit(request, schema, table):
+    post_id = request.GET.get("id")
+    if post_id:
+        view = DBView.objects.get(id=post_id)
+        context = { "type": view.type, "view": view, "schema": schema, "table": table, "filter": view.filter.all()}
+        if view.options is not None:
+            context.update(view.options)
+        return render(request, template_name='dataedit/view_editor.html', context=context)
+    else:
+        type = request.GET.get("type")
+        return render(request, template_name='dataedit/view_editor.html',
+                      context={ "type": type, "new": True, "schema": schema, "table": table})
+
+
+def view_save(request, schema, table):
+    post_name = request.POST.get("name")
+    post_type = request.POST.get("type")
+    post_id = request.POST.get("id")
+    post_options = {}
+
+    if post_type == 'graph':
+        # add x and y axis to post_options
+        post_x_axis = request.POST.get('x-axis')
+        y_axis_list = []
+        for item in request.POST.items():
+            item_name, item_value = item
+            if item_name.startswith('y-axis-') and item_value == 'on':
+                y_axis_list.append(item_name['y-axis-'.__len__():])
+        post_options = { 'x_axis': post_x_axis, 'y_axis': y_axis_list }
+    elif post_type == 'map':
+        # add location column info to options
+        post_pos_type = request.POST.get('location_type')
+        if post_pos_type == 'single-column':
+            post_geo_column = request.POST.get('geo_data')
+            post_options = { 'geo_type': 'single-column', 'geo_column': post_geo_column }
+        elif post_pos_type == 'lat_long':
+            post_geo_lat = request.POST.get('geo_lat')
+            post_geo_long = request.POST.get('geo_long')
+            post_options = { 'geo_type': 'lat_long', 'geo_lat': post_geo_lat, 'geo_long': post_geo_long }
+
+    # update or create corresponding view
+    if post_id:
+        update_view = DBView.objects.filter(id=post_id).get()
+        update_view.name = post_name
+        update_view.options = post_options
+    else:
+        update_view = DBView(name=post_name, type=post_type, options=post_options, table=table, schema=schema)
+
+    update_view.save()
+
+    # create and update filters
+    post_filter_json = request.POST.get("filter")
+    if post_filter_json != "":
+        post_filter = json.loads(post_filter_json)
+
+        for db_filter in update_view.filter.all():
+            # look for filters in the database, that aren't used anymore and delete them
+            db_filter_is_used = False
+            for defined_filter in post_filter:
+                if "id" in defined_filter:
+                    if db_filter.id == defined_filter["id"]:
+                        db_filter_is_used = True
+                        break
+            if not db_filter_is_used:
+                db_filter.delete()
+
+        for filter in post_filter:
+            if post_id and "id" in filter:
+                # filter is already defined and needs to be updated
+                curr_filter = DBFilter.objects.filter(id=filter["id"], view_id=post_id).get()
+                curr_filter.column = filter["column"]
+                curr_filter.type = filter["type"]
+                curr_filter.value = filter["value"]
+                curr_filter.save()
+            else:
+                # create new filter
+                curr_filter = DBFilter(view=update_view, column=filter["column"], type=filter["type"], value=filter["value"])
+                curr_filter.save()
+
+    return redirect('../../' + table + "?view=" + str(update_view.id))
+
+
+def view_set_default(request, schema, table):
+    post_id = request.GET.get("id")
+
+    for view in DBView.objects.filter(schema=schema, table=table):
+        if str(view.id) == post_id:
+            view.is_default = True
+        else:
+            view.is_default = False
+        view.save()
+    return redirect('/dataedit/view/' + schema + '/' + table)
+
+
+def view_delete(request, schema, table):
+    post_id = request.GET.get("id")
+
+    view = DBView.objects.get(id=post_id, schema=schema, table=table)
+    view.delete()
+
+    return redirect('/dataedit/view/' + schema + '/' + table)
+
+
 class DataView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -584,21 +689,43 @@ class DataView(View):
         if request.user and not request.user.is_anonymous():
             is_admin = request.user.has_admin_permissions(schema, table)
 
-        return render(request,
-                      'dataedit/dataedit_overview.html',
-                      {
-                          'comment_on_table': dict(comment_on_table),
-                          'revisions': revisions,
-                          'kinds': ['table', 'map', 'graph'],
-                          'table': table,
-                          'schema': schema,
-                          'tags': tags,
-                          'data': data,
-                          'display_message': display_message,
-                          'display_items': display_items,
-                          'is_admin': is_admin,
-                          'host': request.get_host()
-                      })
+        table_views = DBView.objects.filter(table=table).filter(schema=schema)
+
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id = request.GET.get("view"))
+        except:
+            try:
+                # then use the first db-entry, where is_default is set
+                current_view = table_views.filter(is_default=True)[0]
+            except:
+                try:
+                    # otherwise use the first db-entry
+                    current_view = table_views[0]
+                except:
+                    # if no views are defined, use a temporary default table view
+                    current_view = DBView(name="default", type="table", table=table, schema = schema)
+
+        context_dict = {
+            'comment_on_table': dict(comment_on_table),
+            'revisions': revisions,
+            'kinds': ['table', 'map', 'graph'],
+            'table': table,
+            'schema': schema,
+            'tags': tags,
+            'data': data,
+            'display_message': display_message,
+            'display_items': display_items,
+            'views': table_views,
+            'filter': current_view.filter.all(),
+            'current_view': current_view,
+            'is_admin': is_admin,
+            'host': request.get_host()
+        }
+
+        context_dict.update(current_view.options)
+
+        return render(request, 'dataedit/dataedit_overview.html', context=context_dict)
 
     def post(self, request, schema, table):
         """
@@ -914,17 +1041,22 @@ def get_all_tags(schema=None, table=None):
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by('name'))
             session.commit()
-            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+            r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
+                  'usage_count': r.usage_count,
+                  'usage_tracked_since': r.usage_tracked_since }
                  for r in result]
-            return r
+            return sort_tags_by_popularity(r)
 
         if schema == None:
             # default schema is the public schema
             schema = 'public'
 
         result = session.execute(
-            session.query(Tag.name.label('name'), Tag.id.label('id'),
+            session.query(Tag.name.label('name'),
+                          Tag.id.label('id'),
                           Tag.color.label('color'),
+                          Tag.usage_count.label('usage_count'),
+                          Tag.usage_tracked_since.label('usage_tracked_since'),
                           Table_tags.table_name).filter(
                 Table_tags.tag == Tag.id).filter(
                 Table_tags.table_name == table).filter(
@@ -932,8 +1064,48 @@ def get_all_tags(schema=None, table=None):
         session.commit()
     finally:
         session.close()
-    return [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X')}
+    r = [{'id': r.id, 'name': r.name, 'color': "#" + format(r.color, '06X'),
+             'usage_count': r.usage_count,
+             'usage_tracked_since': r.usage_tracked_since }
             for r in result]
+    return sort_tags_by_popularity(r)
+
+
+def sort_tags_by_popularity(tags):
+
+    def key_func(tag):
+        track_time = datetime.datetime.utcnow() - tag["usage_tracked_since"]
+        return tag["usage_count"] / track_time.total_seconds()
+
+    tags.sort(reverse=True, key=key_func)
+    return tags
+
+
+def get_popular_tags(schema=None, table=None, limit=10):
+    tags = get_all_tags(schema, table)
+    sort_tags_by_popularity(tags)
+
+    return tags[:limit]
+
+
+def increment_usage_count(tag_id):
+    """
+    Increment usage count of a specific tag
+    :param tag_id: ID of the tag which usage count should be incremented
+    :return:
+    """
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    try:
+        result = session.query(Tag).filter_by(id=tag_id).first()
+
+        result.usage_count += 1
+
+        session.commit()
+    finally:
+        session.close()
 
 
 class SearchView(View):
@@ -966,6 +1138,9 @@ class SearchView(View):
         filter_tags = [int(key[len('select_'):]) for key in request.POST if
                        key.startswith('select_')]
 
+        for tag_id in filter_tags:
+            increment_usage_count(tag_id)
+
         tag_agg = array_agg(Table_tags.tag)
         query = session.query(search_view.c.schema.label('schema'),
                               search_view.c.table.label('table'),
@@ -973,7 +1148,8 @@ class SearchView(View):
         search_view.c.table == Table_tags.table_name) and (
                                                      search_view.c.table == Table_tags.table_name))
         if filter_tags:
-            query = query.having(tag_agg.contains(filter_tags))
+            query = query.having(tag_agg.contains(
+                sqla.cast(filter_tags, sqla.ARRAY(sqla.BigInteger))))
 
         query = query.group_by(search_view.c.schema, search_view.c.table)
         results = session.execute(query)
