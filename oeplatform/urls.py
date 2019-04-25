@@ -22,11 +22,7 @@ from django.conf.urls.static import static
 handler500 = 'base.views.handler500'
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('api.urls')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-    url(r'^', include('django.contrib.auth.urls')),
     url(r'^', include('base.urls')),
     url(r'^user/', include('login.urls')),
     url(r'^factsheets/', include('modelview.urls')),

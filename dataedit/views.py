@@ -39,20 +39,20 @@ session = None
 
 """ This is the initial view that initialises the database connection """
 schema_whitelist = [
+    "boundaries",
+    "climate",
     "demand",
     "economy",
     "emission",
     "environment",
     "grid",
-    "boundaries",
-    "society",
-    "supply",
-    "scenario",
-    "climate",
     "model_draft",
     "openstreetmap",
+    "policy",
     "reference",
-    "workshop"
+    "scenario",
+    "society",
+    "supply"
 ]
 
 
@@ -447,12 +447,12 @@ def show_revision(request, schema, table, date):
     return send_dump(schema, table, date)
 
 
-@login_required(login_url='/login/')
+@login_required
 def tag_overview(request):
     return render(request=request, template_name='dataedit/tag_overview.html')
 
 
-@login_required(login_url='/login/')
+@login_required
 def tag_editor(request, id=""):
     tags = get_all_tags()
 
@@ -483,7 +483,7 @@ def tag_editor(request, id=""):
                   context={"name": "", "color": "#000000", "assigned": False})
 
 
-@login_required(login_url='/login/')
+@login_required
 def change_tag(request):
     if "submit_save" in request.POST:
         if "tag_id" in request.POST:
@@ -867,7 +867,7 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
 
-@login_required(login_url='/login/')
+@login_required
 def add_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.

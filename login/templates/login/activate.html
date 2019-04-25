@@ -1,0 +1,33 @@
+{% extends "base/base.html" %}
+{% load i18n static %}
+{% load base_tags %}
+{% block content %}
+    <div>
+        {% if user.is_mail_verified %}
+            <h2>DRY</h2>
+            Your mail is already validated.
+        {% else %}
+            <h2>Your account is not active, yet.</h2>
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">{{error}}</div>
+            {% endfor %}
+            <div class="well">
+                Please click the link in the activation mail that has been
+                sent to your specified address.
+            </div>
+            Your activation mail was sent to <b>{{user.email}}</b>. If this is not the correct address,
+            please set a new one:
+            <form method="post">{% csrf_token %}
+                <fieldset class="module aligned">
+                    <div class="form-group form-row field-email">
+                        {{ form.email.errors }}
+                        <label for="id_email">{% trans 'Email address:' %}</label>
+                        {{ form.email | addclass:"form-control" }}
+                    </div>
+                    <input class="btn btn-success" type="submit" value="{% trans 'Send again' %}">
+                </fieldset>
+            </form>
+        {% endif %}
+    </div>
+
+{% endblock %}

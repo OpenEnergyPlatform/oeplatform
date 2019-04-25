@@ -1,14 +1,17 @@
 from django.shortcuts import get_object_or_404, render, redirect,\
     render_to_response
-from django.views.generic import View
+from django.views.generic import View, FormView
 from django.views.generic.edit import UpdateView
+from django import forms
 from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import GroupUserForm
+from .forms import CreateUserForm, EditUserForm, DetachForm, ChangeEmailForm
 from django.contrib.auth.models import Group
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 import login.models as models
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.http import Http404
+from django.contrib.auth.views import PasswordChangeView, PasswordResetView
+from django.contrib.auth import update_session_auth_hash
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -25,7 +28,7 @@ class ProfileView(View):
         token = None
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
-        return render(request, "login/profile.html", {'user': user,
+        return render(request, "login/profile.html", {'profile_user': user,
                                                       'token': token})
 
 class GroupManagement(View, LoginRequiredMixin):
@@ -179,16 +182,89 @@ class ProfileUpdateView(UpdateView, LoginRequiredMixin):
     Autogenerate a update form for users.
     """
     model = OepUser
-    fields = ['name','affiliation','mail_address']
+    fields = ['name','affiliation','email']
     template_name_suffix = '_update_form'
 
 
-def create_user(request):
-    """
-    We use the user management implemented in the wiki of the openMod-community.
-    New users must be created there.
-    :param request: A HTTP-request object sent by the Django framework.
-    :return: Redirect to AccountRequest-form on wiki.openmod-initiative.org
-    """
-    return redirect(request, "http://wiki.openmod-initiative.org/wiki/Special:RequestAccount")
+class EditUserView(View):
+    def get(self, request, user_id):
+        if not request.user.id == int(user_id):
+            raise PermissionDenied
+        form = EditUserForm(instance=request.user)
+        return render(request, 'login/oepuser_edit_form.html', {'form': form})
 
+    def post(self, request, user_id):
+        if not request.user.id == int(user_id):
+            raise PermissionDenied
+        form = EditUserForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('/user/profile/{id}'.format(id=request.user.id))
+        else:
+            return render(request, 'login/oepuser_edit_form.html',
+                          {'form': form})
+
+class CreateUserView(View):
+    def get(self, request):
+        form = CreateUserForm()
+        return render(request, 'login/oepuser_create_form.html', {'form': form})
+
+    def post(self, request):
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            return redirect('/user/profile/{id}'.format(id=user.id))
+        else:
+            return render(request, 'login/oepuser_create_form.html',
+                          {'form': form})
+
+
+class DetachView(LoginRequiredMixin, View):
+    def get(self, request):
+        if request.user.is_native:
+            raise PermissionDenied
+        form = DetachForm(request.user)
+        return render(request, 'login/detach.html', {'form': form})
+
+    def post(self, request):
+        if request.user.is_native:
+            raise PermissionDenied
+        form = DetachForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+        else:
+            print(form.errors)
+            return render(request, 'login/detach.html', {'form': form})
+
+
+class OEPPasswordChangeView(PasswordChangeView):
+    template_name = 'login/generic_form.html'
+    success_url = '/'
+
+
+class ActivationNoteView(FormView):
+    template_name = 'login/activate.html'
+    form_class = ChangeEmailForm
+    success_url = 'user/activate'
+
+    def form_valid(self, form):
+        if self.request.user.is_anonymous or self.request.user.is_mail_verified:
+            raise PermissionError
+        form.save(self.request.user)
+        return super(ActivationNoteView, self).form_valid(form)
+
+
+def activate(request, token):
+    token_obj = models.ActivationToken.objects.filter(value=token).first()
+    if not token_obj:
+        form = ChangeEmailForm()
+        form._errors = {
+            forms.forms.NON_FIELD_ERRORS:
+                form.error_class(['Your token was invalid or expired'])}
+        return render(request, 'login/activate.html', {'form': form})
+    else:
+        token_obj.user.is_mail_verified = True
+        token_obj.user.save()
+        token_obj.delete()
+    return redirect('/user/profile/{id}'.format(id=token_obj.user.id))

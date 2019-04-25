@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, StreamingHttpResponse
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.db.models import Q
@@ -46,11 +47,12 @@ def load_cursor(f):
             # Thus, we have to replace the data dictionary by one we can mutate.
             if hasattr(args[1].data, '_mutable'):
                 args[1].data._mutable = True
-
+            context = {}
+            context['user'] = args[1].user
             if not artificial_connection:
-                context = {'connection_id': args[1].data['connection_id']}
+                context['connection_id'] = args[1].data['connection_id']
             else:
-                context = actions.open_raw_connection({}, {})
+                context.update(actions.open_raw_connection({}, context))
                 args[1].data['connection_id'] = context['connection_id']
             if 'cursor_id' in args[1].data:
                 context['cursor_id'] = args[1].data['cursor_id']
@@ -286,8 +288,16 @@ class Table(APIView):
         request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
+    def validate_column_names(self, column_definitions):
+        """Raise APIError if any column name is invalid"""
+        for c in column_definitions:
+            colname = c['name']
+            if not colname.isidentifier():
+                raise APIError('Invalid column name: %s' % colname)
+
     @load_cursor
     def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
+        self.validate_column_names(column_definitions)
         context = {'connection_id': actions.get_or_403(request.data,
                                                        'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
@@ -648,7 +658,7 @@ class Rows(APIView):
         if not columns:
             query = table.select()
         else:
-            columns = [getattr(table.c, c) for c in columns]
+            columns = [actions.get_column_obj(table, c) for c in columns]
             query = sqla.select(columns=columns)
 
         where_clauses = data.get('where')
@@ -772,7 +782,8 @@ class FetchView(APIView):
         context = {'connection_id': actions.get_or_403(request.data,
                                                  'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
-                                                       'cursor_id')}
+                                                       'cursor_id'),
+                   'user': request.user}
         return StreamingHttpResponse((part
              for row in fetch(context)
              for part in (self.transform_row(row), '\n')), content_type = 'application/json')
@@ -791,6 +802,12 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
     if allow_cors:
         response['Access-Control-Allow-Origin'] = '*'
     return response
+
+
+class CloseAll(LoginRequiredMixin, APIView):
+    def get(self, request):
+        sessions.close_all_for_user(request.user)
+        return HttpResponse('All connections closed')
 
 
 def get_users(request):
