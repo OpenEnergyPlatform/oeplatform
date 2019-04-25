@@ -11,26 +11,12 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '46fb02acc3b1'
-down_revision = None
+down_revision = '71463e8fd9c3'
 branch_labels = None
 depends_on = None
 
 
 def upgrade():
-    op.create_table(
-        '_edit_base',
-        sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('name', sa.String(50), nullable=False),
-        sa.Column('description', sa.Unicode(200)),
-        sa.Column('_id', sa.BigInteger, nullable=False),
-        sa.Column('_message', sa.Text),
-        sa.Column('_user', sa.String(50)),
-        sa.Column('_submitted', sa.TIMESTAMP, default=sa.func.now),
-        sa.Column('_autocheck', sa.Boolean, default=False),
-        sa.Column('_humancheck', sa.Boolean, default=False),
-        sa.Column('_type', sa.String(8)),
-        sa.Column('_applied', sa.Boolean, default=False),
-    )
 
     op.create_table(
         'api_columns',
@@ -46,4 +32,4 @@ def upgrade():
     )
 
 def downgrade():
-    op.drop_table('_edit_base')
+    op.drop_table('api_columns')
