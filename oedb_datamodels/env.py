@@ -10,7 +10,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
 django.setup()
 
 from api.connection import get_connection_string, _get_engine
-
+from base.structures import metadata as target_metadata
+import dataedit.structures
 from alembic.config import Config
 alembic_cfg = Config()
 alembic_cfg.set_main_option("url", get_connection_string())
@@ -28,10 +29,10 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from egoio.db_tables.reference import Base
-target_metadata = Base.metadata
-target_metadata.bind = _get_engine()
-target_metadata.reflect()
+
+if target_metadata.bind is None:
+    target_metadata.bind = _get_engine()
+#target_metadata.reflect()
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
