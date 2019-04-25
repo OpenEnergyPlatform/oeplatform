@@ -18,10 +18,10 @@ depends_on = None
 
 def upgrade():
     op.create_table('tags',
-    sa.Column('id', sa.BigInteger(), nullable=False),
+    sa.Column('id', sa.BigInteger(), nullable=False, autoincrement=True),
     sa.Column('name', sa.String(length=40), nullable=True),
     sa.Column('color', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
+    sa.PrimaryKeyConstraint('id', name='tags_pkey'),
     schema='public'
     )
 
