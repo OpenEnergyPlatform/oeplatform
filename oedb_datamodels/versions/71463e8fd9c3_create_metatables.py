@@ -14,7 +14,7 @@ from api.connection import _get_engine
 
 # revision identifiers, used by Alembic.
 revision = '71463e8fd9c3'
-down_revision = '048215319c74'
+down_revision = '5c098aa81e2c'
 branch_labels = None
 depends_on = None
 

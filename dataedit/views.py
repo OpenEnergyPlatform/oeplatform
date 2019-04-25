@@ -28,7 +28,7 @@ import api.parser
 import oeplatform.securitysettings as sec
 from api import actions
 from dataedit.models import Table
-from dataedit.structures import Table_tags, Tag
+from dataedit.structures import TableTags, Tag
 from login import models as login_models
 from .models import TableRevision
 
@@ -201,11 +201,16 @@ def listschemas(request):
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
-    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(
-        user=sec.dbuser)
+    query = 'SELECT schema_name, count(tablename) as tables ' \
+            'FROM pg_tables right join information_schema.schemata ' \
+            'ON schema_name=schemaname ' \
+            'WHERE tablename IS NULL ' \
+            '   OR (pg_has_role(\'{user}\', tableowner, \'MEMBER\') ' \
+            '       AND tablename NOT LIKE \'\_%%\') ' \
+            'GROUP BY schema_name;'.format(user=sec.dbuser)
     response = conn.execute(query)
-    schemas = sorted([(row.schemaname, row.tables) for row in response if
-                      row.schemaname in schema_whitelist and not row.schemaname.startswith(
+    schemas = sorted([(row.schema_name, row.tables) for row in response if
+                      row.schema_name in schema_whitelist and not row.schema_name.startswith(
                           '_')], key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
@@ -467,8 +472,8 @@ def tag_editor(request, id=""):
             Session = sessionmaker()
             session = Session(bind=engine)
 
-            assigned = session.query(Table_tags).filter(
-                Table_tags.tag == t["id"]).count() > 0
+            assigned = session.query(TableTags).filter(
+                TableTags.tag == t["id"]).count() > 0
 
             return render(request=request,
                           template_name='dataedit/tag_editor.html',
@@ -522,7 +527,7 @@ def delete_tag(id):
     session = Session(bind=engine)
 
     # delete all occurrences of the tag from Table_tag
-    session.query(Table_tags).filter(Table_tags.tag == id).delete()
+    session.query(TableTags).filter(TableTags.tag == id).delete()
 
     # delete the tag from Tag
     session.query(Tag).filter(Tag.id == id).delete()
@@ -888,10 +893,10 @@ def add_table_tags(request):
     Session = sessionmaker()
     session = Session(bind=engine)
 
-    session.query(Table_tags).filter(
-        Table_tags.table_name == table and Table_tags.schema_name == schema).delete()
+    session.query(TableTags).filter(
+        TableTags.table_name == table and TableTags.schema_name == schema).delete()
     for id in ids:
-        t = Table_tags(
+        t = TableTags(
             **{'schema_name': schema, 'table_name': table, 'tag': id})
         session.add(t)
     session.commit()
@@ -925,10 +930,10 @@ def get_all_tags(schema=None, table=None):
         result = session.execute(
             session.query(Tag.name.label('name'), Tag.id.label('id'),
                           Tag.color.label('color'),
-                          Table_tags.table_name).filter(
-                Table_tags.tag == Tag.id).filter(
-                Table_tags.table_name == table).filter(
-                Table_tags.schema_name == schema).order_by('name'))
+                          TableTags.table_name).filter(
+                TableTags.tag == Tag.id).filter(
+                TableTags.table_name == table).filter(
+                TableTags.schema_name == schema).order_by('name'))
         session.commit()
     finally:
         session.close()
@@ -966,12 +971,12 @@ class SearchView(View):
         filter_tags = [int(key[len('select_'):]) for key in request.POST if
                        key.startswith('select_')]
 
-        tag_agg = array_agg(Table_tags.tag)
+        tag_agg = array_agg(TableTags.tag)
         query = session.query(search_view.c.schema.label('schema'),
                               search_view.c.table.label('table'),
-                              tag_agg).outerjoin(Table_tags, (
-        search_view.c.table == Table_tags.table_name) and (
-                                                     search_view.c.table == Table_tags.table_name))
+                              tag_agg).outerjoin(TableTags, (
+            search_view.c.table == TableTags.table_name) and (
+                                                     search_view.c.table == TableTags.table_name))
         if filter_tags:
             query = query.having(tag_agg.contains(filter_tags))
 
