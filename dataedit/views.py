@@ -201,11 +201,16 @@ def listschemas(request):
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
-    query = 'SELECT schemaname, count(tablename) as tables FROM pg_tables WHERE pg_has_role(\'{user}\', tableowner, \'MEMBER\') AND tablename NOT LIKE \'\_%%\' group by schemaname;'.format(
-        user=sec.dbuser)
+    query = 'SELECT schema_name, count(tablename) as tables ' \
+            'FROM pg_tables right join information_schema.schemata ' \
+            'ON schema_name=schemaname ' \
+            'WHERE tablename IS NULL ' \
+            '   OR (pg_has_role(\'{user}\', tableowner, \'MEMBER\') ' \
+            '       AND tablename NOT LIKE \'\_%%\') ' \
+            'GROUP BY schema_name;'.format(user=sec.dbuser)
     response = conn.execute(query)
-    schemas = sorted([(row.schemaname, row.tables) for row in response if
-                      row.schemaname in schema_whitelist and not row.schemaname.startswith(
+    schemas = sorted([(row.schema_name, row.tables) for row in response if
+                      row.schema_name in schema_whitelist and not row.schema_name.startswith(
                           '_')], key=lambda x: x[0])
     return render(request, 'dataedit/dataedit_schemalist.html',
                   {'schemas': schemas})
