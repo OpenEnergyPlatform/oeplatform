@@ -23,7 +23,7 @@ from api.error import APIError
 from shapely import wkb, wkt
 from sqlalchemy.sql import column
 from api.connection import _get_engine
-from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext
+from api.sessions import load_cursor_from_context, load_session_from_context, SessionContext, close_all_for_user
 from dataedit.models import Table as DBTable
 import login.models as login_models
 from oeplatform.securitysettings import PLAYGROUNDS
@@ -37,6 +37,21 @@ logger = logging.getLogger('oeplatform')
 __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
+
+def get_column_obj(table, column):
+    """
+
+    :param talbe: A sqla-table object
+    :param column: A column name
+    :return: Basically `getattr(table.c, column)` but throws an exception of the
+        column does not exists
+    """
+    tc = table.c
+    try:
+        return getattr(tc, column)
+    except AttributeError:
+        raise APIError('Column \'%s\' does not exist.'%column)
+
 
 def get_table_name(schema, table, restrict_schemas=True):
     if not has_schema(dict(schema=schema)):
@@ -63,50 +78,6 @@ def assert_permission(user, table, permission, schema=None):
     if user.is_anonymous or \
        user.get_table_permission_level(DBTable.load(schema, table)) < permission:
         raise PermissionDenied
-
-
-def load_cursor(f):
-    def wrapper(*args, **kwargs):
-        artificial_connection = 'connection_id' not in args[1].data
-        fetch_all = 'cursor_id' not in args[1].data
-        if fetch_all:
-
-            # django_restframework passes different data dictionaries depending
-            # on the request type: PUT -> Mutable, POST -> Immutable
-            # Thus, we have to replace the data dictionary by one we can mutate.
-            if hasattr(args[1].data, '_mutable'):
-                args[1].data._mutable = True
-
-            if not artificial_connection:
-                context = {'connection_id': args[1].data['connection_id']}
-            else:
-                context = open_raw_connection({}, {})
-                args[1].data['connection_id'] = context['connection_id']
-            if 'cursor_id' in args[1].data:
-                context['cursor_id'] = args[1].data['cursor_id']
-            else:
-                context.update(open_cursor({}, context))
-                args[1].data['cursor_id'] = context['cursor_id']
-        try:
-            result = f(*args, **kwargs)
-            if fetch_all:
-                cursor = load_cursor_from_context(context)
-                session = load_session_from_context(context)
-                if not result:
-                    result = {}
-                if cursor.description:
-                    result['description'] = cursor.description
-                    result['rowcount'] = cursor.rowcount
-                    result['data'] = (list(map(_translate_fetched_cell, row)) for row in cursor.fetchall())
-                if artificial_connection:
-                    session.connection.commit()
-        finally:
-            if fetch_all:
-                close_cursor({}, context)
-            if artificial_connection:
-                close_raw_connection({}, context)
-        return result
-    return wrapper
 
 
 def _translate_fetched_cell(cell):
@@ -664,7 +635,7 @@ def get_column_definition_query(d):
     if 'autoincrement' in d:
         kwargs['autoincrement'] = d['autoincrement']
 
-    if d.get('is_nullable', False):
+    if not d.get('is_nullable', True):
         kwargs['nullable'] = d['is_nullable'] # True
 
     if d.get('primary_key', False):
@@ -764,7 +735,13 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     constraints = []
 
     for constraint in constraints_definitions:
-        if constraint['constraint_type'].lower().replace(' ', '_') == 'primary_key':
+        constraint_type = constraint.get('constraint_type') or \
+                          constraint.get('type')
+        if constraint_type is None:
+            raise APIError('constraint_type required in %s' % str(constraint))
+
+        constraint_type = constraint_type.lower().replace(' ', '_')
+        if constraint_type == 'primary_key':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
@@ -775,7 +752,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
                 ccolumns = [constraint['constraint_parameter']]
             constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns,
                                                               **kwargs))
-        elif constraint['constraint_type'] == 'unique':
+        elif constraint_type == 'unique':
             kwargs = {}
             cname = constraint.get('name')
             if cname:
@@ -953,7 +930,8 @@ def _get_table(schema, table):
 
 def __internal_select(query, context):
     engine = _get_engine()
-    context2 = open_raw_connection({}, {})
+    context2 = dict(user=context.get('user'))
+    context2.update(open_raw_connection({}, context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
@@ -1199,12 +1177,19 @@ def data_insert(request, context=None):
 
 
 def _execute_sqla(query, cursor):
+    dialect = _get_engine().dialect
     try:
-        compiled = query.compile(dialect=_get_engine().dialect)
+        compiled = query.compile(dialect=dialect)
     except exc.SQLAlchemyError as e:
         raise APIError(repr(e))
     try:
         params = dict(compiled.params)
+        for key, value in params.items():
+            if isinstance(value, dict):
+                if dialect._json_serializer is None:
+                    params[key] = json.dumps(value)
+                else:
+                    params[key] = dialect._json_serializer(value)
         cursor.execute(str(compiled), params)
     except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
         raise APIError(repr(e))
@@ -1389,6 +1374,8 @@ def get_table_oid(request, context=None):
                                               get_or_403(request, 'table'),
                                               schema=request.get('schema', DEFAULT_SCHEMA),
                                               **request)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     finally:
         conn.close()
     return result
@@ -1456,8 +1443,11 @@ def get_columns(request, context=None):
     if request.get('info_cache'):
         info_cache = {('get_columns',tuple(k.split('+')),tuple()):v for k,v in request.get('info_cache', {}).items()}
 
-    table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
-                                   info_cache=info_cache)
+    try:
+        table_oid = engine.dialect.get_table_oid(connection, table_name, schema,
+                                                 info_cache=info_cache)
+    except sqla.exc.NoSuchTableError as e:
+        raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
                   pg_catalog.format_type(a.atttypid, a.atttypmod),
@@ -1630,7 +1620,7 @@ def _get_default_schema_name(self, connection):
 
 
 def open_raw_connection(request, context):
-    session_context = SessionContext()
+    session_context = SessionContext(owner=context.get('user'))
     return {'connection_id': session_context.connection._id}
 
 
@@ -1641,13 +1631,17 @@ def commit_raw_connection(request, context):
 
 
 def rollback_raw_connection(request, context):
-    connection = load_session_from_context(context).connection
-    connection.rollback()
+    load_session_from_context(context).rollback()
     return __response_success()
 
 
 def close_raw_connection(request, context):
     load_session_from_context(context).close()
+    return __response_success()
+
+
+def close_all_connections(request, context):
+    close_all_for_user(request, context)
     return __response_success()
 
 
@@ -1660,6 +1654,7 @@ def open_cursor(request, context):
 def close_cursor(request, context):
     session_context = load_session_from_context(context)
     cursor_id = int(context['cursor_id'])
+    session_context.close_cursor(cursor_id)
     return {'cursor_id': cursor_id}
 
 
@@ -1892,21 +1887,20 @@ def set_applied(session, table, rid, mode):
 def apply_insert(session, table, row, rid):
     logger.info("apply insert " + str(row))
     query = table.insert().values(row)
-    query = query.compile()
-    session.execute(str(query), query.params)
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __INSERT)
 
 
 def apply_update(session, table, row, rid):
     logger.info("apply update " + str(row))
     pks = [c.name for c in table.columns if c.primary_key]
-    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row).compile()
-    session.execute(str(query), query.params)
+    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row)
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __UPDATE)
 
 
 def apply_deletion(session, table, row, rid):
     logger.info("apply deletion " + str(row))
-    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row]).compile()
-    session.execute(str(query), query.params)
+    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
+    _execute_sqla(query, session)
     set_applied(session, table, rid, __DELETE)

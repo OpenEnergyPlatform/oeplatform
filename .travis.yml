@@ -1,0 +1,30 @@
+language: python
+python:
+  - "3.5"
+cache: pip
+install:
+  - pip install -r requirements.txt
+script:
+  - python manage.py test --noinput
+services:
+  - postgresql
+addons:
+  postgresql: "9.4"
+env:
+  - OEP_DB_USER="postgres" OEP_DB_PASSWORD="" OEDB_USER="postgres" OEDB_PASSWORD=""
+
+before_script:
+  - sudo apt-get update
+  - sudo apt-get autoremove postgis*
+  - sudo apt-get autoremove postgresql*
+  - sudo apt-get install postgresql-9.4-postgis-2.3
+  - wget https://raw.githubusercontent.com/OpenEnergyPlatform/oeplatform-deploy/master/oedb_mini.dump
+  - psql -U postgres -c 'CREATE DATABASE test;'
+  - psql -U postgres -c "CREATE EXTENSION postgis;" test
+  - psql -U postgres -c "CREATE DATABASE oedb"
+  - psql -U postgres -c "CREATE EXTENSION postgis;" oedb
+  - psql -U postgres oedb < oedb_mini.dump
+  - psql -U postgres -c "CREATE DATABASE django"
+  - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
+  - python manage.py migrate
+  - alembic upgrade head

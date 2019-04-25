@@ -1,0 +1,35 @@
+{% extends "base/base.html" %}
+{% load base_tags %}
+{% block content %}
+    <div>
+        <h2>Why am I here?</h2>
+        <div class="well">
+            The OpenEnergy Platform is moving its login functionalities to an internal
+            management for administrative reasons. We remain in full support for the
+            Openmod Initiative and its community. Please enter a new password and an
+            email address your account should be associated with. This has to be done
+            only once. Your data will be used for your account management (i.e. password
+            activation and reset) only.
+
+            Please excuse this additional inconvenience.
+        </div>
+    </div>
+    <hr>
+    <div>
+
+        <form action="" method="post">{% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+                {{ field |addclass:"form-control"}}
+            </div>
+            {% endfor %}
+            <input type="submit" class="btn btn-success" value="Submit" />
+        </form>
+    </div>
+{% endblock %}

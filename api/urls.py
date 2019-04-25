@@ -1,7 +1,6 @@
 from django.conf.urls import url
 
-from api import actions
-from api import views
+from api import actions, views
 
 pgsql_qualifier = r"[\w\d_]+"
 equal_qualifier = r"[\w\d\s\'\=]"
@@ -15,10 +14,10 @@ urlpatterns = [
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$', views.Rows.as_view()),
     url(r'^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$', views.Rows.as_view(),{'action':'new'}),
 
-    url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True)),
-    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert)),
-    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete)),
-    url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update)),
+    url(r'^v0/advanced/search', views.create_ajax_handler(actions.data_search, allow_cors=True, requires_cursor=True)),
+    url(r'^v0/advanced/insert', views.create_ajax_handler(actions.data_insert, requires_cursor=True)),
+    url(r'^v0/advanced/delete', views.create_ajax_handler(actions.data_delete, requires_cursor=True)),
+    url(r'^v0/advanced/update', views.create_ajax_handler(actions.data_update, requires_cursor=True)),
 
     url(r'^v0/advanced/info', views.create_ajax_handler(actions.data_info)),
     url(r'^v0/advanced/has_schema', views.create_ajax_handler(actions.has_schema)),
@@ -37,9 +36,11 @@ urlpatterns = [
     url(r'^v0/advanced/request_dump', views.create_ajax_handler(actions.get_unique_constraints)),
 
     url(r'^v0/advanced/connection/open', views.create_ajax_handler(actions.open_raw_connection)),
-    url(r'^v0/advanced/connection/close', views.create_ajax_handler(actions.close_raw_connection)),
+    url(r'^v0/advanced/connection/close$', views.create_ajax_handler(actions.close_raw_connection)),
     url(r'^v0/advanced/connection/commit', views.create_ajax_handler(actions.commit_raw_connection)),
     url(r'^v0/advanced/connection/rollback', views.create_ajax_handler(actions.rollback_raw_connection)),
+
+    url(r'^v0/advanced/connection/close_all', views.CloseAll.as_view()),
 
     url(r'^v0/advanced/cursor/open', views.create_ajax_handler(actions.open_cursor)),
     url(r'^v0/advanced/cursor/close', views.create_ajax_handler(actions.close_cursor)),
@@ -54,8 +55,6 @@ urlpatterns = [
     url(r'^v0/advanced/do_rollback_twophase', views.create_ajax_handler(actions.do_rollback_twophase)),
     url(r'^v0/advanced/do_commit_twophase', views.create_ajax_handler(actions.do_commit_twophase)),
     url(r'^v0/advanced/do_recover_twophase', views.create_ajax_handler(actions.do_recover_twophase)),
-
-
 
     url(r'^v0/advanced/show_revisions', views.create_ajax_handler(actions.get_unique_constraints)),
 

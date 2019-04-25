@@ -1,26 +1,83 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.auth.forms import ReadOnlyPasswordHashField, SetPasswordForm
+from django.core.exceptions import ValidationError
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from .models import myuser as OepUser, UserPermission
+from .models import myuser as OepUser, ActivationToken
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
+    PasswordChangeForm
 
 
+class CreateUserForm(UserCreationForm):
+    class Meta:
+        model = OepUser
+        fields = ('name', 'affiliation', 'email', 'password1', 'password2')
 
-class UserChangeForm(forms.ModelForm):
+    def save(self, commit=True):
+        user = super(CreateUserForm, self).save(commit=commit)
+        user.send_activation_mail()
+        return user
+
+    def __init__(self, *args, **kwargs):
+        super(CreateUserForm, self).__init__(*args, **kwargs)
+        for key in self.Meta.fields:
+            field = self.fields[key]
+            cstring = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = cstring + 'form-control'
+            if field.required:
+                field.label_suffix = '*'
+
+class EditUserForm(UserChangeForm):
     """A form for updating users. Includes all the fields on
     the user, but replaces the password field with admin's
     password hash display field.
     """
-    password = ReadOnlyPasswordHashField()
 
     class Meta:
         model = OepUser
-        fields = ('name', 'affiliation', 'mail_address')
+        fields = ('name', 'email', 'affiliation', 'description')
+
+    def __init__(self, *args, **kwargs):
+        super(UserChangeForm, self).__init__(*args, **kwargs)
+        for key in self.Meta.fields:
+            field = self.fields[key]
+            cstring = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = cstring + 'form-control'
+            if field.required:
+                field.label_suffix = '*'
 
     def clean_password(self):
-        # Regardless of what the user provides, return the initial value.
-        # This is done here, rather than on the field, because the
-        # field does not have access to the initial value
-        return self.initial["password"]
+        return None
+
+class DetachForm(SetPasswordForm):
+    email = forms.EmailField(label='Mail')
+    email2 = forms.EmailField(label='Mail confirmation')
+
+    def clean_email(self):
+        if not self.data['email'] == self.data['email2']:
+            raise ValidationError('The two email fields didn\'t match.')
+        mail_user = OepUser.objects.filter(mail_address=self.data['email']).first()
+        if mail_user and mail_user != self.user:
+            raise ValidationError('This mail address is already in use.')
+
+    def save(self, commit=True):
+        super(DetachForm, self).save(commit=commit)
+        self.user.mail_address = self.data['email']
+        self.user.is_native = True
+        self.user.is_mail_verified = False
+
+        if commit:
+            self.user.save()
+            self.user.send_activation_mail()
+
+
+class ChangeEmailForm(forms.Form):
+    email = forms.EmailField()
+
+    def save(self, user):
+        user.email = self.cleaned_data['email']
+        user.save()
+        user.send_activation_mail(reset_token=True)
+
 
 class GroupUserForm(forms.ModelForm):
     """
@@ -39,4 +96,3 @@ class GroupUserForm(forms.ModelForm):
         super(GroupUserForm, self).__init__(*args,**kwargs)
         if group_id != "":
             self.fields['groupmembers'].initial = OepUser.objects.filter(groups__id=group_id)
-

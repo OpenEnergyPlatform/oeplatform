@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, StreamingHttpResponse
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.db.models import Q
@@ -33,6 +34,52 @@ logger = logging.getLogger('oeplatform')
 WHERE_EXPRESSION = re.compile('^(?P<first>[\w\d_\.]+)\s*(?P<operator>' \
                               + '|'.join(parser.sql_operators) \
                               + ')\s*(?P<second>(?![>=]).+)$')
+
+
+def load_cursor(f):
+    def wrapper(*args, **kwargs):
+        artificial_connection = 'connection_id' not in args[1].data
+        fetch_all = 'cursor_id' not in args[1].data
+        if fetch_all:
+
+            # django_restframework passes different data dictionaries depending
+            # on the request type: PUT -> Mutable, POST -> Immutable
+            # Thus, we have to replace the data dictionary by one we can mutate.
+            if hasattr(args[1].data, '_mutable'):
+                args[1].data._mutable = True
+            context = {}
+            context['user'] = args[1].user
+            if not artificial_connection:
+                context['connection_id'] = args[1].data['connection_id']
+            else:
+                context.update(actions.open_raw_connection({}, context))
+                args[1].data['connection_id'] = context['connection_id']
+            if 'cursor_id' in args[1].data:
+                context['cursor_id'] = args[1].data['cursor_id']
+            else:
+                context.update(actions.open_cursor({}, context))
+                args[1].data['cursor_id'] = context['cursor_id']
+        try:
+            result = f(*args, **kwargs)
+            if fetch_all:
+                cursor = actions.load_cursor_from_context(context)
+                session = actions.load_session_from_context(context)
+                if not result:
+                    result = {}
+                if cursor.description:
+                    result['description'] = cursor.description
+                    result['rowcount'] = cursor.rowcount
+                    result['data'] = (list(map(actions._translate_fetched_cell, row)) for row in cursor.fetchall())
+                if artificial_connection:
+                    session.connection.commit()
+        finally:
+            if fetch_all:
+                actions.close_cursor({}, context)
+            if artificial_connection:
+                actions.close_raw_connection({}, context)
+        return result
+    return wrapper
+
 
 def cors(allow):
     def doublewrapper(f):
@@ -111,13 +158,13 @@ class Sequence(APIView):
             raise PermissionDenied
         return self.__delete_sequence(request, schema, sequence, request.data)
 
-    @actions.load_cursor
+    @load_cursor
     def __delete_sequence(self, request, schema, sequence, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.drop(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_200_OK)
 
-    @actions.load_cursor
+    @load_cursor
     def __create_sequence(self, request, schema, sequence, jsn):
         seq = sqla.schema.Sequence(sequence, schema=schema)
         seq.create(bind=actions._get_engine())
@@ -241,8 +288,16 @@ class Table(APIView):
         request.user.save()
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-    @actions.load_cursor
+    def validate_column_names(self, column_definitions):
+        """Raise APIError if any column name is invalid"""
+        for c in column_definitions:
+            colname = c['name']
+            if not colname.isidentifier():
+                raise APIError('Invalid column name: %s' % colname)
+
+    @load_cursor
     def __create_table(self, request, schema, table, column_definitions, constraint_definitions):
+        self.validate_column_names(column_definitions)
         context = {'connection_id': actions.get_or_403(request.data,
                                                        'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
@@ -489,7 +544,7 @@ class Rows(APIView):
         actions.apply_changes(schema, table)
         return JsonResponse(result)
 
-    @actions.load_cursor
+    @load_cursor
     def __delete_rows(self, request, schema, table, row_id=None):
         where = request.GET.getlist('where')
         query = {
@@ -534,7 +589,7 @@ class Rows(APIView):
                                       'type': 'operator'} for match in where_splitted]))
         return where_clauses
 
-    @actions.load_cursor
+    @load_cursor
     def __insert_row(self, request, schema, table, row, row_id=None):
         if row_id and row.get('id', int(row_id)) != int(row_id):
             return actions._response_error('The id given in the query does not '
@@ -558,7 +613,7 @@ class Rows(APIView):
 
         return result
 
-    @actions.load_cursor
+    @load_cursor
     def __update_rows(self, request, schema, table, row, row_id=None):
         context = {'connection_id': request.data['connection_id'],
                    'cursor_id': request.data['cursor_id'],
@@ -593,7 +648,7 @@ class Rows(APIView):
 
         return actions.data_update(query, context)
 
-    @actions.load_cursor
+    @load_cursor
     def __get_rows(self, request, data):
         table = actions._get_table(data['schema'], table=data['table'])
         params = {}
@@ -603,7 +658,7 @@ class Rows(APIView):
         if not columns:
             query = table.select()
         else:
-            columns = [getattr(table.c, c) for c in columns]
+            columns = [actions.get_column_obj(table, c) for c in columns]
             query = sqla.select(columns=columns)
 
         where_clauses = data.get('where')
@@ -652,7 +707,7 @@ def date_handler(obj):
 
 # Create your views here.
 
-def create_ajax_handler(func, allow_cors=False):
+def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
@@ -676,12 +731,18 @@ def create_ajax_handler(func, allow_cors=False):
                 result,
                 allow_cors=allow_cors and request.user.is_anonymous)
 
-
-        @actions.load_cursor
         def execute(self, request):
+            if requires_cursor:
+                return load_cursor(self._internal_execute)(self, request)
+            else:
+                return self._internal_execute(request, request)
+
+        def _internal_execute(self, *args):
+            request = args[1]
             content = request.data
-            context = {'user': request.user,
-                       'cursor_id': request.data['cursor_id']}
+            context = {'user': request.user}
+            if 'cursor_id' in request.data:
+                context['cursor_id'] = request.data['cursor_id']
             if 'connection_id' in request.data:
                 context['connection_id'] = request.data['connection_id']
             query = content.get('query', ['{}'])
@@ -697,8 +758,13 @@ def create_ajax_handler(func, allow_cors=False):
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
             response_data = json.loads(json.dumps(data, default=date_handler))
-            return {'content': response_data,
-                    'cursor_id': context['cursor_id']}
+
+            result = {'content': response_data}
+
+            if 'cursor_id' in context:
+                result['cursor_id'] = context['cursor_id']
+
+            return result
 
     return AJAX_View.as_view()
 
@@ -716,7 +782,8 @@ class FetchView(APIView):
         context = {'connection_id': actions.get_or_403(request.data,
                                                  'connection_id'),
                    'cursor_id': actions.get_or_403(request.data,
-                                                       'cursor_id')}
+                                                       'cursor_id'),
+                   'user': request.user}
         return StreamingHttpResponse((part
              for row in fetch(context)
              for part in (self.transform_row(row), '\n')), content_type = 'application/json')
@@ -735,6 +802,12 @@ def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
     if allow_cors:
         response['Access-Control-Allow-Origin'] = '*'
     return response
+
+
+class CloseAll(LoginRequiredMixin, APIView):
+    def get(self, request):
+        sessions.close_all_for_user(request.user)
+        return HttpResponse('All connections closed')
 
 
 def get_users(request):

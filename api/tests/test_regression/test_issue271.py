@@ -50,7 +50,7 @@ class Test271(APITestCase):
                          load_content_as_json(resp).get('reason', 'No reason returned'))
 
     def test_271(self):
-        data = {"query": {"fields": ['name'],
+        data = {"query": {"fields": [dict(type='column',column='name')],
                           "where": [{'type': 'operator', 'operator': '=',
                                      'operands': [
                                          {'type': 'column', 'column': 'name'},
@@ -66,7 +66,7 @@ class Test271(APITestCase):
         self.check_api_post('/api/v0/advanced/search', data=data, expected_result=[['Hans']])
 
     def test_271_column_does_not_exist(self):
-        data = {"query": {"fields": ['does_not_exist'],
+        data = {"query": {"fields": [dict(type='column',column='does_not_exist')],
                           "from": {'type': 'table',
                                    'table': self.test_table,
                                    'schema': self.test_schema}}}

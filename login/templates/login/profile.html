@@ -1,9 +1,63 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% block content %}
-<h1> {{ user.name }} </h1>
-{% if user == request.user and token%}
-    <h3>Your authorization token:</h3> {{ token }}
+<h1> {{ profile_user.name }} </h1>
+<script>
+    function toggler(divId) {
+        $("#" + divId).toggle();
+    }
+</script>
+<table class="table">
+
+    <tr>
+        <th style="width:20%"> Affiliation: </th>
+        <td>
+            {% if profile_user.affiliation %}
+                {{ profile_user.affiliation }}
+            {% elif profile_user == request.user %}
+                <a href="{{profile_user.id}}/edit">Add your affiliation</a>
+            {% else %}
+                -
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th> Description: </th>
+        <td> {% if profile_user.desctiption %}
+                {{ profile_user.description }}
+            {% elif profile_user == request.user %}
+                <a href="{{profile_user.id}}/edit">Add a description</a>
+            {% else %}
+                -
+            {% endif %} </td>
+    </tr>
+</table>
+{% if profile_user == request.user %}
+<h2>Your Security Information</h2>
+<table class="table">
+
+        <tr>
+            <th style="width:20%"> E-Mail: </th>
+            <td> {{ profile_user.email }} </td>
+        </tr>
+        <tr>
+            <th> API-Token: </th>
+            <td>
+                <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
+                <div style="display:none" id="token">
+                {% if token %}
+                     {{ token }}
+                {% endif %}
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th> Password </th>
+            <td>
+                <a href="password_change">Change your password</a>
+            </td>
+        </tr>
+</table>
 {% endif %}
 {% endblock %}
 {% block content-right %}

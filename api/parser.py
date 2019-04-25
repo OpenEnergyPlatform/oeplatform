@@ -97,7 +97,7 @@ def parse_insert(d, context, message=None, mapper=None):
             raw_values = get_or_403(d, 'values')
             if not isinstance(raw_values, list):
                 raise APIError('{} is not a list'.format(raw_values))
-            values = (zip(field_strings, parse_expression(x)) for x in raw_values)
+            values = (zip(field_strings, parse_expression(x, allow_untyped_dicts=True)) for x in raw_values)
         else:
             values = get_or_403(d, 'values')
 
@@ -317,9 +317,11 @@ def parse_column(d, mapper):
         else:
             return column(name)
 
-def parse_expression(d, mapper=None):
+def parse_expression(d, mapper=None, allow_untyped_dicts=False):
     # TODO: Implement
     if isinstance(d, dict):
+        if allow_untyped_dicts and 'type' not in d:
+            return d
         dtype = get_or_403(d, 'type')
         if dtype == 'column':
             return parse_column(d, mapper)
@@ -355,7 +357,7 @@ def parse_expression(d, mapper=None):
         else:
             raise APIError('Unknown expression type: ' + dtype )
     if isinstance(d, list):
-        return [parse_expression(x) for x in d]
+        return [parse_expression(x, allow_untyped_dicts=allow_untyped_dicts) for x in d]
     if isinstance(d, str):
         return d.replace('"','')
     return d

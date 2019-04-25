@@ -8,11 +8,6 @@
         {% load staticfiles %}
         {% block before-header %}{% endblock %}
         <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
-		<script type="text/javascript" src="/static/admin/js/core.js"></script>
-		<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
-		<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
-		<script type="text/javascript" src="/static/admin/js/SelectBox.js"></script>
-		<script type="text/javascript" src="/static/admin/js/SelectFilter2.js"></script>
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
         <title>
             OEP{% block title %}{% endblock %}
@@ -69,11 +64,11 @@
 
             <div class="btn profile-bar">
                 <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
-                <a class="btn-logout" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+                <a class="btn-logout" href="/user/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
 
           {% else %}
-             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+             <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
         </nav>
         

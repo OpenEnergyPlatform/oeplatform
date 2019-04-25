@@ -6,6 +6,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 import requests
 import itertools
@@ -17,7 +18,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
 import dataedit.models as datamodels
-
+from login.mail import send_verification_mail
 NO_PERM = 0
 WRITE_PERM = 4
 DELETE_PERM = 8
@@ -35,6 +36,7 @@ class UserManager(BaseUserManager):
                           affiliation=affiliation, )
 
         user.save(using=self._db)
+        user.send_activation_mail()
         return user
 
     def create_superuser(self, name, mail_address, affiliation):
@@ -100,17 +102,22 @@ class TablePermission(models.Model):
         unique_together = (('table', 'holder'),)
         abstract = True
 
-
 class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
-    affiliation = models.CharField(max_length=50, null=True)
-    mail_address = models.EmailField(verbose_name='email address',
-                                     max_length=255, unique=True, )
+    affiliation = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(verbose_name='email address',
+                              max_length=255, unique=True, )
 
     did_agree = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
+    is_mail_verified = models.BooleanField(default=False)
+
     is_admin = models.BooleanField(default=False)
+
+    is_native = models.BooleanField(default=True)
+
+    description = models.TextField(blank=True)
 
     USERNAME_FIELD = 'name'
 
@@ -154,6 +161,30 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         return permission_level
 
+    def send_activation_mail(self, reset_token=False):
+        token = self._generate_activation_code(reset_token=reset_token)
+        send_verification_mail(self.email, token.value)
+
+    def _generate_activation_code(self, reset_token=False):
+        token = None
+        if reset_token:
+            ActivationToken.objects.filter(user=self).delete()
+        else:
+            token = ActivationToken.objects.filter(user=self).first()
+        if not token:
+            token = ActivationToken(user=self)
+            candidate = PasswordResetTokenGenerator().make_token(self)
+            # Make sure the token is unique
+            while ActivationToken.objects.filter(value=candidate).first():
+                candidate = PasswordResetTokenGenerator().make_token(self)
+            token.value = candidate
+            token.save()
+        return token
+
+class ActivationToken(models.Model):
+    user = models.ForeignKey(myuser)
+    value = models.TextField()
+
 class UserPermission(TablePermission):
     holder = models.ForeignKey(myuser,
                                related_name='table_permissions')
@@ -177,21 +208,43 @@ class GroupMembership(models.Model):
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
-        url = 'https://wiki.openmod-initiative.org/api.php?action=login'
-        data = {'format':'json', 'lgname':username}
+        """
+        There are two possible means of authentication:
 
-        #A first request to receive the required token
-        token_req = requests.post(url, data)
-        data['lgpassword'] = password
-        data['lgtoken'] = token_req.json()['login']['token']
-
-        # A second request for the actual authentication
-        login_req = requests.post(url, data, cookies=token_req.cookies)
-
-        if login_req.json()['login']['result'] == 'Success':
-            return myuser.objects.get_or_create(name=username)[0]
-        else:
+        1. If the user has registered via the OEP he can log in via his password
+           and username.
+        2. If the user is still connected to the openmod-wiki, the
+           authentication falls back to this method.
+        :param username:
+        :param password:
+        :return:
+        """
+        try:
+            user = myuser.objects.get(name=username)
+        except models.ObjectDoesNotExist:
             return None
+
+        if user.is_native:
+            if user.check_password(password):
+                return user
+            else:
+                return None
+        else:
+            url = 'https://wiki.openmod-initiative.org/api.php?action=login'
+            data = {'format':'json', 'lgname':username}
+
+            #A first request to receive the required token
+            token_req = requests.post(url, data)
+            data['lgpassword'] = password
+            data['lgtoken'] = token_req.json()['login']['token']
+
+            # A second request for the actual authentication
+            login_req = requests.post(url, data, cookies=token_req.cookies)
+
+            if login_req.json()['login']['result'] == 'Success':
+                return myuser.objects.get_or_create(name=username)[0]
+            else:
+                return None
 
 
     def get_user(self, user_id):

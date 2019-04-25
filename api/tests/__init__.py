@@ -34,11 +34,11 @@ class APITestCase(TestCase):
         actions.perform_sql("CREATE SCHEMA _schema3")
 
         super(APITestCase, cls).setUpClass()
-        cls.user, _ = myuser.objects.get_or_create(name='MrTest', mail_address='mrtest@test.com')
+        cls.user, _ = myuser.objects.get_or_create(name='MrTest', email='mrtest@test.com')
         cls.user.save()
         cls.token = Token.objects.get(user=cls.user)
 
-        cls.other_user, _ = myuser.objects.get_or_create(name='NotMrTest', mail_address='notmrtest@test.com')
+        cls.other_user, _ = myuser.objects.get_or_create(name='NotMrTest', email='notmrtest@test.com')
         cls.other_user.save()
         cls.other_token = Token.objects.get(user=cls.other_user)
 

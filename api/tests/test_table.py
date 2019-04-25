@@ -11,14 +11,16 @@ _TYPES = ['bigint', 'bit', 'boolean', 'char', 'date', 'decimal', 'float',
 _TYPEMAP = {
     'char': 'character',
     'decimal': 'numeric',
-    'float': 'double precision',
+    'float': 'numeric',
     'int': 'integer',
     'nchar': 'character',
     'timestamp': 'timestamp without time zone',
     'time': 'time without time zone',
     'varchar': 'character varying',
     'character varying': 'character varying',
-    'bigserial': 'bigint'
+    'bigserial': 'bigint',
+    'bit': 'bytea',
+    'double precision': 'numeric'
 }
 
 
@@ -38,12 +40,13 @@ class TestPut(APITestCase):
                 # We are able to use a list instead of a dictonary to get better iteration possibilities.
                 if key != 'name':
                     value = column[key]
-                    covalue = body['columns'][column['name']][key]
+                    name = column['name']
+                    covalue = body['columns'][name][key]
                     if key == 'data_type':
                         value = _TYPEMAP.get(value, value)
 
                     self.assertEqual(value, covalue,
-                                     "Key '{key}' does not match.".format(key=key))
+                                     "Key '{key}' does not match for column {name}.".format(key=key, name=name))
 
         self.assertEqual(response.status_code, 200, "Status Code is not 200.")
 
