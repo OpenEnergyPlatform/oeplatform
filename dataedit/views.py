@@ -1143,6 +1143,9 @@ class SearchView(View):
         filter_tags = [int(key[len('select_'):]) for key in request.POST if
                        key.startswith('select_')]
 
+        for tag_id in filter_tags:
+            increment_usage_count(tag_id)
+
         tag_agg = array_agg(Table_tags.tag)
         query = session.query(search_view.c.schema.label('schema'),
                               search_view.c.table.label('table'),
