@@ -1146,7 +1146,7 @@ class SearchView(View):
         for tag_id in filter_tags:
             increment_usage_count(tag_id)
 
-        tag_agg = array_agg(Table_tags.tag)
+        tag_agg = array_agg(TableTags.tag)
         query = session.query(search_view.c.schema.label('schema'),
                               search_view.c.table.label('table'),
                               tag_agg).outerjoin(TableTags, (
