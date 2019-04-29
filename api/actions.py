@@ -6,6 +6,7 @@ from datetime import datetime
 
 import psycopg2
 import sqlalchemy as sqla
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
 from sqlalchemy import exc, func, MetaData, sql, Table, types as sqltypes, util,\
@@ -27,6 +28,8 @@ from api.sessions import load_cursor_from_context, load_session_from_context, Se
 from dataedit.models import Table as DBTable
 import login.models as login_models
 from oeplatform.securitysettings import PLAYGROUNDS
+from dataedit.structures import MetaSearch
+from sqlalchemy.sql.expression import func
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -1904,3 +1907,23 @@ def apply_deletion(session, table, row, rid):
     query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
     _execute_sqla(query, session)
     set_applied(session, table, rid, __DELETE)
+
+
+def update_meta_search(session, table, schema, insert_only=False):
+    exists = False
+    if not schema:
+        schema = 'public'
+    if not insert_only:
+        # If it is not known whether the table is already registered,
+        # we have to check whether it is.
+        exists = session.bind().has_table(table, schema=schema)
+    if not exists:
+        meta = MetaData(bind=session.bind)
+        t = sqla.Table(table, meta, schema=schema, autoload=True)
+        comment = t.comment
+        session.execute(sqla.insert(MetaSearch, values=[dict(table=table,
+                             schema=schema,
+                             comment=sa.cast(" ".join((schema,
+                                                       table,
+                                                       comment if comment else '')),
+                                             TSVECTOR))]))
