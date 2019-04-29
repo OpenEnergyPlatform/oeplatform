@@ -1079,8 +1079,8 @@ def get_all_tags(schema=None, table=None):
 def sort_tags_by_popularity(tags):
 
     def key_func(tag):
-        track_time = datetime.datetime.utcnow() - tag["usage_tracked_since"]
-        return tag["usage_count"] / track_time.total_seconds()
+        track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
+        return tag["usage_count"]
 
     tags.sort(reverse=True, key=key_func)
     return tags
