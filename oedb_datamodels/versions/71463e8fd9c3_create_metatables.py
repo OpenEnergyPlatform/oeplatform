@@ -29,7 +29,7 @@ def upgrade():
             op.create_table(
                 '_edit_base',
                 sa.Column('_id', sa.BigInteger, primary_key=True, autoincrement=True),
-                sa.Column('_message', sa.String(500), nullable=False),
+                sa.Column('_message', sa.String(500), nullable=True),
                 sa.Column('_user', sa.String(50), nullable=False),
                 sa.Column('_submitted', sa.TIMESTAMP, nullable=False, server_default=sa.text("now()")),
                 sa.Column('_autocheck', sa.Boolean, nullable=False, default=False),
