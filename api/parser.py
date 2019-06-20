@@ -558,6 +558,8 @@ def parse_sqla_operator(raw_key, *operands):
             return fun.concat(x,y)
         if key in ['is not']:
             return x.isnot(y)
+        if key in ['<->']:
+            return x.distance_centroid(y)
         if key in ['getitem']:
             if isinstance(y, Slice):
                 return x[parse_single(y.start, int):parse_single(y.stop, int)]
