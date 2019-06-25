@@ -309,8 +309,8 @@ def parse_column(d, mapper):
         else:
             schema_name = None
         table = load_table_from_metadata(table_name, schema_name=schema_name)
-    if table is not None and hasattr(table.c, name):
-        return getattr(table.c, name)
+    if table is not None and name in table.c:
+        return table.c[name]
     else:
         if is_literal:
             return literal_column(name)
