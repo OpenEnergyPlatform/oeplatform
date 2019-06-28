@@ -13,7 +13,8 @@ from sqlalchemy.schema import Sequence
 import sqlalchemy as sa
 from api.error import APIError, APIKeyError
 from api.connection import _get_engine
-
+from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
+from sqlalchemy.dialects.postgresql.base import INTERVAL
 from . import DEFAULT_SCHEMA
 
 import geoalchemy2  # Although this import seems unused is has to be here
@@ -310,7 +311,10 @@ def parse_column(d, mapper):
             schema_name = None
         table = load_table_from_metadata(table_name, schema_name=schema_name)
     if table is not None and name in table.c:
-        return table.c[name]
+        col = table.c[name]
+        if isinstance(col.type, INTERVAL):
+            col.type = Interval(col.type)
+        return col
     else:
         if is_literal:
             return literal_column(name)
