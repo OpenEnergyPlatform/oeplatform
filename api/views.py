@@ -757,6 +757,11 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
 
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
+            if isinstance(data, dict) and 'domains' in data:
+                for key in data['domains']:
+                    if isinstance(key, tuple):
+                        data['domains']['.'.join(key)] = data['domains'][key]
+                        del data['domains'][key]
             response_data = json.loads(json.dumps(data, default=date_handler))
 
             result = {'content': response_data}
