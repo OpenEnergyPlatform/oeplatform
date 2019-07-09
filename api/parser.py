@@ -19,6 +19,9 @@ from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
+from api.connection import _get_engine
+from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
+from sqlalchemy.dialects.postgresql.base import INTERVAL
 
 from . import DEFAULT_SCHEMA
 
