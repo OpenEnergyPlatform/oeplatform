@@ -1,6 +1,7 @@
-from django import template
-from dataedit import models
 import webcolors
+from django import template
+
+from dataedit import models
 from dataedit.views import get_all_tags, get_popular_tags
 
 register = template.Library()

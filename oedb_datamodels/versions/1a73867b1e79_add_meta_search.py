@@ -5,10 +5,11 @@ Revises: 1c6e2fb3d3b6
 Create Date: 2019-04-29 11:47:04.783168
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.session import sessionmaker
+
 from api.actions import update_meta_search
 
 # revision identifiers, used by Alembic.

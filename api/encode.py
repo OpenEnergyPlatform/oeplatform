@@ -1,6 +1,7 @@
-from django.core.serializers.json import DjangoJSONEncoder
-from json.encoder import encode_basestring, encode_basestring_ascii, INFINITY
+from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType
+
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 class GeneratorJSONEncoder(DjangoJSONEncoder):

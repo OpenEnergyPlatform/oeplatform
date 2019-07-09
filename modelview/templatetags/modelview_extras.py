@@ -1,13 +1,14 @@
-from django import template
-import matplotlib.pyplot as plt
-import urllib3
-import json
 import datetime
-from scipy import stats
+import json
+
+import matplotlib.pyplot as plt
 import numpy
-from django.utils.safestring import mark_safe
-from django.utils.html import format_html, escape
+import urllib3
+from django import template
 from django.contrib.postgres.forms.array import SimpleArrayField
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
+from scipy import stats
 
 register = template.Library()
 

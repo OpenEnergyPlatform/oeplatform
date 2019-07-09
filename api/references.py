@@ -1,18 +1,10 @@
 # coding: utf-8
-from sqlalchemy import (
-    Boolean,
-    Column,
-    create_engine,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    text,
-)
-from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.orm import relationship, Session
-from sqlalchemy.ext.declarative import declarative_base
 import bibtexparser as btp
+from sqlalchemy import (Boolean, Column, ForeignKey, Integer, String, Text,
+                        create_engine, text)
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, relationship
 
 Base = declarative_base()
 metadata = Base.metadata

@@ -1,34 +1,30 @@
+import csv
+import itertools
 import json
+import logging
 import re
 import time
 from decimal import Decimal
 
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, StreamingHttpResponse
-from django.http import JsonResponse
+import geoalchemy2  # Although this import seems unused is has to be here
+import sqlalchemy as sqla
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.http import (Http404, HttpResponse, JsonResponse,
+                         StreamingHttpResponse)
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
-from django.db.models import Q
-
-import login.models as login_models
-import api.parser
-from api import actions, parser, sessions
-from api.helpers.http import ModHttpResponse
-from api.encode import GeneratorJSONEncoder, Echo
-from api.error import APIError
-from rest_framework.views import APIView
-from dataedit.models import Table as DBTable
-
 from rest_framework import status
-from django.http import Http404
+from rest_framework.views import APIView
 
-import sqlalchemy as sqla
-import csv
-import geoalchemy2  # Although this import seems unused is has to be here
-
-import logging
-import itertools
+import api.parser
+import login.models as login_models
+from api import actions, parser, sessions
+from api.encode import Echo, GeneratorJSONEncoder
+from api.error import APIError
+from api.helpers.http import ModHttpResponse
+from dataedit.models import Table as DBTable
 
 logger = logging.getLogger("oeplatform")
 

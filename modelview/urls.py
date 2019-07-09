@@ -1,8 +1,8 @@
 from django.conf.urls import url
+from django.conf.urls.static import static
 
 from modelview import views
 from oeplatform import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
     url(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),

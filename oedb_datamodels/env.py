@@ -1,19 +1,22 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
+
+import os
+import sys
 from logging.config import fileConfig
 
+import django
+from alembic import context
+from alembic.config import Config
+from sqlalchemy import engine_from_config, pool
 
-import os, django, sys
+import dataedit.structures
+from api.connection import _get_engine, get_connection_string
+from base.structures import metadata as target_metadata
 
 sys.path.append(".")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
 django.setup()
 
-from api.connection import get_connection_string, _get_engine
-from base.structures import metadata as target_metadata
-import dataedit.structures
-from alembic.config import Config
 
 alembic_cfg = Config()
 alembic_cfg.set_main_option("url", get_connection_string())

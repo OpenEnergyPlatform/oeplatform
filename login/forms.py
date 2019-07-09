@@ -1,13 +1,13 @@
 from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField, SetPasswordForm
-from django.core.exceptions import ValidationError
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from .models import myuser as OepUser, ActivationToken
-from django.contrib.auth.forms import (
-    UserCreationForm,
-    UserChangeForm,
-    PasswordChangeForm,
-)
+from django.contrib.auth.forms import (PasswordChangeForm,
+                                       ReadOnlyPasswordHashField,
+                                       SetPasswordForm, UserChangeForm,
+                                       UserCreationForm)
+from django.core.exceptions import ValidationError
+
+from .models import ActivationToken
+from .models import myuser as OepUser
 
 
 class CreateUserForm(UserCreationForm):

@@ -1,36 +1,31 @@
+import csv
 import datetime
 import json
 import os
 import re
 from collections import OrderedDict
-import csv
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 import urllib3
-
-from scipy import stats
-from sqlalchemy.orm import sessionmaker
-
 from django.conf import settings as djangoSettings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
-
+from scipy import stats
+from sqlalchemy.orm import sessionmaker
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
-from .forms import (
-    EnergymodelForm,
-    EnergyframeworkForm,
-    EnergyscenarioForm,
-    EnergystudyForm,
-)
-from .models import Energymodel, Energyframework, Energyscenario, Energystudy
+
+from .forms import (EnergyframeworkForm, EnergymodelForm, EnergyscenarioForm,
+                    EnergystudyForm)
+from .models import Energyframework, Energymodel, Energyscenario, Energystudy
 
 
 def getClasses(sheettype):

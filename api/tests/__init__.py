@@ -1,14 +1,16 @@
 import json
 
-from .util import load_content, load_content_as_json, content2json
-from django.test import TestCase, Client
+from django.test import Client, TestCase
+from rest_framework.authtoken.models import Token
+
 from api import actions
+from login.models import myuser
+
+from .util import content2json, load_content, load_content_as_json
 
 # Create your tests here.
 
-from login.models import myuser
 
-from rest_framework.authtoken.models import Token
 
 
 class APITestCase(TestCase):

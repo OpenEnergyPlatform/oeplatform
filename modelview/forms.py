@@ -1,5 +1,8 @@
 from django.forms import ModelForm
-from modelview.models import Energymodel, Energyframework, Energyscenario, Energystudy
+
+from modelview.models import (Energyframework, Energymodel, Energyscenario,
+                              Energystudy)
+
 
 # Create the form class.
 class EnergymodelForm(ModelForm):

@@ -1,16 +1,20 @@
-from django.shortcuts import get_object_or_404, render, redirect, render_to_response
-from django.views.generic import View, FormView
-from django.views.generic.edit import UpdateView
 from django import forms
-from .models import myuser as OepUser, GroupMembership, ADMIN_PERM, UserGroup
-from .forms import CreateUserForm, EditUserForm, DetachForm, ChangeEmailForm
-from django.contrib.auth.models import Group
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-import login.models as models
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
-from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
+from django.contrib.auth.views import PasswordChangeView, PasswordResetView
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.http import Http404
+from django.shortcuts import (get_object_or_404, redirect, render,
+                              render_to_response)
+from django.views.generic import FormView, View
+from django.views.generic.edit import UpdateView
+
+import login.models as models
+
+from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm
+from .models import ADMIN_PERM, GroupMembership, UserGroup
+from .models import myuser as OepUser
 
 
 class ProfileView(View):

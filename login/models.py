@@ -1,23 +1,21 @@
-from django.db import models
-from django.contrib import auth
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import PermissionsMixin
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.models import User
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-
-import requests
 import itertools
 import json
 
+import requests
 from django.conf import settings
+from django.contrib import auth
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        Group, PermissionsMixin, User)
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-import oeplatform.securitysettings as sec
+
 import dataedit.models as datamodels
+import oeplatform.securitysettings as sec
 from login.mail import send_verification_mail
 
 NO_PERM = 0

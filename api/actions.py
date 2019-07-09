@@ -1,53 +1,39 @@
 import itertools
 import json
+import logging
 import re
 import traceback
 from datetime import datetime
 
+import geoalchemy2  # Although this import seems unused is has to be here
 import psycopg2
-import sqlalchemy as sqla
-from sqlalchemy.dialects.postgresql import TSVECTOR
+import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
-from sqlalchemy import (
-    exc,
-    func,
-    MetaData,
-    sql,
-    Table,
-    types as sqltypes,
-    util,
-    Column,
-    ForeignKey,
-)
-import sqlalchemy as sa
+from shapely import wkb, wkt
+from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
+from sqlalchemy import types as sqltypes
+from sqlalchemy import util
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-
-import geoalchemy2  # Although this import seems unused is has to be here
+from sqlalchemy.sql import column
+from sqlalchemy.sql.expression import func
 
 import api
-from api import references, DEFAULT_SCHEMA
-from api.parser import read_pgid, read_bool, get_or_403
-from api.error import APIError
-from shapely import wkb, wkt
-from sqlalchemy.sql import column
-from api.connection import _get_engine
-from api.sessions import (
-    load_cursor_from_context,
-    load_session_from_context,
-    SessionContext,
-    close_all_for_user,
-)
-from dataedit.models import Table as DBTable
 import login.models as login_models
-from oeplatform.securitysettings import PLAYGROUNDS
+from api import DEFAULT_SCHEMA, references
+from api.connection import _get_engine
+from api.error import APIError
+from api.parser import get_or_403, read_bool, read_pgid
+from api.sessions import (SessionContext, close_all_for_user,
+                          load_cursor_from_context, load_session_from_context)
+from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
-from sqlalchemy.sql.expression import func
+from oeplatform.securitysettings import PLAYGROUNDS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
-import logging
 
 logger = logging.getLogger("oeplatform")
 

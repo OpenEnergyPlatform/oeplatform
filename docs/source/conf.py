@@ -12,12 +12,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
 import shlex
-
 import sys
 from unittest.mock import MagicMock
+
+import django
+from django.conf import settings
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -26,8 +27,6 @@ from unittest.mock import MagicMock
 
 # -- General configuration ------------------------------------------------
 
-import django
-from django.conf import settings
 
 settings.configure()
 django.setup()

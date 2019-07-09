@@ -5,12 +5,11 @@ Revises:
 Create Date: 2017-09-18 17:48:59.971501
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.orm import sessionmaker
 
 from api.connection import _get_engine
-
 
 # revision identifiers, used by Alembic.
 revision = "71463e8fd9c3"

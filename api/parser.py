@@ -4,31 +4,23 @@
 import decimal
 import re
 from datetime import datetime
-from sqlalchemy import (
-    Table,
-    MetaData,
-    Column,
-    select,
-    column,
-    func,
-    literal_column,
-    and_,
-    or_,
-    util,
-)
-from sqlalchemy.sql.expression import CompoundSelect, ColumnClause
-from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.annotation import Annotated
-from sqlalchemy.sql import functions as fun
-from sqlalchemy.schema import Sequence
-import sqlalchemy as sa
-from api.error import APIError, APIKeyError
-from api.connection import _get_engine
-from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
-from sqlalchemy.dialects.postgresql.base import INTERVAL
-from . import DEFAULT_SCHEMA
 
 import geoalchemy2  # Although this import seems unused is has to be here
+import sqlalchemy as sa
+from sqlalchemy import (Column, MetaData, Table, and_, column, func,
+                        literal_column, or_, select, util)
+from sqlalchemy.dialects.postgresql.base import INTERVAL
+from sqlalchemy.schema import Sequence
+from sqlalchemy.sql import functions as fun
+from sqlalchemy.sql.annotation import Annotated
+from sqlalchemy.sql.elements import Slice
+from sqlalchemy.sql.expression import ColumnClause, CompoundSelect
+from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
+
+from api.connection import _get_engine
+from api.error import APIError, APIKeyError
+
+from . import DEFAULT_SCHEMA
 
 __KNOWN_TABLES = {}
 

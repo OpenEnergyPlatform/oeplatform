@@ -1,9 +1,11 @@
-from . import APITestCase
-from .util import load_content, load_content_as_json, content2json
-from api import actions
 import json
 
-from shapely import wkt, wkb
+from shapely import wkb, wkt
+
+from api import actions
+
+from . import APITestCase
+from .util import content2json, load_content, load_content_as_json
 
 
 class TestPut(APITestCase):

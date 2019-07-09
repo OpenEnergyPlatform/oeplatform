@@ -1,7 +1,7 @@
 import json
 
-from api.tests import APITestCase
 from api import actions
+from api.tests import APITestCase
 
 _TYPES = [
     "bigint",

@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
 from alembic.config import main
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):

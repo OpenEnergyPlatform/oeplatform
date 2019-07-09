@@ -1,7 +1,7 @@
 from django import forms
 from django.db import models
-
 from django.forms import ModelForm
+
 from dataedit.models import Tag
 
 # This structure maps postgresql data types to django forms

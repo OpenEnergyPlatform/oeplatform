@@ -1,17 +1,17 @@
-from egoio.db_tables import reference as ref
-from sqlalchemy.orm import relationship, Session
+import datetime
+import io
 
-from django.shortcuts import render, redirect
+import bibtexparser as btp
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-from sqlalchemy import create_engine, MetaData
-import bibtexparser as btp
-from api.actions import _get_engine
+from django.shortcuts import redirect, render
 from django.views.generic import View
-import datetime
+from egoio.db_tables import reference as ref
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.orm import Session, relationship
+
+from api.actions import _get_engine
 from literature import forms
-import io
 
 # Create your views here.
 

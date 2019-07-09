@@ -1,9 +1,10 @@
 import csv
+import datetime
 import json
 import os
 import re
 import threading
-import datetime, time
+import time
 from functools import reduce
 from io import TextIOWrapper
 from operator import add
@@ -12,10 +13,10 @@ from wsgiref.util import FileWrapper
 
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, Http404, JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import PermissionDenied
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
@@ -25,17 +26,15 @@ from sqlalchemy.orm import sessionmaker
 import api.actions as dba
 import api.parser
 import oeplatform.securitysettings as sec
-from api import actions
-from dataedit.models import Table
-from dataedit.structures import TableTags, Tag
-from dataedit.models import View as DBView
-from dataedit.models import Filter as DBFilter
-from login import models as login_models
-from .models import TableRevision
-
+from api import actions as dba
 from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+from dataedit.models import Filter as DBFilter
+from dataedit.models import Table
+from dataedit.models import View as DBView
+from dataedit.structures import TableTags, Tag
+from login import models as login_models
 
-from operator import add
+from .models import TableRevision
 
 session = None
 

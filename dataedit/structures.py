@@ -1,19 +1,9 @@
-from sqlalchemy import (
-    BigInteger,
-    Boolean,
-    Column,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Table,
-    Text,
-    text,
-)
+from sqlalchemy import (BigInteger, Boolean, Column, DateTime, Float,
+                        ForeignKey, Integer, String, Table, Text, text)
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.sql.expression import func
 from sqlalchemy.schema import PrimaryKeyConstraint
+from sqlalchemy.sql.expression import func
+
 from base.structures import Base
 
 

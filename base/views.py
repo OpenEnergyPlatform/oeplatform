@@ -1,11 +1,13 @@
-from django.shortcuts import render
-from django.views.generic import View
-import oeplatform.securitysettings as sec
-from django.core.mail import send_mail
-from base.forms import ContactForm
-import markdown2
 import os
 import re
+
+import markdown2
+from django.core.mail import send_mail
+from django.shortcuts import render
+from django.views.generic import View
+
+import oeplatform.securitysettings as sec
+from base.forms import ContactForm
 
 # Create your views here.
 
