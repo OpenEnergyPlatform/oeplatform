@@ -45,6 +45,9 @@ def redir(request, target):
 
 
 class ContactView(View):
+    error_css_class = 'error'
+    required_css_class = 'required'
+
     def post(self, request):
         form = ContactForm(data=request.POST)
         if form.is_valid():
@@ -58,13 +61,14 @@ class ContactView(View):
                 fail_silently=False,
             )
             return render(request, 'base/contact.html', {'form': ContactForm(),
-                                                         'success':True})
+                                                         'success': True})
         else:
             return render(request, 'base/contact.html', {'form': form,
                                                          'success': False})
     def get(self, request):
+        form = ContactForm()
         return render(request, 'base/contact.html',
-                      {'form': ContactForm(), 'success': False})
+                      {'form': form, 'success': False})
 
 
 def robot(request):
