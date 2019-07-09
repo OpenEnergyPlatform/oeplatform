@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '46fb02acc3b1'
-down_revision = '71463e8fd9c3'
+revision = "46fb02acc3b1"
+down_revision = "71463e8fd9c3"
 branch_labels = None
 depends_on = None
 
@@ -19,17 +19,18 @@ depends_on = None
 def upgrade():
 
     op.create_table(
-        'api_columns',
-        sa.Column('column_name', sa.String(50)),
-        sa.Column('not_null', sa.Boolean),
-        sa.Column('data_type', sa.String(50)),
-        sa.Column('new_name', sa.String(50)),
-        sa.Column('reviewed', sa.Boolean, default=False),
-        sa.Column('changed', sa.Boolean, default=False),
-        sa.Column('id', sa.BigInteger, nullable=False, primary_key=True),
-        sa.Column('c_schema', sa.String(50)),
-        sa.Column('c_table', sa.String(50))
+        "api_columns",
+        sa.Column("column_name", sa.String(50)),
+        sa.Column("not_null", sa.Boolean),
+        sa.Column("data_type", sa.String(50)),
+        sa.Column("new_name", sa.String(50)),
+        sa.Column("reviewed", sa.Boolean, default=False),
+        sa.Column("changed", sa.Boolean, default=False),
+        sa.Column("id", sa.BigInteger, nullable=False, primary_key=True),
+        sa.Column("c_schema", sa.String(50)),
+        sa.Column("c_table", sa.String(50)),
     )
 
+
 def downgrade():
-    op.drop_table('api_columns')
+    op.drop_table("api_columns")

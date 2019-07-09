@@ -9,175 +9,667 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0003_basicfactsheet_energyframework_energymodel'),
-    ]
+    dependencies = [("modelview", "0003_basicfactsheet_energyframework_energymodel")]
 
     operations = [
         migrations.CreateModel(
-            name='Energyscenario',
+            name="Energyscenario",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name_of_the_study', models.CharField(help_text='What is the name of the study?', max_length=100, verbose_name='Name of the study')),
-                ('author_Institution', models.CharField(help_text='Who are the authors of the study and for which institution do they work?', max_length=100, verbose_name='Author, Institution')),
-                ('client', models.CharField(help_text='Who are the customers requesting the study?', max_length=100, verbose_name='Client')),
-                ('funding_private', models.BooleanField(verbose_name='private')),
-                ('funding_public', models.BooleanField(verbose_name='public')),
-                ('funding_no_funding', models.BooleanField(verbose_name='no funding')),
-                ('citation_reference', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100, verbose_name='Citation reference'), size=None)),
-                ('citation_doi', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100, verbose_name='Citation doi'), size=None)),
-                ('aim', models.CharField(help_text='What is the purpose (hypothesis) and research question of the study?', max_length=100, verbose_name='Aim')),
-                ('new_aspects', models.CharField(help_text='What is new? (beyond state of research)', max_length=100, verbose_name='New aspects')),
-                ('spatial_Geographical_coverage', models.CharField(help_text='Which geographical region is adressed in the study?', max_length=100, verbose_name='Spatial / Geographical coverage')),
-                ('time_frame_2020', models.BooleanField(verbose_name='2020')),
-                ('time_frame_2030', models.BooleanField(verbose_name='2030')),
-                ('time_frame_2050', models.BooleanField(verbose_name='2050')),
-                ('time_frame_other', models.BooleanField(verbose_name='other')),
-                ('time_frame_other_text', models.CharField(max_length=100)),
-                ('time_frame_2_target_year', models.BooleanField(verbose_name='target year')),
-                ('time_frame_2_transformation_path', models.BooleanField(verbose_name='transformation path')),
-                ('tools_other', models.CharField(help_text='Which model(s) and other tools have been used?', max_length=100, verbose_name='Tools')),
-                ('modeled_energy_sectors_electricity', models.BooleanField(verbose_name='electricity')),
-                ('modeled_energy_sectors_heat', models.BooleanField(verbose_name='heat')),
-                ('modeled_energy_sectors_liquid_fuels', models.BooleanField(verbose_name='liquid fuels')),
-                ('modeled_energy_sectors_gas', models.BooleanField(verbose_name='gas')),
-                ('modeled_energy_sectors_oil', models.BooleanField(verbose_name='oil')),
-                ('modeled_energy_sectors_others', models.BooleanField(verbose_name='others')),
-                ('modeled_energy_sectors_others_text', models.CharField(max_length=100)),
-                ('modeled_demand_sectors_households', models.BooleanField(verbose_name='households')),
-                ('modeled_demand_sectors_industry', models.BooleanField(verbose_name='industry')),
-                ('modeled_demand_sectors_commercial_sector', models.BooleanField(verbose_name='commercial sector')),
-                ('modeled_demand_sectors_transport', models.BooleanField(verbose_name='transport')),
-                ('economic_behavioral_perfect', models.BooleanField(verbose_name='single fictive decision-maker with perfect knowledge (perfect foresight optimization)')),
-                ('economic_behavioral_myopic', models.BooleanField(verbose_name='single fictive decision-maker with myopic foresight (time-step optimization)')),
-                ('economic_behavioral_qualitative', models.BooleanField(verbose_name='decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)')),
-                ('economic_behavioral_agentbased', models.BooleanField(verbose_name='representation of heterogenous decision rules for multiple agents (agent-based approach)')),
-                ('economic_behavioral_other', models.BooleanField(verbose_name='other')),
-                ('economic_behavioral_other_text', models.CharField(max_length=100)),
-                ('renewables_PV', models.BooleanField(verbose_name='PV')),
-                ('renewables_wind', models.BooleanField(verbose_name='wind')),
-                ('renewables_hydro', models.BooleanField(verbose_name='hydro')),
-                ('renewables_biomass', models.BooleanField(verbose_name='biomass')),
-                ('renewables_biogas', models.BooleanField(verbose_name='biogas')),
-                ('renewables_solar', models.BooleanField(verbose_name='solar thermal')),
-                ('renewables_others', models.BooleanField(verbose_name='others')),
-                ('renewables_others_text', models.CharField(max_length=100)),
-                ('conventional_generation_gas', models.BooleanField(verbose_name='gas')),
-                ('conventional_generation_coal', models.BooleanField(verbose_name='coal')),
-                ('conventional_generation_oil', models.BooleanField(verbose_name='oil')),
-                ('conventional_generation_liquid', models.BooleanField(verbose_name='liquid fuels')),
-                ('conventional_generation_nuclear', models.BooleanField(verbose_name='nuclear')),
-                ('CHP', models.BooleanField(verbose_name='CHP')),
-                ('networks_electricity_gas_heat', models.BooleanField(verbose_name='heat')),
-                ('storages_battery', models.BooleanField(verbose_name='battery')),
-                ('storages_kinetic', models.BooleanField(verbose_name='kinetic')),
-                ('storages_CAES', models.BooleanField(verbose_name='CAES')),
-                ('storages_PHS', models.BooleanField(verbose_name='PHS')),
-                ('storages_chemical', models.BooleanField(verbose_name='chemical')),
-                ('economic_focuses_included', models.CharField(help_text='Have there been economic focusses/sectors included?', max_length=100, verbose_name='Economic focuses included')),
-                ('social_focuses_included', models.CharField(help_text='Have there been social focusses/sectors included? ', max_length=100, verbose_name='Social focuses included')),
-                ('endogenous_variables', models.CharField(help_text='Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)', max_length=100, verbose_name='Endogenous variables')),
-                ('sensitivities', models.BooleanField(help_text='Have there been sensitivities?', verbose_name='Sensitivities')),
-                ('time_steps_anual', models.BooleanField(verbose_name='anual')),
-                ('time_steps_hour', models.BooleanField(verbose_name='hour')),
-                ('time_steps_15_min', models.BooleanField(verbose_name='15 min')),
-                ('time_steps_1_min', models.BooleanField(verbose_name='1 min')),
-                ('time_steps_sec', models.BooleanField(verbose_name='sec')),
-                ('time_steps_other', models.BooleanField(verbose_name='other')),
-                ('time_steps_other_text', models.CharField(max_length=100)),
-                ('exogenous_time_series_used_climate', models.BooleanField(verbose_name='climate')),
-                ('exogenous_time_series_used_feedin', models.BooleanField(verbose_name='feed-in')),
-                ('exogenous_time_series_used_loadcurves', models.BooleanField(verbose_name='load-curves')),
-                ('exogenous_time_series_used_others', models.BooleanField(verbose_name='others')),
-                ('exogenous_time_series_used_others_text', models.CharField(max_length=100)),
-                ('technical_data', models.CharField(help_text='What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?', max_length=100, verbose_name='Technical data + usage')),
-                ('social_data', models.CharField(help_text='What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?', max_length=100, verbose_name='Social data')),
-                ('economical_data', models.CharField(help_text='What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?', max_length=100, verbose_name='Economical data')),
-                ('ecological_data', models.CharField(help_text='What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?', max_length=100, verbose_name='Ecological data')),
-                ('preProcessing', models.CharField(help_text='Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.', max_length=100, verbose_name='Pre-Processing')),
-                ('name_of_scenario', models.CharField(help_text='What is the name of the scenario?', max_length=100, verbose_name='Name of the Scenario')),
-                ('name_of_study', models.URLField(help_text='Which study does the scenario belong to?', verbose_name='Name of the study')),
-                ('energy_saving_amount', models.SmallIntegerField(help_text='development of energy savings or efficiency', verbose_name='Energy saving')),
-                ('energy_saving_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('energy_saving_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('energy_saving_ne', models.BooleanField(verbose_name='not estimated')),
-                ('potential_energy_savings_amount', models.SmallIntegerField(help_text='How was the potential of energy savings determined?', verbose_name='Potential energy saving')),
-                ('potential_energy_savings_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('potential_energy_savings_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('potential_energy_savings_ne', models.BooleanField(verbose_name='not estimated')),
-                ('emission_reductions_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('emission_reductions_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('emission_reductions_ne', models.BooleanField(verbose_name='not estimated')),
-                ('share_RE_amount', models.SmallIntegerField(help_text='Development of renewable energy in the power sector', verbose_name='Share RE (power sector)')),
-                ('share_RE_power_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('share_RE_power_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('share_RE_power_ne', models.BooleanField(verbose_name='not estimated')),
-                ('share_RE_heat_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('share_RE_heat_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('share_RE_heat_ne', models.BooleanField(verbose_name='not estimated')),
-                ('share_RE_mobility_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('share_RE_mobility_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('share_RE_mobility_ne', models.BooleanField(verbose_name='not estimated')),
-                ('emission_reductions_amount', models.SmallIntegerField(help_text='development of total renewable energy supply', verbose_name='Share RE (total energy supply)')),
-                ('share_RE_total_until', models.BooleanField(verbose_name='[x] % until [20xx]')),
-                ('share_RE_total_per', models.BooleanField(verbose_name='[x] % per [year]')),
-                ('share_RE_total_ne', models.BooleanField(verbose_name='not estimated')),
-                ('cost_development_capex', models.BooleanField(verbose_name='capex')),
-                ('cost_development_opex', models.BooleanField(verbose_name='opex')),
-                ('cost_development_learning_curves', models.BooleanField(verbose_name='learning curves')),
-                ('cost_development_constant', models.BooleanField(verbose_name='constant')),
-                ('cost_development_rediscount', models.BooleanField(verbose_name='rediscount')),
-                ('technological_innovations', models.CharField(help_text='Have future technological innovations been regarded?', max_length=100, verbose_name='Technological innovations')),
-                ('potential_wind_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_wind_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_wind_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_wind_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_wind_other', models.BooleanField(verbose_name='other')),
-                ('potential_wind_other_text', models.CharField(max_length=100)),
-                ('potential_solar_electric_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_solar_electric_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_solar_electric_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_solar_electric_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_solar_electric_other', models.BooleanField(verbose_name='other')),
-                ('potential_solar_electric_other_text', models.CharField(max_length=100)),
-                ('potential_solar_thermal_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_solar_thermal_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_solar_thermal_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_solar_thermal_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_solar_thermal_other', models.BooleanField(verbose_name='other')),
-                ('potential_solar_thermal_other_text', models.CharField(max_length=100)),
-                ('potential_biomass_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_biomass_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_biomass_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_biomass_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_biomass_other', models.BooleanField(verbose_name='other')),
-                ('potential_biomass_other_text', models.CharField(max_length=100)),
-                ('potential_geothermal_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_geothermal_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_geothermal_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_geothermal_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_geothermal_othertext', models.CharField(max_length=100)),
-                ('potential_hydro_power_whole', models.BooleanField(verbose_name='whole')),
-                ('potential_hydro_power_technical', models.BooleanField(verbose_name='technical')),
-                ('potential_hydro_power_economical', models.BooleanField(verbose_name='economical')),
-                ('potential_hydro_power_ecological', models.BooleanField(verbose_name='ecological')),
-                ('potential_hydro_power_other', models.BooleanField(verbose_name='other')),
-                ('potential_hydro_power_other_text', models.CharField(max_length=100)),
-                ('social_developement', models.CharField(help_text='How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)', max_length=100, verbose_name='Social developement')),
-                ('economic_development', models.CharField(help_text='e.g. price structures, market settings,..', max_length=100, verbose_name='Economic development')),
-                ('development_of_environmental_aspects', models.CharField(help_text='e.g. landuse', max_length=100, verbose_name='Development of environmental aspects')),
-                ('postprocessing', models.BooleanField(help_text='Are the presented results directly taken from the models’ outcome or are they modified?', verbose_name='Post-processing')),
-                ('further_assumptions_for_postprocessing', models.BooleanField(help_text='Are additional assumptions applied for this modification?', verbose_name='Further assumptions for post-processing')),
-                ('uncertainty_assessment', models.CharField(help_text='How are the identified uncertain factors considered in the study?', max_length=100, verbose_name='Uncertainty assessment')),
-                ('robustness', models.CharField(help_text='How is the robustness of the results proofed?', max_length=100, verbose_name='Robustness')),
-                ('comparability_Validation', models.CharField(help_text='How far do the modelling results fit in compared to similar scientific research?', max_length=100, verbose_name='Comparability / Validation')),
-                ('conclusions', models.CharField(help_text='What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ', max_length=100, verbose_name='Conclusions')),
-                ('tools_models', models.ForeignKey(help_text='Which model(s) and other tools have been used?', on_delete=django.db.models.deletion.CASCADE, to='modelview.Energymodel', verbose_name='Tools')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name_of_the_study",
+                    models.CharField(
+                        help_text="What is the name of the study?",
+                        max_length=100,
+                        verbose_name="Name of the study",
+                    ),
+                ),
+                (
+                    "author_Institution",
+                    models.CharField(
+                        help_text="Who are the authors of the study and for which institution do they work?",
+                        max_length=100,
+                        verbose_name="Author, Institution",
+                    ),
+                ),
+                (
+                    "client",
+                    models.CharField(
+                        help_text="Who are the customers requesting the study?",
+                        max_length=100,
+                        verbose_name="Client",
+                    ),
+                ),
+                ("funding_private", models.BooleanField(verbose_name="private")),
+                ("funding_public", models.BooleanField(verbose_name="public")),
+                ("funding_no_funding", models.BooleanField(verbose_name="no funding")),
+                (
+                    "citation_reference",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(
+                            max_length=100, verbose_name="Citation reference"
+                        ),
+                        size=None,
+                    ),
+                ),
+                (
+                    "citation_doi",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.CharField(
+                            max_length=100, verbose_name="Citation doi"
+                        ),
+                        size=None,
+                    ),
+                ),
+                (
+                    "aim",
+                    models.CharField(
+                        help_text="What is the purpose (hypothesis) and research question of the study?",
+                        max_length=100,
+                        verbose_name="Aim",
+                    ),
+                ),
+                (
+                    "new_aspects",
+                    models.CharField(
+                        help_text="What is new? (beyond state of research)",
+                        max_length=100,
+                        verbose_name="New aspects",
+                    ),
+                ),
+                (
+                    "spatial_Geographical_coverage",
+                    models.CharField(
+                        help_text="Which geographical region is adressed in the study?",
+                        max_length=100,
+                        verbose_name="Spatial / Geographical coverage",
+                    ),
+                ),
+                ("time_frame_2020", models.BooleanField(verbose_name="2020")),
+                ("time_frame_2030", models.BooleanField(verbose_name="2030")),
+                ("time_frame_2050", models.BooleanField(verbose_name="2050")),
+                ("time_frame_other", models.BooleanField(verbose_name="other")),
+                ("time_frame_other_text", models.CharField(max_length=100)),
+                (
+                    "time_frame_2_target_year",
+                    models.BooleanField(verbose_name="target year"),
+                ),
+                (
+                    "time_frame_2_transformation_path",
+                    models.BooleanField(verbose_name="transformation path"),
+                ),
+                (
+                    "tools_other",
+                    models.CharField(
+                        help_text="Which model(s) and other tools have been used?",
+                        max_length=100,
+                        verbose_name="Tools",
+                    ),
+                ),
+                (
+                    "modeled_energy_sectors_electricity",
+                    models.BooleanField(verbose_name="electricity"),
+                ),
+                (
+                    "modeled_energy_sectors_heat",
+                    models.BooleanField(verbose_name="heat"),
+                ),
+                (
+                    "modeled_energy_sectors_liquid_fuels",
+                    models.BooleanField(verbose_name="liquid fuels"),
+                ),
+                ("modeled_energy_sectors_gas", models.BooleanField(verbose_name="gas")),
+                ("modeled_energy_sectors_oil", models.BooleanField(verbose_name="oil")),
+                (
+                    "modeled_energy_sectors_others",
+                    models.BooleanField(verbose_name="others"),
+                ),
+                (
+                    "modeled_energy_sectors_others_text",
+                    models.CharField(max_length=100),
+                ),
+                (
+                    "modeled_demand_sectors_households",
+                    models.BooleanField(verbose_name="households"),
+                ),
+                (
+                    "modeled_demand_sectors_industry",
+                    models.BooleanField(verbose_name="industry"),
+                ),
+                (
+                    "modeled_demand_sectors_commercial_sector",
+                    models.BooleanField(verbose_name="commercial sector"),
+                ),
+                (
+                    "modeled_demand_sectors_transport",
+                    models.BooleanField(verbose_name="transport"),
+                ),
+                (
+                    "economic_behavioral_perfect",
+                    models.BooleanField(
+                        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"
+                    ),
+                ),
+                (
+                    "economic_behavioral_myopic",
+                    models.BooleanField(
+                        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"
+                    ),
+                ),
+                (
+                    "economic_behavioral_qualitative",
+                    models.BooleanField(
+                        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"
+                    ),
+                ),
+                (
+                    "economic_behavioral_agentbased",
+                    models.BooleanField(
+                        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"
+                    ),
+                ),
+                (
+                    "economic_behavioral_other",
+                    models.BooleanField(verbose_name="other"),
+                ),
+                ("economic_behavioral_other_text", models.CharField(max_length=100)),
+                ("renewables_PV", models.BooleanField(verbose_name="PV")),
+                ("renewables_wind", models.BooleanField(verbose_name="wind")),
+                ("renewables_hydro", models.BooleanField(verbose_name="hydro")),
+                ("renewables_biomass", models.BooleanField(verbose_name="biomass")),
+                ("renewables_biogas", models.BooleanField(verbose_name="biogas")),
+                ("renewables_solar", models.BooleanField(verbose_name="solar thermal")),
+                ("renewables_others", models.BooleanField(verbose_name="others")),
+                ("renewables_others_text", models.CharField(max_length=100)),
+                (
+                    "conventional_generation_gas",
+                    models.BooleanField(verbose_name="gas"),
+                ),
+                (
+                    "conventional_generation_coal",
+                    models.BooleanField(verbose_name="coal"),
+                ),
+                (
+                    "conventional_generation_oil",
+                    models.BooleanField(verbose_name="oil"),
+                ),
+                (
+                    "conventional_generation_liquid",
+                    models.BooleanField(verbose_name="liquid fuels"),
+                ),
+                (
+                    "conventional_generation_nuclear",
+                    models.BooleanField(verbose_name="nuclear"),
+                ),
+                ("CHP", models.BooleanField(verbose_name="CHP")),
+                (
+                    "networks_electricity_gas_heat",
+                    models.BooleanField(verbose_name="heat"),
+                ),
+                ("storages_battery", models.BooleanField(verbose_name="battery")),
+                ("storages_kinetic", models.BooleanField(verbose_name="kinetic")),
+                ("storages_CAES", models.BooleanField(verbose_name="CAES")),
+                ("storages_PHS", models.BooleanField(verbose_name="PHS")),
+                ("storages_chemical", models.BooleanField(verbose_name="chemical")),
+                (
+                    "economic_focuses_included",
+                    models.CharField(
+                        help_text="Have there been economic focusses/sectors included?",
+                        max_length=100,
+                        verbose_name="Economic focuses included",
+                    ),
+                ),
+                (
+                    "social_focuses_included",
+                    models.CharField(
+                        help_text="Have there been social focusses/sectors included? ",
+                        max_length=100,
+                        verbose_name="Social focuses included",
+                    ),
+                ),
+                (
+                    "endogenous_variables",
+                    models.CharField(
+                        help_text="Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)",
+                        max_length=100,
+                        verbose_name="Endogenous variables",
+                    ),
+                ),
+                (
+                    "sensitivities",
+                    models.BooleanField(
+                        help_text="Have there been sensitivities?",
+                        verbose_name="Sensitivities",
+                    ),
+                ),
+                ("time_steps_anual", models.BooleanField(verbose_name="anual")),
+                ("time_steps_hour", models.BooleanField(verbose_name="hour")),
+                ("time_steps_15_min", models.BooleanField(verbose_name="15 min")),
+                ("time_steps_1_min", models.BooleanField(verbose_name="1 min")),
+                ("time_steps_sec", models.BooleanField(verbose_name="sec")),
+                ("time_steps_other", models.BooleanField(verbose_name="other")),
+                ("time_steps_other_text", models.CharField(max_length=100)),
+                (
+                    "exogenous_time_series_used_climate",
+                    models.BooleanField(verbose_name="climate"),
+                ),
+                (
+                    "exogenous_time_series_used_feedin",
+                    models.BooleanField(verbose_name="feed-in"),
+                ),
+                (
+                    "exogenous_time_series_used_loadcurves",
+                    models.BooleanField(verbose_name="load-curves"),
+                ),
+                (
+                    "exogenous_time_series_used_others",
+                    models.BooleanField(verbose_name="others"),
+                ),
+                (
+                    "exogenous_time_series_used_others_text",
+                    models.CharField(max_length=100),
+                ),
+                (
+                    "technical_data",
+                    models.CharField(
+                        help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",
+                        max_length=100,
+                        verbose_name="Technical data + usage",
+                    ),
+                ),
+                (
+                    "social_data",
+                    models.CharField(
+                        help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+                        max_length=100,
+                        verbose_name="Social data",
+                    ),
+                ),
+                (
+                    "economical_data",
+                    models.CharField(
+                        help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",
+                        max_length=100,
+                        verbose_name="Economical data",
+                    ),
+                ),
+                (
+                    "ecological_data",
+                    models.CharField(
+                        help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",
+                        max_length=100,
+                        verbose_name="Ecological data",
+                    ),
+                ),
+                (
+                    "preProcessing",
+                    models.CharField(
+                        help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",
+                        max_length=100,
+                        verbose_name="Pre-Processing",
+                    ),
+                ),
+                (
+                    "name_of_scenario",
+                    models.CharField(
+                        help_text="What is the name of the scenario?",
+                        max_length=100,
+                        verbose_name="Name of the Scenario",
+                    ),
+                ),
+                (
+                    "name_of_study",
+                    models.URLField(
+                        help_text="Which study does the scenario belong to?",
+                        verbose_name="Name of the study",
+                    ),
+                ),
+                (
+                    "energy_saving_amount",
+                    models.SmallIntegerField(
+                        help_text="development of energy savings or efficiency",
+                        verbose_name="Energy saving",
+                    ),
+                ),
+                (
+                    "energy_saving_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "energy_saving_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                ("energy_saving_ne", models.BooleanField(verbose_name="not estimated")),
+                (
+                    "potential_energy_savings_amount",
+                    models.SmallIntegerField(
+                        help_text="How was the potential of energy savings determined?",
+                        verbose_name="Potential energy saving",
+                    ),
+                ),
+                (
+                    "potential_energy_savings_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "potential_energy_savings_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                (
+                    "potential_energy_savings_ne",
+                    models.BooleanField(verbose_name="not estimated"),
+                ),
+                (
+                    "emission_reductions_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "emission_reductions_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                (
+                    "emission_reductions_ne",
+                    models.BooleanField(verbose_name="not estimated"),
+                ),
+                (
+                    "share_RE_amount",
+                    models.SmallIntegerField(
+                        help_text="Development of renewable energy in the power sector",
+                        verbose_name="Share RE (power sector)",
+                    ),
+                ),
+                (
+                    "share_RE_power_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "share_RE_power_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                (
+                    "share_RE_power_ne",
+                    models.BooleanField(verbose_name="not estimated"),
+                ),
+                (
+                    "share_RE_heat_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "share_RE_heat_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                ("share_RE_heat_ne", models.BooleanField(verbose_name="not estimated")),
+                (
+                    "share_RE_mobility_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "share_RE_mobility_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                (
+                    "share_RE_mobility_ne",
+                    models.BooleanField(verbose_name="not estimated"),
+                ),
+                (
+                    "emission_reductions_amount",
+                    models.SmallIntegerField(
+                        help_text="development of total renewable energy supply",
+                        verbose_name="Share RE (total energy supply)",
+                    ),
+                ),
+                (
+                    "share_RE_total_until",
+                    models.BooleanField(verbose_name="[x] % until [20xx]"),
+                ),
+                (
+                    "share_RE_total_per",
+                    models.BooleanField(verbose_name="[x] % per [year]"),
+                ),
+                (
+                    "share_RE_total_ne",
+                    models.BooleanField(verbose_name="not estimated"),
+                ),
+                ("cost_development_capex", models.BooleanField(verbose_name="capex")),
+                ("cost_development_opex", models.BooleanField(verbose_name="opex")),
+                (
+                    "cost_development_learning_curves",
+                    models.BooleanField(verbose_name="learning curves"),
+                ),
+                (
+                    "cost_development_constant",
+                    models.BooleanField(verbose_name="constant"),
+                ),
+                (
+                    "cost_development_rediscount",
+                    models.BooleanField(verbose_name="rediscount"),
+                ),
+                (
+                    "technological_innovations",
+                    models.CharField(
+                        help_text="Have future technological innovations been regarded?",
+                        max_length=100,
+                        verbose_name="Technological innovations",
+                    ),
+                ),
+                ("potential_wind_whole", models.BooleanField(verbose_name="whole")),
+                (
+                    "potential_wind_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_wind_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_wind_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                ("potential_wind_other", models.BooleanField(verbose_name="other")),
+                ("potential_wind_other_text", models.CharField(max_length=100)),
+                (
+                    "potential_solar_electric_whole",
+                    models.BooleanField(verbose_name="whole"),
+                ),
+                (
+                    "potential_solar_electric_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_solar_electric_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_solar_electric_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                (
+                    "potential_solar_electric_other",
+                    models.BooleanField(verbose_name="other"),
+                ),
+                (
+                    "potential_solar_electric_other_text",
+                    models.CharField(max_length=100),
+                ),
+                (
+                    "potential_solar_thermal_whole",
+                    models.BooleanField(verbose_name="whole"),
+                ),
+                (
+                    "potential_solar_thermal_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_solar_thermal_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_solar_thermal_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                (
+                    "potential_solar_thermal_other",
+                    models.BooleanField(verbose_name="other"),
+                ),
+                (
+                    "potential_solar_thermal_other_text",
+                    models.CharField(max_length=100),
+                ),
+                ("potential_biomass_whole", models.BooleanField(verbose_name="whole")),
+                (
+                    "potential_biomass_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_biomass_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_biomass_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                ("potential_biomass_other", models.BooleanField(verbose_name="other")),
+                ("potential_biomass_other_text", models.CharField(max_length=100)),
+                (
+                    "potential_geothermal_whole",
+                    models.BooleanField(verbose_name="whole"),
+                ),
+                (
+                    "potential_geothermal_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_geothermal_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_geothermal_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                ("potential_geothermal_othertext", models.CharField(max_length=100)),
+                (
+                    "potential_hydro_power_whole",
+                    models.BooleanField(verbose_name="whole"),
+                ),
+                (
+                    "potential_hydro_power_technical",
+                    models.BooleanField(verbose_name="technical"),
+                ),
+                (
+                    "potential_hydro_power_economical",
+                    models.BooleanField(verbose_name="economical"),
+                ),
+                (
+                    "potential_hydro_power_ecological",
+                    models.BooleanField(verbose_name="ecological"),
+                ),
+                (
+                    "potential_hydro_power_other",
+                    models.BooleanField(verbose_name="other"),
+                ),
+                ("potential_hydro_power_other_text", models.CharField(max_length=100)),
+                (
+                    "social_developement",
+                    models.CharField(
+                        help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",
+                        max_length=100,
+                        verbose_name="Social developement",
+                    ),
+                ),
+                (
+                    "economic_development",
+                    models.CharField(
+                        help_text="e.g. price structures, market settings,..",
+                        max_length=100,
+                        verbose_name="Economic development",
+                    ),
+                ),
+                (
+                    "development_of_environmental_aspects",
+                    models.CharField(
+                        help_text="e.g. landuse",
+                        max_length=100,
+                        verbose_name="Development of environmental aspects",
+                    ),
+                ),
+                (
+                    "postprocessing",
+                    models.BooleanField(
+                        help_text="Are the presented results directly taken from the models’ outcome or are they modified?",
+                        verbose_name="Post-processing",
+                    ),
+                ),
+                (
+                    "further_assumptions_for_postprocessing",
+                    models.BooleanField(
+                        help_text="Are additional assumptions applied for this modification?",
+                        verbose_name="Further assumptions for post-processing",
+                    ),
+                ),
+                (
+                    "uncertainty_assessment",
+                    models.CharField(
+                        help_text="How are the identified uncertain factors considered in the study?",
+                        max_length=100,
+                        verbose_name="Uncertainty assessment",
+                    ),
+                ),
+                (
+                    "robustness",
+                    models.CharField(
+                        help_text="How is the robustness of the results proofed?",
+                        max_length=100,
+                        verbose_name="Robustness",
+                    ),
+                ),
+                (
+                    "comparability_Validation",
+                    models.CharField(
+                        help_text="How far do the modelling results fit in compared to similar scientific research?",
+                        max_length=100,
+                        verbose_name="Comparability / Validation",
+                    ),
+                ),
+                (
+                    "conclusions",
+                    models.CharField(
+                        help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",
+                        max_length=100,
+                        verbose_name="Conclusions",
+                    ),
+                ),
+                (
+                    "tools_models",
+                    models.ForeignKey(
+                        help_text="Which model(s) and other tools have been used?",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="modelview.Energymodel",
+                        verbose_name="Tools",
+                    ),
+                ),
             ],
         ),
         migrations.AlterField(
-            model_name='energyframework',
-            name='model_types',
-            field=models.CharField(choices=[('Grid optimisation', 'Grid optimisation'), ('demand simulation', 'demand simulation'), ('feed-in simulation', 'feed-in simulation'), ('other', 'other')], max_length=20, null=True, verbose_name='API to openmod database'),
+            model_name="energyframework",
+            name="model_types",
+            field=models.CharField(
+                choices=[
+                    ("Grid optimisation", "Grid optimisation"),
+                    ("demand simulation", "demand simulation"),
+                    ("feed-in simulation", "feed-in simulation"),
+                    ("other", "other"),
+                ],
+                max_length=20,
+                null=True,
+                verbose_name="API to openmod database",
+            ),
         ),
     ]

@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5c098aa81e2c'
-down_revision = '048215319c74'
+revision = "5c098aa81e2c"
+down_revision = "048215319c74"
 branch_labels = None
 depends_on = None
 
@@ -28,15 +28,15 @@ schemas = [
     "climate",
     "model_draft",
     "openstreetmap",
-    "reference"
+    "reference",
 ]
 
 
 def upgrade():
     for s in schemas:
-        op.execute("CREATE SCHEMA "+s)
+        op.execute("CREATE SCHEMA " + s)
 
 
 def downgrade():
     for s in schemas:
-        op.execute("DROP SCHEMA "+s)
+        op.execute("DROP SCHEMA " + s)

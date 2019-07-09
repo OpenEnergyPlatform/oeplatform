@@ -10,19 +10,29 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='TableRevision',
+            name="TableRevision",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('table', models.CharField(max_length=1000)),
-                ('schema', models.CharField(max_length=1000)),
-                ('revision', models.CharField(max_length=1000)),
-                ('created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('last_accessed', models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("table", models.CharField(max_length=1000)),
+                ("schema", models.CharField(max_length=1000)),
+                ("revision", models.CharField(max_length=1000)),
+                ("created", models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "last_accessed",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
             ],
-        ),
+        )
     ]

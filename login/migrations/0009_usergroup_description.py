@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0008_auto_20170714_1641'),
-    ]
+    dependencies = [("login", "0008_auto_20170714_1641")]
 
     operations = [
         migrations.AddField(
-            model_name='usergroup',
-            name='description',
-            field=models.TextField(default=''),
-        ),
+            model_name="usergroup",
+            name="description",
+            field=models.TextField(default=""),
+        )
     ]

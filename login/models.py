@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib import auth
-from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser)
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.contenttypes.models import ContentType
@@ -19,6 +19,7 @@ from rest_framework.authtoken.models import Token
 import oeplatform.securitysettings as sec
 import dataedit.models as datamodels
 from login.mail import send_verification_mail
+
 NO_PERM = 0
 WRITE_PERM = 4
 DELETE_PERM = 8
@@ -28,12 +29,13 @@ ADMIN_PERM = 12
 class UserManager(BaseUserManager):
     def create_user(self, name, email, affiliation=None):
         if not email:
-            raise ValueError('An email address must be entered')
+            raise ValueError("An email address must be entered")
         if not name:
-            raise ValueError('A name must be entered')
+            raise ValueError("A name must be entered")
 
-        user = self.model(name=name, email=self.normalize_email(email),
-                          affiliation=affiliation, )
+        user = self.model(
+            name=name, email=self.normalize_email(email), affiliation=affiliation
+        )
 
         user.save(using=self._db)
         user.send_activation_mail()
@@ -41,16 +43,13 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, name, email, affiliation):
 
-        user = self.create_user(name, email,
-                                affiliation=affiliation)
+        user = self.create_user(name, email, affiliation=affiliation)
         user.is_admin = True
         user.save(using=self._db)
         return user
 
 
-class PermissionHolder():
-
-
+class PermissionHolder:
     def has_write_permissions(self, schema, table):
         """
         This function returns the authorization given the schema and table.
@@ -70,8 +69,9 @@ class PermissionHolder():
         return self.__get_perm(schema, table) >= ADMIN_PERM
 
     def __get_perm(self, schema, table):
-        perm = self.table_permissions.filter(table__name=table,
-                                   table__schema__name=schema).first()
+        perm = self.table_permissions.filter(
+            table__name=table, table__schema__name=schema
+        ).first()
         if perm:
             return perm.level
         else:
@@ -79,34 +79,40 @@ class PermissionHolder():
 
 
 class UserGroup(Group, PermissionHolder):
-    description = models.TextField(null=False, default='')
+    description = models.TextField(null=False, default="")
     is_admin = models.BooleanField(null=False, default=False)
 
     def get_table_permission_level(self, table):
         if self.is_admin:
             return ADMIN_PERM
-        return max(itertools.chain([NO_PERM], (perm.level for perm in self.table_permissions.filter(table=table))))
+        return max(
+            itertools.chain(
+                [NO_PERM],
+                (perm.level for perm in self.table_permissions.filter(table=table)),
+            )
+        )
+
 
 class TablePermission(models.Model):
-    choices = ((NO_PERM, 'None'),
-               (WRITE_PERM, 'Write'),
-               (DELETE_PERM, 'Delete'),
-               (ADMIN_PERM, 'Admin'))
+    choices = (
+        (NO_PERM, "None"),
+        (WRITE_PERM, "Write"),
+        (DELETE_PERM, "Delete"),
+        (ADMIN_PERM, "Admin"),
+    )
     table = models.ForeignKey(datamodels.Table)
 
-    level = models.IntegerField(choices=choices,
-                                     default=NO_PERM)
-
+    level = models.IntegerField(choices=choices, default=NO_PERM)
 
     class Meta:
-        unique_together = (('table', 'holder'),)
+        unique_together = (("table", "holder"),)
         abstract = True
+
 
 class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50, blank=True)
-    email = models.EmailField(verbose_name='email address',
-                              max_length=255, unique=True, )
+    email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
 
     did_agree = models.BooleanField(default=False)
 
@@ -119,7 +125,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     description = models.TextField(blank=True)
 
-    USERNAME_FIELD = 'name'
+    USERNAME_FIELD = "name"
 
     REQUIRED_FIELDS = [name]
 
@@ -144,20 +150,22 @@ class myuser(AbstractBaseUser, PermissionHolder):
         if self.is_admin:
             return ADMIN_PERM
 
-        user_membership = self.table_permissions.filter(
-            table=table).first()
+        user_membership = self.table_permissions.filter(table=table).first()
 
         permission_level = NO_PERM
         if user_membership:
             permission_level = max(user_membership.level, permission_level)
 
         # Check permissions of all groups and choose least restrictive one
-        group_perm_levels = (membership.group.get_table_permission_level(table) for membership in
-                             self.memberships.all())
+        group_perm_levels = (
+            membership.group.get_table_permission_level(table)
+            for membership in self.memberships.all()
+        )
 
         if group_perm_levels:
-            permission_level = max(itertools.chain([permission_level],
-                                                   group_perm_levels))
+            permission_level = max(
+                itertools.chain([permission_level], group_perm_levels)
+            )
 
         return permission_level
 
@@ -181,30 +189,34 @@ class myuser(AbstractBaseUser, PermissionHolder):
             token.save()
         return token
 
+
 class ActivationToken(models.Model):
     user = models.ForeignKey(myuser)
     value = models.TextField()
 
+
 class UserPermission(TablePermission):
-    holder = models.ForeignKey(myuser,
-                               related_name='table_permissions')
+    holder = models.ForeignKey(myuser, related_name="table_permissions")
 
 
 class GroupPermission(TablePermission):
-    holder = models.ForeignKey(UserGroup,
-                               related_name='table_permissions')
+    holder = models.ForeignKey(UserGroup, related_name="table_permissions")
+
 
 class GroupMembership(models.Model):
-    choices = ((NO_PERM, 'None'),
-               (WRITE_PERM, 'Invite'),
-               (DELETE_PERM, 'Remove'),
-               (ADMIN_PERM, 'Admin'))
-    user = models.ForeignKey(myuser, related_name='memberships')
-    group = models.ForeignKey(UserGroup, related_name='memberships')
-    level = models.IntegerField(choices=choices,
-                                default=WRITE_PERM)
+    choices = (
+        (NO_PERM, "None"),
+        (WRITE_PERM, "Invite"),
+        (DELETE_PERM, "Remove"),
+        (ADMIN_PERM, "Admin"),
+    )
+    user = models.ForeignKey(myuser, related_name="memberships")
+    group = models.ForeignKey(UserGroup, related_name="memberships")
+    level = models.IntegerField(choices=choices, default=WRITE_PERM)
+
     class Meta:
-        unique_together = (('user', 'group'),)
+        unique_together = (("user", "group"),)
+
 
 class UserBackend(object):
     def authenticate(self, username=None, password=None):
@@ -230,22 +242,21 @@ class UserBackend(object):
             else:
                 return None
         else:
-            url = 'https://wiki.openmod-initiative.org/api.php?action=login'
-            data = {'format':'json', 'lgname':username}
+            url = "https://wiki.openmod-initiative.org/api.php?action=login"
+            data = {"format": "json", "lgname": username}
 
-            #A first request to receive the required token
+            # A first request to receive the required token
             token_req = requests.post(url, data)
-            data['lgpassword'] = password
-            data['lgtoken'] = token_req.json()['login']['token']
+            data["lgpassword"] = password
+            data["lgtoken"] = token_req.json()["login"]["token"]
 
             # A second request for the actual authentication
             login_req = requests.post(url, data, cookies=token_req.cookies)
 
-            if login_req.json()['login']['result'] == 'Success':
+            if login_req.json()["login"]["result"] == "Success":
                 return myuser.objects.get_or_create(name=username)[0]
             else:
                 return None
-
 
     def get_user(self, user_id):
         try:
@@ -253,8 +264,8 @@ class UserBackend(object):
         except myuser.DoesNotExist:
             return None
 
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
-

@@ -8,19 +8,35 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0014_auto_20160302_0756'),
-    ]
+    dependencies = [("modelview", "0014_auto_20160302_0756")]
 
     operations = [
         migrations.AddField(
-            model_name='basicfactsheet',
-            name='authors',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(help_text='Who are the authors? Where do / did they work, on which parts of the model, during which time period?', max_length=300, verbose_name='Author(s) (institution, working field, active time period)'), default=list, null=True, size=None),
+            model_name="basicfactsheet",
+            name="authors",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(
+                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                    max_length=300,
+                    verbose_name="Author(s) (institution, working field, active time period)",
+                ),
+                default=list,
+                null=True,
+                size=None,
+            ),
         ),
         migrations.AddField(
-            model_name='basicfactsheet',
-            name='institutions',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(help_text='Which institutions develop(ed) the model?', max_length=1000, verbose_name='Institution(s)'), default=list, null=True, size=None),
+            model_name="basicfactsheet",
+            name="institutions",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(
+                    help_text="Which institutions develop(ed) the model?",
+                    max_length=1000,
+                    verbose_name="Institution(s)",
+                ),
+                default=list,
+                null=True,
+                size=None,
+            ),
         ),
     ]

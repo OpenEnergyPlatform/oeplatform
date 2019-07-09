@@ -7,20 +7,26 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0007_auto_20160825_1028'),
-    ]
+    dependencies = [("dataedit", "0007_auto_20160825_1028")]
 
     operations = [
         migrations.CreateModel(
-            name='View',
+            name="View",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('table', models.CharField(max_length=1000)),
-                ('schema', models.CharField(max_length=1000)),
-                ('type', models.CharField(max_length=10)),
-                ('data', models.CharField(max_length=1000)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("table", models.CharField(max_length=1000)),
+                ("schema", models.CharField(max_length=1000)),
+                ("type", models.CharField(max_length=10)),
+                ("data", models.CharField(max_length=1000)),
             ],
-        ),
+        )
     ]

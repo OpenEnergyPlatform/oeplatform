@@ -8,14 +8,18 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0009_auto_20160301_1030'),
-    ]
+    dependencies = [("modelview", "0009_auto_20160301_1030")]
 
     operations = [
         migrations.AlterField(
-            model_name='energyscenario',
-            name='tools_models',
-            field=models.ForeignKey(help_text='Which model(s) and other tools have been used?', null=True, on_delete=django.db.models.deletion.CASCADE, to='modelview.Energymodel', verbose_name='Tools'),
-        ),
+            model_name="energyscenario",
+            name="tools_models",
+            field=models.ForeignKey(
+                help_text="Which model(s) and other tools have been used?",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="modelview.Energymodel",
+                verbose_name="Tools",
+            ),
+        )
     ]

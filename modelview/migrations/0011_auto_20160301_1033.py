@@ -7,14 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0010_auto_20160301_1032'),
-    ]
+    dependencies = [("modelview", "0010_auto_20160301_1032")]
 
     operations = [
         migrations.AlterField(
-            model_name='energyscenario',
-            name='social_data',
-            field=models.CharField(help_text='What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?', max_length=1000, null=True, verbose_name='Social data'),
-        ),
+            model_name="energyscenario",
+            name="social_data",
+            field=models.CharField(
+                help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+                max_length=1000,
+                null=True,
+                verbose_name="Social data",
+            ),
+        )
     ]

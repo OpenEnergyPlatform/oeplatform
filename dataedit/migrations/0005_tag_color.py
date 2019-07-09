@@ -8,14 +8,12 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0004_auto_20160803_1157'),
-    ]
+    dependencies = [("dataedit", "0004_auto_20160803_1157")]
 
     operations = [
         migrations.AddField(
-            model_name='tag',
-            name='color',
-            field=colorfield.fields.ColorField(default='#FF0000', max_length=10),
-        ),
+            model_name="tag",
+            name="color",
+            field=colorfield.fields.ColorField(default="#FF0000", max_length=10),
+        )
     ]

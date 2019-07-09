@@ -9,26 +9,34 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0014_myuser_description'),
-    ]
+    dependencies = [("login", "0014_myuser_description")]
 
     operations = [
         migrations.CreateModel(
-            name='ActivationToken',
+            name="ActivationToken",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('value', models.TextField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("value", models.TextField()),
             ],
         ),
         migrations.AlterField(
-            model_name='myuser',
-            name='is_active',
+            model_name="myuser",
+            name="is_active",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='activationtoken',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="activationtoken",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

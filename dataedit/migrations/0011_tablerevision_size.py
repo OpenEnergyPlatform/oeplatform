@@ -7,15 +7,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0010_auto_20170504_1753'),
-    ]
+    dependencies = [("dataedit", "0010_auto_20170504_1753")]
 
     operations = [
         migrations.AddField(
-            model_name='tablerevision',
-            name='size',
+            model_name="tablerevision",
+            name="size",
             field=models.IntegerField(default=-1),
             preserve_default=False,
-        ),
+        )
     ]

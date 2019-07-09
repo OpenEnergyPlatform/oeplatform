@@ -7,19 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0015_auto_20181018_1351'),
-    ]
+    dependencies = [("login", "0015_auto_20181018_1351")]
 
     operations = [
         migrations.AddField(
-            model_name='myuser',
-            name='is_mail_verified',
+            model_name="myuser",
+            name="is_mail_verified",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='myuser',
-            name='is_active',
+            model_name="myuser",
+            name="is_active",
             field=models.BooleanField(default=True),
         ),
     ]

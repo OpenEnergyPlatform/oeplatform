@@ -9,26 +9,51 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0007_myuser_groups'),
-    ]
+    dependencies = [("login", "0007_myuser_groups")]
 
     operations = [
         migrations.CreateModel(
-            name='GroupMembership',
+            name="GroupMembership",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('level', models.IntegerField(choices=[(0, 'None'), (4, 'Invite'), (8, 'Remove'), (12, 'Admin')], default=4)),
-                ('group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to='login.UserGroup')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "level",
+                    models.IntegerField(
+                        choices=[
+                            (0, "None"),
+                            (4, "Invite"),
+                            (8, "Remove"),
+                            (12, "Admin"),
+                        ],
+                        default=4,
+                    ),
+                ),
+                (
+                    "group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="memberships",
+                        to="login.UserGroup",
+                    ),
+                ),
             ],
         ),
-        migrations.RemoveField(
-            model_name='myuser',
-            name='groups',
-        ),
+        migrations.RemoveField(model_name="myuser", name="groups"),
         migrations.AddField(
-            model_name='groupmembership',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='memberships', to=settings.AUTH_USER_MODEL),
+            model_name="groupmembership",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="memberships",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
