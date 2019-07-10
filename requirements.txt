@@ -11,7 +11,7 @@ bibtexparser>=0.6.2
 django-colorfield>=0.1.12
 requests>=2.13.0
 geoalchemy2>=0.4.0
--e git+https://github.com/openego/ego.io.git#egg=Package
+egoio
 djangoajax>=2.3.7
 webcolors>=1.7
 djangorestframework>=3.5.4
