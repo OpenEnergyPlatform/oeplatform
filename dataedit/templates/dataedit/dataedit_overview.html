@@ -88,8 +88,6 @@ for row in result.json():
         </div>
     </div>
 
-    <div id="main-visualization-container" style="min-height: 500px">
-    </div>
 {% endblock %}
 
 {% block script %}
@@ -138,8 +136,6 @@ for row in result.json():
         return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
-    var data_record = {}
-    var unchecked_record = {}
 
     function build_views_leaflet() {
 
@@ -154,7 +150,7 @@ for row in result.json():
         getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
 
             // add geoJSON layer to map
-            geoJSON = L.geoJson(JSON.parse(result["data"][0])).addTo(map);
+            geoJSON = L.geoJson(JSON.parse(result["data"])).addTo(map);
 
             // center map on geoJSON
             map.fitBounds(geoJSON.getBounds());
@@ -213,7 +209,7 @@ for row in result.json():
                 {% if comment_on_table %}
                 var columns = grid.grid.getColumns();
 
-                var fields = {{ comment_on_table.fields | safe }};
+                var fields = {% if comment_on_table.fields %}{{ comment_on_table.fields | safe }}{%else%}[]{%endif%};
 
                 for (var i = 0; i < columns.length;i++)
                 {
@@ -242,38 +238,6 @@ for row in result.json():
                 graph.render();
                 graph.redraw();
             {% endif %}
-        });
-
-        if(unchecked){
-
-            $("#unchecked_data_div").css("display", "block");
-            var dataset_unchecked = new recline.Model.Dataset({
-                    table: '_{{table}}_edit',
-                    schema: '_{{schema}}',
-                    backend: 'OEP',
-                    has_row_comments: false
-            });
-
-            dataset_unchecked.fetch().done(function(dataset) {
-                plot_view(dataset,
-                    false,
-                    $('.data-unchecked-explorer-here'), unchecked_record)
-            });
-        }
-        else
-            $("#unchecked_data_div").css("display", "none");
-
-
-        $('#savebutton').bind('click',
-        function() {
-            changes = {
-                creates: dataset_main._changes.creates,
-                updates:    dataset_main.records.filter(
-                    function(el){return !(jQuery.isEmptyObject(el.changed));}),
-                deletes: dataset_main._changes.deletes
-            };
-
-            dataset_main.backend.save(changes, dataset_main);
         });
     }
 

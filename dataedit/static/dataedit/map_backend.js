@@ -28,37 +28,21 @@ var getMapData = function(schema, table, column, bounds, callback)
                             "operands": [
                                 {
                                     "type": "function",
-                                    "function": "ST_Collect",
+                                    "function": "ST_Transform",
                                     "operands": [
                                         {
-                                            "type": "function",
-                                            "function": "ST_Transform",
-                                            "operands": [
-                                                {
-                                                    "type": "column",
-                                                    "column": column
-                                                },
-                                                {
-                                                    "type": "value",
-                                                    "value": 4326
-                                                }
-                                            ]
+                                            "type": "column",
+                                            "column": column
+                                        },
+                                        {
+                                            "type": "value",
+                                            "value": 4326
                                         }
                                     ]
                                 }
                             ]
                         }
                     ],
-                    "from": {
-                        "type": "select",
-                        "alias": "stuff",
-                        "limit": 250,
-                        "fields": [
-                            {
-                                "type": "column",
-                                "column": column
-                            }
-                        ],
                         "from": {
                             "type": "table",
                             "schema": schema,
@@ -126,8 +110,9 @@ var getMapData = function(schema, table, column, bounds, callback)
                                     }
                                 ]
                             }
-                        ]
-                    }
+                        ],
+                    "limit":250
+
                 }
             }),
         success: callback,

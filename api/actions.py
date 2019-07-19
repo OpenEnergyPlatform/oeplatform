@@ -597,7 +597,7 @@ def parse_type(dt_string):
         is_array = True
         dt_string = arr_match.groups()[0]
         dt, autoincrement = parse_type(dt_string)
-        return sqla.ARRAY(dt), autoincrement
+        return sa.ARRAY(dt), autoincrement
 
     # Is the datatypestring of form NAME(NUMBER)?
     dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
@@ -1411,7 +1411,7 @@ def data_info(request, context=None):
 
 def connect():
     engine = _get_engine()
-    insp = sqla.inspect(engine)
+    insp = sa.inspect(engine)
     return insp
 
 
@@ -1475,7 +1475,7 @@ def get_table_oid(request, context=None):
             schema=request.get("schema", DEFAULT_SCHEMA),
             **request
         )
-    except sqla.exc.NoSuchTableError as e:
+    except sa.exc.NoSuchTableError as e:
         raise ConnectionError(str(e))
     finally:
         conn.close()
@@ -1551,7 +1551,7 @@ def get_columns(request, context=None):
         table_oid = engine.dialect.get_table_oid(
             connection, table_name, schema, info_cache=info_cache
         )
-    except sqla.exc.NoSuchTableError as e:
+    except sa.exc.NoSuchTableError as e:
         raise ConnectionError(str(e))
     SQL_COLS = """
                 SELECT a.attname,
@@ -2081,10 +2081,10 @@ def update_meta_search(session, table, schema, insert_only=False):
         exists = session.bind().has_table(table, schema=schema)
     if not exists:
         meta = MetaData(bind=session.bind)
-        t = sqla.Table(table, meta, schema=schema, autoload=True)
+        t = sa.Table(table, meta, schema=schema, autoload=True)
         comment = t.comment
         session.execute(
-            sqla.insert(
+            sa.insert(
                 MetaSearch,
                 values=[
                     dict(

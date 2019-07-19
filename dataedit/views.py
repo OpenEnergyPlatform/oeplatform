@@ -23,10 +23,9 @@ from django.views.generic import View
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
-import api.actions as dba
 import api.parser
 import oeplatform.securitysettings as sec
-from api import actions as dba
+from api import actions as actions
 from dataedit.metadata import load_comment_from_db, read_metadata_from_post
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
@@ -117,8 +116,8 @@ def change_requests(schema, table):
     # I want to display old and new data, if different.
 
     display_message = None
-    api_columns = dba.get_column_changes(reviewed=False, schema=schema, table=table)
-    api_constraints = dba.get_constraints_changes(
+    api_columns = actions.get_column_changes(reviewed=False, schema=schema, table=table)
+    api_constraints = actions.get_constraints_changes(
         reviewed=False, schema=schema, table=table
     )
 
@@ -140,7 +139,7 @@ def change_requests(schema, table):
         "id",
     ]
 
-    old_description = dba.describe_columns(schema, table)
+    old_description = actions.describe_columns(schema, table)
 
     for change in api_columns:
 
