@@ -6,9 +6,6 @@
     <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}} </h3>
         <table>
             <tr>
-                <td>
-                    <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
-                </td>
                 <td style="padding:5px">
                     <div>
                         <div >
@@ -179,7 +176,6 @@ for row in result.json():
                 table: '{{table}}',
                 schema: '{{schema}}',
                 backend: 'OEP',
-                has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
 

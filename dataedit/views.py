@@ -972,48 +972,6 @@ class MetaView(LoginRequiredMixin, View):
         ]
 
 
-class CommentView(View):
-    """ This method handles the GET requests for the main page of data edit.
-        Initialises the session data (if necessary)
-    """
-
-    def get(self, request, schema, table):
-
-        if schema not in schema_whitelist:
-            raise Http404("Schema not accessible")
-
-        tags = get_all_tags(schema=schema, table=table)
-
-        return render(
-            request,
-            "dataedit/comment_table.html",
-            {"table": table, "schema": schema, "tags": tags},
-        )
-
-    def post(self, request, schema, table):
-        if request.POST and request.FILES:
-            csvfile = TextIOWrapper(
-                request.FILES["csv_file"].file, encoding=request.encoding
-            )
-
-            reader = csv.DictReader(csvfile, delimiter=",")
-
-            actions.data_insert(
-                {
-                    "schema": actions.get_meta_schema_name(schema),
-                    "table": actions.get_comment_table_name(table),
-                    "method": "values",
-                    "values": reader,
-                },
-                {"user": request.user},
-            )
-        return redirect(
-            "/dataedit/view/{schema}/{table}/comments".format(
-                schema=schema, table=table
-            )
-        )
-
-
 class PermissionView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)

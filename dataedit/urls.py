@@ -30,13 +30,6 @@ urlpatterns = [
         name="input",
     ),
     url(
-        r"^view/(?P<schema>{qual})/(?P<table>{qual})/comments$".format(
-            qual=pgsql_qualifier
-        ),
-        views.CommentView.as_view(),
-        name="input",
-    ),
-    url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
             qual=pgsql_qualifier
         ),
