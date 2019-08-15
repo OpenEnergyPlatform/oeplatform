@@ -63,7 +63,7 @@ for row in result.json():
         <h4>Currently defined views:</h4>
 
         {% for view in views %}
-        <a href="{{ request.path }}?view={{ view.id }}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
+        <a href="{{ request.path }}{% if view.id %}?view={{ view.id }}{% endif %}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
         {% endfor %}
         {% if not views %}
         No views were created yet.
@@ -75,7 +75,6 @@ for row in result.json():
                 {% if current_view.id %}
             <span style="float: left">
                 <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-default">Edit active view</a>
-                <a href="{{ request.path }}/view/set-default?id={{ current_view.id }}" class="btn btn-default">Set as default</a>
                 <a href="{{ request.path }}/view/delete?id={{ current_view.id }}" class="btn btn-danger">Delete active view</a>
             </span>
                 {% endif %}

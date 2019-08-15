@@ -7,6 +7,7 @@ import threading
 import time
 from functools import reduce
 from io import TextIOWrapper
+from itertools import chain
 from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
@@ -14,7 +15,7 @@ from wsgiref.util import FileWrapper
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -802,22 +803,22 @@ class DataView(View):
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
-        try:
-            # at first, try to use the view, that is passed as get argument
-            current_view = table_views.get(id=request.GET.get("view"))
-        except:
+        default = DBView(
+            name="default", type="table", table=table, schema=schema
+        )
+
+        view_id = request.GET.get("view")
+
+        if view_id == "default":
+            current_view = default
+        else:
             try:
-                # then use the first db-entry, where is_default is set
-                current_view = table_views.filter(is_default=True)[0]
-            except:
-                try:
-                    # otherwise use the first db-entry
-                    current_view = table_views[0]
-                except:
-                    # if no views are defined, use a temporary default table view
-                    current_view = DBView(
-                        name="default", type="table", table=table, schema=schema
-                    )
+                # at first, try to use the view, that is passed as get argument
+                current_view = table_views.get(id=view_id)
+            except ObjectDoesNotExist:
+                current_view = default
+
+        table_views = chain((default,), table_views)
 
         context_dict = {
             "comment_on_table": dict(comment_on_table),
