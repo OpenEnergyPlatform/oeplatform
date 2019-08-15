@@ -150,8 +150,8 @@ for row in result.json():
         getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
 
             // add geoJSON layer to map
-            geoJSON = L.geoJson(JSON.parse(result["data"])).addTo(map);
-
+            var geom = result["data"].map(x => JSON.parse(x));
+            geoJSON = L.geoJson(geom).addTo(map);
             // center map on geoJSON
             map.fitBounds(geoJSON.getBounds());
 
@@ -165,7 +165,9 @@ for row in result.json():
         function updateFunction() {
             getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
                 geoJSON.clearLayers(); // remove old polygons
-                geoJSON.addData(JSON.parse(result["data"][0]))
+                for(var i=0; i<result["rowcount"]; i++){
+                    geoJSON.addData(JSON.parse(result["data"][i]));
+                }
             });
         }
 
