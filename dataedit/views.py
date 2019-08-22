@@ -803,9 +803,7 @@ class DataView(View):
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
-        default = DBView(
-            name="default", type="table", table=table, schema=schema
-        )
+        default = DBView(name="default", type="table", table=table, schema=schema)
 
         view_id = request.GET.get("view")
 

@@ -26,8 +26,12 @@ from api import DEFAULT_SCHEMA, references
 from api.connection import _get_engine
 from api.error import APIError
 from api.parser import get_or_403, read_bool, read_pgid
-from api.sessions import (SessionContext, close_all_for_user,
-                          load_cursor_from_context, load_session_from_context)
+from api.sessions import (
+    SessionContext,
+    close_all_for_user,
+    load_cursor_from_context,
+    load_session_from_context,
+)
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
 from oeplatform.securitysettings import PLAYGROUNDS

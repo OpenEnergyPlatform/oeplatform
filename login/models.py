@@ -4,8 +4,13 @@ import json
 import requests
 from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        Group, PermissionsMixin, User)
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    Group,
+    PermissionsMixin,
+    User,
+)
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied

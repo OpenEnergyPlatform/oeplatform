@@ -11,8 +11,6 @@ from .util import content2json, load_content, load_content_as_json
 # Create your tests here.
 
 
-
-
 class APITestCase(TestCase):
     test_schema = "test"
     test_table = "population2"

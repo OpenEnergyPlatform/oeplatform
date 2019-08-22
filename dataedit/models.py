@@ -4,8 +4,13 @@ from colorfield.fields import ColorField
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import (BooleanField, CharField, DateTimeField,
-                              ForeignKey, IntegerField)
+from django.db.models import (
+    BooleanField,
+    CharField,
+    DateTimeField,
+    ForeignKey,
+    IntegerField,
+)
 from django.utils import timezone
 
 # Create your models here.

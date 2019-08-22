@@ -23,8 +23,12 @@ from sqlalchemy.orm import sessionmaker
 from api.actions import _get_engine
 from dataedit.structures import Tag
 
-from .forms import (EnergyframeworkForm, EnergymodelForm, EnergyscenarioForm,
-                    EnergystudyForm)
+from .forms import (
+    EnergyframeworkForm,
+    EnergymodelForm,
+    EnergyscenarioForm,
+    EnergystudyForm,
+)
 from .models import Energyframework, Energymodel, Energyscenario, Energystudy
 
 

@@ -11,8 +11,7 @@ import sqlalchemy as sqla
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import (Http404, HttpResponse, JsonResponse,
-                         StreamingHttpResponse)
+from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from rest_framework import status

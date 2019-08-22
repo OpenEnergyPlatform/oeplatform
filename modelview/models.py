@@ -2,9 +2,16 @@ from django import forms
 from django.contrib.postgres import fields
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import (BooleanField, CharField, EmailField, ForeignKey,
-                              ImageField, IntegerField, SmallIntegerField,
-                              TextField)
+from django.db.models import (
+    BooleanField,
+    CharField,
+    EmailField,
+    ForeignKey,
+    ImageField,
+    IntegerField,
+    SmallIntegerField,
+    TextField,
+)
 
 # Create your models here.
 

@@ -1,7 +1,15 @@
 # coding: utf-8
 import bibtexparser as btp
-from sqlalchemy import (Boolean, Column, ForeignKey, Integer, String, Text,
-                        create_engine, text)
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, relationship

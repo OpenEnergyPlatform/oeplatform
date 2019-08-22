@@ -7,8 +7,18 @@ from datetime import datetime
 
 import geoalchemy2  # Although this import seems unused is has to be here
 import sqlalchemy as sa
-from sqlalchemy import (Column, MetaData, Table, and_, column, func,
-                        literal_column, or_, select, util)
+from sqlalchemy import (
+    Column,
+    MetaData,
+    Table,
+    and_,
+    column,
+    func,
+    literal_column,
+    or_,
+    select,
+    util,
+)
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun

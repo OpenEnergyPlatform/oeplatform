@@ -1,9 +1,12 @@
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.auth.forms import (PasswordChangeForm,
-                                       ReadOnlyPasswordHashField,
-                                       SetPasswordForm, UserChangeForm,
-                                       UserCreationForm)
+from django.contrib.auth.forms import (
+    PasswordChangeForm,
+    ReadOnlyPasswordHashField,
+    SetPasswordForm,
+    UserChangeForm,
+    UserCreationForm,
+)
 from django.core.exceptions import ValidationError
 
 from .models import ActivationToken

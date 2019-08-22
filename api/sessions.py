@@ -6,8 +6,11 @@ import sys
 import time
 from random import randrange
 
-from oeplatform.securitysettings import (ANON_CONNECTION_LIMIT, TIME_OUT,
-                                         USER_CONNECTION_LIMIT)
+from oeplatform.securitysettings import (
+    ANON_CONNECTION_LIMIT,
+    TIME_OUT,
+    USER_CONNECTION_LIMIT,
+)
 
 from .actions import _get_engine, get_or_403
 from .error import APIError
