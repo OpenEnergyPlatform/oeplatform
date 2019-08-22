@@ -9,7 +9,7 @@ from alembic import context
 from alembic.config import Config
 from sqlalchemy import engine_from_config, pool
 
-from ..dataedit import structures
+import dataedit.structures
 from api.connection import _get_engine, get_connection_string
 from base.structures import metadata as target_metadata
 
