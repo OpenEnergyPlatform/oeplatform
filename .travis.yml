@@ -1,30 +1,89 @@
 language: python
-python:
-  - "3.5"
 cache: pip
-install:
-  - pip install -r requirements.txt
-script:
-  - python manage.py test --noinput
 services:
   - postgresql
 addons:
   postgresql: "9.4"
 env:
-  - OEP_DB_USER="postgres" OEP_DB_PASSWORD="" OEDB_USER="postgres" OEDB_PASSWORD=""
+
+env:
+  global:
+    - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - SEGFAULT_SIGNALS=all
+    - OEP_DB_USER="postgres" GAVEL_DB_PASSWORD="postgres" GAVEL_DB_NAME="postgres"
+  matrix:
+    - TOXENV=check
+    - TOXENV=docs
+matrix:
+  include:
+    - python: '3.5'
+      env:
+        - TOXENV=py35,report,codecov
+    - python: '3.6'
+      env:
+        - TOXENV=py36,report,codecov
+    - python: '3.7'
+      dist: xenial
+      env:
+        - TOXENV=py37,report,codecov
+    - python: 'pypy'
+      env:
+        - TOXENV=pypy,report,codecov
+    - python: 'pypy3'
+      env:
+        - TOXENV=pypy3,report,codecov
+before_install:
+  - python --version
+  - uname -a
+  - lsb_release -a
+  - sudo apt-get update
+install:
+  - pip install tox
+  - virtualenv --version
+  - easy_install --version
+  - pip --version
+  - tox --version
+  - |
+    set -ex
+    if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then
+        (cd $HOME
+         wget https://bitbucket.org/pypy/pypy/downloads/pypy2-v6.0.0-linux64.tar.bz2
+         tar xf pypy2-*.tar.bz2
+         pypy2-*/bin/pypy -m ensurepip
+         pypy2-*/bin/pypy -m pip install -U virtualenv)
+        export PATH=$(echo $HOME/pypy2-*/bin):$PATH
+        export TOXPYTHON=$(echo $HOME/pypy2-*/bin/pypy)
+    fi
+    if [[ $TRAVIS_PYTHON_VERSION == 'pypy3' ]]; then
+        (cd $HOME
+         wget https://bitbucket.org/pypy/pypy/downloads/pypy3-v6.0.0-linux64.tar.bz2
+         tar xf pypy3-*.tar.bz2
+         pypy3-*/bin/pypy3 -m ensurepip
+         pypy3-*/bin/pypy3 -m pip install -U virtualenv)
+        export PATH=$(echo $HOME/pypy3-*/bin):$PATH
+        export TOXPYTHON=$(echo $HOME/pypy3-*/bin/pypy3)
+    fi
+    set +x
 
 before_script:
   - sudo apt-get update
   - sudo apt-get autoremove postgis*
   - sudo apt-get autoremove postgresql*
   - sudo apt-get install postgresql-9.4-postgis-2.3
-  - wget https://raw.githubusercontent.com/OpenEnergyPlatform/oeplatform-deploy/master/oedb_mini.dump
   - psql -U postgres -c 'CREATE DATABASE test;'
   - psql -U postgres -c "CREATE EXTENSION postgis;" test
   - psql -U postgres -c "CREATE DATABASE oedb"
   - psql -U postgres -c "CREATE EXTENSION postgis;" oedb
-  - psql -U postgres oedb < oedb_mini.dump
   - psql -U postgres -c "CREATE DATABASE django"
   - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
   - python manage.py migrate
   - alembic upgrade head
+script:
+  - tox -v
+after_failure:
+  - more .tox/log/* | cat
+  - more .tox/*/log/* | cat
+notifications:
+  email:
+    on_success: never
+    on_failure: always
