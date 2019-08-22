@@ -76,7 +76,7 @@ before_script:
   - pip install -r requirements.txt
   - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
   - python manage.py migrate
-  - alembic upgrade head
+  - python manage.py alembic upgrade head
 script:
   - tox -v
 after_failure:
