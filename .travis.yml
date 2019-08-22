@@ -73,6 +73,7 @@ before_script:
   - psql -U postgres -c "CREATE DATABASE oedb"
   - psql -U postgres -c "CREATE EXTENSION postgis;" oedb
   - psql -U postgres -c "CREATE DATABASE django"
+  - pip install requirements.txt
   - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
   - python manage.py migrate
   - alembic upgrade head
