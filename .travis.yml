@@ -22,13 +22,13 @@ matrix:
   include:
     - python: '3.5'
       env:
-        - TOXENV=py35
+        - TOXENV=py3
     - python: '3.6'
       env:
-        - TOXENV=py36
+        - TOXENV=py3
     - python: '3.7'
       env:
-        - TOXENV=py37
+        - TOXENV=py3
 before_install:
   - python --version
   - uname -a
