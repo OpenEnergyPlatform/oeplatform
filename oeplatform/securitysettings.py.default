@@ -40,7 +40,7 @@ dbuser = os.environ.get("LOCAL_DB_USER")
 dbpasswd = os.environ.get("LOCAL_DB_PASSWORD")
 dbport = os.environ.get("LOCAL_DB_PORT", 5432)
 dbhost = os.environ.get("LOCAL_DB_HOST", "localhost")
-dbname = os.environ.get("LOCAL_DB_NAME", "oep_db")
+dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
