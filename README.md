@@ -122,15 +122,6 @@ least one should be present if you want to use this app:
 * openstreetmap
 * reference
 
-
-
-#### (Optional) 3. Testing Database
-
-You have may to include a third database, which is used for automated testing.
-This database shouldn't include productive data. The creation of the database
-will be managed by django automatically.
-
-
   
 Finally, you can run your local copy of this platform:
 
