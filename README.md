@@ -34,9 +34,9 @@ Create a file oeplatform/securitysettings.py by omitting the '.default' suffix o
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'django',
-    	'USER': 'databaseuser',
-    	'PASSWORD': 'databasepassword',
+            'NAME': 'oep_django',
+    	'USER': 'oep_django_user',
+    	'PASSWORD': '<oep_django_password>',
     	'HOST': 'localhost'                      
     	}
     }

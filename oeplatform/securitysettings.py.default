@@ -12,12 +12,12 @@ URL = '127.0.0.1'
 # This token is the token the test user is identified with during API-tests
 token_test_user = '0'
 
-# Database to your django database
+# Setting of your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django',
+        'NAME': 'oep_django',
 	'USER': os.environ.get("OEP_DB_USER"),
 	'PASSWORD': os.environ.get("OEP_DB_PASSWORD"),
 	'HOST': 'localhost'                      
