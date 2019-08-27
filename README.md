@@ -59,9 +59,11 @@ Next step is to migrate the database schema from django to your django database:
 
 
     
-#### 2. Another Database
+#### 2. OEDB-like Database
 
-The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. This database corresponds to the OEDB in the live version.
+This database corresponds to the OEDB (OpenEnergyDataBase) in the live version.
+The database connection should point to another *local* postgresql database. 
+It is used for the data input functionality implemented in `dataedit/`.
 
     dbuser = ""
     dbpasswd = ""
@@ -76,25 +78,30 @@ Once logged into your psql session (for example `sudo -u postgres psql`), run th
     create user oep_db_user with password '<oep_db_password>';
     create database oep_db with owner = oep_db_user;
 
+Then enter in `oep_db` (`\c oep_db;`) and type the additional commands:
+
+    create extension postgis;
+    create extension postgis_topology;
+    create extension hstore;
+
 ##### 2.2 Django setup
 
-These are all available as environment variables
+The values of the following variables matched to environment variables' values:
 
 | variable | environment variable  | required |
-|--------|---|----|
-| dbuser | LOCAL_OEDB_USER  |yes|
-| dbpasswd | LOCAL_OEDB_PASSWORD  |yes|
-|   dbport     | LOCAL_OEDB_PORT  |no|
-|   dbhost     | LOCAL_OEDB_HOST  |no|
-|   dbname     | LOCAL_OEDB_NAME  |no|
+|---|---|---|
+| dbuser | LOCAL_DB_USER  |yes|
+| dbpasswd | LOCAL_DB_PASSWORD |yes|
+| dbport | LOCAL_DB_PORT |no|
+| dbhost | LOCAL_DB_HOST |no|
+| dbname | LOCAL_DB_NAME |no|
 
-dbuser = os.environ.get("LOCAL_OEDB_USER")
-dbpasswd = os.environ.get("LOCAL_OEDB_PASSWORD")
-dbport = os.environ.get("LOCAL_OEDB_PORT", 5432)
-dbhost = os.environ.get("LOCAL_OEDB_HOST", "localhost")
-dbname = os.environ.get("LOCAL_OEDB_NAME", "oedb")
+Make sure to set the required environment variable before performing the next step!
 
-To create all tables that are needed in the second database:
+If you kept the default name from the above example in 2.1, then the environment variables
+`LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively
+
+Finally, to create all tables that are needed in the oedb-like database:
 
     python manage.py alembic upgrade head
 
