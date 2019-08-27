@@ -29,6 +29,15 @@ contains data that will be displayed in the data visualisations on the oedb.
 
 #### 1. Django internal database
 
+##### 1.1 Posgresql command line setup
+
+Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+
+    create user oep_django_user with password '<oep_django_password>';
+    create database oep_django with owner = oep_django_user;
+
+##### 1.2 Django setup
+
 Create a file oeplatform/securitysettings.py by omitting the '.default' suffix on oeplatform/securitysettings.py.default and enter the connection to your above mentioned postgresql database.
 
     DATABASES = {
@@ -41,13 +50,14 @@ Create a file oeplatform/securitysettings.py by omitting the '.default' suffix o
     	}
     }
 
+By default, the environment variable `OEP_DB_USER` will provide a value for the `USER` field.
+The same holds between the environment variable `OEP_DB_PASSWORD` and `PASSWORD` field.
+
 Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
 
-And create all tables that are needed in the second database:
 
-    python manage.py alembic upgrade head
     
 #### 2. Another Database
 
@@ -58,6 +68,35 @@ The second database connection should point to another postgresql database. It i
     dbport = 5432
     dbhost = ""
     db = ""
+
+##### 2.1 Posgresql command line setup
+
+Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+
+    create user oep_db_user with password '<oep_db_password>';
+    create database oep_db with owner = oep_db_user;
+
+##### 2.2 Django setup
+
+These are all available as environment variables
+
+| variable | environment variable  | required |
+|--------|---|----|
+| dbuser | LOCAL_OEDB_USER  |yes|
+| dbpasswd | LOCAL_OEDB_PASSWORD  |yes|
+|   dbport     | LOCAL_OEDB_PORT  |no|
+|   dbhost     | LOCAL_OEDB_HOST  |no|
+|   dbname     | LOCAL_OEDB_NAME  |no|
+
+dbuser = os.environ.get("LOCAL_OEDB_USER")
+dbpasswd = os.environ.get("LOCAL_OEDB_PASSWORD")
+dbport = os.environ.get("LOCAL_OEDB_PORT", 5432)
+dbhost = os.environ.get("LOCAL_OEDB_HOST", "localhost")
+dbname = os.environ.get("LOCAL_OEDB_NAME", "oedb")
+
+To create all tables that are needed in the second database:
+
+    python manage.py alembic upgrade head
 
 Only the following schemas are displayed in the dataview app of the OEP. Thus at
 least one should be present if you want to use this app:
