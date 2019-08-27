@@ -58,12 +58,13 @@ Next step is to migrate the database schema from django to your django database:
     python manage.py migrate
 
 
-    
 #### 2. OEDB-like Database
 
 This database corresponds to the OEDB (OpenEnergyDataBase) in the live version.
-The database connection should point to another *local* postgresql database. 
+The database connection should point to another *local* postgresql database.
 It is used for the data input functionality implemented in `dataedit/`.
+If this is the first setup of the OEP, this database should be an empty database as
+it will be instantiated by automated scripts later on.
 
     dbuser = ""
     dbpasswd = ""
@@ -101,7 +102,11 @@ Make sure to set the required environment variable before performing the next st
 If you kept the default name from the above example in 2.1, then the environment variables
 `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively
 
-Finally, to create all tables that are needed in the oedb-like database:
+##### 2.3 Alembic setup
+
+In order to run the OEP, this database needs some management tables.
+We use `alembic` to keep track of changes in those tables. To create all tables that are needed
+in this oedb-like database:
 
     python manage.py alembic upgrade head
 
