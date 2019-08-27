@@ -14,11 +14,22 @@ The open energy platform is built atop an PostgreSQL database. Create a new data
 
 This project is developed in Python 3.4 and therefore all later uses of pip and python should call the corresponding versions.  
 
+### Setup the python
+
 Once this is done, you can proceed with the installation of the actual platform by cloning the repository. Install the required python libraries:
 
     pip install -r requirements.txt
 
-Create a file oeplatform/securitysettings.py by omitting the '.default' prefix on oeplatform/securitysettings.py.default and enter the connection to your above mentioned postgresql database.
+### Setup the databases
+
+The OEP relied on two different databases: One that is managed by django itself. 
+This data base contains all informations that are needed to provide the features
+of the databases (e.g. user management, revision handling, etc.). The second one
+contains data that will be displayed in the data visualisations on the oedb.
+
+#### 1. Django internal database
+
+Create a file oeplatform/securitysettings.py by omitting the '.default' suffix on oeplatform/securitysettings.py.default and enter the connection to your above mentioned postgresql database.
 
     DATABASES = {
         'default': {
@@ -30,7 +41,13 @@ Create a file oeplatform/securitysettings.py by omitting the '.default' prefix o
     	}
     }
 
-The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/.
+Next step is to migrate the database schema from django to your django database:
+
+    python manage.py migrate
+    
+#### 2. Another Database
+
+The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. If this is the first setup of the OEP, this database should be an empty database as it will be instantiated by automated scripts later on.
 
     dbuser = ""
     dbpasswd = ""
@@ -38,17 +55,36 @@ The second database connection should point to another postgresql database. It i
     dbhost = ""
     db = ""
 
-You have to include a third database, which is used for testing. This database shouldn't include productive data.
+Only the following schemas are displayed in the dataview app of the OEP. Thus at
+least one should be present if you want to use this app:
 
-Make sure that both databases has the following extensions installed:
-      
-* hstore               
-* postgis         
-* postgis_topology
+* demand
+* economy
+* emission
+* environment
+* grid
+* boundaries
+* society
+* supply
+* scenario
+* climate
+* model_draft
+* openstreetmap
+* reference
 
-Next step is to migrate the database schema from django to your django database:
+##### 2a) Alembic
 
-    python manage.py migrate
+In order to run the OEP this database needs some management tables. We use `alembic` to keep track of changes those tables. To create all tables that are needed in the second database:
+
+    python manage.py alembic upgrade head
+
+#### (Optional) 3. Testing Database
+
+You have may to include a third database, which is used for automated testing.
+This database shouldn't include productive data. The creation of the database
+will be managed by django automatically.
+
+
   
 Finally, you can run your local copy of this platform:
 
@@ -58,8 +94,10 @@ Per default, you should be able to connect to this copy by visiting [localhost:8
 
 ## User Management
 
-If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running: 
+If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running in your project directory: `DJANGO_SETTINGS_MODULE="oeplatform.settings" python` and paste the following code.
 
+    import django
+    django.setup()
     from login.models import myuser
     u = myuser.objects.create_user('test','test@mail.com')
     u.set_password('pass')

@@ -6,9 +6,6 @@
     <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}} </h3>
         <table>
             <tr>
-                <td>
-                    <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
-                </td>
                 <td style="padding:5px">
                     <div>
                         <div >
@@ -58,7 +55,36 @@ for row in result.json():
         </div>
       </div>
     </div>
-    {% endblock %}
+
+    <div class="well">
+        <h4>Currently defined views:</h4>
+
+        {% for view in views %}
+        <a href="{{ request.path }}{% if view.id %}?view={{ view.id }}{% endif %}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
+        {% endfor %}
+        {% if not views %}
+        No views were created yet.
+        {% endif %}
+
+        <br><br>
+
+        <div>
+                {% if current_view.id %}
+            <span style="float: left">
+                <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-default">Edit active view</a>
+                <a href="{{ request.path }}/view/delete?id={{ current_view.id }}" class="btn btn-danger">Delete active view</a>
+            </span>
+                {% endif %}
+            <span style="float: right">
+                <a href="{{ request.path }}/view?type=table" class="btn btn-default">New table</a>
+                <a href="{{ request.path }}/view?type=graph" class="btn btn-default">New graph</a>
+                <a href="{{ request.path }}/view?type=map" class="btn btn-default">New map</a>
+            </span>
+            <br clear="all">
+        </div>
+    </div>
+
+{% endblock %}
 
 {% block script %}
 <script type="text/javascript">
@@ -106,59 +132,121 @@ for row in result.json():
         return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
-    var data_record = {}
-    var unchecked_record = {}
 
-    function build_views(){
+    function build_views_leaflet() {
+
+        var map = L.map('main-visualization-container');
+
+        // set map center, will be overwritten on polygon load
+        map.setView([0, 0], 0);
+
+        // leaflet geoJson layer
+        var geoJSON;
+
+        getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
+
+            // add geoJSON layer to map
+            var geom = result["data"].map(x => JSON.parse(x));
+            geoJSON = L.geoJson(geom).addTo(map);
+            // center map on geoJSON
+            map.fitBounds(geoJSON.getBounds());
+
+            // load map tiles from openstreetmap
+            L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '©<a href="http://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors',
+                maxZoom: 18,
+            }).addTo(map);
+        });
+
+        function updateFunction() {
+            getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
+                geoJSON.clearLayers(); // remove old polygons
+                for(var i=0; i<result["rowcount"]; i++){
+                    geoJSON.addData(JSON.parse(result["data"][i]));
+                }
+            });
+        }
+
+        map.on('moveend', updateFunction);
+        map.on('zoomend', updateFunction);
+    }
+
+    function build_views_recline(){
         var dataset_main = new recline.Model.Dataset({
                 table: '{{table}}',
                 schema: '{{schema}}',
                 backend: 'OEP',
-                has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
 
         dataset_main.fetch().done(function(dataset) {
 
-            plot_view(dataset,
+            /*plot_view(dataset,
                 true,
-                $('.data-explorer-here'), data_record)
-        });
+                $('.data-explorer-here'), data_record)*/
 
-        if(unchecked){
+            var visualization_container = $('#main-visualization-container');
+            {% if current_view.type == "table" %}
+                var grid = new recline.View.SlickGrid({
+                    model: dataset,
+                    el: visualization_container,
+                    state: {
+                      gridOptions: {
+                        enableCellNavigation: true,
+                        forceFitColumns: true,
+                        fullWidthRows: true
+                      }
+                    }
+                });
 
-            $("#unchecked_data_div").css("display", "block");
-            var dataset_unchecked = new recline.Model.Dataset({
-                    table: '_{{table}}_edit',
-                    schema: '_{{schema}}',
-                    backend: 'OEP',
-                    has_row_comments: false
-            });
+                grid.visible = true;
+                grid.render();
 
-            dataset_unchecked.fetch().done(function(dataset) {
-                plot_view(dataset,
-                    false,
-                    $('.data-unchecked-explorer-here'), unchecked_record)
-            });
-        }
-        else
-            $("#unchecked_data_div").css("display", "none");
+                // add comment tooltip for columns
+                {% if comment_on_table %}
+                var columns = grid.grid.getColumns();
 
+                var fields = {% if comment_on_table.fields %}{{ comment_on_table.fields | safe }}{%else%}[]{%endif%};
 
-        $('#savebutton').bind('click',
-        function() {
-            changes = {
-                creates: dataset_main._changes.creates,
-                updates:    dataset_main.records.filter(
-                    function(el){return !(jQuery.isEmptyObject(el.changed));}),
-                deletes: dataset_main._changes.deletes
-            };
+                for (var i = 0; i < columns.length;i++)
+                {
+                    for (var j = 0; j < fields.length; j++)
+                    {
+                        if (columns[i].name === fields[j].name)
+                            columns[i].toolTip = fields[j].description;
+                    }
+                }
 
-            dataset_main.backend.save(changes, dataset_main);
+                grid.grid.setColumns(columns);
+                {% endif %}
+                grid.render();
+
+            {% elif current_view.type == "graph" %}
+                var graph = new recline.View.Graph({
+                    model: dataset,
+                    el: visualization_container,
+                    state:
+                    {
+                        graphType: "lines-and-points",
+                        group: "{{ x_axis }}",
+                        series: {{ y_axis|safe }}
+                    }
+                });
+                graph.render();
+                graph.redraw();
+            {% endif %}
         });
     }
 
-    build_views(false);
+    function build_views() {
+        {% if current_view.type == "map" %}
+        build_views_leaflet();
+        {% else %}
+        build_views_recline();
+        {% endif %}
+    }
+
+    build_views(/*false*/);
 
 
 

@@ -7,15 +7,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0011_auto_20171120_1431'),
-    ]
+    dependencies = [("login", "0011_auto_20171120_1431")]
 
     operations = [
         migrations.AlterField(
-            model_name='myuser',
-            name='affiliation',
-            field=models.CharField(blank=True, default='', max_length=50),
+            model_name="myuser",
+            name="affiliation",
+            field=models.CharField(blank=True, default="", max_length=50),
             preserve_default=False,
-        ),
+        )
     ]

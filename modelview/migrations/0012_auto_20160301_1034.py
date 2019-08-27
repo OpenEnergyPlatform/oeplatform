@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0011_auto_20160301_1033'),
-    ]
+    dependencies = [("modelview", "0011_auto_20160301_1033")]
 
     operations = [
         migrations.AlterField(
-            model_name='energyscenario',
-            name='energy_saving_year',
+            model_name="energyscenario",
+            name="energy_saving_year",
             field=models.SmallIntegerField(null=True),
-        ),
+        )
     ]

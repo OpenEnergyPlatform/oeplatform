@@ -7,14 +7,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0013_myuser_is_native'),
-    ]
+    dependencies = [("login", "0013_myuser_is_native")]
 
     operations = [
         migrations.AddField(
-            model_name='myuser',
-            name='description',
-            field=models.TextField(blank=True),
-        ),
+            model_name="myuser", name="description", field=models.TextField(blank=True)
+        )
     ]

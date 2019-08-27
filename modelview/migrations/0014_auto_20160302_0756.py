@@ -7,25 +7,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0013_auto_20160301_1320'),
-    ]
+    dependencies = [("modelview", "0013_auto_20160301_1320")]
 
     operations = [
+        migrations.RemoveField(model_name="basicfactsheet", name="authors"),
+        migrations.RemoveField(model_name="basicfactsheet", name="institutions"),
+        migrations.RemoveField(model_name="energymodel", name="energy_sectors_oil"),
         migrations.RemoveField(
-            model_name='basicfactsheet',
-            name='authors',
-        ),
-        migrations.RemoveField(
-            model_name='basicfactsheet',
-            name='institutions',
-        ),
-        migrations.RemoveField(
-            model_name='energymodel',
-            name='energy_sectors_oil',
-        ),
-        migrations.RemoveField(
-            model_name='energyscenario',
-            name='modeled_energy_sectors_oil',
+            model_name="energyscenario", name="modeled_energy_sectors_oil"
         ),
     ]

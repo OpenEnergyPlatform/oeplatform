@@ -8,19 +8,23 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0037_auto_20171130_1909'),
-    ]
+    dependencies = [("modelview", "0037_auto_20171130_1909")]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='tags',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, null=True, size=None),
+            model_name="basicfactsheet",
+            name="tags",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.IntegerField(), default=list, null=True, size=None
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='properties_missed',
-            field=models.TextField(help_text='Which properties of your model have not been mentioned on this factsheet? Please nite them.', null=True, verbose_name='further properties'),
+            model_name="energymodel",
+            name="properties_missed",
+            field=models.TextField(
+                help_text="Which properties of your model have not been mentioned on this factsheet? Please nite them.",
+                null=True,
+                verbose_name="further properties",
+            ),
         ),
     ]
