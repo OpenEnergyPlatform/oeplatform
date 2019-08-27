@@ -34,11 +34,13 @@ USER_CONNECTION_LIMIT = 4
 ANON_CONNECTION_LIMIT = 40
 
 # This database connection is used for the actual data interfaces (App: dataedit)
-dbuser = os.environ.get("OEDB_USER")
-dbpasswd = os.environ.get("OEDB_PASSWORD")
-dbport = os.environ.get("OEDB_PORT", 5432)
-dbhost = os.environ.get("OEDB_HOST", "localhost")
-dbname = os.environ.get("OEDB_NAME", "oedb")
+# This should not be linked with a potential user account of the OpenEnergyDatabase !!!
+# Please refer to the step 2.2 of the README file
+dbuser = os.environ.get("LOCAL_DB_USER")
+dbpasswd = os.environ.get("LOCAL_DB_PASSWORD")
+dbport = os.environ.get("LOCAL_DB_PORT", 5432)
+dbhost = os.environ.get("LOCAL_DB_HOST", "localhost")
+dbname = os.environ.get("LOCAL_DB_NAME", "oep_db")
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
