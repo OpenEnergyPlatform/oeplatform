@@ -7,19 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0019_auto_20160303_2217'),
-    ]
+    dependencies = [("modelview", "0019_auto_20160303_2217")]
 
     operations = [
         migrations.AlterField(
-            model_name='energyscenario',
-            name='storages_CAES',
-            field=models.BooleanField(verbose_name='compressed air'),
+            model_name="energyscenario",
+            name="storages_CAES",
+            field=models.BooleanField(verbose_name="compressed air"),
         ),
         migrations.AlterField(
-            model_name='energyscenario',
-            name='storages_PHS',
-            field=models.BooleanField(verbose_name='pump hydro'),
+            model_name="energyscenario",
+            name="storages_PHS",
+            field=models.BooleanField(verbose_name="pump hydro"),
         ),
     ]

@@ -8,24 +8,34 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0028_auto_20160315_1655'),
-    ]
+    dependencies = [("modelview", "0028_auto_20160315_1655")]
 
     operations = [
         migrations.AlterField(
-            model_name='energymodel',
-            name='changes_in_efficiency',
+            model_name="energymodel",
+            name="changes_in_efficiency",
             field=models.TextField(null=True),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='integrated_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.TextField(), help_text='Which models are integrated in the model? Where are these models available?', null=True, size=None, verbose_name='Integration of other models (comma-separated)'),
+            model_name="energymodel",
+            name="integrated_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.TextField(),
+                help_text="Which models are integrated in the model? Where are these models available?",
+                null=True,
+                size=None,
+                verbose_name="Integration of other models (comma-separated)",
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='integrating_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.TextField(), help_text='With which models has this model been integrated into (providing a link)? Where is the combined model available?', null=True, size=None, verbose_name='Integration with other models (comma-separated)'),
+            model_name="energymodel",
+            name="integrating_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.TextField(),
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?",
+                null=True,
+                size=None,
+                verbose_name="Integration with other models (comma-separated)",
+            ),
         ),
     ]

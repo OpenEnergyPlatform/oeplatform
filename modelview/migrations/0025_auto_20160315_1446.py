@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0024_auto_20160315_1442'),
-    ]
+    dependencies = [("modelview", "0024_auto_20160315_1442")]
 
     operations = [
         migrations.AlterField(
-            model_name='energymodel',
-            name='mathematical_objective_other_text',
+            model_name="energymodel",
+            name="mathematical_objective_other_text",
             field=models.TextField(blank=True),
-        ),
+        )
     ]

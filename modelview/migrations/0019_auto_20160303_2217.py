@@ -8,54 +8,102 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0018_auto_20160302_0821'),
-    ]
+    dependencies = [("modelview", "0018_auto_20160302_0821")]
 
     operations = [
         migrations.AddField(
-            model_name='energymodel',
-            name='integrated_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=1000), help_text='Which models are integrated in the model? Where are these models available? (comma-separated)', null=True, size=None, verbose_name='Integration of other models'),
+            model_name="energymodel",
+            name="integrated_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=1000),
+                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",
+                null=True,
+                size=None,
+                verbose_name="Integration of other models",
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='integrating_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=1000), help_text='With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)', null=True, size=None, verbose_name='Integration with other models'),
+            model_name="energymodel",
+            name="integrating_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=1000),
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",
+                null=True,
+                size=None,
+                verbose_name="Integration with other models",
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='interfaces',
-            field=models.TextField(help_text='Which APIs does the model have?', null=True, verbose_name='Interfaces'),
+            model_name="energymodel",
+            name="interfaces",
+            field=models.TextField(
+                help_text="Which APIs does the model have?",
+                null=True,
+                verbose_name="Interfaces",
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='model_file_format',
-            field=models.CharField(choices=[('.exe', '.exe'), ('.gms', '.gms'), ('.py', '.py'), ('.xls', '.xls'), ('other', 'other')], help_text='In which format is the model saved?', max_length=5, null=True, verbose_name='Model file format'),
+            model_name="energymodel",
+            name="model_file_format",
+            field=models.CharField(
+                choices=[
+                    (".exe", ".exe"),
+                    (".gms", ".gms"),
+                    (".py", ".py"),
+                    (".xls", ".xls"),
+                    ("other", "other"),
+                ],
+                help_text="In which format is the model saved?",
+                max_length=5,
+                null=True,
+                verbose_name="Model file format",
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='model_input',
-            field=models.CharField(choices=[('.csv', '.csv'), ('.py', '.py'), ('text', 'text'), ('.xls', '.xls'), ('other', 'other')], help_text='Of which file format are the input and output data?', max_length=5, null=True, verbose_name='Input/output data file format'),
+            model_name="energymodel",
+            name="model_input",
+            field=models.CharField(
+                choices=[
+                    (".csv", ".csv"),
+                    (".py", ".py"),
+                    ("text", "text"),
+                    (".xls", ".xls"),
+                    ("other", "other"),
+                ],
+                help_text="Of which file format are the input and output data?",
+                max_length=5,
+                null=True,
+                verbose_name="Input/output data file format",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='model_name',
-            field=models.CharField(help_text='What is the full model name?', max_length=1000, unique=True, verbose_name='Name'),
+            model_name="basicfactsheet",
+            name="model_name",
+            field=models.CharField(
+                help_text="What is the full model name?",
+                max_length=1000,
+                unique=True,
+                verbose_name="Name",
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='storage_electricity_CAES',
-            field=models.BooleanField(default=False, verbose_name='compressed air'),
+            model_name="energymodel",
+            name="storage_electricity_CAES",
+            field=models.BooleanField(default=False, verbose_name="compressed air"),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='storage_electricity_PHS',
-            field=models.BooleanField(default=False, verbose_name='pump hydro'),
+            model_name="energymodel",
+            name="storage_electricity_PHS",
+            field=models.BooleanField(default=False, verbose_name="pump hydro"),
         ),
         migrations.AlterField(
-            model_name='energyscenario',
-            name='endogenous_variables',
-            field=models.CharField(help_text='Which time series and variables are generated inside the model?', max_length=1000, null=True, verbose_name='Endogenous variables'),
+            model_name="energyscenario",
+            name="endogenous_variables",
+            field=models.CharField(
+                help_text="Which time series and variables are generated inside the model?",
+                max_length=1000,
+                null=True,
+                verbose_name="Endogenous variables",
+            ),
         ),
     ]

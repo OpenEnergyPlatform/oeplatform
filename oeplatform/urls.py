@@ -14,19 +14,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib import admin
 
 from oeplatform import settings
-from django.conf.urls.static import static
 
-handler500 = 'base.views.handler500'
+handler500 = "base.views.handler500"
+handler404 = "base.views.handler404"
 
 urlpatterns = [
-    url(r'^api/', include('api.urls')),
-    url(r'^', include('base.urls')),
-    url(r'^user/', include('login.urls')),
-    url(r'^factsheets/', include('modelview.urls')),
-    url(r'^dataedit/', include('dataedit.urls')),
-    url(r'^literature/', include('literature.urls')),
-    url(r'^tutorial/', include('tutorial.urls')),
+    url(r"^api/", include("api.urls")),
+    url(r"^", include("base.urls")),
+    url(r"^user/", include("login.urls")),
+    url(r"^factsheets/", include("modelview.urls")),
+    url(r"^dataedit/", include("dataedit.urls")),
+    url(r"^literature/", include("literature.urls")),
+    url(r"^tutorial/", include("tutorial.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
