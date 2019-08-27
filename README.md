@@ -122,8 +122,9 @@ least one should be present if you want to use this app:
 * openstreetmap
 * reference
 
+### Deploy locally
   
-Finally, you can run your local copy of this platform:
+You can run your local copy of this platform with:
 
     python manage.py runserver
     
