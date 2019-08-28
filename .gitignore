@@ -50,6 +50,9 @@ coverage.xml
 *,cover
 .hypothesis/
 
+# API token
+api/tutorials/token_config.py
+
 # Translations
 *.mo
 *.pot
