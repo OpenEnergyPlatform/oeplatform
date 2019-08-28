@@ -29,31 +29,86 @@ contains data that will be displayed in the data visualisations on the oedb.
 
 #### 1. Django internal database
 
+##### 1.1 Posgresql command line setup
+
+Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+
+    create user oep_django_user with password '<oep_django_password>';
+    create database oep_django with owner = oep_django_user;
+
+##### 1.2 Django setup
+
 Create a file oeplatform/securitysettings.py by omitting the '.default' suffix on oeplatform/securitysettings.py.default and enter the connection to your above mentioned postgresql database.
 
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'django',
-    	'USER': 'databaseuser',
-    	'PASSWORD': 'databasepassword',
+            'NAME': 'oep_django',
+    	'USER': 'oep_django_user',
+    	'PASSWORD': '<oep_django_password>',
     	'HOST': 'localhost'                      
     	}
     }
 
+By default, the environment variable `OEP_DB_USER` will provide a value for the `USER` field.
+The same holds between the environment variable `OEP_DB_PASSWORD` and `PASSWORD` field.
+
 Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
-    
-#### 2. Another Database
 
-The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. If this is the first setup of the OEP, this database should be an empty database as it will be instantiated by automated scripts later on.
+
+#### 2. OEDB-like Database
+
+This database corresponds to the OEDB (OpenEnergyDataBase) in the live version.
+The database connection should point to another *local* postgresql database.
+It is used for the data input functionality implemented in `dataedit/`.
+If this is the first setup of the OEP, this database should be an empty database as
+it will be instantiated by automated scripts later on.
 
     dbuser = ""
     dbpasswd = ""
     dbport = 5432
     dbhost = ""
     db = ""
+
+##### 2.1 Posgresql command line setup
+
+Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+
+    create user oep_db_user with password '<oep_db_password>';
+    create database oep_db with owner = oep_db_user;
+
+Then enter in `oep_db` (`\c oep_db;`) and type the additional commands:
+
+    create extension postgis;
+    create extension postgis_topology;
+    create extension hstore;
+
+##### 2.2 Django setup
+
+The values of the following variables matched to environment variables' values:
+
+| variable | environment variable  | required |
+|---|---|---|
+| dbuser | LOCAL_DB_USER  |yes|
+| dbpasswd | LOCAL_DB_PASSWORD |yes|
+| dbport | LOCAL_DB_PORT |no|
+| dbhost | LOCAL_DB_HOST |no|
+| dbname | LOCAL_DB_NAME |no|
+
+Make sure to set the required environment variable before performing the next step!
+
+If you kept the default name from the above example in 2.1, then the environment variables
+`LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively
+
+##### 2.3 Alembic setup
+
+In order to run the OEP, this database needs some management tables.
+We use `alembic` to keep track of changes in those tables. To create all tables that are needed
+in this oedb-like database:
+
+    python manage.py alembic upgrade head
 
 Only the following schemas are displayed in the dataview app of the OEP. Thus at
 least one should be present if you want to use this app:
@@ -72,21 +127,9 @@ least one should be present if you want to use this app:
 * openstreetmap
 * reference
 
-##### 2a) Alembic
-
-In order to run the OEP this database needs some management tables. We use `alembic` to keep track of changes those tables. To create all tables that are needed in the second database:
-
-    python manage.py alembic upgrade head
-
-#### (Optional) 3. Testing Database
-
-You have may to include a third database, which is used for automated testing.
-This database shouldn't include productive data. The creation of the database
-will be managed by django automatically.
-
-
+### Deploy locally
   
-Finally, you can run your local copy of this platform:
+You can run your local copy of this platform with:
 
     python manage.py runserver
     
