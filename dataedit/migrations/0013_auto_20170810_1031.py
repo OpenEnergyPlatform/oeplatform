@@ -3,43 +3,58 @@
 from __future__ import unicode_literals
 
 import django.contrib.postgres.fields.jsonb
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0012_merge_20170910_1002'),
-    ]
+    dependencies = [("dataedit", "0012_merge_20170910_1002")]
 
     operations = [
         migrations.CreateModel(
-            name='Filter',
+            name="Filter",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('column', models.CharField(max_length=100)),
-                ('type', models.CharField(choices=[('equal', 'equal'), ('range', 'range')], max_length=10)),
-                ('value', django.contrib.postgres.fields.jsonb.JSONField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("column", models.CharField(max_length=100)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("equal", "equal"), ("range", "range")], max_length=10
+                    ),
+                ),
+                ("value", django.contrib.postgres.fields.jsonb.JSONField()),
             ],
         ),
-        migrations.RemoveField(
-            model_name='view',
-            name='data',
-        ),
+        migrations.RemoveField(model_name="view", name="data"),
         migrations.AddField(
-            model_name='view',
-            name='options',
+            model_name="view",
+            name="options",
             field=django.contrib.postgres.fields.jsonb.JSONField(default=dict),
         ),
         migrations.AlterField(
-            model_name='view',
-            name='type',
-            field=models.CharField(choices=[('table', 'table'), ('map', 'map'), ('graph', 'graph')], max_length=10),
+            model_name="view",
+            name="type",
+            field=models.CharField(
+                choices=[("table", "table"), ("map", "map"), ("graph", "graph")],
+                max_length=10,
+            ),
         ),
         migrations.AddField(
-            model_name='filter',
-            name='view',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='filter', to='dataedit.View'),
+            model_name="filter",
+            name="view",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="filter",
+                to="dataedit.View",
+            ),
         ),
     ]

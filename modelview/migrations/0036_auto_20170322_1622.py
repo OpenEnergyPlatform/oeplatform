@@ -8,14 +8,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        #('modelview', '0035_auto_20160426_1721'),
-        ('modelview', '0035_auto_20170724_1801'),
+        # ('modelview', '0035_auto_20160426_1721'),
+        ("modelview", "0035_auto_20170724_1801")
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='source_of_funding',
-            field=models.CharField(help_text='What is the main source of funding?', max_length=200, null=True, verbose_name='Source of funding'),
-        ),
+            model_name="basicfactsheet",
+            name="source_of_funding",
+            field=models.CharField(
+                help_text="What is the main source of funding?",
+                max_length=200,
+                null=True,
+                verbose_name="Source of funding",
+            ),
+        )
     ]

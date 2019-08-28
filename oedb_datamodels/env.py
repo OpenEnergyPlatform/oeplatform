@@ -1,18 +1,23 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
+
+import os
+import sys
 from logging.config import fileConfig
 
+import django
+from alembic import context
+from alembic.config import Config
+from sqlalchemy import engine_from_config, pool
 
-import os, django, sys
-sys.path.append('.')
+import dataedit.structures
+from api.connection import _get_engine, get_connection_string
+from base.structures import metadata as target_metadata
+
+sys.path.append(".")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "oeplatform.settings")
 django.setup()
 
-from api.connection import get_connection_string, _get_engine
-from base.structures import metadata as target_metadata
-import dataedit.structures
-from alembic.config import Config
+
 alembic_cfg = Config()
 alembic_cfg.set_main_option("url", get_connection_string())
 
@@ -32,7 +37,7 @@ fileConfig(config.config_file_name)
 
 if target_metadata.bind is None:
     target_metadata.bind = _get_engine()
-#target_metadata.reflect()
+# target_metadata.reflect()
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -53,8 +58,7 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
 
     with context.begin_transaction():
         context.run_migrations()
@@ -70,13 +74,11 @@ def run_migrations_online():
     connectable = _get_engine()
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

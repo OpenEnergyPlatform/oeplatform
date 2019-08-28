@@ -44,14 +44,10 @@ Create a file oeplatform/securitysettings.py by omitting the '.default' suffix o
 Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
-
-And create all tables that are needed in the second database:
-
-    python manage.py alembic upgrade head
     
 #### 2. Another Database
 
-The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. This database corresponds to the OEDB in the live version.
+The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. If this is the first setup of the OEP, this database should be an empty database as it will be instantiated by automated scripts later on.
 
     dbuser = ""
     dbpasswd = ""
@@ -76,7 +72,11 @@ least one should be present if you want to use this app:
 * openstreetmap
 * reference
 
+##### 2a) Alembic
 
+In order to run the OEP this database needs some management tables. We use `alembic` to keep track of changes those tables. To create all tables that are needed in the second database:
+
+    python manage.py alembic upgrade head
 
 #### (Optional) 3. Testing Database
 

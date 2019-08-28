@@ -1,30 +1,59 @@
+dist: trusty
+sudo: false
 language: python
-python:
-  - "3.5"
 cache: pip
-install:
-  - pip install -r requirements.txt
-script:
-  - python manage.py test --noinput
 services:
   - postgresql
 addons:
-  postgresql: "9.4"
+  postgresql: 9.6
+  apt:
+    packages:
+    - postgresql-9.6-postgis-2.3
+
 env:
-  - OEP_DB_USER="postgres" OEP_DB_PASSWORD="" OEDB_USER="postgres" OEDB_PASSWORD=""
+  global:
+    - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - SEGFAULT_SIGNALS=all
+    - OEP_DB_USER="postgres" OEP_DB_PW="postgres" OEDB_USER="postgres" OEPB_PW="postgres"
+  matrix:
+    - TOXENV=check
+    - TOXENV=docs
+matrix:
+  include:
+    - python: '3.5'
+      env:
+        - TOXENV=py3
+    - python: '3.6'
+      env:
+        - TOXENV=py3
+before_install:
+  - python --version
+  - uname -a
+  - lsb_release -a
+  - sudo apt-get update
+install:
+  - pip install tox
+  - virtualenv --version
+  - easy_install --version
+  - pip --version
+  - tox --version
 
 before_script:
-  - sudo apt-get update
-  - sudo apt-get autoremove postgis*
-  - sudo apt-get autoremove postgresql*
-  - sudo apt-get install postgresql-9.4-postgis-2.3
-  - wget https://raw.githubusercontent.com/OpenEnergyPlatform/oeplatform-deploy/master/oedb_mini.dump
   - psql -U postgres -c 'CREATE DATABASE test;'
   - psql -U postgres -c "CREATE EXTENSION postgis;" test
   - psql -U postgres -c "CREATE DATABASE oedb"
   - psql -U postgres -c "CREATE EXTENSION postgis;" oedb
-  - psql -U postgres oedb < oedb_mini.dump
   - psql -U postgres -c "CREATE DATABASE django"
+  - pip install -r requirements.txt
   - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
   - python manage.py migrate
-  - alembic upgrade head
+  - python manage.py alembic upgrade head
+script:
+  - tox -v
+after_failure:
+  - more .tox/log/* | cat
+  - more .tox/*/log/* | cat
+notifications:
+  email:
+    on_success: never
+    on_failure: always

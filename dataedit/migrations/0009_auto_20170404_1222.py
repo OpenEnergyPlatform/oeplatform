@@ -7,19 +7,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0008_view'),
-    ]
+    dependencies = [("dataedit", "0008_view")]
 
     operations = [
         migrations.AddField(
-            model_name='view',
-            name='is_default',
+            model_name="view",
+            name="is_default",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='view',
-            name='data',
-            field=models.CharField(max_length=3000),
+            model_name="view", name="data", field=models.CharField(max_length=3000)
         ),
     ]

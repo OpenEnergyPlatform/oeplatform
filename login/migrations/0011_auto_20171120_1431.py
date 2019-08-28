@@ -7,18 +7,15 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0010_usergroup_is_admin'),
-    ]
+    dependencies = [("login", "0010_usergroup_is_admin")]
 
     operations = [
         migrations.AddField(
-            model_name='myuser',
-            name='did_agree',
+            model_name="myuser",
+            name="did_agree",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterUniqueTogether(
-            name='groupmembership',
-            unique_together=set([('user', 'group')]),
+            name="groupmembership", unique_together=set([("user", "group")])
         ),
     ]

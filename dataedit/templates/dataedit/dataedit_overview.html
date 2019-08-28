@@ -6,9 +6,6 @@
     <h3><a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}} </h3>
         <table>
             <tr>
-                <td>
-                    <a href="{{table}}/comments" alt="Comments" class="glyphicon glyphicon-list-alt"> </a>
-                </td>
                 <td style="padding:5px">
                     <div>
                         <div >
@@ -63,7 +60,7 @@ for row in result.json():
         <h4>Currently defined views:</h4>
 
         {% for view in views %}
-        <a href="{{ request.path }}?view={{ view.id }}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
+        <a href="{{ request.path }}{% if view.id %}?view={{ view.id }}{% endif %}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
         {% endfor %}
         {% if not views %}
         No views were created yet.
@@ -75,7 +72,6 @@ for row in result.json():
                 {% if current_view.id %}
             <span style="float: left">
                 <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-default">Edit active view</a>
-                <a href="{{ request.path }}/view/set-default?id={{ current_view.id }}" class="btn btn-default">Set as default</a>
                 <a href="{{ request.path }}/view/delete?id={{ current_view.id }}" class="btn btn-danger">Delete active view</a>
             </span>
                 {% endif %}
@@ -88,8 +84,6 @@ for row in result.json():
         </div>
     </div>
 
-    <div id="main-visualization-container" style="min-height: 500px">
-    </div>
 {% endblock %}
 
 {% block script %}
@@ -138,8 +132,6 @@ for row in result.json():
         return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
-    var data_record = {}
-    var unchecked_record = {}
 
     function build_views_leaflet() {
 
@@ -154,8 +146,8 @@ for row in result.json():
         getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
 
             // add geoJSON layer to map
-            geoJSON = L.geoJson(JSON.parse(result["data"][0])).addTo(map);
-
+            var geom = result["data"].map(x => JSON.parse(x));
+            geoJSON = L.geoJson(geom).addTo(map);
             // center map on geoJSON
             map.fitBounds(geoJSON.getBounds());
 
@@ -169,7 +161,9 @@ for row in result.json():
         function updateFunction() {
             getMapData("{{ schema }}", "{{ table }}", "{{ geo_column }}", map.getBounds(), function (result) {
                 geoJSON.clearLayers(); // remove old polygons
-                geoJSON.addData(JSON.parse(result["data"][0]))
+                for(var i=0; i<result["rowcount"]; i++){
+                    geoJSON.addData(JSON.parse(result["data"][i]));
+                }
             });
         }
 
@@ -182,7 +176,6 @@ for row in result.json():
                 table: '{{table}}',
                 schema: '{{schema}}',
                 backend: 'OEP',
-                has_row_comments: {% if has_row_comments %} true {% else %} false {% endif %}
         });
 
 
@@ -213,7 +206,7 @@ for row in result.json():
                 {% if comment_on_table %}
                 var columns = grid.grid.getColumns();
 
-                var fields = {{ comment_on_table.fields | safe }};
+                var fields = {% if comment_on_table.fields %}{{ comment_on_table.fields | safe }}{%else%}[]{%endif%};
 
                 for (var i = 0; i < columns.length;i++)
                 {
@@ -242,38 +235,6 @@ for row in result.json():
                 graph.render();
                 graph.redraw();
             {% endif %}
-        });
-
-        if(unchecked){
-
-            $("#unchecked_data_div").css("display", "block");
-            var dataset_unchecked = new recline.Model.Dataset({
-                    table: '_{{table}}_edit',
-                    schema: '_{{schema}}',
-                    backend: 'OEP',
-                    has_row_comments: false
-            });
-
-            dataset_unchecked.fetch().done(function(dataset) {
-                plot_view(dataset,
-                    false,
-                    $('.data-unchecked-explorer-here'), unchecked_record)
-            });
-        }
-        else
-            $("#unchecked_data_div").css("display", "none");
-
-
-        $('#savebutton').bind('click',
-        function() {
-            changes = {
-                creates: dataset_main._changes.creates,
-                updates:    dataset_main.records.filter(
-                    function(el){return !(jQuery.isEmptyObject(el.changed));}),
-                deletes: dataset_main._changes.deletes
-            };
-
-            dataset_main.backend.save(changes, dataset_main);
         });
     }
 

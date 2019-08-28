@@ -8,44 +8,68 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0027_auto_20160315_1532'),
-    ]
+    dependencies = [("modelview", "0027_auto_20160315_1532")]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='code_documentation',
-            field=models.CharField(help_text='Where is the code documentation publicly available?', max_length=200, null=True, verbose_name='Link to Developer/Code Documentation'),
+            model_name="basicfactsheet",
+            name="code_documentation",
+            field=models.CharField(
+                help_text="Where is the code documentation publicly available?",
+                max_length=200,
+                null=True,
+                verbose_name="Link to Developer/Code Documentation",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='link_to_source_code',
-            field=models.CharField(max_length=200, null=True, verbose_name='Link to source code'),
+            model_name="basicfactsheet",
+            name="link_to_source_code",
+            field=models.CharField(
+                max_length=200, null=True, verbose_name="Link to source code"
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='user_documentation',
-            field=models.CharField(help_text='Where is the user documentation publicly available?', max_length=200, null=True, verbose_name='Link to User Documentation'),
+            model_name="basicfactsheet",
+            name="user_documentation",
+            field=models.CharField(
+                help_text="Where is the user documentation publicly available?",
+                max_length=200,
+                null=True,
+                verbose_name="Link to User Documentation",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='website',
-            field=models.CharField(max_length=200, null=True, verbose_name='Website'),
+            model_name="basicfactsheet",
+            name="website",
+            field=models.CharField(max_length=200, null=True, verbose_name="Website"),
         ),
         migrations.AlterField(
-            model_name='energyframework',
-            name='api_doc',
-            field=models.CharField(max_length=200, null=True, verbose_name='Link to API documentation'),
+            model_name="energyframework",
+            name="api_doc",
+            field=models.CharField(
+                max_length=200, null=True, verbose_name="Link to API documentation"
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='integrated_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.TextField(), help_text='Which models are integrated in the model? Where are these models available? (comma-separated)', null=True, size=None, verbose_name='Integration of other models'),
+            model_name="energymodel",
+            name="integrated_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.TextField(),
+                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",
+                null=True,
+                size=None,
+                verbose_name="Integration of other models",
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='integrating_models',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.TextField(), help_text='With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)', null=True, size=None, verbose_name='Integration with other models'),
+            model_name="energymodel",
+            name="integrating_models",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.TextField(),
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",
+                null=True,
+                size=None,
+                verbose_name="Integration with other models",
+            ),
         ),
     ]
