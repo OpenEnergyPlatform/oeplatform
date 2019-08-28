@@ -57,13 +57,15 @@ def redir(request, target):
 
 
 class ContactView(View):
-    error_css_class = 'error'
-    required_css_class = 'required'
+    error_css_class = "error"
+    required_css_class = "required"
 
     def post(self, request):
         form = ContactForm(data=request.POST)
         if form.is_valid():
-            receps = sec.CONTACT_ADDRESSES[request.POST["contact"]]
+            receps = sec.CONTACT_ADDRESSES.get(
+                request.POST["contact_category"], "technical"
+            )
             send_mail(
                 request.POST.get("contact_topic"),
                 request.POST.get("contact_name")
