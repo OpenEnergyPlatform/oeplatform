@@ -51,6 +51,17 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_devuser(self, name, email):
+        if not email:
+            raise ValueError("An email address must be entered")
+        if not name:
+            raise ValueError("A name must be entered")
+        user = self.model(
+            name=name, email=self.normalize_email(email), affiliation=name, is_mail_verified=True
+            )
+        user.save(using=self._db)
+        return user
+
 
 class PermissionHolder:
     def has_write_permissions(self, schema, table):
