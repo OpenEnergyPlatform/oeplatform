@@ -1,0 +1,12 @@
+diff a/base/templates/base/base.html b/base/templates/base/base.html	(rejected hunks)
+@@ -122,8 +122,8 @@
+                         <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
+                         <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
+                         <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
+-                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
+-                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
++                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
++                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
+                     </ul>
+                   </div>
+             </nav>
