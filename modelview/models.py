@@ -255,7 +255,7 @@ class BasicFactsheet(models.Model):
     )
     larger_scale_usage = CharField(
         max_length=10000,
-        verbose_name="Larger scale usage",
+        verbose_name="Model usage",
         help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",
         null=True,
     )
