@@ -1,0 +1,76 @@
+@charset "UTF-8";
+
+html {
+    --primaryColor1: #1F567D;
+    --primaryColor2: #3B77A0;
+    --primaryColor3: #0B3E62;
+    --primaryColor4: #072437;
+    --secondaryColor1: #BFD7EA;
+    --grey1: #62869D;
+    --white: #FFFFFF;
+}
+
+
+.index-home {
+    text-align: center;
+
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.index-home h3 {
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: var(--primaryColor1);
+}
+
+.index-home h4 {
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: var(--primaryColor1);
+}
+
+.index-tile {
+    height: 150px;
+    width: 150px;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-end;
+
+    padding: 0.5em;
+}
+
+.index-tile button {
+    background-color: var(--primaryColor1);
+    color: var(--white);
+    background-image: none;
+    border: none;
+}
+
+.index-tile-colored {
+    background-color: var(--secondaryColor1);
+}
+
+.index-tile-container {
+    display: grid;
+    grid-template-columns: repeat(4, 150px);
+    grid-gap: 1em;
+    padding: 2em 0;
+
+}
+
+.index-tutorial-tile-container {
+    display: grid;
+    grid-template-columns: repeat(3, 150px);
+    grid-gap: 1em;
+    padding: 2em 0;
+
+}
+
+@media screen and (max-width: 800px) {
+    .index-tile-container {
+        grid-template-columns: repeat(2, 150px);
+        grid-template-rows: repeat(2, 150px);
+    }
+}
