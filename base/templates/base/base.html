@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         {% load bootstrap3 %}
         {% bootstrap_css %}
@@ -17,8 +17,8 @@
         <title>
             OEP{% block title %}{% endblock %}
         </title>
-        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/theme-style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
         {% block after-header %}{% endblock %}
     </head>
 
@@ -76,7 +76,7 @@
              <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
         </nav>
-        
+
     {% endblock %}
 
 
@@ -130,5 +130,5 @@
         </div>
 
 </body>
-    
+
 </html>
