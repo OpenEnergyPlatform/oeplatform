@@ -329,6 +329,9 @@ class FSAdd(LoginRequiredMixin, View):
             if form.is_valid():
 
                 model = form.save()
+                if model.license:
+                    if model.license != 'Other':
+                        model.license_other_text = None
                 ids = {
                     int(field[len("tag_") :])
                     for field in request.POST

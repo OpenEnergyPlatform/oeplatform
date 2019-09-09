@@ -17,7 +17,7 @@
                     <span class='glyphicon glyphicon-remove'></span> 
                 {% elif val == True  %}
                     <span class='glyphicon glyphicon-ok'></span> 
-                {% elif 'http' in val or 'www' in val%}
+                {% elif 'http://' in val or 'www.' in val or 'https://' in val %}
                     <a href="{% get_field model field %} ">{% get_field model field %}</a>
                 {% else %}
                     {% get_field model field %} 
