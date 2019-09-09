@@ -158,7 +158,9 @@ class BasicFactsheet(models.Model):
         help_text="Is the model available on GitHub?",
     )
     link_to_source_code = CharField(
-        max_length=200, verbose_name="Link to source code", null=True
+        max_length=200, verbose_name="Access to source code", 
+        help_text="Where is the source code available (e.g. link, email address)?",
+        null=True
     )
     data_provided = CharField(
         max_length=1000,
