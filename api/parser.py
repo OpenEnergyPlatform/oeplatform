@@ -19,6 +19,7 @@ from sqlalchemy import (
     or_,
     select,
     util,
+    cast
 )
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.schema import Sequence
@@ -33,6 +34,7 @@ from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
 from sqlalchemy.dialects.postgresql.base import INTERVAL
+from sqlalchemy import types as sqltypes
 
 from . import DEFAULT_SCHEMA
 
@@ -354,6 +356,76 @@ def parse_column(d, mapper):
             return column(name)
 
 
+def parse_type(dt_string):
+
+    # Are you an array?
+    dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
+    arr_match = re.match(dtarr_expression, dt_string)
+    if arr_match:
+        is_array = True
+        dt_string = arr_match.groups()[0]
+        dt, autoincrement = parse_type(dt_string)
+        return sa.ARRAY(dt), autoincrement
+
+    # Is the datatypestring of form NAME(NUMBER)?
+    dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
+    match = re.match(dt_expression, dt_string)
+    if match:
+        dt_string = match.groups()[0]
+        if dt_string.lower() == "geometry":
+            return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
+        else:
+            dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
+        dt, autoincrement = parse_type(dt_string)
+        return dt(*dt_cardinality), autoincrement
+
+    # So it's a plain type
+    autoincrement = False
+
+    dt_string = dt_string.lower()
+
+    if dt_string in ("int", "integer"):
+        dt = sa.types.INTEGER
+    elif dt_string in ("bigint", "biginteger"):
+        dt = sa.types.BigInteger
+    elif dt_string in ("bit",):
+        dt = sa.types.Binary
+    elif dt_string in ("boolean", "bool"):
+        dt = sa.types.Boolean
+    elif dt_string in ("char",):
+        dt = sqltypes.CHAR
+    elif dt_string in ("date",):
+        dt = sqltypes.Date
+    elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp"):
+        dt = sqltypes.DateTime
+    elif dt_string in ("decimal", "float"):
+        dt = sqltypes.DECIMAL
+    elif dt_string in ("interval",):
+        dt = sqltypes.Interval
+    elif dt_string in ("json",):
+        dt = sqltypes.JSON
+    elif dt_string in ("nchar",):
+        dt = sqltypes.NCHAR
+    elif dt_string in ("numerical", "numeric"):
+        dt = sa.types.Numeric
+    elif dt_string in ["varchar", "character varying"]:
+        dt = sqltypes.VARCHAR
+    elif dt_string in ("real",):
+        dt = sqltypes.REAL
+    elif dt_string in ("smallint",):
+        dt = sqltypes.SMALLINT
+    elif hasattr(geoalchemy2, dt_string):
+        dt = getattr(geoalchemy2, dt_string)
+    elif hasattr(sqltypes, dt_string.upper()):
+        dt = getattr(sqltypes, dt_string.upper())
+    elif dt_string == "bigserial":
+        dt = sa.types.BigInteger
+        autoincrement = True
+    else:
+        raise APIError("Unknown type (%s)." % dt_string)
+    return dt, autoincrement
+
+
 def parse_expression(d, mapper=None, allow_untyped_dicts=False):
     # TODO: Implement
     if isinstance(d, dict):
@@ -395,6 +467,10 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False):
             return Sequence(get_or_403(d, "sequence"), schema=schema)
         if dtype == "select":
             return parse_select(d)
+        if dtype == "cast":
+            expr = parse_expression(get_or_403(d,'source'))
+            t, _ = parse_type(get_or_403(d,'as'))
+            return cast(expr, t)
         else:
             raise APIError("Unknown expression type: " + dtype)
     if isinstance(d, list):
