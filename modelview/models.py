@@ -159,7 +159,7 @@ class BasicFactsheet(models.Model):
     )
     link_to_source_code = CharField(
         max_length=200, verbose_name="Access to source code", 
-        help_text="Where is the source code available (e.g. link, email address)?",
+        help_text="Is the necessary data to run a scenario available?",
         null=True
     )
     data_provided = CharField(
@@ -673,6 +673,11 @@ class Energystudy(models.Model):
         verbose_name="Author, Institution",
         help_text="Who are the authors of the study and for which institution do they work?",
         max_length=1000,
+    )
+    contact_email = EmailField(
+        verbose_name="Contact (e-mail)",
+        help_text="Please provide the mailadress of the contact person.",
+        null=True,
     )
     client = CharField(
         verbose_name="Client",
