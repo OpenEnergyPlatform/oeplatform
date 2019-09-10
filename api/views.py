@@ -771,7 +771,7 @@ def date_handler(obj):
     :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
     """
     if isinstance(obj, Decimal):
-        return float(obj)
+        return str(obj)
     if hasattr(obj, "isoformat"):
         return obj.isoformat()
     else:

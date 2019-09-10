@@ -380,6 +380,10 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False):
             return "*"
         if dtype == "value":
             if "value" in d:
+                if "datatype" in d:
+                    dt = d["datatype"]
+                    if dt == "Decimal":
+                        return decimal.Decimal(get_or_403(d, "value"))
                 return read_pgvalue(get_or_403(d, "value"))
             else:
                 return None
