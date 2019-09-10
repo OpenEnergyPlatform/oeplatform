@@ -400,7 +400,7 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.CHAR
         elif dt_string in ("date",):
             dt = sqltypes.Date
-        elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp"):
+        elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp", "time without time zone"):
             dt = sqltypes.DateTime
         elif dt_string in ("float"):
             dt= sqltypes.FLOAT
