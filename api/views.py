@@ -24,7 +24,7 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
-
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
@@ -139,7 +139,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -152,7 +152,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -216,7 +216,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -270,7 +270,7 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied

@@ -34,7 +34,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
-from oeplatform.securitysettings import PLAYGROUNDS
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -69,7 +69,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
     if restrict_schemas:
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
     return schema, table
 
@@ -1021,7 +1021,7 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1047,7 +1047,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1190,7 +1190,7 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS:
+    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
 
     return response
