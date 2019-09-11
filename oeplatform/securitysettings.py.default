@@ -24,7 +24,8 @@ DATABASES = {
 	}
 }
 
-PLAYGROUNDS = ('sandbox', 'test')
+DEFAULT_SCHEMA = 'sandbox'
+PLAYGROUNDS = (DEFAULT_SCHEMA, 'test')
 
 UNVERSIONED_SCHEMAS = ("model_draft", )
 
