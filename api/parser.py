@@ -3,7 +3,7 @@
 ###########
 import decimal
 import re
-from datetime import datetime
+from datetime import datetime, date
 
 import geoalchemy2  # Although this import seems unused is has to be here
 import sqlalchemy as sa
@@ -21,6 +21,7 @@ from sqlalchemy import (
     util,
     cast
 )
+import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
@@ -400,8 +401,12 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.CHAR
         elif dt_string in ("date",):
             dt = sqltypes.Date
-        elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp", "time without time zone"):
+        elif dt_string in ("datetime",):
             dt = sqltypes.DateTime
+        elif dt_string in ("timestamp",):
+            dt = sqltypes.TIMESTAMP
+        elif dt_string in ("time without time zone",):
+            dt = sqltypes.TIME
         elif dt_string in ("float"):
             dt= sqltypes.FLOAT
         elif dt_string in ("decimal"):
@@ -462,6 +467,12 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
                     dt = d["datatype"]
                     if dt == "Decimal":
                         return decimal.Decimal(get_or_403(d, "value"))
+                    elif dt == "date":
+                        return dateutil.parser.parse(get_or_403(d, "value")).date()
+                    elif dt == "datetime":
+                        return dateutil.parser.parse(get_or_403(d, "value"))
+                    elif dt == "time":
+                        return dateutil.parser.parse(get_or_403(d, "value")).time()
                 return read_pgvalue(get_or_403(d, "value"))
             else:
                 return None
