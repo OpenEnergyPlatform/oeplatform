@@ -25,6 +25,7 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
@@ -830,7 +831,10 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
             if isinstance(data, dict) and "domains" in data:
-                data["domains"] = {(".".join(key) if isinstance(key, tuple) else key) : val for key,val in data["domains"].items()}
+                data["domains"] = {
+                    (".".join(key) if isinstance(key, tuple) else key): val
+                    for key, val in data["domains"].items()
+                }
             response_data = json.loads(json.dumps(data, default=date_handler))
 
             result = {"content": response_data}

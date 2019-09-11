@@ -592,7 +592,6 @@ def get_column(d):
     return Column("%s.%s" % (table, name), schema=schema)
 
 
-
 def get_column_definition_query(d):
     name = get_or_403(d, "name")
     args = []

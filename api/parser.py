@@ -19,7 +19,7 @@ from sqlalchemy import (
     or_,
     select,
     util,
-    cast
+    cast,
 )
 import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
@@ -127,7 +127,10 @@ def parse_insert(d, context, message=None, mapper=None):
             if not isinstance(raw_values, list):
                 raise APIError("{} is not a list".format(raw_values))
             values = (
-                zip(field_strings, parse_expression(x, allow_untyped_dicts=True, escape_quotes=False))
+                zip(
+                    field_strings,
+                    parse_expression(x, allow_untyped_dicts=True, escape_quotes=False),
+                )
                 for x in raw_values
             )
         else:
@@ -360,7 +363,9 @@ def parse_column(d, mapper):
 def parse_type(dt_string, **kwargs):
 
     if isinstance(dt_string, dict):
-        dt = parse_type(get_or_403(dt_string, "datatype"), **dt_string.get('kwargs', {}))
+        dt = parse_type(
+            get_or_403(dt_string, "datatype"), **dt_string.get("kwargs", {})
+        )
         return dt
     else:
         # Are you an array?
@@ -408,7 +413,7 @@ def parse_type(dt_string, **kwargs):
         elif dt_string in ("time", "time without time zone"):
             dt = sqltypes.TIME
         elif dt_string in ("float"):
-            dt= sqltypes.FLOAT
+            dt = sqltypes.FLOAT
         elif dt_string in ("decimal"):
             dt = sqltypes.DECIMAL
         elif dt_string in ("interval",):
@@ -485,16 +490,21 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
         if dtype == "select":
             return parse_select(d)
         if dtype == "cast":
-            expr = parse_expression(get_or_403(d,'source'))
-            t, _ = parse_type(get_or_403(d,'as'))
+            expr = parse_expression(get_or_403(d, "source"))
+            t, _ = parse_type(get_or_403(d, "as"))
             return cast(expr, t)
         else:
             raise APIError("Unknown expression type: " + dtype)
     if isinstance(d, list):
-        return [parse_expression(x, allow_untyped_dicts=allow_untyped_dicts, escape_quotes=escape_quotes) for x in d]
+        return [
+            parse_expression(
+                x, allow_untyped_dicts=allow_untyped_dicts, escape_quotes=escape_quotes
+            )
+            for x in d
+        ]
     if isinstance(d, str):
         if escape_quotes:
-            return d.replace("\"", "")
+            return d.replace('"', "")
         else:
             return d
     return d
