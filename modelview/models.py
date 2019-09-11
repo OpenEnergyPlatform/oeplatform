@@ -325,14 +325,20 @@ class Energymodel(BasicFactsheet):
     generation_renewables_hydro = BooleanField(default=False, verbose_name="Hydro")
     generation_renewables_biomass = BooleanField(default=False, verbose_name="Biomass")
     generation_renewables_biogas = BooleanField(default=False, verbose_name="Biogas")
+    generation_renewables_bio = BooleanField(default=False, verbose_name="Biomass,Biogas,Biofuels")
     generation_renewables_solar_thermal = BooleanField(
         default=False, verbose_name="Solar thermal"
+    )
+    generation_renewables_geothermal = BooleanField(
+        default=False, verbose_name="Geothermal heat"
     )
     generation_renewables_others = BooleanField(default=False, verbose_name="Others")
     generation_renewables_others_text = CharField(max_length=200, null=True)
 
     generation_conventional_gas = BooleanField(default=False, verbose_name="gas")
     generation_conventional_coal = BooleanField(default=False, verbose_name="coal")
+    generation_conventional_lignite = BooleanField(default=False, verbose_name="lignite")
+    generation_conventional_hard_coal = BooleanField(default=False, verbose_name="hard coal")
     generation_conventional_oil = BooleanField(default=False, verbose_name="oil")
     generation_conventional_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
@@ -342,6 +348,9 @@ class Energymodel(BasicFactsheet):
     )
 
     generation_CHP = BooleanField(default=False, verbose_name="CHP")
+
+    modeled_technology_renewables = BooleanField(default=False, verbose_name="renewables")
+    modeled_technology_conventional = BooleanField(default=False, verbose_name="conventional")
 
     transfer_electricity = BooleanField(default=False, verbose_name="electricity")
     transfer_electricity_distribution = BooleanField(
