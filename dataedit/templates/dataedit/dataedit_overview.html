@@ -213,13 +213,12 @@ for row in result.json():
                     for (var j = 0; j < fields.length; j++)
                     {
                         if (columns[i].name === fields[j].name)
-                            columns[i].toolTip = fields[j].description;
+                            columns[i].toolTip = (fields[j].description) ? fields[j].description:fields[j].name;
                     }
                 }
-
                 grid.grid.setColumns(columns);
                 {% endif %}
-                grid.render();
+
 
             {% elif current_view.type == "graph" %}
                 var graph = new recline.View.Graph({
