@@ -16,7 +16,11 @@ This project is developed in Python 3.4 and therefore all later uses of pip and 
 
 ### Setup the python
 
-Once this is done, you can proceed with the installation of the actual platform by cloning the repository. Install the required python libraries:
+Once this is done, you can proceed with the installation of the actual platform by cloning the repository. Uninstall django-bootstrap3:
+
+    pip uninstall django-bootstrap3
+
+Install the required python libraries:
 
     pip install -r requirements.txt
 
