@@ -215,13 +215,16 @@ confirmOnLeave();
         </tr>
         <tr>
             <th> Modeled technologies: components for power generation or conversion </th>
-            <td><table class="checktable check"  align="top">{% include 'modelview/editmodel_snippet.html' with     field=form.modeled_technology_renewables  event='onclick'%}</table></td>
+            <td align="left">         
+                <table  class="modeledTec">
+                {% include 'modelview/editmodel_snippet.html' with     field=form.modeled_technology_renewables  event='onclick'%}
+                </table>
+            </td>
         </tr>
         <tr>
-            <td></td><td>
-                <table class="checktable"  align="center"> 
-                    <tr>
-                        <td>
+            <td></td>
+            <td>
+                <table class="checktable"  align="right"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV  class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro class='renewable_tec' visible='none' %}
@@ -229,34 +232,31 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_solar_thermal class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_geothermal class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_others add=form.generation_renewables_others_text class='renrewable_tec' visible='none' %}
-                        </td>
-                    </tr>   
+                </table>
+            </td>
+        </tr>
+        <tr></tr>
+        <tr>
+            <td></td>
+            <td align="left">         
+                <table  class="modeledTec">
+                    {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional  event='onclick'%}
                 </table>
             </td>
         </tr>
         <tr>
-            <th></th>
-            <td><table class="checktable"  align="top">{% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional  event='onclick'%}</table></td>
-        </tr>
-        <tr>
-            <td></td><td>
-                <table class="checktable" align="center">    
-                    <tr>
-                        <td>        
+            <td></td>
+            <td>
+                <table class="checktable"  align="right"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas  class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_lignite   class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_hard_coal   class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil   class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels   class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear   class='conventional_tec' visible='none' %}
-                        </td>
-                    </tr>
                 </table>
-
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_CHP %}
-                                    </td>
-                    </tr> 
-        
+            </td>
+        </tr>        
         <tr>
             <th> Modeled technologies: components for transfer, infrastructure or grid </th>
             <td>
