@@ -24,7 +24,10 @@ DATABASES = {
 	}
 }
 
-PLAYGROUNDS = ('sandbox')
+DEFAULT_SCHEMA = 'sandbox'
+PLAYGROUNDS = (DEFAULT_SCHEMA, 'test')
+
+UNVERSIONED_SCHEMAS = ("model_draft", )
 
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']

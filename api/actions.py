@@ -25,7 +25,7 @@ import login.models as login_models
 from api import DEFAULT_SCHEMA, references
 from api.connection import _get_engine
 from api.error import APIError
-from api.parser import get_or_403, read_bool, read_pgid
+from api.parser import get_or_403, read_bool, read_pgid, parse_type
 from api.sessions import (
     SessionContext,
     close_all_for_user,
@@ -34,7 +34,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
-from oeplatform.securitysettings import PLAYGROUNDS
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -69,7 +69,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
     if restrict_schemas:
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
     return schema, table
 
@@ -592,76 +592,6 @@ def get_column(d):
     return Column("%s.%s" % (table, name), schema=schema)
 
 
-def parse_type(dt_string):
-
-    # Are you an array?
-    dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
-    arr_match = re.match(dtarr_expression, dt_string)
-    if arr_match:
-        is_array = True
-        dt_string = arr_match.groups()[0]
-        dt, autoincrement = parse_type(dt_string)
-        return sa.ARRAY(dt), autoincrement
-
-    # Is the datatypestring of form NAME(NUMBER)?
-    dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
-    match = re.match(dt_expression, dt_string)
-    if match:
-        dt_string = match.groups()[0]
-        if dt_string.lower() == "geometry":
-            return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
-        else:
-            dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
-        dt, autoincrement = parse_type(dt_string)
-        return dt(*dt_cardinality), autoincrement
-
-    # So it's a plain type
-    autoincrement = False
-
-    dt_string = dt_string.lower()
-
-    if dt_string in ("int", "integer"):
-        dt = sa.types.INTEGER
-    elif dt_string in ("bigint", "biginteger"):
-        dt = sa.types.BigInteger
-    elif dt_string in ("bit",):
-        dt = sa.types.Binary
-    elif dt_string in ("boolean", "bool"):
-        dt = sa.types.Boolean
-    elif dt_string in ("char",):
-        dt = sqltypes.CHAR
-    elif dt_string in ("date",):
-        dt = sqltypes.Date
-    elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp"):
-        dt = sqltypes.DateTime
-    elif dt_string in ("decimal", "float"):
-        dt = sqltypes.DECIMAL
-    elif dt_string in ("interval",):
-        dt = sqltypes.Interval
-    elif dt_string in ("json",):
-        dt = sqltypes.JSON
-    elif dt_string in ("nchar",):
-        dt = sqltypes.NCHAR
-    elif dt_string in ("numerical", "numeric"):
-        dt = sa.types.Numeric
-    elif dt_string in ["varchar", "character varying"]:
-        dt = sqltypes.VARCHAR
-    elif dt_string in ("real",):
-        dt = sqltypes.REAL
-    elif dt_string in ("smallint",):
-        dt = sqltypes.SMALLINT
-    elif hasattr(geoalchemy2, dt_string):
-        dt = getattr(geoalchemy2, dt_string)
-    elif hasattr(sqltypes, dt_string.upper()):
-        dt = getattr(sqltypes, dt_string.upper())
-    elif dt_string == "bigserial":
-        dt = sa.types.BigInteger
-        autoincrement = True
-    else:
-        raise APIError("Unknown type (%s)." % dt_string)
-    return dt, autoincrement
-
-
 def get_column_definition_query(d):
     name = get_or_403(d, "name")
     args = []
@@ -1090,7 +1020,7 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1116,7 +1046,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1259,7 +1189,7 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS:
+    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
 
     return response
