@@ -303,7 +303,9 @@ confirmOnLeave();
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_DC %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_NT %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_TM %}                    
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_SN %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_other add=form.network_coverage_other_text %}
                 </table>
             </td>
         </tr>

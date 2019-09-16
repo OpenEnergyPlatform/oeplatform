@@ -372,9 +372,13 @@ class Energymodel(BasicFactsheet):
 
     network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow")
     network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow")
-    network_coverage_NT = BooleanField(
-        default=False, verbose_name="net transfer capacities"
+    network_coverage_TM = BooleanField(default=False, verbose_name="transshipment model")    
+    network_coverage_SN = BooleanField(default=False, verbose_name="single-node / copper plate model")
+    network_coverage_other = BooleanField(
+        default=False, verbose_name="other"
     )
+    network_coverage_other_text = CharField(max_length=200, null=True)
+
 
     storage_electricity_battery = BooleanField(default=False, verbose_name="battery")
     storage_electricity_kinetic = BooleanField(default=False, verbose_name="kinetic")

@@ -519,8 +519,6 @@ MODEL_VIEW_PROPS = OrderedDict(
                         [
                             "energy_sectors_electricity",
                             "energy_sectors_heat",
-                            "energy_sectors_liquid_fuels",
-                            "energy_sectors_gas",
                             "energy_sectors_others",
                             "energy_sectors_others_text",
                         ],
@@ -559,9 +557,9 @@ MODEL_VIEW_PROPS = OrderedDict(
                             "generation_renewables_PV",
                             "generation_renewables_wind",
                             "generation_renewables_hydro",
-                            "generation_renewables_biomass",
-                            "generation_renewables_biogas",
+                            "generation_renewables_bio",
                             "generation_renewables_solar_thermal",
+                            "generation_renewables_geothermal",
                             "generation_renewables_others",
                             "generation_renewables_others_text",
                         ],
@@ -570,7 +568,8 @@ MODEL_VIEW_PROPS = OrderedDict(
                         "generation conventional",
                         [
                             "generation_conventional_gas",
-                            "generation_conventional_coal",
+                            "generation_conventional_lignite",
+                            "generation_conventional_hard_coal",
                             "generation_conventional_oil",
                             "generation_conventional_liquid_fuels",
                             "generation_conventional_nuclear",
@@ -606,7 +605,9 @@ MODEL_VIEW_PROPS = OrderedDict(
                         [
                             "network_coverage_AC",
                             "network_coverage_DC",
-                            "network_coverage_NT",
+                            "network_coverage_TM",
+                            "network_coverage_SN",
+                            "network_coverage_other",
                         ],
                     ),
                     (
