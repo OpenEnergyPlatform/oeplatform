@@ -12,6 +12,7 @@ from sqlalchemy import (
     MetaData,
     Table,
     and_,
+    not_,
     column,
     func,
     literal_column,
@@ -589,7 +590,7 @@ def parse_sqla_operator(raw_key, *operands):
         return query
     elif key in ["not"]:
         x = operands[0]
-        return parse_condition(x)._not()
+        return not_(parse_condition(x))
     else:
         if len(operands) != 2:
             raise APIError(
