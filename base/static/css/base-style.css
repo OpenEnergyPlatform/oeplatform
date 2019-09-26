@@ -3,6 +3,28 @@
     border: 2px solid #C5C5CF;
 }*/
 
+body {
+    height: calc(100% - 52px);
+    overflow: auto;
+
+}
+
+.base-navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+    background-color: var(--primaryColor2);
+    background-image: unset;
+}
+
+.base {
+    height: 100%;
+
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: 1fr auto;
+}
+
+
 .tag {
     padding: 0px;
     padding-left: 5px;

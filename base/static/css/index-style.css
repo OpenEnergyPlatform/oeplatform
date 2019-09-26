@@ -1,8 +1,8 @@
 @charset "UTF-8";
 
 html {
-    --primaryColor1: #1F567D;
-    --primaryColor2: #3B77A0;
+    --primaryColor1: #3B77A0;
+    --primaryColor2: #1F567D;
     --primaryColor3: #0B3E62;
     --primaryColor4: #072437;
     --secondaryColor1: #BFD7EA;
@@ -10,6 +10,14 @@ html {
     --white: #FFFFFF;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+}
 
 .index-home {
     text-align: center;
@@ -17,6 +25,7 @@ html {
     display: flex;
     flex-flow: column;
     align-items: center;
+    justify-content: space-between;
 }
 
 .index-home h3 {
@@ -33,37 +42,108 @@ html {
 
 .index-tile {
     height: 150px;
-    width: 150px;
-    display: flex;
-    flex-flow: column;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    grid-template-columns: 100%;
+    justify-content: center;
+    align-items: center;
 
     padding: 0.5em;
 }
 
+.index-tile img {
+    align-self: center;
+    justify-self: center;
+    height: 50px;
+}
+
 .index-tile button {
-    background-color: var(--primaryColor1);
     color: var(--white);
     background-image: none;
     border: none;
+
+    width: 100%;
+}
+
+.index-tile-color-1 button {
+     background-color: var(--primaryColor1);
+}
+
+.index-tile-color-2 button {
+     background-color: var(--primaryColor2);
+}
+
+.index-tile-color-3 button {
+     background-color: var(--primaryColor3);
+}
+
+.index-tile-color-4 button {
+     background-color: var(--primaryColor4);
 }
 
 .index-tile-colored {
     background-color: var(--secondaryColor1);
 }
 
+.index-tile-bordered button {
+    border: 1px solid var(--primaryColor4);
+    color: var(--primaryColor4);
+}
+
+.index-about-container-background {
+    background-color: var(--secondaryColor1);
+    width: 100%;
+    margin-top: auto;
+}
+
+.index-about-container {
+    padding: 2em 0;
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: 50% 50%;
+    max-width: 800px;
+    margin: auto;
+}
+
+.index-about-container .index-about-text {
+    text-align: left;
+    justify-self: flex-start;
+
+    display: grid;
+    grid-template-rows: repeat(3, auto);
+    justify-items: left;
+
+    grid-gap: 1em;
+}
+
+.index-about-container .index-about-text button {
+    background-color: var(--primaryColor3);
+    background-image: none;
+    border: none;
+    color: var(--white)
+
+}
+
+.index-about-container img {
+    width: 70%;
+    justify-self: flex-end;
+
+}
+
 .index-tile-container {
     display: grid;
     grid-template-columns: repeat(4, 150px);
-    grid-gap: 1em;
+    grid-gap: 2em;
     padding: 2em 0;
 
 }
 
 .index-tutorial-tile-container {
     display: grid;
-    grid-template-columns: repeat(3, 150px);
-    grid-gap: 1em;
+    grid-template-columns: repeat(3, 120px);
+    grid-gap: 3em;
     padding: 2em 0;
 
 }

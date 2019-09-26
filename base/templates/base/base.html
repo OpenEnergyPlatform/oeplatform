@@ -19,15 +19,15 @@
 
 <body>
     {% block nav %}
-        <nav class="navbar navbar-default navbar-fixed-top">
+        <nav class="navbar navbar-default base-navbar base-navbar-top">
           <div class="container-fluid" style="width:80%; float:left;">
             <div class="navbar-header">
-                  <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
-                    <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
-                  </div>
+              <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
+                <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
+              </div>
               <a class="navbar-brand" href="/">
-
-                  OpenEnergy Platform</a>
+                  OpenEnergy Platform
+              </a>
             </div>
             <ul class="nav navbar-nav">
 
@@ -75,18 +75,20 @@
     {% endblock %}
 
 
-
+        {% if not disableSidebar %}
         <div class="container-fluid oe-wrapper" style="margin-top:70px">
             <div class="row">
-
                 <div class="col-lg-8 col-lg-offset-1 col-md-9">
                     <div class="panel panel-default">
                         <div class="panel-body">
+        {% else %}
+        <div class="base">
+        {% endif %}
                             {% block content %}{% endblock %}
+        {% if not disableSidebar %}
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-3">
                     <div class="panel panel-default">
                         <div class="panel-body">
@@ -107,8 +109,8 @@
                 </div>
 
             </div>
-
-            <nav class="navbar navbar-default  navbar-fixed-bottom">
+        {% endif %}
+            <nav class="navbar navbar-default base-navbar base-navbar-bottom">
                   <div class="container-fluid" style="width:80%; float:left;">
                     <ul class="nav navbar-nav">
                         <li class="inactive"><a href="/about/">About us</a></li>
@@ -123,7 +125,6 @@
                   </div>
             </nav>
         </div>
-
 </body>
 
 </html>
