@@ -22,11 +22,14 @@ class Welcome(View):
         with open(os.path.join(SITE_ROOT, '..',
                                'versions/changelogs/%s_%s_%s.md'%(major, minor, patch))) as change_file:
             changes = markdowner.convert(
-                '\n'.join(line for line in change_file.readlines()))
-        return render(request,
-                      'base/index.html',
-                      {'version': '%s.%s.%s'%(major, minor, patch),
-                       'changes': changes})
+                "\n".join(line for line in change_file.readlines())
+            )
+        return render(
+            request,
+            "base/index.html",
+            {"version": "%s.%s.%s" % (major, minor, patch), "changes": changes, "disableSidebar": True},
+        )
+
 
 def get_logs(request):
     version_expr = r'^(?P<major>\d+)_(?P<major>\d+)+_(?P<major>\d+)\.md$'
