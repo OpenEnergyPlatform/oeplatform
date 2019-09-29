@@ -3,6 +3,25 @@
     border: 2px solid #C5C5CF;
 }*/
 
+html {
+    --primaryColor1: #3B77A0;
+    --primaryColor2: #1F567D;
+    --primaryColor3: #0B3E62;
+    --primaryColor4: #072437;
+    --secondaryColor1: #BFD7EA;
+    --grey1: #62869D;
+    --white: #FFFFFF;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+}
+
 body {
     height: calc(100% - 52px);
     overflow: auto;
@@ -19,9 +38,15 @@ body {
 .base {
     height: 100%;
 
+
+
     display: grid;
     grid-template-columns: 100%;
     grid-template-rows: 1fr auto;
+}
+
+.base > div:first-child {
+    margin: 0 -15px;
 }
 
 
@@ -74,6 +99,15 @@ body {
     float: right;
     background:none;
 
+}
+
+.oe-wrapper {
+    margin-top: 1em;
+}
+
+.container-center {
+    width: 800px;
+    margin: 0 auto;
 }
 
 .logo-container{
