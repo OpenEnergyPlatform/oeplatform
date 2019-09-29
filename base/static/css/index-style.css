@@ -1,23 +1,5 @@
 @charset "UTF-8";
 
-html {
-    --primaryColor1: #3B77A0;
-    --primaryColor2: #1F567D;
-    --primaryColor3: #0B3E62;
-    --primaryColor4: #072437;
-    --secondaryColor1: #BFD7EA;
-    --grey1: #62869D;
-    --white: #FFFFFF;
-}
-
-html, body {
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    height: 100%;
-}
 
 .index-home {
     text-align: center;
@@ -57,7 +39,7 @@ html {
     height: 50px;
 }
 
-.index-tile button {
+.index-tile a {
     color: var(--white);
     background-image: none;
     border: none;
@@ -65,19 +47,19 @@ html {
     width: 100%;
 }
 
-.index-tile-color-1 button {
+.index-tile-color-1 a {
      background-color: var(--primaryColor1);
 }
 
-.index-tile-color-2 button {
+.index-tile-color-2 a {
      background-color: var(--primaryColor2);
 }
 
-.index-tile-color-3 button {
+.index-tile-color-3 a {
      background-color: var(--primaryColor3);
 }
 
-.index-tile-color-4 button {
+.index-tile-color-4 a {
      background-color: var(--primaryColor4);
 }
 
@@ -85,7 +67,7 @@ html {
     background-color: var(--secondaryColor1);
 }
 
-.index-tile-bordered button {
+.index-tile-bordered a {
     border: 1px solid var(--primaryColor4);
     color: var(--primaryColor4);
 }
@@ -118,11 +100,12 @@ html {
     grid-gap: 1em;
 }
 
-.index-about-container .index-about-text button {
+.index-about-container .index-about-text a {
     background-color: var(--primaryColor3);
     background-image: none;
     border: none;
-    color: var(--white)
+    color: var(--white);
+    align-self: flex-start;
 
 }
 

@@ -20,16 +20,13 @@
 <body>
     {% block nav %}
         <nav class="navbar navbar-default base-navbar base-navbar-top">
-          <div class="container-fluid" style="width:80%; float:left;">
+          <div class="container-fluid container-center">
             <div class="navbar-header">
-              <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
-                <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
-              </div>
-              <a class="navbar-brand" href="/">
-                  OpenEnergy Platform
-              </a>
+                <a href="/">
+                    <img style="width:45px;height: 45px;" src="{% static 'oeplogo.svg' %}"/>
+                </a>
             </div>
-            <ul class="nav navbar-nav">
+            <ul class="nav navbar-nav navbar-right">
 
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
 
@@ -43,20 +40,10 @@
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                     </ul>
                 </li>
-                <li class="inactive"><a href="/literature/">Literature</a></li>
-                <li class="inactive">
-                    <a href="/discussion" target="_blank">
-                        Discussion
-                    </a>
-                </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
-                    <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Main_Page" target="_blank">OpenMod Wiki {% bootstrap_icon "new-window" %}</a> </li>
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary {% bootstrap_icon "new-window" %}</a> </li>
-                    </ul>
-                </li>
+                <li class="inactive"><a href="/bundles/">Bundles</a></li>
+                <li class="inactive"><a href="/documentation/">Documentation</a></li>
+                <li class="inactive"><a href="/about/">About OEP</a></li>
+
                 {%block nav-additional %}{% endblock %}
             </ul>
           </div>
@@ -76,15 +63,15 @@
 
 
         {% if not disableSidebar %}
-        <div class="container-fluid oe-wrapper" style="margin-top:70px">
+        <div class="container-fluid oe-wrapper">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-1 col-md-9">
                     <div class="panel panel-default">
                         <div class="panel-body">
         {% else %}
-        <div class="base">
+        <div class="base container-fluid">
         {% endif %}
-                            {% block content %}{% endblock %}
+                    {% block content %}{% endblock %}
         {% if not disableSidebar %}
                         </div>
                     </div>
@@ -107,23 +94,20 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         {% endif %}
-            <nav class="navbar navbar-default base-navbar base-navbar-bottom">
-                  <div class="container-fluid" style="width:80%; float:left;">
-                    <ul class="nav navbar-nav">
-                        <li class="inactive"><a href="/about/">About us</a></li>
-                        <li class="inactive"><a href="/faq/">FAQ</a></li>
-                        <li class="inactive"><a href="/contact/">Contact us</a></li>
-                        <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
-                        <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
-                        <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
-                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
-                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
-                    </ul>
-                  </div>
-            </nav>
+            <div class="row">
+                <nav class="navbar navbar-default base-navbar base-navbar-bottom">
+                      <div class="container-fluid container-center">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="inactive"><a href="/contact/">Contact</a></li>
+                            <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
+                            <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
+                            <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
+                        </ul>
+                      </div>
+                </nav>
+            </div>
         </div>
 </body>
 
