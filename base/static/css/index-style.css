@@ -29,6 +29,7 @@
 
 .index-tile {
     height: 150px;
+    width: 150px;
     display: grid;
     grid-template-rows: 1fr auto;
     grid-template-columns: 100%;
@@ -122,23 +123,35 @@
 
 .index-tile-container {
     display: grid;
-    grid-template-columns: repeat(4, 150px);
+    grid-template-columns: repeat(4, auto);
     grid-gap: 2em;
     padding: 2em 0;
+
+    justify-items: center;
 
 }
 
 .index-tutorial-tile-container {
     display: grid;
     grid-template-columns: repeat(3, 120px);
-    grid-gap: 3em;
+    grid-column-gap: 3em;
     padding: 2em 0;
 
 }
 
 @media screen and (max-width: 800px) {
     .index-tile-container {
-        grid-template-columns: repeat(2, 150px);
-        grid-template-rows: repeat(2, 150px);
+        grid-template-columns: repeat(2, auto);
+        grid-template-rows: repeat(2, auto);
+    }
+
+    .index-tutorial-tile-container {
+        grid-template-columns: auto;
+        grid-template-rows: repeat(3, auto);
+        justify-content: center;
+    }
+
+    .index-about-container {
+
     }
 }
