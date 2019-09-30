@@ -8,6 +8,11 @@
     flex-flow: column;
     align-items: center;
     justify-content: space-between;
+
+}
+
+.index-padding {
+    padding: 0 1em;
 }
 
 .index-home h3 {
@@ -79,7 +84,7 @@
 }
 
 .index-about-container {
-    padding: 2em 0;
+    padding: 2em 1em;
     width: 100%;
 
     display: grid;
