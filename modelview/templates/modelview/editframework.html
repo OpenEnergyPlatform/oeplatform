@@ -91,7 +91,11 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.institutions%}
         </table>
         <table class="formtable">
-                    <th> Geographical Scope </th>
+                    <th> Geographical Scope 
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What geographical scope was modelled with the framework?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                    </th>
                     <td>
                         <table class="checktable" align="center"> 
                             {% include 'modelview/editmodel_snippet.html' with field=form.gs_global %}
@@ -103,7 +107,11 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th> Sectoral Scope </th>
+                    <th> Sectoral Scope 
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What sectoral scope was modelled with the framework?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                    </th>
                     <td>
                         <table class="checktable" align="center"> 
                             {% include 'modelview/editmodel_snippet.html' with field=form.ss_electricity %}
@@ -115,7 +123,11 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th> General Problem Scope </th>
+                    <th> General Problem Scope
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is the primary purpose of the framework?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                    </th>
                     <td>
                         <table class="checktable" align="center"> 
                             {% include 'modelview/editmodel_snippet.html' with field=form.gps_forecast %}
@@ -125,7 +137,11 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th> Specific Problem Scope </th>
+                    <th> Specific Problem Scope
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is/are the specific purpose(s) of the framework?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a>
+                    </th>
                     <td>
                         <table class="checktable" align="center"> 
                             {% include 'modelview/editmodel_snippet.html' with field=form.sps_energydemand %}
@@ -174,7 +190,10 @@ confirmOnLeave();
         <table class="formtable">
         {% include 'modelview/editmodel_snippet.html' with field=form.gui %}
         <table class="formtable">
-                    <th> Programming Framework </th>
+                    <th> Programming Framework 
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="WWhich programming framework/language is used to develop the framework?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a></th>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.pf_GAMS %}
@@ -193,7 +212,10 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th> External Solver </th>
+                    <th> External Solver                         
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="WWhich external optimizer(s) can the framework apply? Please list them.">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a></th>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.es_CPLEX %}
@@ -205,7 +227,10 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th> Input Data Format </th>
+                    <th> Input Data Format 
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="WWhich input format(s) can the framework apply? Please list">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a></th>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.idf_Pandas %}    
@@ -225,7 +250,10 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.data_preprocessing %}
         </table>
         <table class="formtable">
-                    <th> Output Data Format </th>
+                    <th> Output Data Format
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which output format(s) can the framework apply? Please list">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a></th>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.odf_Pandas %}    
@@ -245,7 +273,10 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.plotting_functionalities %}
         </table>
         <table class="formtable">
-                    <th> The analytical approach </th>
+                    <th> The analytical approach 
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is the analytical approach that your framework applies?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                        </a></th>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.ap_TopDown %}        
@@ -259,7 +290,9 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.additional_software %}
         {% include 'modelview/editmodel_snippet.html' with field=form.interfaces %}
             <table class="formtable">
-                    <th>The mathematical approach</th>
+                    <th>The mathematical approach
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is the mathematical approach that your framework applies?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.ma_lp %}        
@@ -272,7 +305,9 @@ confirmOnLeave();
         </table>
      
         <table class="formtable">
-                    <th>The underlying methodology</th>
+                    <th>The underlying methodology
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What underlying methodology(-y/-ies) is the FW based on?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.um_econometric %}        
@@ -290,7 +325,9 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-                    <th>Objective function type</th>
+                    <th>Objective function type
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="If the FW is applying optimization, what objectives are commonly formulated?">
+                            <span class='glyphicon glyphicon-question-sign'></span>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.oft_mtsc %}        
@@ -325,7 +362,10 @@ confirmOnLeave();
         </div>
         </table>
         <table class="formtable">
-                    <th>Support</th>
+                    <th>Support
+                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Click the check box if there is a support or Q and A Forum for the Model">
+                            <span class='glyphicon glyphicon-question-sign'></span>
+                    </a>
                     <td>
                         <table class="checktable" align="center"> 
         {% include 'modelview/editmodel_snippet.html' with field=form.support_forum %}        
@@ -359,7 +399,11 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.fixed_units %}
         </table>
         <table class="formtable">
-        <th> Renewable Technology Inclusion</th>
+        <th> Renewable Technology Inclusion                        
+            <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which renewable energy technologies were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a>
+        </th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.Hydro %}
@@ -373,7 +417,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Storage Technology Inclusion</th>
+        <th>Storage Technology Inclusion
+            <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which storage technologies were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.st_hydro %}
@@ -384,7 +431,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Transport Demand</th>
+        <th>Transport Demand
+            <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which transportation demands were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.dc_combustion %}
@@ -397,7 +447,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Residential Demand</th>
+        <th>Residential Demand
+            <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which residential demands were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.rd_Heating %}
@@ -409,7 +462,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Commercial Demand</th>
+        <th>Commercial Demand
+            <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which commercial demands were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.cd_Offices %}
@@ -431,7 +487,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Cost Inclusion</th>
+        <th>Cost Inclusion
+         <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="Which cost types were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.ci_FuelPrices %}
@@ -449,7 +508,10 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.variable_rolling_horizon %}
         </table>
         <table class="formtable">
-        <th>Commonly used time step</th>
+        <th>Commonly used time step
+         <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is/are commonly used time steps that were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.ts_Minutely %}
@@ -461,7 +523,10 @@ confirmOnLeave();
             </td>
         </table>
         <table class="formtable">
-        <th>Commonly modelled time horizon</th>
+        <th>Commonly modelled time horizon
+         <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="What is/are commonly used time horizon that were already modelled with the framework?">
+                <span class='glyphicon glyphicon-question-sign'></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.th_st %}
