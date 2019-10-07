@@ -12,7 +12,6 @@ from django.db.models import (
     SmallIntegerField,
     TextField,
 )
-#from multiselectfield import MultiSelectField
 
 class BasicFactsheet(models.Model):
     model_name = CharField(
@@ -675,21 +674,6 @@ class Energymodel(BasicFactsheet):
         help_text="Which models are integrated in the model? Where are these models available?",
         null=True,
     )
-            
-class ChoiceArrayField(ArrayField):
-    """
-    A field that allows us to store an array of choices.
-    
-    Uses Django 1.9's postgres ArrayField
-    and a MultipleChoiceField for its formfield.
-    
-    Usage:
-        
-        choices = ChoiceArrayField(models.CharField(max_length=...,
-                                                    choices=(...,)),
-                                   default=[...])
-    """
-
     def formfield(self, **kwargs):
         defaults = {
             'form_class': forms.MultipleChoiceField,
