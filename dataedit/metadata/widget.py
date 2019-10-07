@@ -117,3 +117,51 @@ class MetaDataWidget:
     def render(self):
         answer = mark_safe(self.__convert_to_html(data=self.json))
         return answer
+
+    def __convert_to_form(self, data, level=0, parent=''):
+        """Formats variables into html form for editing
+
+        :param data: either a dict, a list or a string
+        :param level: the level of indentation inside the JSON variable
+        :return:
+        """
+
+        if level == 0:
+            html = ''
+            for key, value in data.items():
+                html += f'{self.__convert_to_form(value, level + 1, parent=key)}'
+                html += '<hr>'
+            html.rstrip('<hr>')
+        elif level > 0:
+            if isinstance(data, str):
+                html = '<div class="form_group">'
+                if level == 1:
+                    label = parent.capitalize()
+                else:
+                    label = parent.split('_')[-1].capitalize()
+                html += f'<label for="{parent}"> {label} </label>'
+                html += f'<input class="form-control" id="{parent}" name="{parent}" type="text" value="{data}" />'
+                html += '</div>'
+            elif isinstance(data, dict):
+                html = '<table style="width:100%">'
+                html += f'<tr><td style="width:150px"><label>{parent.capitalize()}</label></td></tr>'
+                html += '<tr><td></td><td>'
+                for key, value in data.items():
+                    html += self.__convert_to_form(
+                        value,
+                        level + 1,
+                        parent='{}_{}'.format(parent, key)
+                    )
+
+                html += '</td></tr>'
+                html += '</table>'
+            elif isinstance(data, list):
+                html = f'<p>list{parent}</p>'
+
+        return html
+
+    def render_editmode(self):
+
+        answer = mark_safe(self.__convert_to_form(data=self.json))
+        return answer
+
