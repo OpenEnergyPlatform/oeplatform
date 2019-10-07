@@ -28,6 +28,7 @@ import api.parser
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
@@ -758,7 +759,10 @@ def view_delete(request, schema, table):
 
 
 class DataView(View):
-    """ This method handles the GET requests for the main page of data edit.
+    """ This class handles the GET and POST requests for the main page of data edit.
+
+        This view is displayed when a table is clicked on after choosing a schema on the website
+
         Initialises the session data (if necessary)
     """
 
@@ -785,14 +789,17 @@ class DataView(View):
         if not engine.dialect.has_table(engine, table, schema=schema):
             raise Http404
 
+        # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
+        # the metadata are stored in the table's comment
         comment_on_table = load_comment_from_db(schema, table)
+        meta_widget = MetaDataWidget(comment_on_table)
 
         revisions = []
 
+        # load the admin interface
         api_changes = change_requests(schema, table)
-
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
@@ -818,8 +825,11 @@ class DataView(View):
 
         table_views = chain((default,), table_views)
 
+
+
         context_dict = {
             "comment_on_table": dict(comment_on_table),
+            "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
