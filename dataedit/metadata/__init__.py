@@ -5,6 +5,12 @@ from .error import MetadataException
 
 
 def load_comment_from_db(schema, table):
+    """Get comment for a table in OEP database (contains the metadata)
+
+    :param schema: name of the OEP schema
+    :param table: name of the OEP table in the OEP schema
+    :return:
+    """
     comment = actions.get_comment_table(schema, table)
     if "error" in comment:
         return comment
@@ -14,22 +20,7 @@ def load_comment_from_db(schema, table):
         if "error" in comment:
             return {"description": comment["content"], "error": comment["error"]}
         try:
-            if "metadata_version" in comment:
-                version = __parse_version(comment["metadata_version"])
-            elif "meta_version" in comment:
-                version = __parse_version(comment["meta_version"])
-            elif "resources" in comment:
-                versions = [
-                    __parse_version(x["meta_version"])
-                    for x in comment["resources"]
-                    if "meta_version" in x
-                ]
-                if not versions:
-                    version = None
-                else:
-                    version = min(versions)
-            else:
-                version = (0, 0)
+            version = get_metadata_version(comment)
             if version:
                 if not isinstance(version, tuple):
                     version = (version,)
@@ -42,6 +33,17 @@ def load_comment_from_db(schema, table):
                         comment_on_table = __LATEST.from_v1_2(comment)
                     elif version[1] == 3:
                         comment_on_table = comment
+                        # This is not part of the actual metadata-schema. We move the fields to
+                        # a higher level in order to avoid fetching the first resource in the
+                        # templates.
+                        comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
+
+                    elif version[1] == 4:
+                        comment_on_table = comment
+                        # This is not part of the actual metadata-schema. We move the fields to
+                        # a higher level in order to avoid fetching the first resource in the
+                        # templates.
+                        comment_on_table["fields"] = comment_on_table["resources"][0]["schema"]["fields"]
                 elif version[0] == 0:
                     comment_on_table = __LATEST.from_v0(comment, schema, table)
                 else:
@@ -55,11 +57,6 @@ def load_comment_from_db(schema, table):
                 if hasattr(me.error, "message")
                 else str(me.error),
             }
-
-    # This is not part of the actual metadata-schema. We move the fields to
-    # a higher level in order to avoid fetching the first resource in the
-    # templates.
-    comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
 
     return comment_on_table
 
@@ -149,5 +146,41 @@ def load_metaversion(x):
     return x[""]
 
 
+def get_metadata_version(metadata):
+    """Find the metadata version in the metadata
+
+    :param metadata: a json-like dict
+    :return: the version in (X, Y, Z) format
+    """
+    if "metaMetadata" in metadata:
+        # v1.4
+        version = metadata["metaMetadata"]["metadataVersion"]
+        version = __parse_version(version.replace("OEP-", ""))
+    elif "metadata_version" in metadata:
+        # v1.3
+        version = __parse_version(metadata["metadata_version"])
+    elif "meta_version" in metadata:
+        # < v1.3
+        version = __parse_version(metadata["meta_version"])
+    elif "resources" in metadata:
+        # < v1.3
+        versions = [
+            __parse_version(x["meta_version"])
+            for x in metadata["resources"]
+            if "meta_version" in x
+        ]
+        if not versions:
+            version = None
+        else:
+            version = min(versions)
+    else:
+        version = (0, 0, 0)
+
+    return version
+
+
 def __parse_version(version_string):
+    """Formats the string version to a tuple of int"""
+    if version_string.count('.') == 1:
+        version_string = version_string + '.0'
     return tuple(map(int, version_string.split(".")))
