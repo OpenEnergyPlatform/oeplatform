@@ -311,7 +311,7 @@ class Energymodel(BasicFactsheet):
         max_length=50,
         verbose_name="Methodical Focus",
         help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',
-        null=False,
+        null=True,
     )
     methodical_focus_2 = CharField(max_length=50, null=True, blank=True)
     methodical_focus_3 = CharField(max_length=50, null=True, blank=True)
