@@ -162,6 +162,7 @@ confirmOnLeave();
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.inital_purpose %}
             {% include 'modelview/editmodel_snippet.html' with field=form.inital_purpose_change %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.research_questions %}
             {% include 'modelview/editmodel_snippet.html' with field=form.inital_release_date %}
             {% include 'modelview/editmodel_snippet.html' with field=form.parent_framework %}
             {% include 'modelview/editmodel_snippet.html' with field=form.version %}
@@ -538,9 +539,10 @@ confirmOnLeave();
     </div>
     <div id="References" class="tab-pane fade in">
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
         {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.citation_reference %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.how_to_cite %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.fw_appliance %}
         {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
         </table>
     </div>

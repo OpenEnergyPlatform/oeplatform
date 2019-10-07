@@ -276,7 +276,7 @@ class BasicFactsheet(models.Model):
     )
     references_to_reports_produced_using_the_model = CharField(
         max_length=10000,
-        verbose_name="Please list references to reports and studies which were produced using the model",
+        verbose_name="Reference Studies/Models",
         help_text="Which studies have been calculated with this model?",
         null=True,
     )
@@ -732,7 +732,10 @@ class Energyframework(BasicFactsheet):
     inital_purpose = CharField(verbose_name="Inital purpose", null=True, help_text="What was the initial purpose/task/motivation to start the development?", max_length=1000)
     inital_purpose_change = CharField(verbose_name="Inital purpose change", null=True, help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?", max_length=1000)
     inital_release_date = CharField(verbose_name="Inital Release Date", null=True, help_text="When [mm-yyyy] was the framework initially released?", max_length=30)
-    parent_framework = CharField(verbose_name="Inital Release Date", null=True, help_text="Is the framework based on a framework? If yes, which?", max_length=80)
+    research_questions = ArrayField(
+        CharField(max_length=1000), verbose_name="Research questions", null=True, help_text="What are 3 typical research questions that are answered by applying the FW?"
+    )
+    parent_framework = CharField(verbose_name="Parent Framework", null=True, help_text="Is the framework based on a framework? If yes, which?", max_length=80)
     # GEOGRAPHICAL SCOPE
     gs_global = BooleanField(verbose_name="Global", default=False)
     gs_regional = BooleanField(verbose_name="Regional", default=False)
@@ -913,6 +916,19 @@ class Energyframework(BasicFactsheet):
     new_components = BooleanField(verbose_name="New components", help_text="Is the framework build to allow for the implementation of new components?",default=False)
     variable_time_step = BooleanField(verbose_name="Variable time step", help_text="Is it possible to model variable time steps with the framework? ",default=False)
     variable_rolling_horizon = BooleanField(verbose_name="Variable rolling", help_text="Is it possible to model a variable Rolling Horizon with the framework? ", default=False)
+
+    how_to_cite = CharField(
+        verbose_name="Citation",
+        help_text="How to cite the framework?",
+        max_length=1000,
+        null = True,
+    )
+    fw_appliance = CharField(
+        verbose_name="Projects using the framework",
+        help_text="Which research projects (on-going or past) apply the framework?",
+        max_length=1000,
+        null = True,
+    )
 
 class Energystudy(models.Model):
     def __str__(self):
