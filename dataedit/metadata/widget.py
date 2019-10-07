@@ -43,23 +43,40 @@ class MetaDataWidget:
 
         elif isinstance(data, list):
 
-
-
+            # For list item control
             no_valid_item = True
 
-            for item in data:
-                name = None
-                if isinstance(item, dict):
-                    item = item.copy()
-                    name = item.pop('name', None)
-                    if name is None:
-                        name = item.pop('title', None)
-                    url = item.pop('url', '')
-                    if url != '':
-                        name = f'<a href="{url}">{name}</a>'
-                if name is not None:
+            # Check if the first item of the list is a string
+            string_list = False
+            if len(data) > 0:
+                if isinstance(data[0], str):
+                    string_list = True
                     no_valid_item = False
-                    html += f'<p class="metaproperty">{name}{self.__convert_to_html(item, level + 1, parent=parent)}</p>'
+
+            if string_list:
+                html += '<ul>'
+                for item in data:
+                    html += f'<li>{self.__convert_to_html(item, level + 1, parent=parent)}</li>'
+                html += '</ul>'
+
+            else:
+
+                for item in data:
+                    if isinstance(item, dict):
+                        item = item.copy()
+                        name = item.pop('title', None)
+                        if name is None or name == '':
+                            name = item.pop('name', None)
+                        else:
+                            item.pop('name', None)
+                        url = item.pop('url', '')
+                        if url != '':
+                            name = f'<a href="{url}">{name}</a>'
+                        if name is not None and name != '':
+                            no_valid_item = False
+                            html += f'<p class="metaproperty">{name}{self.__convert_to_html(item, level + 1, parent=parent)}</p>'
+                    else:
+                        html += f'<p>Not implemented yet</p>'
 
             if no_valid_item:
                 html += f'<p class="metaproperty">There is no valid entry for this field</p>'
