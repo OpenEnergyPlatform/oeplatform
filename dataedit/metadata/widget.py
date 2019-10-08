@@ -20,6 +20,12 @@ class MetaDataWidget:
             r'(?:/?|[/?]\S+)$', re.IGNORECASE
         )
 
+    def camel_case_split(self, string):
+        matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', string)
+        matches = [m.group(0) for m in matches]
+        matches[0] = matches[0].capitalize()
+        return " ".join(matches)
+
     def __convert_to_html(self, data, level=0, parent=''):
         """Formats variables into html code
 
@@ -40,14 +46,14 @@ class MetaDataWidget:
             html += '' if level == 0 else '<ul>'
             for key, value in data.items():
                 if level == 0:
-                    html += f'<tr><th>{key.capitalize()}:</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
+                    html += f'<tr><th>{self.camel_case_split(key)}:</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
                 elif level >= 1:
                     if LICENSE_KEY in key:
                         html += self.__format_license(value, level)
                     elif COLUMNS_KEY in key:
                         html += self.__format_columns(value, level)
                     else:
-                        html += f'<li><b>{key.capitalize()}:</b> {self.__convert_to_html(value, level + 1, parent=key)}</li>'
+                        html += f'<li><b>{self.camel_case_split(key)}:</b> {self.__convert_to_html(value, level + 1, parent=key)}</li>'
 
             html += '' if level == 0 else '</ul>'
 
