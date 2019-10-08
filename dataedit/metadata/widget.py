@@ -127,13 +127,16 @@ class MetaDataWidget:
         """
 
         if level == 0:
+            # separate each item with a horizontal line
             html = ''
             for key, value in data.items():
                 html += f'{self.__convert_to_form(value, level + 1, parent=key)}'
                 html += '<hr>'
             html.rstrip('<hr>')
         elif level > 0:
+            # between the horizontal lines the item can be a string, a list of objects or a dict
             if isinstance(data, str):
+                # simply an input field and a label within a div
                 html = '<div class="form_group">'
                 if level == 1:
                     label = parent.capitalize()
@@ -156,7 +159,22 @@ class MetaDataWidget:
                 html += '</td></tr>'
                 html += '</table>'
             elif isinstance(data, list):
-                html = f'<p>list{parent}</p>'
+                html = '<table style="width:100%">'
+                html += f'<tr><td style="width:150px"><label for="{parent}_container">{parent.capitalize()}</label></td></tr>'
+                html += '<tr><td>'
+                html += f'<div id="{parent}_container">'
+                for item in data:
+                    html += self.__convert_to_form(
+                        item,
+                        level + 1,
+                        parent='{}'.format(parent)
+                    )
+
+                html += '</div>'
+                html += f'<a onclick="add_{parent}($(\'#{parent}_container\'))">Add</a>'
+
+                html += '</td></tr>'
+                html += '</table>'
 
         return html
 
@@ -164,4 +182,3 @@ class MetaDataWidget:
 
         answer = mark_safe(self.__convert_to_form(data=self.json))
         return answer
-
