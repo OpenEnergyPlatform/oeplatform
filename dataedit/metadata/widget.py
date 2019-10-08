@@ -1,3 +1,5 @@
+import re
+
 from django.utils.safestring import mark_safe
 
 LICENSE_KEY = 'license'
@@ -9,6 +11,14 @@ class MetaDataWidget:
 
     def __init__(self, json):
         self.json = json
+        self.url_regex = re.compile(
+            r'^(?:http|ftp)s?://'
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+            r'localhost|'
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+            r'(?::\d+)?'
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE
+        )
 
     def __convert_to_html(self, data, level=0, parent=''):
         """Formats variables into html code
@@ -81,6 +91,8 @@ class MetaDataWidget:
             if no_valid_item:
                 html += f'<p class="metaproperty">There is no valid entry for this field</p>'
 
+        elif isinstance(data, str) and re.match(self.url_regex, data):
+            html += f'<a href="{data}">{data}</a>'
         elif isinstance(data, str):
             html += f'{data}'
         else:
