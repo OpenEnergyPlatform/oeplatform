@@ -2,7 +2,7 @@ import re
 
 from django.utils.safestring import mark_safe
 
-from . import METADATA_HIDDEN_FIELDS
+from dataedit.metadata import METADATA_HIDDEN_FIELDS
 
 LICENSE_KEY = 'license'
 COLUMNS_KEY = 'fields'
