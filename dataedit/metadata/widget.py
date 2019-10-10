@@ -5,6 +5,13 @@ from django.utils.safestring import mark_safe
 LICENSE_KEY = 'license'
 COLUMNS_KEY = 'fields'
 
+METADATA_HIDDEN_FIELDS = [
+    '_comment',  # v1.4
+    'resources',  # v1.4
+    'metaMetadata',  # v1.4
+    'metadata_version'  # v1.3
+]
+
 
 class MetaDataWidget:
     """Html display of metadata JSON variable"""
@@ -46,7 +53,11 @@ class MetaDataWidget:
             html += '' if level == 0 else '<ul>'
             for key, value in data.items():
                 if level == 0:
-                    html += f'<tr><th>{self.camel_case_split(key)}:</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
+                    if key not in METADATA_HIDDEN_FIELDS:
+                        if COLUMNS_KEY in key:
+                            html += f'<tr><th>Columns</th> <td>{self.__format_columns(value)}</td></tr>'
+                        else:
+                            html += f'<tr><th>{self.camel_case_split(key)}</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
                 elif level >= 1:
                     if LICENSE_KEY in key:
                         html += self.__format_license(value, level)
@@ -148,8 +159,9 @@ class MetaDataWidget:
             # separate each item with a horizontal line
             html = ''
             for key, value in data.items():
-                html += f'{self.__convert_to_form(value, level + 1, parent=key)}'
-                html += '<hr>'
+                if key not in METADATA_HIDDEN_FIELDS:
+                    html += f'{self.__convert_to_form(value, level + 1, parent=key)}'
+                    html += '<hr>'
             html.rstrip('<hr>')
         elif level > 0:
             # between the horizontal lines the item can be a string, a list of objects or a dict
