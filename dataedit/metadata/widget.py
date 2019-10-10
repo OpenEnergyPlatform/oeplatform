@@ -59,12 +59,7 @@ class MetaDataWidget:
                         else:
                             html += f'<tr><th>{self.camel_case_split(key)}</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
                 elif level >= 1:
-                    if LICENSE_KEY in key:
-                        html += self.__format_license(value, level)
-                    elif COLUMNS_KEY in key:
-                        html += self.__format_columns(value, level)
-                    else:
-                        html += f'<li><b>{self.camel_case_split(key)}:</b> {self.__convert_to_html(value, level + 1, parent=key)}</li>'
+                    html += f'<li><b>{self.camel_case_split(key)}:</b> {self.__convert_to_html(value, level + 1, parent=key)}</li>'
 
             html += '' if level == 0 else '</ul>'
 
@@ -87,7 +82,6 @@ class MetaDataWidget:
                 html += '</ul>'
 
             else:
-
                 for item in data:
                     if isinstance(item, dict):
                         item = item.copy()
@@ -122,12 +116,10 @@ class MetaDataWidget:
 
         return html
 
-    def __format_license(self, value, level):
-        return f'<li><b>License:</b> {self.__convert_to_html(value, level + 1)}</li>'
-
-    def __format_columns(self, columns, level):
-        html = '<p class="metaproperty">'
+    def __format_columns(self, columns):
+        html = ''
         for item in columns:
+            html +='<p class="metaproperty">'
             item = item.copy()
 
             name = item.pop('name')
@@ -136,11 +128,13 @@ class MetaDataWidget:
                 html += f'{name} ({unit})'
             else:
                 html += f'{name}'
-
+            html += '</p>'
             descr = item.pop('description', '')
             if descr != '':
-                html += f': {descr}'
-        html += '</p>'
+                html += f'{descr}'
+            else:
+                html += 'No description '
+            html += '<hr>'
         return html
 
     def render(self):
