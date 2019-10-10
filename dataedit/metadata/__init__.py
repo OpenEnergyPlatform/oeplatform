@@ -207,7 +207,7 @@ def read_metadata_from_post(content_query, schema, table):
                                     )
                                 )
 
-                    elif k in STR_FIELD:
+                    else:
                         template[k] = content[format_content_key(parent, k)]
         else:
             template = content
