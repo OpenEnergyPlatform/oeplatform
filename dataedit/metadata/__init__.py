@@ -3,6 +3,41 @@ from dataedit.metadata import v1_3 as __LATEST
 
 from .error import MetadataException
 
+# name of the metadata fields which should not be filled by the user
+METADATA_HIDDEN_FIELDS = [
+    '_comment',  # v1.4
+    'resources',  # v1.4
+    'metaMetadata',  # v1.4
+    'metadata_version'  # v1.3
+]
+# names of the metadata fields which have string values
+STR_FIELD = [
+    "name",
+    "title",
+    "id",
+    "description",
+    "publicationDate"
+]
+# names of the metadata fields which have dict values
+DICT_FIELD = [
+    "context",
+    "spatial",
+    "temporal",
+    "review",
+    "timeseries"
+]
+# name of the metadata fields which have list values
+LIST_FIELD = [
+    "language",
+    "keywords",
+    "sources",
+    "licenses",
+    "contributors",
+    "resources",
+    "fields"
+]
+
+
 
 def load_metadata_from_db(schema, table):
     """Get comment for a table in OEP database (contains the metadata)

@@ -2,15 +2,10 @@ import re
 
 from django.utils.safestring import mark_safe
 
+from . import METADATA_HIDDEN_FIELDS
+
 LICENSE_KEY = 'license'
 COLUMNS_KEY = 'fields'
-
-METADATA_HIDDEN_FIELDS = [
-    '_comment',  # v1.4
-    'resources',  # v1.4
-    'metaMetadata',  # v1.4
-    'metadata_version'  # v1.3
-]
 
 
 class MetaDataWidget:
