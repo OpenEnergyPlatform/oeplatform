@@ -27,7 +27,7 @@ from sqlalchemy.orm import sessionmaker
 import api.parser
 import oeplatform.securitysettings as sec
 from api import actions as actions
-from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
@@ -793,8 +793,9 @@ class DataView(View):
         actions.create_meta(schema, table)
 
         # the metadata are stored in the table's comment
-        comment_on_table = load_comment_from_db(schema, table)
-        meta_widget = MetaDataWidget(comment_on_table)
+        metadata = load_metadata_from_db(schema, table)
+
+        meta_widget = MetaDataWidget(metadata)
 
         revisions = []
 
@@ -825,10 +826,8 @@ class DataView(View):
 
         table_views = chain((default,), table_views)
 
-
-
         context_dict = {
-            "comment_on_table": dict(comment_on_table),
+            "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
@@ -894,12 +893,21 @@ class MetaView(LoginRequiredMixin, View):
         :return: Renders a form that contains a form with the tables metadata
         """
 
-        comment_on_table = load_comment_from_db(schema, table)
+        metadata = load_metadata_from_db(schema, table)
+
+        meta_widget = MetaDataWidget(metadata)
+
+        context_dict = {
+            "schema": schema,
+            "table": table,
+            "meta_widget": meta_widget.render_editmode(),
+            "comment_on_table": metadata
+        }
 
         return render(
             request,
             "dataedit/meta_edit.html",
-            {"schema": schema, "table": table, "comment_on_table": comment_on_table},
+            context=context_dict,
         )
 
     def post(self, request, schema, table):

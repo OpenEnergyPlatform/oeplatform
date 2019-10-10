@@ -4,23 +4,23 @@ from dataedit.metadata import v1_3 as __LATEST
 from .error import MetadataException
 
 
-def load_comment_from_db(schema, table):
+def load_metadata_from_db(schema, table):
     """Get comment for a table in OEP database (contains the metadata)
 
     :param schema: name of the OEP schema
     :param table: name of the OEP table in the OEP schema
     :return:
     """
-    comment = actions.get_comment_table(schema, table)
-    if "error" in comment:
-        return comment
-    if not comment:
-        comment_on_table = __LATEST.get_empty(schema, table)
+    metadata = actions.get_comment_table(schema, table)
+    if "error" in metadata:
+        return metadata
+    if not metadata:
+        metadata = __LATEST.get_empty(schema, table)
     else:
-        if "error" in comment:
-            return {"description": comment["content"], "error": comment["error"]}
+        if "error" in metadata:
+            return {"description": metadata["content"], "error": metadata["error"]}
         try:
-            version = get_metadata_version(comment)
+            version = get_metadata_version(metadata)
             if version:
                 if not isinstance(version, tuple):
                     version = (version,)
@@ -28,37 +28,33 @@ def load_comment_from_db(schema, table):
                     version = (version[0], 0)
                 if version[0] == 1:
                     if version[1] == 1:
-                        comment_on_table = __LATEST.from_v1_1(comment, schema, table)
+                        metadata = __LATEST.from_v1_1(metadata, schema, table)
                     elif version[1] == 2:
-                        comment_on_table = __LATEST.from_v1_2(comment)
+                        metadata = __LATEST.from_v1_2(metadata)
                     elif version[1] == 3:
-                        comment_on_table = comment
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
+                        metadata["fields"] = metadata["resources"][0]["fields"]
 
                     elif version[1] == 4:
-                        comment_on_table = comment
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        comment_on_table["fields"] = comment_on_table["resources"][0]["schema"]["fields"]
+                        metadata["fields"] = metadata["resources"][0]["schema"]["fields"]
                 elif version[0] == 0:
-                    comment_on_table = __LATEST.from_v0(comment, schema, table)
-                else:
-                    comment_on_table = comment
+                    metadata = __LATEST.from_v0(metadata, schema, table)
             else:
-                comment_on_table = __LATEST.from_v0(comment, schema, table)
+                metadata = __LATEST.from_v0(metadata, schema, table)
         except MetadataException as me:
             return {
-                "description": comment,
+                "description": metadata,
                 "error": me.error.message
                 if hasattr(me.error, "message")
                 else str(me.error),
             }
 
-    return comment_on_table
+    return metadata
 
 
 def read_metadata_from_post(c, schema, table):
