@@ -1,6 +1,8 @@
 from api import actions
 from dataedit.metadata import v1_3 as __LATEST
 
+from dataedit.metadata.v1_4 import TEMPLATE_V1_4
+
 from .error import MetadataException
 
 # name of the metadata fields which should not be filled by the user
@@ -92,89 +94,139 @@ def load_metadata_from_db(schema, table):
     return metadata
 
 
-def read_metadata_from_post(c, schema, table):
-    d = {
-        "title": c["title"],
-        "description": c["description"],
-        "spatial": {
-            "location": c["spatial_location"],
-            "extent": c["spatial_extend"],
-            "resolution": c["spatial_resolution"],
-        },
-        "temporal": {
-            "reference_date": c["temporal_reference_date"],
-            "start": c["temporal_start"],
-            "end": c["temporal_end"],
-            "resolution": c["temporal_resolution"],
-        },
-        "license": {
-            "id": c["license_id"],
-            "name": c["license_name"],
-            "version": c["license_version"],
-            "url": c["license_url"],
-            "instruction": c["license_instruction"],
-            "copyright": c["license_copyright"],
-        },
-    }
+def read_metadata_from_post(content_query, schema, table):
+    """Prepare dict to modify the comment prop of a table in OEP database (contains the metadata)
 
-    for prefix, f, props in [
-        ("language", load_language, 1),
-        ("sources", load_sources, 5),
-        ("contributors", load_contributors, 4),
-        ("field", load_field, 3),
-    ]:
-        count = len([(k, c[k]) for k in c if k.startswith(prefix)]) // props
-        d[prefix] = [
-            f(
-                {
-                    k[len("%s%d" % (prefix, i + 1)) + 1 :]: c[k]
-                    for k in c
-                    if k.startswith("%s%d" % (prefix, i + 1))
-                }
-            )
-            for i in range(count)
-        ]
+    :param content_query: the content of the POST request
 
-    d["resources"] = [
-        {
-            "name": "%s.%s" % (schema, table),
-            "format": "PostgreSQL",
-            "fields": d["field"],
+    :param schema: name of the OEP schema
+    :param table: name of the OEP table in the OEP schema
+    :return: metadata dict
+    """
+
+    def format_content_key(parent, k):
+        if parent != '':
+            answer = '{}_{}'.format(parent, k)
+        else:
+            answer = k
+
+        return answer
+
+    def assign_content_values(content, template=None, parent=''):
+        """Match a query dict onto a nested structure
+
+        example :
+        content = {
+            "name": ["Example"]
+            "sources0_title": ["S0"],
+            "sources0_description": ["desc S0"],
+            "sources0_licenses0_name": ["first license source 0"],
+            "sources1_title": ["S1"],
+            "licenses0_name": ["first licence"],
         }
-    ]
-    d["metadata_version"] = "1.3"
-    del d["field"]
 
-    return d
+        template_dict = {
+            "name": ""
+            "sources": [
+                {
+                    "title": "",
+                    "description": "",
+                    "path": "",
+                    "licenses": [
+                        {
+                            "name": "",
+                            "title": "",
+                            "path": "",
+                            "instruction": "",
+                            "attribution": ""
+                        }
+                    ]
+                }
+            ],
+            "licenses": [
+                {
+                    "name": "",
+                    "title": "",
+                    "path": "",
+                    "instruction": "",
+                    "attribution": ""
+                }
+            ],
+        }
 
+        template_dict["sources"][0]["title"] will have the values contained in
+        content["sources0_title"]
 
-def load_sources(x):
-    return {
-        "name": x["name"],
-        "description": x["description"],
-        "url": x["url"],
-        "license": x["license"],
-        "copyright": x["copyright"],
-    }
+        :param content: query dict
+        :param template: dict (can be nested dicts)
+        :param parent: a parameter to link content keys with the nested structure of template
+        :return: the template with assigned values from the content query dict
+        """
 
+        if template is not None:
+            for k in template:
+                if k not in METADATA_HIDDEN_FIELDS:
+                    if k in DICT_FIELD:
+                        # the value is a dict, so we make a recursive call
+                        template[k] = assign_content_values(
+                            content=content,
+                            template=template[k],
+                            parent=format_content_key(parent, k)
+                        )
+                    elif k in LIST_FIELD:
+                        # the value is a list, so we make a recursive call on the unique instances
+                        # in the list
 
-def load_language(x):
-    # This looks weird, but makes things way more convenient
-    # all other 'load'-functions expect dictionaries but languages do not have
-    # labels. Thus, for the sake of convenience, an empty label is generated.
-    return x[""]
+                        # find the matches with the prefix in the content
+                        prefix = format_content_key(parent, k)
+                        matches = [i for i in content if i.startswith(prefix)]
 
+                        # count the number of instances among the matches
+                        # (in case of list of dicts, this is not equal to the number of matches)
+                        count = []
+                        for i in matches:
+                            num = i.replace(prefix, '').split('_')[0]
+                            if num not in count:
+                                count.append(num)
+                        count = len(count)
 
-def load_contributors(x):
-    return x
+                        item_list = []
+                        is_dict = isinstance(template[k][0], dict)
+                        for j in range(count):
+                            if is_dict:
+                                # it is a list of dict
+                                item_list.append(assign_content_values(
+                                    content=content,
+                                    template=template[k][0],
+                                    parent=format_content_key(parent, f'{k}{j}')))
+                            else:
+                                # it is a list of string
+                                item_list.append(
+                                    assign_content_values(
+                                        content=content[format_content_key(parent, f'{k}{j}')][0]
+                                    )
+                                )
 
+                    elif k in STR_FIELD:
+                        template[k] = content[format_content_key(parent, k)]
+        else:
+            template = content
+        return template
 
-def load_field(x):
-    return {"name": x["name"], "description": x["description"], "unit": x["unit"]}
+    metadata = assign_content_values(content=content_query, template=TEMPLATE_V1_4.copy())
 
+    # TODO fill the "resource" field here
+    # d["resources"] = [
+    #     {
+    #         "name": "%s.%s" % (schema, table),
+    #         "format": "PostgreSQL",
+    #         "fields": d["field"],
+    #     }
+    # ]
+    # d["metadata_version"] = "1.3"
+    # del d["field"]
 
-def load_metaversion(x):
-    return x[""]
+    return metadata
 
 
 def get_metadata_version(metadata):
