@@ -114,7 +114,7 @@ class MetaDataWidget:
     def __format_columns(self, columns):
         html = ''
         for item in columns:
-            html +='<p class="metaproperty">'
+            html += '<p class="metaproperty">'
             item = item.copy()
 
             name = item.pop('name')
@@ -161,6 +161,7 @@ class MetaDataWidget:
                     label = parent.capitalize()
                 else:
                     label = parent.split('_')[-1].capitalize()
+
                 html += f'<label for="{parent}"> {label} </label>'
                 html += f'<input class="form-control" id="{parent}" name="{parent}" type="text" value="{data}" />'
                 html += '</div>'
@@ -178,23 +179,43 @@ class MetaDataWidget:
                 html += '</td></tr>'
                 html += '</table>'
             elif isinstance(data, list):
+
+
+
                 html = '<table style="width:100%">'
                 html += f'<tr><td style="width:150px"><label for="{parent}_container">{parent.capitalize()}</label></td></tr>'
                 html += '<tr><td>'
                 html += f'<div id="{parent}_container">'
-                for item in data:
-                    html += self.__convert_to_form(
-                        item,
-                        level + 1,
-                        parent='{}'.format(parent)
-                    )
 
+                # TODO remove this loop and execute the list_field.html from the meta_edit.html
+                for i, item in enumerate(data):
+                    html += self.__container(
+                        self.__convert_to_form(
+                            item,
+                            level + 1,
+                            parent='{}{}'.format(parent, i)
+                        ),
+                        parent,
+                        i
+                    )
                 html += '</div>'
                 html += f'<a onclick="add_{parent}($(\'#{parent}_container\'))">Add</a>'
 
                 html += '</td></tr>'
                 html += '</table>'
 
+        return html
+
+    # TODO remove this function once the solution with list_field.html is implemented
+    def __container(self, item, parent, idx):
+        """wraps a container"""
+        html = f'<div class="metacontainer" id={parent}{idx}>'
+
+        html += f'<div class="metacontainer-header"><a style="color:white" onclick="$(\'#{parent}{idx}\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a></div>'
+        html += f'<div class="metaformframe" id={parent}{idx}>'
+        html += item
+        html += '</div>'
+        html += '</div>'
         return html
 
     def render_editmode(self):
