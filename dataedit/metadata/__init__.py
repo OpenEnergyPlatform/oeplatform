@@ -8,37 +8,102 @@ from .error import MetadataException
 # name of the metadata fields which should not be filled by the user
 METADATA_HIDDEN_FIELDS = [
     '_comment',  # v1.4
-    'resources',  # v1.4
+    #'resources',  # v1.4
     'metaMetadata',  # v1.4
     'metadata_version'  # v1.3
 ]
-# names of the metadata fields which have string values
-STR_FIELD = [
-    "name",
-    "title",
-    "id",
-    "description",
-    "publicationDate"
-]
-# names of the metadata fields which have dict values
-DICT_FIELD = [
-    "context",
-    "spatial",
-    "temporal",
-    "review",
-    "timeseries"
-]
-# name of the metadata fields which have list values
-LIST_FIELD = [
-    "language",
-    "keywords",
-    "sources",
-    "licenses",
-    "contributors",
-    "resources",
-    "fields"
-]
 
+
+def format_content_key(parent, k):
+    if parent != '':
+        answer = '{}_{}'.format(parent, k)
+    else:
+        answer = k
+
+    return answer
+
+
+def assign_content_values_to_metadata(content, template=None, parent=''):
+    """Match a query dict onto a nested structure
+
+    example :
+    content = {
+        "name": ["Example"]
+        "sources0_title": ["S0"],
+        "sources0_licenses0_name": ["first license source 0"],
+        "sources1_title": ["S1"],
+        "licenses0_name": ["first licence"],
+    }
+
+    template_dict = {
+        "name": ""
+        "sources": [
+            {
+                "title": "",
+                "description": "",
+                "path": "",
+                "licenses": [{"name": "", ...}]
+            }
+        ],
+        "licenses": [{name": "", ... }],
+    }
+
+    template_dict["sources"][0]["title"] will be assigned the values contained in
+    content["sources0_title"]
+
+    :param content: query dict
+    :param template: dict (can be nested dicts)
+    :param parent: a parameter to link content keys with the nested structure of template
+    :return: the template with assigned values from the content query dict
+    """
+    for k in template:
+        if k not in METADATA_HIDDEN_FIELDS:
+            if isinstance(template[k], dict):
+                # the value is a dict, so we make a recursive call
+                template[k] = assign_content_values_to_metadata(
+                    content=content,
+                    template=template[k],
+                    parent=format_content_key(parent, k)
+                )
+            elif isinstance(template[k], list):
+                # the value is a list, so we make a recursive call on the unique instances
+                # in the list
+
+                # find the instances which start with the prefix in the content keys
+                prefix = format_content_key(parent, k)
+                matches = [i for i in content if i.startswith(prefix)]
+
+                # count the number of unique instances among the matches
+                # (in case of list of dicts, this is not equal to the number of matches)
+                count = []
+                for i in matches:
+                    num = i.replace(prefix, '').split('_')[0]
+                    if num not in count:
+                        count.append(num)
+                count = len(count)
+
+                item_list = []
+                is_dict = isinstance((template[k][0]), dict)
+
+                for j in range(count):
+                    if is_dict:
+                        # it is a list of dict, so we make a recursive call
+                        item_list.append(
+                            assign_content_values_to_metadata(
+                                content=content,
+                                template=template[k][0].copy(),
+                                parent=format_content_key(parent, f'{k}{j}')
+                            )
+                        )
+                    else:
+                        # it is a list of string
+                        item_list.append(content[format_content_key(parent, f'{k}{j}')])
+                if count != 0:
+                    template[k] = item_list
+            elif isinstance(template[k], str):
+                template[k] = content.get(format_content_key(parent, k), '')
+
+    return template
 
 
 def load_metadata_from_db(schema, table):
@@ -104,118 +169,12 @@ def read_metadata_from_post(content_query, schema, table):
     :return: metadata dict
     """
 
-    def format_content_key(parent, k):
-        if parent != '':
-            answer = '{}_{}'.format(parent, k)
-        else:
-            answer = k
+    metadata = assign_content_values_to_metadata(
+        content=content_query,
+        template=TEMPLATE_V1_4.copy()
+    )
 
-        return answer
-
-    def assign_content_values(content, template=None, parent=''):
-        """Match a query dict onto a nested structure
-
-        example :
-        content = {
-            "name": ["Example"]
-            "sources0_title": ["S0"],
-            "sources0_description": ["desc S0"],
-            "sources0_licenses0_name": ["first license source 0"],
-            "sources1_title": ["S1"],
-            "licenses0_name": ["first licence"],
-        }
-
-        template_dict = {
-            "name": ""
-            "sources": [
-                {
-                    "title": "",
-                    "description": "",
-                    "path": "",
-                    "licenses": [
-                        {
-                            "name": "",
-                            "title": "",
-                            "path": "",
-                            "instruction": "",
-                            "attribution": ""
-                        }
-                    ]
-                }
-            ],
-            "licenses": [
-                {
-                    "name": "",
-                    "title": "",
-                    "path": "",
-                    "instruction": "",
-                    "attribution": ""
-                }
-            ],
-        }
-
-        template_dict["sources"][0]["title"] will have the values contained in
-        content["sources0_title"]
-
-        :param content: query dict
-        :param template: dict (can be nested dicts)
-        :param parent: a parameter to link content keys with the nested structure of template
-        :return: the template with assigned values from the content query dict
-        """
-
-        if template is not None:
-            for k in template:
-                if k not in METADATA_HIDDEN_FIELDS:
-                    if k in DICT_FIELD:
-                        # the value is a dict, so we make a recursive call
-                        template[k] = assign_content_values(
-                            content=content,
-                            template=template[k],
-                            parent=format_content_key(parent, k)
-                        )
-                    elif k in LIST_FIELD:
-                        # the value is a list, so we make a recursive call on the unique instances
-                        # in the list
-
-                        # find the matches with the prefix in the content
-                        prefix = format_content_key(parent, k)
-                        matches = [i for i in content if i.startswith(prefix)]
-
-                        # count the number of instances among the matches
-                        # (in case of list of dicts, this is not equal to the number of matches)
-                        count = []
-                        for i in matches:
-                            num = i.replace(prefix, '').split('_')[0]
-                            if num not in count:
-                                count.append(num)
-                        count = len(count)
-
-                        item_list = []
-                        is_dict = isinstance(template[k][0], dict)
-                        for j in range(count):
-                            if is_dict:
-                                # it is a list of dict
-                                item_list.append(assign_content_values(
-                                    content=content,
-                                    template=template[k][0],
-                                    parent=format_content_key(parent, f'{k}{j}')))
-                            else:
-                                # it is a list of string
-                                item_list.append(
-                                    assign_content_values(
-                                        content=content[format_content_key(parent, f'{k}{j}')][0]
-                                    )
-                                )
-
-                    else:
-                        template[k] = content[format_content_key(parent, k)]
-        else:
-            template = content
-        return template
-
-    metadata = assign_content_values(content=content_query, template=TEMPLATE_V1_4.copy())
-
-    # TODO fill the "resource" field here
+    # TODO fill the "resource" field for v1.4
     # d["resources"] = [
     #     {
     #         "name": "%s.%s" % (schema, table),
