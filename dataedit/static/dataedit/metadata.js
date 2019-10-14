@@ -35,36 +35,19 @@ function add_language($parent, obj){
     add_labeled_textfield($container, label, prefix+idx, obj.language);
 };
 
-function add_spatial($parent, obj){
-    prefix='spatial';
-    indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);
+function add_keywords($parent, obj){
+    prefix='keywords';
+    const idx = $parent[0].childElementCount;
+    console.log(idx);
+    const label = format_label(prefix, idx);
+    var $container = create_box($parent, prefix+idx);
 
     if('undefined' === typeof obj){
         var obj={};
-        obj.extent='';
-        obj.resolution='';
+        obj.keywords='';
     }
 
-    add_labeled_textfield($container, 'Extent', prefix+indexes[prefix]+'_extent', obj.extent);
-    add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_resolution', obj.resolution);
-};
-
-function add_temporal($parent, obj){
-    prefix='temporal';
-    indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);
-
-    if('undefined' === typeof obj){
-        var obj={};
-        obj.start='';
-        obj.end='';
-		obj.resolution='';
-    }
-
-    add_labeled_textfield($container, 'Start', prefix+indexes[prefix]+'_start', obj.extent);
-    add_labeled_textfield($container, 'End', prefix+indexes[prefix]+'_end', obj.resolution);
-	add_labeled_textfield($container, 'Resolution', prefix+indexes[prefix]+'_resolution', obj.resolution);
+    add_labeled_textfield($container, label, prefix+idx, obj.keywords);
 };
 
 function add_sources($parent, obj){
