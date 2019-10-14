@@ -1,18 +1,11 @@
-indexes = {
-    'sources':0,
-    'spatial':0,
-    'license':0,
-    'contributors':0,
-    'language':0,
-};
 
-function create_box($parent){
-    var $container = $('<div class="metacontainer" id='+prefix+indexes[prefix]+'></div>');
+function create_box($parent, id){
+    var $container = $('<div class="metacontainer" id='+id+'></div>');
 
     var $header = $('<div class="metacontainer-header"></div>')
 
-    var $removeBtn = $('<a style="color:white" onclick="$(\'#'+prefix+indexes[prefix]+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a>');
-    var $subcontainer = $('<div class="metaformframe" id='+prefix+indexes[prefix]+'></div>')
+    var $removeBtn = $('<a style="color:white" onclick="$(\'#'+id+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a>');
+    var $subcontainer = $('<div class="metaformframe" id='+id+'></div>')
 
     $header.append($removeBtn);
     $container.append($header);
@@ -29,16 +22,17 @@ function add_labeled_textfield($container, label, id, value){
 }
 
 function add_language($parent, obj){
-    prefix='language';
-    indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);
+    prefix = 'language';
+    const idx = $parent[0].childElementCount;
+    const label=format_label(prefix, idx);
+    var $container = create_box($parent, prefix+idx);
 
     if('undefined' === typeof obj){
         var obj={};
         obj.language='';
     }
 
-    add_labeled_textfield($container, 'Language', prefix+indexes[prefix], obj.language);
+    add_labeled_textfield($container, label, prefix+idx, obj.language);
 };
 
 function add_spatial($parent, obj){
