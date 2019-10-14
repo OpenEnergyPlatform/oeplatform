@@ -52,46 +52,62 @@ function add_keywords($parent, obj){
 
 function add_sources($parent, obj){
     prefix='sources';
-    indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);
+    const idx = $parent[0].childElementCount;
+    const label=format_label(prefix, idx);
 
-    if('undefined' === typeof obj){
-        var obj={};
-        obj.name='';
-        obj.description='';
-        obj.url='';
-        obj.license='';
-        obj.copyright='';
+    var $clone = $parent[0].firstElementChild.cloneNode(true);
+
+    // fetch the fields which are list
+    var sub_container = $clone.querySelectorAll('[id*=_container]');
+    for (let i = 0; i < sub_container.length; i++){
+
+        while (sub_container[i].childNodes.length > 1) {
+            sub_container[i].removeChild(sub_container[i].lastChild);
+        }
     }
 
-    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name', obj.name);
-    add_labeled_textfield($container, 'Description', prefix+indexes[prefix]+'_description', obj.description);
-    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url', obj.url);
-    add_labeled_textfield($container, 'License', prefix+indexes[prefix]+'_license', obj.license);
-    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright', obj.copyright);
+    $clone.id = prefix+idx;
+    var elements = $clone.querySelectorAll('[id*='+prefix+'0]');
+    console.log(elements);
+
+    for (let i = 0; i < elements.length; i++) {
+
+        // replace the copied element id's
+        var new_id = elements[i].id;
+        elements[i].id = new_id.replace(prefix+'0', prefix+idx);
+        if (elements[i].tagName === 'INPUT') {
+        // clear the input fields
+            console.log(elements[i]);
+            elements[i].value="";
+            elements[i].name = new_id.replace(prefix+'0', prefix+idx);
+        }
+    }
+
+    $parent.append($clone)
 };
 
-function add_license($parent, obj){
-    prefix='license';
-    indexes[prefix] = indexes[prefix] +1;
-    var $container = create_box($parent);
+function add_licenses($parent, obj){
+    prefix='licenses';
+    const idx = $parent[0].childElementCount;
+    const label=format_label(prefix, idx);
 
-    if('undefined' === typeof obj){
-        var obj={};
-        obj.id='';
-        obj.name='';
-        obj.version='';
-        obj.url='';
-        obj.instruction='';
-        obj.copyright='';
-    }
+    var $clone = $parent[0].firstElementChild.cloneNode(true);
 
-    add_labeled_textfield($container, 'ID', prefix+indexes[prefix]+'_id', obj.id);
-    add_labeled_textfield($container, 'Name', prefix+indexes[prefix]+'_name', obj.name);
-    add_labeled_textfield($container, 'Version', prefix+indexes[prefix]+'_version', obj.version);
-    add_labeled_textfield($container, 'URL', prefix+indexes[prefix]+'_url', obj.url);
-    add_labeled_textfield($container, 'Instruction', prefix+indexes[prefix]+'_instruction', obj.instruction);
-    add_labeled_textfield($container, 'Copyright', prefix+indexes[prefix]+'_copyright', obj.copyright);
+    $clone.id= prefix+idx;
+    $clone.querySelectorAll('[id*='+prefix+'0]').forEach(function(element){
+        // replace the copied element id's
+        var new_id = element.id;
+        element.id = new_id.replace(prefix+'0', prefix+idx);
+        if (element.tagName === 'INPUT') {
+        // clear the input fields
+            element.value="";
+            element.name = new_id.replace(prefix+'0', prefix+idx);
+            console.log(element);
+        }
+
+    });
+
+    $parent.append($clone)
 };
 
 function add_contributors($parent, obj){
