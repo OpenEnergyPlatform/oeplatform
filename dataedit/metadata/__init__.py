@@ -76,29 +76,27 @@ def assign_content_values_to_metadata(content, template=None, parent=''):
                 # count the number of unique instances among the matches
                 # (in case of list of dicts, this is not equal to the number of matches)
                 count = []
-                for i in matches:
-                    num = i.replace(prefix, '').split('_')[0]
-                    if num not in count:
-                        count.append(num)
-                count = len(count)
-
                 item_list = []
                 is_dict = isinstance((template[k][0]), dict)
+                for i in matches:
+                    idx = i.replace(prefix, '').split('_')[0]
+                    if idx not in count:
+                        count.append(idx)
 
-                for j in range(count):
-                    if is_dict:
-                        # it is a list of dict, so we make a recursive call
-                        item_list.append(
-                            assign_content_values_to_metadata(
-                                content=content,
-                                template=template[k][0].copy(),
-                                parent=format_content_key(parent, f'{k}{j}')
+                        if is_dict:
+                            # it is a list of dict, so we make a recursive call
+                            item_list.append(
+                                assign_content_values_to_metadata(
+                                    content=content,
+                                    template=template[k][0].copy(),
+                                    parent=format_content_key(parent, f'{k}{idx}')
+                                )
                             )
-                        )
-                    else:
-                        # it is a list of string
-                        item_list.append(content[format_content_key(parent, f'{k}{j}')])
-                if count != 0:
+                        else:
+                            # it is a list of string
+                            item_list.append(content[format_content_key(parent, f'{k}{idx}')])
+
+                if len(count) != 0:
                     template[k] = item_list
             elif isinstance(template[k], str):
                 template[k] = content.get(format_content_key(parent, k), '')
