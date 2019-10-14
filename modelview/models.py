@@ -11,6 +11,7 @@ from django.db.models import (
     IntegerField,
     SmallIntegerField,
     TextField,
+    DateField,
 )
 
 class BasicFactsheet(models.Model):
@@ -164,6 +165,7 @@ class BasicFactsheet(models.Model):
                 "University of Illinois/NCSA Open Source License",
                 "The Unlicense",
                 "zLib License",
+                "BSD 3-clause 'New' or 'Revised' license",
                 "Other",
                 "Unknown",
             ]
@@ -715,7 +717,7 @@ class Energyframework(BasicFactsheet):
     )
     inital_purpose = CharField(verbose_name="Inital purpose", null=True, help_text="What was the initial purpose/task/motivation to start the development?", max_length=1000)
     inital_purpose_change = CharField(verbose_name="Inital purpose change", null=True, help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?", max_length=1000)
-    inital_release_date = CharField(verbose_name="Inital Release Date", null=True, help_text="When [mm-yyyy] was the framework initially released?", max_length=30)
+    inital_release_date = DateField(verbose_name="Inital Release Date", null=True, help_text="When [mm-yyyy] was the framework initially released?", max_length=30)
     research_questions = ArrayField(
         CharField(max_length=1000), verbose_name="Research questions", null=True, help_text="What are 3 typical research questions that are answered by applying the FW?"
     )
@@ -725,7 +727,7 @@ class Energyframework(BasicFactsheet):
     gs_regional = BooleanField(verbose_name="Regional", default=False)
     gs_national = BooleanField(verbose_name="National", default=False)
     gs_local = BooleanField(verbose_name="Local/community", default=False)
-    gs_single_project = BooleanField(verbose_name="Points/degree of abstraction", default=False)
+    gs_single_project = BooleanField(verbose_name="Single-project", default=False)
     # SECTORAL SCOPE
     ss_electricity = BooleanField(verbose_name="Electricity", default=False)
     ss_heat = BooleanField(verbose_name="Heat/Cooling", default=False)
@@ -750,7 +752,7 @@ class Energyframework(BasicFactsheet):
     sps_rule_based = BooleanField(verbose_name="Rule based operation management", default=False)
     sps_sector_coupling = BooleanField(verbose_name="Sector-coupling ", default=False)
 
-    last_updated = CharField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated?", null=True)
+    last_updated = DateField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated?", null=True)
     version = CharField(verbose_name="Version", max_length=200, help_text="To which version of the framework does the factsheet refer?", null=True)
     #PROGRAMMING FRAMEWORK 
     pf_GAMS = BooleanField(verbose_name="GAMS", default=False)
@@ -879,7 +881,7 @@ class Energyframework(BasicFactsheet):
     gm_LinearOptimal = BooleanField(verbose_name="Linear optimal power flow", default=False)
     # COST INCLUSION
     ci_FuelPrices = BooleanField(verbose_name="Fuel prices", default=False)
-    ci_FuelHandling = BooleanField(verbose_name="OFuel handling", default=False)
+    ci_FuelHandling = BooleanField(verbose_name="Fuel handling", default=False)
     ci_Investment = BooleanField(verbose_name="Investment", default=False)
     ci_FixedOperation = BooleanField(verbose_name="Fixed Operation & Maintenance", default=False)
     ci_VariableOperation = BooleanField(verbose_name="Variable Operation & Maintenance", default=False)
