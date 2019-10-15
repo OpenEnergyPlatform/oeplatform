@@ -168,21 +168,20 @@ class MetaDataWidget:
                     html += '<hr>'
             html.rstrip('<hr>')
         elif level > 0:
+            label = parent.split('_')[-1]
+            print(label)
+            label = self.format_index_numbers(label)
+            print(label)
             # between the horizontal lines the item can be a string, a list of objects or a dict
             if isinstance(data, str):
                 # simply an input field and a label within a div
                 html = '<div class="form_group">'
-                if level == 1:
-                    label = parent.capitalize()
-                else:
-                    label = parent.split('_')[-1].capitalize()
-
                 html += f'<label for="{parent}"> {label} </label>'
                 html += f'<input class="form-control" id="{parent}" name="{parent}" type="text" value="{data}" />'
                 html += '</div>'
             elif isinstance(data, dict):
                 html = '<table style="width:100%">'
-                html += f'<tr><td style="width:150px"><label>{parent.capitalize()}</label></td></tr>'
+                html += f'<tr><td style="width:150px"><label>{label.capitalize()}</label></td></tr>'
                 html += '<tr><td></td><td>'
                 for key, value in data.items():
                     html += self.__convert_to_form(
@@ -196,9 +195,8 @@ class MetaDataWidget:
             elif isinstance(data, list):
 
 
-
                 html = '<table style="width:100%">'
-                html += f'<tr><td style="width:150px"><label for="{parent}_container">{parent.capitalize()}</label></td></tr>'
+                html += f'<tr><td style="width:150px"><label for="{parent}_container">{label.capitalize()}</label></td></tr>'
                 html += '<tr><td>'
                 html += f'<div id="{parent}_container">'
 
