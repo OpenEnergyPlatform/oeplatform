@@ -176,13 +176,15 @@ class MetaDataWidget:
             if isinstance(data, str):
                 # simply an input field and a label within a div
                 html = '<div class="form_group">'
-                html += f'<label for="{parent}"> {label} </label>'
+                html += f'<label class="field-str-label" for="{parent}"> {label} </label>'
                 html += f'<input class="form-control" id="{parent}" name="{parent}" type="text" value="{data}" />'
                 html += '</div>'
             elif isinstance(data, dict):
                 html = '<table style="width:100%">'
-                html += f'<tr><td style="width:150px"><label>{label.capitalize()}</label></td></tr>'
-                html += '<tr><td></td><td>'
+                html += '<tr><td style="width:150px">'
+                html += f'<label class="field-dict-label">{label.capitalize()}</label>'
+                html += '</td></tr>'
+                html += '<tr><td style="width:20px"></td><td>'
                 for key, value in data.items():
                     html += self.__convert_to_form(
                         value,
@@ -193,10 +195,9 @@ class MetaDataWidget:
                 html += '</td></tr>'
                 html += '</table>'
             elif isinstance(data, list):
-
-
                 html = '<table style="width:100%">'
-                html += f'<tr><td style="width:150px"><label for="{parent}_container">{label.capitalize()}</label></td></tr>'
+                html += '<tr><td style="width:150px">'
+                html += f'<label class="field-list-label for="{parent}_container">{label.capitalize()}</label></td></tr>'
                 html += '<tr><td>'
                 html += f'<div id="{parent}_container">'
 
