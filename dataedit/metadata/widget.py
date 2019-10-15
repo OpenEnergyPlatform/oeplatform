@@ -212,7 +212,10 @@ class MetaDataWidget:
                         i
                     )
                 html += '</div>'
-                html += f'<a onclick="add_{parent}($(\'#{parent}_container\'))">Add</a>'
+
+                # bind to js function defined in dataedit/static/dataedit/metadata.js
+                # to add new elements to the list upon user click
+                html += f'<a onclick="add_list_objects(\'{parent}\')">Add</a>'
 
                 html += '</td></tr>'
                 html += '</table>'

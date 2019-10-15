@@ -55,6 +55,65 @@ function add_keywords($parent, obj){
     add_labeled_textfield($container, label, prefix+idx, obj.keywords);
 };
 
+function add_list_objects(prefix){
+
+    var $parent = $('#' + prefix + '_container')
+
+    // create index of the new element in the list for the ids of child elements
+    // of the new element
+    const idx = parseInt($parent[0].lastChild.id.match(/\d+/)[0]) + 1;
+
+    const label=format_label(prefix);
+
+    // copy the first element (so that the id will always bear the index 0
+    var $clone = $parent[0].firstElementChild.cloneNode(true);
+
+
+    // fetch the fields of the element which are lists themselves
+    var sub_container = $clone.querySelectorAll('[id*=_container]');
+    for (let i = 0; i < sub_container.length; i++){
+        // empty the list of all but the first element
+        while (sub_container[i].childNodes.length > 1) {
+            sub_container[i].removeChild(sub_container[i].lastChild);
+        }
+    }
+
+    var clone_idx = $clone.id.match(/\d+/)[0];
+    // replace the new index in the ids of the clone's children elements
+    var new_id = $clone.id;
+    $clone.id = new_id.replace(prefix + clone_idx, prefix + idx);
+
+    var elements = $clone.querySelectorAll('[id*=' + prefix + clone_idx + ']');
+    for (let i = 0; i < elements.length; i++) {
+        // replace the copied element id's
+        new_id = elements[i].id;
+        elements[i].id = new_id.replace(prefix + clone_idx, prefix + idx);
+        if (elements[i].tagName === 'INPUT') {
+            // clear the input fields
+            elements[i].value="";
+            elements[i].name = new_id.replace(prefix + clone_idx, prefix + idx);
+        }
+    }
+
+    elements = $clone.querySelectorAll("label");
+    for (let i = 0; i < elements.length; i++) {
+        // replace the copied labels 'for' attribute
+        elements[i].htmlFor = elements[i].htmlFor.replace(prefix + clone_idx, prefix + idx);
+        // replace the copied labels' content
+        if(elements[i].innerHTML.includes(label + ' ' + clone_idx)){
+            elements[i].innerHTML = label + ' ' + idx;
+        }
+    }
+
+    elements = $clone.querySelectorAll("a");
+    for (let i = 0; i < elements.length; i++) {
+        // replace the copied links' (a) onclick' attribute
+        new_id = elements[i].attributes['onclick'].value.replace(prefix + clone_idx, prefix + idx);
+        elements[i].attributes['onclick'].value = new_id;
+    }
+
+    $parent.append($clone)
+};
 function add_sources($parent, obj){
     prefix='sources';
     const idx = $parent[0].childElementCount;
