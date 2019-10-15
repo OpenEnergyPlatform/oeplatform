@@ -1,3 +1,5 @@
+from api import actions
+
 TEMPLATE_V1_4 = {
     "name": "",
     "title": "",
@@ -124,3 +126,14 @@ TEMPLATE_V1_4 = {
             "null": "If not applicable use (null)"
         }
 }
+
+
+def get_empty(schema, table):
+    template = TEMPLATE_V1_4.copy()
+    columns = actions.analyze_columns(schema, table)
+    # TODO: check how the fields should
+    template["resources"][0]["schema"]["fields"] = [
+        {"name": col["id"], "description": "", "unit": ""}
+        for col in columns
+    ]
+    return template
