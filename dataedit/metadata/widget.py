@@ -164,14 +164,20 @@ class MetaDataWidget:
             html = ''
             for key, value in data.items():
                 if key not in METADATA_HIDDEN_FIELDS:
-                    html += f'{self.__convert_to_form(value, level + 1, parent=key)}'
+                    html += self.__convert_to_form(value, level + 1, parent=key)
                     html += '<hr>'
+                else:
+                    html += '<div class="metahiddenfield">'
+                    html += self.__convert_to_form(value, level + 1, parent=key)
+                    html += '</div>'
+                    html += f'<label>{key}</label>'
+                    html += self.__convert_to_html(value, level + 1, parent=key)
+                    html += '<hr>'
+
             html.rstrip('<hr>')
         elif level > 0:
             label = parent.split('_')[-1]
-            print(label)
             label = self.format_index_numbers(label)
-            print(label)
             # between the horizontal lines the item can be a string, a list of objects or a dict
             if isinstance(data, str):
                 # simply an input field and a label within a div
