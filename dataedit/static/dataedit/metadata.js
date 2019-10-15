@@ -31,9 +31,9 @@ function add_list_objects(prefix){
 
     // create index of the new element in the list for the ids of child elements
     // of the new element
-    const idx = parseInt($parent[0].lastChild.id.match(/\d+/)[0]) + 1;
+    const idx = parseInt(extract_el_index($parent[0].lastChild.id)) + 1;
 
-    const label=format_label(prefix);
+    const label = format_label(prefix);
 
     // copy the first element (so that the id will always bear the index 0
     var $clone = $parent[0].firstElementChild.cloneNode(true);
@@ -47,7 +47,8 @@ function add_list_objects(prefix){
         }
     }
 
-    var clone_idx = $clone.id.match(/\d+/)[0];
+
+    var clone_idx = extract_el_index($clone.id);
     // replace the new index in the ids of the clone's children elements
     var new_id = $clone.id;
     $clone.id = new_id.replace(prefix + clone_idx, prefix + idx);
