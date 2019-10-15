@@ -186,11 +186,6 @@ def read_metadata_from_post(content_query, schema, table):
     #     }
     # ]
     # d["metadata_version"] = "1.3"
-    metadata["resources"][0]["fields"] = [
-        {"name": col["id"], "description": "", "unit": ""}
-        for col in columns
-    ]
-    del metadata["field"]
 
     return metadata
 
