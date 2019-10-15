@@ -94,13 +94,13 @@ def assign_content_values_to_metadata(content, template=None, parent=''):
                                 assign_content_values_to_metadata(
                                     content=content,
                                     template=template[k][0].copy(),
-                                    parent=format_content_key(parent, '{k}{idx}'.format(k, idx))
+                                    parent=format_content_key(parent, '{}{}'.format(k, idx))
                                 )
                             )
                         else:
                             # it is a list of string
                             item_list.append(
-                                content[format_content_key(parent, '{k}{idx}'.format(k, idx))]
+                                content[format_content_key(parent, '{}{}'.format(k, idx))]
                             )
 
                 if len(count) != 0:

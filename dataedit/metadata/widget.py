@@ -65,11 +65,21 @@ class MetaDataWidget:
                 if level == 0:
                     if key not in METADATA_HIDDEN_FIELDS:
                         if COLUMNS_KEY in key:
-                            html += f'<tr><th>Columns</th> <td>{self.__format_columns(value)}</td></tr>'
+                            html += '<tr><th>Columns</th> <td>'
+                            html += self.__format_columns(value)
+                            html += '</td></tr>'
                         else:
-                            html += f'<tr><th>{self.camel_case_split(key)}</th> {self.__convert_to_html(value, level + 1, parent=key)}</tr>'
+                            html += '<tr><th>'
+                            html += self.camel_case_split(key)
+                            html += '</th>'
+                            html += self.__convert_to_html(value, level + 1, parent=key)
+                            html += '</tr>'
                 elif level >= 1:
-                    html += f'<li><b>{self.camel_case_split(key)}:</b> {self.__convert_to_html(value, level + 1, parent=key)}</li>'
+                    html += '<li><b>'
+                    html += self.camel_case_split(key)
+                    html += ':</b> '
+                    html += self.__convert_to_html(value, level + 1, parent=key)
+                    html += '</li>'
 
             html += '' if level == 0 else '</ul>'
 
@@ -88,7 +98,9 @@ class MetaDataWidget:
             if string_list:
                 html += '<ul>'
                 for item in data:
-                    html += f'<li>{self.__convert_to_html(item, level + 1, parent=parent)}</li>'
+                    html += '<li>'
+                    html += self.__convert_to_html(item, level + 1, parent=parent)
+                    html += '</li>'
                 html += '</ul>'
 
             else:
@@ -102,20 +114,22 @@ class MetaDataWidget:
                             item.pop('name', None)
                         url = item.pop('url', '')
                         if url != '':
-                            name = f'<a href="{url}">{name}</a>'
+                            name = '<a href="{url}">{name}</a>'.format(url, name)
                         if name is not None and name != '':
                             no_valid_item = False
-                            html += f'<p class="metaproperty">{name}{self.__convert_to_html(item, level + 1, parent=parent)}</p>'
+                            html += '<p class="metaproperty">'
+                            html += name + self.__convert_to_html(item, level + 1, parent=parent)
+                            html += '</p>'
                     else:
-                        html += f'<p>Not implemented yet</p>'
+                        html += '<p>Not implemented yet</p>'
 
             if no_valid_item:
-                html += f'<p class="metaproperty">There is no valid entry for this field</p>'
+                html += '<p class="metaproperty">There is no valid entry for this field</p>'
 
         elif isinstance(data, str) and re.match(self.url_regex, data):
-            html += f'<a href="{data}">{data}</a>'
+            html += '<a href="{}">{}</a>'.format(data, data)
         elif isinstance(data, str):
-            html += f'{data}'
+            html += data
         else:
             html += str(type(data))
 
@@ -135,13 +149,13 @@ class MetaDataWidget:
             name = item.pop('name')
             unit = item.pop('unit', '')
             if unit != '':
-                html += f'{name} ({unit})'
+                html += '{} ({})'.format(name, unit)
             else:
-                html += f'{name}'
+                html += str(name)
             html += '</p>'
             descr = item.pop('description', '')
             if descr != '':
-                html += f'{descr}'
+                html += str(descr)
             else:
                 html += 'No description '
             html += '<hr>'
@@ -170,7 +184,7 @@ class MetaDataWidget:
                     html += '<div class="metahiddenfield">'
                     html += self.__convert_to_form(value, level + 1, parent=key)
                     html += '</div>'
-                    html += f'<label>{key}</label>'
+                    html += '<label>{}</label>'.format(key)
                     html += self.__convert_to_html(value, level + 1, parent=key)
                     html += '<hr>'
 
@@ -182,13 +196,16 @@ class MetaDataWidget:
             if isinstance(data, str):
                 # simply an input field and a label within a div
                 html = '<div class="form_group">'
-                html += f'<label class="field-str-label" for="{parent}"> {label} </label>'
-                html += f'<input class="form-control" id="{parent}" name="{parent}" type="text" value="{data}" />'
+                html += '<label class="field-str-label" for="{}"> {} </label>'.format(
+                    parent,
+                    label
+                )
+                html += '<input class="form-control" id="{}" name="{}" type="text" value="{}" />'.format(parent, parent, data)
                 html += '</div>'
             elif isinstance(data, dict):
                 html = '<table style="width:100%">'
                 html += '<tr><td style="width:150px">'
-                html += f'<label class="field-dict-label">{label.capitalize()}</label>'
+                html += '<label class="field-dict-label">{}</label>'.format(label.capitalize())
                 html += '</td></tr>'
                 html += '<tr><td style="width:20px"></td><td>'
                 for key, value in data.items():
@@ -203,11 +220,12 @@ class MetaDataWidget:
             elif isinstance(data, list):
                 html = '<table style="width:100%">'
                 html += '<tr><td style="width:150px">'
-                html += f'<label class="field-list-label for="{parent}_container">{label.capitalize()}</label></td></tr>'
+                html += '<label class="field-list-label for="{}_container">'.format(parent)
+                html += label.capitalize()
+                html += '</label></td></tr>'
                 html += '<tr><td>'
-                html += f'<div id="{parent}_container">'
+                html += '<div id="{}_container">'.format(parent)
 
-                # TODO remove this loop and execute the list_field.html from the meta_edit.html
                 for i, item in enumerate(data):
                     html += self.__container(
                         self.__convert_to_form(
@@ -222,7 +240,7 @@ class MetaDataWidget:
 
                 # bind to js function defined in dataedit/static/dataedit/metadata.js
                 # to add new elements to the list upon user click
-                html += f'<a onclick="add_list_objects(\'{parent}\')">Add</a>'
+                html += '<a onclick="add_list_objects(\'{}\')">Add</a>'.format(parent)
 
                 html += '</td></tr>'
                 html += '</table>'
@@ -232,10 +250,12 @@ class MetaDataWidget:
     # TODO remove this function once the solution with list_field.html is implemented
     def __container(self, item, parent, idx):
         """wraps a container"""
-        html = f'<div class="metacontainer" id={parent}{idx}>'
+        html = '<div class="metacontainer" id={}{}>'.format(parent, idx)
 
-        html += f'<div class="metacontainer-header"><a style="color:white" onclick="remove_element(\'{parent}{idx}\')"><span class="glyphicon glyphicon-minus-sign"/></a></div>'
-        html += f'<div class="metaformframe" id={parent}{idx}>'
+        html += '<div class="metacontainer-header">'
+        html += '<a style="color:white" onclick="remove_element(\'{}{}\')">'.format(parent, idx)
+        html += '<span class="glyphicon glyphicon-minus-sign"/></a></div>'
+        html += '<div class="metaformframe" id={}{}>'.format(parent, idx)
         html += item
         html += '</div>'
         html += '</div>'
