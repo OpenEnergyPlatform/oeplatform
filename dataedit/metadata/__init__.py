@@ -1,14 +1,19 @@
 from api import actions
-from dataedit.metadata import v1_3 as __LATEST
+from dataedit.metadata import v1_4 as __LATEST
 
+from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
+
+METADATA_TEMPLATE = {
+    4: TEMPLATE_V1_4,
+    3: TEMPLATE_v1_3,
+}
 
 from .error import MetadataException
 
 # name of the metadata fields which should not be filled by the user
 METADATA_HIDDEN_FIELDS = [
     '_comment',  # v1.4
-    #'resources',  # v1.4
     'metaMetadata',  # v1.4
     'metadata_version'  # v1.3
 ]
@@ -153,7 +158,6 @@ def load_metadata_from_db(schema, table):
                 if hasattr(me.error, "message")
                 else str(me.error),
             }
-
     return metadata
 
 
@@ -166,12 +170,11 @@ def read_metadata_from_post(content_query, schema, table):
     :param table: name of the OEP table in the OEP schema
     :return: metadata dict
     """
-
+    version = get_metadata_version(content_query)
     metadata = assign_content_values_to_metadata(
         content=content_query,
-        template=TEMPLATE_V1_4.copy()
+        template=METADATA_TEMPLATE[version[1]].copy()
     )
-
     # TODO fill the "resource" field for v1.4
     # d["resources"] = [
     #     {
@@ -181,7 +184,11 @@ def read_metadata_from_post(content_query, schema, table):
     #     }
     # ]
     # d["metadata_version"] = "1.3"
-    # del d["field"]
+    metadata["resources"][0]["fields"] = [
+        {"name": col["id"], "description": "", "unit": ""}
+        for col in columns
+    ]
+    del metadata["field"]
 
     return metadata
 
@@ -195,6 +202,10 @@ def get_metadata_version(metadata):
     if "metaMetadata" in metadata:
         # v1.4
         version = metadata["metaMetadata"]["metadataVersion"]
+        version = __parse_version(version.replace("OEP-", ""))
+    elif "metaMetadata_metadataVersion" in metadata:
+        # v1.4 from post request
+        version = metadata["metaMetadata_metadataVersion"]
         version = __parse_version(version.replace("OEP-", ""))
     elif "metadata_version" in metadata:
         # v1.3
