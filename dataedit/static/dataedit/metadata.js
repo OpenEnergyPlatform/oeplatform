@@ -1,4 +1,5 @@
 function format_label(s){
+  // capitalize the string
   if (typeof s !== 'string') return ''
   s = s.split('_').pop()
   return s.charAt(0).toUpperCase() + s.slice(1)
@@ -10,10 +11,16 @@ function extract_el_index(name){
 	return name.match(/\d+/)[0]
 }
 
+function extract_el_name(name, idx){
+    // get the field at the end of the name, without the number
+  	name = name.substring(0, name.length - idx.length)
+	return name
+}
+
 
 function remove_element(parent){
     var idx = extract_el_index(parent)
-    parent = parent.substring(0, parent.length - idx.length);
+    parent = extract_el_name(parent, idx);
 
     //find element container
     var $parent = $('#' + parent + '_container');
@@ -40,10 +47,32 @@ function add_list_objects(prefix){
 
     // fetch the fields of the element which are lists themselves
     var sub_container = $clone.querySelectorAll('[id*=_container]');
+    var field_id = '';
+    var field_name = '';
+    var field_idx = '';
     for (let i = 0; i < sub_container.length; i++){
         // empty the list of all but the first element
         while (sub_container[i].childNodes.length > 1) {
             sub_container[i].removeChild(sub_container[i].lastChild);
+        }
+        // if the last element did not have index 0, replace the remaining index by 0
+        var sub_container_id = sub_container[i].querySelectorAll('.metacontainer')[0].id
+        if(sub_container_id){
+            field_id = sub_container_id.split('_').pop();
+            field_idx = extract_el_index(field_id)
+            field_name = extract_el_name(field_id, field_idx)
+            var elements = sub_container[i].querySelectorAll('[id*=' + sub_container_id + ']')
+            for (let j = 0; j < elements.length; j++){
+                elements[j].id = elements[j].id.replace(field_id, field_name + '0')
+            }
+        }
+        // reset the labels with index 0
+        var label_to_change = format_label(sub_container[i].id.replace('_container', ''));
+        var label_elements = sub_container[i].querySelectorAll('label')
+        for (let j = 0; j < label_elements.length; j++){
+            if(label_elements[j].innerHTML.includes(label_to_change)){
+                label_elements[j].innerHTML = label_to_change + ' 0'
+            }
         }
     }
 
