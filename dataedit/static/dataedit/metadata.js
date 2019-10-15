@@ -3,23 +3,25 @@ function format_label(s){
   if (typeof s !== 'string') return ''
   s = s.split('_').pop()
   return s.charAt(0).toUpperCase() + s.slice(1)
-}
+};
+
 
 function extract_el_index(name){
     // get the number at the end of the name
   	name = name.split('_').pop()
 	return name.match(/\d+/)[0]
-}
+};
+
 
 function extract_el_name(name, idx){
     // get the field at the end of the name, without the number
-  	name = name.substring(0, name.length - idx.length)
+  	name = name.substring(0, name.length - idx.length);
 	return name
-}
+};
 
 
 function remove_element(parent){
-    var idx = extract_el_index(parent)
+    var idx = extract_el_index(parent);
     parent = extract_el_name(parent, idx);
 
     //find element container
@@ -29,12 +31,12 @@ function remove_element(parent){
         var $container = $('#'+ parent + idx);
         $container.remove();
     }
-}
+};
 
 
 function add_list_objects(prefix){
 
-    var $parent = $('#' + prefix + '_container')
+    var $parent = $('#' + prefix + '_container');
 
     // create index of the new element in the list for the ids of child elements
     // of the new element
@@ -56,14 +58,14 @@ function add_list_objects(prefix){
             sub_container[i].removeChild(sub_container[i].lastChild);
         }
         // if the last element did not have index 0, replace the remaining index by 0
-        var sub_container_id = sub_container[i].querySelectorAll('.metacontainer')[0].id
+        var sub_container_id = sub_container[i].querySelectorAll('.metacontainer')[0].id;
         if(sub_container_id){
             field_id = sub_container_id.split('_').pop();
-            field_idx = extract_el_index(field_id)
-            field_name = extract_el_name(field_id, field_idx)
-            var elements = sub_container[i].querySelectorAll('[id*=' + sub_container_id + ']')
+            field_idx = extract_el_index(field_id);
+            field_name = extract_el_name(field_id, field_idx);
+            var elements = sub_container[i].querySelectorAll('[id*=' + sub_container_id + ']');
             for (let j = 0; j < elements.length; j++){
-                elements[j].id = elements[j].id.replace(field_id, field_name + '0')
+                elements[j].id = elements[j].id.replace(field_id, field_name + '0');
             }
         }
         // reset the labels with index 0
@@ -71,7 +73,7 @@ function add_list_objects(prefix){
         var label_elements = sub_container[i].querySelectorAll('label')
         for (let j = 0; j < label_elements.length; j++){
             if(label_elements[j].innerHTML.includes(label_to_change)){
-                label_elements[j].innerHTML = label_to_change + ' 0'
+                label_elements[j].innerHTML = label_to_change + ' 0';
             }
         }
     }
