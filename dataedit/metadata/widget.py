@@ -28,6 +28,21 @@ class MetaDataWidget:
         matches[0] = matches[0].capitalize()
         return " ".join(matches)
 
+    def format_index_numbers(self, string):
+        """Remove numbers in string
+
+        :param string:
+        :return:
+        """
+        answer = string
+        match = re.match(r"([a-z]+)([0-9]+)", string, re.I)
+        if match:
+            items = match.groups()
+            answer = '{} {}'.format(*items)
+
+        return self.camel_case_split(answer)
+
+
     def __convert_to_html(self, data, level=0, parent=''):
         """Formats variables into html code
 

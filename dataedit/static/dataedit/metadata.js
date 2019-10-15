@@ -1,3 +1,8 @@
+function format_label(s){
+  if (typeof s !== 'string') return ''
+  s = s.split('_').pop()
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 
 function create_box($parent, id){
     var $container = $('<div class="metacontainer" id='+id+'></div>');
