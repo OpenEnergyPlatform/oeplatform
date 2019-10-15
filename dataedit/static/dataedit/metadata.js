@@ -4,7 +4,24 @@ function format_label(s){
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+function extract_el_index(name){
+    // get the number at the end of the name
+  	name = name.split('_').pop()
+	return name.match(/\d+/)[0]
+}
 
+
+function remove_element(parent){
+    var idx = extract_el_index(parent)
+    parent = parent.substring(0, parent.length - idx.length);
+
+    //find element container
+    var $parent = $('#' + parent + '_container');
+    // if element is not the last, proceed to removal
+    if($parent[0].childElementCount > 1){
+        var $container = $('#'+ parent + idx);
+        $container.remove();
+    }
 }
 
 

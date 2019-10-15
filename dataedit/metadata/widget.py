@@ -228,7 +228,7 @@ class MetaDataWidget:
         """wraps a container"""
         html = f'<div class="metacontainer" id={parent}{idx}>'
 
-        html += f'<div class="metacontainer-header"><a style="color:white" onclick="$(\'#{parent}{idx}\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a></div>'
+        html += f'<div class="metacontainer-header"><a style="color:white" onclick="remove_element(\'{parent}{idx}\')"><span class="glyphicon glyphicon-minus-sign"/></a></div>'
         html += f'<div class="metaformframe" id={parent}{idx}>'
         html += item
         html += '</div>'
