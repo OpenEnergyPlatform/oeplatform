@@ -114,7 +114,7 @@ class MetaDataWidget:
                             item.pop('name', None)
                         url = item.pop('url', '')
                         if url != '':
-                            name = '<a href="{url}">{name}</a>'.format(url, name)
+                            name = '<a href="{}">{}</a>'.format(url, name)
                         if name is not None and name != '':
                             no_valid_item = False
                             html += '<p class="metaproperty">'
