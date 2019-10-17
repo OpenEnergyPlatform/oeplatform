@@ -202,6 +202,16 @@ class MetaDataWidget:
                 )
                 html += '<input class="form-control" id="{}" name="{}" type="text" value="{}" />'.format(parent, parent, data)
                 html += '</div>'
+            elif data is None:
+                # if data has no tpye, add an input field and a label within a div
+                html = '<div class="form_group">'
+                html += '<label class="field-str-label" for="{}"> {} </label>'.format(
+                    parent,
+                    label
+                )
+                # None has to be written as null in JSON context
+                html += '<input class="form-control" id="{}" name="{}" type="text" value="null" />'.format(parent, parent)
+                html += '</div>'
             elif isinstance(data, dict):
                 html = '<table style="width:100%">'
                 html += '<tr><td style="width:150px">'
