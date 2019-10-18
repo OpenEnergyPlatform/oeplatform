@@ -4,21 +4,25 @@
 {% block after-head %}
 <script type="text/javascript" src="{% static 'dataedit/metadata.js' %}"></script>
 <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
+<style>
+    @media only screen and (max-width: 992px) {
+        #main-left-sidebar {
+            padding-top: 50px;
+        }
+    }
+    @media only screen and (min-width: 992px) {
+        #main-left-sidebar {
+            position: fixed;
+            z-index: 1;
+        }
+    }
+</style>
 {% endblock after-head %}
 
 {% block main-left-sidebar %}
-    <div class="col-md-3">
+    <div id="main-left-sidebar" class="col-md-3">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div>
-                    <p>
-                        If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
-                        You can also fork the project and get involved.
-                    </p>
-                    <p>
-                        <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
-                    </p>
-                </div>
                 <div>
                     <input type="submit" form="metadata-form" class="btn btn-success" value="Submit" />
                 </div>
@@ -28,7 +32,7 @@
 {% endblock main-left-sidebar %}
 
 {% block main-content %}
-    <div class="col-lg-8 col-md-9 ">
+    <div class="col-md-9 col-md-offset-3">
         <div class="panel panel-default">
             <div class="panel-body">
                 {% block main-content-body %}
