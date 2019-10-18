@@ -20,7 +20,7 @@
                     </p>
                 </div>
                 <div>
-                    <input class="btn btn-success" type="submit" value="Submit" />
+                    <input type="submit" form="metadata-form" class="btn btn-success" value="Submit" />
                 </div>
             </div>
         </div>
@@ -35,7 +35,7 @@
                     <div>
                         <h4>Metadata</h4>
                         <div class="table table-hover">
-                            <form action="" role="form" method="post">{% csrf_token %}
+                            <form id="metadata-form" action="" role="form" method="post">{% csrf_token %}
                                 {{meta_widget}}
                             </form>
                         </div>
