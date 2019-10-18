@@ -253,7 +253,7 @@ class MetaDataWidget:
                 html += '<a onclick="add_list_objects(\'{}\')">Add</a>'.format(parent)
 
                 html += '</td></tr>'
-                MetaDataWidgethtml += '</table>'
+                html += '</table>'
 
         return html
 
