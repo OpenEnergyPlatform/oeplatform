@@ -1,21 +1,49 @@
 {% extends "dataedit/base.html" %}
-
-{% block main-content-body-data %}
 {% load staticfiles %}
+
+{% block after-head %}
 <script type="text/javascript" src="{% static 'dataedit/metadata.js' %}"></script>
 <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
-<script type="text/javascript">
+{% endblock after-head %}
 
-</script>
-
-<div>
-    <h4>Metadata</h4>
-    <div class="table table-hover">
-        <form action="" role="form" method="post">{% csrf_token %}
-            {{meta_widget}}
-            <input class="btn btn-success" type="submit" value="Submit" />
-        </form>
+{% block main-left-sidebar %}
+    <div class="col-md-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    <p>
+                        If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                        You can also fork the project and get involved.
+                    </p>
+                    <p>
+                        <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
+                    </p>
+                </div>
+                <div>
+                    <input class="btn btn-success" type="submit" value="Submit" />
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+{% endblock main-left-sidebar %}
 
-{% endblock %}
+{% block main-content %}
+    <div class="col-lg-8 col-md-9 ">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% block main-content-body %}
+                    <div>
+                        <h4>Metadata</h4>
+                        <div class="table table-hover">
+                            <form action="" role="form" method="post">{% csrf_token %}
+                                {{meta_widget}}
+                            </form>
+                        </div>
+                    </div>
+                {% endblock main-content-body %}
+            </div>
+        </div>
+    </div>
+{% endblock main-content %}
+
+{% block main-right-sidebar %}{% endblock main-right-sidebar %}
