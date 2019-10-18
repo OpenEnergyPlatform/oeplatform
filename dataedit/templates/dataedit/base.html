@@ -27,20 +27,20 @@
     </div>
     <hr>
     {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
-{% endblock %}
-{% block main-content-body %}
-{% block data_search %}
-<div class="searchbox_container small">
-    <form action="/dataedit/search" method="post">{% csrf_token %}
-        <div class="inner-addon right-addon">
-            <a href="" type="submit" class="glyphicon glyphicon-search"></a>
-            <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
-        </div>
-    </form>
-    <a href="/dataedit/search/">Advanced Search</a>
-</div>
-{% endblock %}
-{% block data_content %}
+{% endblock main-right-sidebar-content %}
 
-{% endblock %}
-{% endblock %}
+{% block main-content-body %}
+    {% block main-content-body-search %}
+        <div class="searchbox_container small">
+            <form action="/dataedit/search" method="post">{% csrf_token %}
+                <div class="inner-addon right-addon">
+                    <a href="" type="submit" class="glyphicon glyphicon-search"></a>
+                    <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
+                </div>
+            </form>
+            <a href="/dataedit/search/">Advanced Search</a>
+        </div>
+    {% endblock main-content-body-search %}
+    {% block main-content-body-data %}
+    {% endblock main-content-body-data %}
+{% endblock main-content-body%}
