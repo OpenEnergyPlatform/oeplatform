@@ -1,12 +1,12 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 
-{% block content-right %}
+{% block main-right-sidebar-content %}
 <h2>Changes in version {{version}}</h2>
 {{changes|safe}}
 {% endblock %}
 
-{% block content %}
+{% block main-content-body %}
 {% load staticfiles %}
 
 <h3>Welcome to the OpenEnergy Platform!</h3> <br>
