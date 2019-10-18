@@ -5,6 +5,13 @@
 <script type="text/javascript" src="{% static 'dataedit/metadata.js' %}"></script>
 <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
 <style>
+    a.anchor {
+        display: block; 
+        position: relative; 
+        top: -120px; 
+        visibility: hidden;
+    }
+
     @media only screen and (max-width: 991px) {
         #main-left-sidebar {
             padding-top: 50px;
@@ -24,6 +31,22 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div>
+                    <div><p>Navigate to Section:</p></div>
+                    <div><a href="#anchor-name">- General</a></div>
+                    <div><a href="#anchor-context_homepage">- Context</a></div>
+                    <div><a href="#anchor-spatial_location">- Spatial</a></div>
+                    <div><a href="#anchor-temporal_referenceDate">- Temporal</a></div>
+                    <div><a href="#anchor-sources">- Sources</a></div>
+                    <div><a href="#anchor-licenses">- Licenses</a></div>
+                    <div><a href="#anchor-contributors">- Contributors</a></div>
+                    <div><a href="#anchor-resources">- Resources</a></div>
+                    <div><a href="#anchor-review_path">- Review</a></div>
+                    <div><a href="#anchor-review_path">- MetaMetadata</a></div>
+                    <div><a href="#anchor-review_path">- Comment</a></div>
+                    <div><a href="#anchor-fields">- Fields</a></div>
+                </div>
+                <div style="padding-top: 10px">
+                    <div><p>Submit Form:</p></div>
                     <input type="submit" form="metadata-form" class="btn btn-success" value="Submit" />
                 </div>
             </div>
