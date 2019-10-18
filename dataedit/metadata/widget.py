@@ -253,19 +253,19 @@ class MetaDataWidget:
                 html += '<a onclick="add_list_objects(\'{}\')">Add</a>'.format(parent)
 
                 html += '</td></tr>'
-                html += '</table>'
+                MetaDataWidgethtml += '</table>'
 
         return html
 
     # TODO remove this function once the solution with list_field.html is implemented
     def __container(self, item, parent, idx):
         """wraps a container"""
-        html = '<div class="metacontainer" id={}{}>'.format(parent, idx)
+        html = '<div class="metacontainer" id="{}{}">'.format(parent, idx)
 
         html += '<div class="metacontainer-header">'
         html += '<a style="color:white" onclick="remove_element(\'{}{}\')">'.format(parent, idx)
         html += '<span class="glyphicon glyphicon-minus-sign"/></a></div>'
-        html += '<div class="metaformframe" id={}{}>'.format(parent, idx)
+        html += '<div class="metaformframe" id="{}{}">'.format(parent, idx)
         html += item
         html += '</div>'
         html += '</div>'
