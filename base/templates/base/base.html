@@ -1,20 +1,19 @@
+{% load static %}
+{% load bootstrap3 %}
 <!DOCTYPE html>
-<html> 
-    <head>
-        {% load bootstrap3 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript jquery=1%}
-        {% load staticfiles %}
-        {% block before-head %}{% endblock before-head %}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
-        <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
-        <title>
-            OEP{% block title %}{% endblock title %}
-        </title>
-        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
-        {% block after-head %}{% endblock after-head %}
-    </head>
+<html lang="en">
+<head>
+    {% block before-head %}{% endblock before-head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>OEP{% block title %}{% endblock title %}</title>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
+    {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+    {% block after-head %}{% endblock after-head %}
+</head>
 <body>
 {% block header %}
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -67,7 +66,7 @@
     <div class="container-fluid oe-wrapper" style="margin-top:70px">
         <div class="row">
             {% block main-left-sidebar %}{% endblock main-left-sidebar %}
-            
+
             {% block main-content %}
             <div class="col-lg-8 col-lg-offset-1 col-md-9">
                 <div class="panel panel-default">
@@ -121,5 +120,12 @@
             </div>
     </nav>
 {% endblock footer %}
+
+{% block body-bottom-js %}
+    {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    {% bootstrap_javascript jquery=1%}
+    <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+    {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+{% endblock body-bottom-js %}
 </body>
 </html>
