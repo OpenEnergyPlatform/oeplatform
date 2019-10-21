@@ -1,39 +1,31 @@
+{% load static %}
+{% load bootstrap3 %}
 <!DOCTYPE html>
-<html> 
-    <head>
-        {% load bootstrap3 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript jquery=1%}
-        {% load staticfiles %}
-        {% block before-head %}
-        {% endblock before-head %}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
-        <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
-        <title>
-            OEP{% block title %}
-            {% endblock title %}
-        </title>
-        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
-        {% block after-head %}
-        {% endblock after-head %}
-    </head>
+<html lang="en">
+<head>
+    {% block before-head %}{% endblock before-head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>OEP{% block title %}{% endblock title %}</title>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
+    {% bootstrap_css %}
+    <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+    {% block after-head %}{% endblock after-head %}
+</head>
 <body>
 {% block header %}
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container-fluid" style="width:80%; float:left;">
         <div class="navbar-header">
-                <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
+            <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
                 <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
-                </div>
-            <a class="navbar-brand" href="/">
-
-                OpenEnergy Platform</a>
+            </div>
+            <a class="navbar-brand" href="/">OpenEnergy Platform</a>
         </div>
         <ul class="nav navbar-nav">
-
             <li class="inactive"><a href="/dataedit/">Database</a></li>
-
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
                 <span class="caret"></span></a>
@@ -46,9 +38,7 @@
             </li>
             <li class="inactive"><a href="/literature/">Literature</a></li>
             <li class="inactive">
-                <a href="/discussion" target="_blank">
-                    Discussion
-                </a>
+                <a href="/discussion" target="_blank">Discussion</a>
             </li>
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
@@ -62,12 +52,10 @@
         </ul>
         </div>
         {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-
         <div class="btn profile-bar">
             <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
             <a class="btn-logout" href="/user/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
         </div>
-
         {% else %}
             <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
         {% endif %}
@@ -77,9 +65,7 @@
 {% block main %}
     <div class="container-fluid oe-wrapper" style="margin-top:70px">
         <div class="row">
-
-            {% block main-left-sidebar %}
-            {% endblock main-left-sidebar %}
+            {% block main-left-sidebar %}{% endblock main-left-sidebar %}
 
             {% block main-content %}
             <div class="col-lg-8 col-lg-offset-1 col-md-9">
@@ -134,5 +120,12 @@
             </div>
     </nav>
 {% endblock footer %}
+
+{% block body-bottom-js %}
+    {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    {% bootstrap_javascript jquery=1%}
+    <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+    {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+{% endblock body-bottom-js %}
 </body>
 </html>
