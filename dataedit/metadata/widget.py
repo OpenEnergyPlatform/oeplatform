@@ -200,7 +200,7 @@ class MetaDataWidget:
                     parent,
                     label
                 )
-                html += '<input class="form-control" id="{}" name="{}" type="text" value="{}" />'.format(parent, parent, data)
+                html += '<a class="anchor" id="anchor-{}"></a><input class="form-control" id="{}" name="{}" type="text" value="{}" />'.format(parent, parent, parent, data)
                 html += '</div>'
             elif data is None:
                 # if data has no tpye, add an input field and a label within a div
@@ -210,7 +210,7 @@ class MetaDataWidget:
                     label
                 )
                 # None has to be written as null in JSON context
-                html += '<input class="form-control" id="{}" name="{}" type="text" value="null" />'.format(parent, parent)
+                html += '<a class="anchor" id="anchor-{}"></a><input class="form-control" id="{}" name="{}" type="text" value="null" />'.format(parent, parent, parent)
                 html += '</div>'
             elif isinstance(data, dict):
                 html = '<table style="width:100%">'
@@ -234,7 +234,7 @@ class MetaDataWidget:
                 html += label.capitalize()
                 html += '</label></td></tr>'
                 html += '<tr><td>'
-                html += '<div id="{}_container">'.format(parent)
+                html += '<a class="anchor" id="anchor-{}"></a><div id="{}_container">'.format(parent, parent)
 
                 for i, item in enumerate(data):
                     html += self.__container(

@@ -1,8 +1,8 @@
 {% extends "dataedit/base.html" %}
 
-{% block data_search %} {# This replaces the tiny search bar in the default template #}
+{% block main-content-body-search %} {# This replaces the tiny search bar in the default template #}
 {% endblock %}
-{% block data_content %}
+{% block main-content-body-data %}
 {% load dataedit.taghandler %}
 <div class="searchbox_container small">
     <form action="/dataedit/search" role="form" method="post">{% csrf_token %}

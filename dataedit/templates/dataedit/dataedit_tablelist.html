@@ -1,6 +1,6 @@
 {% extends "dataedit/base.html" %}
 {% block title %} - {{schema}}{% endblock %}
-{% block data_content %}
+{% block main-content-body-data %}
 {% load dataedit.taghandler %}
 <h3>Schema: {{schema}}</h3>
 {% include 'dataedit/taggable_setting.html' with schema=schema.name %}

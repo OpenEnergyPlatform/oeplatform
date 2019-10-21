@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load staticfiles %}
-{% block content-right %}
+{% block main-right-sidebar-content %}
 <hr>
     <div style="overflow: hidden;">
         <a href="/dataedit/tags"><h3>Manage Tags</h3></a>
@@ -22,7 +22,7 @@ models we filter all “EPS” models and choose different characteristics that 
 want to compare. OEP will give us tables (views) that facilitate the comparison.
 <hr>
 {% endblock %}
-{% block content %}
+{% block main-content-body %}
 {% block factsheets_content %}
 
 {% endblock %}

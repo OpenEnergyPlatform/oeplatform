@@ -3,11 +3,11 @@
 {% load staticfiles %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
-{% block after-header %}
+{% block after-head %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
-{% endblock %}
+{% endblock after-head %}
 
 {% block factsheets_content %}
 <h3>{{label}} Factsheets <a class="btn btn-add btn-circle glyphicon glyphicon-plus" style="padding:0" href="add"></a>  <a id="dlcsv" class="btn btn-info" style="float:right;bottom: 5;right: 0;" href="download"><span name="icon"></span>Download CSV</a>

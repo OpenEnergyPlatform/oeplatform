@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 {% load widget_tweaks %}
-{% block content %}
+{% block main-content-body %}
 <form action="/dataedit/edit" method="post" role="form">
     {% csrf_token %}
     <table class ="table-striped">

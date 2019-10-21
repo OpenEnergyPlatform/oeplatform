@@ -1,6 +1,6 @@
 {% extends "literature/base.html" %}
 
-{% block content %}
+{% block main-content-body %}
 <ul class="nav nav-tabs">
     {% if not id or btype == "article" %}<li><a data-toggle="tab" href="#tab_article">article</a></li>{%endif%}
     {% if not id or btype == "book" %}<li><a data-toggle="tab" href="#tab_book">book</a></li>{%endif%}
