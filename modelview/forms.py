@@ -32,7 +32,7 @@ class EnergyframeworkForm(ModelForm):
                 )
             if "label" in self.fields[key].__dict__:
                 if self.fields[key].label == "Model usage":
-                    self.fields[key].label = self.fields[key].label.replace("Model", "Framework")
+                    self.fields[key].label = "Framework usage"
 
     class Meta:
         model = Energyframework

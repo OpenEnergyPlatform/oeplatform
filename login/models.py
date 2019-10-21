@@ -51,7 +51,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    """def create_devuser(self, name, email):
+    def create_devuser(self, name, email):
         if not email:
             raise ValueError("An email address must be entered")
         if not name:
@@ -60,7 +60,7 @@ class UserManager(BaseUserManager):
             name=name, email=self.normalize_email(email), affiliation=name, is_mail_verified=True
             )
         user.save(using=self._db)
-        return user"""
+        return user
 
 
 class PermissionHolder:
