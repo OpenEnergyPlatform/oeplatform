@@ -31,6 +31,7 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div>
+                    {% if metadata_version == "(1, 4, 0)" %}
                     <div><p>Navigate to Section:</p></div>
                     <div><a href="#anchor-name">- General</a></div>
                     <div><a href="#anchor-context_homepage">- Context</a></div>
@@ -44,6 +45,17 @@
                     <div><a href="#anchor-review_path">- MetaMetadata</a></div>
                     <div><a href="#anchor-review_path">- Comment</a></div>
                     <div><a href="#anchor-fields">- Fields</a></div>
+                    {% elif metadata_version == "(1, 3, 0)" %}
+                    <div><p>Navigate to Section:</p></div>
+                    <div><a href="#anchor-title">- General</a></div>
+                    <div><a href="#anchor-spatial_location">- Spatial</a></div>
+                    <div><a href="#anchor-temporal_reference_date">- Temporal</a></div>
+                    <div><a href="#anchor-sources">- Sources</a></div>
+                    <div><a href="#anchor-license_id">- License</a></div>
+                    <div><a href="#anchor-contributors">- Contributors</a></div>
+                    <div><a href="#anchor-resources">- Resources</a></div>
+                    <div><a href="#anchor-fields">- Fields</a></div>
+                    {% endif %}
                 </div>
                 <div style="padding-top: 10px">
                     <div><p>Submit Form:</p></div>

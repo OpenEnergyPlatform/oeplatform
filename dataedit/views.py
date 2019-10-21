@@ -27,7 +27,7 @@ from sqlalchemy.orm import sessionmaker
 import api.parser
 import oeplatform.securitysettings as sec
 from api import actions as actions
-from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
+from dataedit.metadata import load_metadata_from_db, read_metadata_from_post, get_metadata_version
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
@@ -899,6 +899,7 @@ class MetaView(LoginRequiredMixin, View):
 
         context_dict = {
             "schema": schema,
+            "metadata_version": "".join(str(get_metadata_version(metadata))),
             "table": table,
             "meta_widget": meta_widget.render_editmode(),
             "comment_on_table": metadata
