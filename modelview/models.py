@@ -158,7 +158,9 @@ class BasicFactsheet(models.Model):
         help_text="Is the model available on GitHub?",
     )
     link_to_source_code = CharField(
-        max_length=200, verbose_name="Link to source code", null=True
+        max_length=200, verbose_name="Access to source code", 
+        help_text="Is the necessary data to run a scenario available?",
+        null=True
     )
     data_provided = CharField(
         max_length=1000,
@@ -255,7 +257,7 @@ class BasicFactsheet(models.Model):
     )
     larger_scale_usage = CharField(
         max_length=10000,
-        verbose_name="Larger scale usage",
+        verbose_name="Model usage",
         help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",
         null=True,
     )
@@ -323,14 +325,20 @@ class Energymodel(BasicFactsheet):
     generation_renewables_hydro = BooleanField(default=False, verbose_name="Hydro")
     generation_renewables_biomass = BooleanField(default=False, verbose_name="Biomass")
     generation_renewables_biogas = BooleanField(default=False, verbose_name="Biogas")
+    generation_renewables_bio = BooleanField(default=False, verbose_name="Biomass,Biogas,Biofuels")
     generation_renewables_solar_thermal = BooleanField(
         default=False, verbose_name="Solar thermal"
+    )
+    generation_renewables_geothermal = BooleanField(
+        default=False, verbose_name="Geothermal heat"
     )
     generation_renewables_others = BooleanField(default=False, verbose_name="Others")
     generation_renewables_others_text = CharField(max_length=200, null=True)
 
     generation_conventional_gas = BooleanField(default=False, verbose_name="gas")
     generation_conventional_coal = BooleanField(default=False, verbose_name="coal")
+    generation_conventional_lignite = BooleanField(default=False, verbose_name="lignite")
+    generation_conventional_hard_coal = BooleanField(default=False, verbose_name="hard coal")
     generation_conventional_oil = BooleanField(default=False, verbose_name="oil")
     generation_conventional_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
@@ -340,6 +348,9 @@ class Energymodel(BasicFactsheet):
     )
 
     generation_CHP = BooleanField(default=False, verbose_name="CHP")
+
+    modeled_technology_renewables = BooleanField(default=False, verbose_name="renewables")
+    modeled_technology_conventional = BooleanField(default=False, verbose_name="conventional")
 
     transfer_electricity = BooleanField(default=False, verbose_name="electricity")
     transfer_electricity_distribution = BooleanField(
@@ -361,9 +372,13 @@ class Energymodel(BasicFactsheet):
 
     network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow")
     network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow")
-    network_coverage_NT = BooleanField(
-        default=False, verbose_name="net transfer capacities"
+    network_coverage_TM = BooleanField(default=False, verbose_name="transshipment model")    
+    network_coverage_SN = BooleanField(default=False, verbose_name="single-node / copper plate model")
+    network_coverage_other = BooleanField(
+        default=False, verbose_name="other"
     )
+    network_coverage_other_text = CharField(max_length=200, null=True)
+
 
     storage_electricity_battery = BooleanField(default=False, verbose_name="battery")
     storage_electricity_kinetic = BooleanField(default=False, verbose_name="kinetic")
@@ -671,6 +686,11 @@ class Energystudy(models.Model):
         verbose_name="Author, Institution",
         help_text="Who are the authors of the study and for which institution do they work?",
         max_length=1000,
+    )
+    contact_email = EmailField(
+        verbose_name="Contact (e-mail)",
+        help_text="Please provide the mailadress of the contact person.",
+        null=True,
     )
     client = CharField(
         verbose_name="Client",

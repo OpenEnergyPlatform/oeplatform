@@ -57,3 +57,7 @@ required:0;
     cursor: pointer;
     color: red;
 }
+
+.modeledTec th {
+    vertical-align: inherit;
+}

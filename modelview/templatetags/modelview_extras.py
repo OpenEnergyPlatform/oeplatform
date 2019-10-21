@@ -68,7 +68,9 @@ def checklist(model, labels):
         if "=" in name:
             decider, text = name.split("=")
             is_other = True
-
+        if  "conventional_generation" in name or "networks_electricity" in name or "storage" in name or "CHP" in name:
+                is_other = False
+                
         if model.__dict__[decider]:
             if first:
                 first = False
