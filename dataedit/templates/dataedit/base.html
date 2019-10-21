@@ -28,19 +28,6 @@
     <hr>
     {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
 {% endblock %}
-{% block main-content-body %}
-{% block data_search %}
-<div class="searchbox_container small">
-    <form action="/dataedit/search" method="post">{% csrf_token %}
-        <div class="inner-addon right-addon">
-            <a href="" type="submit" class="glyphicon glyphicon-search"></a>
-            <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
-        </div>
-    </form>
-    <a href="/dataedit/search/">Advanced Search</a>
-</div>
-{% endblock %}
-{% block data_content %}
 
 {% block main-content-body %}
     {% block main-content-body-search %}
