@@ -1321,6 +1321,7 @@ def create_meta(schema, table):
 def get_comment_table(schema, table):
     engine = _get_engine()
 
+    # https://www.postgresql.org/docs/9.5/functions-info.html
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table
     )
@@ -1766,6 +1767,11 @@ def get_meta_schema_name(schema):
 
 
 def create_meta_schema(schema):
+    """Create a schema to store schema meta information
+
+    :param schema: Name of the schema
+    :return: None
+    """
     engine = _get_engine()
     query = "CREATE SCHEMA {schema}".format(schema=get_meta_schema_name(schema))
     connection = engine.connect()

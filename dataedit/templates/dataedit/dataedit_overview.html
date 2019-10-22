@@ -133,6 +133,9 @@ for row in result.json():
     }
     var csrftoken = getCookie('csrftoken');
 
+    /*
+    * Visualization of the data contained in the table on a map
+    */
     function build_views_leaflet() {
 
         var map = L.map('main-visualization-container');
@@ -171,7 +174,12 @@ for row in result.json():
         map.on('zoomend', updateFunction);
     }
 
+    /*
+    * Visualization of the data contained in the table in a spreadsheet format
+    */
     function build_views_recline(){
+
+        var data_record = {}
         var dataset_main = new recline.Model.Dataset({
                 table: '{{table}}',
                 schema: '{{schema}}',
@@ -198,7 +206,6 @@ for row in result.json():
                       }
                     }
                 });
-
                 grid.visible = true;
                 grid.render();
 
@@ -237,6 +244,10 @@ for row in result.json():
         });
     }
 
+    /*
+    * Visualization of the data contained in the table
+    * Either as points on a map or as spreadsheet
+    */
     function build_views() {
         {% if current_view.type == "map" %}
         build_views_leaflet();

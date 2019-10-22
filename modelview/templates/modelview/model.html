@@ -190,7 +190,7 @@
                     </td>
                     <td>
                         <table>
-{% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_liquid_fuels,energy_sectors_gas,energy_sectors_others=energy_sectors_others_text" %}
+{% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_others=energy_sectors_others_text" %}
 
                         </table>
                     </td>
@@ -209,62 +209,7 @@
                 </tr>
                 <tr>
                     <td class="sheetlabel">
-                        Modelled energy carriers (primary energy carrier)
-                    </td>
-                    <td>
-                        <table class="profiletable">
-                           <tr>
-                                <td class="sheetlabel">
-                                    Gas
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "energy_carrier_gas_natural_gas,energy_carrier_gas_biogas,energy_carrier_gas_hydrogen" %}
-
-
-                                    </table>
-                                </td>
-                            </tr>
-                           <tr>
-                                <td class="sheetlabel">
-                                    Liquids
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "energy_carrier_liquids_petrol,energy_carrier_liquids_diesel,energy_carrier_liquids_ethanol" %}
-
-
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="sheetlabel">
-                                    Solid
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "energy_carrier_solid_hard_coal,energy_carrier_solid_hard_lignite,energy_carrier_solid_hard_uranium,energy_carrier_solid_hard_biomass,energy_carrier_renewables_sun,energy_carrier_renewables_wind,energy_carrier_renewables_hydro,energy_carrier_renewables_geothermal_heat" %}
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="sheetlabel">
-                                    Renewables
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "energy_carrier_renewables_sun,energy_carrier_renewables_wind,energy_carrier_renewables_hydro,energy_carrier_renewables_geothermal_heat" %}
-                                    </table>
-                                </td>
-                            </tr>
-
-
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for generation or conversion
+                        Modeled technologies: components for power generation or conversion
                     </td>
                     <td>
                         <table class="profiletable">
@@ -274,7 +219,7 @@
                                 </td>
                                 <td>
                                     <table>
-{% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_biomass,generation_renewables_biogas,generation_renewables_solar_thermal,generation_renewables_others=generation_renewables_others_text" %}
+{% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_bio,generation_renewables_solar_thermal,generation_renewables_geothermal" %}
                                     </table>
                                 </td>
                             </tr>
@@ -284,7 +229,7 @@
                                 </td>
                                 <td>
                                     <table>
-{% checklist model "generation_conventional_gas,generation_conventional_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
+{% checklist model "generation_conventional_gas,generation_conventional_lignite,generation_conventional_hard_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
                                     </table>
                                 </td>
                             </tr>
@@ -336,7 +281,7 @@
                     </td>
                     <td>
                         <table>
-{% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_NT" %}
+{% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_TM,network_coverage_SN,network_coverage_other=network_coverage_other_text" %}
                         </table>
                     </td>
                 </tr>              

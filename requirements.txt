@@ -18,3 +18,4 @@ django-axes==2.3.3
 shapely>=1.5.17
 markdown2
 alembic
+git+https://github.com/solar-c/django-bootstrap3.git
