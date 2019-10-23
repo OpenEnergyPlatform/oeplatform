@@ -7,13 +7,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0002_tablerevision_file'),
-    ]
+    dependencies = [("dataedit", "0002_tablerevision_file")]
 
-    operations = [
-        migrations.RemoveField(
-            model_name='tablerevision',
-            name='file',
-        ),
-    ]
+    operations = [migrations.RemoveField(model_name="tablerevision", name="file")]

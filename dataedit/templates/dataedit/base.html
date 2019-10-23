@@ -4,7 +4,7 @@
     <hr>
     <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
     {% load dataedit.taghandler %}
-    {% get_tags 10 as all_tags %}
+    {% get_tags None None 10 as all_tags %}
     <h3>Popular tags:</h3>
     <div style="overflow: hidden;">
     {% for t in all_tags %}

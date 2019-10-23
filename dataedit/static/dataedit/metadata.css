@@ -12,6 +12,10 @@
     text-align:right;
 }
 
+.metahiddenfield{
+    display:none;
+}
+
 .metaformframe{
    padding:5px;
 }

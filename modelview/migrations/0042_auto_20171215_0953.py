@@ -7,13 +7,23 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0041_merge_20171211_1420'),
-    ]
+    dependencies = [("modelview", "0041_merge_20171211_1420")]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='license',
-            field=models.CharField(choices=[('MIT Licence', 'MIT Licence'), ('Apache Licence', 'Apache Licence'), ('GNU GPL Licence', 'GNU GPL Licence'), ('Other', 'Other'), ('Unknown', 'Unknown')], default='Unknown', max_length=20, verbose_name='License'))
+            model_name="basicfactsheet",
+            name="license",
+            field=models.CharField(
+                choices=[
+                    ("MIT Licence", "MIT Licence"),
+                    ("Apache Licence", "Apache Licence"),
+                    ("GNU GPL Licence", "GNU GPL Licence"),
+                    ("Other", "Other"),
+                    ("Unknown", "Unknown"),
+                ],
+                default="Unknown",
+                max_length=20,
+                verbose_name="License",
+            ),
+        )
     ]

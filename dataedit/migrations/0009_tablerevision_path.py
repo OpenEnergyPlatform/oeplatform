@@ -7,15 +7,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0008_auto_20170504_1651'),
-    ]
+    dependencies = [("dataedit", "0008_auto_20170504_1651")]
 
     operations = [
         migrations.AddField(
-            model_name='tablerevision',
-            name='path',
-            field=models.CharField(default='', max_length=100),
+            model_name="tablerevision",
+            name="path",
+            field=models.CharField(default="", max_length=100),
             preserve_default=False,
-        ),
+        )
     ]

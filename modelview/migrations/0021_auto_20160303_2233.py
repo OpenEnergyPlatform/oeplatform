@@ -7,29 +7,53 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0020_auto_20160303_2218'),
-    ]
+    dependencies = [("modelview", "0020_auto_20160303_2218")]
 
     operations = [
         migrations.AddField(
-            model_name='energymodel',
-            name='model_file_format_other_text',
+            model_name="energymodel",
+            name="model_file_format_other_text",
             field=models.CharField(max_length=1000, null=True),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='model_input_other_text',
+            model_name="energymodel",
+            name="model_input_other_text",
             field=models.CharField(max_length=1000, null=True),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='model_file_format',
-            field=models.CharField(choices=[('.exe', '.exe'), ('.gms', '.gms'), ('.py', '.py'), ('.xls', '.xls'), ('other', 'other')], default='other', help_text='In which format is the model saved?', max_length=5, null=True, verbose_name='Model file format'),
+            model_name="energymodel",
+            name="model_file_format",
+            field=models.CharField(
+                choices=[
+                    (".exe", ".exe"),
+                    (".gms", ".gms"),
+                    (".py", ".py"),
+                    (".xls", ".xls"),
+                    ("other", "other"),
+                ],
+                default="other",
+                help_text="In which format is the model saved?",
+                max_length=5,
+                null=True,
+                verbose_name="Model file format",
+            ),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='model_input',
-            field=models.CharField(choices=[('.csv', '.csv'), ('.py', '.py'), ('text', 'text'), ('.xls', '.xls'), ('other', 'other')], default='other', help_text='Of which file format are the input and output data?', max_length=5, null=True, verbose_name='Input/output data file format'),
+            model_name="energymodel",
+            name="model_input",
+            field=models.CharField(
+                choices=[
+                    (".csv", ".csv"),
+                    (".py", ".py"),
+                    ("text", "text"),
+                    (".xls", ".xls"),
+                    ("other", "other"),
+                ],
+                default="other",
+                help_text="Of which file format are the input and output data?",
+                max_length=5,
+                null=True,
+                verbose_name="Input/output data file format",
+            ),
         ),
     ]

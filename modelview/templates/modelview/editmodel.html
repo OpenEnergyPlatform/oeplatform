@@ -101,7 +101,6 @@ confirmOnLeave();
                 </td>
             </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.institutions%}
-            {% include 'modelview/editmodel_snippet.html' with field=form.institutions%}
             {% include 'modelview/editmodel_snippet.html' with field=form.authors %}
             {% include 'modelview/editmodel_snippet.html' with field=form.current_contact_person %}
             {% include 'modelview/editmodel_snippet.html' with field=form.contact_email %}
@@ -137,7 +136,36 @@ confirmOnLeave();
                 no[i].style.display = sty_no;
             }
         }
+
+        function modeled_technology_renewables_click(cb) {
+            var ren = document.getElementsByClassName('renewable_tec')
+            if (cb.checked) { 
+                for (i = 0; i < ren.length; i++) {
+                    ren[i].style.display = '';
+                }
+            } 
+            else {
+                for (i = 0; i < ren.length; i++) {
+                    ren[i].style.display = 'none';
+                }
+            }
+        }
+
+        function modeled_technology_conventional_click(cb) {
+            var ren = document.getElementsByClassName('conventional_tec')
+            if (cb.checked) { 
+                for (i = 0; i < ren.length; i++) {
+                    ren[i].style.display = '';
+                }
+            } 
+            else {
+                for (i = 0; i < ren.length; i++) {
+                    ren[i].style.display = 'none';
+                }
+            }
+        }
     </script>
+
     <div id="Openness" class="tab-pane fade">
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.open_source event='onclick'%}
@@ -167,11 +195,9 @@ confirmOnLeave();
     <div id="Coverage" class="tab-pane fade">
         <table class="formtable">
         <tr><th> Modeled energy sectors (final energy) </th><td>
-        <table class="checktable">
+        <table class="checktable"  align="center">
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_electricity %}
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_heat %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_liquid_fuels %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_gas %}
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_others add=form.energy_sectors_others_text%}
         </table></td></tr>
         
@@ -179,7 +205,7 @@ confirmOnLeave();
         <tr>
             <th> Modeled demand sectors </th>
             <td>
-                <table class="checktable"> 
+                <table class="checktable"  align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_households %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_industry %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_commercial_sector %}
@@ -187,103 +213,50 @@ confirmOnLeave();
                 </table>
             </td>
         </tr>
-        
         <tr>
-            <th> Modeled energy carriers (primary energy carriers) </th>
-            <td>
-                <table class="formtable" align="center"> 
-                    <tr>
-                        <th>
-                            Gas
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_natural_gas %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_biogas %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_gas_hydrogen %}
-                            </table>
-                        </td>
-                    </tr>    
-                    <tr>
-                        <th>
-                            Liquids
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_petrol %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_diesel %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_liquids_ethanol %}
-                            </table>
-                        </td>
-                    </tr>    
-                    <tr>
-                        <th>
-                            Solid
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_coal %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_lignite %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_uranium %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_solid_hard_biomass %}
-                            </table>
-                        </td>
-                    </tr>    
-                    <tr>
-                        <th>
-                            Renewables
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_sun %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_wind %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_hydro %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.energy_carrier_renewables_geothermal_heat %}
-                            </table>
-                        </td>
-                    </tr>    
+            <th> Modeled technologies: components for power generation or conversion </th>
+            <td align="left">         
+                <table  class="modeledTec">
+                {% include 'modelview/editmodel_snippet.html' with     field=form.modeled_technology_renewables  event='onclick'%}
                 </table>
             </td>
         </tr>
         <tr>
-            <th> Modeled technologies: components for generation or conversion </td>
+            <td></td>
             <td>
-                <table class="formtable"> 
-                    <tr>
-                        <th>
-                            Renewables
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">            
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biomass %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_biogas %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_solar_thermal %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_others add=form.generation_renewables_others_text%}
-                            </table>
-                        </td>
-                    </tr>    
-                    <tr>
-                        <th>
-                            Conventional
-                        </th>
-                        <td>
-                            <table class="checktable" align="center">            
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_coal %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear %}
-                            </table>
-                        </td>
-                    </tr> 
-                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_CHP %}
+                <table class="checktable"  align="right"> 
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV  class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_bio class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_solar_thermal class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_geothermal class='renewable_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_others add=form.generation_renewables_others_text class='renrewable_tec' visible='none' %}
                 </table>
             </td>
-        </tr>   
-
+        </tr>
+        <tr></tr>
+        <tr>
+            <td></td>
+            <td align="left">         
+                <table  class="modeledTec">
+                    {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional  event='onclick'%}
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <table class="checktable"  align="right"> 
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas  class='conventional_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_lignite   class='conventional_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_hard_coal   class='conventional_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil   class='conventional_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels   class='conventional_tec' visible='none' %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear   class='conventional_tec' visible='none' %}
+                </table>
+            </td>
+        </tr>        
         <tr>
             <th> Modeled technologies: components for transfer, infrastructure or grid </th>
             <td>
@@ -330,7 +303,9 @@ confirmOnLeave();
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_DC %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_NT %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_TM %}                    
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_SN %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_other add=form.network_coverage_other_text %}
                 </table>
             </td>
         </tr>
