@@ -72,13 +72,13 @@
 
 
         {% if not disableSidebar %}
-        <div class="container-fluid oe-wrapper">
+        <div class="container-fluid base">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-1 col-md-9">
                     <div class="panel panel-default">
                         <div class="panel-body">
         {% else %}
-        <div class="base container-fluid">
+        <div class="container-fluid base">
         {% endif %}
                     {% block content %}{% endblock %}
         {% if not disableSidebar %}
