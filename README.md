@@ -168,13 +168,14 @@ To create a dummy user for functionality testing purposes
 
       export DJANGO_SETTINGS_MODULE=oeplatform.settings
 
+Then execute this python code (either directly in a terminal or from a file)
 
-    import django
-    django.setup()
-    from login.models import myuser
-    u = myuser.objects.create_devuser('test','test@mail.com')
-    u.set_password('pass')
-    u.save()
+      import django
+      django.setup()
+      from login.models import myuser
+      u = myuser.objects.create_devuser('test','test@mail.com')
+      u.set_password('pass')
+      u.save()
 
 ## Code contribution
 
