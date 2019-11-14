@@ -1,8 +1,8 @@
 ﻿<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
-# OpenEnergyPlatform - OEPlatform
+# Open Energy Platform - OEP
 
-The OEP code.
+Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). It does not contain data, for this please see 
 
 ## License / Copyright
 
