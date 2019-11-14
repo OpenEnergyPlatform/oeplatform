@@ -11,6 +11,9 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 ## Installation
 
 
+The installation steps have been proofed on linux and windows for python 3.6 and 3.7. Be aware that some of the required packages present installation's difficulties on windows
+
+
 ### Setup the repository
 
 Clone the repository locally
@@ -26,38 +29,44 @@ Move to the cloned repository
 ### Setup virtual environment
 
 
-[Here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) can you find instructions for setting up virtual environment
+If you are a windows user, we recommand you use conda
+
+    conda env create -f environment.yml
+
+
+If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
 
 
 After you have activated your virtual environment, install the required python libraries:
 
     pip install -r requirements.txt
 
-It is also possible to use conda 
-
-    conda env create -f environment.yml
-
 
 
 ### Setup the databases
 
-The OEP relied on two different databases: One that is managed by django itself. 
-This data base contains all informations that are needed to provide the features
-of the databases (e.g. user management, revision handling, etc.). The second one
-contains data that will be displayed in the data visualisations on the oedb.
+The OEP website relies on two different databases: 
+1. One that is managed by django itself (django internal database). 
+This database contains all information that is needed to provide the features
+of the databases (e.g. user management, revision handling, etc.). 
+2. The second one is a local copy of the OEDB structure. It
+will contain the data that the user can access from the website.
 
 #### 1. Django internal database
+##### 0.1 Install postgresql
+
+If postgresql is not installed yet on your computer, you can follow this [guide](https://wam.readthedocs.io/en/latest/getting_started.html#installation-from-scratch)
 
 ##### 1.1 Posgresql command line setup
 
-Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
     create user oep_django_user with password '<oep_django_password>';
     create database oep_django with owner = oep_django_user;
 
 ##### 1.2 Django setup
 
-Create a file oeplatform/securitysettings.py by omitting the '.default' suffix on oeplatform/securitysettings.py.default and enter the connection to your above mentioned postgresql database.
+In the repository, copy the file `oeplatform/securitysettings.py.default` and rename it `oeplatform/securitysettings.py`. Then, enter the connection to your above mentioned postgresql database.
 
     DATABASES = {
         'default': {
