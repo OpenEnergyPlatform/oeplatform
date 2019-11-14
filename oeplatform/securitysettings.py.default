@@ -16,11 +16,11 @@ token_test_user = '0'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
-    'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': 'oep_django',
-    'USER': os.environ.get("OEP_DB_USER"),
-    'PASSWORD': os.environ.get("OEP_DB_PASSWORD"),
-    'HOST': 'localhost'
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'oep_django',
+        'USER': os.environ.get("OEP_DB_USER"),
+        'PASSWORD': os.environ.get("OEP_DB_PASSWORD"),
+        'HOST': 'localhost'
     }
 }
 
