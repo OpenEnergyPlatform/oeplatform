@@ -10,7 +10,6 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-
 The installation steps have been proofed on linux and windows for python 3.6 and 3.7. Be aware that some of the required packages present installation's difficulties on windows
 
 
@@ -47,10 +46,9 @@ After you have activated your virtual environment, install the required python l
 
 The OEP website relies on two different databases: 
 1. One that is managed by django itself (django internal database). 
-This database contains all information that is needed to provide the features
-of the databases (e.g. user management, revision handling, etc.). 
-2. The second one is a local copy of the OEDB structure. It
-will contain the data that the user can access from the website.
+This database contains all information that is needed for the website (user management, factsheets and api token for connection to the second database). 
+2. The second one
+will contain the data that the user can access from the website (primary database).
 
 #### 1. Django internal database
 ##### 0.1 Install postgresql
@@ -68,37 +66,33 @@ Once logged into your psql session (for linux: `sudo -u postgres psql`, for wind
 
 In the repository, copy the file `oeplatform/securitysettings.py.default` and rename it `oeplatform/securitysettings.py`. Then, enter the connection to your above mentioned postgresql database.
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'oep_django',
-    	'USER': 'oep_django_user',
-    	'PASSWORD': '<oep_django_password>',
-    	'HOST': 'localhost'                      
-    	}
-    }
+Create the environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with values `oep_django_user` and `<oep_django_password>`, respectively.
 
-By default, the environment variable `OEP_DB_USER` will provide a value for the `USER` field.
-The same holds between the environment variable `OEP_DB_PASSWORD` and `PASSWORD` field.
+For default settings, you can type the following commands
 
-Next step is to migrate the database schema from django to your django database:
+- On windows
+
+      set OEP_DJANGO_USER=oep_django_user
+      set OEP_DJANGO_PW=<oep_django_password>
+    
+
+- On linux
+
+      export OEP_DJANGO_USER=oep_django_user
+      export OEP_DJANGO_PW=<oep_django_password>
+
+Finish the django database setup with this command
 
     python manage.py migrate
 
 
-#### 2. OEDB-like Database
+#### 2. Primary Database
 
-This database corresponds to the OEDB (OpenEnergyDataBase) in the live version.
-The database connection should point to another *local* postgresql database.
-It is used for the data input functionality implemented in `dataedit/`.
-If this is the first setup of the OEP, this database should be an empty database as
+
+This database is used for the data input functionality implemented in `dataedit/`.
+
+If this is your first local setup of the OEP website, this database should be an empty database as
 it will be instantiated by automated scripts later on.
-
-    dbuser = ""
-    dbpasswd = ""
-    dbport = 5432
-    dbhost = ""
-    db = ""
 
 ##### 2.1 Posgresql command line setup
 
@@ -113,21 +107,35 @@ Then enter in `oep_db` (`\c oep_db;`) and type the additional commands:
     create extension postgis_topology;
     create extension hstore;
 
-##### 2.2 Django setup
+##### 2.2 Database connection setup
 
-The values of the following variables matched to environment variables' values:
+| environment variable  | required |
+|---|---|
+| LOCAL_DB_USER  |yes|
+| LOCAL_DB_PASSWORD |yes|
+| LOCAL_DB_PORT |no|
+| LOCAL_DB_HOST |no|
+| LOCAL_DB_NAME |no|
 
-| variable | environment variable  | required |
-|---|---|---|
-| dbuser | LOCAL_DB_USER  |yes|
-| dbpasswd | LOCAL_DB_PASSWORD |yes|
-| dbport | LOCAL_DB_PORT |no|
-| dbhost | LOCAL_DB_HOST |no|
-| dbname | LOCAL_DB_NAME |no|
+Make sure to set the required environment variables before going to the next section!
 
-Make sure to set the required environment variable before performing the next step!
+For default settings, you can type the following commands
 
-If you kept the default name from the above example in 2.1, then the environment variables
+- On windows
+
+      set LOCAL_DB_USER=oep_db_user
+      set LOCAL_DB_PASSWORD=<oep_db_password>
+      set LOCAL_DB_NAME=oep_db
+    
+
+- On linux
+
+      export LOCAL_DB_USER=oep_db_user
+      export LOCAL_DB_PASSWORD=<oep_db_password>
+      export LOCAL_DB_NAME=oep_db
+
+
+Note, if you kept the default name from the above example in 2.1, then the environment variables
 `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively
 
 ##### 2.3 Alembic setup
