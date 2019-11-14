@@ -10,19 +10,34 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-The open energy platform is built atop an PostgreSQL database. Create a new database to avoid clashes.
 
-This project is developed in Python 3.4 and therefore all later uses of pip and python should call the corresponding versions.  
+### Setup the repository
 
-### Setup the python
+Clone the repository locally
 
-Once this is done, you can proceed with the installation of the actual platform by cloning the repository. Uninstall django-bootstrap3:
+    git clone https://github.com/OpenEnergyPlatform/oeplatform.git oep-website
 
-    pip uninstall django-bootstrap3
 
-Install the required python libraries:
+Move to the cloned repository
+
+    cd oep-website 
+
+
+### Setup virtual environment
+
+
+[Here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) can you find instructions for setting up virtual environment
+
+
+After you have activated your virtual environment, install the required python libraries:
 
     pip install -r requirements.txt
+
+It is also possible to use conda 
+
+    conda env create -f environment.yml
+
+
 
 ### Setup the databases
 
