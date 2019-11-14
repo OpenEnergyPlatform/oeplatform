@@ -923,28 +923,12 @@ class MetaView(LoginRequiredMixin, View):
         columns = actions.analyze_columns(schema, table)
 
         comment = read_metadata_from_post(request.POST, schema, table)
+        save_metadata_as_table_comment(schema, table, metadata=comment)
 
-        engine = actions._get_engine()
-        conn = engine.connect()
-        trans = conn.begin()
-        try:
-            conn.execute(
-                sqla.text(
-                    "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                        schema=schema, table=table
-                    )
-                ),
-                comment=json.dumps(comment),
-            )
-        except Exception as e:
-            raise e
-        else:
-            trans.commit()
-        finally:
-            conn.close()
         return redirect(
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
+
 
     name_pattern = r"[\w\s]*"
 
@@ -986,6 +970,35 @@ class MetaView(LoginRequiredMixin, View):
             }
             for col in columns
         ]
+
+
+def save_metadata_as_table_comment(schema, table, metadata):
+    """Save metadata as comment string on a database table
+    :param schema (string):
+    :param table (string):
+    :param metadata: structured data according to metadata specifications
+    """
+    # TODO: validate metadata!
+    # metadata = validate(metadata)
+
+    engine = actions._get_engine()
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute(
+            sqla.text(
+                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema, table=table
+                )
+            ),
+            comment=json.dumps(metadata),
+        )
+    except Exception as e:
+        raise e
+    else:
+        trans.commit()
+    finally:
+        conn.close()
 
 
 class PermissionView(View):
