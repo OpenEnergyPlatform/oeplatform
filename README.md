@@ -72,6 +72,8 @@ For default settings, you can type the following commands
 
 - On windows
 
+     before you can set environment variable in your terminal you should first type `cmd/v`
+
       set OEP_DJANGO_USER=oep_django_user
       set OEP_DJANGO_PW=<oep_django_password>
     
