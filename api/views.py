@@ -24,6 +24,7 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
+from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
@@ -759,6 +760,23 @@ class Rows(APIView):
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
 
+
+class Metadata(APIView):
+    @api_exception
+    def get(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        metadata = load_metadata_from_db(schema=schema, table=table)
+        response = {'metadata': metadata}
+        return stream(data=response)
+
+    @api_exception
+    @require_write_permission
+    def post(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        metadata = request.data['metadata']
+        save_metadata_as_table_comment(schema=schema, table=table, metadata=metadata)
+        response = {'status': 'ok'}
+        return stream(data=response)
 
 class Session(APIView):
     def get(self, request, length=1):
