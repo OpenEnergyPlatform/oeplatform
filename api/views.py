@@ -27,6 +27,8 @@ from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
+from omi.dialects.oep.parser import JSONParser_1_4
+
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
@@ -174,6 +176,25 @@ class Sequence(APIView):
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
+
+class Metadata(APIView):
+
+    @api_exception
+    def get(self, request, schema, table):
+        table_obj = actions._get_table(schema=schema, table=table)
+        return JsonResponse(table_obj.comment)
+
+    @api_exception
+    @require_write_permission
+    def post(self, request, schema, table):
+        table_obj = actions._get_table(schema=schema, table=table)
+        parser = JSONParser_1_4()
+        try:
+            json = parser.parse(request.data)
+        except Exception as e:
+            raise APIError(e)
+        else:
+            table_obj.comment = json
 
 class Table(APIView):
     """
