@@ -176,3 +176,6 @@ To create a dummy user for functionality testing purposes
     u.set_password('pass')
     u.save()
 
+## Code contribution
+
+Please read carefully the `CONTRIBUTE.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTE.md) before you start contributing!
