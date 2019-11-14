@@ -140,36 +140,26 @@ Note, if you kept the default name from the above example in 2.1, then the envir
 
 ##### 2.3 Alembic setup
 
-In order to run the OEP, this database needs some management tables.
-We use `alembic` to keep track of changes in those tables. To create all tables that are needed
-in this oedb-like database:
+In order to run the OEP website, the primary database needs some extra management tables.
+We use `alembic` to keep track of changes in those tables. To create all tables that are needed, simply type
 
     python manage.py alembic upgrade head
 
-Only the following schemas are displayed in the dataview app of the OEP. Thus at
-least one should be present if you want to use this app:
-
-* demand
-* economy
-* emission
-* environment
-* grid
-* boundaries
-* society
-* supply
-* scenario
-* climate
-* model_draft
-* openstreetmap
-* reference
-
 ### Deploy locally
   
-You can run your local copy of this platform with:
+You can run your local copy of the OEP website with
 
     python manage.py runserver
     
-Per default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
+By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
+
+
+
+
+
+
+
+
 
 ## User Management
 
