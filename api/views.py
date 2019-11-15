@@ -199,8 +199,14 @@ class Metadata(APIView):
         else:
             table_obj.comment = json.dumps(raw_input)
             cursor = actions.load_cursor_from_context(request.data)
-            comp = sqla.schema.SetTableComment(table_obj).compile()
-            cursor.execute(str(comp))
+            # Surprisingly, SQLAlchemy does not seem to escape comment strings
+            # properly. Certain strings cause errors database errors.
+            # This MAY be a security issue. Therefore, we do not use
+            # SQLAlchemy's compiler here but do it manually.
+            sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+                schema=table_obj.schema,
+                table=table_obj.name)
+            cursor.execute(sql, (table_obj.comment, ))
             return JsonResponse(raw_input)
 
 class Table(APIView):
