@@ -1,8 +1,8 @@
 ﻿<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
-# Open Energy Platform - OEP
+# Open Energy Family - Open Energy Platform (OEP)
 
-Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). It does not contain data, for this please see 
+Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md) 
 
 ## License / Copyright
 
@@ -36,7 +36,7 @@ If you are a windows user, we recommand you use conda
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
 
 
-After you have activated your virtual environment, install the required python libraries:
+After you have activated your virtual environment, install the required python libraries
 
     pip install -r requirements.txt
 
@@ -45,10 +45,10 @@ After you have activated your virtual environment, install the required python l
 ### Setup the databases
 
 The OEP website relies on two different databases: 
-1. One that is managed by django itself (django internal database). 
+1. One that is managed by django itself (django internal database)
 This database contains all information that is needed for the website (user management, factsheets and api token for connection to the second database). 
 2. The second one
-will contain the data that the user can access from the website (primary database).
+will contain the data that the user can access from the website (primary database)
 
 #### 1. Django internal database
 ##### 0.1 Install postgresql
@@ -71,6 +71,8 @@ Create the environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with valu
 For default settings, you can type the following commands
 
 - On windows
+
+     before you can set environment variables in your terminal you should first type `cmd/v`
 
       set OEP_DJANGO_USER=oep_django_user
       set OEP_DJANGO_PW=<oep_django_password>
@@ -96,7 +98,7 @@ it will be instantiated by automated scripts later on.
 
 ##### 2.1 Posgresql command line setup
 
-Once logged into your psql session (for example `sudo -u postgres psql`), run the following lines:
+Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
     create user oep_db_user with password '<oep_db_password>';
     create database oep_db with owner = oep_db_user;
@@ -154,21 +156,27 @@ You can run your local copy of the OEP website with
 By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
 
 
+### User Management
 
+To create a dummy user for functionality testing purposes
 
+- On windows
 
+      set DJANGO_SETTINGS_MODULE=oeplatform.settings
 
+- On linux
 
+      export DJANGO_SETTINGS_MODULE=oeplatform.settings
 
+Then execute this python code (either directly in a terminal or from a file)
 
-## User Management
+      import django
+      django.setup()
+      from login.models import myuser
+      u = myuser.objects.create_devuser('test','test@mail.com')
+      u.set_password('pass')
+      u.save()
 
-If the Debug-mode is enabled, the user management is set to a Django-internal manager. Thus, developers are not forced to create accounts in the linked wiki, but can use create a local user 'test' with password 'pass' by running in your project directory: `DJANGO_SETTINGS_MODULE="oeplatform.settings" python` and paste the following code.
+## Code contribution
 
-    import django
-    django.setup()
-    from login.models import myuser
-    u = myuser.objects.create_user('test','test@mail.com')
-    u.set_password('pass')
-    u.save()
-
+Please read carefully the `CONTRIBUTE.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTE.md) before you start contributing!
