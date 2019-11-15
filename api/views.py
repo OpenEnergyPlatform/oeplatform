@@ -183,7 +183,7 @@ class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
-        return JsonResponse(table_obj.comment)
+        return JsonResponse(json.loads(table_obj.comment))
 
     @api_exception
     @require_write_permission
@@ -193,18 +193,15 @@ class Metadata(APIView):
         parser = JSONParser_1_4()
         raw_input = request.data['query']
         try:
-            jsn = parser.parse(raw_input)
+            parser.parse(raw_input)
         except Exception as e:
-            raise APIError(str(e))
+            raise APIError("Metadata could not be parsed")
         else:
-            context = {
-                "connection_id": request.data["connection_id"],
-                "cursor_id": request.data["cursor_id"],
-                "user": request.user,
-            }
             table_obj.comment = json.dumps(raw_input)
-            actions._get_engine().execute(sqla.schema.SetTableComment(table_obj))
-            return HttpResponse()
+            cursor = actions.load_cursor_from_context(request.data)
+            comp = sqla.schema.SetTableComment(table_obj).compile()
+            cursor.execute(str(comp))
+            return JsonResponse(raw_input)
 
 class Table(APIView):
     """
@@ -790,24 +787,6 @@ class Rows(APIView):
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
-
-
-class Metadata(APIView):
-    @api_exception
-    def get(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        metadata = load_metadata_from_db(schema=schema, table=table)
-        response = {'metadata': metadata}
-        return stream(data=response)
-
-    @api_exception
-    @require_write_permission
-    def post(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        metadata = request.data['metadata']
-        save_metadata_as_table_comment(schema=schema, table=table, metadata=metadata)
-        response = {'status': 'ok'}
-        return stream(data=response)
 
 class Session(APIView):
     def get(self, request, length=1):

@@ -40,10 +40,6 @@ urlpatterns = [
         {"action": "new"},
     ),
     url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/metadata$",
-        views.Metadata.as_view()
-    ),
-    url(
         r"^v0/advanced/search",
         views.create_ajax_handler(
             actions.data_search, allow_cors=True, requires_cursor=True
