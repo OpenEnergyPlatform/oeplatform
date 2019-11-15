@@ -14,26 +14,33 @@ by [Vincent Driessen](https://nvie.com/posts/a-successful-git-branching-model/):
     
     Discussion about the implementation details should occur within this issue.
     
-2. Create a branch from `develop` to work on your issue (see below, the "Branch name convention" section)
+2. Checkout `develop` and pull the latest changes
     ```bash
-    git checkout -b feature/myfeature develop
+    git checkout develop
     ```
-5. Push your local branch on the remote server `origin`
+    ```bash
+    git pull
+    ```
+3. Create a branch from `develop` to work on your issue (see below, the "Branch name convention" section)
+    ```bash
+    git checkout -b feature/myfeature
+    ```
+4. Push your local branch on the remote server `origin`
     ```bash
     git push
     ```
     If your branch does not exist on the remote server yet, git will provide you with instructions, simply follow them
-6. Submit a pull request (PR)
+5. Submit a pull request (PR)
     - Follow the [steps](https://help.github.com/en/articles/creating-a-pull-request) of the github help to create the PR.
     - Please note that you PR should be directed from your branch (for example `myfeature`) towards the branch `develop`
-7. Describe briefly (i.e. in one or two lines) what you changed in the `CHANGELOG.md` file. End the description by the number in parenthesis `(#<your PR number>)`
-8. Commit the changes to the `CHANGELOG.md` file
-9. Write the PR number in the corresponding issue so that they are linked. Write it with one of the [special keywords](https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords) so that the issue will be automatically closed when the PR is merged (example: `Closes #<your issue number>`)
-10. [Ask](https://help.github.com/en/github/managing-your-work-on-github/assigning-issues-and-pull-requests-to-other-github-users) for review of your PR 
+6. Describe briefly (i.e. in one or two lines) what you changed in the `CHANGELOG.md` file. End the description by the number in parenthesis `(#<your PR number>)`
+7. Commit the changes to the `CHANGELOG.md` file
+8. Write the PR number in the corresponding issue so that they are linked. Write it with one of the [special keywords](https://help.github.com/en/github/managing-your-work-on-github/closing-issues-using-keywords) so that the issue will be automatically closed when the PR is merged (example: `Closes #<your issue number>`)
+9. [Ask](https://help.github.com/en/github/managing-your-work-on-github/assigning-issues-and-pull-requests-to-other-github-users) for review of your PR 
 
-11. Check that, after this whole process, you branch does not have conflict with `develop` (github prevents you to merge if there are conflicts). In case of conflicts you are responsible to fix them on your branch before your merge (see below "Fixing merge conflicts" section)
+10. Check that, after this whole process, you branch does not have conflict with `develop` (github prevents you to merge if there are conflicts). In case of conflicts you are responsible to fix them on your branch before your merge (see below "Fixing merge conflicts" section)
     
-12. (if approved) Merge the PR into `develop` and delete the branch on which you were working. In the merge message on github, you can notify people who are currently working on other branches that you just merged into `develop`, so they know they have to check for potential conflicts with `develop`
+11. (if approved) Merge the PR into `develop` and delete the branch on which you were working. In the merge message on github, you can notify people who are currently working on other branches that you just merged into `develop`, so they know they have to check for potential conflicts with `develop`
    
 
 ### Fixing merge conflicts
