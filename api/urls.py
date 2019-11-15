@@ -15,6 +15,10 @@ urlpatterns = [
         views.Sequence.as_view(),
     ),
     url(
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
+        views.Metadata.as_view(),
+    ),
+    url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",
         views.Column.as_view(),
     ),

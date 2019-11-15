@@ -29,6 +29,8 @@ from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 from omi.dialects.oep.parser import JSONParser_1_4
 
+import json
+
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
@@ -176,7 +178,6 @@ class Sequence(APIView):
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-
 class Metadata(APIView):
 
     @api_exception
@@ -186,15 +187,24 @@ class Metadata(APIView):
 
     @api_exception
     @require_write_permission
+    @load_cursor
     def post(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
         parser = JSONParser_1_4()
+        raw_input = request.data['query']
         try:
-            json = parser.parse(request.data)
+            jsn = parser.parse(raw_input)
         except Exception as e:
-            raise APIError(e)
+            raise APIError(str(e))
         else:
-            table_obj.comment = json
+            context = {
+                "connection_id": request.data["connection_id"],
+                "cursor_id": request.data["cursor_id"],
+                "user": request.user,
+            }
+            table_obj.comment = json.dumps(raw_input)
+            actions._get_engine().execute(sqla.schema.SetTableComment(table_obj))
+            return HttpResponse()
 
 class Table(APIView):
     """
