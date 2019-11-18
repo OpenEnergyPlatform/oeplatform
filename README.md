@@ -45,6 +45,10 @@ Next step is to migrate the database schema from django to your django database:
 
     python manage.py migrate
 
+And create all tables that are needed in the second database:
+
+    python manage.py alembic upgrade head
+    
 #### 2. Another Database
 
 The second database connection should point to another postgresql database. It is used for the data input functionality implemented in dataedit/. This database corresponds to the OEDB in the live version.

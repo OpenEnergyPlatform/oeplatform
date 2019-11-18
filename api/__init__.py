@@ -1,1 +1,1 @@
-DEFAULT_SCHEMA = 'sandbox'
+DEFAULT_SCHEMA = "sandbox"

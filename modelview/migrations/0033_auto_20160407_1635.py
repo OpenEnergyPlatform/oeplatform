@@ -7,26 +7,24 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0032_auto_20160323_1716'),
-    ]
+    dependencies = [("modelview", "0032_auto_20160323_1716")]
 
     operations = [
         migrations.AddField(
-            model_name='energyscenario',
-            name='networks_electricity_gas_electricity',
-            field=models.BooleanField(default=True, verbose_name='electricity'),
+            model_name="energyscenario",
+            name="networks_electricity_gas_electricity",
+            field=models.BooleanField(default=True, verbose_name="electricity"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='energyscenario',
-            name='networks_electricity_gas_gas',
-            field=models.BooleanField(default=True, verbose_name='gas'),
+            model_name="energyscenario",
+            name="networks_electricity_gas_gas",
+            field=models.BooleanField(default=True, verbose_name="gas"),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='logo',
-            field=models.ImageField(null=True, upload_to='logos', verbose_name='Logo'),
+            model_name="basicfactsheet",
+            name="logo",
+            field=models.ImageField(null=True, upload_to="logos", verbose_name="Logo"),
         ),
     ]

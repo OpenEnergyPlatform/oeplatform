@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('login', '0016_auto_20181018_1401'),
-    ]
+    dependencies = [("login", "0016_auto_20181018_1401")]
 
     operations = [
         migrations.AlterField(
-            model_name='myuser',
-            name='is_native',
+            model_name="myuser",
+            name="is_native",
             field=models.BooleanField(default=True),
-        ),
+        )
     ]

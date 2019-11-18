@@ -7,17 +7,11 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0006_auto_20160825_1027'),
-    ]
+    dependencies = [("dataedit", "0006_auto_20160825_1027")]
 
     operations = [
+        migrations.AlterUniqueTogether(name="schema", unique_together=set([("name",)])),
         migrations.AlterUniqueTogether(
-            name='schema',
-            unique_together=set([('name',)]),
-        ),
-        migrations.AlterUniqueTogether(
-            name='table',
-            unique_together=set([('schema', 'name')]),
+            name="table", unique_together=set([("schema", "name")])
         ),
     ]

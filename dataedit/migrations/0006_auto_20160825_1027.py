@@ -7,14 +7,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dataedit', '0005_tag_color'),
-    ]
+    dependencies = [("dataedit", "0005_tag_color")]
 
     operations = [
         migrations.AlterField(
-            model_name='tag',
-            name='label',
+            model_name="tag",
+            name="label",
             field=models.CharField(max_length=50, unique=True),
-        ),
+        )
     ]

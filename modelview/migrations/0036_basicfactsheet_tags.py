@@ -8,14 +8,14 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0035_auto_20170724_1801'),
-    ]
+    dependencies = [("modelview", "0035_auto_20170724_1801")]
 
     operations = [
         migrations.AddField(
-            model_name='basicfactsheet',
-            name='tags',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None),
-        ),
+            model_name="basicfactsheet",
+            name="tags",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.IntegerField(), default=list, size=None
+            ),
+        )
     ]
