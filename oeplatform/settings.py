@@ -47,6 +47,7 @@ INSTALLED_APPS = (
     "captcha",
     "django.contrib.postgres",
     "fontawesome_5",
+    "tutorials"
 )
 
 MIDDLEWARE = (
