@@ -18,5 +18,5 @@ class Command(BaseCommand):
             os.system('git submodule update')
 
         if options["command"] == "build":
-            os.system('jupyter nbconvert examples/**/*.ipynb --output-dir=examples/build --to html --template examples/templates/base.tpl')
+            os.system('jupyter nbconvert examples/**/*.ipynb --output-dir=examples/build --to html --template examples/templates/openenergyplatform.tpl')
 
