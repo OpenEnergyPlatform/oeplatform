@@ -143,15 +143,6 @@ been created.
     >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
 
-.. doctest::
-
-    >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "integer"}]} }
-    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    >>> response.status_code
-    500
-    >>> response.json()['reason']
-    'Your column "id" must have type "bigserial"'
 
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
