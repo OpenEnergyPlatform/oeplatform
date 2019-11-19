@@ -1,0 +1,15 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+{% load staticfiles %}
+
+<span>Tutorial: {{tutorial.id}}</span>
+
+<div>
+    {{ tutorial.html | safe }}
+</div>
+
+{% endblock %}
+
+

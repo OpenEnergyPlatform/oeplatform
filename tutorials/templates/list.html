@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+{% load staticfiles %}
+
+<span>Tutorials</span>
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tutorial in tutorials %}
+        <tr>
+          <td>
+            <a href="{{tutorial.id}}">{{ tutorial.title }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}
+
+
