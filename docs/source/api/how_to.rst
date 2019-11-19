@@ -4,14 +4,6 @@ How to work with the API - An example
 
 .. testsetup::
 
-
-    from api.actions import _get_engine
-    engine = _get_engine()
-    connection = engine.connect()
-    #connection.execute('CREATE SCHEMA IF NOT EXISTS sandbox;')
-    #connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
-    connection.close()
-
     oep_url = 'http://localhost:8000'
     from oeplatform.securitysettings import token_test_user as your_token
 
@@ -401,7 +393,7 @@ added anymore.
     >>> data = {"query": {"name": "McPaul"}}
     >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
-    500
+    400
     >>> result.json()['reason']
     'Action violates not-null constraint on first_name. Failing row was (McPaul)'
 
@@ -452,7 +444,7 @@ Array-typed fields.
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
-.. doctest::arrays
+.. doctest::
 
     >>> import requests
     >>> data = {"query": {"arr": [1,2,3]}}
@@ -464,18 +456,8 @@ Array-typed fields.
     >>> json_result['arr']
     [1, 2, 3]
 
-.. testcleanup::arrays
-
-    >>> import requests
-    >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    <Response [200]>
-
-
 .. testcleanup::
 
-    from api.actions import _get_engine
-    engine = _get_engine()
-    connection = engine.connect()
-    #connection.execute('DROP SCHEMA sandbox CASCADE;')
-    #connection.execute('DROP SCHEMA _sandbox CASCADE;')
-    connection.close()
+    import requests
+    response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    assert response.status_code == 200
