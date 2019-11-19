@@ -117,13 +117,11 @@ def _resolveStaticTutorials(tutorials):
     return resolvedTutorials
 
 
-staticTutorialsResolved = _resolveStaticTutorials(staticTutorials)
-
 def _gatherTutorials(id = None):
 
 
     # TODO: Add dynamic tutorials
-    tutorials = staticTutorialsResolved
+    tutorials = _resolveStaticTutorials(staticTutorials)
 
     if id:
         filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
