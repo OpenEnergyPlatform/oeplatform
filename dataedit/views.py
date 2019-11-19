@@ -806,7 +806,7 @@ class DataView(View):
         display_items = api_changes.get("display_items")
 
         is_admin = False
-        if request.user and not request.user.is_anonymous():
+        if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
@@ -1019,7 +1019,7 @@ class PermissionView(View):
         can_add = False
         can_remove = False
         level = login_models.NO_PERM
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             is_admin = level >= login_models.ADMIN_PERM
             can_add = level >= login_models.WRITE_PERM
@@ -1043,7 +1043,7 @@ class PermissionView(View):
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
         if (
-            request.user.is_anonymous()
+            request.user.is_anonymous
             or request.user.get_table_permission_level(table_obj)
             < login_models.ADMIN_PERM
         ):

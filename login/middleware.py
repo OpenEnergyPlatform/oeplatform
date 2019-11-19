@@ -5,8 +5,12 @@ DETACH_PATH = "/user/detach"
 ACTIVATE_PATH = "/user/activate"
 
 
-class DetachMiddleware(object):
-    def process_request(self, request):
+class DetachMiddleware:
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         if (
             not request.path == "/login/"
             and not request.path.startswith("/api")
@@ -23,3 +27,4 @@ class DetachMiddleware(object):
                 or request.path.startswith("/logout")
             ):
                 return HttpResponseRedirect(ACTIVATE_PATH)
+        return self.get_response(request)

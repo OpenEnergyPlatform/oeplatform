@@ -114,7 +114,7 @@ class TablePermission(models.Model):
         (DELETE_PERM, "Delete"),
         (ADMIN_PERM, "Admin"),
     )
-    table = models.ForeignKey(datamodels.Table)
+    table = models.ForeignKey(datamodels.Table, on_delete=models.CASCADE)
 
     level = models.IntegerField(choices=choices, default=NO_PERM)
 
@@ -205,16 +205,16 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
 
 class ActivationToken(models.Model):
-    user = models.ForeignKey(myuser)
+    user = models.ForeignKey(myuser, on_delete=models.CASCADE)
     value = models.TextField()
 
 
 class UserPermission(TablePermission):
-    holder = models.ForeignKey(myuser, related_name="table_permissions")
+    holder = models.ForeignKey(myuser, related_name="table_permissions", on_delete=models.CASCADE)
 
 
 class GroupPermission(TablePermission):
-    holder = models.ForeignKey(UserGroup, related_name="table_permissions")
+    holder = models.ForeignKey(UserGroup, related_name="table_permissions", on_delete=models.CASCADE)
 
 
 class GroupMembership(models.Model):
@@ -224,8 +224,8 @@ class GroupMembership(models.Model):
         (DELETE_PERM, "Remove"),
         (ADMIN_PERM, "Admin"),
     )
-    user = models.ForeignKey(myuser, related_name="memberships")
-    group = models.ForeignKey(UserGroup, related_name="memberships")
+    user = models.ForeignKey(myuser, related_name="memberships", on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, related_name="memberships", on_delete=models.CASCADE)
     level = models.IntegerField(choices=choices, default=WRITE_PERM)
 
     class Meta:

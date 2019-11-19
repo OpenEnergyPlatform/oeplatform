@@ -145,7 +145,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_sequence(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists")
@@ -158,7 +158,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         return self.__delete_sequence(request, schema, sequence, request.data)
 
@@ -276,7 +276,7 @@ class Table(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")
