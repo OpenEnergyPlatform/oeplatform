@@ -288,6 +288,7 @@ Joins can be queried by using the corresponding from-item::
 .. testcleanup::
 
     import requests
-    requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
+    response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
+    assert response.status_code == 200
 
 
