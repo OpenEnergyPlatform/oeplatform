@@ -357,7 +357,10 @@ def parse_column(d, mapper):
         if is_literal:
             return literal_column(name)
         else:
-            return column(name)
+            if table_name is not None:
+                return literal_column(table_name + "." + name)
+            else:
+                return column(name)
 
 
 def parse_type(dt_string, **kwargs):
