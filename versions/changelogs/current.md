@@ -7,3 +7,4 @@
 ### Bugs
 * API: Fixed negation in where clauses
 * API: Fixed metadata tooltips
+* API: Fixed alias handling (#482)

@@ -846,7 +846,7 @@ class DataView(View):
 
         context_dict.update(current_view.options)
 
-        return render(request, "dataedit/dataedit_overview.html", context=context_dict)
+        return render(request, "dataedit/dataview.html", context=context_dict)
 
     def post(self, request, schema, table):
         """
