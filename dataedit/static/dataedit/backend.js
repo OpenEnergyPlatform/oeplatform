@@ -1,4 +1,3 @@
-
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -35,20 +34,9 @@ function fail_handler(jqXHR, exception) {
     console.log(msg);
 }
 
-function count_query(query){
-    var jqxhr = $.ajax({
-        type: 'POST',
-        url:'/api/v0/advanced/search',
-        dataType:'json',
-        data: {
-            csrfmiddlewaretoken: csrftoken,
-            query: JSON.stringify(query)
-        }
-    })
-}
+function request_data(data, callback, settings) {
 
-
-function request_data(data, callback, settings){
+    $("#loading-indicator").show();
 
     var base_query = {
         "from": {
@@ -57,85 +45,101 @@ function request_data(data, callback, settings){
             "table": table
         }
     };
-    var count_query_1 = JSON.parse(JSON.stringify(base_query));
-    count_query_1["fields"] = [{
+    var count_query = JSON.parse(JSON.stringify(base_query));
+    count_query["fields"] = [{
         type: "function",
         function: "count",
         operands: ["*"]
     }];
-    var count_query_2 = JSON.parse(JSON.stringify(count_query_1));
-    var select_query  = JSON.parse(JSON.stringify(base_query));
-    select_query["order_by"] = data.order.map(function(c){
-           return {
-               type: "column",
-               column: columns_list[c.column],
-               ordering: c.dir
-           }
-        });
+    var select_query = JSON.parse(JSON.stringify(base_query));
+    select_query["order_by"] = data.order.map(function (c) {
+        return {
+            type: "column",
+            column: table_info.columns[c.column],
+            ordering: c.dir
+        }
+    });
     select_query.offset = data.start;
     select_query.limit = data.length;
     var draw = Number(data.draw);
-    var jqxhr = $.when(
+    $.when(
         $.ajax({
             type: 'POST',
-            url:'/api/v0/advanced/search',
-            dataType:'json',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
             data: {
                 csrfmiddlewaretoken: csrftoken,
-                query: JSON.stringify(count_query_1)
+                query: JSON.stringify(count_query)
             }
-        }),$.ajax({
+        }), $.ajax({
             type: 'POST',
-            url:'/api/v0/advanced/search',
-            dataType:'json',
-            data: {
-                csrfmiddlewaretoken: csrftoken,
-                query: JSON.stringify(count_query_2)
-            }
-        }),$.ajax({
-            type: 'POST',
-            url:'/api/v0/advanced/search',
-            dataType:'json',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
             data: {
                 csrfmiddlewaretoken: csrftoken,
                 query: JSON.stringify(select_query)
             }
         })
-            ).done(function (response1, response2, response3) {
-            callback({
-                data:response3[0].data,
-                draw: draw,
-                recordsFiltered: response2[0].data[0][0],
-                recordsTotal: response1[0].data[0][0]
-            });
-        }).fail(fail_handler);
+    ).done(function (count_response, select_response) {
+        $("#loading-indicator").hide();
+        callback({
+            data: select_response[0].data,
+            draw: draw,
+            recordsFiltered: count_response[0].data[0][0],
+            recordsTotal: table_info.rows
+        });
+    }).fail(fail_handler);
 }
-columns_list = [];
-load_table = function(schema, table, csrftoken){
 
-    var jqxhr = $.ajax({
-        url: '/api/v0/schema/'+schema+'/tables/'+table+'/columns',
-    }).done(function(){
-        var data = JSON.parse(jqxhr.responseText);
-        var columns = Object.getOwnPropertyNames(data).map(function(colname){
+var table_info = {
+    columns: [],
+    rows: null,
+    name: null,
+    schema: null
+};
+
+load_table = function (schema, table, csrftoken) {
+
+    table_info.name = table;
+    table_info.schema = schema;
+    var count_query = {
+        from: {
+            type: "table",
+            schema: schema,
+            table: table
+        },
+        fields: [{
+            type: "function",
+            function: "count",
+            operands: ["*"]
+        }]
+    };
+    $.when(
+        $.ajax({
+            url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns',
+        }), $.ajax({
+            type: 'POST',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                query: JSON.stringify(count_query)
+            }
+        })
+    ).done(function (column_response, count_response) {
+        Object.getOwnPropertyNames(column_response[0]).forEach(function (colname) {
             var str = '<th>' + colname + '</th>';
-            $(str).appendTo('#datatable'+'>thead>tr');
-            columns_list.push(colname);
+            $(str).appendTo('#datatable' + '>thead>tr');
+            table_info.columns.push(colname);
             return {data: colname, name: colname};
         });
+        table_info.rows = count_response[0].data[0][0];
         $('#datatable').DataTable({
             ajax: request_data,
             serverSide: true,
             scrollY: true,
             scrollX: true,
-            searching: false,
+            searching: false
         });
     }).fail(fail_handler)
-
-
-
-
-
-
-
 };
