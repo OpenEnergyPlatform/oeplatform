@@ -87,3 +87,27 @@ git commit --amend
 ```
 to edit the commit message of your latest commit (provided it is not already pushed on the remote server).
 With `--amend` you can even add/modify changes to the commit.
+
+
+## Project structure
+
+The OpenEnergyPlatform is build upon the [Django Webframework](https://www.djangoproject.com) to implement the interaction between the data its database 
+(e.g. factsheets etc) and their representation in the web frontend:
+
+[here goes the image]
+
+### Models
+
+Models are python structures used by django that represent tables and relations inside the django database. Please refer to the [Django documentation](https://docs.djangoproject.com/en/1.11/topics/db/models/) for further information.
+
+### URL Dispatcher
+
+Whenever users connects to the OEP (via web interface or API) they do so via an url. These urls are processed by URL Dispatchers that parse its internal structure and call the corresponding [View](Views)
+
+### Views
+
+Views are python methods that collect all data that is needed to answer the user's request or show the requested page. You may use the django [models](Models) to load data from the django database or [SQLAlchemy](https://www.sqlalchemy.org) to access data in the primary database. Please refer to the [Django documentation](https://docs.djangoproject.com/en/1.11/topics/http/views/) for further information.
+
+### Templates 
+
+Django is using [Jinja2](https://jinja.palletsprojects.com/en/2.10.x/)-templates that take data submitted by a view and renders it into an html form. The OEP-Desing is based on a [generic template](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/base/templates/base/base.html) that should be inherited by every new template. Be aware that some OEP-apps may implement their own base design (see `<app>/templates/<app>/base.html`)
