@@ -28,9 +28,13 @@ Move to the cloned repository
 ### Setup virtual environment
 
 
-If you are a windows user, we recommand you use conda
+If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
 
-    conda env create -f environment.yml
+1)      conda env create –n oep-website
+2)      activate oep-website
+3)      conda config –add channels conda-forge
+4)      conda install shapely
+5)      pip install –r requirements.txt
 
 
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
