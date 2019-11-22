@@ -146,6 +146,7 @@ function request_data(data, callback, settings) {
                     var buf = new buffer.Buffer(row[i], "hex");
                     var wkb = wkx.Geometry.parse(buf);
                     var gj = L.geoJSON(wkb.toGeoJSON());
+                    gj.on("click", flash_handler(row_id));
                     gj.addTo(map);
                     return gj;
                 });
@@ -165,6 +166,12 @@ function request_data(data, callback, settings) {
     }).fail(fail_handler);
 }
 
+function flash_handler(i){
+    return function (){
+        var tr = table_container.row(i).node();
+        $(tr).fadeOut(50).fadeIn(50);
+    };
+}
 
 function load_table (schema, table, csrftoken) {
 
