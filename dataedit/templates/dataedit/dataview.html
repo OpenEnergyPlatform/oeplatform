@@ -7,10 +7,14 @@
 
 
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'dataedit/wkx.min.js' %}"></script>
+<script src="{% static 'dataedit/proj4.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
 <link href="{% static 'dataedit/query-builder.default.min.css' %}"  rel="stylesheet">
 <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
+
 <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"  rel="stylesheet">
     <h3>
         <a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}}
@@ -80,7 +84,6 @@
    integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
    crossorigin=""></script>
 
-
 <div>
     <div class="panel-group">
         <div class="panel panel-default">
@@ -101,6 +104,7 @@
                         <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
                     </div>
 
+                    <div style='height: 800px; width: 100%;' id="map"></div>
                     <div id="loading-indicator" class="sk-fading-circle">
                         <div class="sk-circle1 sk-circle"></div>
                         <div class="sk-circle2 sk-circle"></div>
@@ -133,6 +137,27 @@
     var table = '{{table}}';
     var schema = '{{schema}}';
     load_table(schema, table, csrftoken);
+</script>
+<script type="text/javascript">
+    // Get the modal
+    var modal = document.getElementById('fetch_overlay');
+    // Get the button that opens the modal
+    var btn = document.getElementById("fetch_overlay_open");
+    var cls = document.getElementById("fetch_overlay_close");
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    };
+    // When the user clicks on <span> (x), close the modal
+    cls.onclick = function() {
+        modal.style.display = "none";
+    };
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
 </script>
 {% endblock %}
 
