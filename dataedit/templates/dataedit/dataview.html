@@ -7,6 +7,8 @@
 
 
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
+<link href="{% static 'dataedit/query-builder.default.min.css' %}"  rel="stylesheet">
 <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
 <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"  rel="stylesheet">
@@ -94,6 +96,11 @@
                             <tr></tr>
                         </thead>
                     </table>
+                    <div>
+                        <div id="builder"></div>
+                        <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
+                    </div>
+
                     <div id="loading-indicator" class="sk-fading-circle">
                         <div class="sk-circle1 sk-circle"></div>
                         <div class="sk-circle2 sk-circle"></div>

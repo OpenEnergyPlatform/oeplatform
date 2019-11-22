@@ -1,3 +1,8 @@
+var filters = [];
+var table_container;
+var query_builder;
+var where;
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -35,7 +40,6 @@ function fail_handler(jqXHR, exception) {
 }
 
 function request_data(data, callback, settings) {
-
     $("#loading-indicator").show();
 
     var base_query = {
@@ -51,6 +55,7 @@ function request_data(data, callback, settings) {
         function: "count",
         operands: ["*"]
     }];
+    count_query.where = where;
     var select_query = JSON.parse(JSON.stringify(base_query));
     select_query["order_by"] = data.order.map(function (c) {
         return {
@@ -61,6 +66,9 @@ function request_data(data, callback, settings) {
     });
     select_query.offset = data.start;
     select_query.limit = data.length;
+    if(where !== null){
+        select_query.where = where;
+    }
     var draw = Number(data.draw);
     $.when(
         $.ajax({
@@ -131,15 +139,208 @@ load_table = function (schema, table, csrftoken) {
             var str = '<th>' + colname + '</th>';
             $(str).appendTo('#datatable' + '>thead>tr');
             table_info.columns.push(colname);
+            var dt = column_response[0][colname]["data_type"];
+            var mapped_dt;
+            if(dt in type_maps) {
+                mapped_dt = type_maps[dt];
+            } else {
+                if(valid_types.includes(dt)) {
+                    mapped_dt = dt;
+                } else {
+                    mapped_dt = "string";
+                }
+            }
+            filters.push({id: colname, type: mapped_dt});
             return {data: colname, name: colname};
         });
         table_info.rows = count_response[0].data[0][0];
-        $('#datatable').DataTable({
+        table_container = $('#datatable').DataTable({
             ajax: request_data,
             serverSide: true,
             scrollY: true,
             scrollX: true,
-            searching: false
+            searching: true,
+            search: {}
         });
+        query_builder = $('#builder').queryBuilder({
+            filters: filters
+        });
+        $('#btn-set').on('click', apply_filters);
+
     }).fail(fail_handler)
 };
+
+function apply_filters(){
+    var rules = $('#builder').queryBuilder('getRules');
+    if(rules !== null) {
+        where = parse_filter(rules);
+        table_container.ajax.reload();
+    }
+}
+
+function parse_filter(f){
+    return {
+        type: "operator",
+        operator: f.condition.toLowerCase(),
+        operands: f.rules.map(parse_rule)
+    }
+}
+
+function negate(q){
+    return {
+        type: "operator",
+        operator: "not",
+        operands: [q]
+    }
+}
+
+function parse_rule(r){
+    switch(r.operator) {
+        case "equal":
+            return {
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_equal":
+            return negate({
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, r.value]
+            });
+        case "in":
+            return {
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_in":
+            return negate({
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            });
+        case "less":
+            return {
+                type: "operator",
+                operator: "<",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "less_or_equal":
+            return {
+                type: "operator",
+                operator: "<=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "greater":
+            return {
+                type: "operator",
+                operator: ">",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "greater_or_equal":
+            return {
+                type: "operator",
+                operator: ">=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "between":
+            return {
+                type: "operator",
+                operator: "and",
+                operands:
+                    [
+                        {
+                            type: "operator",
+                            operator: "<",
+                            operands: [r.value[0], {type:"column", column: r.field}]
+                        }, {
+                            type: "operator",
+                            operator: "<",
+                            operands: [{type:"column", column: r.field}, r.value[1]]
+                    }]
+            };
+        case "not_between":
+            return negate({
+                type: "operator",
+                operator: "and",
+                operands:
+                    [
+                        {
+                            type: "operator",
+                            operator: "<",
+                            operands: [r.value[0], {type:"column", column: r.field}]
+                        }, {
+                            type: "operator",
+                            operator: "<",
+                            operands: [{type:"column", column: r.field}, r.value[1]]
+                    }]
+            });
+        case "begins_with":
+            return {
+                type: "operator",
+                operator: "equal",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_begins_with":
+            return {
+                type: "operator",
+                operator: "equal",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "contains":
+            return {
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_contains":
+            return negate({
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            });
+        case "ends_with":
+            return {
+                type: "operator",
+                operator: "equal",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_ends_with":
+            return {
+                type: "operator",
+                operator: "equal",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "is_empty":
+            return {
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, '']
+            };
+        case "is_not_empty":
+            return negate({
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, '']
+            });
+        case "is_null":
+            return {
+                type: "operator",
+                operator: "IS",
+                operands: [{type:"column", column: r.field}, null]
+            };
+        case "is_not_null":
+            return negate({
+                type: "operator",
+                operator: "IS",
+                operands: [{type:"column", column: r.field}, null]
+            });
+    }
+}
+
+var type_maps = {
+    "double precision": "double",
+};
+
+var valid_types = ["string", "integer", "double", "date", "time", "datetime", "boolean"];
