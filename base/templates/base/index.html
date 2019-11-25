@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 
-{% block content-right %}
+{% block main-right-sidebar-content %}
     <h2>Changes in version {{ version }}</h2>
     {{ changes|safe }}
 {% endblock %}
@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/index-style.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block main %}
     {% load staticfiles %}
 
     <div class="index-home">
