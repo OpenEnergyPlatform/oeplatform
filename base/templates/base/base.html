@@ -1,20 +1,24 @@
-<!DOCTYPE html>
-<html>
+{% load static %}
+{% load bootstrap3 %}
 
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        {% load bootstrap3 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript jquery=1%}
-        {% load staticfiles %}
-        {% block before-header %}{% endblock %}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+        {% block before-head %}{% endblock before-head %}
+
+        <!-- Meta Tags, which should be implemented -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <title> OEP{% block title %}{% endblock %} </title>
+
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
-        <title>
-            OEP{% block title %}{% endblock %}
-        </title>
+
+        {% bootstrap_css %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/theme-style.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
-        {% block after-header %}{% endblock %}
+        {% block after-head %}{% endblock after-head %}
     </head>
 
 <body>
@@ -105,6 +109,7 @@
                 </div>
             </div>
         {% endif %}
+
             <div class="row">
                 <nav class="navbar navbar-default base-navbar base-navbar-bottom">
                       <div class="container-fluid container-center">
@@ -119,6 +124,12 @@
             </div>
 
         </div>
+        {% block body-bottom-js %}
+            {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+            {% bootstrap_javascript jquery=1%}
+            <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+            {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+        {% endblock body-bottom-js %}
 </body>
 
 </html>
