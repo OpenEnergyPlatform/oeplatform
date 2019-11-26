@@ -43,6 +43,7 @@ class TestAliasesTracking(APITestCase):
             content_type="application/json",
         )
 
+        # Check HTTP-response (201 = Successful create)
         self.assertEqual(
             resp.status_code, 201, resp.json().get("reason", "No reason returned")
         )
@@ -56,6 +57,7 @@ class TestAliasesTracking(APITestCase):
             content_type="application/json",
         )
 
+        # Check HTTP-response (201 = Successful create)
         self.assertEqual(
             resp.status_code,
             201,
