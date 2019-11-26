@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         {% load bootstrap3 %}
         {% bootstrap_css %}
@@ -8,33 +8,32 @@
         {% load staticfiles %}
         {% block before-header %}{% endblock %}
         <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
-		<script type="text/javascript" src="/static/admin/js/core.js"></script>
-		<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
-		<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
-		<script type="text/javascript" src="/static/admin/js/SelectBox.js"></script>
-		<script type="text/javascript" src="/static/admin/js/SelectFilter2.js"></script>
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
         <title>
             OEP{% block title %}{% endblock %}
         </title>
-        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/theme-style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
         {% block after-header %}{% endblock %}
     </head>
 
 <body>
     {% block nav %}
-        <nav class="navbar navbar-default navbar-fixed-top">
-          <div class="container-fluid" style="width:80%; float:left;">
-            <div class="navbar-header">
-                  <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
-                    <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
-                  </div>
-              <a class="navbar-brand" href="/">
+        <nav class="navbar navbar-default base-navbar base-navbar-top ">
+            <div class="container-center">
 
-                  OpenEnergy Platform</a>
+            <div class="navbar-header">
+                <a href="/">
+                    <img style="width:45px;height: 45px;" src="{% static 'oeplogo.svg' %}"/>
+                </a>
+                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
             </div>
-            <ul class="nav navbar-nav">
+            <ul id="navbar" class="nav navbar-nav navbar-right navbar-collapse collapse">
 
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
 
@@ -48,50 +47,44 @@
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                     </ul>
                 </li>
-                <li class="inactive"><a href="/literature/">Literature</a></li>
-                <li class="inactive">
-                    <a href="/discussion" target="_blank">
-                        Discussion
-                    </a>
-                </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
-                    <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Main_Page" target="_blank">OpenMod Wiki {% bootstrap_icon "new-window" %}</a> </li>
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary {% bootstrap_icon "new-window" %}</a> </li>
-                    </ul>
-                </li>
+                {#<li class="inactive"><a href="/bundles/">Bundles</a></li>#}
+                <li class="inactive"><a href="/documentation/">Documentation</a></li>
+                <li class="inactive"><a href="/about/">About OEP</a></li>
+
                 {%block nav-additional %}{% endblock %}
             </ul>
-          </div>
           {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
             <div class="btn profile-bar">
                 <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% bootstrap_icon "user" %} {{ user }}</a>
-                <a class="btn-logout" href="/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
+                <a class="btn-logout" href="/user/logout/?next=/">{% bootstrap_icon "arrow-right" %} Logout</a>
             </div>
 
           {% else %}
-             <a class="btn btn-info" style="float: right;margin:5px" href="/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
+             <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
+
+            </div>
+
         </nav>
-        
+
     {% endblock %}
 
 
-
-        <div class="container-fluid oe-wrapper" style="margin-top:70px">
+        {% if not disableSidebar %}
+        <div class="container-fluid oe-wrapper">
             <div class="row">
-
                 <div class="col-lg-8 col-lg-offset-1 col-md-9">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            {% block content %}{% endblock %}
+        {% else %}
+        <div class="base container-fluid">
+        {% endif %}
+                    {% block content %}{% endblock %}
+        {% if not disableSidebar %}
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-3">
                     <div class="panel panel-default">
                         <div class="panel-body">
@@ -110,25 +103,22 @@
                         </div>
                     </div>
                 </div>
-
+            </div>
+        {% endif %}
+            <div class="row">
+                <nav class="navbar navbar-default base-navbar base-navbar-bottom">
+                      <div class="container-fluid container-center">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="inactive"><a href="/contact/">Contact</a></li>
+                            <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
+                            <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
+                            <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
+                        </ul>
+                      </div>
+                </nav>
             </div>
 
-            <nav class="navbar navbar-default  navbar-fixed-bottom">
-                  <div class="container-fluid" style="width:80%; float:left;">
-                    <ul class="nav navbar-nav">
-                        <li class="inactive"><a href="/about/">About us</a></li>
-                        <li class="inactive"><a href="/faq/">FAQ</a></li>
-                        <li class="inactive"><a href="/contact/">Contact us</a></li>
-                        <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
-                        <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
-                        <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
-                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
-                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
-                    </ul>
-                  </div>
-            </nav>
         </div>
-
 </body>
-    
+
 </html>

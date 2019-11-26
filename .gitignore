@@ -68,3 +68,10 @@ target/
 # Logos for legal reasons
 base/static/logos/
 
+# IDEs
+.idea/
+.vscode/
+
+# Other generated files
+venv
+src

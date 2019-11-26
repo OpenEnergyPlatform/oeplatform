@@ -7,38 +7,33 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0029_auto_20160315_1743'),
-    ]
+    dependencies = [("modelview", "0029_auto_20160315_1743")]
 
     operations = [
-        migrations.RemoveField(
-            model_name='energyframework',
-            name='model_types',
+        migrations.RemoveField(model_name="energyframework", name="model_types"),
+        migrations.AddField(
+            model_name="energyframework",
+            name="model_types_demand_simulation",
+            field=models.BooleanField(default=False, verbose_name="demand simulation"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='model_types_demand_simulation',
-            field=models.BooleanField(default=False, verbose_name='demand simulation'),
+            model_name="energyframework",
+            name="model_types_feed_in_simulation",
+            field=models.BooleanField(default=False, verbose_name="feed-in simulation"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='model_types_feed_in_simulation',
-            field=models.BooleanField(default=False, verbose_name='feed-in simulation'),
+            model_name="energyframework",
+            name="model_types_grid",
+            field=models.BooleanField(default=False, verbose_name="Grid optimisation"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='model_types_grid',
-            field=models.BooleanField(default=False, verbose_name='Grid optimisation'),
-        ),
-        migrations.AddField(
-            model_name='energyframework',
-            name='model_types_other',
-            field=models.BooleanField(default=False, verbose_name='Other'),
+            model_name="energyframework",
+            name="model_types_other",
+            field=models.BooleanField(default=False, verbose_name="Other"),
         ),
         migrations.AlterField(
-            model_name='energymodel',
-            name='changes_in_efficiency',
-            field=models.TextField(null=True, verbose_name='Changes in efficiency'),
+            model_name="energymodel",
+            name="changes_in_efficiency",
+            field=models.TextField(null=True, verbose_name="Changes in efficiency"),
         ),
     ]

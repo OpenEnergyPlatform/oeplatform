@@ -1,1 +1,1 @@
-DEFAULT_SCHEMA = 'sandbox'
+from oeplatform.securitysettings import DEFAULT_SCHEMA

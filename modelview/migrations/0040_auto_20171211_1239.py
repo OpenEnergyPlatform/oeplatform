@@ -7,19 +7,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0039_auto_20171211_1228'),
-    ]
+    dependencies = [("modelview", "0039_auto_20171211_1228")]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='methodical_focus_2',
+            model_name="basicfactsheet",
+            name="methodical_focus_2",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='methodical_focus_3',
+            model_name="basicfactsheet",
+            name="methodical_focus_3",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
     ]

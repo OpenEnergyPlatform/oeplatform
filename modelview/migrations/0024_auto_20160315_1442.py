@@ -7,29 +7,45 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('modelview', '0023_auto_20160314_2017'),
-    ]
+    dependencies = [("modelview", "0023_auto_20160314_2017")]
 
     operations = [
         migrations.AddField(
-            model_name='energymodel',
-            name='uncertainty_Other_text',
-            field=models.BooleanField(default=False, verbose_name='Other'),
+            model_name="energymodel",
+            name="uncertainty_Other_text",
+            field=models.BooleanField(default=False, verbose_name="Other"),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='code_documentation',
-            field=models.URLField(help_text='Where is the code documentation publicly available?', null=True, verbose_name='Link to Developer/Code Documentation'),
+            model_name="basicfactsheet",
+            name="code_documentation",
+            field=models.URLField(
+                help_text="Where is the code documentation publicly available?",
+                null=True,
+                verbose_name="Link to Developer/Code Documentation",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='license',
-            field=models.CharField(choices=[('MIT Licence', 'MIT Licence'), ('Apache Licence', 'Apache Licence'), ('GNU GPL Licence', 'GNU GPL Licence'), ('Other', 'Other')], default='Apache Licence', max_length=20, verbose_name='License'),
+            model_name="basicfactsheet",
+            name="license",
+            field=models.CharField(
+                choices=[
+                    ("MIT Licence", "MIT Licence"),
+                    ("Apache Licence", "Apache Licence"),
+                    ("GNU GPL Licence", "GNU GPL Licence"),
+                    ("Other", "Other"),
+                ],
+                default="Apache Licence",
+                max_length=20,
+                verbose_name="License",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='user_documentation',
-            field=models.URLField(help_text='Where is the user documentation publicly available?', null=True, verbose_name='Link to User Documentation'),
+            model_name="basicfactsheet",
+            name="user_documentation",
+            field=models.URLField(
+                help_text="Where is the user documentation publicly available?",
+                null=True,
+                verbose_name="Link to User Documentation",
+            ),
         ),
     ]
