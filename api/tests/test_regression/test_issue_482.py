@@ -7,7 +7,7 @@ from api.tests import APITestCase
 from ..util import load_content_as_json
 
 
-class Test482(APITestCase):
+class TestAliasesTracking(APITestCase):
     def setUp(self):
         self._structure_data = {
             "constraints": [
