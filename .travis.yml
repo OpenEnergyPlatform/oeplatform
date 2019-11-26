@@ -51,7 +51,7 @@ before_script:
   - python manage.py alembic upgrade head
   - python manage.py runserver 8000 &
 script:
-  - tox -v
+  - OEP_DJANGO_USER=$OEP_DJANGO_USER;OEP_DJANGO_PW=$OEP_DJANGO_PW;LOCAL_DB_USER=$LOCAL_DB_USER;LOCAL_DB_PW=$LOCAL_DB_PW tox -v
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
