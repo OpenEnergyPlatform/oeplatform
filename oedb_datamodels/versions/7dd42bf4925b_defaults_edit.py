@@ -23,24 +23,24 @@ def upgrade():
     )
     op.alter_column(
         "_edit_base", "_humancheck", existing_type=sa.Boolean,
-        servar_default=sa.text("false")
+        server_default=sa.text("false")
     )
     op.alter_column(
         "_edit_base", "_applied", existing_type=sa.Boolean,
-        servar_default=sa.text("false")
+        server_default=sa.text("false")
     )
 
 
 def downgrade():
     op.alter_column(
         "_edit_base", "_autocheck", existing_type=sa.Boolean,
-        servar_default=None
+        server_default=None
     )
     op.alter_column(
         "_edit_base", "_humancheck", existing_type=sa.Boolean,
-        servar_default=None
+        server_default=None
     )
     op.alter_column(
         "_edit_base", "_applied", existing_type=sa.Boolean,
-        servar_default=None
+        server_default=None
     )
