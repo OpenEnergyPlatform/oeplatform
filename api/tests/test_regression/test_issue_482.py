@@ -62,7 +62,7 @@ class TestAliasesTracking(APITestCase):
             load_content_as_json(resp).get("reason", "No reason returned"),
         )
 
-    def test_482(self):
+    def test_aliases_in_form_clauses(self):
         data = {
             "query": {
                 "fields": [dict(type="column", column="id", table="a")],
