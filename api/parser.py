@@ -98,6 +98,7 @@ def set_meta_info(method, user, message=None):
     val_dict = {}
     val_dict["_user"] = user  # TODO: Add user handling
     val_dict["_message"] = message
+    val_dict["_type"] = method
     return val_dict
 
 
