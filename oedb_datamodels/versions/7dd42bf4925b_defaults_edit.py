@@ -19,7 +19,7 @@ depends_on = None
 def upgrade():
     op.alter_column(
         "_edit_base", "_autocheck", existing_type=sa.Boolean,
-        servar_default=sa.text("false")
+        server_default=sa.text("false")
     )
     op.alter_column(
         "_edit_base", "_humancheck", existing_type=sa.Boolean,
