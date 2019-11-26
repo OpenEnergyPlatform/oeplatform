@@ -49,7 +49,7 @@ before_script:
   - python manage.py makemigrations
   - python manage.py migrate
   - python manage.py alembic upgrade head
-  - python manage.py runserver 8000
+  - python manage.py runserver 8000 &
 script:
   - tox -v
 after_failure:
