@@ -126,6 +126,7 @@ class TestAliasesTracking(APITestCase):
             content_type="application/json",
         )
 
+        # Check HTTP-response (200 = Successful request)
         self.assertEqual(
             resp.status_code, 200, resp.json().get("reason", "No reason returned")
         )
