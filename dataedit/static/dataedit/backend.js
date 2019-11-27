@@ -173,7 +173,31 @@ function flash_handler(i){
     };
 }
 
-function load_table (schema, table, csrftoken) {
+
+function load_graph(schema, table, csrftoken){
+    var plotly_div = $("#datagraph")[0];
+    console.log(plotly_div);
+    Plotly.plot(
+        plotly_div,
+        [{
+          x: [1,2,3,4],
+          y: [1,2,3,4]
+        }],
+        {
+          margin: {t: 0},
+          xaxis: {
+            title: {text: 'X'}
+          },
+          yaxis: {
+            title: {text: 'Y'}
+          }
+        }
+    );
+
+}
+
+
+function load_table(schema, table, csrftoken) {
 
     table_info.name = table;
     table_info.schema = schema;
@@ -202,6 +226,8 @@ function load_table (schema, table, csrftoken) {
             }
         })
     ).done(function (column_response, count_response) {
+
+
         for (var colname in column_response[0]){
             var str = '<th>' + colname + '</th>';
             $(str).appendTo('#datatable' + '>thead>tr');
