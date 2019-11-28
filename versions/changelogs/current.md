@@ -6,6 +6,7 @@
 * Add contribute file (#469)
 * Factsheets: General remodeling of factsheets (#419)
 * Factsheets: Make links clickable (#74)
+* API: Explicit column handling (#484)
 
 ### Bugs
 * API: Fixed negation in where clauses
