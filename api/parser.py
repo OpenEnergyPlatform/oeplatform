@@ -98,6 +98,7 @@ def set_meta_info(method, user, message=None):
     val_dict = {}
     val_dict["_user"] = user  # TODO: Add user handling
     val_dict["_message"] = message
+    val_dict["_type"] = method
     return val_dict
 
 
@@ -357,7 +358,10 @@ def parse_column(d, mapper):
         if is_literal:
             return literal_column(name)
         else:
-            return column(name)
+            if table_name is not None:
+                return literal_column(table_name + "." + name)
+            else:
+                return column(name)
 
 
 def parse_type(dt_string, **kwargs):
