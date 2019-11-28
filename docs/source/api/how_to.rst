@@ -180,9 +180,10 @@ In the following example, we want to add a row containing just the name
     >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     201
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/')
     >>> json_result = result.json()
-    >>> json_result['data'] # Show the id of the new row
-    [[1]]
+    >>> json_result[-1]["id"] # Show the id of the new row
+    1
 
 Alternatively, we can specify that the new row should be stored under id 12:
 
