@@ -4,8 +4,9 @@ Advanced API features
 
 .. testsetup::
 
+    import os
     oep_url = 'http://localhost:8000'
-    from oeplatform.securitysettings import token_test_user as your_token
+    your_token = os.environ.get("LOCAL_OEP_TOKEN")
     from shapely import wkt
     from django.contrib.gis.geos import Point
     import json

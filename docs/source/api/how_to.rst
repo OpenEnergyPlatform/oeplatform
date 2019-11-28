@@ -4,8 +4,9 @@ How to work with the API - An example
 
 .. testsetup::
 
+    import os
     oep_url = 'http://localhost:8000'
-    from oeplatform.securitysettings import token_test_user as your_token
+    your_token = os.environ.get("LOCAL_OEP_TOKEN")
 
 .. note::
 
