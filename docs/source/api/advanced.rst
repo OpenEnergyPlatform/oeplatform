@@ -304,4 +304,4 @@ Joins can be queried by using the corresponding from-item::
 
     import requests
     response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
-    assert response.status_code == 200
+    assert response.status_code == 200, response

@@ -462,4 +462,4 @@ Array-typed fields.
 
     import requests
     response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    assert response.status_code == 200
+    assert response.status_code == 200, response
