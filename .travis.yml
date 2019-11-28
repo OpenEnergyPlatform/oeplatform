@@ -49,9 +49,12 @@ before_script:
   - python manage.py makemigrations
   - python manage.py migrate
   - python manage.py alembic upgrade head
+  - python manage.py shell -c "from login.models import myuser; u=myuser.objects.create_user(name='$LOCAL_OEP_USER',email='test@test.com',affiliation='');u.is_mail_verified=True;u.save()"
+  - LOCAL_OEP_TOKEN=`python manage.py shell -c "from login.models import Token;print(Token.objects.filter(user__name='$LOCAL_OEP_USER').first().key)"`
   - python manage.py runserver 8000 &
+
 script:
-  - OEP_DJANGO_USER=$OEP_DJANGO_USER;OEP_DJANGO_PW=$OEP_DJANGO_PW;LOCAL_DB_USER=$LOCAL_DB_USER;LOCAL_DB_PW=$LOCAL_DB_PW tox -v
+  - OEP_DJANGO_USER=$OEP_DJANGO_USER;OEP_DJANGO_PW=$OEP_DJANGO_PW;LOCAL_DB_USER=$LOCAL_DB_USER;LOCAL_DB_PW=$LOCAL_DB_PW;LOCAL_OEP_TOKEN=$LOCAL_OEP_TOKEN tox -v
 after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
