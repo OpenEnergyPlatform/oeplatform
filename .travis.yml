@@ -45,6 +45,7 @@ before_script:
   - psql -U postgres -c "CREATE EXTENSION postgis;" oedb
   - psql -U postgres -c "CREATE DATABASE oep_django"
   - psql -U postgres -c "CREATE SCHEMA IF NOT EXISTS sandbox" oedb
+  - psql -U postgres -c "CREATE SCHEMA IF NOT EXISTS _sandbox" oedb
   - pip install -r requirements.txt
   - cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
   - python manage.py makemigrations
