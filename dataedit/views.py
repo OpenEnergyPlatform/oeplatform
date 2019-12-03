@@ -32,10 +32,11 @@ from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
+from dataedit.forms import TableGraphForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import TableRevision, TableGraph
 
 session = None
 
@@ -756,6 +757,21 @@ def view_delete(request, schema, table):
     view.delete()
 
     return redirect("/dataedit/view/" + schema + "/" + table)
+
+
+def create_graph(request, schema, table):
+
+    if request.method == 'POST':
+        print(request.POST, schema, table)
+        # TODO save an instance of tablegraph here
+        return redirect(
+            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+        )
+    else:
+        formset = TableGraphForm()
+
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
 
 
 class DataView(View):

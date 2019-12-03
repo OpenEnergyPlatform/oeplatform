@@ -79,4 +79,9 @@ urlpatterns = [
     url(r"^tags/set/?$", views.change_tag),
     url(r"^tags/new/?$", views.tag_editor),
     url(r"^tags/(?P<id>[0-9]+)/?$", views.tag_editor),
+    url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
+            qual=pgsql_qualifier
+        ),
+        views.create_graph
+    ),
 ]
