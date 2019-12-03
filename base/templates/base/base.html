@@ -1,24 +1,28 @@
-<!DOCTYPE html>
-<html>
+{% load static %}
+{% load bootstrap3 %}
 
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        {% load bootstrap3 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript jquery=1%}
-        {% load staticfiles %}
-        {% block before-header %}{% endblock %}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+        {% block before-head %}{% endblock before-head %}
+
+        <!-- Meta Tags, which should be implemented -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <title> OEP{% block title %}{% endblock %} </title>
+
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
-        <title>
-            OEP{% block title %}{% endblock %}
-        </title>
+
+        {% bootstrap_css %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/theme-style.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
-        {% block after-header %}{% endblock %}
+        {% block after-head %}{% endblock after-head %}
     </head>
 
 <body>
-    {% block nav %}
+    {% block header %}
         <nav class="navbar navbar-default base-navbar base-navbar-top ">
             <div class="container-center">
 
@@ -68,57 +72,68 @@
 
         </nav>
 
-    {% endblock %}
+    {% endblock header%}
+        <div class="container-fluid base">
+            {% block main %}
+                <div class="row">
 
-
-        {% if not disableSidebar %}
-        <div class="container-fluid oe-wrapper">
-            <div class="row">
-                <div class="col-lg-8 col-lg-offset-1 col-md-9">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-        {% else %}
-        <div class="base container-fluid">
-        {% endif %}
-                    {% block content %}{% endblock %}
-        {% if not disableSidebar %}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div>
-                                <p>
-                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
-                                    You can also fork the project and get involved.
-                                </p>
-                                <p>
-                                    <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
-                                </p>
-                            </div>
-                            <div>
-                                {% block content-right %}{% endblock %}
+                {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+                {% block main-content %}
+                    <div class="col-lg-8 col-lg-offset-1 col-md-9">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {% block main-content-body %}{% endblock %}
                             </div>
                         </div>
                     </div>
+                {% endblock main-content %}
+                {% block main-right-sidebar %}
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div>
+                                    <p>
+                                        If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                                        You can also fork the project and get involved.
+                                    </p>
+                                    <p>
+                                        <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
+                                    </p>
+                                </div>
+                                <div>
+                                    {% block main-right-sidebar-content %}
+                                    {% endblock main-right-sidebar-content %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endblock main-right-sidebar %}
                 </div>
-            </div>
-        {% endif %}
-            <div class="row">
-                <nav class="navbar navbar-default base-navbar base-navbar-bottom">
-                      <div class="container-fluid container-center">
-                        <ul class="nav navbar-nav navbar-right">
-                            <li class="inactive"><a href="/contact/">Contact</a></li>
-                            <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
-                            <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
-                            <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
-                        </ul>
-                      </div>
-                </nav>
-            </div>
+                {% endblock main %}
+                {% block footer %}
+                        <footer class="row">
+                            <nav class="navbar navbar-default base-navbar base-navbar-bottom">
+                                  <div class="container-fluid container-center">
+                                    <ul class="nav navbar-nav navbar-right">
+                                        <li class="inactive"><a href="/contact/">Contact</a></li>
+                                        <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
+                                        <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
+                                        <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
+                                    </ul>
+                                  </div>
+                            </nav>
+                        </footer>
 
+                    </div>
+                {% endblock footer %}
+            </div>
         </div>
+    {% block body-bottom-js %}
+        {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+        {% bootstrap_javascript jquery=1%}
+        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+        {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+    {% endblock body-bottom-js %}
 </body>
 
 </html>

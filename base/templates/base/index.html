@@ -1,73 +1,83 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 
-{% block content-right %}
+{% block main-right-sidebar-content %}
     <h2>Changes in version {{ version }}</h2>
     {{ changes|safe }}
 {% endblock %}
 
-{% block after-header %}
+{% block after-head %}
     {% load staticfiles %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/index-style.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block main %}
     {% load staticfiles %}
 
     <div class="index-home">
-        <div class="index-padding">
-            <h3>Open Energy Platform</h3>
-            <h5>Make your energy system modelling process transparent!</h5>
+        <div class="index-group">
+            <div class="index-padding">
+                <h3>Open Energy Platform</h3>
+                <h5>Make your energy system modelling process transparent!</h5>
 
-            <div class="index-tile-container">
-                <div class="index-tile index-tile-colored index-tile-color-1">
-                    <img src="/static/img/welcome/database.png" alt="">
-                    <a role="button" class="btn btn-default" href="/dataedit/">Database</a>
-                </div>
-                <div class="index-tile index-tile-colored index-tile-color-2">
-                    <img src="/static/img/welcome/factsheets.png" alt="">
-                    <a role="button" class="btn btn-default" href="/factsheets/overview/">Factsheets</a>
-                </div>
-                {% comment %}<div class="index-tile index-tile-colored index-tile-color-3">
-                    <img src="/static/img/welcome/bundles.png" alt="">
-                    <a role="button" class="btn btn-default">Bundles</a>
-                </div>{% endcomment %}
-                <div class="index-tile index-tile-colored index-tile-color-4">
-                    <img src="/static/img/welcome/documentation.png" alt="">
-                    <a role="button" class="btn btn-default" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">Documentation</a>
+                <div class="index-tile-container">
+                    <div class="index-tile index-tile-colored index-tile-color-1">
+                        <img src="/static/img/welcome/database.png" alt="">
+                        <a role="button" class="btn btn-default" href="/dataedit/">Database</a>
+                    </div>
+                    <div class="index-tile index-tile-colored index-tile-color-2">
+                        <img src="/static/img/welcome/factsheets.png" alt="">
+                        <a role="button" class="btn btn-default" href="/factsheets/overview/">Factsheets</a>
+                    </div>
+                    <div class="index-tile index-tile-colored index-tile-color-3">
+                        <img src="/static/img/welcome/bundles.png" alt="">
+                        <a role="button" class="btn btn-default">Bundles</a>
+                    </div>
+                    <div class="index-tile index-tile-colored index-tile-color-4">
+                        <img src="/static/img/welcome/ontology.svg" alt="">
+                        <a role="button" class="btn btn-default">Ontology</a>
+                    </div>
+                    <div class="index-tile index-tile-colored index-tile-color-5">
+                        <img src="/static/img/welcome/documentation.png" alt="">
+                        <a role="button" class="btn btn-default" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">Documentation</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="index-padding">
-            <h4>Tutorials</h4>
-            <h6>These beginner and advanced tutorials can help you get the most out of the OEP!</h6>
+            <div class="index-tutorial">
+                <h4>Tutorials</h4>
+                <h6>There is something you'd like to do on the platform, but you don't know how?<br/>
+                Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.</h6>
 
-            <div class="index-tutorial-tile-container">
-                {% comment %}<div class="index-tile index-tile-bordered">
-                    <img src="/static/img/welcome/videos.svg" alt="">
-                    <a role="button" class="btn btn-default btn-sm">Videos</a>
-                </div>{% endcomment %}
-                <div class="index-tile index-tile-bordered">
-                    <img src="/static/img/welcome/beginners.svg" alt="">
-                    <a role="button" class="btn btn-default btn-sm" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">Beginners</a>
-                </div>
-                <div class="index-tile index-tile-bordered">
-                    <img src="/static/img/welcome/api.png" alt="">
-                    <a role="button" class="btn btn-default btn-sm" href="https://github.com/OpenEnergyPlatform/examples/blob/master/api/OEP_API_tutorial_part1.ipynb">API</a>
-                </div>
+                <a role="button" class="btn btn-default btn-sm" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">See tutorials</a>
             </div>
         </div>
 
         <div class="index-about-container-background">
             <div class="index-about-container">
-                <div class="index-about-text">
-                    <h3>About the OEP</h3>
+                <div class="index-about-column">
+                    <img src="/static/img/welcome/about-process-modelling.svg" alt="">
+                    <b>Process Modelling</b>
                     <span>
-                        The OEP aims to ensure quality, transparency and reproducibility in energy system research. It provides a way for modelers to publish proper documentation of data, code and underlying assumptions. The OEP is a community effort and is constantly evolving.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
                     </span>
-                    <a href="/about" class="btn btn-default btn-sm" role="button">Learn more</a>
+                    <a role="button" class="btn btn-default">Learn more</a>
                 </div>
-                <img src="/static/img/welcome/concept.png" alt="">
+                <div class="index-about-column">
+                    <img src="/static/img/welcome/about-openscience.svg" alt="">
+                    <b>Open Science</b>
+                    <span>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
+                    </span>
+                    <a role="button" class="btn btn-default">Learn more</a>
+                </div>
+                <div class="index-about-column">
+                    <img src="/static/img/welcome/about-community.svg" alt="">
+                    <b>OEP-Community</b>
+                    <span>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
+                    </span>
+                    <a role="button" class="btn btn-default">Learn more</a>
+                </div>
             </div>
         </div>
 
