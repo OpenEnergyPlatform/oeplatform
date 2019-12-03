@@ -768,7 +768,12 @@ def create_graph(request, schema, table):
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
     else:
-        formset = TableGraphForm()
+        # TODO get the columns from the schema and the table
+        columns = [
+            ('col1', 'col1_name'),
+            ('col2', 'col2_name'),
+        ]
+        formset = TableGraphForm(columns=columns)
 
         return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
 
