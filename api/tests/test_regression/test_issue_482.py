@@ -84,15 +84,15 @@ class TestAliasesTracking(APITestCase):
                         "type": "table",
                         "table": self.test_table,
                         "schema": self.test_schema,
-                        "alias": "a"
+                        "alias": "a",
                     },
                     "right": {
                         "type": "table",
                         "table": self.test_table,
                         "schema": self.test_schema,
-                        "alias": "b"
+                        "alias": "b",
                     },
-                    "on":[
+                    "on": [
                         {
                             "type": "operator",
                             "operator": "=",
@@ -101,8 +101,8 @@ class TestAliasesTracking(APITestCase):
                                 {"type": "column", "column": "id", "table": "b"},
                             ],
                         }
-                    ]
-                }
+                    ],
+                },
             }
         }
 
@@ -113,9 +113,7 @@ class TestAliasesTracking(APITestCase):
             content_type="application/json",
         )
 
-        self.check_api_post(
-            "/api/v0/advanced/search", data=data, expected_result=[[1]]
-        )
+        self.check_api_post("/api/v0/advanced/search", data=data, expected_result=[[1]])
 
     def tearDown(self):
         resp = self.__class__.client.delete(
