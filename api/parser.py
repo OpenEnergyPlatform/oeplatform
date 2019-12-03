@@ -203,6 +203,11 @@ def parse_select(d):
         if "fields" in d and d["fields"]:
             L = []
             for field in d["fields"]:
+                if isinstance(field, str):
+                    field = dict(
+                        type="column",
+                        column=field
+                    )
                 col = parse_expression(field)
                 if "as" in field:
                     col.label(read_pgid(field["as"]))
