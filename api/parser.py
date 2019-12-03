@@ -730,8 +730,12 @@ def parse_sqla_operator(raw_key, *operands):
             return x / y
         if key in ["concatenate", "||"]:
             return fun.concat(x, y)
+        if key in ["is"]:
+            return x is y
         if key in ["is not"]:
             return x.isnot(y)
+        if key in ["like"]:
+            return x.match(y)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:
