@@ -73,5 +73,5 @@ base/static/logos/
 .vscode/
 
 # Other generated files
-venv
+venv*/
 src

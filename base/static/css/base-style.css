@@ -8,6 +8,7 @@ html {
     --primaryColor2: #1F567D;
     --primaryColor3: #0B3E62;
     --primaryColor4: #072437;
+    --primaryColor5: #01090D;
     --secondaryColor1: #BFD7EA;
     --grey1: #62869D;
     --white: #FFFFFF;
@@ -23,9 +24,8 @@ html {
 }
 
 body {
-    height: calc(100% - 52px);
     overflow: auto;
-
+    height: calc(100% - 52px);
 }
 
 .base-navbar {
@@ -37,12 +37,15 @@ body {
 
 .base {
     height: 100%;
+    box-sizing: border-box;
+    padding-top: 1em;
 
 
 
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: 1fr auto;
+    /* container-fluid creates pseudo-elements, which are handled like normal children in grids, WTF. */
+    grid-template-rows: auto 1fr auto auto;
 }
 
 .base > div:first-child {
@@ -99,10 +102,6 @@ body {
     float: right;
     background:none;
 
-}
-
-.oe-wrapper {
-    margin-top: 1em;
 }
 
 .container-center {

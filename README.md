@@ -1,4 +1,6 @@
-﻿<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
+[![Documentation Status](https://readthedocs.org/projects/oep-data-interface/badge/?version=latest)](http://oep-data-interface.readthedocs.io/?badge=latest)
+
+<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
 # Open Energy Family - Open Energy Platform (OEP)
 
@@ -28,9 +30,13 @@ Move to the cloned repository
 ### Setup virtual environment
 
 
-If you are a windows user, we recommand you use conda
+If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
 
-    conda env create -f environment.yml
+1)      conda env create –n oep-website
+2)      activate oep-website
+3)      conda config –add channels conda-forge
+4)      conda install shapely
+5)      pip install –r requirements.txt
 
 
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
