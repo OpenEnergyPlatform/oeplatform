@@ -48,6 +48,8 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials"
+    "tutorials",
+    "martor"
 )
 
 MIDDLEWARE = (
