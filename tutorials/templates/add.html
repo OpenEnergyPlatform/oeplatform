@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+{% load staticfiles %}
+
+<span>Neues Tutorial:</span>
+
+    <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Erstellen</button>
+    </form>
+
+{% endblock %}
