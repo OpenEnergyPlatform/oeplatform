@@ -5,8 +5,14 @@ How to work with the API - An example
 .. testsetup::
 
     import os
+    from oeplatform import securitysettings as sec
     oep_url = 'http://localhost:8000'
     your_token = os.environ.get("LOCAL_OEP_TOKEN")
+    if your_token is None:
+        if hasattr(sec, "token_test_user") and sec.token_test_user is not None:
+            your_token = sec.token_test_user
+        else:
+            raise Exception("No token available, please set LOCAL_OEP_TOKEN or adapt your security settings")
 
 .. note::
 
