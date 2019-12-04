@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
 
-{% block content %}
+{% block main-content-body %}
 {% load staticfiles %}
 
 <span>Tutorial: {{tutorial.id}}</span>
@@ -10,6 +10,6 @@
     {{ tutorial.html | safe }}
 </div>
 
-{% endblock %}
+{% endblock main-content-body %}
 
 
