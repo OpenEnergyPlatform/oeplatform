@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
+from django.views.generic.base import TemplateView
+from .forms import TutorialForm
 
 from os.path import join
 
@@ -90,14 +92,18 @@ staticTutorials = [
     },
 ]
 
+
 def _resolveStaticTutorial(tutorial):
-    with open(join(settings.BASE_DIR, "examples", "build", tutorial["fileName"]), 'r') as buildFile:
-            buildFileContent = buildFile.read()
+    try:
+        with open(join(settings.BASE_DIR, "examples", "build", tutorial["fileName"]), 'r') as buildFile:
+                buildFileContent = buildFile.read()
 
+        return {
+            "html": buildFileContent
+        }
+    except:
+        return {"html": "Tutorial is missing"}
 
-    return {
-        "html": buildFileContent
-    }
 
 def _resolveStaticTutorials(tutorials):
 
@@ -113,12 +119,10 @@ def _resolveStaticTutorials(tutorials):
 
         resolvedTutorials.append(copiedTutorial)
 
-
     return resolvedTutorials
 
 
 def _gatherTutorials(id = None):
-
 
     # TODO: Add dynamic tutorials
     tutorials = _resolveStaticTutorials(staticTutorials)
@@ -128,6 +132,7 @@ def _gatherTutorials(id = None):
         return filteredElement
 
     return tutorials
+
 
 class ListTutorials(View):
     def get(self, request):
@@ -146,7 +151,6 @@ class ListTutorials(View):
         )
 
 
-
 class TutorialDetail(View):
     def get(self, request, tutorial_id):
         """
@@ -159,10 +163,31 @@ class TutorialDetail(View):
 
         tutorial = _gatherTutorials(tutorial_id)
 
-
         return render(
             request, 'detail.html', {"tutorial": tutorial}
         )
+
+
+class NewTutorial(TemplateView):
+    template_name = 'add.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            form = TutorialForm()
+            if form.is_valid():
+                tutorial = form.save(commit=False)
+                # Add more information to the dataset like date, time, contributor ...
+                tutorial.save()
+                # return redirect('')
+        else:
+            form = TutorialForm()
+        return render(request, 'add.html', {'form': form})
+
+    def addTutorialFromMarkdownFile(self):
+        pass
+
+    def updateTutorial(self):
+        pass
 
 
 
