@@ -5,8 +5,9 @@ from tutorials import views
 
 urlpatterns = [
     url(r'^$', views.ListTutorials.as_view()),
-    url(r'^(?P<tutorial_id>[\w\-]+)/$', views.TutorialDetail.as_view()),
-    # this not working correctly - some error in gatherTutorials
-    url(r'/add/', views.NewTutorial.as_view(), name='add_tutorial'),
+    url(r'add/', views.NewTutorial.as_view(), name='add_tutorial'),
     url(r'^markdownx/', include(markdownx)),
+
+    # This must be last, otherwise it will match anything
+    url(r'^(?P<tutorial_id>[\w\-]+)/$', views.TutorialDetail.as_view()),
 ]
