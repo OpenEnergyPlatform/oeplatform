@@ -45,7 +45,8 @@ INSTALLED_APPS = (
     "api",
     "axes",
     "django.contrib.postgres",
-    "tutorials"
+    "tutorials",
+    "markdownx"
 )
 
 MIDDLEWARE_CLASSES = (
