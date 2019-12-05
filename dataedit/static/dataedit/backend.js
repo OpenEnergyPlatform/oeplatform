@@ -131,29 +131,37 @@ function request_data(data, callback, settings) {
         })
     ).done(function (count_response, select_response) {
         $("#loading-indicator").hide();
-        map.eachLayer(function (layer) {
-           if(layer !== tile_layer){map.removeLayer(layer)}
-        });
-        var geo_cols = get_selected_geo_columns();
-        if(geo_cols !== null){
-            var col_idxs = select_response[0].description.reduce(function(l, r, i){
-                if(geo_cols.includes(r[0])){l.push(i);} return l;
-            }, []);
-            var bounds = [];
-            for(var row_id in select_response[0].data){
-                var row = select_response[0].data[row_id];
-                var geo_values = col_idxs.map(function(i){
-                    var buf = new buffer.Buffer(row[i], "hex");
-                    var wkb = wkx.Geometry.parse(buf);
-                    var gj = L.geoJSON(wkb.toGeoJSON());
-                    gj.on("click", flash_handler(row_id));
-                    gj.addTo(map);
-                    return gj;
-                });
-                bounds.push(L.featureGroup(geo_values));
+        if(map !== undefined) {
+            map.eachLayer(function (layer) {
+                if (layer !== tile_layer) {
+                    map.removeLayer(layer)
+                }
+            });
+
+            var geo_cols = get_selected_geo_columns();
+            if(geo_cols !== null) {
+                var col_idxs = select_response[0].description.reduce(function (l, r, i) {
+                    if (geo_cols.includes(r[0])) {
+                        l.push(i);
+                    }
+                    return l;
+                }, []);
+                var bounds = [];
+                for (var row_id in select_response[0].data) {
+                    var row = select_response[0].data[row_id];
+                    var geo_values = col_idxs.map(function (i) {
+                        var buf = new buffer.Buffer(row[i], "hex");
+                        var wkb = wkx.Geometry.parse(buf);
+                        var gj = L.geoJSON(wkb.toGeoJSON());
+                        gj.on("click", flash_handler(row_id));
+                        gj.addTo(map);
+                        return gj;
+                    });
+                    bounds.push(L.featureGroup(geo_values));
+                }
+                var b = L.featureGroup(bounds).getBounds();
+                console.log(b);
             }
-            var b = L.featureGroup(bounds).getBounds();
-            console.log(b);
             map.fitBounds(b);
         }
 
@@ -227,6 +235,7 @@ function load_table (schema, table, csrftoken) {
         }
         if(table_info.geo_columns.length>0){
             map = L.map('map');
+            debugger;
             tile_layer = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     'attribution':  'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
