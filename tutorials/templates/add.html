@@ -6,9 +6,13 @@
 
 <span>Neues Tutorial:</span>
 
-    <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Erstellen</button>
+    <form method="POST" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Erstellen</button>
     </form>
 
+{#Preview for markdown field in form#}
+{{ form.media }}
 {% endblock main-content-body %}
