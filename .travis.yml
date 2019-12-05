@@ -16,7 +16,6 @@ env:
     - SEGFAULT_SIGNALS=all
     - OEP_DJANGO_USER="postgres" OEP_DJANGO_PW="postgres" LOCAL_DB_USER="postgres" LOCAL_DB_PW="postgres"
   matrix:
-    - TOXENV=check
     - TOXENV=docs
 matrix:
   include:
