@@ -235,7 +235,6 @@ function load_table (schema, table, csrftoken) {
         }
         if(table_info.geo_columns.length>0){
             map = L.map('map');
-            debugger;
             tile_layer = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     'attribution':  'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
