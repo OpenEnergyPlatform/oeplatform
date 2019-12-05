@@ -11,7 +11,6 @@ def load_content(response):
 def content2json(content):
     if isinstance(content, bytes):
         content = content.decode("utf-8")
-        print(content)
     return json.loads(content)
 
 

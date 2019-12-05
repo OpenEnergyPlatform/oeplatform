@@ -29,7 +29,7 @@ _TYPES = [
 _TYPEMAP = {
     "char": "character",
     "decimal": "numeric",
-    "float": "numeric",
+    "float": "double precision",
     "int": "integer",
     "nchar": "character",
     "timestamp": "timestamp without time zone",
