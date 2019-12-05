@@ -19,10 +19,15 @@ from django.contrib import admin
 
 from oeplatform import settings
 
+# This is used for Markdown forms in the tutorials app
+from markdownx import urls as markdownx
+
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
 
 urlpatterns = [
+    # This is used for Markdown forms in the tutorials app
+    url(r'^markdownx/', include(markdownx)),
     url(r"^api/", include("api.urls")),
     url(r"^", include("base.urls")),
     url(r"^user/", include("login.urls")),
