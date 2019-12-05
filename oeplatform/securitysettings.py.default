@@ -30,7 +30,7 @@ PLAYGROUNDS = (DEFAULT_SCHEMA, 'test')
 UNVERSIONED_SCHEMAS = ("model_draft", )
 
 # This is unnecessary as long DEBUG is True
-ALLOWED_HOSTS = [] if DEBUG else ['localhost']
+ALLOWED_HOSTS = ['0.0.0.0'] if DEBUG else ['localhost']
 
 TIME_OUT = 30
 USER_CONNECTION_LIMIT = 4

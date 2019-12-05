@@ -14,7 +14,7 @@ class TestSelenium(unittest.TestCase):
 
     def test_main_page_shows(self):
         driver = self.driver
-        driver.get("http://localhost:8000")
+        driver.get("http://0.0.0.0:8000")
         self.assertIn("OEP", driver.title)
 
     def tearDown(self):
