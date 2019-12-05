@@ -4,16 +4,15 @@ How to work with the API - An example
 
 .. testsetup::
 
-
-    from api.actions import _get_engine
-    engine = _get_engine()
-    connection = engine.connect()
-    #connection.execute('CREATE SCHEMA IF NOT EXISTS sandbox;')
-    #connection.execute('CREATE SCHEMA IF NOT EXISTS _sandbox;')
-    connection.close()
-
+    import os
+    from oeplatform import securitysettings as sec
     oep_url = 'http://localhost:8000'
-    from oeplatform.securitysettings import token_test_user as your_token
+    your_token = os.environ.get("LOCAL_OEP_TOKEN")
+    if your_token is None:
+        if hasattr(sec, "token_test_user") and sec.token_test_user is not None:
+            your_token = sec.token_test_user
+        else:
+            raise Exception("No token available, please set LOCAL_OEP_TOKEN or adapt your security settings")
 
 .. note::
 
@@ -143,28 +142,6 @@ been created.
     >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
 
-.. note::
-    A table **must** have a column 'id' of type 'bigserial'.
-
-.. doctest::
-
-    >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"name", "data_type": "varchar", "character_maximum_length": "50" }]} }
-    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    >>> response.status_code
-    500
-    >>> response.json()['reason']
-    'Your table must have one column "id" of type "bigserial"'
-
-.. doctest::
-
-    >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "integer"}]} }
-    >>> response = requests.put(oep_url+'/api/v0/schema/sandbox/tables/faulty_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    >>> response.status_code
-    500
-    >>> response.json()['reason']
-    'Your column "id" must have type "bigserial"'
 
 .. _200-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 .. _201-Resonse: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -209,9 +186,10 @@ In the following example, we want to add a row containing just the name
     >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
     201
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/')
     >>> json_result = result.json()
-    >>> json_result['data'] # Show the id of the new row
-    [[1]]
+    >>> json_result[-1]["id"] # Show the id of the new row
+    1
 
 Alternatively, we can specify that the new row should be stored under id 12:
 
@@ -423,7 +401,7 @@ added anymore.
     >>> data = {"query": {"name": "McPaul"}}
     >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     >>> result.status_code
-    500
+    400
     >>> result.json()['reason']
     'Action violates not-null constraint on first_name. Failing row was (McPaul)'
 
@@ -474,7 +452,7 @@ Array-typed fields.
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
-.. doctest::arrays
+.. doctest::
 
     >>> import requests
     >>> data = {"query": {"arr": [1,2,3]}}
@@ -486,18 +464,8 @@ Array-typed fields.
     >>> json_result['arr']
     [1, 2, 3]
 
-.. testcleanup::arrays
-
-    >>> import requests
-    >>> requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
-    <Response [200]>
-
-
 .. testcleanup::
 
-    from api.actions import _get_engine
-    engine = _get_engine()
-    connection = engine.connect()
-    #connection.execute('DROP SCHEMA sandbox CASCADE;')
-    #connection.execute('DROP SCHEMA _sandbox CASCADE;')
-    connection.close()
+    import requests
+    response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
+    assert response.status_code == 200, response

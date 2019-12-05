@@ -35,7 +35,7 @@ class Welcome(View):
         return render(
             request,
             "base/index.html",
-            {"version": "%s.%s.%s" % (major, minor, patch), "changes": changes, "disableSidebar": True},
+            {"version": "%s.%s.%s" % (major, minor, patch), "changes": changes},
         )
 
 
