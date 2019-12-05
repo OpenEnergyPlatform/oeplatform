@@ -1,7 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic.base import TemplateView
-from .forms import TutorialForm
 
 from os.path import join
 
@@ -11,6 +10,8 @@ from copy import deepcopy
 
 from django.conf import settings
 
+from .forms import TutorialForm
+from .models import Tutorial
 # Create your views here.
 
 
@@ -122,10 +123,15 @@ def _resolveStaticTutorials(tutorials):
     return resolvedTutorials
 
 
+def _resolveDynamicTutorials(tutorials):
+    pass
+
+
 def _gatherTutorials(id = None):
 
-    # TODO: Add dynamic tutorials
     tutorials = _resolveStaticTutorials(staticTutorials)
+    # ToDo: Combine static and dynamic tutorials
+    dyn_tutorials = Tutorial.objects.all()
 
     if id:
         filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
@@ -169,19 +175,26 @@ class TutorialDetail(View):
 
 
 class NewTutorial(TemplateView):
+    tutorial_form = TutorialForm
     template_name = 'add.html'
+    redirect_detail_url = 'detail_tutorial'
 
     def get(self, request, *args, **kwargs):
+        form = self.tutorial_form()
+
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
         if request.method == 'POST':
-            form = TutorialForm()
+            form = self.tutorial_form(request.POST)
             if form.is_valid():
                 tutorial = form.save(commit=False)
                 # Add more information to the dataset like date, time, contributor ...
                 tutorial.save()
-                # return redirect('')
+                return redirect(self.redirect_detail_url, id=tutorial.id)
         else:
-            form = TutorialForm()
-        return render(request, 'add.html', {'form': form})
+            form = self.tutorial_form
+        return render(request, self.template_name, {'form': form})
 
     def addTutorialFromMarkdownFile(self):
         pass
