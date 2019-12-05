@@ -3,14 +3,14 @@ import unittest
 from selenium import webdriver
 
 
-class TestCesiSearch(unittest.TestCase):
+class TestSelenium(unittest.TestCase):
 
     def setUp(self):
         # you need to download the driver for the tests from
         # https://github.com/mozilla/geckodriver/releases
         # drivers for other browsers are located here
         # https://selenium-python.readthedocs.io/installation.html#drivers
-        self.driver = webdriver.Firefox(executable_path=os.path.abspath('geckodriver'))
+        self.driver = webdriver.Firefox(executable_path=os.path.abspath('tests/geckodriver'))
 
     def test_main_page_shows(self):
         driver = self.driver
