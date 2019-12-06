@@ -10,6 +10,7 @@ import psycopg2
 import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
+from omi.dialects.oep.parser import JSONParser_1_4, ParserException
 from shapely import wkb, wkt
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
@@ -117,6 +118,35 @@ def _translate_sqla_type(t, el):
         return el + "[]"
     else:
         return t
+
+def try_parse_metadata(string):
+    """
+    :param string:
+    :return: Tuple[OEPMetadata or None, string or None]:
+        The first component is the result of the parsing procedure or `None` if
+        the parsing failed. The second component is None, if the parsing failed,
+        otherwise an error message.
+
+    >>> result, error = try_parse_metadata("{'id':'id')")
+    >>> error
+    None
+
+    """
+
+    parser = JSONParser_1_4()
+    try:
+        jsn = json.loads(string)
+    except:
+        return None, "Could not parse json"
+    else:
+        try:
+            metadata = parser.parse(jsn)
+        except ParserException as e:
+            return None, e
+        except:
+            raise APIError("Metadata could not be parsed")
+        else:
+            return metadata, None
 
 
 def describe_columns(schema, table):

@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from omi.dialects.oep.compiler import JSONCompiler
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -27,7 +28,6 @@ from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
-from omi.dialects.oep.parser import JSONParser_1_4
 
 import json
 
@@ -190,14 +190,11 @@ class Metadata(APIView):
     @load_cursor
     def post(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
-        parser = JSONParser_1_4()
         raw_input = request.data['query']
-        try:
-            parser.parse(raw_input)
-        except Exception as e:
-            raise APIError("Metadata could not be parsed")
-        else:
-            table_obj.comment = json.dumps(raw_input)
+        metadata, error = actions.try_parse_metadata(raw_input)
+        if metadata is not None:
+            compiler = JSONCompiler()
+            table_obj.comment = json.dumps(compiler.visit(metadata))
             cursor = actions.load_cursor_from_context(request.data)
             # Surprisingly, SQLAlchemy does not seem to escape comment strings
             # properly. Certain strings cause errors database errors.
@@ -208,6 +205,8 @@ class Metadata(APIView):
                 table=table_obj.name)
             cursor.execute(sql, (table_obj.comment, ))
             return JsonResponse(raw_input)
+        else:
+            raise APIError(error)
 
 class Table(APIView):
     """
