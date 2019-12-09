@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic.base import TemplateView
+from django.core import serializers
 
 from os.path import join
 
@@ -93,6 +94,9 @@ staticTutorials = [
     },
 ]
 
+# Retrieve allTutorials and cache
+dynamicTutorialsQs = Tutorial.objects.all()
+
 
 def _resolveStaticTutorial(tutorial):
     try:
@@ -102,6 +106,7 @@ def _resolveStaticTutorial(tutorial):
         return {
             "html": buildFileContent
         }
+
     except:
         return {"html": "Tutorial is missing"}
 
@@ -123,19 +128,64 @@ def _resolveStaticTutorials(tutorials):
     return resolvedTutorials
 
 
-def _resolveDynamicTutorials(tutorials):
-    pass
+def _resolveDynamicTutorial(evaluatedQs):
+    """
+
+    :param evaluatedQs: Evaluated queryset object
+    :return:
+    """
+
+    # Initialize dict that stores a tutorial
+    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': ''}
+
+    # populate dict
+    currentTutorial.update(id=str(evaluatedQs.id),
+                           title=evaluatedQs.title,
+                           # ToDo: is the html fiel used correctly -> static tuts.
+                           html=evaluatedQs.markdown,
+                           # html=evaluatedQs.html,
+                           # markdown=evaluatedQs.markdown
+                            )
+
+    # ToDo: remove this if not needed
+    # tutorialJSON = serializers.serialize('json', qs, fields=('id', 'titel', 'html', 'markdown'))
+    # print(tutorialJSON)
+    # return tutorialJSON
+
+    return currentTutorial
+
+
+def _resolveDynamicTutorials(tutorials_qs):
+    """
+
+    :param tutorials_qs:
+    :return:
+    """
+    resolvedTutorials = []
+
+    # ToDo: remove this if serializer not used
+    # paramsToAdd = _resolveDynamicTutorial(tutorials_qs)
+    # resolvedTutorials.append(paramsToAdd)
+
+    for tutorial in tutorials_qs:
+        paramsToAdd = _resolveDynamicTutorial(tutorial)
+
+        resolvedTutorials.append(paramsToAdd)
+
+    return resolvedTutorials
 
 
 def _gatherTutorials(id = None):
 
     tutorials = _resolveStaticTutorials(staticTutorials)
-    # ToDo: Combine static and dynamic tutorials
-    dyn_tutorials = Tutorial.objects.all()
+    tutorials.extend(_resolveDynamicTutorials(dynamicTutorialsQs))
 
     if id:
+
         filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
+        print(filteredElement)
         return filteredElement
+
 
     return tutorials
 
@@ -180,11 +230,24 @@ class NewTutorial(TemplateView):
     redirect_detail_url = 'detail_tutorial'
 
     def get(self, request, *args, **kwargs):
+        """
+
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         form = self.tutorial_form()
 
         return render(request, self.template_name, {'form': form})
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
+        """
+
+        :param request:
+        :return:
+        """
+
         if request.method == 'POST':
             form = self.tutorial_form(request.POST)
             if form.is_valid():
