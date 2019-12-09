@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic.base import TemplateView
-from django.core import serializers
+from django.urls import exceptions
 
 from os.path import join
 
@@ -94,9 +94,6 @@ staticTutorials = [
     },
 ]
 
-# Retrieve allTutorials and cache
-dynamicTutorialsQs = Tutorial.objects.all()
-
 
 def _resolveStaticTutorial(tutorial):
     try:
@@ -141,7 +138,7 @@ def _resolveDynamicTutorial(evaluatedQs):
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
                            title=evaluatedQs.title,
-                           # ToDo: is the html fiel used correctly -> static tuts.
+                           # ToDo: is the html field used correctly -> static tuts.
                            html=evaluatedQs.markdown,
                            # html=evaluatedQs.html,
                            # markdown=evaluatedQs.markdown
@@ -176,16 +173,15 @@ def _resolveDynamicTutorials(tutorials_qs):
 
 
 def _gatherTutorials(id = None):
+    # Retrieve allTutorials and cache
+    dynamicTutorialsQs = Tutorial.objects.all()
 
     tutorials = _resolveStaticTutorials(staticTutorials)
     tutorials.extend(_resolveDynamicTutorials(dynamicTutorialsQs))
 
     if id:
-
         filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
-        print(filteredElement)
         return filteredElement
-
 
     return tutorials
 
@@ -227,7 +223,7 @@ class TutorialDetail(View):
 class NewTutorial(TemplateView):
     tutorial_form = TutorialForm
     template_name = 'add.html'
-    redirect_detail_url = 'detail_tutorial'
+    redirect_url = 'detail_tutorial'
 
     def get(self, request, *args, **kwargs):
         """
@@ -254,16 +250,59 @@ class NewTutorial(TemplateView):
                 tutorial = form.save(commit=False)
                 # Add more information to the dataset like date, time, contributor ...
                 tutorial.save()
-                return redirect(self.redirect_detail_url, id=tutorial.id)
+                return redirect(self.redirect_url, tutorial_id=str(tutorial.id))
         else:
             form = self.tutorial_form
+
         return render(request, self.template_name, {'form': form})
 
     def addTutorialFromMarkdownFile(self):
         pass
 
-    def updateTutorial(self):
-        pass
+
+class EditTutorials(TemplateView):
+    tutorial_form = TutorialForm
+    template_name = 'add.html'
+    redirect_url = 'detail_tutorial'
+
+    def get(self, request, *args, **kwargs):
+        """
+
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        form = self.tutorial_form()
+
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, id):
+        """
+
+        :param request:
+        :param id:
+        :return:
+        """
+
+        tutorialToEdit = get_object_or_404(Tutorial, pk=id)
+        print(tutorialToEdit)
+
+        if request.method == 'POST':
+            form = self.tutorial_form(request.POST, instance=tutorialToEdit)
+            if form.is_valid():
+                tutorial = form.save(commit=False)
+                # Add more information to the dataset like date, time, contributor ...
+                tutorial.save()
+                return redirect(self.redirect_url, tutorial_id=str(tutorial.id))
+        else:
+            form = self.tutorial_form(instance=tutorialToEdit)
+
+        return render(request, self.template_name, {'form': form})
+
+
+
+
 
 
 
