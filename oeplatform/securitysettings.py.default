@@ -10,7 +10,7 @@ DEBUG = True
 URL = '127.0.0.1'
 
 # This token is the token the test user is identified with during API-tests
-token_test_user = '0'
+token_test_user = None
 
 # Setting of your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
