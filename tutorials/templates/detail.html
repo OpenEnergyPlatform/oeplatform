@@ -4,6 +4,7 @@
 {% block main-content-body %}
 {% load staticfiles %}
 
+<a href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}"> Bearbeiten </a>
 <span>Tutorial: {{tutorial.id}}</span>
 
 <div>
