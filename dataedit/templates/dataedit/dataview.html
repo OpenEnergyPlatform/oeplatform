@@ -15,6 +15,7 @@
 <script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
 <script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 
 <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"  rel="stylesheet">
     <h3>
@@ -125,7 +126,7 @@
                 <a href="/dataedit/view/{{schema}}/{{table}}/graph/new" method="post">
                     Create Graph
                 </a>
-                {% if current_view.type == "map" %}
+                {% if current_view.type == "graph" %}
                     <div id="datagraph">
                 {% endif %}
                 </div>
@@ -146,8 +147,8 @@
     var table = '{{table}}';
     var schema = '{{schema}}';
     var view = {
-        type: {{ current_view.type }},
-        options: {{ current_view.options }}
+        type: "{{ current_view.type }}",
+        options: JSON5.parse("{{ current_view.options | escapejs }}")
     };
     load_view(schema, table, csrftoken, view);
 </script>
