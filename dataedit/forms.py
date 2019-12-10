@@ -2,7 +2,7 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 
-from dataedit.models import Tag, TableGraph
+from dataedit.models import Tag, View
 
 # This structure maps postgresql data types to django forms
 typemap = [
@@ -102,16 +102,16 @@ class UploadMapForm(forms.Form):
                 self.fields[name].initial = "---"
 
 
-class TableGraphForm(ModelForm):
+class GraphViewForm(ModelForm):
 
     class Meta:
-        model = TableGraph
+        model = View
         fields = '__all__'
-        exclude = ('table', 'schema')
+        exclude = ('table', 'schema', 'VIEW_TYPES', 'options', 'type')
 
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop('columns', None)
-        super(TableGraphForm, self).__init__(*args, **kwargs)
+        super(GraphViewForm, self).__init__(*args, **kwargs)
 
         if columns is not None:
             self.fields['column_x'] = forms.ChoiceField(choices=columns)
