@@ -8,6 +8,7 @@ var filters = [];
 var table_container;
 var query_builder;
 var where;
+var view;
 
 function getCookie(name) {
     var cookieValue = null;
@@ -50,7 +51,6 @@ var table_info = {
     rows: null,
     name: null,
     schema: null,
-    geo_columns: []
 };
 
 var geo_datatypes = [
@@ -131,32 +131,12 @@ function request_data(data, callback, settings) {
         })
     ).done(function (count_response, select_response) {
         $("#loading-indicator").hide();
-        map.eachLayer(function (layer) {
-           if(layer !== tile_layer){map.removeLayer(layer)}
-        });
-        var geo_cols = get_selected_geo_columns();
-        if(geo_cols !== null){
-            var col_idxs = select_response[0].description.reduce(function(l, r, i){
-                if(geo_cols.includes(r[0])){l.push(i);} return l;
-            }, []);
-            var bounds = [];
-            for(var row_id in select_response[0].data){
-                var row = select_response[0].data[row_id];
-                var geo_values = col_idxs.map(function(i){
-                    var buf = new buffer.Buffer(row[i], "hex");
-                    var wkb = wkx.Geometry.parse(buf);
-                    var gj = L.geoJSON(wkb.toGeoJSON());
-                    gj.on("click", flash_handler(row_id));
-                    gj.addTo(map);
-                    return gj;
-                });
-                bounds.push(L.featureGroup(geo_values));
-            }
-            var b = L.featureGroup(bounds).getBounds();
-            console.log(b);
-            map.fitBounds(b);
-        }
 
+        if(view.type === "map") {
+            build_map(select_response[0].data, select_response[0].description);
+        } else if(view.type === "graph") {
+            build_graph(select_response[0].data);
+        }
         callback({
             data: select_response[0].data,
             draw: draw,
@@ -164,6 +144,73 @@ function request_data(data, callback, settings) {
             recordsTotal: table_info.rows
         });
     }).fail(fail_handler);
+}
+
+function build_map(data, description){
+    map.eachLayer(function (layer) {
+        if(layer !== tile_layer){map.removeLayer(layer)}
+    });
+        var col_idxs = description.reduce(function (l, r, i) {
+        if (view.options.columns.includes(r[0])) {
+            l.push(i);
+        }
+        return l;
+    }, []);
+    var bounds = [];
+    for (var row_id in data) {
+        var row = data[row_id];
+        var geo_values = col_idxs.map(function (i) {
+            var buf = new buffer.Buffer(row[i], "hex");
+            var wkb = wkx.Geometry.parse(buf);
+            var gj = L.geoJSON(wkb.toGeoJSON());
+            gj.on("click", flash_handler(row_id));
+            gj.addTo(map);
+            return gj;
+        });
+        bounds.push(L.featureGroup(geo_values));
+    }
+    var b = L.featureGroup(bounds).getBounds();
+    map.fitBounds(b);
+}
+
+function build_graph(data){
+    // Get the div for the graph
+    var plotly_div = $("#datagraph")[0];
+
+    // Load column names to use in plot
+    var x = view.options.x;
+    var y = view.options.y;
+
+    // Get ids of those columns
+    var x_id = table_info.columns.indexOf(x);
+    var y_id = table_info.columns.indexOf(y);
+
+    // Extract data from query results
+    var points = data.reduce(function(accumulator, row){
+        accumulator[0].push(row[x_id]);
+        accumulator[1].push(row[y_id]);
+        return accumulator}, [[],[]]);
+
+    // Remove possible older plots
+    Plotly.purge(plotly_div);
+
+    // Plot it
+    Plotly.plot(
+        plotly_div,
+        [{
+          x: points[0],
+          y: points[1]
+        }],
+        {
+          margin: {t: 0},
+          xaxis: {
+            title: {text: x}
+          },
+          yaxis: {
+            title: {text: y}
+          }
+        }
+    );
 }
 
 function flash_handler(i){
@@ -175,30 +222,12 @@ function flash_handler(i){
 
 
 function load_graph(schema, table, csrftoken){
-    var plotly_div = $("#datagraph")[0];
-    console.log(plotly_div);
-    Plotly.plot(
-        plotly_div,
-        [{
-          x: [1,2,3,4],
-          y: [1,2,3,4]
-        }],
-        {
-          margin: {t: 0},
-          xaxis: {
-            title: {text: 'X'}
-          },
-          yaxis: {
-            title: {text: 'Y'}
-          }
-        }
-    );
 
 }
 
 
-function load_table(schema, table, csrftoken) {
-
+function load_view(schema, table, csrftoken, current_view) {
+    view = current_view;
     table_info.name = table;
     table_info.schema = schema;
     var count_query = {
@@ -245,13 +274,7 @@ function load_table(schema, table, csrftoken) {
             }
             filters.push({id: colname, type: mapped_dt});
         }
-        if(table_info.columns.includes("lan") && table_info.columns.includes("lon")){
-            table_info.geo_columns.push(["lat", "lon"]);
-        }
-        if(table_info.columns.includes("geom")){
-            table_info.geo_columns.push(["geom"]);
-        }
-        if(table_info.geo_columns.length>0){
+        if(view.type === "map"){
             map = L.map('map');
             tile_layer = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -453,14 +476,3 @@ var type_maps = {
 };
 
 var valid_types = ["string", "integer", "double", "date", "time", "datetime", "boolean"];
-function get_selected_geo_columns(){
-    /**
-     * This should load a selected column from some input element. Currently we
-     * just take the first one.
-     */
-    if(table_info.geo_columns.length === 0){
-        return null;
-    } else {
-        return table_info.geo_columns[0]
-    }
-}
