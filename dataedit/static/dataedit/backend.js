@@ -157,6 +157,44 @@ function request_data(data, callback, settings) {
             map.fitBounds(b);
         }
 
+        // Get the div for the graph
+        var plotly_div = $("#datagraph")[0];
+
+        // Load column names to use in plot
+        var x = "id"; // TODO: Load column from options
+        var y = "id"; // TODO: Load column from options
+
+        // Get ids of those columns
+        var x_id = table_info.columns.indexOf(x);
+        var y_id = table_info.columns.indexOf(y);
+
+        // Extract data from query results
+        var points = select_response[0].data.reduce(function(accumulator, row){
+            accumulator[0].push(row[x_id]);
+            accumulator[1].push(row[y_id]);
+            return accumulator}, [[],[]]);
+
+        // Remove possible older plots
+        Plotly.purge(plotly_div);
+
+        // Plot it
+        Plotly.plot(
+            plotly_div,
+            [{
+              x: points[0],
+              y: points[1]
+            }],
+            {
+              margin: {t: 0},
+              xaxis: {
+                title: {text: x}
+              },
+              yaxis: {
+                title: {text: y}
+              }
+            }
+        );
+
         callback({
             data: select_response[0].data,
             draw: draw,
@@ -175,24 +213,6 @@ function flash_handler(i){
 
 
 function load_graph(schema, table, csrftoken){
-    var plotly_div = $("#datagraph")[0];
-    console.log(plotly_div);
-    Plotly.plot(
-        plotly_div,
-        [{
-          x: [1,2,3,4],
-          y: [1,2,3,4]
-        }],
-        {
-          margin: {t: 0},
-          xaxis: {
-            title: {text: 'X'}
-          },
-          yaxis: {
-            title: {text: 'Y'}
-          }
-        }
-    );
 
 }
 
