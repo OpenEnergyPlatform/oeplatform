@@ -62,16 +62,6 @@ class Table(Tagable):
         unique_together = (("schema", "name"),)
 
 
-class TableGraph(models.Model):
-    name = CharField(max_length=50, null=False)
-    table = CharField(max_length=1000, null=False)
-    schema = CharField(max_length=1000, null=False)
-    column_x = CharField(max_length=200, null=False)
-    column_y = CharField(max_length=200, null=False)
-    filters_x = CharField(max_length=1000, null=False)
-    filters_y = CharField(max_length=1000, null=False)
-
-
 class View(models.Model):
     name = CharField(max_length=50, null=False)
     table = CharField(max_length=1000, null=False)

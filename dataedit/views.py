@@ -36,7 +36,7 @@ from dataedit.forms import TableGraphForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision, TableGraph
+from .models import TableRevision
 
 session = None
 
