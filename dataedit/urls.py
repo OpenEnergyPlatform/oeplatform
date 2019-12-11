@@ -78,5 +78,5 @@ urlpatterns = [
     url(r"^tags/?$", views.tag_overview),
     url(r"^tags/set/?$", views.change_tag),
     url(r"^tags/new/?$", views.tag_editor),
-    url(r"^tags/(?P<id>[0-9]+)/?$", views.tag_editor),
+    url(r"^tags/(?P<tag_id>[0-9]+)/?$", views.tag_editor),
 ]

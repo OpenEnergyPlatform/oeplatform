@@ -37,6 +37,7 @@ from login import models as login_models
 
 from .models import TableRevision
 
+pending_dumps = {}
 session = None
 
 """ This is the initial view that initialises the database connection """
@@ -57,62 +58,72 @@ schema_whitelist = [
     "supply",
 ]
 
+COMMENT_KEYS = [
+    ("Title", "Title"),
+    ("Description", "Description"),
+    ("Reference Date", "Reference Date"),
+    ("Spatial", "Spatial"),
+    ("Temporal", "Temporal"),
+    ("Source", "Source"),
+    ("Licence", "Licence"),
+    ("Contributors", "Contributors"),
+    ("Fields", "Fields"),
+]
 
-def admin_constraints(request):
+
+# --------------------------------- Utils functions -------------------------------------------
+def read_label(table, comment):
     """
-    Way to apply changes
-    :param request:
-    :return:
+    Extracts the readable name from @comment and appends the real name in parens.
+    If comment is not a JSON-dictionary or does not contain a field 'Name' None
+    is returned.
+
+    :param table: name of a table stored in this schema
+
+    :param comment: String containing a JSON-dictionary according to @Metadata
+
+    :return: Readable name appended by the true table name as string or None
     """
-    post_dict = dict(request.POST)
-    action = post_dict.get("action")[0]
-    id = post_dict.get("id")[0]
-    schema = post_dict.get("schema")[0]
-    table = post_dict.get("table")[0]
-
-    print("action: " + action)
-    print("id: " + id)
-
-    if "deny" in action:
-        actions.remove_queued_constraint(id)
-    elif "apply" in action:
-        actions.apply_queued_constraint(id)
-
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    try:
+        return (
+            json.loads(comment.replace("\n", ""))["Name"].strip() + " (" + table + ")"
+        )
+    except Exception as e:
+        return None
 
 
-def admin_columns(request):
+def get_readable_table_names(schema):
     """
-    Way to apply changes
-    :param request:
-    :return:
+    Loads all tables from a schema with their corresponding comments, extracts
+    their readable names, if possible.
+
+    :param schema: name of a schema
+
+    :return: A dictionary with that maps table names to readable names as returned by
+        :py:meth:`dataedit.views.read_label`
     """
-
-    post_dict = dict(request.POST)
-    action = post_dict.get("action")[0]
-    id = post_dict.get("id")[0]
-    schema = post_dict.get("schema")[0]
-    table = post_dict.get("table")[0]
-
-    print("action: " + action)
-    print("id: " + id)
-
-    if "deny" in action:
-        actions.remove_queued_column(id)
-    elif "apply" in action:
-        actions.apply_queued_column(id)
-
-    return redirect(
-        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-    )
+    engine = actions._get_engine()
+    conn = engine.connect()
+    try:
+        res = conn.execute(
+            "SELECT table_name as TABLE, obj_description((('\"{table_schema}\".\"' || table_name || '\"' ))::regclass) as COMMENT "
+            "FROM information_schema.tables where table_schema='{table_schema}';".format(
+                table_schema=schema
+            )
+        )
+    except Exception as e:
+        raise e
+        return {}
+    finally:
+        conn.close()
+    return {table: read_label(table, comment) for (table, comment) in res}
 
 
 def change_requests(schema, table):
-    """
-    Loads the dataedit admin interface
-    :param request:
+    """Loads the dataedit admin interface
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
     :return:
     """
     # I want to display old and new data, if different.
@@ -122,9 +133,6 @@ def change_requests(schema, table):
     api_constraints = actions.get_constraints_changes(
         reviewed=False, schema=schema, table=table
     )
-
-    # print(api_columns)
-    # print(api_constraints)
 
     cache = dict()
     data = dict()
@@ -210,144 +218,13 @@ def change_requests(schema, table):
     }
 
 
-def listschemas(request):
-    """
-    Loads all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py. Only schemas that are present in the
-    whitelist are processed that do not start with an underscore.
-
-    :param request: A HTTP-request object sent by the Django framework
-
-    :return: Renders the schema list
-    """
-
-    insp = actions.connect()
-    engine = actions._get_engine()
-    conn = engine.connect()
-    query = (
-        "SELECT schema_name, count(tablename) as tables "
-        "FROM pg_tables right join information_schema.schemata "
-        "ON schema_name=schemaname "
-        "WHERE tablename IS NULL "
-        "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
-        "       AND tablename NOT LIKE '\_%%') "
-        "GROUP BY schema_name;".format(user=sec.dbuser)
-    )
-    response = conn.execute(query)
-    schemas = sorted(
-        [
-            (row.schema_name, row.tables)
-            for row in response
-            if row.schema_name in schema_whitelist
-            and not row.schema_name.startswith("_")
-        ],
-        key=lambda x: x[0],
-    )
-    return render(request, "dataedit/dataedit_schemalist.html", {"schemas": schemas})
-
-
-def overview(request):
-    return render(request, "dataedit/dataedit_choices.html", {})
-
-
-def read_label(table, comment):
-    """
-    Extracts the readable name from @comment and appends the real name in parens.
-    If comment is not a JSON-dictionary or does not contain a field 'Name' None
-    is returned.
-
-    :param table: Name to append
-
-    :param comment: String containing a JSON-dictionary according to @Metadata
-
-    :return: Readable name appended by the true table name as string or None
-    """
-    try:
-        return (
-            json.loads(comment.replace("\n", ""))["Name"].strip() + " (" + table + ")"
-        )
-    except Exception as e:
-        return None
-
-
-def get_readable_table_names(schema):
-    """
-    Loads all tables from a schema with their corresponding comments, extracts
-    their readable names, if possible.
-
-    :param schema: The schema name as string
-
-    :return: A dictionary with that maps table names to readable names as returned by :py:meth:`dataedit.views.read_label`
-    """
-    engine = actions._get_engine()
-    conn = engine.connect()
-    try:
-        res = conn.execute(
-            "SELECT table_name as TABLE, obj_description((('\"{table_schema}\".\"' || table_name || '\"' ))::regclass) as COMMENT "
-            "FROM information_schema.tables where table_schema='{table_schema}';".format(
-                table_schema=schema
-            )
-        )
-    except Exception as e:
-        raise e
-        return {}
-    finally:
-        conn.close()
-    return {table: read_label(table, comment) for (table, comment) in res}
-
-
-def listtables(request, schema_name):
-    """
-    :param request: A HTTP-request object sent by the Django framework
-    :param schema_name: Name of a schema
-    :return: Renders the list of all tables in the specified schema
-    """
-    engine = actions._get_engine()
-    conn = engine.connect()
-    labels = get_readable_table_names(schema_name)
-    query = (
-        "SELECT tablename FROM pg_tables WHERE schemaname = '{schema}' "
-        "AND pg_has_role('{user}', tableowner, 'MEMBER');".format(
-            schema=schema_name, user=sec.dbuser
-        )
-    )
-    tables = conn.execute(query)
-    tables = [
-        (
-            table.tablename,
-            labels[table.tablename] if table.tablename in labels else None,
-        )
-        for table in tables
-        if not table.tablename.startswith("_")
-    ]
-    tables = sorted(tables, key=lambda x: x[0])
-    return render(
-        request,
-        "dataedit/dataedit_tablelist.html",
-        {"schema": schema_name, "tables": tables},
-    )
-
-
-COMMENT_KEYS = [
-    ("Title", "Title"),
-    ("Description", "Description"),
-    ("Reference Date", "Reference Date"),
-    ("Spatial", "Spatial"),
-    ("Temporal", "Temporal"),
-    ("Source", "Source"),
-    ("Licence", "Licence"),
-    ("Contributors", "Contributors"),
-    ("Fields", "Fields"),
-]
-
-
 def _type_json(json_obj):
-    """
-    Recursively labels JSON-objects by their types. Singleton lists are handled
-    as elementary objects.
+    """Recursively labels JSON-objects by their types.
 
-    :param json_obj: An JSON-object - possibly a dictionary, a list or an elementary JSON-object (e.g a string)
+        Singleton lists are handled as elementary objects.
 
+    :param json_obj: An JSON-object - possibly a dictionary, a list or an elementary JSON-object
+    (e.g a string)
     :return: An annotated JSON-object (type, object)
 
     """
@@ -361,77 +238,14 @@ def _type_json(json_obj):
         return str(type(json_obj)), json_obj
 
 
-pending_dumps = {}
-
-
-class RevisionView(View):
-    def get(self, request, schema, table):
-        revisions = TableRevision.objects.filter(schema=schema, table=table)
-        pending = [
-            (schema, table, date)
-            for (schema, table, date) in pending_dumps
-            if schema == schema and table == table
-        ]
-        return render(
-            request,
-            "dataedit/dataedit_revision.html",
-            {
-                "schema": schema,
-                "table": table,
-                "revisions": revisions,
-                "pending": pending,
-            },
-        )
-
-    def post(self, request, schema, table, date=None):
-        """
-        This method handles an ajax request for a data revision of a specific table.
-        On success the TableRevision-object will be stored to mark that the corresponding
-        revision is available.
-
-        :param request:
-        :param schema:
-        :param table:
-        :param date:
-        :return:
-        """
-
-        # date = time.strftime('%Y-%m-%d %H:%M:%S')
-        # fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
-
-        date = time.strftime("%Y-%m-%d %H:%M:%S")
-        # fname = time.strftime(schema+'_' + table + '%Y%m%d_%H%M%S', time.gmtime())
-
-        fname = "20170814_000000"
-
-        original = True  # marks whether this method initialised the revision creation
-
-        # If some user already requested this dataset wait for this thread to finish
-        if (schema, table, date) in pending_dumps:
-            t = pending_dumps[(schema, table, date)]
-            original = False
-        else:
-            t = threading.Thread(target=create_dump, args=(schema, table, fname))
-            t.start()
-            pending_dumps[(schema, table, date)] = t
-
-        while t.is_alive():
-            time.sleep(10)
-
-        pending_dumps.pop((schema, table, date))
-        if original:
-            path = "/dumps/{schema}/{table}/{fname}.dump".format(
-                fname=fname, schema=schema, table=table
-            )
-            size = os.path.getsize(sec.MEDIA_ROOT + path)
-            rev = TableRevision(
-                schema=schema, table=table, date=date, path="/media" + path, size=size
-            )
-            rev.save()
-        return JsonResponse({})
-
-
 def get_dependencies(schema, table, found=None):
+    """Gather the dependencies of a table in a schema
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param found:
+    :return:
+    """
     if not found:
         found = {(schema, table)}
 
@@ -468,6 +282,13 @@ def get_dependencies(schema, table, found=None):
 
 
 def create_dump(schema, table, fname):
+    """Used in data revision
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param fname:
+    :return:
+    """
     assert re.match(actions.pgsql_qualifier, table)
     assert re.match(actions.pgsql_qualifier, schema)
     for path in [
@@ -478,26 +299,26 @@ def create_dump(schema, table, fname):
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = [
-        "pg_dump",
-        "-O",
-        "-x",
-        "-w",
-        "-Fc",
-        "--quote-all-identifiers",
-        "-U",
-        sec.dbuser,
-        "-h",
-        sec.dbhost,
-        "-p",
-        str(sec.dbport),
-        "-d",
-        sec.dbname,
-        "-f",
-        sec.MEDIA_ROOT
-        + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
-        + fname
-        + ".dump",
-    ] + reduce(
+            "pg_dump",
+            "-O",
+            "-x",
+            "-w",
+            "-Fc",
+            "--quote-all-identifiers",
+            "-U",
+            sec.dbuser,
+            "-h",
+            sec.dbhost,
+            "-p",
+            str(sec.dbport),
+            "-d",
+            sec.dbname,
+            "-f",
+            sec.MEDIA_ROOT
+            + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
+            + fname
+            + ".dump",
+        ] + reduce(
         add,
         (["-n", s, "-t", s + "." + t] for s, t in get_dependencies(schema, table)),
         [],
@@ -506,6 +327,13 @@ def create_dump(schema, table, fname):
 
 
 def send_dump(schema, table, fname):
+    """Used in data revision
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param fname:
+    :return:
+    """
     path = sec.MEDIA_ROOT + "/dumps/{schema}/{table}/{fname}.dump".format(
         fname=fname, schema=schema, table=table
     )
@@ -522,6 +350,14 @@ def send_dump(schema, table, fname):
 
 
 def show_revision(request, schema, table, date):
+    """Retrieve the revisions on a given table from a given schema
+
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param date:
+    :return:
+    """
     global pending_dumps
 
     rev = TableRevision.objects.get(schema=schema, table=table, date=date)
@@ -530,19 +366,216 @@ def show_revision(request, schema, table, date):
     return send_dump(schema, table, date)
 
 
+def increment_usage_count(tag_id):
+    """Increment usage count of a specific tag
+    :param tag_id: ID of the tag which usage count should be incremented
+    :return:
+    """
+    engine = actions._get_engine()
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    try:
+        result = session.query(Tag).filter_by(id=tag_id).first()
+        result.usage_count += 1
+        session.commit()
+    finally:
+        session.close()
+
+
+def save_metadata_as_table_comment(schema, table, metadata):
+    """Save metadata as comment string on a given table from a given schema
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param metadata: structured data according to metadata specifications
+    """
+    # TODO: validate metadata!
+    # metadata = validate(metadata)
+
+    engine = actions._get_engine()
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute(
+            sqla.text(
+                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema, table=table
+                )
+            ),
+            comment=json.dumps(metadata),
+        )
+    except Exception as e:
+        raise e
+    else:
+        trans.commit()
+    finally:
+        conn.close()
+
+
+# ------------------------------------ Views -------------------------------------------------------
+def admin_constraints(request):
+    """
+    Way to apply changes
+    :param request: A HTTP-request object sent by the Django framework
+    :return:
+    """
+    post_dict = dict(request.POST)
+    action = post_dict.get("action")[0]
+    id = post_dict.get("id")[0]
+    schema = post_dict.get("schema")[0]
+    table = post_dict.get("table")[0]
+
+    print("action: " + action)
+    print("id: " + id)
+
+    if "deny" in action:
+        actions.remove_queued_constraint(id)
+    elif "apply" in action:
+        actions.apply_queued_constraint(id)
+
+    return redirect(
+        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+    )
+
+
+def admin_columns(request):
+    """
+    Way to apply changes
+    :param request: A HTTP-request object sent by the Django framework
+    :return:
+    """
+
+    post_dict = dict(request.POST)
+    action = post_dict.get("action")[0]
+    id = post_dict.get("id")[0]
+    schema = post_dict.get("schema")[0]
+    table = post_dict.get("table")[0]
+
+    print("action: " + action)
+    print("id: " + id)
+
+    if "deny" in action:
+        actions.remove_queued_column(id)
+    elif "apply" in action:
+        actions.apply_queued_column(id)
+
+    return redirect(
+        "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+    )
+
+
+def overview(request):
+    """View after clicking on 'Database' from landing page
+
+        provide the choice for accessing the database between
+        web interface (dataview) and api (link to tutorials)
+
+    :param request: A HTTP-request object sent by the Django framework
+    :return: html template
+    """
+    return render(request, "dataedit/dataedit_choices.html", {})
+
+
+def listschemas(request):
+    """View after choosing the web interface (dataview) from 'overview'
+
+        Loads all schemas that are present in the external database specified in
+        oeplatform/securitysettings.py. Only schemas that are present in the
+        whitelist are processed that do not start with an underscore.
+
+    :param request: A HTTP-request object sent by the Django framework
+    :return: html template
+    """
+
+    insp = actions.connect()
+    engine = actions._get_engine()
+    conn = engine.connect()
+    query = (
+        "SELECT schema_name, count(tablename) as tables "
+        "FROM pg_tables right join information_schema.schemata "
+        "ON schema_name=schemaname "
+        "WHERE tablename IS NULL "
+        "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
+        "       AND tablename NOT LIKE '\_%%') "
+        "GROUP BY schema_name;".format(user=sec.dbuser)
+    )
+    response = conn.execute(query)
+    schemas = sorted(
+        [
+            (row.schema_name, row.tables)
+            for row in response
+            if row.schema_name in schema_whitelist
+            and not row.schema_name.startswith("_")
+        ],
+        key=lambda x: x[0],
+    )
+    return render(request, "dataedit/dataedit_schemalist.html", {"schemas": schemas})
+
+
+def listtables(request, schema_name):
+    """View after choosing a schema from 'listschemas'
+
+        list of the table in the selected schema
+        options to search and add a tag
+
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema_name: Name of a schema
+    :return: html template
+    """
+    engine = actions._get_engine()
+    conn = engine.connect()
+    labels = get_readable_table_names(schema_name)
+    query = (
+        "SELECT tablename FROM pg_tables WHERE schemaname = '{schema}' "
+        "AND pg_has_role('{user}', tableowner, 'MEMBER');".format(
+            schema=schema_name, user=sec.dbuser
+        )
+    )
+    tables = conn.execute(query)
+    tables = [
+        (
+            table.tablename,
+            labels[table.tablename] if table.tablename in labels else None,
+        )
+        for table in tables
+        if not table.tablename.startswith("_")
+    ]
+    tables = sorted(tables, key=lambda x: x[0])
+    return render(
+        request,
+        "dataedit/dataedit_tablelist.html",
+        {"schema": schema_name, "tables": tables},
+    )
+
+
+# -------------------------------- Tag Views -------------------------------------------------------
 @login_required
 def tag_overview(request):
+    """View after clicking on 'Manage Tags' button
+        all tags are listed and there is the option to create a new tag
+
+    :param request: A HTTP-request object sent by the Django framework
+    :return: html template
+    """
     return render(request=request, template_name="dataedit/tag_overview.html")
 
 
 @login_required
-def tag_editor(request, id=""):
+def tag_editor(request, tag_id=""):
+    """View after selecting a tag or clicking on 'Create new Tag' button in 'tag_overview'
+
+        There are two forms to change the name and the color of the tag.
+        There is a 'Save' button to save the changes to the tag and a 'Delete' button to delete
+        the tag. The 'Delete' button is only accessible for admin login.
+    :param request: A HTTP-request object sent by the Django framework
+    :param tag_id: the id number of the tag
+    :return: html template
+    """
     tags = get_all_tags()
 
-    create_new = True
-
     for t in tags:
-        if id != "" and int(id) == t["id"]:
+        if tag_id != "" and int(tag_id) == t["id"]:
             tag = t
 
             # inform the user if tag is assigned to an object
@@ -559,7 +592,7 @@ def tag_editor(request, id=""):
                 template_name="dataedit/tag_editor.html",
                 context={
                     "name": tag["name"],
-                    "id": tag["id"],
+                    "tag_id": tag["id"],
                     "color": tag["color"],
                     "assigned": assigned,
                 },
@@ -572,31 +605,73 @@ def tag_editor(request, id=""):
 
 
 @login_required
+def add_table_tags(request):
+    """Updates the tags on a table according to the tag values in request.
+    The update will delete all tags that are not present in request and add all tags that are.
+
+    :param request: A HTTP-request object sent by the Django framework.
+        The *POST* field must contain the following values:
+        * schema: The name of a schema
+        * table: The name of a table
+        * Any number of values that start with 'tag_' followed by the id of a tag.
+    :return: redirects to the previous page
+    """
+    ids = {
+        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
+    }
+    schema = request.POST["schema"]
+    table = request.POST.get("table", None)
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+
+    session.query(TableTags).filter(
+        TableTags.table_name == table and TableTags.schema_name == schema
+    ).delete()
+    for tag_id in ids:
+        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": tag_id})
+        session.add(t)
+    session.commit()
+    return redirect(request.META["HTTP_REFERER"])
+
+
+@login_required
 def change_tag(request):
+    """Executed after the user clicked on the 'Save' or 'Delete' buttons in 'tag_editor'
+    :param request: A HTTP-request object sent by the Django framework
+    :return: html template
+    """
     if "submit_save" in request.POST:
         if "tag_id" in request.POST:
-            id = request.POST["tag_id"]
+            tag_id = request.POST["tag_id"]
             name = request.POST["tag_text"]
             color = request.POST["tag_color"]
-            edit_tag(id, name, color)
+            edit_tag(tag_id, name, color)
         else:
             name = request.POST["tag_text"]
             color = request.POST["tag_color"]
             add_tag(name, color)
 
     elif "submit_delete" in request.POST:
-        id = request.POST["tag_id"]
-        delete_tag(id)
+        tag_id = request.POST["tag_id"]
+        delete_tag(tag_id)
 
     return redirect("/dataedit/tags/")
 
 
-def edit_tag(id, name, color):
+def edit_tag(tag_id, name, color):
+    """Edit a given tag on a table
+
+    :param tag_id: the id number of the tag
+    :param name: the name of the tag
+    :param color: the color string of the tag
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
 
-    result = session.query(Tag).filter(Tag.id == id).one()
+    result = session.query(Tag).filter(Tag.id == tag_id).one()
 
     result.name = name
     result.color = str(int(color[1:], 16))
@@ -604,21 +679,30 @@ def edit_tag(id, name, color):
     session.commit()
 
 
-def delete_tag(id):
+def delete_tag(tag_id):
+    """Delete a given tag on a table
+
+    :param tag_id: the id number of the tag
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
 
     # delete all occurrences of the tag from Table_tag
-    session.query(TableTags).filter(TableTags.tag == id).delete()
+    session.query(TableTags).filter(TableTags.tag == tag_id).delete()
 
     # delete the tag from Tag
-    session.query(Tag).filter(Tag.id == id).delete()
+    session.query(Tag).filter(Tag.id == tag_id).delete()
 
     session.commit()
 
 
 def add_tag(name, color):
+    """Create a tag
+
+    :param name: the name of the tag
+    :param color: the color string of the tag
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
@@ -627,7 +711,104 @@ def add_tag(name, color):
     session.commit()
 
 
+def get_all_tags(schema=None, table=None):
+    """Load all tags of a given table from a given schema
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :return: list of tags
+    """
+    engine = actions._get_engine()
+    metadata = sqla.MetaData(bind=engine)
+    Session = sessionmaker()
+    session = Session(bind=engine)
+    try:
+        if table is None:
+            # Neither table, not schema are defined
+            result = session.execute(sqla.select([Tag]).order_by("name"))
+            session.commit()
+            r = [
+                {
+                    "id": r.id,
+                    "name": r.name,
+                    "color": "#" + format(r.color, "06X"),
+                    "usage_count": r.usage_count,
+                    "usage_tracked_since": r.usage_tracked_since,
+                }
+                for r in result
+            ]
+            return sort_tags_by_popularity(r)
+
+        if schema is None:
+            # default schema is the public schema
+            schema = "public"
+
+        result = session.execute(
+            session.query(
+                Tag.name.label("name"),
+                Tag.id.label("id"),
+                Tag.color.label("color"),
+                Tag.usage_count.label("usage_count"),
+                Tag.usage_tracked_since.label("usage_tracked_since"),
+                TableTags.table_name,
+            )
+            .filter(TableTags.tag == Tag.id)
+            .filter(TableTags.table_name == table)
+            .filter(TableTags.schema_name == schema)
+            .order_by("name")
+        )
+        session.commit()
+    finally:
+        session.close()
+    r = [
+        {
+            "id": r.id,
+            "name": r.name,
+            "color": "#" + format(r.color, "06X"),
+            "usage_count": r.usage_count,
+            "usage_tracked_since": r.usage_tracked_since,
+        }
+        for r in result
+    ]
+    return sort_tags_by_popularity(r)
+
+
+def sort_tags_by_popularity(tags):
+    """Sorting function for tags
+
+    :param tags:
+    :return: list of tags
+    """
+    def key_func(tag):
+        track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
+        return tag["usage_count"]
+
+    tags.sort(reverse=True, key=key_func)
+    return tags
+
+
+def get_popular_tags(schema=None, table=None, limit=10):
+    """Get the most popular tags on a given table from a given schema
+
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :param limit:
+    :return: list of tags
+    """
+    tags = get_all_tags(schema, table)
+    sort_tags_by_popularity(tags)
+
+    return tags[:limit]
+
+
+# -------------------------------- Edit Views ------------------------------------------------------
 def view_edit(request, schema, table):
+    """Edit a view on the data stored in a given table from a given schema
+        The view type can be a spreadsheet, a map or a plot
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :return: html template
+    """
     post_id = request.GET.get("id")
     if post_id:
         view = DBView.objects.get(id=post_id)
@@ -644,15 +825,23 @@ def view_edit(request, schema, table):
             request, template_name="dataedit/view_editor.html", context=context
         )
     else:
-        type = request.GET.get("type")
+        view_type = request.GET.get("type")
         return render(
             request,
             template_name="dataedit/view_editor.html",
-            context={"type": type, "new": True, "schema": schema, "table": table},
+            context={"type": view_type, "new": True, "schema": schema, "table": table},
         )
 
 
 def view_save(request, schema, table):
+    """Save a view on the data stored in a given table from a given schema
+        The view type can be a spreadsheet, a map or a plot
+
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :return:
+    """
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
     post_id = request.POST.get("id")
@@ -738,6 +927,13 @@ def view_save(request, schema, table):
 
 
 def view_set_default(request, schema, table):
+    """Set a view as the default view of the data stored given table from a given schema
+
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :return: html template
+    """
     post_id = request.GET.get("id")
 
     for view in DBView.objects.filter(schema=schema, table=table):
@@ -750,6 +946,13 @@ def view_set_default(request, schema, table):
 
 
 def view_delete(request, schema, table):
+    """Delete a view of the data stored given table from a given schema
+
+    :param request: A HTTP-request object sent by the Django framework
+    :param schema: name of a schema
+    :param table: name of a table stored in this schema
+    :return: html template
+    """
     post_id = request.GET.get("id")
 
     view = DBView.objects.get(id=post_id, schema=schema, table=table)
@@ -758,6 +961,7 @@ def view_delete(request, schema, table):
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
+# -------------------------------- Class Views -----------------------------------------------------
 class DataView(View):
     """ This class handles the GET and POST requests for the main page of data edit.
 
@@ -773,10 +977,10 @@ class DataView(View):
             * A list of all columns
             * A list of all revisions of this table
 
-        :param request: An HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table stored in this schema
-        :return:
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :return: html template
         """
         if schema not in schema_whitelist or schema.startswith("_"):
             raise Http404("Schema not accessible")
@@ -854,8 +1058,8 @@ class DataView(View):
         The contained datasets are inserted into the corresponding table via
         the API.
         :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
         :return: Redirects to the view of the table the data was sent to.
         """
         if request.POST and request.FILES:
@@ -880,17 +1084,15 @@ class DataView(View):
 
 
 class MetaView(LoginRequiredMixin, View):
-    """
-
-    """
+    """View of the metadata display and edition"""
 
     def get(self, request, schema, table):
-        """
-        Loads the metadata of the passed table and its columns.
+        """Loads the metadata of a given table from a given schema
+
         :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
-        :return: Renders a form that contains a form with the tables metadata
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :return: html template
         """
 
         metadata = load_metadata_from_db(schema, table)
@@ -916,8 +1118,8 @@ class MetaView(LoginRequiredMixin, View):
         metadata is transformed into a JSON-dictionary and stored in the tables
         comment inside the database.
         :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
         :return: Redirects to the view of the specified table
         """
         columns = actions.analyze_columns(schema, table)
@@ -929,11 +1131,10 @@ class MetaView(LoginRequiredMixin, View):
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
 
-
     name_pattern = r"[\w\s]*"
 
     def loadName(self, name):
-        """
+        """Currently unused
         Checks whether the `name` contains only alphanumeric symbols and whitespaces
         :param name: A string
         :return: If the string is valid it is returned. Otherwise an AssertionError is raised.
@@ -942,6 +1143,12 @@ class MetaView(LoginRequiredMixin, View):
         return name
 
     def _load_list(self, request, name):
+        """Currently unused
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param name:
+        :return:
+        """
 
         pattern = r"%s_(?P<index>\d*)" % name
         return [
@@ -951,6 +1158,12 @@ class MetaView(LoginRequiredMixin, View):
         ]
 
     def _load_url_list(self, request, name):
+        """Currently unused
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param name:
+        :return:
+        """
         pattern = r"%s_name_(?P<index>\d*)" % name
         return [
             {
@@ -962,6 +1175,12 @@ class MetaView(LoginRequiredMixin, View):
         ]
 
     def _load_col_list(self, request, columns):
+        """Currently unused
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param columns:
+        :return:
+        """
         return [
             {
                 "Name": col["id"],
@@ -972,33 +1191,79 @@ class MetaView(LoginRequiredMixin, View):
         ]
 
 
-def save_metadata_as_table_comment(schema, table, metadata):
-    """Save metadata as comment string on a database table
-    :param schema (string):
-    :param table (string):
-    :param metadata: structured data according to metadata specifications
-    """
-    # TODO: validate metadata!
-    # metadata = validate(metadata)
+class RevisionView(View):
+    """View for data revision"""
+    def get(self, request, schema, table):
+        """
 
-    engine = actions._get_engine()
-    conn = engine.connect()
-    trans = conn.begin()
-    try:
-        conn.execute(
-            sqla.text(
-                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                    schema=schema, table=table
-                )
-            ),
-            comment=json.dumps(metadata),
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :return: html template
+        """
+        revisions = TableRevision.objects.filter(schema=schema, table=table)
+        pending = [
+            (schema, table, date)
+            for (schema, table, date) in pending_dumps
+            if schema == schema and table == table
+        ]
+        return render(
+            request,
+            "dataedit/dataedit_revision.html",
+            {
+                "schema": schema,
+                "table": table,
+                "revisions": revisions,
+                "pending": pending,
+            },
         )
-    except Exception as e:
-        raise e
-    else:
-        trans.commit()
-    finally:
-        conn.close()
+
+    def post(self, request, schema, table, date=None):
+        """
+        This method handles an ajax request for a data revision of a specific table.
+        On success the TableRevision-object will be stored to mark that the corresponding
+        revision is available.
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :param date:
+        :return: JsonResponse
+        """
+
+        # date = time.strftime('%Y-%m-%d %H:%M:%S')
+        # fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
+
+        date = time.strftime("%Y-%m-%d %H:%M:%S")
+        # fname = time.strftime(schema+'_' + table + '%Y%m%d_%H%M%S', time.gmtime())
+
+        fname = "20170814_000000"
+
+        original = True  # marks whether this method initialised the revision creation
+
+        # If some user already requested this dataset wait for this thread to finish
+        if (schema, table, date) in pending_dumps:
+            t = pending_dumps[(schema, table, date)]
+            original = False
+        else:
+            t = threading.Thread(target=create_dump, args=(schema, table, fname))
+            t.start()
+            pending_dumps[(schema, table, date)] = t
+
+        while t.is_alive():
+            time.sleep(10)
+
+        pending_dumps.pop((schema, table, date))
+        if original:
+            path = "/dumps/{schema}/{table}/{fname}.dump".format(
+                fname=fname, schema=schema, table=table
+            )
+            size = os.path.getsize(sec.MEDIA_ROOT + path)
+            rev = TableRevision(
+                schema=schema, table=table, date=date, path="/media" + path, size=size
+            )
+            rev.save()
+        return JsonResponse({})
 
 
 class PermissionView(View):
@@ -1007,6 +1272,13 @@ class PermissionView(View):
     """
 
     def get(self, request, schema, table):
+        """
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :return: html template
+        """
 
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
@@ -1041,6 +1313,13 @@ class PermissionView(View):
         )
 
     def post(self, request, schema, table):
+        """
+
+        :param request: A HTTP-request object sent by the Django framework
+        :param schema: name of a schema
+        :param table: name of a table stored in this schema
+        :return: self.get with different arguments
+        """
         table_obj = Table.load(schema, table)
         if (
             request.user.is_anonymous()
@@ -1114,136 +1393,6 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
 
-@login_required
-def add_table_tags(request):
-    """
-    Updates the tags on a table according to the tag values in request.
-    The update will delete all tags that are not present in request and add all tags that are.
-
-    :param request: A HTTP-request object sent by the Django framework. The *POST* field must contain the following values:
-        * schema: The name of a schema
-        * table: The name of a table
-        * Any number of values that start with 'tag_' followed by the id of a tag.
-    :return: Redirects to the previous page
-    """
-    ids = {
-        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
-    }
-    schema = request.POST["schema"]
-    table = request.POST.get("table", None)
-    engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
-
-    session.query(TableTags).filter(
-        TableTags.table_name == table and TableTags.schema_name == schema
-    ).delete()
-    for id in ids:
-        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": id})
-        session.add(t)
-    session.commit()
-    return redirect(request.META["HTTP_REFERER"])
-
-
-def get_all_tags(schema=None, table=None):
-    """
-    Load all tags of a specific table
-    :param schema: Name of a schema
-    :param table: Name of a table
-    :return:
-    """
-    engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
-    try:
-        if table == None:
-            # Neither table, not schema are defined
-            result = session.execute(sqla.select([Tag]).order_by("name"))
-            session.commit()
-            r = [
-                {
-                    "id": r.id,
-                    "name": r.name,
-                    "color": "#" + format(r.color, "06X"),
-                    "usage_count": r.usage_count,
-                    "usage_tracked_since": r.usage_tracked_since,
-                }
-                for r in result
-            ]
-            return sort_tags_by_popularity(r)
-
-        if schema == None:
-            # default schema is the public schema
-            schema = "public"
-
-        result = session.execute(
-            session.query(
-                Tag.name.label("name"),
-                Tag.id.label("id"),
-                Tag.color.label("color"),
-                Tag.usage_count.label("usage_count"),
-                Tag.usage_tracked_since.label("usage_tracked_since"),
-                TableTags.table_name,
-            )
-            .filter(TableTags.tag == Tag.id)
-            .filter(TableTags.table_name == table)
-            .filter(TableTags.schema_name == schema)
-            .order_by("name")
-        )
-        session.commit()
-    finally:
-        session.close()
-    r = [
-        {
-            "id": r.id,
-            "name": r.name,
-            "color": "#" + format(r.color, "06X"),
-            "usage_count": r.usage_count,
-            "usage_tracked_since": r.usage_tracked_since,
-        }
-        for r in result
-    ]
-    return sort_tags_by_popularity(r)
-
-
-def sort_tags_by_popularity(tags):
-    def key_func(tag):
-        track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
-        return tag["usage_count"]
-
-    tags.sort(reverse=True, key=key_func)
-    return tags
-
-
-def get_popular_tags(schema=None, table=None, limit=10):
-    tags = get_all_tags(schema, table)
-    sort_tags_by_popularity(tags)
-
-    return tags[:limit]
-
-
-def increment_usage_count(tag_id):
-    """
-    Increment usage count of a specific tag
-    :param tag_id: ID of the tag which usage count should be incremented
-    :return:
-    """
-    engine = actions._get_engine()
-    Session = sessionmaker()
-    session = Session(bind=engine)
-
-    try:
-        result = session.query(Tag).filter_by(id=tag_id).first()
-
-        result.usage_count += 1
-
-        session.commit()
-    finally:
-        session.close()
-
-
 class SearchView(View):
     """
 
@@ -1253,7 +1402,7 @@ class SearchView(View):
         """
         Renders an empty search field with a list of tags
         :param request: A HTTP-request object sent by the Django framework
-        :return:
+        :return: html template
         """
         return render(
             request, "dataedit/search.html", {"results": [], "tags": get_all_tags()}
@@ -1262,8 +1411,9 @@ class SearchView(View):
     def post(self, request):
         """
 
-        :param request: A HTTP-request object sent by the Django framework. May contain a set of ids prefixed by *select_*
-        :return:
+        :param request: A HTTP-request object sent by the Django framework
+            May contain a set of ids prefixed by *select_*
+        :return: html template
         """
         results = []
         engine = actions._get_engine()
@@ -1273,7 +1423,7 @@ class SearchView(View):
         search_view = sqla.Table("meta_search", metadata, autoload=True)
 
         filter_tags = [
-            int(key[len("select_") :])
+            int(key[len("select_"):])
             for key in request.POST
             if key.startswith("select_")
         ]
