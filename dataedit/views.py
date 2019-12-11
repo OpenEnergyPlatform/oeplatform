@@ -25,6 +25,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -779,10 +780,10 @@ def create_graph(request, schema, table):
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
     else:
-        # TODO get the columns from the schema and the table
+        # get the columns id from the schema and the table
         columns = [
-            ('col1', 'col1_name'),
-            ('col2', 'col2_name'),
+            (c, c)
+            for c in describe_columns(schema, table).keys()
         ]
         formset = GraphViewForm(columns=columns)
 
