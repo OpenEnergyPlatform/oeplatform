@@ -131,6 +131,39 @@ function request_data(data, callback, settings) {
         })
     ).done(function (count_response, select_response) {
         $("#loading-indicator").hide();
+        if(map !== undefined) {
+            map.eachLayer(function (layer) {
+                if (layer !== tile_layer) {
+                    map.removeLayer(layer)
+                }
+            });
+
+            var geo_cols = get_selected_geo_columns();
+            if(geo_cols !== null) {
+                var col_idxs = select_response[0].description.reduce(function (l, r, i) {
+                    if (geo_cols.includes(r[0])) {
+                        l.push(i);
+                    }
+                    return l;
+                }, []);
+                var bounds = [];
+                for (var row_id in select_response[0].data) {
+                    var row = select_response[0].data[row_id];
+                    var geo_values = col_idxs.map(function (i) {
+                        var buf = new buffer.Buffer(row[i], "hex");
+                        var wkb = wkx.Geometry.parse(buf);
+                        var gj = L.geoJSON(wkb.toGeoJSON());
+                        gj.on("click", flash_handler(row_id));
+                        gj.addTo(map);
+                        return gj;
+                    });
+                    bounds.push(L.featureGroup(geo_values));
+                }
+                var b = L.featureGroup(bounds).getBounds();
+                console.log(b);
+            }
+            map.fitBounds(b);
+        }
 
         if(view.type === "map") {
             build_map(select_response[0].data, select_response[0].description);
@@ -411,15 +444,15 @@ function parse_rule(r){
         case "begins_with":
             return {
                 type: "operator",
-                operator: "equal",
-                operands: [{type:"column", column: r.field}, r.value]
+                operator: "like",
+                operands: [{type:"column", column: r.field}, r.value+"%"]
             };
         case "not_begins_with":
-            return {
+            return negate({
                 type: "operator",
-                operator: "equal",
-                operands: [{type:"column", column: r.field}, r.value]
-            };
+                operator: "like",
+                operands: [{type:"column", column: r.field}, r.value+"%"]
+            });
         case "contains":
             return {
                 type: "operator",
@@ -435,15 +468,15 @@ function parse_rule(r){
         case "ends_with":
             return {
                 type: "operator",
-                operator: "equal",
-                operands: [{type:"column", column: r.field}, r.value]
+                operator: "like",
+                operands: [{type:"column", column: r.field}, "%"+r.value]
             };
         case "not_ends_with":
-            return {
+            return negate({
                 type: "operator",
-                operator: "equal",
-                operands: [{type:"column", column: r.field}, r.value]
-            };
+                operator: "like",
+                operands: [{type:"column", column: r.field}, "%"+r.value]
+            });
         case "is_empty":
             return {
                 type: "operator",
@@ -459,7 +492,7 @@ function parse_rule(r){
         case "is_null":
             return {
                 type: "operator",
-                operator: "IS",
+                operator: "is",
                 operands: [{type:"column", column: r.field}, null]
             };
         case "is_not_null":
