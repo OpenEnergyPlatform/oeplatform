@@ -37,7 +37,10 @@ from dataedit.forms import GraphViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import (
+    TableRevision,
+    View as DataViewModel
+)
 
 session = None
 
@@ -766,7 +769,7 @@ def create_graph(request, schema, table):
         # save an instance of View, look at GraphViewForm fields in forms.py for information to the
         # options
         opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
-        gview = View.objects.create(
+        gview = DataViewModel.objects.create(
             name=request.POST.get('name'),
             table=table,
             schema=schema,
