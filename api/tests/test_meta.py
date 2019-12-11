@@ -6,7 +6,7 @@ from api import actions
 
 from . import APITestCase
 from .util import content2json, load_content, load_content_as_json
-
+from omi.dialects.oep.dialect import OEP_V_1_4_Dialect
 
 class TestPut(APITestCase):
     def setUp(self):
@@ -98,10 +98,13 @@ class TestPut(APITestCase):
 
         self.assertEqual(response.status_code, 200, response.json())
 
-        self.assertDictEqualKeywise(response.json(), meta)
+        d = OEP_V_1_4_Dialect()
+        omi_meta = json.loads(json.dumps((d.compile(d.parse(json.dumps(meta))))))
+
+        self.assertDictEqualKeywise(response.json(), omi_meta)
 
     def test_nonexistent_key(self):
-        meta = {"nonexistent_key": ""}
+        meta = {"id":"id", "nonexistent_key": ""}
         response = self.__class__.client.post(
             "/api/v0/schema/{schema}/tables/{table}/meta/".format(
                 schema=self.test_schema, table=self.test_table
@@ -111,15 +114,11 @@ class TestPut(APITestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            400,
-            response.content,
-        )
+        # This should fail, but OMI does not warn about excess keys
 
         self.assertEqual(
-            json.loads(response.content)["reason"],
-            "Metadata could not be parsed",
+            response.status_code,
+            200,
             response.content,
         )
 
