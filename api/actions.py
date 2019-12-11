@@ -119,9 +119,9 @@ def _translate_sqla_type(t, el):
     else:
         return t
 
-def try_parse_metadata(string):
+def try_parse_metadata(inp):
     """
-    :param string:
+    :param inp: string or dict
     :return: Tuple[OEPMetadata or None, string or None]:
         The first component is the result of the parsing procedure or `None` if
         the parsing failed. The second component is None, if the parsing failed,
@@ -134,19 +134,21 @@ def try_parse_metadata(string):
     """
 
     parser = JSONParser_1_4()
-    try:
-        jsn = json.loads(string)
-    except:
-        return None, "Could not parse json"
+    if isinstance(inp, dict):
+        jsn = inp
     else:
         try:
-            metadata = parser.parse(jsn)
-        except ParserException as e:
-            return None, e
+            jsn = json.loads(inp)
         except:
-            raise APIError("Metadata could not be parsed")
-        else:
-            return metadata, None
+            return None, "Could not parse json"
+    try:
+        metadata = parser.parse(jsn)
+    except ParserException as e:
+        return None, str(e)
+    except:
+        raise APIError("Metadata could not be parsed")
+    else:
+        return metadata, None
 
 
 def describe_columns(schema, table):
