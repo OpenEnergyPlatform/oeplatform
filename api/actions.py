@@ -127,9 +127,11 @@ def try_parse_metadata(inp):
         the parsing failed. The second component is None, if the parsing failed,
         otherwise an error message.
 
-    >>> result, error = try_parse_metadata("{'id':'id')")
-    >>> error
-    None
+    .. doctest::
+
+        >>> result, error = try_parse_metadata("{'id':'id')")
+        >>> error
+        None
 
     """
 
