@@ -775,7 +775,7 @@ def create_graph(request, schema, table):
             schema=schema,
             type='graph',
             options=opt,
-            is_default=request.POST.get('is_default')
+            is_default=request.POST.get('is_default', False)
         )
         gview.save()
 
@@ -791,7 +791,6 @@ def create_graph(request, schema, table):
         formset = GraphViewForm(columns=columns)
 
         return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
-
 
 
 class DataView(View):
