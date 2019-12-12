@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.views import View
-from django.views.generic.base import TemplateView
-from django.urls import exceptions
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import exceptions, reverse_lazy
 
 from os.path import join
 
@@ -10,6 +10,8 @@ from uuid import uuid4
 from copy import deepcopy
 
 from django.conf import settings
+
+from markdown2 import Markdown
 
 from .forms import TutorialForm
 from .models import Tutorial
@@ -133,21 +135,15 @@ def _resolveDynamicTutorial(evaluatedQs):
     """
 
     # Initialize dict that stores a tutorial
-    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': ''}
+    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'level': ''}
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
                            title=evaluatedQs.title,
-                           # ToDo: is the html field used correctly -> static tuts.
-                           html=evaluatedQs.markdown,
-                           # html=evaluatedQs.html,
-                           # markdown=evaluatedQs.markdown
-                            )
-
-    # ToDo: remove this if not needed
-    # tutorialJSON = serializers.serialize('json', qs, fields=('id', 'titel', 'html', 'markdown'))
-    # print(tutorialJSON)
-    # return tutorialJSON
+                           html=evaluatedQs.html,
+                           markdown=evaluatedQs.markdown,
+                           category= evaluatedQs.category,
+                           level=evaluatedQs.level)
 
     return currentTutorial
 
@@ -160,10 +156,6 @@ def _resolveDynamicTutorials(tutorials_qs):
     """
     resolvedTutorials = []
 
-    # ToDo: remove this if serializer not used
-    # paramsToAdd = _resolveDynamicTutorial(tutorials_qs)
-    # resolvedTutorials.append(paramsToAdd)
-
     for tutorial in tutorials_qs:
         paramsToAdd = _resolveDynamicTutorial(tutorial)
 
@@ -173,7 +165,7 @@ def _resolveDynamicTutorials(tutorials_qs):
 
 
 def _gatherTutorials(id = None):
-    # Retrieve allTutorials and cache
+    # Retrieve allTutorials objects from db and cache
     dynamicTutorialsQs = Tutorial.objects.all()
 
     tutorials = _resolveStaticTutorials(staticTutorials)
@@ -184,6 +176,18 @@ def _gatherTutorials(id = None):
         return filteredElement
 
     return tutorials
+
+
+def formattedMarkdown(markdown):
+    """
+
+    :param markdown:
+    :return:
+    """
+
+    markdowner = Markdown()
+
+    return markdowner.convert(markdown)
 
 
 class ListTutorials(View):
@@ -220,85 +224,58 @@ class TutorialDetail(View):
         )
 
 
-class NewTutorial(TemplateView):
-    tutorial_form = TutorialForm
+class CreateNewTutorial(CreateView):
     template_name = 'add.html'
     redirect_url = 'detail_tutorial'
+    form_class = TutorialForm
 
-    def get(self, request, *args, **kwargs):
+    def form_valid(self, form):
         """
 
-        :param request:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        form = self.tutorial_form()
-
-        return render(request, self.template_name, {'form': form})
-
-    def post(self, request):
-        """
-
-        :param request:
+        :param form:
         :return:
         """
 
-        if request.method == 'POST':
-            form = self.tutorial_form(request.POST)
-            if form.is_valid():
-                tutorial = form.save(commit=False)
-                # Add more information to the dataset like date, time, contributor ...
-                tutorial.save()
-                return redirect(self.redirect_url, tutorial_id=str(tutorial.id))
-        else:
-            form = self.tutorial_form
+        tutorial = form.save(commit=False)
+        # Add more information to the dataset like date, time, contributor ...
+        tutorial.save()
 
-        return render(request, self.template_name, {'form': form})
+        # Convert markdown to HTML and save to db
+        _html = formattedMarkdown(tutorial.markdown)
+        addHtml = Tutorial.objects.get(pk=tutorial.id)
+        addHtml.html = _html
+        addHtml.save()
+
+        return redirect(self.redirect_url, tutorial_id=tutorial.id)
 
     def addTutorialFromMarkdownFile(self):
         pass
 
 
-class EditTutorials(TemplateView):
-    tutorial_form = TutorialForm
+class EditTutorials(UpdateView):
     template_name = 'add.html'
     redirect_url = 'detail_tutorial'
+    model = Tutorial
+    form_class = TutorialForm
+    pk_url_kwarg = 'tutorial_id'
 
-    def get(self, request, *args, **kwargs):
-        """
+    def form_valid(self, form):
+        tutorial = form.save(commit=False)
+        # Add more information to the dataset like date, time, contributor ...
+        tutorial.save()
+        _html = formattedMarkdown(tutorial.markdown)
+        addHtml = Tutorial.objects.get(pk=tutorial.id)
+        addHtml.html = _html
+        addHtml.save()
 
-        :param request:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        form = self.tutorial_form()
+        return redirect(self.redirect_url, tutorial_id=tutorial.id)
 
-        return render(request, self.template_name, {'form': form})
 
-    def post(self, request, id):
-        """
-
-        :param request:
-        :param id:
-        :return:
-        """
-
-        tutorialToEdit = get_object_or_404(Tutorial, pk=id)
-        print(tutorialToEdit)
-
-        if request.method == 'POST':
-            form = self.tutorial_form(request.POST, instance=tutorialToEdit)
-            if form.is_valid():
-                tutorial = form.save(commit=False)
-                # Add more information to the dataset like date, time, contributor ...
-                tutorial.save()
-                return redirect(self.redirect_url, tutorial_id=str(tutorial.id))
-        else:
-            form = self.tutorial_form(instance=tutorialToEdit)
-
-        return render(request, self.template_name, {'form': form})
+class DeleteTutorial(DeleteView):
+    template_name = 'tutorial_confirm_delete.html'
+    model = Tutorial
+    pk_url_kwarg = 'tutorial_id'
+    success_url = reverse_lazy('list_tutorials')
 
 
 
