@@ -4,13 +4,13 @@
 {% block main-content-body %}
 {% load staticfiles %}
 
-<a href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}"> Bearbeiten </a>
-<span>Tutorial: {{tutorial.id}}</span>
+    <a href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}"> Bearbeiten </a>
+    <a href="{% url 'delete_tutorial' tutorial_id=tutorial.id %}"> Löschen </a>
+    <span>Tutorial: {{tutorial.id}}</span>
 
-<div>
-    {{ tutorial.html | safe }}
-</div>
-
+    <div>
+        {{ tutorial.html | safe }}
+    </div>
 {% endblock main-content-body %}
 
 
