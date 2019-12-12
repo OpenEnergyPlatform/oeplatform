@@ -7,4 +7,4 @@ class TutorialForm(forms.ModelForm):
 
     class Meta:
         model = Tutorial
-        fields = ('title', 'html', 'markdown')
+        fields = ('category', 'title', 'markdown', 'level')
