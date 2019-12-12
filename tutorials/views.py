@@ -111,7 +111,6 @@ def _resolveStaticTutorial(tutorial):
 
 
 def _resolveStaticTutorials(tutorials):
-
     resolvedTutorials = []
 
     # I was not able to solve this problem without an object spread operator due to my JS history.
@@ -129,6 +128,7 @@ def _resolveStaticTutorials(tutorials):
 
 def _resolveDynamicTutorial(evaluatedQs):
     """
+
 
     :param evaluatedQs: Evaluated queryset object
     :return:
@@ -150,6 +150,9 @@ def _resolveDynamicTutorial(evaluatedQs):
 
 def _resolveDynamicTutorials(tutorials_qs):
     """
+    Evaluates a QuerySet and passes each evaluated object to the next function which returns a
+    list with all parameters from the object as dict. The dict is added to a list to later merge
+    the static and dynamic tutorials together
 
     :param tutorials_qs:
     :return:
@@ -165,6 +168,14 @@ def _resolveDynamicTutorials(tutorials_qs):
 
 
 def _gatherTutorials(id = None):
+    """
+    Collects all existing tutorials (static/dynamic) and returns them as a list. If an id is
+    specified as parameter a specific tutorial is returned filtered by id.
+
+    :param id:
+    :return:
+    """
+
     # Retrieve allTutorials objects from db and cache
     dynamicTutorialsQs = Tutorial.objects.all()
 
@@ -180,6 +191,8 @@ def _gatherTutorials(id = None):
 
 def formattedMarkdown(markdown):
     """
+    A parameter is used to enter a text formatted as markdown that is formatted
+    to html and returned using Markdown2.
 
     :param markdown:
     :return:
@@ -194,6 +207,7 @@ class ListTutorials(View):
     def get(self, request):
         """
         Load and list the available tutorials.
+
         :param request: A HTTP-request object sent by the Django framework.
         :return: Tutorials renderer
         """
@@ -210,7 +224,8 @@ class ListTutorials(View):
 class TutorialDetail(View):
     def get(self, request, tutorial_id):
         """
-        Load and list the available tutorials.
+        Detail view for specific tutorial.
+
         :param request: A HTTP-request object sent by the Django framework.
         :return: Tutorials renderer
         """
@@ -231,6 +246,8 @@ class CreateNewTutorial(CreateView):
 
     def form_valid(self, form):
         """
+         validates a form and stores the values in the database and inserts a
+         value for the tutorials field html.
 
         :param form:
         :return:
@@ -260,6 +277,13 @@ class EditTutorials(UpdateView):
     pk_url_kwarg = 'tutorial_id'
 
     def form_valid(self, form):
+        """
+        validates a form and stores the values in the database and inserts a
+         value for the tutorials field html.
+
+        :param form:
+        :return:
+        """
         tutorial = form.save(commit=False)
         # Add more information to the dataset like date, time, contributor ...
         tutorial.save()
