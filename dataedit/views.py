@@ -25,6 +25,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -32,10 +33,14 @@ from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
+from dataedit.forms import GraphViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import (
+    TableRevision,
+    View as DataViewModel
+)
 
 session = None
 
@@ -756,6 +761,36 @@ def view_delete(request, schema, table):
     view.delete()
 
     return redirect("/dataedit/view/" + schema + "/" + table)
+
+
+def create_graph(request, schema, table):
+
+    if request.method == 'POST':
+        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
+        # options
+        opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
+        gview = DataViewModel.objects.create(
+            name=request.POST.get('name'),
+            table=table,
+            schema=schema,
+            type='graph',
+            options=opt,
+            is_default=request.POST.get('is_default', False)
+        )
+        gview.save()
+
+        return redirect(
+            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+        )
+    else:
+        # get the columns id from the schema and the table
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        formset = GraphViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
 
 
 class DataView(View):
