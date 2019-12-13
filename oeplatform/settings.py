@@ -29,7 +29,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap3",
+    "bootstrap4",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",
@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     "api",
     "axes",
     "django.contrib.postgres",
+    "fontawesome_5",
 )
 
 MIDDLEWARE = (
