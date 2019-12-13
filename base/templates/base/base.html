@@ -4,137 +4,147 @@
 
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        {% block before-head %}{% endblock before-head %}
+<head>
+    {% block before-head %}{% endblock before-head %}
 
-        <!-- Meta Tags, which should be implemented -->
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Meta Tags, which should be implemented -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-        <title> OEP{% block title %}{% endblock %} </title>
+    <title> OEP{% block title %}{% endblock %} </title>
 
-        <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
 
-        {% fontawesome_5_static %}
-        {% bootstrap_css %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
+    {% fontawesome_5_static %}
+    {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
 
-        {% block after-head %}{% endblock after-head %}
-    </head>
+    {% block after-head %}{% endblock after-head %}
+</head>
 
 <body>
-    {% block header %}
-        <nav class="navbar navbar-expand-md navbar-light base-navbar base-navbar-top ">
-            <div class="container-center">
+{% block header %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="/">
+            <img style="width:45px;height: 45px;" src="{% static 'oeplogo.svg' %}"/>
+        </a>
 
-            <div class="navbar-header">
-                <a href="/">
-                    <img style="width:45px;height: 45px;" src="{% static 'oeplogo.svg' %}"/>
-                </a>
-                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-            <ul id="navbar" class="nav navbar-nav navbar-right navbar-collapse collapse">
-
-                <li class="inactive"><a href="/dataedit/">Database</a></li>
-
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Factsheets</a>
-                    <ul class="dropdown-menu">
-                        <li> <a href="/factsheets/overview/">Overview</a> </li>
-                        <li> <a href="/factsheets/models/">Models</a> </li>
-                        <li> <a href="/factsheets/frameworks/">Frameworks</a> </li>
-                        <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
-                    </ul>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dataedit">Databases</a>
                 </li>
-                {#<li class="inactive"><a href="/bundles/">Bundles</a></li>#}
-                <li class="inactive"><a href="/documentation/">Documentation</a></li>
-                <li class="inactive"><a href="/about/">About OEP</a></li>
-
-                {%block nav-additional %}{% endblock %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Factsheets
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
+                        <a class="dropdown-item" href="/factsheets/models/">Models</a>
+                        <a class="dropdown-item" href="/factsheets/frameworks/">Frameworks</a>
+                        <a class="dropdown-item" href="/factsheets/scenarios/">Scenarios</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/documentation">Documentation</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About OEP</a>
+                </li>
             </ul>
-          {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
+        </div>
+        {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
             <div class="btn profile-bar">
-                <a class="btn-profile" href="/user/profile/{{ user.pk }}" >{% fa5_icon 'user' 'fas' %} {{ user }}</a>
+                <a class="btn-profile" href="/user/profile/{{ user.pk }}">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
                 <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
             </div>
 
-          {% else %}
-             <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
-          {% endif %}
+        {% else %}
+            <a class="btn btn-info" style="float: right;margin:5px"
+               href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
+        {% endif %}
 
-            </div>
-
-        </nav>
-
-    {% endblock header%}
-        <div class="container-fluid base">
-            {% block main %}
-                <div class="row">
-
-                {% block main-left-sidebar %}{% endblock main-left-sidebar %}
-                {% block main-content %}
-                    <div class="col-lg-8 offset-lg-1 col-md-9">
-                        <div class="card ">
-                            <div class="card-body">
-                                {% block main-content-body %}{% endblock %}
-                            </div>
-                        </div>
-                    </div>
-                {% endblock main-content %}
-                {% block main-right-sidebar %}
-                    <div class="col-md-3">
-                        <div class="card ">
-                            <div class="card-body">
-                                <div>
-                                    <p>
-                                        If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
-                                        You can also fork the project and get involved.
-                                    </p>
-                                    <p>
-                                        <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
-                                    </p>
-                                </div>
-                                <div>
-                                    {% block main-right-sidebar-content %}
-                                    {% endblock main-right-sidebar-content %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endblock main-right-sidebar %}
-                </div>
-                {% endblock main %}
-                {% block footer %}
-                        <footer class="row">
-                            <nav class="navbar navbar-expand-md navbar-light base-navbar base-navbar-bottom">
-                                  <div class="container-fluid container-center">
-                                    <ul class="nav navbar-nav navbar-right">
-                                        <li class="inactive"><a href="/contact/">Contact</a></li>
-                                        <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
-                                        <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
-                                        <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
-                                    </ul>
-                                  </div>
-                            </nav>
-                        </footer>
-
-                    </div>
-                {% endblock footer %}
-            </div>
         </div>
-    {% block body-bottom-js %}
-        {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-        {% bootstrap_javascript jquery=1%}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
-        {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
-    {% endblock body-bottom-js %}
+
+    </nav>
+
+{% endblock header %}
+<div class="container-fluid base">
+    {% block main %}
+        <div class="row">
+
+            {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+            {% block main-content %}
+                <div class="col-lg-8 offset-lg-1 col-md-9">
+                    <div class="card ">
+                        <div class="card-body">
+                            {% block main-content-body %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+            {% endblock main-content %}
+            {% block main-right-sidebar %}
+                <div class="col-md-3">
+                    <div class="card ">
+                        <div class="card-body">
+                            <div>
+                                <p>
+                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are
+                                    welcome to add your comments to the existing issues on <a
+                                        href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                                    You can also fork the project and get involved.
+                                </p>
+                                <p>
+                                    <b> Please note that the platform is still under construction and therefore the
+                                        design of this page is still highly volatile!</b>
+                                </p>
+                            </div>
+                            <div>
+                                {% block main-right-sidebar-content %}
+                                {% endblock main-right-sidebar-content %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endblock main-right-sidebar %}
+        </div>
+    {% endblock main %}
+    {% block footer %}
+        <footer class="navbar-footer bg-dark">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <ul class="navbar-nav mr-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact/">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/legal/impressum/">Imprint</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/legal/datasec/">Legal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/legal/tou/">Terms of Use</a>
+                    </li>
+                </ul>
+            </nav>
+        </footer>
+    {% endblock footer %}
+</div>
+</div>
+{% block body-bottom-js %}
+    {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    {% bootstrap_javascript jquery=1 %}
+    <script type="text/javascript" src="{% static '/js/jsi18n' %}"></script>
+    {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+{% endblock body-bottom-js %}
 </body>
 
 </html>
