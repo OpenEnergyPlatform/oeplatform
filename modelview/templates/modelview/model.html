@@ -25,14 +25,14 @@
         <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
           </h4>
         </div>
-        <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
+        <div id="BasicInformation" class="card-collapse collapse in profilebox in">
             
 
                     
@@ -83,14 +83,14 @@
         </div>
     </div>
 </div>
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
+        <div class="">
+            <div class="card ">
+                <div class="card-header">
+                  <h4 class="card-title">
                     <a data-toggle="collapse" href="#Openness">Openness</a>
                   </h4>
                 </div>
-                <div id="Openness" class="panel-collapse collapse in profilebox">
+                <div id="Openness" class="card-collapse collapse in profilebox">
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
                         {% if not model.open_source %}
@@ -120,14 +120,14 @@
                 </div>
             </div>
         </div>
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
+        <div class="">
+            <div class="card ">
+                <div class="card-header">
+                  <h4 class="card-title">
                     <a href="#Software" data-toggle="collapse">Software</a>
                   </h4>
                 </div>
-                <div id="Software" class="panel-collapse collapse in profilebox">
+                <div id="Software" class="card-collapse collapse in profilebox">
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model field='modelling_software'  %}
                         {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software'  %}
@@ -139,14 +139,14 @@
             </div>
         </div>
     
-        <div class="panel-group">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                  <h4 class="panel-title">
+        <div class="">
+            <div class="card ">
+                <div class="card-header">
+                  <h4 class="card-title">
                     <a data-toggle="collapse" href="#References">References</a>
                   </h4>
                 </div>
-                <div id="References" class="panel-collapse collapse  profilebox">
+                <div id="References" class="card-collapse collapse  profilebox">
                     <div>
                         <table class="profiletable">
                             {% include 'modelview/model_snippet.html' with model=model field='citation_reference'  %}
@@ -175,14 +175,14 @@
                 </div>
             </div>
         </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#Coverage">Coverage</a>
           </h4>
         </div>
-        <div id="Coverage" class="panel-collapse collapse  profilebox">
+        <div id="Coverage" class="card-collapse collapse  profilebox">
             <table class="profiletable">
                 <tr>
                     <td class="sheetlabel">
@@ -346,14 +346,14 @@
         </div>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
           </h4>
         </div>
-        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
+        <div id="MathematicalProperties" class="card-collapse collapse profilebox">
             <table class="profiletable">
                 <tr>
                     <td class="sheetlabel">
@@ -399,14 +399,14 @@
         </div>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a class="fill-div" data-toggle="collapse" href="#Integration">Model Integration</a>
           </h4>
         </div>
-        <div id="Integration" class="panel-collapse collapse in profilebox in">
+        <div id="Integration" class="card-collapse collapse in profilebox in">
             <table class="profiletable">
                 {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
                 {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text%}

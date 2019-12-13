@@ -25,7 +25,7 @@
 
 <body>
     {% block header %}
-        <nav class="navbar navbar-default base-navbar base-navbar-top ">
+        <nav class="navbar navbar-expand-md navbar-light base-navbar base-navbar-top ">
             <div class="container-center">
 
             <div class="navbar-header">
@@ -44,8 +44,7 @@
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
 
                 <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Factsheets
-                    <span class="caret"></span></a>
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Factsheets</a>
                     <ul class="dropdown-menu">
                         <li> <a href="/factsheets/overview/">Overview</a> </li>
                         <li> <a href="/factsheets/models/">Models</a> </li>
@@ -81,9 +80,9 @@
 
                 {% block main-left-sidebar %}{% endblock main-left-sidebar %}
                 {% block main-content %}
-                    <div class="col-lg-8 col-lg-offset-1 col-md-9">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
+                    <div class="col-lg-8 offset-lg-1 col-md-9">
+                        <div class="card ">
+                            <div class="card-body">
                                 {% block main-content-body %}{% endblock %}
                             </div>
                         </div>
@@ -91,8 +90,8 @@
                 {% endblock main-content %}
                 {% block main-right-sidebar %}
                     <div class="col-md-3">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
+                        <div class="card ">
+                            <div class="card-body">
                                 <div>
                                     <p>
                                         If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
@@ -114,7 +113,7 @@
                 {% endblock main %}
                 {% block footer %}
                         <footer class="row">
-                            <nav class="navbar navbar-default base-navbar base-navbar-bottom">
+                            <nav class="navbar navbar-expand-md navbar-light base-navbar base-navbar-bottom">
                                   <div class="container-fluid container-center">
                                     <ul class="nav navbar-nav navbar-right">
                                         <li class="inactive"><a href="/contact/">Contact</a></li>

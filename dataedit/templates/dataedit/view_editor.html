@@ -608,7 +608,7 @@
                         <tr>
                             <td colspan="4">
                                 <br>
-                                <button type="button" onclick="add_filter()" class="btn btn-default">Add filter</button>
+                                <button type="button" onclick="add_filter()" class="btn btn-secondary">Add filter</button>
                             </td>
                         </tr>
                     </table>
@@ -619,7 +619,7 @@
 
     <br>
     <label>Preview </label>
-    <button class="btn btn-default" type="button" onclick="update()">Refresh</button>
+    <button class="btn btn-secondary" type="button" onclick="update()">Refresh</button>
     <br>
 
     <div id="container" style="min-height: 500px">
@@ -629,7 +629,7 @@
 
     <input type="submit" class="btn btn-success" value="Save">
     <a href="/dataedit/view/{{ schema }}/{{ table }}{% if not new %}?view={{ view.id }}{% endif %}"
-       class="btn btn-default">Cancel</a>
+       class="btn btn-secondary">Cancel</a>
     <br><br><br>
 </form>
 

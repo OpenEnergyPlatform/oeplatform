@@ -29,7 +29,7 @@ No matches found
 <div class="list-group">
 {% for r in results %}
     <div class="inner-addon right-addon">
-        <a class="list-group-item" href="/dataedit/view/{{r.schema}}/{{r.table}}">
+        <a class="list-group-item list-group-item-action" href="/dataedit/view/{{r.schema}}/{{r.table}}">
             {% get_tags table=r.table schema=r.schema as table_tags%}
             {% include 'dataedit/tagged_field.html' with label=r.table tags=table_tags %}
         </a>

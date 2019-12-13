@@ -14,8 +14,8 @@ Now you are in the database schema you selected and see the list of all tables o
 You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
 </div>
 {% if is_admin %}<b> You are allowed to administrate this table </b>{% endif %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card ">
+        <div class="card-header">
 
             {% if is_admin %}
                 <div style="position:relative;">
@@ -52,7 +52,7 @@ You if you are logged in, you can add tags to this schema to improve the searcha
         </script>
         {% endif %}
         {% for perm in group_perms %}
-            <div class="panel-body">
+            <div class="card-body">
                 <div>
                     {% if is_admin %}
                         <label for="group_level">{{ perm.holder.name }}</label>
@@ -80,8 +80,8 @@ You if you are logged in, you can add tags to this schema to improve the searcha
             </div>
         {% endfor %}
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card ">
+        <div class="card-header">
 
             {% if is_admin %}
                 <div style="position:relative;">
@@ -118,7 +118,7 @@ You if you are logged in, you can add tags to this schema to improve the searcha
             </script>
         {% endif %}
         {% for perm in user_perms %}
-            <div class="panel-body">
+            <div class="card-body">
                 <div>
                     {% if is_admin %}
                         <label for="level">{{ perm.holder.name }}</label>

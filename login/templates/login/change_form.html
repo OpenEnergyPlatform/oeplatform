@@ -28,12 +28,12 @@
     {% if group.description %}
         <div class="well"> <b>Description:</b> {{group.description}} </div>
     {% endif %}
-	<div class="panel panel-default" style="width:60%">
-		<div class="panel-heading">
+	<div class="card " style="width:60%">
+		<div class="card-header">
 			Members
 		</div>
 		{% for membership in group.memberships.all %}
-		<div class="panel-body">
+		<div class="card-body">
 			<div>
                 <label for="level">{{ membership.user.name }}</label>
 				{% if is_admin %}

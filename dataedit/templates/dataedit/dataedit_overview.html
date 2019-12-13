@@ -39,7 +39,7 @@
               <p> <br>
                 Here you can download this dataset in csv format. Mind that the textbased csv format tends to be costly regarding the file size. Thus, this download might take some time.
               </p>
-              <a class="btn btn-default" style="margin-left:50%" href="/api/v0/schema/{{schema}}/tables/{{table}}/rows?form=csv" >Download CSV</a>
+              <a class="btn btn-secondary" style="margin-left:50%" href="/api/v0/schema/{{schema}}/tables/{{table}}/rows?form=csv" >Download CSV</a>
           </div>
           <div id="python" class="tab-pane fade">
             <div>
@@ -60,7 +60,7 @@ for row in result.json():
         <h4>Currently defined views:</h4>
 
         {% for view in views %}
-        <a href="{{ request.path }}{% if view.id %}?view={{ view.id }}{% endif %}" class="btn btn-default {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
+        <a href="{{ request.path }}{% if view.id %}?view={{ view.id }}{% endif %}" class="btn btn-secondary {% if view.id == current_view.id %}active{% endif %}">{{ view.name }}</a>
         {% endfor %}
         {% if not views %}
         No views were created yet.
@@ -71,14 +71,14 @@ for row in result.json():
         <div>
                 {% if current_view.id %}
             <span style="float: left">
-                <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-default">Edit active view</a>
+                <a href="{{ request.path }}/view?id={{ current_view.id }}" class="btn btn-secondary">Edit active view</a>
                 <a href="{{ request.path }}/view/delete?id={{ current_view.id }}" class="btn btn-danger">Delete active view</a>
             </span>
                 {% endif %}
             <span style="float: right">
-                <a href="{{ request.path }}/view?type=table" class="btn btn-default">New table</a>
-                <a href="{{ request.path }}/view?type=graph" class="btn btn-default">New graph</a>
-                <a href="{{ request.path }}/view?type=map" class="btn btn-default">New map</a>
+                <a href="{{ request.path }}/view?type=table" class="btn btn-secondary">New table</a>
+                <a href="{{ request.path }}/view?type=graph" class="btn btn-secondary">New graph</a>
+                <a href="{{ request.path }}/view?type=map" class="btn btn-secondary">New map</a>
             </span>
             <br clear="all">
         </div>
