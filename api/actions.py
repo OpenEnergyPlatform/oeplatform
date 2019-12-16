@@ -131,8 +131,8 @@ def try_parse_metadata(inp):
 
         >>> from api.actions import try_parse_metadata
         >>> result, error = try_parse_metadata('{"id":"id"}')
-        >>> error
-        None
+        >>> error is None
+        True
 
     """
 
