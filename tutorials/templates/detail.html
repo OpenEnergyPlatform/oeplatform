@@ -11,6 +11,16 @@
     <div>
         {{ tutorial.html | safe }}
     </div>
+    <div>
+        {% if not tutorial.media %}
+            <iframe width="425" height="349"
+                    src="{{ tutorial.media }}"
+                    frameborder="0"
+                    allowfullscreen>
+
+            </iframe>
+        {% endif %}
+    </div>
 {% endblock main-content-body %}
 
 
