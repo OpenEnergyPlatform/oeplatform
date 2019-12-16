@@ -150,9 +150,9 @@ def _resolveDynamicTutorial(evaluatedQs):
 
 def _resolveDynamicTutorials(tutorials_qs):
     """
-    Evaluates a QuerySet and passes each evaluated object to the next function which returns a
-    list with all parameters from the object as dict. The dict is added to a list to later merge
-    the static and dynamic tutorials together
+    Evaluates a QuerySet and passes each evaluated object to the next function which returns a python
+    dictionary that contains all parameters from the object as dict. The dict is added to a list to
+    later merge the static and dynamic tutorials together.
 
     :param tutorials_qs:
     :return:
@@ -192,7 +192,7 @@ def _gatherTutorials(id = None):
 def formattedMarkdown(markdown):
     """
     A parameter is used to enter a text formatted as markdown that is formatted
-    to html and returned using Markdown2.
+    to html and returned. This functionality is implemented using Markdown2.
 
     :param markdown:
     :return:
