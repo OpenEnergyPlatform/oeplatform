@@ -95,6 +95,25 @@
                 </h4>
             </div>
             <div>
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Views<span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">Graph</li>
+                        {% for view in views %}
+                            {% if view.type == "graph" %}
+                                <li><a href="?view={{view.id}}">{{ view.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li><a href="/dataedit/view/{{schema}}/{{table}}/graph/new">Add a new graph view</a></li>
+                        <li class="dropdown-header">Map</li>
+                        {% for view in views %}
+                            {% if view.type == "map" %}
+                                <li><a href="?view={{view.id}}">{{ view.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li><a href="/dataedit/view/{{schema}}/{{table}}/map/new">Add a new map view</a></li>
+                    </ul>
+                </div>
                 <div class="datatable">
                     <table class="display" id="datatable">
                         <thead>
@@ -123,9 +142,7 @@
                         <div class="sk-circle12 sk-circle"></div>
                     </div>
                 </div>
-                <a href="/dataedit/view/{{schema}}/{{table}}/graph/new" method="post">
-                    Create Graph
-                </a>
+
                 {% if current_view.type == "graph" %}
                     <div id="datagraph">
                 {% endif %}
