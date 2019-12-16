@@ -136,7 +136,7 @@ def _resolveDynamicTutorial(evaluatedQs):
     """
 
     # Initialize dict that stores a tutorial
-    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'level': ''}
+    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'media_src': '', 'level': ''}
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
@@ -144,6 +144,7 @@ def _resolveDynamicTutorial(evaluatedQs):
                            html=evaluatedQs.html,
                            markdown=evaluatedQs.markdown,
                            category= evaluatedQs.category,
+                           media_src= evaluatedQs.media_src,
                            level=evaluatedQs.level)
 
     return currentTutorial

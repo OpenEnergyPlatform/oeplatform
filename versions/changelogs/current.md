@@ -9,6 +9,7 @@
 * Factsheets: Make links clickable (#74)
 * API: Explicit column handling (#484)
 * Add tutorials app (#489)
+* Show video-contend in tutorials (#516)
 
 ### Bugs
 * API: Fixed negation in where clauses
