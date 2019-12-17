@@ -118,6 +118,52 @@ class GraphViewForm(ModelForm):
             self.fields['column_y'] = forms.ChoiceField(choices=columns)
 
 
+class MapViewForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.columns = [c for (c, _) in kwargs.pop('columns', {})]
+        super(MapViewForm, self).__init__(*args, **kwargs)
+
+
+    class Meta:
+        model = View
+        fields = '__all__'
+        exclude = ('table', 'schema', 'VIEW_TYPES', 'options', 'type')
+
+    def save(self, commit=True):
+        view = View.objects.create(
+            name=self.data["name"],
+            table=self.table,
+            schema=self.schema,
+            type="map",
+            options=self.options,
+            is_default= self.data.get("is_default", "off") == "on"
+        )
+        if commit:
+            view.save()
+
+
+class LatLonViewForm(MapViewForm):
+    def __init__(self, *args, **kwargs):
+        super(LatLonViewForm, self).__init__(*args, **kwargs)
+        if self.columns is not None:
+            self.fields['lat'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+            self.fields['lon'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+
+    def is_valid(self):
+        return super(LatLonViewForm, self).is_valid() and (self.options['lat'] in self.columns) and (self.options['lon'] in self.columns)
+
+
+class GeomViewForm(MapViewForm):
+    def __init__(self, *args, **kwargs):
+        super(GeomViewForm, self).__init__(*args, **kwargs)
+        if self.columns is not None:
+            self.fields['geom'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+
+    def is_valid(self):
+        return super(GeomViewForm, self).is_valid() and self.options['geom'] in self.columns
+
+
 class TagForm(ModelForm):
     class Meta:
         model = Tag

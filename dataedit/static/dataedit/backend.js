@@ -160,7 +160,6 @@ function request_data(data, callback, settings) {
                     bounds.push(L.featureGroup(geo_values));
                 }
                 var b = L.featureGroup(bounds).getBounds();
-                console.log(b);
             }
             map.fitBounds(b);
         }
@@ -183,8 +182,9 @@ function build_map(data, description){
     map.eachLayer(function (layer) {
         if(layer !== tile_layer){map.removeLayer(layer)}
     });
-        var col_idxs = description.reduce(function (l, r, i) {
-        if (view.options.columns.includes(r[0])) {
+    var geo_columns = get_selected_geo_columns();
+    var col_idxs = description.reduce(function (l, r, i) {
+        if (geo_columns.includes(r[0])) {
             l.push(i);
         }
         return l;
@@ -204,6 +204,17 @@ function build_map(data, description){
     }
     var b = L.featureGroup(bounds).getBounds();
     map.fitBounds(b);
+}
+
+function get_selected_geo_columns(){
+    if(view.options.hasOwnProperty("geom")){
+        return [view.options.geom];
+    } else if (view.options.hasOwnProperty("lat") && view.options.hasOwnProperty("lon")){
+        return [view.options.lat, view.options.lon];
+    }
+    else {
+        console.log("Unrecognised map type")
+    }
 }
 
 function build_graph(data){

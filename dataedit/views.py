@@ -33,7 +33,7 @@ from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
-from dataedit.forms import GraphViewForm
+from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
@@ -792,6 +792,46 @@ def create_graph(request, schema, table):
 
         return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
 
+class MapView(View):
+    def get(self, request, schema, table):
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+
+        latlonform = LatLonViewForm(columns=columns)
+        geomform = GeomViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablemap_form.html',
+                      {'latlonform': latlonform, 'geomform': geomform})
+
+    def post(self, request, schema, table):
+        maptype = request.POST.get('maptype')
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        if maptype == "latlon":
+            form = LatLonViewForm(request.POST, columns=columns)
+            options = dict(
+                lat=request.POST.get('lat'),
+                lon=request.POST.get('lon')
+            )
+        elif maptype == "geom":
+            form = GeomViewForm(request.POST, columns=columns)
+            options = dict(
+                geom=request.POST.get('geom')
+            )
+        else:
+            return HttpResponse("Unknown map type:", status=401)
+        form.schema = schema
+        form.table = table
+        form.options = options
+        if form.is_valid():
+            form.save(commit=True)
+        return redirect(
+            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+        )
 
 class DataView(View):
     """ This class handles the GET and POST requests for the main page of data edit.
@@ -859,7 +899,7 @@ class DataView(View):
             except ObjectDoesNotExist:
                 current_view = default
 
-        table_views = chain((default,), table_views)
+        table_views = list(chain((default,), table_views))
 
         context_dict = {
             "comment_on_table": dict(metadata),
