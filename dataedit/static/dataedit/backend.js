@@ -335,7 +335,7 @@ function load_view(schema, table, csrftoken, current_view) {
             serverSide: true,
             scrollY: true,
             scrollX: true,
-            searching: true,
+            searching: false,
             search: {}
         });
         query_builder = $('#builder').queryBuilder({
