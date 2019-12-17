@@ -141,7 +141,9 @@ class MapViewForm(ModelForm):
         )
         if commit:
             view.save()
-
+            return view.id
+        else:
+            return None
 
 class LatLonViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):

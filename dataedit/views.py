@@ -780,7 +780,7 @@ def create_graph(request, schema, table):
         gview.save()
 
         return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
+            "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
         )
     else:
         # get the columns id from the schema and the table
@@ -791,6 +791,7 @@ def create_graph(request, schema, table):
         formset = GraphViewForm(columns=columns)
 
         return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
 
 class MapView(View):
     def get(self, request, schema, table):
@@ -828,10 +829,13 @@ class MapView(View):
         form.table = table
         form.options = options
         if form.is_valid():
-            form.save(commit=True)
-        return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-        )
+            view_id = form.save(commit=True)
+            return redirect(
+                "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=view_id)
+            )
+        else:
+            return self.get(request, schema, table)
+
 
 class DataView(View):
     """ This class handles the GET and POST requests for the main page of data edit.
