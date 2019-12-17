@@ -2,17 +2,41 @@
 
 
 .index-home {
+
+    height: 100%;
+
     text-align: center;
+
+    display: grid;
+    grid-template-rows: 1fr auto;
+
+    align-items: center;
+
+}
+
+.index-group {
+
+    height: 100%;
 
     display: flex;
     flex-flow: column;
     align-items: center;
-    justify-content: space-between;
-
+    justify-content: space-around;
 }
 
-.index-padding {
+.index-tutorial {
     padding: 0 1em;
+}
+
+.index-tutorial h6 {
+    line-height: 1.5em;
+}
+
+.index-tutorial a {
+    background-image: none;
+    border: 1px solid black;
+    align-self: flex-start;
+
 }
 
 .index-home h3 {
@@ -69,6 +93,10 @@
      background-color: var(--primaryColor4);
 }
 
+.index-tile-color-5 a {
+     background-color: var(--primaryColor5);
+}
+
 .index-tile-colored {
     background-color: var(--secondaryColor1);
 }
@@ -81,7 +109,6 @@
 .index-about-container-background {
     background-color: var(--secondaryColor1);
     width: 100%;
-    margin-top: auto;
 }
 
 .index-about-container {
@@ -90,52 +117,50 @@
 
     display: grid;
 
-    grid-template-columns: 50% 50%;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 48px;
     max-width: 800px;
     margin: auto;
+
+    font-size: 12px;
+
+    color: var(--primaryColor3);
 }
 
-.index-about-container .index-about-text {
-    text-align: left;
-    justify-self: flex-start;
-
-    display: grid;
-    grid-template-rows: repeat(3, auto);
-    justify-items: left;
-
-    grid-gap: 1em;
+.index-about-column img {
+    height: 32px;
 }
 
-.index-about-container .index-about-text a {
+
+
+.index-about-column {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.index-about-column *:not(:first-child) {
+    margin-top: 1em;
+}
+
+.index-about-column a {
+    color: var(--white);
     background-color: var(--primaryColor3);
     background-image: none;
     border: none;
-    color: var(--white);
-    align-self: flex-start;
 
+    padding: 4px 12px;
 }
 
-.index-about-container img {
-    width: 70%;
-    justify-self: flex-end;
-
-}
 
 .index-tile-container {
     display: grid;
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(5, auto);
     grid-gap: 2em;
     padding: 2em 0;
 
     justify-items: center;
-
-}
-
-.index-tutorial-tile-container {
-    display: grid;
-    grid-template-columns: repeat(3, 120px);
-    grid-column-gap: 3em;
-    padding: 2em 0;
 
 }
 
@@ -145,13 +170,4 @@
         grid-template-rows: repeat(2, auto);
     }
 
-    .index-tutorial-tile-container {
-        grid-template-columns: auto;
-        grid-template-rows: repeat(3, auto);
-        justify-content: center;
-    }
-
-    .index-about-container {
-
-    }
 }

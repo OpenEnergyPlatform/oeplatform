@@ -1,4 +1,6 @@
-﻿<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
+[![Documentation Status](https://readthedocs.org/projects/oep-data-interface/badge/?version=latest)](http://oep-data-interface.readthedocs.io/?badge=latest)
+
+<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
 # Open Energy Family - Open Energy Platform (OEP)
 
@@ -28,9 +30,13 @@ Move to the cloned repository
 ### Setup virtual environment
 
 
-If you are a windows user, we recommand you use conda
+If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
 
-    conda env create -f environment.yml
+1)      conda env create –n oep-website
+2)      activate oep-website
+3)      conda config –add channels conda-forge
+4)      conda install shapely
+5)      pip install –r requirements.txt
 
 
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
@@ -71,12 +77,12 @@ Create the environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with valu
 For default settings, you can type the following commands
 
 - On windows
-
-     before you can set environment variables in your terminal you should first type `cmd/v`
+     We recommend you set the environment variables [via menus](https://www.computerhope.com/issues/ch000549.htm). However, we still provide you with the terminal commands (before you can set environment variables in your terminal you should first type `cmd/v`).
 
       set OEP_DJANGO_USER=oep_django_user
       set OEP_DJANGO_PW=<oep_django_password>
-    
+
+    In the following steps we'll provide the terminal commands but you always can set the environment variables via menus instead.
 
 - On linux
 
@@ -179,4 +185,4 @@ Then execute this python code (either directly in a terminal or from a file)
 
 ## Code contribution
 
-Please read carefully the `CONTRIBUTE.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTE.md) before you start contributing!
+Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
