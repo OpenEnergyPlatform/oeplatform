@@ -10,7 +10,6 @@ django-colorfield>=0.1.12
 requests>=2.13.0
 egoio
 psycopg2-binary
-djangoajax
 webcolors>=1.7
 djangorestframework>=3.5.4
 django-axes

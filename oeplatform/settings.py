@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     "widget_tweaks",
     "dataedit",
     "colorfield",
-    "django_ajax",
     "literature",
     "api",
     "axes",
