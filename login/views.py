@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render, render_to_response
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
 
