@@ -5,8 +5,7 @@
 {% load dataedit.taghandler %}
 {% block after-head %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
 {% endblock %}
 
 {% block factsheets_content %}
@@ -68,8 +67,27 @@
                 {% endfor %}
             </div>
         </div>
-    <table id="overview" class="display">
+    <table id="overview" class="display" style="width:100%">
     </table>
+
+
+{% elif label == 'Scenario' %}
+
+    <div class="list-group">
+        {% for id, name in models %}
+            <a class="list-group-item" href="{{id}}">{{ name }}</a>
+        {% endfor %}
+    </div>
+
+{% endif %}
+
+
+
+
+{% endblock %}
+
+{% block after-body-bottom-js %}
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 
     <script>
     var dt;
