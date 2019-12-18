@@ -67,7 +67,19 @@ def load_cursor(f):
                 if not result:
                     result = {}
                 if cursor.description:
-                    result["description"] = cursor.description
+                    description = [
+                        [
+                            col.name,
+                            col.type_code,
+                            col.display_size,
+                            col.internal_size,
+                            col.precision,
+                            col.scale,
+                            col.null_ok,
+                        ]
+                        for col in cursor.description
+                    ]
+                    result["description"] = description
                     result["rowcount"] = cursor.rowcount
                     result["data"] = (
                         list(map(actions._translate_fetched_cell, row))
