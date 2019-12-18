@@ -128,7 +128,7 @@ class BasicFactsheet(models.Model):
     )
     costs = CharField(max_length=1000, verbose_name="Costs", null=True)
     license = CharField(
-        max_length=20,
+        max_length=50,
         verbose_name="License",
         choices=(
             (x, x)
