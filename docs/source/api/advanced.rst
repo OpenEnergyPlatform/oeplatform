@@ -14,7 +14,6 @@ Advanced API features
         else:
             raise Exception("No token available, please set LOCAL_OEP_TOKEN or adapt your security settings")
     from shapely import wkt
-    from django.contrib.gis.geos import Point
     import json
 
 .. doctest::
@@ -23,7 +22,7 @@ Advanced API features
     >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
-    >>> data = {"query": [{"id": i, "name": "John Doe"+str(i), "geom":str(Point(0,i,srid=32140))} for i in range(10)]}
+    >>> data = {"query": [{"id": i, "name": "John Doe"+str(i), "geom":"SRID=32140;POINT(0 %d)"%i} for i in range(10)]}
     >>> requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/new', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
