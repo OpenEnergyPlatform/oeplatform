@@ -15,7 +15,8 @@ class Tutorial(models.Model):
     category = models.CharField(max_length=15, choices=CATEGORY_OPTIONS, blank=True)
     title = models.TextField()
     html = models.TextField()
-    media = models.URLField(null=True, blank=True)
+    # make sure to use official embed links
+    media_src = models.URLField(null=True, blank=True)
     markdown = MarkdownxField()
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
 
