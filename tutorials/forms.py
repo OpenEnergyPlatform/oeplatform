@@ -6,4 +6,4 @@ class TutorialForm(forms.ModelForm):
 
     class Meta:
         model = Tutorial
-        fields = ('category', 'title', 'markdown', 'media', 'level')
+        fields = ('category', 'title', 'markdown', 'media_src', 'level')
