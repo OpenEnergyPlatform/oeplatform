@@ -12,12 +12,13 @@
         {{ tutorial.html | safe }}
     </div>
     <div>
-        {% if not tutorial.media %}
-            <iframe width="425" height="349"
-                    src="{{ tutorial.media }}"
+        {% if tutorial.media_src %}
+            <iframe width="560"
+                    height="315"
+                    src="{{ tutorial.media_src }}"
                     frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
-
             </iframe>
         {% endif %}
     </div>
