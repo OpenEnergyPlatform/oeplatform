@@ -1,5 +1,5 @@
 {% extends "modelview/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% bootstrap_javascript_url %}
 {% load staticfiles %}
 {% load modelview_extras %}
@@ -24,14 +24,14 @@
         <a class="btn btn-info" style="bottom: 5;" href="/factsheets/studies/{{ model.study.pk }}/edit"><span name="icon"></span>Edit Study</a>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#BasicInformation">Study</a>
           </h4>
         </div>
-        <div id="BasicInformation" class="panel-collapse collapse in profilebox in">
+        <div id="BasicInformation" class="card-collapse collapse in profilebox in">
                     
                     <table class="profiletable">
                         {% include 'modelview/model_snippet.html' with model=model_study field='name_of_the_study' %}
@@ -123,14 +123,14 @@
                     </table>
                 </div>
     </div>     
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
           </h4>
         </div>
-        <div id="MathematicalProperties" class="panel-collapse collapse profilebox">
+        <div id="MathematicalProperties" class="card-collapse collapse profilebox">
             <table class="profiletable">
                 <tr>
                     <td class="sheetlabel">
@@ -152,14 +152,14 @@
         </div>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#Coverage">Assumptions</a>
           </h4>
         </div>
-        <div id="Coverage" class="panel-collapse collapse  profilebox">
+        <div id="Coverage" class="card-collapse collapse  profilebox">
             <table class="profiletable">
                 {% develop_year model 'energy_saving' %}
                 {% develop_year model 'potential_energy_savings' %}
@@ -243,14 +243,14 @@
         </div>
     </div>
 </div>
-<div class="panel-group">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
+<div class="">
+    <div class="card ">
+        <div class="card-header">
+          <h4 class="card-title">
             <a data-toggle="collapse" href="#Results">Results</a>
           </h4>
         </div>
-        <div id="Results" class="panel-collapse collapse profilebox">
+        <div id="Results" class="card-collapse collapse profilebox">
             <table class="profiletable">
                 {% include 'modelview/model_snippet.html' with model=model field='uncertainty_assessment' %}
                 {% include 'modelview/model_snippet.html' with model=model field='robustness' %}

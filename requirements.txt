@@ -1,5 +1,4 @@
-django>=2.2
-django-bootstrap3>=8.2
+django==2.2
 matplotlib>=2.0
 urllib3>=1.20
 scipy>=0.18.1
@@ -10,7 +9,7 @@ bibtexparser>=0.6.2
 django-colorfield>=0.1.12
 requests>=2.13.0
 egoio
-psycopg2-binary==2.7.6
+psycopg2-binary
 djangoajax
 webcolors>=1.7
 djangorestframework>=3.5.4
@@ -18,4 +17,5 @@ django-axes
 shapely>=1.5.17
 markdown2
 alembic
-git+https://github.com/solar-c/django-bootstrap3.git
+django-bootstrap4
+django-fontawesome-5

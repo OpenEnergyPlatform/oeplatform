@@ -25,7 +25,7 @@ html {
 
 body {
     overflow: auto;
-    height: calc(100% - 52px);
+    height: calc(100% - 55px);
 }
 
 .base-navbar {
@@ -36,7 +36,7 @@ body {
 }
 
 .base {
-    height: 100%;
+    height: calc(100% - 1em);
     box-sizing: border-box;
     padding-top: 1em;
 
@@ -121,4 +121,18 @@ body {
 
 .flex-item {
     margin: 10px;
+}
+
+.navbar-footer {
+    margin: auto -15px 0;
+
+    border-top: 1em white solid;
+    width: calc(100% + 30px);
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar-footer .navbar {
+    height: 71px;
 }

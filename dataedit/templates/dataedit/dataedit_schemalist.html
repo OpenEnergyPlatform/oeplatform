@@ -7,7 +7,7 @@
 </div>
 <div class="list-group">
 {% for schema, tables in schemas %}
-    <a href="view/{{schema}}" class="list-group-item">
+    <a href="view/{{schema}}" class="list-group-item list-group-item-action">
         {% include 'dataedit/tagged_field.html' with label=schema %}
         <span class="badge">
             {{tables}}

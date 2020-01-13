@@ -1,5 +1,5 @@
 {% extends "modelview/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% load staticfiles %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
@@ -32,13 +32,13 @@
     <div class="checkbox-container">
     {% for heading,d in fields.items %}
         <div class="checkbox-item">
-            <div class="panel-heading">
-              <h4 class="panel-title">
+            <div class="card-header">
+              <h4 class="card-title">
                 <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
               </h4>
             </div>
 
-            <div id="{{heading.split|join:'_'}}" class="panel-collapse collapse">
+            <div id="{{heading.split|join:'_'}}" class="card-collapse collapse">
                 <table class="table">
                     {% for key,value in d.items %}
                         <tr>
@@ -194,7 +194,7 @@
 
     <div class="list-group">
         {% for id, name in models %}
-            <a class="list-group-item" href="{{id}}">{{ name }}</a>
+            <a class="list-group-item list-group-item-action" href="{{id}}">{{ name }}</a>
         {% endfor %}
     </div>
 
