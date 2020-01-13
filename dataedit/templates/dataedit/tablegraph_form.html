@@ -1,0 +1,10 @@
+{% extends "dataedit/base.html" %}
+
+{% block data_content %}
+{% load staticfiles %}
+<form method="post">
+        {% csrf_token %}
+    {{ formset.as_ul }}
+    <input type="submit" value="Submit Form"/>
+</form>
+{% endblock %}

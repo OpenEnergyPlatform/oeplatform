@@ -1,0 +1,20 @@
+{% extends "dataedit/base.html" %}
+
+{% block data_content %}
+{% load staticfiles %}
+<form method="post">
+        {% csrf_token %}
+    {{ latlonform.as_ul }}
+    <input type="hidden" name="maptype" value="latlon">
+    <input type="submit" value="Submit Form"/>
+</form>
+
+
+<form method="post">
+        {% csrf_token %}
+    {{ geomform.as_ul }}
+    <input type="hidden" name="maptype" value="geom">
+    <input type="submit" value="Submit Form"/>
+</form>
+
+{% endblock %}
