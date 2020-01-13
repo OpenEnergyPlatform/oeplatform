@@ -25,6 +25,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -32,10 +33,14 @@ from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
+from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import (
+    TableRevision,
+    View as DataViewModel
+)
 
 session = None
 
@@ -758,6 +763,80 @@ def view_delete(request, schema, table):
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
+def create_graph(request, schema, table):
+
+    if request.method == 'POST':
+        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
+        # options
+        opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
+        gview = DataViewModel.objects.create(
+            name=request.POST.get('name'),
+            table=table,
+            schema=schema,
+            type='graph',
+            options=opt,
+            is_default=request.POST.get('is_default', False)
+        )
+        gview.save()
+
+        return redirect(
+            "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
+        )
+    else:
+        # get the columns id from the schema and the table
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        formset = GraphViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
+
+class MapView(View):
+    def get(self, request, schema, table):
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+
+        latlonform = LatLonViewForm(columns=columns)
+        geomform = GeomViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablemap_form.html',
+                      {'latlonform': latlonform, 'geomform': geomform})
+
+    def post(self, request, schema, table):
+        maptype = request.POST.get('maptype')
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        if maptype == "latlon":
+            form = LatLonViewForm(request.POST, columns=columns)
+            options = dict(
+                lat=request.POST.get('lat'),
+                lon=request.POST.get('lon')
+            )
+        elif maptype == "geom":
+            form = GeomViewForm(request.POST, columns=columns)
+            options = dict(
+                geom=request.POST.get('geom')
+            )
+        else:
+            return HttpResponse("Unknown map type:", status=401)
+        form.schema = schema
+        form.table = table
+        form.options = options
+        if form.is_valid():
+            view_id = form.save(commit=True)
+            return redirect(
+                "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=view_id)
+            )
+        else:
+            return self.get(request, schema, table)
+
+
 class DataView(View):
     """ This class handles the GET and POST requests for the main page of data edit.
 
@@ -824,7 +903,7 @@ class DataView(View):
             except ObjectDoesNotExist:
                 current_view = default
 
-        table_views = chain((default,), table_views)
+        table_views = list(chain((default,), table_views))
 
         context_dict = {
             "comment_on_table": dict(metadata),
@@ -846,7 +925,7 @@ class DataView(View):
 
         context_dict.update(current_view.options)
 
-        return render(request, "dataedit/dataedit_overview.html", context=context_dict)
+        return render(request, "dataedit/dataview.html", context=context_dict)
 
     def post(self, request, schema, table):
         """
