@@ -1,7 +1,7 @@
 
 {% extends "literature/base.html" %}
 
-{% block content %}
+{% block main-content-body %}
 <h1>{{entry.title}} <small>(#{{entry.entries_id}})</small></h1> <a class="btn" href="edit">Edit</a>
 <table class="table table-hover">
 {% include 'literature/reference_item.html' with key='abstract' value=entry.abstract %}

@@ -25,16 +25,22 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
-from dataedit.metadata import load_comment_from_db, read_metadata_from_post
+from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
+from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
+from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import (
+    TableRevision,
+    View as DataViewModel
+)
 
 session = None
 
@@ -757,8 +763,85 @@ def view_delete(request, schema, table):
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
+def create_graph(request, schema, table):
+
+    if request.method == 'POST':
+        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
+        # options
+        opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
+        gview = DataViewModel.objects.create(
+            name=request.POST.get('name'),
+            table=table,
+            schema=schema,
+            type='graph',
+            options=opt,
+            is_default=request.POST.get('is_default', False)
+        )
+        gview.save()
+
+        return redirect(
+            "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
+        )
+    else:
+        # get the columns id from the schema and the table
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        formset = GraphViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
+
+class MapView(View):
+    def get(self, request, schema, table):
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+
+        latlonform = LatLonViewForm(columns=columns)
+        geomform = GeomViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablemap_form.html',
+                      {'latlonform': latlonform, 'geomform': geomform})
+
+    def post(self, request, schema, table):
+        maptype = request.POST.get('maptype')
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        if maptype == "latlon":
+            form = LatLonViewForm(request.POST, columns=columns)
+            options = dict(
+                lat=request.POST.get('lat'),
+                lon=request.POST.get('lon')
+            )
+        elif maptype == "geom":
+            form = GeomViewForm(request.POST, columns=columns)
+            options = dict(
+                geom=request.POST.get('geom')
+            )
+        else:
+            return HttpResponse("Unknown map type:", status=401)
+        form.schema = schema
+        form.table = table
+        form.options = options
+        if form.is_valid():
+            view_id = form.save(commit=True)
+            return redirect(
+                "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=view_id)
+            )
+        else:
+            return self.get(request, schema, table)
+
+
 class DataView(View):
-    """ This method handles the GET requests for the main page of data edit.
+    """ This class handles the GET and POST requests for the main page of data edit.
+
+        This view is displayed when a table is clicked on after choosing a schema on the website
+
         Initialises the session data (if necessary)
     """
 
@@ -785,14 +868,18 @@ class DataView(View):
         if not engine.dialect.has_table(engine, table, schema=schema):
             raise Http404
 
+        # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
-        comment_on_table = load_comment_from_db(schema, table)
+        # the metadata are stored in the table's comment
+        metadata = load_metadata_from_db(schema, table)
+
+        meta_widget = MetaDataWidget(metadata)
 
         revisions = []
 
+        # load the admin interface
         api_changes = change_requests(schema, table)
-
         data = api_changes.get("data")
         display_message = api_changes.get("display_message")
         display_items = api_changes.get("display_items")
@@ -816,10 +903,11 @@ class DataView(View):
             except ObjectDoesNotExist:
                 current_view = default
 
-        table_views = chain((default,), table_views)
+        table_views = list(chain((default,), table_views))
 
         context_dict = {
-            "comment_on_table": dict(comment_on_table),
+            "comment_on_table": dict(metadata),
+            "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
             "table": table,
@@ -837,7 +925,7 @@ class DataView(View):
 
         context_dict.update(current_view.options)
 
-        return render(request, "dataedit/dataedit_overview.html", context=context_dict)
+        return render(request, "dataedit/dataview.html", context=context_dict)
 
     def post(self, request, schema, table):
         """
@@ -884,12 +972,21 @@ class MetaView(LoginRequiredMixin, View):
         :return: Renders a form that contains a form with the tables metadata
         """
 
-        comment_on_table = load_comment_from_db(schema, table)
+        metadata = load_metadata_from_db(schema, table)
+
+        meta_widget = MetaDataWidget(metadata)
+
+        context_dict = {
+            "schema": schema,
+            "table": table,
+            "meta_widget": meta_widget.render_editmode(),
+            "comment_on_table": metadata
+        }
 
         return render(
             request,
             "dataedit/meta_edit.html",
-            {"schema": schema, "table": table, "comment_on_table": comment_on_table},
+            context=context_dict,
         )
 
     def post(self, request, schema, table):
@@ -905,28 +1002,12 @@ class MetaView(LoginRequiredMixin, View):
         columns = actions.analyze_columns(schema, table)
 
         comment = read_metadata_from_post(request.POST, schema, table)
+        save_metadata_as_table_comment(schema, table, metadata=comment)
 
-        engine = actions._get_engine()
-        conn = engine.connect()
-        trans = conn.begin()
-        try:
-            conn.execute(
-                sqla.text(
-                    "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                        schema=schema, table=table
-                    )
-                ),
-                comment=json.dumps(comment),
-            )
-        except Exception as e:
-            raise e
-        else:
-            trans.commit()
-        finally:
-            conn.close()
         return redirect(
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
+
 
     name_pattern = r"[\w\s]*"
 
@@ -968,6 +1049,35 @@ class MetaView(LoginRequiredMixin, View):
             }
             for col in columns
         ]
+
+
+def save_metadata_as_table_comment(schema, table, metadata):
+    """Save metadata as comment string on a database table
+    :param schema (string):
+    :param table (string):
+    :param metadata: structured data according to metadata specifications
+    """
+    # TODO: validate metadata!
+    # metadata = validate(metadata)
+
+    engine = actions._get_engine()
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute(
+            sqla.text(
+                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema, table=table
+                )
+            ),
+            comment=json.dumps(metadata),
+        )
+    except Exception as e:
+        raise e
+    else:
+        trans.commit()
+    finally:
+        conn.close()
 
 
 class PermissionView(View):

@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
-{% block content %}
+{% block main-content-body %}
 {% block title %} - {{group.name}} {% endblock %}
 
 <h2>Group Management </h2>
@@ -24,7 +24,7 @@
  
 {% endif %}
 {% endblock %}
-{% block content-right %}
+{% block main-right-sidebar-content %}
 <hr>
 <h3>Manage Groups</h3>
 <div style="overflow: hidden;">
