@@ -77,12 +77,12 @@ Create the environment variables `OEP_DJANGO_USER` and `OEP_DJANGO_PW` with valu
 For default settings, you can type the following commands
 
 - On windows
-
-     before you can set environment variables in your terminal you should first type `cmd/v`
+     We recommend you set the environment variables [via menus](https://www.computerhope.com/issues/ch000549.htm). However, we still provide you with the terminal commands (before you can set environment variables in your terminal you should first type `cmd/v`).
 
       set OEP_DJANGO_USER=oep_django_user
       set OEP_DJANGO_PW=<oep_django_password>
-    
+
+    In the following steps we'll provide the terminal commands but you always can set the environment variables via menus instead.
 
 - On linux
 

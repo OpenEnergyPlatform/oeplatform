@@ -71,6 +71,9 @@ class View(models.Model):
     options = JSONField(null=False, default=dict)
     is_default = BooleanField(default=False)
 
+    def __str__(self):
+        return '{}/{}--"{}"({})'.format(self.schema, self.table, self.name, self.type.upper())
+
 
 class Filter(models.Model):
     column = CharField(max_length=100, null=False)
