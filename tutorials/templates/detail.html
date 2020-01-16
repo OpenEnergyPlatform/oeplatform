@@ -6,7 +6,7 @@
 
     <a href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}"> Bearbeiten </a>
     <a href="{% url 'delete_tutorial' tutorial_id=tutorial.id %}"> Löschen </a>
-    <span>Tutorial: {{tutorial.id}}</span>
+    <span>Tutorial: {{tutorial.title}}</span>
 
     <div>
         {{ tutorial.html | safe }}
