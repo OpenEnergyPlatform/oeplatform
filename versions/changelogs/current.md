@@ -8,6 +8,7 @@
 * Factsheets: General remodeling of factsheets (#419)
 * Factsheets: Make links clickable (#74)
 * API: Explicit column handling (#484)
+* API: Handle metadata via API
 
 ### Bugs
 * API: Fixed negation in where clauses
