@@ -7,10 +7,10 @@
     {% if not tutorial.fileName %}
         <a href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}"> Bearbeiten </a>
         <a href="{% url 'delete_tutorial' tutorial_id=tutorial.id %}"> Löschen </a>
-        <span>Tutorial: {{tutorial.title}}</span>
     {% else %}
          <a href="https://github.com/OpenEnergyPlatform/examples"> Bearbeiten </a>
     {% endif %}
+     <span>Tutorial: {{tutorial.title}}</span>
 
     <div>
         {{ tutorial.html | safe }}
