@@ -5,18 +5,7 @@
 {% load bootstrap3 %}
 {% block heading %}
 
-
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<script src="{% static 'dataedit/wkx.min.js' %}"></script>
-<script src="{% static 'dataedit/proj4.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
 <link href="{% static 'dataedit/query-builder.default.min.css' %}"  rel="stylesheet">
-<script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
-
 <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"  rel="stylesheet">
     <h3>
         <a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}}
@@ -158,7 +147,18 @@
 </div>
 
 <hr>
+{% endblock %}
 
+{% block after-body-bottom-js %}
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'dataedit/wkx.min.js' %}"></script>
+<script src="{% static 'dataedit/proj4.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 <script>
     var csrftoken = getCookie('csrftoken');
     var table = '{{table}}';
