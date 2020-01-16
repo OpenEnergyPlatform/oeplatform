@@ -167,7 +167,7 @@ def _resolveDynamicTutorials(tutorials_qs):
     return resolvedTutorials
 
 
-def _gatherTutorials(id = None):
+def _gatherTutorials(id=None):
     """
     Collects all existing tutorials (static/dynamic) and returns them as a list. If an id is
     specified as parameter a specific tutorial is returned filtered by id.
