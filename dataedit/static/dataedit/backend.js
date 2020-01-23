@@ -164,16 +164,18 @@ function build_map(data, description){
     for (var row_id in data) {
         var row = data[row_id];
         var geo_values = col_idxs.map(function (i) {
-            if(row[i] !== null) {
-                var buf = new buffer.Buffer(row[i], "hex");
-                var wkb = wkx.Geometry.parse(buf);
-                var gj = L.geoJSON(wkb.toGeoJSON());
-                gj.on("click", flash_handler(row_id));
-                gj.addTo(map);
-                return gj;
+            if(row[i] !== null && row[i] !== "{}") {
+                return row[i].replace(/[{}]/g,"").split(":").map(function(part){
+                    var buf = new buffer.Buffer(part, "hex");
+                    var wkb = wkx.Geometry.parse(buf);
+                    var gj = L.geoJSON(wkb.toGeoJSON());
+                    gj.on("click", flash_handler(row_id));
+                    gj.addTo(map);
+                    return gj;
+                })
             }
         });
-        bounds.push(L.featureGroup(geo_values.filter(x => !!x)));
+        bounds.push(L.featureGroup([...geo_values].filter(x => !!x)[0]));
     }
     var b = L.featureGroup(bounds).getBounds();
     map.fitBounds(b);
