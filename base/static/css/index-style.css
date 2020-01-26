@@ -1,6 +1,5 @@
 @charset "UTF-8";
 
-
 .index-home {
 
     height: 100%;
@@ -14,6 +13,10 @@
 
 }
 
+.index-padding {
+    margin-top: 2em;
+}
+
 .index-group {
 
     height: 100%;
@@ -25,30 +28,28 @@
 }
 
 .index-tutorial {
-    padding: 0 1em;
+    padding: 2em 1em;
 }
 
-.index-tutorial h6 {
+.index-tutorial span {
     line-height: 1.5em;
 }
 
 .index-tutorial a {
+    margin-top: 1em;
     background-image: none;
     border: 1px solid black;
-    align-self: flex-start;
 
 }
 
 .index-home h3 {
-    font-weight: 900;
-    letter-spacing: -1px;
-    color: var(--primaryColor1);
+    font-weight: 600;
+    color: var(--primaryColor2);
 }
 
 .index-home h4 {
-    font-weight: 900;
-    letter-spacing: -1px;
-    color: var(--primaryColor1);
+    font-weight: 600;
+    color: var(--primaryColor4);
 }
 
 .index-tile {

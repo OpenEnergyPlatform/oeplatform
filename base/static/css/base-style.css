@@ -28,6 +28,11 @@ body {
     height: calc(100% - 55px);
 }
 
+
+.alternative {
+    color: var(--grey1)
+}
+
 .base-navbar {
     margin-bottom: 0;
     border-radius: 0;
