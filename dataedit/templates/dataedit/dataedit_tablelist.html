@@ -1,19 +1,22 @@
 {% extends "dataedit/base.html" %}
 {% block title %} - {{schema}}{% endblock %}
+
+{% block site-header %}
+    <h2 class="site-header">Schema: {{ schema }}</h2>
+{% endblock site-header %}
+
 {% block data_content %}
 {% load dataedit.taghandler %}
-<h3>Schema: {{schema}}</h3>
 
 <table id="tables" class="table table-hover table-bordered">
     <thead>
-        <tr>
+        <tr class="table-primary">
             <th>Name</th>
             <th>Tags</th>
         </tr>
     </thead>
     <tbody>
-        {% for table, label in tables %}
-            {% get_tags table=table schema=schema as table_tags%}
+        {% for table, label, tags in tables %}
 
             <tr onclick="window.location='/dataedit/view/{{ schema }}/{{ table }}'">
                 {% if label %}
@@ -22,7 +25,7 @@
                     <td>{{ table }}</td>
                 {% endif %}
                 <td>
-                    {% for tag in table_tags %}
+                    {% for tag in tags %}
                         <button class="btn tag" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</button>
                     {% endfor %}
                 </td>
@@ -34,8 +37,3 @@
 
 {% endblock %}
 
-{% block main-right-sidebar-content-additional %}
-    <hr>
-    <h5>Tags:</h5>
-    {% include 'dataedit/taggable_setting.html' with schema=schema.name %}
-{% endblock  %}

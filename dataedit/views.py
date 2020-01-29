@@ -12,6 +12,7 @@ from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
 
+import numpy
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -226,28 +227,46 @@ def listschemas(request):
     :return: Renders the schema list
     """
 
+    searchedQueryString = request.GET.get("query")
+    searchedTagIds = list(map(
+        lambda t: int(t),
+        request.GET.getlist("tags"),
+    ))
+
+    for tag_id in searchedTagIds:
+        increment_usage_count(tag_id)
+
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
     query = (
-        "SELECT schema_name, count(tablename) as tables "
-        "FROM pg_tables right join information_schema.schemata "
-        "ON schema_name=schemaname "
-        "WHERE tablename IS NULL "
+        "SELECT i.schema_name as schemaname, count(p.tablename) as table_count, array_agg(p.tablename) as tables, array_agg(tg.id) as tag_ids FROM pg_tables p "
+        "right join information_schema.schemata i "
+        "ON p.schemaname=i.schema_name "
+        "left join table_tags t "
+        "ON p.schemaname=t.schema_name "
+        "left join tags tg "
+        "ON t.tag=tg.id "
+        "WHERE p.tablename IS NULL "
         "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
-        "       AND tablename NOT LIKE '\_%%') "
-        "GROUP BY schema_name;".format(user=sec.dbuser)
+        "       AND p.tablename NOT LIKE '\_%%') "
+        "GROUP BY i.schema_name;".format(user=sec.dbuser)
     )
     response = conn.execute(query)
     schemas = sorted(
         [
-            (row.schema_name, row.tables)
+            (row.schemaname, row.table_count, row.tag_ids)
             for row in response
-            if row.schema_name in schema_whitelist
-            and not row.schema_name.startswith("_")
+            if row.schemaname in schema_whitelist
+            and not row.schemaname.startswith("_")
+            and (not searchedQueryString or searchedQueryString in row.schemaname or list(filter(lambda tableName: tableName and searchedQueryString in tableName, row.tables)))
+            and (not searchedTagIds or numpy.intersect1d(searchedTagIds, list(filter(lambda x: x is not None, row.tag_ids))))
         ],
         key=lambda x: x[0],
     )
+
+    print(schemas)
+
     return render(request, "dataedit/dataedit_schemalist.html", {"schemas": schemas})
 
 
@@ -307,6 +326,16 @@ def listtables(request, schema_name):
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
+
+    searchedQueryString = request.GET.get("query")
+    searchedTagIds = list(map(
+        lambda t: int(t),
+        request.GET.getlist("tags"),
+    ))
+
+    for tag_id in searchedTagIds:
+        increment_usage_count(tag_id)
+
     engine = actions._get_engine()
     conn = engine.connect()
     labels = get_readable_table_names(schema_name)
@@ -317,14 +346,25 @@ def listtables(request, schema_name):
         )
     )
     tables = conn.execute(query)
+
+
     tables = [
         (
             table.tablename,
             labels[table.tablename] if table.tablename in labels else None,
+            get_all_tags(schema_name, table.tablename)
         )
         for table in tables
         if not table.tablename.startswith("_")
+           and (not searchedQueryString or searchedQueryString in table.tablename)
     ]
+
+    # Apply tag filter later on, because I am not smart enough to do it inline.
+    tables = list(filter(
+        lambda tableEntry: not searchedTagIds or numpy.intersect1d(searchedTagIds, list(map(lambda tag: tag['id'], tableEntry[2]))),
+        tables
+    ))
+
     tables = sorted(tables, key=lambda x: x[0])
     return render(
         request,
@@ -1322,66 +1362,3 @@ def increment_usage_count(tag_id):
     finally:
         session.close()
 
-
-class SearchView(View):
-    """
-
-    """
-
-    def get(self, request):
-        """
-        Renders an empty search field with a list of tags
-        :param request: A HTTP-request object sent by the Django framework
-        :return:
-        """
-        return render(
-            request, "dataedit/search.html", {"results": [], "tags": get_all_tags()}
-        )
-
-    def post(self, request):
-        """
-
-        :param request: A HTTP-request object sent by the Django framework. May contain a set of ids prefixed by *select_*
-        :return:
-        """
-        results = []
-        engine = actions._get_engine()
-        metadata = sqla.MetaData(bind=engine)
-        Session = sessionmaker()
-        session = Session(bind=engine)
-        search_view = sqla.Table("meta_search", metadata, autoload=True)
-
-        filter_tags = [
-            int(key[len("select_") :])
-            for key in request.POST
-            if key.startswith("select_")
-        ]
-
-        for tag_id in filter_tags:
-            increment_usage_count(tag_id)
-
-        tag_agg = array_agg(TableTags.tag)
-        query = session.query(
-            search_view.c.schema.label("schema"),
-            search_view.c.table.label("table"),
-            tag_agg,
-        ).outerjoin(
-            TableTags,
-            (search_view.c.table == TableTags.table_name)
-            and (search_view.c.table == TableTags.table_name),
-        )
-        if filter_tags:
-            query = query.having(
-                tag_agg.contains(sqla.cast(filter_tags, sqla.ARRAY(sqla.BigInteger)))
-            )
-
-        query = query.group_by(search_view.c.schema, search_view.c.table)
-        results = session.execute(query)
-
-        session.commit()
-        ret = [{"schema": r.schema, "table": r.table} for r in results]
-        return render(
-            request,
-            "dataedit/search.html",
-            {"results": ret, "tags": get_all_tags(), "selected": filter_tags},
-        )

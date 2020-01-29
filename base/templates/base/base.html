@@ -77,40 +77,36 @@
 
 {% endblock header %}
 <div class="container-fluid base">
+    {% block site-header %}
+    {% endblock site-header %}
     {% block main %}
         <div class="row">
 
             {% block main-left-sidebar %}{% endblock main-left-sidebar %}
             {% block main-content %}
-                <div class="col-lg-8 offset-lg-1 col-md-9">
-                    <div class="card ">
-                        <div class="card-body">
-                            {% block main-content-body %}{% endblock %}
-                        </div>
-                    </div>
+                <div class="col-lg-7 offset-lg-1 col-md-9">
+                    {% block main-content-body %}{% endblock %}
                 </div>
             {% endblock main-content %}
             {% block main-right-sidebar %}
-                <div class="col-md-3">
-                    <div class="card ">
-                        <div class="card-body">
-                            <div>
-                                <p>
-                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are
-                                    welcome to add your comments to the existing issues on <a
-                                        href="https://github.com/openego/oeplatform">GitHub</a>. <br>
-                                    You can also fork the project and get involved.
-                                </p>
-                                <p>
-                                    <b> Please note that the platform is still under construction and therefore the
-                                        design of this page is still highly volatile!</b>
-                                </p>
-                            </div>
-                            <div>
-                                {% block main-right-sidebar-content %}
-                                {% endblock main-right-sidebar-content %}
-                            </div>
-                        </div>
+                <div class="col-md-3 col-lg-3 border-left">
+                    {% block main-right-sidebar-disclaimer %}
+                    <div>
+                        <p>
+                            If you find bugs or if you have ideas to improve the Open Energy Platform, you are
+                            welcome to add your comments to the existing issues on <a
+                                href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                            You can also fork the project and get involved.
+                        </p>
+                        <p>
+                            <b> Please note that the platform is still under construction and therefore the
+                                design of this page is still highly volatile!</b>
+                        </p>
+                    </div>
+                    {% endblock main-right-sidebar-disclaimer %}
+                    <div>
+                        {% block main-right-sidebar-content %}
+                        {% endblock main-right-sidebar-content %}
                     </div>
                 </div>
             {% endblock main-right-sidebar %}

@@ -271,3 +271,67 @@ input[type="checkbox"]:checked+label{
     text-decoration: none;
     cursor: pointer;
 }
+
+.tag-checkbox {
+    display: none;
+}
+
+.tag-checkbox:before {
+    display: none;
+}
+
+.tag-checkbox-container {
+    padding: 0.25em 0.5em;
+    border-radius: 0.5em;
+
+    display: flex;
+    align-items: center;
+}
+
+.tag-checkbox-container:not(:last-child) {
+    margin-right: 0.5em;
+}
+
+.tag-checkbox-icon {
+    display: none;
+
+    margin-left: 0.5em;
+}
+
+.tag-checkbox-checked .tag-checkbox-icon {
+    display: block;
+}
+
+.foldable-entry {
+
+    display: grid;
+
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+
+    align-items: center;
+
+    grid-template-areas:
+        "Title Caret"
+        "Content Content";
+
+
+}
+
+.foldable-entry > h5 {
+    margin: 0;
+}
+
+.foldable-entry > span {
+    margin-right: 0.5em;
+    transition: transform 0.3s ease-in-out;
+}
+
+.foldable-entry > span.collapsed {
+    transform: rotate(180deg);
+}
+
+.foldable-entry-body {
+    margin-top: 1em;
+    grid-area: Content;
+}
