@@ -20,6 +20,7 @@ from sqlalchemy import (
     select,
     util,
     cast,
+    null,
 )
 import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
@@ -67,7 +68,7 @@ def is_pg_qual(x):
 def read_pgvalue(x):
     # TODO: Implement check for valid values
     if x is None:
-        return "null"
+        return null()
     return x
 
 
@@ -467,6 +468,8 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
                 return parse_expression(grouping)
         if dtype == "operator":
             return parse_operator(d)
+        if dtype == "case":
+            return parse_case(d)
         if dtype == "modifier":
             return parse_modifier(d)
         if dtype == "function":
@@ -555,6 +558,18 @@ def parse_condition(dl):
     clean_dl = _unpack_clauses(dl)
     return parse_expression(clean_dl)
 
+def parse_case(dl):
+    else_clause=parse_expression(dl["else"])
+    if "expression" in dl:
+        return sa.case(
+            {parse_expression(case["when"]): parse_expression(case["then"]) for case in dl.get("cases", [])},
+            value=parse_expression(dl["expression"]),
+            else_=else_clause
+        )
+    else:
+        return sa.case(
+            [(parse_expression(case["when"]), parse_expression(case["then"])) for case in dl.get("cases", [])],
+            else_=else_clause)
 
 def parse_operator(d):
     query = parse_sqla_operator(
@@ -717,6 +732,9 @@ def parse_sqla_operator(raw_key, *operands):
                 % (key, len(operands))
             )
         x, y = operands
+        if x is None:
+            x = null()
+
         if key in ["equals", "="]:
             return x == y
         if key in ["greater", ">"]:
