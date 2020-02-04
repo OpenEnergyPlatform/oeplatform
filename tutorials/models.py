@@ -5,7 +5,7 @@ from markdownx.models import MarkdownxField
 
 # add options if needed
 CATEGORY_OPTIONS = [('io', 'I/O'), ('intro', 'Introduction')]
-LEVEL_OPTIONS = [(1, '1'), (2, '2'), (3, '3')]
+LEVEL_OPTIONS = [(1, 'Beginners'), (2, 'Intermediates'), (3, 'Advanced')]
 
 # Create your models here.
 
