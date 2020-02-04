@@ -78,6 +78,22 @@ App: login
 
    login
 
+App: tutorials
+**************
+
+The OEP features should be easy to use for the user. Therefore text, video or jupyternotebook based tutorials
+are offered. The tutorials app can be accessed via the front page. With the tutorials app text and
+video tutorials can be created.  All CRUD functions are implemented here. The tutorials are stored as
+markdown and html format in the django internal database. Jupyternotebook tutorials are imported
+from https://github.com/OpenEnergyPlatform/examples Editing the jupyternotebook tutorials is not possible
+via the webinterface. Update and delete functionalities for updating the listed tutorials are implemented
+via console commands (base/management/commands/notebooks.py)
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials
+
 Indices and tables
 ==================
 
