@@ -3,6 +3,7 @@
 * API: More fine grained handling of temporal data
 * Support metadata version 1.4
 * Metadata upload and download via API (#461)
+* Allow Metadata on table creation
 * Add contribute file (#469, #505)
 * Cover versioning tables in migrations
 * Factsheets: General remodeling of factsheets (#419)
