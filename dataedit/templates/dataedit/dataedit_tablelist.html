@@ -1,4 +1,4 @@
-{% extends "dataedit/base.html" %}
+{% extends "dataedit/filter.html" %}
 {% block title %} - {{schema}}{% endblock %}
 
 {% block site-header %}
@@ -26,7 +26,7 @@
                 {% endif %}
                 <td>
                     {% for tag in tags %}
-                        <button class="btn tag" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</button>
+                        <a class="btn tag" href="/dataedit/tags" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
                     {% endfor %}
                 </td>
             </tr>

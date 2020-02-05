@@ -267,7 +267,15 @@ def listschemas(request):
 
     print(schemas)
 
-    return render(request, "dataedit/dataedit_schemalist.html", {"schemas": schemas})
+    return render(
+        request,
+        "dataedit/dataedit_schemalist.html",
+        {
+            "schemas": schemas,
+            "query": searchedQueryString,
+            "tags": searchedTagIds
+        }
+    )
 
 
 def overview(request):
@@ -369,7 +377,10 @@ def listtables(request, schema_name):
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
-        {"schema": schema_name, "tables": tables},
+        {
+            "schema": schema_name, "tables": tables,
+            "query": searchedQueryString, "tags": searchedTagIds
+        },
     )
 
 
