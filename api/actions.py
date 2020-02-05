@@ -20,7 +20,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
-
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
 import api
 import login.models as login_models
 from api import DEFAULT_SCHEMA, references
@@ -721,7 +721,7 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 
-def table_create(schema, table, columns, constraints_definitions, cursor):
+def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
     """
     Creates a new table.
     :param schema: schema
@@ -740,6 +740,16 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     # cid = id_columns[0]
     # if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
+
+    if table_metadata is not None:
+        omi_dialect = OmiDialect()
+        try:
+            comment_on_table = omi_dialect.parse(table_metadata)
+        except ParserException as e:
+            raise APIError(str(e))
+        comment_on_table = json.dumps(omi_dialect.compile(comment_on_table))
+    else:
+        comment_on_table = None
 
     metadata = MetaData()
 
@@ -774,7 +784,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
-    t = Table(table, metadata, *(columns + constraints), schema=schema)
+    t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
     return get_response_dict(success=True)
