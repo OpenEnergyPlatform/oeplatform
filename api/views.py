@@ -15,6 +15,7 @@ from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpRespon
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from omi.dialects.oep.compiler import JSONCompiler
+from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -183,7 +184,10 @@ class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
-        return JsonResponse(json.loads(table_obj.comment))
+        comment = table_obj.comment
+        return JsonResponse(
+            dict(content=json.loads(comment)) if comment else {})
+
 
     @api_exception
     @require_write_permission
@@ -328,9 +332,10 @@ class Table(APIView):
         for column_definition in json_data["columns"]:
             column_definition.update({"c_table": table, "c_schema": schema})
             column_definitions.append(column_definition)
+        metadata = json_data.get("metadata")
 
         result = self.__create_table(
-            request, schema, table, column_definitions, constraint_definitions
+            request, schema, table, column_definitions, constraint_definitions, metadata=metadata
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
@@ -350,8 +355,9 @@ class Table(APIView):
 
     @load_cursor
     def __create_table(
-        self, request, schema, table, column_definitions, constraint_definitions
+        self, request, schema, table, column_definitions, constraint_definitions, metadata=None
     ):
+
         self.validate_column_names(column_definitions)
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
@@ -359,7 +365,7 @@ class Table(APIView):
         }
         cursor = sessions.load_cursor_from_context(context)
         actions.table_create(
-            schema, table, column_definitions, constraint_definitions, cursor
+            schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
 
     @api_exception
