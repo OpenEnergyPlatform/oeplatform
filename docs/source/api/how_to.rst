@@ -425,6 +425,82 @@ table. The permissions can be granted by an admin in the OEP web interface.
     >>> result.status_code
     404
 
+
+Metadata
+********
+
+The OEP gives the opportunity to publish datasets and annotate it with important
+information. You can query this metadata
+
+.. doctest::
+
+    >>> import requests
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/')
+    >>> result.status_code
+    200
+    >>> result.json() == {'name': None, 'title': None, 'id': 'sandbox.example_table', 'description': None, 'language': None, 'keywords': None, 'publicationDate': None, 'context': None, 'spatial': None, 'temporal': None, 'sources': None, 'licenses': None, 'contributors': None, 'resources': None, 'review': None, 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}, '_comment': None}
+    True
+
+Notice that the returned metadata differs from the metadata passed when creating
+the table. This is because the OEP autocompletes missing fields. You can fill
+those fields to make you data more easily accessible.
+
+.. doctest::
+
+    >>> import requests
+    >>> data = {
+    ... "id": "sandbox.example_table",
+    ... "name": "Human-readable name",
+    ... "description": "A verbose description of this dataset",
+    ... "language": [
+    ...     "eng-uk"
+    ...    ],
+    ...    "keywords": [
+    ...        "test"
+    ...    ],
+    ...    "publicationDate": "2020-02-06",
+    ...    "context": {
+    ...        "homepage": "example.com",
+    ...        "documentation": "doc.example.com",
+    ...        "sourceCode": "src.example.com",
+    ...        "contact": "example.com",
+    ...        "grantNo": "0",
+    ...        "fundingAgency": "test agency",
+    ...        "fundingAgencyLogo": "http://www.example.com/logo.png",
+    ...        "publisherLogo": "http://www.example.com/logo2.png"
+    ...    },
+    ...    "licenses": [
+    ...        {
+    ...            "name": "CC0-1.0",
+    ...            "title": "Creative Commons Zero v1.0 Universal",
+    ...            "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+    ...            "instruction": "You are free: To Share, To Create, To Adapt",
+    ...            "attribution": "© Reiner Lemoine Institut"
+    ...        }
+    ...    ],
+    ...    "metaMetadata": {
+    ...        "metadataVersion": "OEP-1.4.0",
+    ...        "metadataLicense": {
+    ...            "name": "CC0-1.0",
+    ...            "title": "Creative Commons Zero v1.0 Universal",
+    ...            "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+    ...        }
+    ...    },
+    ...    "_comment": {
+    ...        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
+    ...        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+    ...        "units": "Use a space between numbers and units (100 m)",
+    ...        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
+    ...        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
+    ...        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
+    ...        "null": "If not applicable use (null)"
+    ...    }
+    ... }
+    >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/', json=data, headers={'Authorization': 'Token %s'%your_token})
+    >>> result.status_code
+    200
+
+
 Delete tables
 *************
 
