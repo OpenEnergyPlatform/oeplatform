@@ -80,7 +80,7 @@ class TestPut(APITestCase):
             "/api/v0/schema/{schema}/tables/{table}/meta/".format(
                 schema=self.test_schema, table=self.test_table
             ),
-            data=json.dumps({"query": meta}),
+            data=json.dumps(meta),
             HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
             content_type="application/json",
         )
@@ -109,7 +109,7 @@ class TestPut(APITestCase):
             "/api/v0/schema/{schema}/tables/{table}/meta/".format(
                 schema=self.test_schema, table=self.test_table
             ),
-            data=json.dumps({"query": meta}),
+            data=json.dumps(meta),
             HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
             content_type="application/json",
         )
@@ -128,7 +128,8 @@ class TestPut(APITestCase):
         self.metadata_roundtrip(meta)
 
     def test_complete_metadata(self):
-        meta = json.loads("""{"name": "oep_metadata_table_example_v14",
+        null = None
+        meta = {"name": "oep_metadata_table_example_v14",
 "title": "Good example title",
 "id": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v14",
 "description": "example metadata for example data",
@@ -235,5 +236,5 @@ class TestPut(APITestCase):
     "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
     "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
     "null": "If not applicable use (null)"} }
-""")
+
         self.metadata_roundtrip(meta)
