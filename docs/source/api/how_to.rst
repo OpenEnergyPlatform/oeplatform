@@ -441,9 +441,10 @@ information. You can query this metadata
     >>> result.json() == {'name': None, 'title': None, 'id': 'sandbox.example_table', 'description': None, 'language': None, 'keywords': None, 'publicationDate': None, 'context': None, 'spatial': None, 'temporal': None, 'sources': None, 'licenses': None, 'contributors': None, 'resources': None, 'review': None, 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}, '_comment': None}
     True
 
-Notice that the returned metadata differs from the metadata passed when creating
+Note that the returned metadata differs from the metadata passed when creating
 the table. This is because the OEP autocompletes missing fields. You can fill
-those fields to make you data more easily accessible.
+those fields to make you data more easily accessible. You can also set metadata
+on existing tables via `POST`-requests (granted that you have write-permissions):
 
 .. doctest::
 
