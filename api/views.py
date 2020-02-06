@@ -185,8 +185,7 @@ class Metadata(APIView):
     def get(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
         comment = table_obj.comment
-        return JsonResponse(
-            dict(content=json.loads(comment)) if comment else {})
+        return JsonResponse(json.loads(comment) if comment else {})
 
 
     @api_exception

@@ -69,7 +69,8 @@ In order to do so, we send the following PUT request::
                     "constraint_type": "PRIMARY KEY",
                     "constraint_parameter": "id",
                 }
-            ]
+            ],
+            "metadata": {"id": "sandbox.example_table"}
         }
     }
 
@@ -106,7 +107,8 @@ tool **curl**::
                             "constraint_type": "PRIMARY KEY",
                             "constraint_parameter": "id",
                         }
-                    ]
+                    ],
+                    "metadata": {"id": "sandbox.example_table"}
                 }
             }'
         oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
@@ -117,7 +119,7 @@ or **python**:
 .. doctest::
 
     >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ], "metadata": {"id": "sandbox.example_table"} } }
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 

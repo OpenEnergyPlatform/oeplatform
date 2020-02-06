@@ -744,7 +744,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
     if table_metadata is not None:
         omi_dialect = OmiDialect()
         try:
-            comment_on_table = omi_dialect.parse(table_metadata)
+            comment_on_table = omi_dialect._parser().parse(table_metadata)
         except ParserException as e:
             raise APIError(str(e))
         comment_on_table = json.dumps(omi_dialect.compile(comment_on_table))
