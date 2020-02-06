@@ -193,7 +193,7 @@ class Metadata(APIView):
     @load_cursor
     def post(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
-        raw_input = request.data['query']
+        raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
         if metadata is not None:
             compiler = JSONCompiler()
