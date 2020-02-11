@@ -253,9 +253,24 @@ def listschemas(request):
         "GROUP BY i.schema_name;".format(user=sec.dbuser)
     )
     response = conn.execute(query)
+
+    description = {
+        "boundaries": "legal land descriptions. examples: political and administrative boundaries",
+        "climate": "processes and phenomena of the atmosphere. examples: cloud cover, weather, climate, atmospheric conditions, climate change, precipitation",
+        "economy": "economic activities, conditions and employment. examples: production, labour, revenue, commerce, industry, tourism and ecotourism, forestry, fisheries, commercial or subsistence hunting, exploration and exploitation of resources such as minerals, oil and gas",
+        "demand": "consumption and use of energy. examples: peak loads, load curves",
+        "grid": "energy transmission infrastructure. examples: power lines, substation, pipelines",
+        "supply": "conversion (generation) of energy. examples: power stations, renewables",
+        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
+        "society": "characteristics of society and cultures. examples: settlements, anthropology, archaeology, education, traditional beliefs, manners and customs, demographic data, recreational areas and activities, social impact assessments, crime and justice, census information",
+        "model_draft": "modelling sandbox, temp tables. examples: ego_grid_loadareas. !no version control!",
+        "scenario": "scenario data",
+        "reference": "sources, literature"
+    }
+
     schemas = sorted(
         [
-            (row.schemaname, row.table_count, row.tag_ids)
+            (row.schemaname, description.get(row.schemaname, "No description"), row.table_count, row.tag_ids)
             for row in response
             if row.schemaname in schema_whitelist
             and not row.schemaname.startswith("_")

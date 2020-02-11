@@ -11,13 +11,15 @@
     <thead>
         <tr class="table-primary">
             <th>Name</th>
+            <th>Description</th>
             <th>Tables</th>
         </tr>
     </thead>
     <tbody>
-        {% for schema, tables, tag_ids in schemas %}
+        {% for schema, description, tables, tag_ids in schemas %}
             <tr onclick="window.location='/dataedit/view/{{ schema }}'">
                 <td>{{schema}}</td>
+                <td>{{description}}</td>
                 <td>{{tables}}</td>
             </tr>
         {% endfor %}
