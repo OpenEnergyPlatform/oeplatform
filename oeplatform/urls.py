@@ -27,7 +27,7 @@ handler404 = "base.views.handler404"
 
 urlpatterns = [
     # This is used for Markdown forms in the tutorials app
-    url(r'^markdownx/', include(markdownx)),
+    url(r'^martor/', include('martor.urls')),
     url(r"^api/", include("api.urls")),
     url(r"^", include("base.urls")),
     url(r"^user/", include("login.urls")),
