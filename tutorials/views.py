@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import exceptions, reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from os.path import join
 
@@ -239,10 +240,12 @@ class TutorialDetail(View):
         )
 
 
-class CreateNewTutorial(CreateView):
+class CreateNewTutorial(LoginRequiredMixin, CreateView):
     template_name = 'add.html'
     redirect_url = 'detail_tutorial'
     form_class = TutorialForm
+    login_url = '/user/login/'
+    redirect_field_name = 'redirect_to'
 
     def form_valid(self, form):
         """
@@ -269,12 +272,14 @@ class CreateNewTutorial(CreateView):
         pass
 
 
-class EditTutorials(UpdateView):
+class EditTutorials(LoginRequiredMixin, UpdateView):
     template_name = 'add.html'
     redirect_url = 'detail_tutorial'
     model = Tutorial
     form_class = TutorialForm
     pk_url_kwarg = 'tutorial_id'
+    login_url = '/user/login/'
+    redirect_field_name = 'redirect_to'
 
     def form_valid(self, form):
         """
@@ -295,11 +300,13 @@ class EditTutorials(UpdateView):
         return redirect(self.redirect_url, tutorial_id=tutorial.id)
 
 
-class DeleteTutorial(DeleteView):
+class DeleteTutorial(LoginRequiredMixin, DeleteView):
     template_name = 'tutorial_confirm_delete.html'
     model = Tutorial
     pk_url_kwarg = 'tutorial_id'
     success_url = reverse_lazy('list_tutorials')
+    login_url = '/user/login/'
+    redirect_field_name = 'redirect_to'
 
 
 
