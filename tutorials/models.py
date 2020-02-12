@@ -1,7 +1,8 @@
 from django.db import models
 from django.urls import reverse
 
-from markdownx.models import MarkdownxField
+from martor.models import MartorField
+
 
 # add options if needed
 CATEGORY_OPTIONS = [('io', 'I/O'), ('intro', 'Introduction')]
@@ -16,7 +17,7 @@ class Tutorial(models.Model):
     title = models.TextField()
     html = models.TextField()
     # media = models.TextField()
-    markdown = MarkdownxField()
+    markdown = MartorField()
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
 
     def get_absolute_url (self):
