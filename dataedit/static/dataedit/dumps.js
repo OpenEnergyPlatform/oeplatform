@@ -1,5 +1,4 @@
 function request_dump(schema, table){
-        debugger;
         var dfd = new $.Deferred();
         var div = $('#revision_request_'+ schema + table)[0];
         var request = $.ajax({url:table+'/request',  type: "POST"});

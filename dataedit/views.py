@@ -971,6 +971,8 @@ class DataView(View):
 
         table_views = list(chain((default,), table_views))
 
+
+
         context_dict = {
             "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
