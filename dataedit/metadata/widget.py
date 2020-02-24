@@ -52,7 +52,7 @@ class MetaDataWidget:
         """
 
         if level == 0:
-            html = '<table class="table">'
+            html = '<table class="table table-responsive">'
         elif level == 1:
             html = '<td>'
         else:

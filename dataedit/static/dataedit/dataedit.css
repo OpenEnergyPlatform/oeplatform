@@ -335,3 +335,14 @@ input[type="checkbox"]:checked+label{
     margin-top: 1em;
     grid-area: Content;
 }
+
+/**
+This is a fix, because we use modals within a position:fixed context, which is not supported by Bootstrap 4.
+*/
+.modal {
+    z-index: 10000;
+}
+
+.modal * {
+    z-index: inherit!important;
+}
