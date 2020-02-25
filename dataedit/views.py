@@ -8,7 +8,7 @@ import time
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
-from operator import add
+from operator import add, or_
 from subprocess import call
 from wsgiref.util import FileWrapper
 
@@ -1369,7 +1369,10 @@ class SearchView(View):
             TableTags,
             (search_view.c.table == TableTags.table_name)
             and (search_view.c.table == TableTags.table_name),
-        )
+        ).filter(reduce(or_,
+                        (search_view.c.schema.label("schema") == s
+                         for s in schema_whitelist)))
+
         if filter_tags:
             query = query.having(
                 tag_agg.contains(sqla.cast(filter_tags, sqla.ARRAY(sqla.BigInteger)))
