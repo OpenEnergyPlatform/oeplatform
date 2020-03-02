@@ -5,7 +5,7 @@ function addInput_{{ field.name }}(val){
     var newdiv = document.createElement('div');
     newdiv.id = "div_{{ field.name }}_" + counter_{{ field.name }};
     newdiv.className="btn-group arraywrapper";
-    newdiv.innerHTML = "<input class='form-control' type='text' id=id_{{ field.name }}_" + counter_{{ field.name }} + " name={{ field.name }}_" + counter_{{ field.name }} + " value='" + val + "'><span class='removeicon glyphicon glyphicon-remove-sign' onclick='delInput_{{ field.name }}("+ counter_{{ field.name }} + ")'></span>";
+    newdiv.innerHTML = "<input class='form-control' type='text' id=id_{{ field.name }}_" + counter_{{ field.name }} + " name={{ field.name }}_" + counter_{{ field.name }} + " value='" + val + "'><span class='removeicon fas fa-times' onclick='delInput_{{ field.name }}("+ counter_{{ field.name }} + ")'></span>";
     document.getElementById("{{ field.name }}_container").appendChild(newdiv,0);
     counter_{{ field.name }}++;
 }
@@ -23,6 +23,6 @@ function delInput_{{ field.name }}(c){
     {% endfor %}
     </script>
 </div> <a href="javascript:addInput_{{ field.name }}('');" style="color:green">
-        <span class='glyphicon glyphicon-plus-sign'></span>
+        <span class='fas fa-plus'></span>
     </a>
 </div>

@@ -37,9 +37,9 @@ def checktable(model, label, prefix, suffixes, separator="_"):
     data = ""
     for s in suffixes.split(";"):
         if model.__dict__["{0}{2}{1}".format(prefix, s, separator)]:
-            data = '<span class="glyphicon glyphicon-ok"></span>'
+            data = '<span class="fas fas-check"></span>'
         else:
-            data = '<span class="glyphicon glyphicon-remove"></span>'
+            data = '<span class="fas fas-times"></span>'
         header += "<td>{1} {0} </td>".format(s, data)
     i = 0
     return """<tr>
