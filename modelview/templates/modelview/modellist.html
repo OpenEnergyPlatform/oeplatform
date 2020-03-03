@@ -9,14 +9,6 @@
 
 
 <style>
-  .btn-add{
-    background: transparent;
-    color: green;
-  }
-  input[type="checkbox"]:checked+label{
-    font-weight: bold;
-    border: 3px solid;
-  }
 </style>
 {% endblock %}
 
@@ -35,42 +27,30 @@
       <span class="fas fa-download"></span> Download CSV
     </a>
   <hr>
+  <h3>Fields</h3>
+    <div class="checkbox-container">
+    {% for heading,d in fields.items %}
+        <div class="checkbox-item">
+            <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
+
+            <div id="{{heading.split|join:'_'}}" class="card-collapse collapse">
+                {% for key,value in d.items %}
+                    <div style="display: flex;flex-flow: nowrap;align-items: center">
+                        <input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}>
+                        <label style="margin: 0" for="{{key}}">{{key}}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+  <hr>
 
 {% endblock main-right-sidebar-content %}
 
 {% block factsheets_content %}
 
 {% if label == 'Model' or label == 'Framework' %}
-<div>
-    <h4>Filter</h4>
-    <div>
-    You can filter the attributes to compare the models by clicking the categories below. If you only want to compare a selection of models you can filter them by using the colored tags below.
-    </div>
-    <div class="checkbox-container">
-    {% for heading,d in fields.items %}
-        <div class="checkbox-item">
-            <div class="card-header">
-              <h4 class="card-title">
-                <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
-              </h4>
-            </div>
-
-            <div id="{{heading.split|join:'_'}}" class="card-collapse collapse">
-                <table class="table">
-                    {% for key,value in d.items %}
-                        <tr>
-                            <th><label for="{{key}}">{{key}}</label></th>
-                            <td><input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}></td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-    {% endfor %}
-    </div>
-</div>
-<hr>
-
 	<div>
             <h4>Select tag filter:</h4>
             <div>
