@@ -1,7 +1,7 @@
 import re
 
 from django.utils.safestring import mark_safe
-from django.utils.html import conditional_escape, format_html
+from django.utils.html import conditional_escape, format_html, format_html_join
 
 from dataedit.metadata import METADATA_HIDDEN_FIELDS
 
@@ -27,7 +27,7 @@ class MetaDataWidget:
         matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', string)
         matches = [m.group(0) for m in matches]
         matches[0] = matches[0].capitalize()
-        return " ".join(map(conditional_escape, matches))
+        return format_html_join('', '{}', ((m,) for m in matches))
 
     def format_index_numbers(self, string):
         """Remove numbers in string
@@ -39,7 +39,7 @@ class MetaDataWidget:
         match = re.match(r"([a-z]+)([0-9]+)", string, re.I)
         if match:
             items = match.groups()
-            answer = '{} {}'.format(*map(conditional_escape, items))
+            answer = format_html('{} {}', *items)
 
         return self.camel_case_split(answer)
 
@@ -61,7 +61,7 @@ class MetaDataWidget:
 
         if isinstance(data, dict):
 
-            html += '' if level == 0 else '<ul>'
+            html += mark_safe('') if level == 0 else mark_safe('<ul>')
             for key, value in data.items():
                 if level == 0:
                     if key not in METADATA_HIDDEN_FIELDS:
@@ -82,7 +82,7 @@ class MetaDataWidget:
                     html += self.__convert_to_html(value, level + 1, parent=key)
                     html += mark_safe('</li>')
 
-            html += '' if level == 0 else '</ul>'
+            html += mark_safe('') if level == 0 else mark_safe('</ul>')
 
         elif isinstance(data, list):
 
@@ -119,7 +119,7 @@ class MetaDataWidget:
                         if name is not None and name != '':
                             no_valid_item = False
                             html += mark_safe('<p class="metaproperty">')
-                            html += name + self.__convert_to_html(item, level + 1, parent=parent)
+                            html += conditional_escape(name) + self.__convert_to_html(item, level + 1, parent=parent)
                             html += mark_safe('</p>')
                     else:
                         html += mark_safe('<p>Not implemented yet</p>')
