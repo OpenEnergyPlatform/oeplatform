@@ -240,7 +240,7 @@ def listschemas(request):
     engine = actions._get_engine()
     conn = engine.connect()
     query = (
-        "SELECT i.schema_name as schemaname, count(p.tablename) as table_count, array_agg(p.tablename) as tables, array_agg(tg.id) as tag_ids FROM pg_tables p "
+        "SELECT i.schema_name as schemaname, count(distinct p.tablename) as table_count, array_agg(p.tablename) as tables, array_agg(tg.id) as tag_ids FROM pg_tables p "
         "right join information_schema.schemata i "
         "ON p.schemaname=i.schema_name "
         "left join table_tags t "
