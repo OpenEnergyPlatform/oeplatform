@@ -1,6 +1,7 @@
 import re
 
 from django.utils.safestring import mark_safe
+from django.utils.html import conditional_escape, format_html
 
 from dataedit.metadata import METADATA_HIDDEN_FIELDS
 
@@ -26,7 +27,7 @@ class MetaDataWidget:
         matches = re.finditer('.+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)', string)
         matches = [m.group(0) for m in matches]
         matches[0] = matches[0].capitalize()
-        return " ".join(matches)
+        return " ".join(map(conditional_escape, matches))
 
     def format_index_numbers(self, string):
         """Remove numbers in string
@@ -38,7 +39,7 @@ class MetaDataWidget:
         match = re.match(r"([a-z]+)([0-9]+)", string, re.I)
         if match:
             items = match.groups()
-            answer = '{} {}'.format(*items)
+            answer = '{} {}'.format(*map(conditional_escape, items))
 
         return self.camel_case_split(answer)
 
@@ -52,11 +53,11 @@ class MetaDataWidget:
         """
 
         if level == 0:
-            html = '<table class="table table-responsive">'
+            html = mark_safe('<table class="table table-responsive">')
         elif level == 1:
-            html = '<td>'
+            html = mark_safe('<td>')
         else:
-            html = ''
+            html = mark_safe('')
 
         if isinstance(data, dict):
 
@@ -65,21 +66,21 @@ class MetaDataWidget:
                 if level == 0:
                     if key not in METADATA_HIDDEN_FIELDS:
                         if COLUMNS_KEY in key:
-                            html += '<tr><th>Columns</th> <td>'
+                            html += mark_safe('<tr><th>Columns</th> <td>')
                             html += self.__format_columns(value)
-                            html += '</td></tr>'
+                            html += mark_safe('</td></tr>')
                         else:
-                            html += '<tr><th>'
+                            html += mark_safe('<tr><th>')
                             html += self.camel_case_split(key)
-                            html += '</th>'
+                            html += mark_safe('</th>')
                             html += self.__convert_to_html(value, level + 1, parent=key)
-                            html += '</tr>'
+                            html += mark_safe('</tr>')
                 elif level >= 1:
-                    html += '<li><b>'
+                    html += mark_safe('<li><b>')
                     html += self.camel_case_split(key)
-                    html += ':</b> '
+                    html += mark_safe(':</b> ')
                     html += self.__convert_to_html(value, level + 1, parent=key)
-                    html += '</li>'
+                    html += mark_safe('</li>')
 
             html += '' if level == 0 else '</ul>'
 
@@ -96,12 +97,12 @@ class MetaDataWidget:
                     no_valid_item = False
 
             if string_list:
-                html += '<ul>'
+                html += mark_safe('<ul>')
                 for item in data:
-                    html += '<li>'
+                    html += mark_safe('<li>')
                     html += self.__convert_to_html(item, level + 1, parent=parent)
-                    html += '</li>'
-                html += '</ul>'
+                    html += mark_safe('</li>')
+                html += mark_safe('</ul>')
 
             else:
                 for item in data:
@@ -114,55 +115,55 @@ class MetaDataWidget:
                             item.pop('name', None)
                         url = item.pop('url', '')
                         if url != '':
-                            name = '<a href="{}">{}</a>'.format(url, name)
+                            name = format_html('<a href="{}">{}</a>', url, name)
                         if name is not None and name != '':
                             no_valid_item = False
-                            html += '<p class="metaproperty">'
+                            html += mark_safe('<p class="metaproperty">')
                             html += name + self.__convert_to_html(item, level + 1, parent=parent)
-                            html += '</p>'
+                            html += mark_safe('</p>')
                     else:
-                        html += '<p>Not implemented yet</p>'
+                        html += mark_safe('<p>Not implemented yet</p>')
 
             if no_valid_item:
-                html += '<p class="metaproperty">There is no valid entry for this field</p>'
+                html += mark_safe('<p class="metaproperty">There is no valid entry for this field</p>')
 
         elif isinstance(data, str) and re.match(self.url_regex, data):
-            html += '<a href="{}">{}</a>'.format(data, data)
+            html += format_html('<a href="{}">{}</a>', data, data)
         elif isinstance(data, str):
-            html += data
+            html += conditional_escape(data)
         else:
-            html += str(type(data))
+            html += conditional_escape(str(type(data)))
 
         if level == 0:
-            html += '</table>'
+            html += mark_safe('</table>')
         elif level == 1:
-            html += '</td>'
+            html += mark_safe('</td>')
 
         return html
 
     def __format_columns(self, columns):
-        html = ''
+        html = mark_safe('')
         for item in columns:
-            html += '<p class="metaproperty">'
+            html += mark_safe('<p class="metaproperty">')
             item = item.copy()
 
             name = item.pop('name')
             unit = item.pop('unit', '')
             if unit != '':
-                html += '{} ({})'.format(name, unit)
+                html += format_html('{} ({})', name, unit)
             else:
-                html += str(name)
-            html += '</p>'
+                html += conditional_escape(str(name))
+            html += mark_safe('</p>')
             descr = item.pop('description', '')
             if descr != '':
-                html += str(descr)
+                html += conditional_escape(str(descr))
             else:
-                html += 'No description '
-            html += '<hr>'
+                html += mark_safe('No description ')
+            html += mark_safe('<hr>')
         return html
 
     def render(self):
-        answer = mark_safe(self.__convert_to_html(data=self.json))
+        answer = self.__convert_to_html(data=self.json)
         return answer
 
     def __convert_to_form(self, data, level=0, parent=''):
@@ -175,18 +176,18 @@ class MetaDataWidget:
 
         if level == 0:
             # separate each item with a horizontal line
-            html = ''
+            html = mark_safe('')
             for key, value in data.items():
                 if key not in METADATA_HIDDEN_FIELDS:
                     html += self.__convert_to_form(value, level + 1, parent=key)
-                    html += '<hr>'
+                    html += mark_safe('<hr>')
                 else:
-                    html += '<div class="metahiddenfield">'
+                    html += mark_safe('<div class="metahiddenfield">')
                     html += self.__convert_to_form(value, level + 1, parent=key)
-                    html += '</div>'
-                    html += '<label>{}</label>'.format(key)
+                    html += mark_safe('</div>')
+                    html += format_html('<label>{}</label>',key)
                     html += self.__convert_to_html(value, level + 1, parent=key)
-                    html += '<hr>'
+                    html += mark_safe('<hr>')
 
             html.rstrip('<hr>')
         elif level > 0:
@@ -195,29 +196,40 @@ class MetaDataWidget:
             # between the horizontal lines the item can be a string, a list of objects or a dict
             if isinstance(data, str):
                 # simply an input field and a label within a div
-                html = '<div class="form_group">'
-                html += '<label class="field-str-label" for="{}"> {} </label>'.format(
+                html = mark_safe('<div class="form_group">')
+                html += format_html(
+                    '<label class="field-str-label" for="{}"> {} </label>',
                     parent,
                     label
                 )
-                html += '<input class="form-control" id="{}" name="{}" type="text" value="{}" />'.format(parent, parent, data)
-                html += '</div>'
+                html += format_html(
+                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',
+                    parent,
+                    parent,
+                    data)
+                html += mark_safe('</div>')
             elif data is None:
                 # if data has no tpye, add an input field and a label within a div
-                html = '<div class="form_group">'
-                html += '<label class="field-str-label" for="{}"> {} </label>'.format(
+                html = mark_safe('<div class="form_group">')
+                html += format_html(
+                    '<label class="field-str-label" for="{}"> {} </label>',
                     parent,
                     label
                 )
                 # None has to be written as null in JSON context
-                html += '<input class="form-control" id="{}" name="{}" type="text" value="null" />'.format(parent, parent)
-                html += '</div>'
+                html += format_html(
+                    '<input class="form-control" id="{}" name="{}" type="text" value="null" />',
+                    parent,
+                    parent)
+                html += mark_safe('</div>')
             elif isinstance(data, dict):
-                html = '<table style="width:100%">'
-                html += '<tr><td style="width:150px">'
-                html += '<label class="field-dict-label">{}</label>'.format(label.capitalize())
-                html += '</td></tr>'
-                html += '<tr><td style="width:20px"></td><td>'
+                html = mark_safe('<table style="width:100%">')
+                html += mark_safe('<tr><td style="width:150px">')
+                html += format_html(
+                    '<label class="field-dict-label">{}</label>',
+                    label.capitalize())
+                html += mark_safe('</td></tr>')
+                html += mark_safe('<tr><td style="width:20px"></td><td>')
                 for key, value in data.items():
                     html += self.__convert_to_form(
                         value,
@@ -225,16 +237,18 @@ class MetaDataWidget:
                         parent='{}_{}'.format(parent, key)
                     )
 
-                html += '</td></tr>'
-                html += '</table>'
+                html += mark_safe('</td></tr>')
+                html += mark_safe('</table>')
             elif isinstance(data, list):
-                html = '<table style="width:100%">'
-                html += '<tr><td style="width:150px">'
-                html += '<label class="field-list-label for="{}_container">'.format(parent)
-                html += label.capitalize()
-                html += '</label></td></tr>'
-                html += '<tr><td>'
-                html += '<div id="{}_container">'.format(parent)
+                html = mark_safe('<table style="width:100%">')
+                html += mark_safe('<tr><td style="width:150px">')
+                html += format_html(
+                    '<label class="field-list-label for="{}_container">',
+                    parent)
+                html += conditional_escape(label.capitalize())
+                html += mark_safe('</label></td></tr>')
+                html += mark_safe('<tr><td>')
+                html += format_html('<div id="{}_container">',parent)
 
                 for i, item in enumerate(data):
                     html += self.__container(
@@ -246,32 +260,40 @@ class MetaDataWidget:
                         parent,
                         i
                     )
-                html += '</div>'
+                html += mark_safe('</div>')
 
                 # bind to js function defined in dataedit/static/dataedit/metadata.js
                 # to add new elements to the list upon user click
-                html += '<a onclick="add_list_objects(\'{}\')">Add</a>'.format(parent)
+                html += format_html(
+                    '<a onclick="add_list_objects(\'{}\')">Add</a>',
+                    parent)
 
-                html += '</td></tr>'
-                html += '</table>'
+                html += mark_safe('</td></tr>')
+                html += mark_safe('</table>')
 
         return html
 
     # TODO remove this function once the solution with list_field.html is implemented
     def __container(self, item, parent, idx):
         """wraps a container"""
-        html = '<div class="metacontainer" id="{}{}">'.format(parent, idx)
+        html = format_html('<div class="metacontainer" id="{}{}">', parent, idx)
 
-        html += '<div class="metacontainer-header">'
-        html += '<a style="color:white" onclick="remove_element(\'{}{}\')">'.format(parent, idx)
-        html += '<span class="fas fa-minus"/></a></div>'
-        html += '<div class="metaformframe" id="{}{}">'.format(parent, idx)
-        html += item
-        html += '</div>'
-        html += '</div>'
+        html += mark_safe('<div class="metacontainer-header">')
+        html += format_html(
+            '<a style="color:white" onclick="remove_element(\'{}{}\')">',
+            parent,
+            idx)
+        html += mark_safe('<span class="fas fa-minus"/></a></div>')
+        html += format_html(
+            '<div class="metaformframe" id="{}{}">',
+            parent,
+            idx)
+        html += conditional_escape(item)
+        html += mark_safe('</div>')
+        html += mark_safe('</div>')
         return html
 
     def render_editmode(self):
 
-        answer = mark_safe(self.__convert_to_form(data=self.json))
+        answer = self.__convert_to_form(data=self.json)
         return answer
