@@ -114,7 +114,7 @@
     {% endblock main %}
     {% block footer %}
         <footer class="navbar-footer bg-primary">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <nav class="navbar navbar-expand navbar-dark bg-primary">
                 <ul class="navbar-nav mr-auto">
 
                     <li class="nav-item">
@@ -134,13 +134,14 @@
         </footer>
     {% endblock footer %}
 </div>
-</div>
+
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
     {% bootstrap_javascript jquery=1 %}
     <script type="text/javascript" src="{% static '/js/jsi18n' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
+
 </body>
 
 </html>

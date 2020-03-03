@@ -140,10 +140,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .navbar-footer {
-    margin: auto -15px 0;
-
     border-top: 1em white solid;
     width: calc(100% + 30px);
+    margin: auto -15px 0;
 
     display: flex;
     justify-content: flex-end;

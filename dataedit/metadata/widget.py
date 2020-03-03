@@ -264,7 +264,7 @@ class MetaDataWidget:
 
         html += '<div class="metacontainer-header">'
         html += '<a style="color:white" onclick="remove_element(\'{}{}\')">'.format(parent, idx)
-        html += '<span class="glyphicon glyphicon-minus-sign"/></a></div>'
+        html += '<span class="fas fa-minus"/></a></div>'
         html += '<div class="metaformframe" id="{}{}">'.format(parent, idx)
         html += item
         html += '</div>'
