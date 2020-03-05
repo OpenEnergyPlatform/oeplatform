@@ -265,7 +265,9 @@ def listschemas(request):
         "society": "characteristics of society and cultures. examples: settlements, anthropology, archaeology, education, traditional beliefs, manners and customs, demographic data, recreational areas and activities, social impact assessments, crime and justice, census information",
         "model_draft": "modelling sandbox, temp tables. examples: ego_grid_loadareas. !no version control!",
         "scenario": "scenario data",
-        "reference": "sources, literature"
+        "reference": "sources, literature",
+        "emission": "emissions, generally means the emission of particles, substances, (sound) waves or radiation into the environment. examples: Annual CO² emissions of Fossil fuel power station",
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License."
     }
 
     schemas = sorted(
