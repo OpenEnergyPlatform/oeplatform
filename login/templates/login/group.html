@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+{% block title %} Edit Group {% endblock %}
+{% block main-content-body %}
+{% load static %}
+	<h4> {{ group.name }} </h4>  <a href="edit">edit</a> | <a href="members">members</a> <hr>
+    {{ group.description }}
+{% endblock %}
