@@ -8,6 +8,7 @@
 * Factsheets: General remodeling of factsheets (#419)
 * Factsheets: Make links clickable (#74)
 * API: Explicit column handling (#484)
+* API: Pass GIS-types in column descriptions (#507)
 
 ### Bugs
 * API: Fixed negation in where clauses

@@ -112,11 +112,13 @@ class InvalidRequest(Exception):
     pass
 
 
-def _translate_sqla_type(t, el):
-    if t.lower() == "array":
-        return el + "[]"
+def _translate_sqla_type(column):
+    if column.data_type.lower() == "array":
+        return column.element_type + "[]"
+    if column.data_type.lower() == "user-defined":
+        return column.udt_name
     else:
-        return t
+        return column.data_type
 
 
 def describe_columns(schema, table):
@@ -156,7 +158,7 @@ def describe_columns(schema, table):
         "c.character_maximum_length, c.character_octet_length, "
         "c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, "
         "c.datetime_precision, c.interval_type, c.interval_precision, "
-        "c.maximum_cardinality, c.dtd_identifier, c.is_updatable, e.data_type as element_type "
+        "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "
         "from INFORMATION_SCHEMA.COLUMNS  c "
         "LEFT JOIN information_schema.element_types e "
         "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "
@@ -170,7 +172,7 @@ def describe_columns(schema, table):
             "ordinal_position": column.ordinal_position,
             "column_default": column.column_default,
             "is_nullable": column.is_nullable == "YES",
-            "data_type": _translate_sqla_type(column.data_type, column.element_type),
+            "data_type": _translate_sqla_type(column),
             "character_maximum_length": column.character_maximum_length,
             "character_octet_length": column.character_octet_length,
             "numeric_precision": column.numeric_precision,

@@ -23,6 +23,7 @@ _TYPES = [
     "time",
     "varchar",
     "character varying",
+    "geometry"
 ]
 
 
