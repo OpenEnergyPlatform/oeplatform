@@ -1,10 +1,13 @@
 {% extends "base/base.html" %}
 {% load static %}
 {% block main-right-sidebar-content %}
+
+{% block main-right-sidebar-content-before %}
+{% endblock main-right-sidebar-content-before %}
 <hr>
-    <div style="overflow: hidden;">
-        <a href="/dataedit/tags"><h3>Manage Tags</h3></a>
-    </div>
+  <div style="overflow: hidden;">
+      <a href="/dataedit/tags"><h3>Manage Tags</h3></a>
+  </div>
 <hr>
 
 Fact Sheet objectives: The Fact Sheets are made to...

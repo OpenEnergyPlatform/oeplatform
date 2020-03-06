@@ -156,7 +156,7 @@ def show(request, sheettype, model_name):
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
-        {"model": model, "model_study": model_study, "gh_org": org, "gh_repo": repo},
+        {"model": model, "model_study": model_study, "gh_org": org, "gh_repo": repo, "displaySheetType": sheettype.capitalize()},
     )
 
 

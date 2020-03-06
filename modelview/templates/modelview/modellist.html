@@ -46,7 +46,7 @@
       <div class="checkbox-item">
           <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
 
-          <div id="{{heading.split|join:'_'}}" class="card-collapse collapse">
+          <div id="{{heading.split|join:'_'}}" class="collapse">
               {% for key,value in d.items %}
                   <div style="display: flex;flex-flow: nowrap;align-items: center">
                       <input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}>

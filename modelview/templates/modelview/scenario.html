@@ -1,264 +1,238 @@
-{% extends "modelview/base.html" %}
+{% extends "modelview/detail_view.html" %}
 {% load bootstrap4 %}
-{% bootstrap_javascript_url %}
 {% load static %}
 {% load modelview_extras %}
 
+{% block main-right-sidebar-content-actions %}
+  <a class="btn btn-info" href="edit"><span class="fas fa-edit"></span>Edit Scenario</a>
+  <a class="btn btn-info" href="/factsheets/studies/{{ model.study.pk }}/edit"><span
+    class="fas fa-edit"></span>Edit Study</a>
+{% endblock main-right-sidebar-content-actions %}
+
 {% block factsheets_content %}
 
-<script type="text/javascript">
-    <!--
-    $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-    });
-    //-->
-</script>
+  <div class="card-container">
+    <div class="card">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#BasicInformation">Study</a>
+      </div>
+      <div id="BasicInformation" class="title= collapse in card-body">
 
-<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<div class="container">
-    <div style="float: left;">
-        <h1> {{ model.name_of_scenario }} </h1>
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model_study field='name_of_the_study' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='author_Institution' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='contact_email' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='client' %}
+          <tr>
+            <td class="sheetlabel">
+              Source of funding
+            </td>
+            <td>
+              <table>
+                {% checklist model_study "funding_private,funding_public,funding_no_funding" %}
+
+              </table>
+            </td>
+          </tr>
+
+          {% include 'modelview/model_snippet.html' with model=model_study field='citation_reference' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='citation_doi' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='aim' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='new_aspects' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='spatial_Geographical_coverage' %}
+          <tr>
+            <td class="sheetlabel">
+              Time frame
+            </td>
+            <td>
+              {% checklist model_study "time_frame_2020,time_frame_2030,time_frame_2050,time_frame_other=time_frame_other_text" %}
+
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model_study field='time_frame_2_target_year' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='time_frame_2_transformation_path' %}
+          <tr>
+            <td class="sheetlabel">
+              Modeled energy sectors
+            </td>
+            <td>
+              {% checklist model_study "modeled_energy_sectors_electricity,modeled_energy_sectors_heat,modeled_energy_sectors_liquid_fuels,modeled_energy_sectors_gas,modeled_energy_sectors_others=modeled_energy_sectors_others_text" %}
+
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Modeled demand sectors
+            </td>
+            <td>
+              {% checklist model_study "modeled_demand_sectors_households,modeled_demand_sectors_industry,modeled_demand_sectors_commercial_sector,modeled_demand_sectors_transport" %}
+
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sheetlabel">
+              Economic (behavioural) rationale
+            </td>
+            <td>
+              {% checklist model_study "economic_behavioral_perfect,economic_behavioral_myopic,economic_behavioral_qualitative,economic_behavioral_agentbased,economic_behavioral_other=economic_behavioral_other_text" %}
+
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sheetlabel">
+              Technologies included
+            </td>
+            <td>
+              {% checklist model_study "renewables_PV,renewables_wind,renewables_hydro,renewables_biomass,renewables_biogas,renewables_solar,renewables_others=renewables_others_text,conventional_generation_gas,conventional_generation_coal,conventional_generation_oil,conventional_generation_liquid,conventional_generation_nuclear,CHP,networks_electricity_gas_electricity,networks_electricity_gas_gas,networks_electricity_gas_heat,storages_battery,storages_kinetic,storages_CAES,storages_PHS,storages_chemical" %}
+
+            </td>
+          </tr>
+
+          {% include 'modelview/model_snippet.html' with model=model_study field='economic_focuses_included' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='social_focuses_included' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='endogenous_variables' %}
+          {% include 'modelview/model_snippet.html' with model=model_study field='sensitivities' %}
+          <tr>
+            <td class="sheetlabel">
+              Technologies included
+            </td>
+            <td>
+              <table>
+                {% checklist model_study "time_steps_anual,time_steps_hour,time_steps_15_min,time_steps_1_min,time_steps_sec,time_steps_other=time_steps_other_text" %}
+
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <div style="float:right; position: absolute;right: 0;">
-        <a class="btn btn-info" style="bottom: 40;" href="edit"><span name="icon"></span>Edit Scenario</a>
-        <a class="btn btn-info" style="bottom: 5;" href="/factsheets/studies/{{ model.study.pk }}/edit"><span name="icon"></span>Edit Study</a>
-    </div>
-</div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#BasicInformation">Study</a>
-          </h4>
-        </div>
-        <div id="BasicInformation" class="card-collapse collapse in profilebox in">
-                    
-                    <table class="profiletable">
-                        {% include 'modelview/model_snippet.html' with model=model_study field='name_of_the_study' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='author_Institution' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='contact_email' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='client' %}
-                        <tr>
-                            <td class="sheetlabel">
-                                Source of funding
-                            </td>
-                            <td>
-                                <table>
-				  {% checklist model_study "funding_private,funding_public,funding_no_funding" %}
+      <div class="card-header">
+        <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
+      </div>
+      <div id="MathematicalProperties" class="title= collapse card-body">
+        <table class="profiletable">
+          <tr>
+            <td class="sheetlabel">
+              Exogenous time series used
+            </td>
+            <td>
+              {% checklist model "exogenous_time_series_used_climate,exogenous_time_series_used_feedin,exogenous_time_series_used_loadcurves,exogenous_time_series_used_others=exogenous_time_series_used_others_text" %}
+            </td>
+          </tr>
 
-                                </table>
-                            </td>
-                        </tr>
-                        
-                        {% include 'modelview/model_snippet.html' with model=model_study field='citation_reference' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='citation_doi' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='aim' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='new_aspects' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='spatial_Geographical_coverage' %}
-                        <tr>
-                            <td class="sheetlabel">
-                                Time frame
-                            </td>
-                            <td>
-                                {% checklist model_study "time_frame_2020,time_frame_2030,time_frame_2050,time_frame_other=time_frame_other_text" %}
+          {% include 'modelview/model_snippet.html' with model=model field='technical_data' %}
+          {% include 'modelview/model_snippet.html' with model=model field='social_data' %}
+          {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
+          {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
+          {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
+          {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
 
-                            </td>
-                        </tr>
-                        {% include 'modelview/model_snippet.html' with model=model_study field='time_frame_2_target_year' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='time_frame_2_transformation_path' %}
-                        <tr>
-                            <td class="sheetlabel">
-                                Modeled energy sectors
-                            </td>
-                            <td>
-				{% checklist model_study "modeled_energy_sectors_electricity,modeled_energy_sectors_heat,modeled_energy_sectors_liquid_fuels,modeled_energy_sectors_gas,modeled_energy_sectors_others=modeled_energy_sectors_others_text" %}
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="sheetlabel">
-                                Modeled demand sectors
-                            </td>
-                            <td>
-                                {% checklist model_study "modeled_demand_sectors_households,modeled_demand_sectors_industry,modeled_demand_sectors_commercial_sector,modeled_demand_sectors_transport" %}
-
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="sheetlabel">
-                                Economic (behavioural) rationale
-                            </td>
-                            <td>
-                                {% checklist model_study "economic_behavioral_perfect,economic_behavioral_myopic,economic_behavioral_qualitative,economic_behavioral_agentbased,economic_behavioral_other=economic_behavioral_other_text" %}
-
-                            </td>
-                        </tr>
-                        
-                        <tr>
-                            <td class="sheetlabel">
-                                Technologies included
-                            </td>
-                            <td>
-				{% checklist model_study "renewables_PV,renewables_wind,renewables_hydro,renewables_biomass,renewables_biogas,renewables_solar,renewables_others=renewables_others_text,conventional_generation_gas,conventional_generation_coal,conventional_generation_oil,conventional_generation_liquid,conventional_generation_nuclear,CHP,networks_electricity_gas_electricity,networks_electricity_gas_gas,networks_electricity_gas_heat,storages_battery,storages_kinetic,storages_CAES,storages_PHS,storages_chemical" %}
-
-                            </td>
-                        </tr>                        
-                       
-                        {% include 'modelview/model_snippet.html' with model=model_study field='economic_focuses_included' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='social_focuses_included' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='endogenous_variables' %}
-                        {% include 'modelview/model_snippet.html' with model=model_study field='sensitivities' %}
-                        <tr>
-                            <td class="sheetlabel">
-                                Technologies included
-                            </td>
-                            <td>
-                                <table>
-				     {% checklist model_study "time_steps_anual,time_steps_hour,time_steps_15_min,time_steps_1_min,time_steps_sec,time_steps_other=time_steps_other_text" %}
-
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-    </div>     
-<div class="">
-    <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
-          </h4>
-        </div>
-        <div id="MathematicalProperties" class="card-collapse collapse profilebox">
-            <table class="profiletable">
-                <tr>
-                    <td class="sheetlabel">
-                        Exogenous time series used
-                    </td>
-                    <td>
-                        {% checklist model "exogenous_time_series_used_climate,exogenous_time_series_used_feedin,exogenous_time_series_used_loadcurves,exogenous_time_series_used_others=exogenous_time_series_used_others_text" %}
-                    </td>
-                </tr>
-                
-                {% include 'modelview/model_snippet.html' with model=model field='technical_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='social_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='economical_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='ecological_data' %}
-                {% include 'modelview/model_snippet.html' with model=model field='preProcessing' %}
-                {% include 'modelview/model_snippet.html' with model=model field='name_of_scenario' %}
-                
-            </table>
-        </div>
+        </table>
+      </div>
     </div>
-</div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#Coverage">Assumptions</a>
-          </h4>
-        </div>
-        <div id="Coverage" class="card-collapse collapse  profilebox">
-            <table class="profiletable">
-                {% develop_year model 'energy_saving' %}
-                {% develop_year model 'potential_energy_savings' %}
-                {% develop_year model 'emission_reductions' %}
-                {% develop_year model 'share_RE_heat' %}
-                {% develop_year model 'share_RE_mobility' %}
-                {% develop_year model 'share_RE_power' %}
-                {% develop_year model 'share_RE_total' %}                
-                <tr>
-                    <td class="sheetlabel">
-                        Cost development
-                    </td>
-                    <td>
-                        <table>
-                            {% checklist model "cost_development_capex,cost_development_opex,cost_development_learning_curves,cost_development_constant,cost_development_rediscount" %}
+      <div class="card-header">
+        <a data-toggle="collapse" href="#Coverage">Assumptions</a>
+      </div>
+      <div id="Coverage" class="title= collapse  card-body">
+        <table class="profiletable">
+          {% develop_year model 'energy_saving' %}
+          {% develop_year model 'potential_energy_savings' %}
+          {% develop_year model 'emission_reductions' %}
+          {% develop_year model 'share_RE_heat' %}
+          {% develop_year model 'share_RE_mobility' %}
+          {% develop_year model 'share_RE_power' %}
+          {% develop_year model 'share_RE_total' %}
+          <tr>
+            <td class="sheetlabel">
+              Cost development
+            </td>
+            <td>
+              <table>
+                {% checklist model "cost_development_capex,cost_development_opex,cost_development_learning_curves,cost_development_constant,cost_development_rediscount" %}
 
-                        </table>
-                    </td>
-                </tr>
-                {% include 'modelview/model_snippet.html' with model=model field='technological_innovations' %}
-                <tr>
-                    <td class="sheetlabel">
-                        Potential wind
-                    </td>
-                    <td>
-                        {% checklist model "potential_wind_whole,potential_wind_technical,potential_wind_economical,potential_wind_ecological,potential_wind_other,potential_wind_other_text" %}
-                    </td>
-                </tr>
-                
-                
-                <tr>
-                    <td class="sheetlabel">
-                        Potential solar electric
-                    </td>
-                    <td>
-                        {% checklist model "potential_solar_electric_whole,potential_solar_electric_technical,potential_solar_electric_economical,potential_solar_electric_ecological,potential_solar_electric_other=potential_solar_electric_other_text" %}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Potential solar thermal
-                    </td>
-                    <td>
-                        {% checklist model "potential_solar_thermal_whole,potential_solar_thermal_technical,potential_solar_thermal_economical,potential_solar_thermal_ecological,potential_solar_thermal_other=potential_solar_thermal_other_text" %}
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="sheetlabel">
-                        Potential biomass
-                    </td>
-                    <td>
-                        {% checklist model "potential_biomass_whole,potential_biomass_technical,potential_biomass_economical,potential_biomass_ecological,potential_biomass_other=potential_biomass_other_text" %}
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="sheetlabel">
-                        Potential geothermal
-                    </td>
-                    <td>
-                        {% checklist model "potential_geothermal_whole,potential_geothermal_technical,potential_geothermal_economical,potential_geothermal_ecological,potential_geothermal_other,potential_geothermal_othertext" %}
-                    </td>
-                </tr>
-                
-                <tr>
-                    <td class="sheetlabel">
-                        Potential hydro power
-                    </td>
-                    <td>
-                        {% checklist model "potential_hydro_power_whole,potential_hydro_power_technical,potential_hydro_power_economical,potential_hydro_power_ecological,potential_hydro_power_other,potential_hydro_power_other_text" %}
-                    </td>
-                </tr>
-                
-                {% include 'modelview/model_snippet.html' with model=model field='social_developement' %}
-                {% include 'modelview/model_snippet.html' with model=model field='economic_development' %}
-                {% include 'modelview/model_snippet.html' with model=model field='development_of_environmental_aspects' %}
-                {% include 'modelview/model_snippet.html' with model=model field='postprocessing' %}
-                {% include 'modelview/model_snippet.html' with model=model field='further_assumptions_for_postprocessing' %}
-            </table>
-        </div>
+              </table>
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model field='technological_innovations' %}
+          <tr>
+            <td class="sheetlabel">
+              Potential wind
+            </td>
+            <td>
+              {% checklist model "potential_wind_whole,potential_wind_technical,potential_wind_economical,potential_wind_ecological,potential_wind_other,potential_wind_other_text" %}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td class="sheetlabel">
+              Potential solar electric
+            </td>
+            <td>
+              {% checklist model "potential_solar_electric_whole,potential_solar_electric_technical,potential_solar_electric_economical,potential_solar_electric_ecological,potential_solar_electric_other=potential_solar_electric_other_text" %}
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Potential solar thermal
+            </td>
+            <td>
+              {% checklist model "potential_solar_thermal_whole,potential_solar_thermal_technical,potential_solar_thermal_economical,potential_solar_thermal_ecological,potential_solar_thermal_other=potential_solar_thermal_other_text" %}
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sheetlabel">
+              Potential biomass
+            </td>
+            <td>
+              {% checklist model "potential_biomass_whole,potential_biomass_technical,potential_biomass_economical,potential_biomass_ecological,potential_biomass_other=potential_biomass_other_text" %}
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sheetlabel">
+              Potential geothermal
+            </td>
+            <td>
+              {% checklist model "potential_geothermal_whole,potential_geothermal_technical,potential_geothermal_economical,potential_geothermal_ecological,potential_geothermal_other,potential_geothermal_othertext" %}
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sheetlabel">
+              Potential hydro power
+            </td>
+            <td>
+              {% checklist model "potential_hydro_power_whole,potential_hydro_power_technical,potential_hydro_power_economical,potential_hydro_power_ecological,potential_hydro_power_other,potential_hydro_power_other_text" %}
+            </td>
+          </tr>
+
+          {% include 'modelview/model_snippet.html' with model=model field='social_developement' %}
+          {% include 'modelview/model_snippet.html' with model=model field='economic_development' %}
+          {% include 'modelview/model_snippet.html' with model=model field='development_of_environmental_aspects' %}
+          {% include 'modelview/model_snippet.html' with model=model field='postprocessing' %}
+          {% include 'modelview/model_snippet.html' with model=model field='further_assumptions_for_postprocessing' %}
+        </table>
+      </div>
     </div>
-</div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#Results">Results</a>
-          </h4>
-        </div>
-        <div id="Results" class="card-collapse collapse profilebox">
-            <table class="profiletable">
-                {% include 'modelview/model_snippet.html' with model=model field='uncertainty_assessment' %}
-                {% include 'modelview/model_snippet.html' with model=model field='robustness' %}
-                {% include 'modelview/model_snippet.html' with model=model field='comparability_Validation' %}
-                {% include 'modelview/model_snippet.html' with model=model field='conclusions' %}
-            </table>
-        </div>
+      <div class="card-header">
+        <a data-toggle="collapse" href="#Results">Results</a>
+      </div>
+      <div id="Results" class="title= collapse card-body">
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model field='uncertainty_assessment' %}
+          {% include 'modelview/model_snippet.html' with model=model field='robustness' %}
+          {% include 'modelview/model_snippet.html' with model=model field='comparability_Validation' %}
+          {% include 'modelview/model_snippet.html' with model=model field='conclusions' %}
+        </table>
+      </div>
     </div>
-</div>
+  </div>
 
 {% endblock %}
