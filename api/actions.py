@@ -25,7 +25,7 @@ import login.models as login_models
 from api import DEFAULT_SCHEMA, references
 from api.connection import _get_engine
 from api.error import APIError
-from api.parser import get_or_403, read_bool, read_pgid
+from api.parser import get_or_403, read_bool, read_pgid, parse_type
 from api.sessions import (
     SessionContext,
     close_all_for_user,
@@ -34,7 +34,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
-from oeplatform.securitysettings import PLAYGROUNDS
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -69,7 +69,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
     if restrict_schemas:
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
     return schema, table
 
@@ -112,11 +112,13 @@ class InvalidRequest(Exception):
     pass
 
 
-def _translate_sqla_type(t, el):
-    if t.lower() == "array":
-        return el + "[]"
+def _translate_sqla_type(column):
+    if column.data_type.lower() == "array":
+        return column.element_type + "[]"
+    if column.data_type.lower() == "user-defined":
+        return column.udt_name
     else:
-        return t
+        return column.data_type
 
 
 def describe_columns(schema, table):
@@ -156,7 +158,7 @@ def describe_columns(schema, table):
         "c.character_maximum_length, c.character_octet_length, "
         "c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, "
         "c.datetime_precision, c.interval_type, c.interval_precision, "
-        "c.maximum_cardinality, c.dtd_identifier, c.is_updatable, e.data_type as element_type "
+        "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "
         "from INFORMATION_SCHEMA.COLUMNS  c "
         "LEFT JOIN information_schema.element_types e "
         "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "
@@ -170,7 +172,7 @@ def describe_columns(schema, table):
             "ordinal_position": column.ordinal_position,
             "column_default": column.column_default,
             "is_nullable": column.is_nullable == "YES",
-            "data_type": _translate_sqla_type(column.data_type, column.element_type),
+            "data_type": _translate_sqla_type(column),
             "character_maximum_length": column.character_maximum_length,
             "character_octet_length": column.character_octet_length,
             "numeric_precision": column.numeric_precision,
@@ -590,76 +592,6 @@ def get_column(d):
     table = get_or_403(d, "table")
     name = get_or_403(d, "column")
     return Column("%s.%s" % (table, name), schema=schema)
-
-
-def parse_type(dt_string):
-
-    # Are you an array?
-    dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
-    arr_match = re.match(dtarr_expression, dt_string)
-    if arr_match:
-        is_array = True
-        dt_string = arr_match.groups()[0]
-        dt, autoincrement = parse_type(dt_string)
-        return sa.ARRAY(dt), autoincrement
-
-    # Is the datatypestring of form NAME(NUMBER)?
-    dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
-    match = re.match(dt_expression, dt_string)
-    if match:
-        dt_string = match.groups()[0]
-        if dt_string.lower() == "geometry":
-            return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
-        else:
-            dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
-        dt, autoincrement = parse_type(dt_string)
-        return dt(*dt_cardinality), autoincrement
-
-    # So it's a plain type
-    autoincrement = False
-
-    dt_string = dt_string.lower()
-
-    if dt_string in ("int", "integer"):
-        dt = sa.types.INTEGER
-    elif dt_string in ("bigint", "biginteger"):
-        dt = sa.types.BigInteger
-    elif dt_string in ("bit",):
-        dt = sa.types.Binary
-    elif dt_string in ("boolean", "bool"):
-        dt = sa.types.Boolean
-    elif dt_string in ("char",):
-        dt = sqltypes.CHAR
-    elif dt_string in ("date",):
-        dt = sqltypes.Date
-    elif dt_string in ("datetime", "TIMESTAMP WITHOUT TIME ZONE", "timestamp"):
-        dt = sqltypes.DateTime
-    elif dt_string in ("decimal", "float"):
-        dt = sqltypes.DECIMAL
-    elif dt_string in ("interval",):
-        dt = sqltypes.Interval
-    elif dt_string in ("json",):
-        dt = sqltypes.JSON
-    elif dt_string in ("nchar",):
-        dt = sqltypes.NCHAR
-    elif dt_string in ("numerical", "numeric"):
-        dt = sa.types.Numeric
-    elif dt_string in ["varchar", "character varying"]:
-        dt = sqltypes.VARCHAR
-    elif dt_string in ("real",):
-        dt = sqltypes.REAL
-    elif dt_string in ("smallint",):
-        dt = sqltypes.SMALLINT
-    elif hasattr(geoalchemy2, dt_string):
-        dt = getattr(geoalchemy2, dt_string)
-    elif hasattr(sqltypes, dt_string.upper()):
-        dt = getattr(sqltypes, dt_string.upper())
-    elif dt_string == "bigserial":
-        dt = sa.types.BigInteger
-        autoincrement = True
-    else:
-        raise APIError("Unknown type (%s)." % dt_string)
-    return dt, autoincrement
 
 
 def get_column_definition_query(d):
@@ -1090,7 +1022,7 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1116,7 +1048,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUNDS:
+    if orig_schema in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1259,7 +1191,7 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUNDS:
+    if schema in PLAYGROUNDS or orig_schema in UNVERSIONED_SCHEMAS:
         apply_changes(schema, table, cursor)
 
     return response
@@ -1391,6 +1323,7 @@ def create_meta(schema, table):
 def get_comment_table(schema, table):
     engine = _get_engine()
 
+    # https://www.postgresql.org/docs/9.5/functions-info.html
     sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table
     )
@@ -1805,28 +1738,22 @@ def get_comment_table_name(schema, table, create=True):
 
 
 def get_delete_table_name(schema, table, create=True):
-    table_name = "_" + table + "_delete"
-    if create and not has_table(
-        {"schema": get_meta_schema_name(schema), "table": table_name}
-    ):
+    table_name = '_' + table + '_delete'
+    if create:
         create_delete_table(schema, table)
     return table_name
 
 
 def get_edit_table_name(schema, table, create=True):
-    table_name = "_" + table + "_edit"
-    if create and not has_table(
-        {"schema": get_meta_schema_name(schema), "table": table_name}
-    ):
+    table_name = '_' + table + '_edit'
+    if create:
         create_edit_table(schema, table)
     return table_name
 
 
 def get_insert_table_name(schema, table, create=True):
-    table_name = "_" + table + "_insert"
-    if create and not has_table(
-        {"schema": get_meta_schema_name(schema), "table": table_name}
-    ):
+    table_name = '_' + table + '_insert'
+    if create:
         create_insert_table(schema, table)
     return table_name
 
@@ -1836,61 +1763,49 @@ def get_meta_schema_name(schema):
 
 
 def create_meta_schema(schema):
+    """Create a schema to store schema meta information
+
+    :param schema: Name of the schema
+    :return: None
+    """
     engine = _get_engine()
     query = "CREATE SCHEMA {schema}".format(schema=get_meta_schema_name(schema))
     connection = engine.connect()
     connection.execute(query)
 
 
-def create_edit_table(schema, table, meta_schema=None):
+def create_meta_table(schema, table, meta_table, meta_schema=None, include_indexes=True):
     if not meta_schema:
         meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = (
-        'CREATE TABLE "{meta_schema}"."{edit_table}" '
-        '(LIKE "{schema}"."{table}" INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) '
-        "INHERITS (_edit_base);".format(
+    if not has_table(dict(schema=meta_schema, table=meta_table)):
+        query = 'CREATE TABLE "{meta_schema}"."{edit_table}" ' \
+                '(LIKE "{schema}"."{table}"'
+        if include_indexes:
+            query += 'INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) '
+        query += ') INHERITS (_edit_base);'
+        query = query.format(
             meta_schema=meta_schema,
-            edit_table=get_edit_table_name(schema, table, create=False),
+            edit_table=meta_table,
             schema=schema,
-            table=table,
-        )
-    )
-    engine.execute(query)
+            table=table)
+        engine = _get_engine()
+        engine.execute(query)
 
 
 def create_delete_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = (
-        "CREATE TABLE {meta_schema}.{edit_table} "
-        "(id bigint) "
-        "INHERITS (_edit_base);".format(
-            meta_schema=meta_schema,
-            edit_table=get_delete_table_name(schema, table, create=False),
-            schema=schema,
-            table=table,
-        )
-    )
-    engine.execute(query)
+    meta_table = get_delete_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema, include_indexes=False)
+
+
+def create_edit_table(schema, table, meta_schema=None):
+    meta_table = get_edit_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema)
+
 
 
 def create_insert_table(schema, table, meta_schema=None):
-    if not meta_schema:
-        meta_schema = get_meta_schema_name(schema)
-    engine = _get_engine()
-    query = (
-        "CREATE TABLE {meta_schema}.{edit_table} "
-        "(LIKE {schema}.{table} INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id)) "
-        "INHERITS (_edit_base);".format(
-            meta_schema=meta_schema,
-            edit_table=get_insert_table_name(schema, table, create=False),
-            schema=schema,
-            table=table,
-        )
-    )
-    engine.execute(query)
+    meta_table = get_insert_table_name(schema, table, create=False)
+    create_meta_table(schema, table, meta_table, meta_schema)
 
 
 def create_comment_table(schema, table, meta_schema=None):

@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load modelview_extras %}
-{% block content %}
+{% block main-content-body %}
 {% load bootstrap3 %}
 {% load staticfiles %}
 
@@ -129,6 +129,7 @@ existing_or_new_study();
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=formstudy.name_of_the_study %}
             {% include 'modelview/editmodel_snippet.html' with field=formstudy.author_Institution %}
+            {% include 'modelview/editmodel_snippet.html' with field=formstudy.contact_email %}
             {% include 'modelview/editmodel_snippet.html' with field=formstudy.client %}
             <tr>
                 <th> 

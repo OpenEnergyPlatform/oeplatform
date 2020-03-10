@@ -24,6 +24,8 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
+from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
@@ -139,7 +141,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -152,7 +154,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -216,7 +218,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -270,7 +272,7 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if schema not in ["model_draft", "sandbox", "test"]:
+        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -759,6 +761,23 @@ class Rows(APIView):
         actions._execute_sqla(query, cursor)
 
 
+class Metadata(APIView):
+    @api_exception
+    def get(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        metadata = load_metadata_from_db(schema=schema, table=table)
+        response = {'metadata': metadata}
+        return stream(data=response)
+
+    @api_exception
+    @require_write_permission
+    def post(self, request, schema, table):
+        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        metadata = request.data['metadata']
+        save_metadata_as_table_comment(schema=schema, table=table, metadata=metadata)
+        response = {'status': 'ok'}
+        return stream(data=response)
+
 class Session(APIView):
     def get(self, request, length=1):
         return request.session["resonse"]
@@ -771,7 +790,7 @@ def date_handler(obj):
     :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
     """
     if isinstance(obj, Decimal):
-        return float(obj)
+        return str(obj)
     if hasattr(obj, "isoformat"):
         return obj.isoformat()
     else:
@@ -830,10 +849,10 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
             # This must be done in order to clean the structure of non-serializable
             # objects (e.g. datetime)
             if isinstance(data, dict) and "domains" in data:
-                for key in data["domains"]:
-                    if isinstance(key, tuple):
-                        data["domains"][".".join(key)] = data["domains"][key]
-                        del data["domains"][key]
+                data["domains"] = {
+                    (".".join(key) if isinstance(key, tuple) else key): val
+                    for key, val in data["domains"].items()
+                }
             response_data = json.loads(json.dumps(data, default=date_handler))
 
             result = {"content": response_data}

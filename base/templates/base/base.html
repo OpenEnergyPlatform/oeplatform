@@ -1,35 +1,43 @@
+{% load static %}
+{% load bootstrap3 %}
+
 <!DOCTYPE html>
-<html>
-    
+<html lang="en">
     <head>
-        {% load bootstrap3 %}
-        {% bootstrap_css %}
-        {% bootstrap_javascript jquery=1%}
-        {% load staticfiles %}
-        {% block before-header %}{% endblock %}
-        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+        {% block before-head %}{% endblock before-head %}
+
+        <!-- Meta Tags, which should be implemented -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+        <title> OEP{% block title %}{% endblock %} </title>
+
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}"  type="image/x-icon" />
-        <title>
-            OEP{% block title %}{% endblock %}
-        </title>
-        <link rel="stylesheet" href="{% static 'css/theme-style.css' %}">
-        <link rel="stylesheet" href="{% static 'css/base-style.css' %}">
-        {% block after-header %}{% endblock %}
+
+        {% bootstrap_css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/theme-style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
+        {% block after-head %}{% endblock after-head %}
     </head>
 
 <body>
-    {% block nav %}
-        <nav class="navbar navbar-default navbar-fixed-top">
-          <div class="container-fluid" style="width:80%; float:left;">
-            <div class="navbar-header">
-                  <div class="circular_image" style="width: 45px;height: 45px;border-radius: 50%;overflow: hidden;background-color: white;float: left;margin-left: 15px;margin-right: 5px;margin-top: 2px;display:inline-block;vertical-align:middle;">
-                    <img style="width:45px;height: 45px;" src="{% static 'OEP_logo_2_no_text.svg' %}"/>
-                  </div>
-              <a class="navbar-brand" href="/">
+    {% block header %}
+        <nav class="navbar navbar-default base-navbar base-navbar-top ">
+            <div class="container-center">
 
-                  OpenEnergy Platform</a>
+            <div class="navbar-header">
+                <a href="/">
+                    <img style="width:45px;height: 45px;" src="{% static 'oeplogo.svg' %}"/>
+                </a>
+                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
             </div>
-            <ul class="nav navbar-nav">
+            <ul id="navbar" class="nav navbar-nav navbar-right navbar-collapse collapse">
 
                 <li class="inactive"><a href="/dataedit/">Database</a></li>
 
@@ -43,23 +51,12 @@
                         <li> <a href="/factsheets/scenarios/">Scenarios</a> </li>
                     </ul>
                 </li>
-                <li class="inactive"><a href="/literature/">Literature</a></li>
-                <li class="inactive">
-                    <a href="/discussion" target="_blank">
-                        Discussion
-                    </a>
-                </li>
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#"> Wiki
-                    <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Main_Page" target="_blank">OpenMod Wiki {% bootstrap_icon "new-window" %}</a> </li>
-                        <li> <a href="https://wiki.openmod-initiative.org/wiki/Category:Glossary" target="_blank">Glossary {% bootstrap_icon "new-window" %}</a> </li>
-                    </ul>
-                </li>
+                {#<li class="inactive"><a href="/bundles/">Bundles</a></li>#}
+                <li class="inactive"><a href="/documentation/">Documentation</a></li>
+                <li class="inactive"><a href="/about/">About OEP</a></li>
+
                 {%block nav-additional %}{% endblock %}
             </ul>
-          </div>
           {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
 
             <div class="btn profile-bar">
@@ -70,60 +67,73 @@
           {% else %}
              <a class="btn btn-info" style="float: right;margin:5px" href="/user/login/?next={{ request.get_full_path|urlencode }}">{% bootstrap_icon "log-in" %} Login</a>
           {% endif %}
-        </nav>
-        
-    {% endblock %}
-
-
-
-        <div class="container-fluid oe-wrapper" style="margin-top:70px">
-            <div class="row">
-
-                <div class="col-lg-8 col-lg-offset-1 col-md-9">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            {% block content %}{% endblock %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div>
-                                <p>
-                                    If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
-                                    You can also fork the project and get involved.
-                                </p>
-                                <p>
-                                    <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
-                                </p>
-                            </div>
-                            <div>
-                                {% block content-right %}{% endblock %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
             </div>
 
-            <nav class="navbar navbar-default  navbar-fixed-bottom">
-                  <div class="container-fluid" style="width:80%; float:left;">
-                    <ul class="nav navbar-nav">
-                        <li class="inactive"><a href="/about/">About us</a></li>
-                        <li class="inactive"><a href="/faq/">FAQ</a></li>
-                        <li class="inactive"><a href="/contact/">Contact us</a></li>
-                        <li class="inactive"><a href="/legal/impressum/">Impressum</a></li>
-                        <li class="inactive"><a href="/legal/datasec/">Datenschutzerklärung</a></li>
-                        <li class="inactive"><a href="/legal/tou/">Terms of use</a></li>
-                        <li class="inactive"><a href="https://okfn.org/" target="_blank">Open Data {% bootstrap_icon "new-window" %}</a></li>
-                        <li class="inactive"><a href="http://opendefinition.org/od/2.0/en/" target="_blank">Open Knowledge  {% bootstrap_icon "new-window" %}</a></li>
-                    </ul>
-                  </div>
-            </nav>
-        </div>
+        </nav>
 
+    {% endblock header%}
+        <div class="container-fluid base">
+            {% block main %}
+                <div class="row">
+
+                {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+                {% block main-content %}
+                    <div class="col-lg-8 col-lg-offset-1 col-md-9">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {% block main-content-body %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                {% endblock main-content %}
+                {% block main-right-sidebar %}
+                    <div class="col-md-3">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div>
+                                    <p>
+                                        If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on <a href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                                        You can also fork the project and get involved.
+                                    </p>
+                                    <p>
+                                        <b> Please note that the platform is still under construction and therefore the design of this page is still highly volatile!</b>
+                                    </p>
+                                </div>
+                                <div>
+                                    {% block main-right-sidebar-content %}
+                                    {% endblock main-right-sidebar-content %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endblock main-right-sidebar %}
+                </div>
+                {% endblock main %}
+                {% block footer %}
+                        <footer class="row">
+                            <nav class="navbar navbar-default base-navbar base-navbar-bottom">
+                                  <div class="container-fluid container-center">
+                                    <ul class="nav navbar-nav navbar-right">
+                                        <li class="inactive"><a href="/contact/">Contact</a></li>
+                                        <li class="inactive"><a href="/legal/impressum/">Imprint</a></li>
+                                        <li class="inactive"><a href="/legal/datasec/">Legal</a></li>
+                                        <li class="inactive"><a href="/legal/tou/">Terms of Use</a></li>
+                                    </ul>
+                                  </div>
+                            </nav>
+                        </footer>
+
+                    </div>
+                {% endblock footer %}
+            </div>
+        </div>
+    {% block body-bottom-js %}
+        {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+        {% bootstrap_javascript jquery=1%}
+        <script type="text/javascript" src="{% static '/js/jsi18n'%}"></script>
+        {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
+    {% endblock body-bottom-js %}
 </body>
-    
+
 </html>

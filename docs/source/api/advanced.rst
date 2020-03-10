@@ -4,8 +4,15 @@ Advanced API features
 
 .. testsetup::
 
+    import os
+    from oeplatform import securitysettings as sec
     oep_url = 'http://localhost:8000'
-    from oeplatform.securitysettings import token_test_user as your_token
+    your_token = os.environ.get("LOCAL_OEP_TOKEN")
+    if your_token is None:
+        if hasattr(sec, "token_test_user") and sec.token_test_user is not None:
+            your_token = sec.token_test_user
+        else:
+            raise Exception("No token available, please set LOCAL_OEP_TOKEN or adapt your security settings")
     from shapely import wkt
     from django.contrib.gis.geos import Point
     import json
@@ -163,7 +170,9 @@ we use the following query::
     >>> import requests
     >>> data = { "query": {"fields": ["id", "name"], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data )
-    >>> response.json()['data']
+    >>> response.status_code
+    200
+    >>> response.json().get('data')
     [[0, 'John Doe0'], [1, 'John Doe1'], [2, 'John Doe2'], [3, 'John Doe3'], [4, 'John Doe4'], [5, 'John Doe5'], [6, 'John Doe6'], [7, 'John Doe7'], [8, 'John Doe8'], [9, 'John Doe9']]
 
 In order to get all entries with an id less than 3, we could extend above query
@@ -189,7 +198,9 @@ by a where clause::
     >>> import requests
     >>> data = { "query": {"fields": ["id", "name"], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}, 'where': {'operands': [{'type': 'column', 'column':'id'}, 3], 'operator': '<', 'type': 'operator'} }}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> response.json()['data']
+    >>> response.status_code
+    200
+    >>> response.json().get('data')
     [[0, 'John Doe0'], [1, 'John Doe1'], [2, 'John Doe2']]
 
 You can add several conditons as a list. Those will be interpreted as a conjunction:
@@ -199,7 +210,9 @@ You can add several conditons as a list. Those will be interpreted as a conjunct
     >>> import requests
     >>> data = { "query": {"fields": ["id", "name"], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}, 'where': [{'operands': [{'type': 'column', 'column':'id'}, 3], 'operator': '<', 'type': 'operator'}, {'operands': [{'type': 'column', 'column':'id'}, 1], 'operator': '>', 'type': 'operator'} ] }}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> response.json()['data']
+    >>> response.status_code
+    200
+    >>> response.json().get('data')
     [[2, 'John Doe2']]
 
 Functions
@@ -214,7 +227,9 @@ simply add two to every id:
     >>> import requests
     >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': '+', 'operands':[{'type': 'column', 'column': 'id'}, 2]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> response.json()['data']
+    >>> response.status_code
+    200
+    >>> response.json().get('data')
     [[0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6, 8], [7, 9], [8, 10], [9, 11]]
 
 Functions are especially usefull if you want to return geodata in a specific
@@ -225,7 +240,9 @@ format. In the following we obtain the WKT representation of our data:
     >>> import requests
     >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': 'ST_AsText', 'operands':[{'type': 'column', 'column': 'geom'}]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> data = response.json()['data']
+    >>> response.status_code
+    200
+    >>> data = response.json().get('data')
     >>> data[0]
     [0, 'POINT(0 0)']
     >>> all(geom == 'POINT(0 %d)'%pid for pid, geom in data)
@@ -238,7 +255,9 @@ format. In the following we obtain the WKT representation of our data:
     >>> import requests
     >>> data = { "query": {"fields": ['id', {'type': 'function', 'function': 'ST_AsGeoJSON', 'operands':[{'type': 'column', 'column': 'geom'}, 4236]}], "from":{'type': 'table', 'table': 'example_table', 'schema':"sandbox"}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> data = response.json()['data']
+    >>> response.status_code
+    200
+    >>> data = response.json().get('data')
     >>> data[0]
     [0, '{"type":"Point","coordinates":[0,0]}']
     >>> all(pid == json.loads(geom)['coordinates'][1] for pid, geom in data)
@@ -279,15 +298,16 @@ Joins can be queried by using the corresponding from-item::
 .. doctest::
 
     >>> import requests
-    >>> data = { "query": {"from":{'type': 'join','left': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"a"},'right': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"b"},'on': {'operands': [{'type': 'column', 'column':'id', 'table': 'a'}, {'type': 'column', 'column':'id', 'table': 'b'}], 'operator': '<', 'type': 'operator'}}}}
+    >>> data = { "query": {"from":{'type': 'join','left': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"a"},'right': {'type': 'table', 'table': 'example_table', 'schema':"sandbox", "alias":"b"},'on': {'operands': [{'type': 'column', 'column':'id', 'table': 'a', 'schema':'sandbox',}, {'type': 'column', 'column':'id', 'table': 'b', 'schema':'sandbox',}], 'operator': '<', 'type': 'operator'}}}}
     >>> response = requests.post(oep_url+'/api/v0/advanced/search', json=data)
-    >>> response.json()['data']
+    >>> response.status_code
+    200
+    >>> response.json().get('data')
     [[0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [0, 'John Doe0', '01010000208C7D000000000000000000000000000000000000', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [1, 'John Doe1', '01010000208C7D00000000000000000000000000000000F03F', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [2, 'John Doe2', '01010000208C7D000000000000000000000000000000000040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [3, 'John Doe3', '01010000208C7D000000000000000000000000000000000840', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [4, 'John Doe4', '01010000208C7D000000000000000000000000000000001040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [5, 'John Doe5', '01010000208C7D000000000000000000000000000000001440', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [6, 'John Doe6', '01010000208C7D000000000000000000000000000000001840', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40', 8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040'], [7, 'John Doe7', '01010000208C7D000000000000000000000000000000001C40', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240'], [8, 'John Doe8', '01010000208C7D000000000000000000000000000000002040', 9, 'John Doe9', '01010000208C7D000000000000000000000000000000002240']]
 
 
 .. testcleanup::
 
     import requests
-    requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
-
-
+    response = requests.delete(oep_url+'/api/v0/schema/sandbox/tables/example_table', headers={'Authorization': 'Token %s'%your_token} )
+    assert response.status_code == 200, response

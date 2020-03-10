@@ -1,27 +1,59 @@
 {% extends "dataedit/base.html" %}
-
+{% load dataedit.metadata %}
 {% block data_content %}
-<div id="comment_modal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Comment</h4>
-          </div>
-          <div class="modal-body">
-            <p> Method: <span id="modal_method"></span></p>
-            <p> Origin: <span id="modal_origin"></span> </p>
-            <p> Assumption: <span id="modal_assumption"></span></p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-    </div>
-</div>
 {% load staticfiles %}
 {% load bootstrap3 %}
-{% block heading %}{% endblock %}
+{% block heading %}
+
+<link href="{% static 'dataedit/query-builder.default.min.css' %}"  rel="stylesheet">
+<link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"  rel="stylesheet">
+    <h3>
+        <a href="/dataedit/view/{{schema}}">{{schema}}</a>.{{table}}
+    </h3>
+    <table>
+        <tr>
+            <td style="padding:5px">
+                <div>
+                    <div >
+                        <a id="fetch_overlay_open" class="glyphicon glyphicon-download-alt"></a>
+                    </div>
+
+                </div>
+            </td>
+            <td>
+                <a href="{{table}}/permissions" class="glyphicon glyphicon-user"> </a>
+            </td>
+        </tr>
+    </table>
+    <div id="fetch_overlay" class="modal" style="z-index:3">
+      <div class="modal-content">
+        <span id="fetch_overlay_close" class="close">&times;</span>
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#csv">CSV</a></li>
+            <li><a data-toggle="tab" href="#python">Python</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="csv" class="tab-pane fade in active">
+              <p> <br>
+                Here you can download this dataset in csv format. Mind that the textbased csv format tends to be costly regarding the file size. Thus, this download might take some time.
+              </p>
+              <a class="btn btn-default" style="margin-left:50%" href="/api/v0/schema/{{schema}}/tables/{{table}}/rows?form=csv" >Download CSV</a>
+          </div>
+          <div id="python" class="tab-pane fade">
+            <div>
+                Use below snippet to fetch data from this dataset.
+              <textarea class="form-control" rows="6" cols="50" style="font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+    from requests import get
+
+    result = get('https://{{host}}/api/v0/schema/{{schema}}/tables/{{table}}/rows')
+    for row in result.json():
+    # Process the row</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
 
 {% load dataedit.taghandler %}
 {% get_tags table=table schema=schema as table_tags%}
@@ -29,72 +61,9 @@
 <hr>
 
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
-<script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
-
-<!-- vendor css -->
-{#<link href="https://rawgit.com/okfn/recline/master/vendor/leaflet/0.7.3/leaflet.css" rel="stylesheet">#}
-<link href="https://rawgit.com/okfn/recline/master/vendor/leaflet.markercluster/MarkerCluster.css" rel="stylesheet">
-<link href="https://rawgit.com/okfn/recline/master/vendor/leaflet.markercluster/MarkerCluster.Default.css" rel=
-  "stylesheet">
-<link rel="stylesheet" href="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/slick.grid.css">
-
-<!-- recline css -->
-{#<link href="https://rawgit.com/okfn/recline/master/css/map.css" rel="stylesheet">#}
-
-<link href="https://rawgit.com/okfn/recline/master/css/multiview.css" rel="stylesheet">
-<link href="https://rawgit.com/okfn/recline/master/css/slickgrid.css"rel="stylesheet">
-<link href="https://rawgit.com/okfn/recline/master/css/flot.css" rel="stylesheet">
 <link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
 <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
 <!-- Vendor JS - general dependencies -->
-
-<script type="text/javascript">
-    var bs_jQuery = jQuery.noConflict(true);
-</script>
-
-<script src="https://rawgit.com/okfn/recline/master/vendor/jquery/1.7.1/jquery.js" type="text/javascript"></script>
-<script src="https://rawgit.com/okfn/recline/master/vendor/underscore/1.4.4/underscore.js" type="text/javascript"></script>
-<script src="https://rawgit.com/okfn/recline/master/vendor/backbone/1.0.0/backbone.js" type="text/javascript"></script>
-<script src="https://rawgit.com/okfn/recline/master/vendor/mustache/0.5.0-dev/mustache.js" type="text/javascript"></script>
-{#<script src="https://rawgit.com/okfn/recline/master/vendor/bootstrap/3.2.0/js/bootstrap.js" type="text/javascript"></script>#}
-
-<!-- Vendor JS - view dependencies -->
-{#<script src="https://rawgit.com/okfn/recline/master/vendor/leaflet/0.7.3/leaflet.js" type="text/javascript"></script>#}
-{#<script src="https://rawgit.com/okfn/recline/master/vendor/leaflet.markercluster/leaflet.markercluster.js" type="text/javascript"></script>#}
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/flot/jquery.flot.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/flot/jquery.flot.time.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/moment/2.0.0/moment.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/jquery-ui-1.8.16.custom.min.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/jquery.event.drag-2.2.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/slick.core.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/slick.formatters.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/slick.editors.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/slick.grid.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/plugins/slick.rowselectionmodel.js"></script>
-<script type="text/javascript" src="https://rawgit.com/okfn/recline/master/vendor/slickgrid/2.2/plugins/slick.rowmovemanager.js"></script>
-<!-- Recline JS (combined distribution, all views) -->
-<script type="text/javascript" src="{% static 'dataedit/recline/dist/recline.js' %}"></script>
-
-<script type="text/javascript">
-    var jQuery = bs_jQuery;
-</script>
-
-<script>
-    unchecked = false;
-    function swap_checked(){
-        unchecked = !unchecked;
-        build_views();
-    }
-</script>
-
-<script type="text/javascript" src="{% static 'dataedit/editors.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/map_backend.js' %}"></script>
-
-<script type="text/javascript">
-
-</script>
 
 <!-- include leaflet without recline -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
@@ -106,20 +75,7 @@
    integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
    crossorigin=""></script>
 
-
 <div>
-  <style type="text/css">
-    .recline-slickgrid {
-      min-height: 700px;
-    }
-
-    .changelog {
-      display: none;
-      border-bottom: 1px solid #ccc;
-      margin-bottom: 10px;
-    }
-  </style>
-
     <div class="panel-group">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -128,8 +84,38 @@
                 </h4>
             </div>
             <div>
-                <!-- TODO: Es wird nur die erste row geladen !!! -->
-                <div class="data-explorer-here" id="main-visualization-container">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Views<span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header">Graph</li>
+                        {% for view in views %}
+                            {% if view.type == "graph" %}
+                                <li><a href="?view={{view.id}}">{{ view.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li><a href="/dataedit/view/{{schema}}/{{table}}/graph/new">Add a new graph view</a></li>
+                        <li class="dropdown-header">Map</li>
+                        {% for view in views %}
+                            {% if view.type == "map" %}
+                                <li><a href="?view={{view.id}}">{{ view.name }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li><a href="/dataedit/view/{{schema}}/{{table}}/map/new">Add a new map view</a></li>
+                    </ul>
+                </div>
+                <div class="datatable">
+                    <table class="display" id="datatable" style="width:100%">
+                        <thead>
+                            <tr></tr>
+                        </thead>
+                    </table>
+                    <div>
+                        <div id="builder"></div>
+                        <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
+                    </div>
+                    {% if current_view.type == "map" %}
+                        <div style='height: 800px; width: 100%;' id="map"></div>
+                    {% endif %}
                     <div id="loading-indicator" class="sk-fading-circle">
                         <div class="sk-circle1 sk-circle"></div>
                         <div class="sk-circle2 sk-circle"></div>
@@ -145,136 +131,66 @@
                         <div class="sk-circle12 sk-circle"></div>
                     </div>
                 </div>
+
+                {% if current_view.type == "graph" %}
+                    <div id="datagraph">
+                {% endif %}
+                </div>
             </div>
         </div>
     </div>
-  <div style="clear: both;"></div>
-    Data is displayed using <a href="http://okfnlabs.org/recline/">recline.js</a>
 </div>
 
-{% block script %}{% endblock %}
-
 <div>
-    <h4>Metadata</h4><a href="{{table}}/meta_edit"> Edit</a>
-    <table class="table">
-        <tr>
-            <th>Title</th>
-            <td>{{comment_on_table.title}}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td class="metavalue">{{comment_on_table.description}}</td>
-        </tr>
-        <tr>
-            <th>Languages</th>
-            <td class="metavalue">
-              <ul>
-                {% for row in comment_on_table.language %}
-                    <li>{{row}}</li>
-                {% endfor %}
-              </ul>
-            </td>
-        </tr>
-        {% if comment_on_table.spatial %}
-        <tr>
-            <th>Spatial</th>
-            <td>
-                {{comment_on_table.spatial.extent}} {% if comment_on_table.spatial.resolution %} ({{comment_on_table.spatial.resolution}}) {% endif %} <br/>
-            </td>
-        </tr>
-        {% endif %}
-
-		{% if comment_on_table.temporal %}
-        <tr>
-            <th>Temporal</th>
-            <td>
-                {{comment_on_table.temporal.start}} {% if comment_on_table.temporal.end %} ({{comment_on_table.temporal.end}}) {% if comment_on_table.temporal.resolution %} ({{comment_on_table.temporal.resolution}}) {% endif %} {% endif %} <br/>
-            </td>
-        </tr>
-        {% endif %}
-		
-		{% if comment_on_table.sources %}
-        <tr>
-            <th>Sources</th>
-            <td>
-
-                {% for row in comment_on_table.sources %}
-                    <p class="metaproperty">
-                    {% if row.url %}
-                        <a href="{{row.url}}">{{row.name}}</a>
-                    {% else %}
-                        {{row.name}}
-                    {% endif %}
-                    </p>
-                    <ul>
-                        <li> Description: {{row.description }}</li>
-                        <li> License: {{row.license }}</li>
-                    </ul>
-                {% endfor %}
-            </td>
-        </tr>
-        {% endif %}
-		
-        {% if comment_on_table.license %}
-        <tr>
-            <th>License</th>
-            <td>
-                    <p class="metaproperty">
-                        {% if comment_on_table.license.url %}
-                            <a href="{{comment_on_table.license.url}}">
-                        {% endif %}
-                        {{comment_on_table.license.name}} ({{comment_on_table.license.id}})
-                        {% if comment_on_table.license.url %}
-                            </a>
-                        {% endif %}
-                    </p>
-                    <ul>
-                        <li> Version: {{comment_on_table.license.version }}</li>
-                        <li> Instruction: {{comment_on_table.license.instruction }}</li>
-                        <li> Copyright: {{comment_on_table.license.copyright }}</li>
-                    </ul>
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.contributors %}
-        <tr>
-            <th>Contributors</th>
-            <td>
-                {% for row in comment_on_table.contributors %}
-                    <p class="metaproperty">
-                        {% if row.email %}
-                            <a href="mailto:{{row.email}}">{{row.name}} ({{row.date}})</a>
-                        {% else %}
-                            {{row.name}} ({{row.date}})
-                        {% endif %}
-                    </p>
-                    {{row.comment}}
-                {% endfor %}
-            </td>
-        </tr>
-        {% endif %}
-        {% if comment_on_table.fields %}
-        <tr>
-            <th>Columns</th>
-            <td>
-                    {% for source in comment_on_table.fields %}
-                        <p class="metaproperty">{{source.name}} {% if source.unit %} (in {{source.unit}}) {% endif %}</p>
-                        {% if source.description %}
-                            {{source.description}}
-                        {% else %}
-                            No description
-                        {% endif %}
-                        <hr>
-                    {% endfor %}
-            </td>
-        </tr>
-        {% endif %}
-    </table>
+     <h4>Metadata</h4><a href="{{table}}/meta_edit"> Edit</a>
+        {{meta_widget}}
 </div>
 
 <hr>
-
-
-
-
 {% endblock %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'dataedit/wkx.min.js' %}"></script>
+<script src="{% static 'dataedit/proj4.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/dumps.js' %}"></script>
+<script type="text/javascript" src="{% static 'dataedit/views.js' %}"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
+<script>
+    var csrftoken = getCookie('csrftoken');
+    var table = '{{table}}';
+    var schema = '{{schema}}';
+    var view = {
+        type: "{{ current_view.type }}",
+        options: JSON5.parse("{{ current_view.options | escapejs }}")
+    };
+    load_view(schema, table, csrftoken, view);
+</script>
+<script type="text/javascript">
+    // Get the modal
+    var modal = document.getElementById('fetch_overlay');
+    // Get the button that opens the modal
+    var btn = document.getElementById("fetch_overlay_open");
+    var cls = document.getElementById("fetch_overlay_close");
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    };
+    // When the user clicks on <span> (x), close the modal
+    cls.onclick = function() {
+        modal.style.display = "none";
+    };
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}
+
+
+

@@ -10,21 +10,24 @@ DEBUG = True
 URL = '127.0.0.1'
 
 # This token is the token the test user is identified with during API-tests
-token_test_user = '0'
+token_test_user = None
 
-# Database to your django database
+# Setting of your django database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django',
-	'USER': os.environ.get("OEP_DB_USER"),
-	'PASSWORD': os.environ.get("OEP_DB_PASSWORD"),
-	'HOST': 'localhost'                      
+        'NAME': 'oep_django',
+	    'USER': os.environ.get("OEP_DJANGO_USER"),
+	    'PASSWORD': os.environ.get("OEP_DB_PW"),
+	    'HOST': 'localhost'
 	}
 }
 
-PLAYGROUNDS = ('sandbox')
+DEFAULT_SCHEMA = 'sandbox'
+PLAYGROUNDS = (DEFAULT_SCHEMA, 'test')
+
+UNVERSIONED_SCHEMAS = ("model_draft", )
 
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
@@ -34,11 +37,13 @@ USER_CONNECTION_LIMIT = 4
 ANON_CONNECTION_LIMIT = 40
 
 # This database connection is used for the actual data interfaces (App: dataedit)
-dbuser = os.environ.get("OEDB_USER")
-dbpasswd = os.environ.get("OEDB_PASSWORD")
-dbport = os.environ.get("OEDB_PORT", 5432)
-dbhost = os.environ.get("OEDB_HOST", "localhost")
-dbname = os.environ.get("OEDB_NAME", "oedb")
+# This should not be linked with a potential user account of the OpenEnergyDatabase !!!
+# Please refer to the step 2.2 of the README file
+dbuser = os.environ.get("LOCAL_DB_USER")
+dbpasswd = os.environ.get("LOCAL_DB_PASSWORD")
+dbport = os.environ.get("LOCAL_DB_PORT", 5432)
+dbhost = os.environ.get("LOCAL_DB_HOST", "localhost")
+dbname = os.environ.get("LOCAL_DB_NAME", "oedb")
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

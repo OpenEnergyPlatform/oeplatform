@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load bootstrap3 %}
-{% block content %}
+{% block main-content-body %}
 <h1> {{ profile_user.name }} </h1>
 <script>
     function toggler(divId) {
@@ -60,7 +60,7 @@
 </table>
 {% endif %}
 {% endblock %}
-{% block content-right %}
+{% block main-right-sidebar-content %}
 <hr>
 <h3>Manage Groups</h3>
 <div style="overflow: hidden;">

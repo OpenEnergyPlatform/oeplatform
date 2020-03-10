@@ -3,6 +3,56 @@
     border: 2px solid #C5C5CF;
 }*/
 
+html {
+    --primaryColor1: #3B77A0;
+    --primaryColor2: #1F567D;
+    --primaryColor3: #0B3E62;
+    --primaryColor4: #072437;
+    --primaryColor5: #01090D;
+    --secondaryColor1: #BFD7EA;
+    --grey1: #62869D;
+    --white: #FFFFFF;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    overflow: auto;
+    height: calc(100% - 52px);
+}
+
+.base-navbar {
+    margin-bottom: 0;
+    border-radius: 0;
+    background-color: var(--primaryColor2);
+    background-image: unset;
+}
+
+.base {
+    height: 100%;
+    box-sizing: border-box;
+    padding-top: 1em;
+
+
+
+    display: grid;
+    grid-template-columns: 100%;
+    /* container-fluid creates pseudo-elements, which are handled like normal children in grids, WTF. */
+    grid-template-rows: auto 1fr auto auto;
+}
+
+.base > div:first-child {
+    margin: 0 -15px;
+}
+
+
 .tag {
     padding: 0px;
     padding-left: 5px;
@@ -52,6 +102,12 @@
     float: right;
     background:none;
 
+}
+
+.container-center {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .logo-container{

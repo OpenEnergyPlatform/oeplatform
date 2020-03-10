@@ -3,7 +3,7 @@
 ###########
 import decimal
 import re
-from datetime import datetime
+from datetime import datetime, date
 
 import geoalchemy2  # Although this import seems unused is has to be here
 import sqlalchemy as sa
@@ -12,13 +12,16 @@ from sqlalchemy import (
     MetaData,
     Table,
     and_,
+    not_,
     column,
     func,
     literal_column,
     or_,
     select,
     util,
+    cast,
 )
+import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
@@ -32,6 +35,7 @@ from api.error import APIError, APIKeyError
 from api.connection import _get_engine
 from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
 from sqlalchemy.dialects.postgresql.base import INTERVAL
+from sqlalchemy import types as sqltypes
 
 from . import DEFAULT_SCHEMA
 
@@ -94,6 +98,7 @@ def set_meta_info(method, user, message=None):
     val_dict = {}
     val_dict["_user"] = user  # TODO: Add user handling
     val_dict["_message"] = message
+    val_dict["_type"] = method
     return val_dict
 
 
@@ -123,7 +128,10 @@ def parse_insert(d, context, message=None, mapper=None):
             if not isinstance(raw_values, list):
                 raise APIError("{} is not a list".format(raw_values))
             values = (
-                zip(field_strings, parse_expression(x, allow_untyped_dicts=True))
+                zip(
+                    field_strings,
+                    parse_expression(x, allow_untyped_dicts=True, escape_quotes=False),
+                )
                 for x in raw_values
             )
         else:
@@ -195,6 +203,11 @@ def parse_select(d):
         if "fields" in d and d["fields"]:
             L = []
             for field in d["fields"]:
+                if isinstance(field, str):
+                    field = dict(
+                        type="column",
+                        column=field
+                    )
                 col = parse_expression(field)
                 if "as" in field:
                     col.label(read_pgid(field["as"]))
@@ -350,10 +363,101 @@ def parse_column(d, mapper):
         if is_literal:
             return literal_column(name)
         else:
-            return column(name)
+            if table_name is not None:
+                return literal_column(table_name + "." + name)
+            else:
+                return column(name)
 
 
-def parse_expression(d, mapper=None, allow_untyped_dicts=False):
+def parse_type(dt_string, **kwargs):
+
+    if isinstance(dt_string, dict):
+        dt = parse_type(
+            get_or_403(dt_string, "datatype"), **dt_string.get("kwargs", {})
+        )
+        return dt
+    else:
+        # Are you an array?
+        dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
+        arr_match = re.match(dtarr_expression, dt_string)
+        if arr_match:
+            is_array = True
+            dt_string = arr_match.groups()[0]
+            dt, autoincrement = parse_type(dt_string)
+            return sa.ARRAY(dt), autoincrement
+
+        # Is the datatypestring of form NAME(NUMBER)?
+        dt_expression = r"(?P<dtname>[A-z_]+)\s*\((?P<cardinality>.*(,.*)?)\)"
+        match = re.match(dt_expression, dt_string)
+        if match:
+            dt_string = match.groups()[0]
+            if dt_string.lower() == "geometry":
+                return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
+            else:
+                dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
+            dt, autoincrement = parse_type(dt_string)
+            return dt(*dt_cardinality, **kwargs), autoincrement
+
+        # So it's a plain type
+        autoincrement = False
+
+        dt_string = dt_string.lower()
+
+        if dt_string in ("int", "integer"):
+            dt = sa.types.INTEGER
+        elif dt_string in ("bigint", "biginteger"):
+            dt = sa.types.BigInteger
+        elif dt_string in ("bit",):
+            dt = sa.types.Binary
+        elif dt_string in ("boolean", "bool"):
+            dt = sa.types.Boolean
+        elif dt_string in ("char",):
+            dt = sqltypes.CHAR
+        elif dt_string in ("date",):
+            dt = sqltypes.Date
+        elif dt_string in ("datetime",):
+            dt = sqltypes.DateTime
+        elif dt_string in ("timestamp", "timestamp without time zone"):
+            dt = sqltypes.TIMESTAMP
+        elif dt_string in ("time", "time without time zone"):
+            dt = sqltypes.TIME
+        elif dt_string in ("float"):
+            dt = sqltypes.FLOAT
+        elif dt_string in ("decimal"):
+            dt = sqltypes.DECIMAL
+        elif dt_string in ("interval",):
+            dt = sqltypes.Interval
+        elif dt_string in ("json",):
+            dt = sqltypes.JSON
+        elif dt_string in ("nchar",):
+            dt = sqltypes.NCHAR
+        elif dt_string in ("numerical", "numeric"):
+            dt = sa.types.Numeric
+        elif dt_string in ["varchar", "character varying"]:
+            dt = sqltypes.VARCHAR
+        elif dt_string in ("real",):
+            dt = sqltypes.REAL
+        elif dt_string in ("smallint",):
+            dt = sqltypes.SMALLINT
+        elif hasattr(geoalchemy2, dt_string):
+            dt = getattr(geoalchemy2, dt_string)
+        elif dt_string in _POSTGIS_MAP:
+            dt = _POSTGIS_MAP[dt_string]
+        elif hasattr(sqltypes, dt_string.upper()):
+            dt = getattr(sqltypes, dt_string.upper())
+        elif dt_string == "bigserial":
+            dt = sa.types.BigInteger
+            autoincrement = True
+        else:
+            raise APIError("Unknown type (%s)." % dt_string)
+        return dt, autoincrement
+
+
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement, 'geography': geoalchemy2.types.Geography , 'geometry': geoalchemy2.types.Geometry, 'raster': geoalchemy2.types.Raster, 'rasterelement':geoalchemy2.types.RasterElement
+}
+
+def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
     # TODO: Implement
     if isinstance(d, dict):
         if allow_untyped_dicts and "type" not in d:
@@ -379,6 +483,16 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False):
             return "*"
         if dtype == "value":
             if "value" in d:
+                if "datatype" in d:
+                    dt = d["datatype"]
+                    if dt == "Decimal":
+                        return decimal.Decimal(get_or_403(d, "value"))
+                    elif dt == "date":
+                        return dateutil.parser.parse(get_or_403(d, "value")).date()
+                    elif dt == "datetime":
+                        return dateutil.parser.parse(get_or_403(d, "value"))
+                    elif dt == "time":
+                        return dateutil.parser.parse(get_or_403(d, "value")).time()
                 return read_pgvalue(get_or_403(d, "value"))
             else:
                 return None
@@ -390,12 +504,24 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False):
             return Sequence(get_or_403(d, "sequence"), schema=schema)
         if dtype == "select":
             return parse_select(d)
+        if dtype == "cast":
+            expr = parse_expression(get_or_403(d, "source"))
+            t, _ = parse_type(get_or_403(d, "as"))
+            return cast(expr, t)
         else:
             raise APIError("Unknown expression type: " + dtype)
     if isinstance(d, list):
-        return [parse_expression(x, allow_untyped_dicts=allow_untyped_dicts) for x in d]
+        return [
+            parse_expression(
+                x, allow_untyped_dicts=allow_untyped_dicts, escape_quotes=escape_quotes
+            )
+            for x in d
+        ]
     if isinstance(d, str):
-        return d.replace('"', "")
+        if escape_quotes:
+            return d.replace('"', "")
+        else:
+            return d
     return d
 
 
@@ -589,7 +715,7 @@ def parse_sqla_operator(raw_key, *operands):
         return query
     elif key in ["not"]:
         x = operands[0]
-        return parse_condition(x)._not()
+        return not_(parse_condition(x))
     else:
         if len(operands) != 2:
             raise APIError(
@@ -619,8 +745,12 @@ def parse_sqla_operator(raw_key, *operands):
             return x / y
         if key in ["concatenate", "||"]:
             return fun.concat(x, y)
+        if key in ["is"]:
+            return x is y
         if key in ["is not"]:
             return x.isnot(y)
+        if key in ["like"]:
+            return x.match(y)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:
