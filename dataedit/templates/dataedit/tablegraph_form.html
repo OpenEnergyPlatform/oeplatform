@@ -1,10 +1,16 @@
 {% extends "dataedit/base.html" %}
 
+{% block site-header %}
+  <h4 class="site-header">Create Graph View</h4>
+{% endblock site-header %}
+
 {% block data_content %}
 {% load static %}
 <form method="post">
-        {% csrf_token %}
-    {{ formset.as_ul }}
-    <input type="submit" value="Submit Form"/>
+  <div class="form-group">
+          {% csrf_token %}
+      {{ formset.as_p }}
+      <input type="submit" class="btn btn-success" value="Submit Form"/>
+  </div>
 </form>
 {% endblock %}

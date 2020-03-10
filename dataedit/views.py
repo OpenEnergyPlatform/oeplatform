@@ -831,9 +831,18 @@ def view_delete(request, schema, table):
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
-def create_graph(request, schema, table):
+class GraphView(View):
+    def get(self, request, schema, table):
+        # get the columns id from the schema and the table
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        formset = GraphViewForm(columns=columns)
 
-    if request.method == 'POST':
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
+    def post(self, request, schema, table):
         # save an instance of View, look at GraphViewForm fields in forms.py for information to the
         # options
         opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
@@ -850,15 +859,6 @@ def create_graph(request, schema, table):
         return redirect(
             "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
         )
-    else:
-        # get the columns id from the schema and the table
-        columns = [
-            (c, c)
-            for c in describe_columns(schema, table).keys()
-        ]
-        formset = GraphViewForm(columns=columns)
-
-        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
 
 
 class MapView(View):

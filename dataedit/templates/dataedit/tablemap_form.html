@@ -1,20 +1,25 @@
 {% extends "dataedit/base.html" %}
 
+{% block site-header %}
+  <h4 class="site-header">Create Map View</h4>
+{% endblock site-header %}
+
 {% block data_content %}
 {% load static %}
 <form method="post">
         {% csrf_token %}
-    {{ latlonform.as_ul }}
+    {{ latlonform.as_p }}
     <input type="hidden" name="maptype" value="latlon">
-    <input type="submit" value="Submit Form"/>
+    <input type="submit" class="btn btn-success" value="Submit Form"/>
 </form>
 
+<hr>
 
 <form method="post">
         {% csrf_token %}
-    {{ geomform.as_ul }}
+    {{ geomform.as_p }}
     <input type="hidden" name="maptype" value="geom">
-    <input type="submit" value="Submit Form"/>
+    <input type="submit" class="btn btn-success" value="Submit Form"/>
 </form>
 
 {% endblock %}

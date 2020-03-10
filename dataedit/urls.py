@@ -81,7 +81,7 @@ urlpatterns = [
     url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
             qual=pgsql_qualifier
         ),
-        views.create_graph
+        views.GraphView.as_view()
     ),
     url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/new".format(
             qual=pgsql_qualifier

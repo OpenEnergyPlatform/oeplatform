@@ -109,13 +109,17 @@ class GraphViewForm(ModelForm):
         fields = '__all__'
         exclude = ('table', 'schema', 'VIEW_TYPES', 'options', 'type')
 
+
     def __init__(self, *args, **kwargs):
         columns = kwargs.pop('columns', None)
         super(GraphViewForm, self).__init__(*args, **kwargs)
 
+        self.fields["name"] = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control"}))
+        self.fields["is_default"] = forms.BooleanField(label="Default", required=False)
+
         if columns is not None:
-            self.fields['column_x'] = forms.ChoiceField(choices=columns)
-            self.fields['column_y'] = forms.ChoiceField(choices=columns)
+            self.fields['column_x'] = forms.ChoiceField(choices=columns, widget=forms.Select(attrs={"class": "form-control"}))
+            self.fields['column_y'] = forms.ChoiceField(choices=columns, widget=forms.Select(attrs={"class": "form-control"}))
 
 
 class MapViewForm(ModelForm):
@@ -124,11 +128,16 @@ class MapViewForm(ModelForm):
         self.columns = [c for (c, _) in kwargs.pop('columns', {})]
         super(MapViewForm, self).__init__(*args, **kwargs)
 
+        self.fields["name"] = forms.CharField(widget=forms.TextInput(attrs={"class": "form-control"}))
+        self.fields["is_default"] = forms.BooleanField(label="Default", required=False)
+
+
 
     class Meta:
         model = View
         fields = '__all__'
         exclude = ('table', 'schema', 'VIEW_TYPES', 'options', 'type')
+
 
     def save(self, commit=True):
         view = View.objects.create(
@@ -149,8 +158,8 @@ class LatLonViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):
         super(LatLonViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            self.fields['lat'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
-            self.fields['lon'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+            self.fields['lat'] = forms.ChoiceField(choices=[(c,c) for c in self.columns], widget=forms.Select(attrs={"class": "form-control"}))
+            self.fields['lon'] = forms.ChoiceField(choices=[(c,c) for c in self.columns], widget=forms.Select(attrs={"class": "form-control"}))
 
     def is_valid(self):
         return super(LatLonViewForm, self).is_valid() and (self.options['lat'] in self.columns) and (self.options['lon'] in self.columns)
@@ -160,7 +169,7 @@ class GeomViewForm(MapViewForm):
     def __init__(self, *args, **kwargs):
         super(GeomViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            self.fields['geom'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+            self.fields['geom'] = forms.ChoiceField(choices=[(c,c) for c in self.columns], widget=forms.Select(attrs={"class": "form-control"}))
 
     def is_valid(self):
         return super(GeomViewForm, self).is_valid() and self.options['geom'] in self.columns
