@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     "colorfield",
     "literature",
     "api",
+    "ontology",
     "axes",
     "django.contrib.postgres",
     "fontawesome_5",
