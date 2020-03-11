@@ -6,11 +6,12 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UserChangeForm,
     UserCreationForm,
+
 )
 from django.core.exceptions import ValidationError
 
 from .models import ActivationToken
-from .models import myuser as OepUser
+from .models import myuser as OepUser, UserGroup
 
 
 class CreateUserForm(UserCreationForm):
@@ -86,6 +87,11 @@ class ChangeEmailForm(forms.Form):
         user.save()
         user.send_activation_mail(reset_token=True)
 
+
+class GroupForm(forms.ModelForm):
+    class Meta:
+        model = UserGroup
+        fields = ("name", "description")
 
 class GroupUserForm(forms.ModelForm):
     """

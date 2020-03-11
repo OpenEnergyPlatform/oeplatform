@@ -1,13 +1,13 @@
 {% extends "base/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% block title %} - My Memberships {% endblock %}
 {% block main-content-body %}
-{% load staticfiles %}
+{% load static %}
 	<h4> My Memberships</h4>
 
     <ul class="list-group">
 	{% for membership in request.user.memberships.all %}
-			<li class="list-group-item"><a href="{{ membership.group.id }}/members">{{ membership.group.name }}</a></li>
+			<li class="list-group-item"><a href="{{ membership.group.id }}">{{ membership.group.name }}</a></li>
     {% endfor %}
     </ul>
     <div>

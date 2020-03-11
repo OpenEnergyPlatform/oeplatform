@@ -1,5 +1,5 @@
 {% load modelview_extras %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% if field|fieldtype == "CheckboxInput" and add %}
     {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name%}
 {% elif field|fieldtype == "Select" and add %}
@@ -9,7 +9,7 @@
     <th class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}
         {% if field.help_text != "" %}
             <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ field.help_text }}">
-                <span class='glyphicon glyphicon-question-sign'></span>
+                <span class='fas fa-question'></span>
             </a>
         {% endif %}</th>
     <td>

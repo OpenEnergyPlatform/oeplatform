@@ -74,7 +74,6 @@ urlpatterns = [
         views.show_revision,
         name="input",
     ),
-    url(r"^search", views.SearchView.as_view()),
     url(r"^tags/?$", views.tag_overview),
     url(r"^tags/set/?$", views.change_tag),
     url(r"^tags/new/?$", views.tag_editor),

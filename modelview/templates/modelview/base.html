@@ -1,27 +1,12 @@
 {% extends "base/base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% block main-right-sidebar-content %}
-<hr>
-    <div style="overflow: hidden;">
-        <a href="/dataedit/tags"><h3>Manage Tags</h3></a>
-    </div>
-<hr>
 
-Fact Sheet objectives: The Fact Sheets are made to...
-<ul>
-    <li>Find models/frameworks for your needs or just get an overview about the existing ones</li>
-    <li>Compare a selection of models for different purposes - e.g. to develop a strategy to link them</li>
-    <li>Store your model/framework information to provide transparency</li>
-</ul>
-More info <a href="/factsheets/overview/">here</a>
-<hr>
-<b>Use case example model Fact Sheet:</b> For a European pathway simulation (EPS) we
-want to choose the models that best meet our requirements. All partners include
-their models in the Model Fact Sheets and tag them with “EPS”. To compare the
-models we filter all “EPS” models and choose different characteristics that we
-want to compare. OEP will give us tables (views) that facilitate the comparison.
-<hr>
+{% block main-right-sidebar-content-before %}
+{% endblock main-right-sidebar-content-before %}
+
 {% endblock %}
+
 {% block main-content-body %}
 {% block factsheets_content %}
 

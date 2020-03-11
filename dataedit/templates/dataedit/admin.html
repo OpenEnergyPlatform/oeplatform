@@ -1,6 +1,6 @@
 {% block main-content-body %}
 {% load dict_handler %}
-{% load bootstrap3   %}
+{% load bootstrap4   %}
 {% csrf_token %}
 
 <h2>API Changes</h2>
@@ -97,7 +97,7 @@
                         <input type="hidden" name="action" value="apply">
                         <input type="hidden" name="schema" value="{{ value.c_schema}}">
                         <input type="hidden" name="table" value="{{ value.c_table}}">
-                        <button type="submit" value="apply" class="btn btn-success pull-left" style="margin-right: 20px">Apply</button>
+                        <button type="submit" value="apply" class="btn btn-success" style="margin-right: 20px">Apply</button>
                     </form>
                     <form action="/dataedit/admin/constraints/" method="post">
                         {% csrf_token %}
@@ -105,7 +105,7 @@
                         <input type="hidden" name="action" value="deny">
                         <input type="hidden" name="schema" value="{{ value.c_schema}}">
                         <input type="hidden" name="table" value="{{ value.c_table}}">
-                        <button type="submit" value="deny" class="btn btn-danger pull-right">Deny</button>
+                        <button type="submit" value="deny" class="btn btn-danger">Deny</button>
                     </form>
                 </div>
                 </div>

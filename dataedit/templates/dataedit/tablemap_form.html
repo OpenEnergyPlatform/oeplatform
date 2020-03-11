@@ -1,7 +1,7 @@
 {% extends "dataedit/base.html" %}
 
 {% block data_content %}
-{% load staticfiles %}
+{% load static %}
 <form method="post">
         {% csrf_token %}
     {{ latlonform.as_ul }}

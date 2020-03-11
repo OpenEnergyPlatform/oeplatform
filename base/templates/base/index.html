@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 
 {% block main-right-sidebar-content %}
     <h2>Changes in version {{ version }}</h2>
@@ -7,48 +7,50 @@
 {% endblock %}
 
 {% block after-head %}
-    {% load staticfiles %}
+    {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/index-style.css' %}">
 {% endblock %}
 
 {% block main %}
-    {% load staticfiles %}
+    {% load static %}
 
     <div class="index-home">
         <div class="index-group">
             <div class="index-padding">
                 <h3>Open Energy Platform</h3>
-                <h5>Make your energy system modelling process transparent!</h5>
+                <span class="alternative">Make your energy system modelling process transparent!</span>
 
                 <div class="index-tile-container">
                     <div class="index-tile index-tile-colored index-tile-color-1">
                         <img src="/static/img/welcome/database.png" alt="">
-                        <a role="button" class="btn btn-default" href="/dataedit/">Database</a>
+                        <a role="button" class="btn btn-secondary" href="/dataedit/">Database</a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-2">
                         <img src="/static/img/welcome/factsheets.png" alt="">
-                        <a role="button" class="btn btn-default" href="/factsheets/overview/">Factsheets</a>
+                        <a role="button" class="btn btn-secondary" href="/factsheets/overview/">Factsheets</a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-3">
                         <img src="/static/img/welcome/bundles.png" alt="">
-                        <a role="button" class="btn btn-default">Bundles</a>
+                        <a role="button" class="btn btn-secondary">Bundles</a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-4">
                         <img src="/static/img/welcome/ontology.svg" alt="">
-                        <a role="button" class="btn btn-default">Ontology</a>
+                        <a role="button" class="btn btn-secondary">Ontology</a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-5">
                         <img src="/static/img/welcome/documentation.png" alt="">
-                        <a role="button" class="btn btn-default" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">Documentation</a>
+                        <a role="button" class="btn btn-secondary" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">Documentation</a>
                     </div>
                 </div>
             </div>
             <div class="index-tutorial">
                 <h4>Tutorials</h4>
-                <h6>There is something you'd like to do on the platform, but you don't know how?<br/>
-                Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.</h6>
+                <span class="alternative">
+                    There is something you'd like to do on the platform, but you don't know how?<br/>
+                    Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.<br/>
+                </span>
 
-                <a role="button" class="btn btn-default btn-sm" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">See tutorials</a>
+                <a role="button" class="btn btn-sm" href="https://github.com/OpenEnergyPlatform/oeplatform/wiki">See tutorials</a>
             </div>
         </div>
 
@@ -57,26 +59,26 @@
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-process-modelling.svg" alt="">
                     <b>Process Modelling</b>
-                    <span>
+                    <span class="alternative">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
                     </span>
-                    <a role="button" class="btn btn-default">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm">Learn more</a>
                 </div>
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-openscience.svg" alt="">
                     <b>Open Science</b>
-                    <span>
+                    <span class="alternative">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
                     </span>
-                    <a role="button" class="btn btn-default">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm">Learn more</a>
                 </div>
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-community.svg" alt="">
                     <b>OEP-Community</b>
-                    <span>
+                    <span class="alternative">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ullamcorper ante libero.
                     </span>
-                    <a role="button" class="btn btn-default">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm">Learn more</a>
                 </div>
             </div>
         </div>

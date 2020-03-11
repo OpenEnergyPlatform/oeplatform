@@ -128,7 +128,7 @@ class BasicFactsheet(models.Model):
     )
     costs = CharField(max_length=1000, verbose_name="Costs", null=True)
     license = CharField(
-        max_length=20,
+        max_length=50,
         verbose_name="License",
         choices=(
             (x, x)
@@ -981,6 +981,7 @@ class Energystudy(models.Model):
         verbose_name="Tools",
         help_text="Which model(s) and other tools have been used?",
         null=True,
+        on_delete=models.SET_NULL
     )
     tools_other = CharField(
         verbose_name="Tools",
@@ -1078,7 +1079,7 @@ class Energystudy(models.Model):
 class Energyscenario(models.Model):
 
     study = ForeignKey(
-        "Energystudy", db_column="name_of_the_study_id", null=True, blank=True
+        "Energystudy", db_column="name_of_the_study_id", null=True, blank=True, on_delete=models.CASCADE
     )
 
     exogenous_time_series_used_climate = BooleanField(verbose_name="climate")
