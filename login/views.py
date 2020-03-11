@@ -254,7 +254,7 @@ class CreateUserView(View):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect("/user/profile/{id}".format(id=user.id))
+            return redirect("activate")
         else:
             return render(request, "login/oepuser_create_form.html", {"form": form})
 
