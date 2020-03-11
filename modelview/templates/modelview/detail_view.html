@@ -1,0 +1,36 @@
+{% extends "modelview/base.html" %}
+{% load bootstrap4 %}
+{% load static %}
+{% load modelview_extras %}
+{% load dataedit.taghandler %}
+
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
+{% endblock after-head %}
+
+{% block site-header %}
+  <h2 class="site-header">
+    {{ displaySheetType }} Factsheet:
+    {% if model.model_name %} {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %}{% endif %}
+    {% if model.name_of_scenario %} {{ model.name_of_scenario }} {% endif %}
+
+  </h2>
+{% endblock site-header %}
+
+{% block main-right-sidebar-content-before %}
+  <hr>
+
+  <h3>Actions</h3>
+
+  {% block main-right-sidebar-content-actions %}
+  {% endblock main-right-sidebar-content-actions %}
+
+  <hr>
+
+  <h3>Tags</h3>
+  {% for t in model.tags %}
+      <a href="" class="btn tag"
+         style="background:{{ t.color }};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
+  {% endfor %}
+
+{% endblock main-right-sidebar-content-before %}

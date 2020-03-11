@@ -151,3 +151,35 @@ h1, h2, h3, h4, h5, h6 {
 .navbar-footer .navbar {
     height: 71px;
 }
+
+/** Styling for OEP Tags **/
+
+.tag-checkbox {
+    display: none;
+}
+
+.tag-checkbox:before {
+    display: none;
+}
+
+.tag-checkbox-container {
+    padding: 0.25em 0.5em;
+    border-radius: 0.5em;
+
+    display: flex;
+    align-items: center;
+}
+
+.tag-checkbox-container:not(:last-child) {
+    margin-right: 0.5em;
+}
+
+.tag-checkbox-icon {
+    display: none;
+
+    margin-left: 0.5em;
+}
+
+.tag-checkbox-checked .tag-checkbox-icon {
+    display: block;
+}

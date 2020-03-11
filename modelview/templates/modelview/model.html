@@ -1,421 +1,391 @@
-{% extends "modelview/base.html" %}
+{% extends "modelview/detail_view.html" %}
 {% load bootstrap4 %}
-{% bootstrap_javascript_url %}
 {% load static %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
+
+{% block main-right-sidebar-content-actions %}
+  <a class="btn btn-info" href="edit">Edit</a>
+{% endblock main-right-sidebar-content-actions %}
+
+
 {% block factsheets_content %}
-<script type="text/javascript">
-    <!--
-    $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-    });
-    //-->
-</script>
 
-<link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<div class="container">
-    <div style="float: left;">
-        <h1> {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %} </h1>
-        {% for t in model.tags %}
-            <a href="" class="btn tag" style="background:{{t.color}};color:{% readable_text_color t.color %}; display:inline-block;">{{ t.name }}</a>
-        {% endfor %}
-    </div>
-    <div>
-        <a class="btn btn-info" style="float:right; position: absolute;bottom: 5;right: 0;" href="edit"><span name="icon"></span>Edit</a>
-    </div>
-</div>
-<div class="">
+  <div class="card-container">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
-          </h4>
-        </div>
-        <div id="BasicInformation" class="card-collapse collapse in profilebox in">
-            
+      <div class="card-header">
+        <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
+      </div>
+      <div id="BasicInformation" class="card-body collapse in  in">
 
-                    
-                    <table class="profiletable">
-                    <!-- <tr><td class="rowlabel"> id_name</td><td> {{ model.id_name }}</td></tr> -->
-                    {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
-                    <tr>
-                        <td class="sheetlabel">
-                            {% get_field_attr model 'methodical_focus_1' 'verbose_name'%}
-                            <a href='javascript://' data-toggle='popover' data-trigger="focus" title="" data-content="{{ model.methodical_focus_1.help_text }}">
-                                <span class='fas fa-question'></span>
-                            </a>
-                        </td>
-                        <td>
-                            {{ model.methodical_focus_1 }}
-                            {% if model.methodical_focus_2 %}, {{ model.methodical_focus_2 }} {% endif %}
-                            {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }} {% endif %}
-                        </td>
-                    </tr>
-                    {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='authors' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='website' %}
-                    <tr>
-                        <th> 
-                            Logo 
-                        </th>
-                        <td>
-                            {% if model.logo %}
-                                <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}" style="max-width:30%;max-height:500px;"> {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='support' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text%}
-                    {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
-                    {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers'  %}
-                    {% include 'modelview/model_snippet.html' with model=model field='number_of_users'  %}
-                    </table>
 
-        </div>
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
+          {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
+          <tr>
+            <td class="sheetlabel">
+              {% get_field_attr model 'methodical_focus_1' 'verbose_name' %}
+              <a href='javascript://' data-toggle='popover' data-trigger="focus" title=""
+                 data-content="{{ model.methodical_focus_1.help_text }}">
+                <span class='fas fa-question'></span>
+              </a>
+            </td>
+            <td>
+              {{ model.methodical_focus_1 }}
+              {% if model.methodical_focus_2 %}, {{ model.methodical_focus_2 }} {% endif %}
+              {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }} {% endif %}
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
+          {% include 'modelview/model_snippet.html' with model=model field='authors' %}
+          {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
+          {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
+          {% include 'modelview/model_snippet.html' with model=model field='website' %}
+          <tr>
+            <th>
+              Logo
+            </th>
+            <td>
+              {% if model.logo %}
+                <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}"
+                     style="max-width:30%;max-height:500px;">
+                {# {% include 'modelview/model_snippet.html' with model=model field='logo' %} #}
+              {% endif %}
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
+          {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
+          {% include 'modelview/model_snippet.html' with model=model field='support' %}
+          {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
+          {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
+          {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
+          {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
+          {% include 'modelview/model_snippet.html' with model=model field='number_of_devolopers' %}
+          {% include 'modelview/model_snippet.html' with model=model field='number_of_users' %}
+        </table>
+
+      </div>
     </div>
-</div>
-        <div class="">
-            <div class="card ">
-                <div class="card-header">
-                  <h4 class="card-title">
-                    <a data-toggle="collapse" href="#Openness">Openness</a>
-                  </h4>
-                </div>
-                <div id="Openness" class="card-collapse collapse in profilebox">
-                    <table class="profiletable">
-                        {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
-                        {% if not model.open_source %}
-                            {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='costs' %}
-                        {% else %}
-                            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-                            {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
-                            {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='data_provided'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming'  %}
-                        {% endif %}
-                                                
-                    </table>
-                    {% if model.gitHub %}
-                        
-                        
-                        <table class="profiletable">
-                        <tr><td class="sheetlabel">GitHub Organisation</td><td><div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}" class="github-card"></div><script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script> <td></tr> 
-                         <tr><td class="sheetlabel">GitHub Contributions Graph</td><td> 
-                        <img src="/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
-                        </td></tr>
-                                                
-                    </table>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="">
-            <div class="card ">
-                <div class="card-header">
-                  <h4 class="card-title">
-                    <a href="#Software" data-toggle="collapse">Software</a>
-                  </h4>
-                </div>
-                <div id="Software" class="card-collapse collapse in profilebox">
-                    <table class="profiletable">
-                        {% include 'modelview/model_snippet.html' with model=model field='modelling_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' add=model.external_optimizer_yes_text %}
-                        {% include 'modelview/model_snippet.html' with model=model field='additional_software'  %}
-                        {% include 'modelview/model_snippet.html' with model=model field='gui'  %}
-                    </table>
-                </div>
-            </div>
-        </div>
-    
-        <div class="">
-            <div class="card ">
-                <div class="card-header">
-                  <h4 class="card-title">
-                    <a data-toggle="collapse" href="#References">References</a>
-                  </h4>
-                </div>
-                <div id="References" class="card-collapse collapse  profilebox">
-                    <div>
-                        <table class="profiletable">
-                            {% include 'modelview/model_snippet.html' with model=model field='citation_reference'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage'  %}
-                            
-                            <tr>
-			      <td class="sheetlabel">
-				  Model validation
-			      </td>
-			      <td>
-				  <table>
-				      {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
-
-				  </table>
-			      </td>
-			    </tr>
-
-                            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='properties_missed'  %}
-                            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties'  %}
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#Coverage">Coverage</a>
-          </h4>
-        </div>
-        <div id="Coverage" class="card-collapse collapse  profilebox">
-            <table class="profiletable">
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled energy sectors (final energy)
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_others=energy_sectors_others_text" %}
+      <div class="card-header">
+        <a data-toggle="collapse" href="#Openness">Openness</a>
+      </div>
+      <div id="Openness" class="card-body collapse in ">
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
+          {% if not model.open_source %}
+            {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
+            {% include 'modelview/model_snippet.html' with model=model field='costs' %}
+          {% else %}
+            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
+            {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
+            {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
+            {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code' %}
+            {% include 'modelview/model_snippet.html' with model=model field='data_provided' %}
+            {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming' %}
+          {% endif %}
 
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled demand sectors
-                    </td>
-                    <td>
-                        <table>
-                            {% checklist model "demand_sectors_households,demand_sectors_industry,demand_sectors_commercial_sector,demand_sectors_transport" %}
+        </table>
+        {% if model.gitHub %}
 
 
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for power generation or conversion
-                    </td>
-                    <td>
-                        <table class="profiletable">
-                            <tr>
-                                <td class="sheetlabel">
-                                    Renewables
-                                </td>
-                                <td>
-                                    <table>
-{% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_bio,generation_renewables_solar_thermal,generation_renewables_geothermal" %}
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="sheetlabel">
-                                    Conventional
-                                </td>
-                                <td>
-                                    <table>
-{% checklist model "generation_conventional_gas,generation_conventional_lignite,generation_conventional_hard_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for transfer, infrastructure or grid
-                    </td>
-                    <td>
-                        <table class="profiletable">
-                            <tr>
-                                <td class="sheetlabel">
-                                    Electricity
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "transfer_electricity_distribution,transfer_electricity_transition" %}
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="sheetlabel">
-                                    Gas
-                                </td>
-                                <td>
-                                    <table>
-                                        {% checklist model "transfer_gas_distribution,transfer_gas_transition" %}
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="sheetlabel">
-                                    Heat
-                                </td>
-                                <td>
-                                    <table>
-                                         {% checklist model "transfer_heat_distribution,transfer_heat_transition" %}
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Properties electrical grid
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_TM,network_coverage_SN,network_coverage_other=network_coverage_other_text" %}
-                        </table>
-                    </td>
-                </tr>              
-                <tr>
-                    <td class="sheetlabel">
-                        Modeled technologies: components for storage
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "storage_electricity_battery,storage_electricity_kinetic,storage_electricity_CAES,storage_electricity_PHS,storage_electricity_chemical,storage_heat,storage_gas" %}
+          <table class="profiletable">
+            <tr>
+              <td class="sheetlabel">GitHub Organisation</td>
+              <td>
+                <div data-theme="default" data-height="150" data-width="400" data-github="{{ gh_org }}/{{ gh_repo }}"
+                     class="github-card"></div>
+                <script src="//cdn.jsdelivr.net/github-cards/latest/widget.js"></script>
+              <td>
+            </tr>
+            <tr>
+              <td class="sheetlabel">GitHub Contributions Graph</td>
+              <td>
+                <img src="/media/GitHub_{{ gh_org }}_{{ gh_repo }}_Contribution.png">
+              </td>
+            </tr>
 
-                        </table>
-                    </td>
-                </tr>
-                
-                {% include 'modelview/model_snippet.html' with model=model field='user_behaviour' add=model.user_behaviour_yes_text %}
-                {% include 'modelview/model_snippet.html' with model=model field='changes_in_efficiency'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='market_models'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage'  %}
-                <tr>
-                    <td class="sheetlabel">
-                        Geographic (spatial) resolution
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "geo_resolution_global,geo_resolution_continents,geo_resolution_national_states,geo_resolution_TSO_regions,geo_resolution_federal_states,geo_resolution_regions,geo_resolution_NUTS_3,geo_resolution_municipalities,geo_resolution_districts,geo_resolution_households,geo_resolution_power_stations,geo_resolution_others=geo_resolution_others_text" %}
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Time resolution
-                    </td>
-                    <td>
-                        {% checklist model "time_resolution_anual,time_resolution_hour,time_resolution_15_min,time_resolution_1_min,time_resolution_other=time_resolution_other_text" %}
-                    </td>
-                </tr>
-                {% include 'modelview/model_snippet.html' with model=model field='comment_on_geo_resolution'  %}
-                <tr>
-                    <td class="sheetlabel">
-                        Observation period
-                    </td>
-                    <td>
-                        {% checklist model "observation_period_less_1_year,observation_period_1_year,observation_period_more_1_year,observation_period_other=observation_period_other_text" %}
-
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Additional dimensions (sector)
-                    </td>
-                    <td>
-                        <table>
-{% checklist model "additional_dimensions_sector_ecological,additional_dimensions_sector_ecological_text,additional_dimensions_sector_economic,additional_dimensions_sector_economic_text,additional_dimensions_sector_social,additional_dimensions_sector_social_text,additional_dimensions_sector_others=additional_dimensions_sector_others_text" %}
-
-                        </table>
-                    </td>
-                </tr>
-
-                
-            </table>
-        </div>
+          </table>
+        {% endif %}
+      </div>
     </div>
-</div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
-          </h4>
-        </div>
-        <div id="MathematicalProperties" class="card-collapse collapse profilebox">
-            <table class="profiletable">
-                <tr>
-                    <td class="sheetlabel">
-                        Model class (optimisation)
-                    </td>
-                    <td>
-                        {% checklist model "model_class_optimization_LP,model_class_optimization_MILP,model_class_optimization_Nonlinear=model_class_optimization_LP_MILP_Nonlinear_text" %}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="sheetlabel">
-                        Model class (simulation)
-                    </td>
-                    <td>
-                        {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
-
-                    </td>
-                </tr>
-                {% include 'modelview/model_snippet.html' with model=model field='model_class_other' add=model.model_class_other_text  %}
-                {% include 'modelview/model_snippet.html' with model=model field='short_description_of_mathematical_model_class'  %}
-                <tr>
-                    <td class="sheetlabel">
-                        Mathematical objective
-                    </td>
-                    <td>
-                        {% checklist model "mathematical_objective_cO2,mathematical_objective_costs,mathematical_objective_rEshare,mathematical_objective_other=mathematical_objective_other_text" %}
-                    </td>
-                </tr>                
-                <tr>
-                    <td class="sheetlabel">
-                        Approach to uncertainty
-                    </td>
-                    <td>
-                        {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
-                    </td>
-                </tr>
-
-                {% include 'modelview/model_snippet.html' with model=model field='montecarlo'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='typical_computation_hardware'  %}
-                {% include 'modelview/model_snippet.html' with model=model field='technical_data_anchored_in_the_model'  %}
-            </table>
-        </div>
+      <div class="card-header">
+        <a href="#Software" data-toggle="collapse">Software</a>
+      </div>
+      <div id="Software" class="card-body collapse in ">
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
+          {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
+          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' add=model.external_optimizer_yes_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
+          {% include 'modelview/model_snippet.html' with model=model field='gui' %}
+        </table>
+      </div>
     </div>
-</div>
-<div class="">
     <div class="card ">
-        <div class="card-header">
-          <h4 class="card-title">
-            <a class="fill-div" data-toggle="collapse" href="#Integration">Model Integration</a>
-          </h4>
+      <div class="card-header">
+        <a data-toggle="collapse" href="#References">References</a>
+      </div>
+      <div id="References" class="card-body collapse  ">
+        <div>
+          <table class="profiletable">
+            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
+            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
+            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
+
+            <tr>
+              <td class="sheetlabel">
+                Model validation
+              </td>
+              <td>
+                <table>
+                  {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
+
+                </table>
+              </td>
+            </tr>
+
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
+            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
+          </table>
         </div>
-        <div id="Integration" class="card-collapse collapse in profilebox in">
-            <table class="profiletable">
-                {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
-                {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text%}
-                {% include 'modelview/model_snippet.html' with model=model field='model_input' add=model.model_input_other_text%}
-                {% include 'modelview/model_snippet.html' with model=model field='model_output' add=model.model_output_other_text%}
-                {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
-                {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
-            </table>
-        </div>
+      </div>
     </div>
-</div>
+    <div class="card ">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#Coverage">Coverage</a>
+      </div>
+      <div id="Coverage" class="card-body collapse  ">
+        <table class="profiletable">
+          <tr>
+            <td class="sheetlabel">
+              Modeled energy sectors (final energy)
+            </td>
+            <td>
+              <table>
+                {% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_others=energy_sectors_others_text" %}
+
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Modeled demand sectors
+            </td>
+            <td>
+              <table>
+                {% checklist model "demand_sectors_households,demand_sectors_industry,demand_sectors_commercial_sector,demand_sectors_transport" %}
+
+
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Modeled technologies: components for power generation or conversion
+            </td>
+            <td>
+              <table class="profiletable">
+                <tr>
+                  <td class="sheetlabel">
+                    Renewables
+                  </td>
+                  <td>
+                    <table>
+                      {% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_bio,generation_renewables_solar_thermal,generation_renewables_geothermal" %}
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="sheetlabel">
+                    Conventional
+                  </td>
+                  <td>
+                    <table>
+                      {% checklist model "generation_conventional_gas,generation_conventional_lignite,generation_conventional_hard_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Modeled technologies: components for transfer, infrastructure or grid
+            </td>
+            <td>
+              <table class="profiletable">
+                <tr>
+                  <td class="sheetlabel">
+                    Electricity
+                  </td>
+                  <td>
+                    <table>
+                      {% checklist model "transfer_electricity_distribution,transfer_electricity_transition" %}
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="sheetlabel">
+                    Gas
+                  </td>
+                  <td>
+                    <table>
+                      {% checklist model "transfer_gas_distribution,transfer_gas_transition" %}
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="sheetlabel">
+                    Heat
+                  </td>
+                  <td>
+                    <table>
+                      {% checklist model "transfer_heat_distribution,transfer_heat_transition" %}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Properties electrical grid
+            </td>
+            <td>
+              <table>
+                {% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_TM,network_coverage_SN,network_coverage_other=network_coverage_other_text" %}
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Modeled technologies: components for storage
+            </td>
+            <td>
+              <table>
+                {% checklist model "storage_electricity_battery,storage_electricity_kinetic,storage_electricity_CAES,storage_electricity_PHS,storage_electricity_chemical,storage_heat,storage_gas" %}
+
+              </table>
+            </td>
+          </tr>
+
+          {% include 'modelview/model_snippet.html' with model=model field='user_behaviour' add=model.user_behaviour_yes_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='changes_in_efficiency' %}
+          {% include 'modelview/model_snippet.html' with model=model field='market_models' %}
+          {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage' %}
+          <tr>
+            <td class="sheetlabel">
+              Geographic (spatial) resolution
+            </td>
+            <td>
+              <table>
+                {% checklist model "geo_resolution_global,geo_resolution_continents,geo_resolution_national_states,geo_resolution_TSO_regions,geo_resolution_federal_states,geo_resolution_regions,geo_resolution_NUTS_3,geo_resolution_municipalities,geo_resolution_districts,geo_resolution_households,geo_resolution_power_stations,geo_resolution_others=geo_resolution_others_text" %}
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Time resolution
+            </td>
+            <td>
+              {% checklist model "time_resolution_anual,time_resolution_hour,time_resolution_15_min,time_resolution_1_min,time_resolution_other=time_resolution_other_text" %}
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model field='comment_on_geo_resolution' %}
+          <tr>
+            <td class="sheetlabel">
+              Observation period
+            </td>
+            <td>
+              {% checklist model "observation_period_less_1_year,observation_period_1_year,observation_period_more_1_year,observation_period_other=observation_period_other_text" %}
+
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Additional dimensions (sector)
+            </td>
+            <td>
+              <table>
+                {% checklist model "additional_dimensions_sector_ecological,additional_dimensions_sector_ecological_text,additional_dimensions_sector_economic,additional_dimensions_sector_economic_text,additional_dimensions_sector_social,additional_dimensions_sector_social_text,additional_dimensions_sector_others=additional_dimensions_sector_others_text" %}
+
+              </table>
+            </td>
+          </tr>
+
+
+        </table>
+      </div>
+    </div>
+    <div class="card ">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
+      </div>
+      <div id="MathematicalProperties" class="card-body collapse ">
+        <table class="profiletable">
+          <tr>
+            <td class="sheetlabel">
+              Model class (optimisation)
+            </td>
+            <td>
+              {% checklist model "model_class_optimization_LP,model_class_optimization_MILP,model_class_optimization_Nonlinear=model_class_optimization_LP_MILP_Nonlinear_text" %}
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Model class (simulation)
+            </td>
+            <td>
+              {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
+
+            </td>
+          </tr>
+          {% include 'modelview/model_snippet.html' with model=model field='model_class_other' add=model.model_class_other_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='short_description_of_mathematical_model_class' %}
+          <tr>
+            <td class="sheetlabel">
+              Mathematical objective
+            </td>
+            <td>
+              {% checklist model "mathematical_objective_cO2,mathematical_objective_costs,mathematical_objective_rEshare,mathematical_objective_other=mathematical_objective_other_text" %}
+            </td>
+          </tr>
+          <tr>
+            <td class="sheetlabel">
+              Approach to uncertainty
+            </td>
+            <td>
+              {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
+            </td>
+          </tr>
+
+          {% include 'modelview/model_snippet.html' with model=model field='montecarlo' %}
+          {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time' %}
+          {% include 'modelview/model_snippet.html' with model=model field='typical_computation_hardware' %}
+          {% include 'modelview/model_snippet.html' with model=model field='technical_data_anchored_in_the_model' %}
+        </table>
+      </div>
+    </div>
+    <div class="card ">
+      <div class="card-header">
+        <a class="fill-div" data-toggle="collapse" href="#Integration">Model Integration</a>
+      </div>
+      <div id="Integration" class="card-body collapse in  in">
+        <table class="profiletable">
+          {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
+          {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='model_input' add=model.model_input_other_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='model_output' add=model.model_output_other_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
+          {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
+        </table>
+      </div>
+    </div>
+  </div>
 {% endblock %}
