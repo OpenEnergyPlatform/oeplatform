@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import (
     AbstractBaseUser,
-    BaseUserManager,
+    UserManager,
     Group,
     PermissionsMixin,
     User,
@@ -29,7 +29,7 @@ DELETE_PERM = 8
 ADMIN_PERM = 12
 
 
-class UserManager(BaseUserManager):
+class OEPUserManager(UserManager):
     def create_user(self, name, email, affiliation=None):
         if not email:
             raise ValueError("An email address must be entered")
@@ -143,8 +143,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     REQUIRED_FIELDS = [name]
 
-    if sec.DEBUG:
-        objects = UserManager()
+    """if sec.DEBUG:
+        objects = OEPUserManager()"""
 
     def get_full_name(self):
         return self.name
