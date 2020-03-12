@@ -143,8 +143,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
     REQUIRED_FIELDS = [name]
 
-    """if sec.DEBUG:
-        objects = OEPUserManager()"""
+    objects = OEPUserManager()
 
     def get_full_name(self):
         return self.name
