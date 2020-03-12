@@ -329,7 +329,7 @@ class FSAdd(LoginRequiredMixin, View):
             if form.is_valid():
 
                 model = form.save()
-                if model.license:
+                if hasattr(model, "license") and model.license:
                     if model.license != 'Other':
                         model.license_other_text = None
                 ids = {
@@ -339,7 +339,7 @@ class FSAdd(LoginRequiredMixin, View):
                 }
 
                 if sheettype == "scenario":
-                    raise NotImplementedError
+                    pass
                 else:
                     model.tags = sorted(list(ids))
                     model.save()
