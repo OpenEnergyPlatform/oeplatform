@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% block main-content-body %}
-{% load staticfiles %}
+{% load static %}
 <h3>OEP - Contact</h3> <br>
 <div style="padding:10px">
     <form class="form form-horizontal" action="" method="post">
@@ -11,10 +11,9 @@
           <strong>Success!</strong> Your message has been sent.
         </div>
         {% endif %}
-
-            <table>
-                {% bootstrap_form form %}
-            </table>
+        <table>
+            {% bootstrap_form form %}
+        </table>
         <button type="submit">Submit</button>
     </form>
 </div>

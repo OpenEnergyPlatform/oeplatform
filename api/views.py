@@ -67,7 +67,19 @@ def load_cursor(f):
                 if not result:
                     result = {}
                 if cursor.description:
-                    result["description"] = cursor.description
+                    description = [
+                        [
+                            col.name,
+                            col.type_code,
+                            col.display_size,
+                            col.internal_size,
+                            col.precision,
+                            col.scale,
+                            col.null_ok,
+                        ]
+                        for col in cursor.description
+                    ]
+                    result["description"] = description
                     result["rowcount"] = cursor.rowcount
                     result["data"] = (
                         list(map(actions._translate_fetched_cell, row))
@@ -145,7 +157,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_sequence(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists")
@@ -158,7 +170,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         return self.__delete_sequence(request, schema, sequence, request.data)
 
@@ -276,7 +288,7 @@ class Table(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")

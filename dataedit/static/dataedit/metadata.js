@@ -121,7 +121,7 @@ function add_list_field(id){
     var index = window[id+"_counter"];
     var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
         <table  style="width:100%"><tr><td class="form-group"> <input class="form-control" name="'+id+'_'+index+'" id="'+id+'_'+index+'"/></td> \
-        <td><a style="position:inline" onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a></td></tr></table> \
+        <td><a style="position:inline" onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="fas fa-minus"/></a></td></tr></table> \
     </div>');
     $div.appendTo($('#'+id+'_container'));
     window[id+"_counter"] += 1;
@@ -140,7 +140,7 @@ function add_url_list_field(id){
             <label>URL</label> \
             <input class="form-control" name="'+id+'_url_'+index+'"/> \
         </div> \
-        <a onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="glyphicon glyphicon-minus-sign"/></a><hr> \
+        <a onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="fas fa-minus"/></a><hr> \
     </div>');
     $div.appendTo($('#'+id+'_container'));
     window[id+"_counter"] += 1;

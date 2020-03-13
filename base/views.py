@@ -99,7 +99,7 @@ def handler500(request):
     return response
 
 
-def handler404(request):
+def handler404(request, exception):
     response = render(request, "base/404.html", {})
     response.status_code = 404
     return response

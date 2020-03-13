@@ -1,8 +1,8 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
-{% load bootstrap3 %}
-{% load staticfiles %}
+{% load bootstrap4 %}
+{% load static %}
 
 <style>
     .btn-add{
@@ -82,7 +82,7 @@ confirmOnLeave();
                 <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
                     {% if form.methodical_focus_1.help_text != "" %}
                         <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ form.methodical_focus_1.help_text }}">
-                            <span class='glyphicon glyphicon-question-sign'></span>
+                            <span class='fas fa-question'></span>
                         </a>
                     {% endif %}
                 </th>
