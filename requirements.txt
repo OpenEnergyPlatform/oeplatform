@@ -16,5 +16,6 @@ django-axes
 shapely>=1.5.17
 markdown2
 alembic
+django-simple-captcha
 django-bootstrap4
 git+http://github.com/frague59/django-fontawesome-5.git

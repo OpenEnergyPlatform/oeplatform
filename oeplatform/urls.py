@@ -29,4 +29,5 @@ urlpatterns = [
     url(r"^factsheets/", include("modelview.urls")),
     url(r"^dataedit/", include("dataedit.urls")),
     url(r"^literature/", include("literature.urls")),
+    url(r"^captcha/", include("captcha.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

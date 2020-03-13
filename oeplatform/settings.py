@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     "literature",
     "api",
     "axes",
+    "captcha",
     "django.contrib.postgres",
     "fontawesome_5",
 )
