@@ -23,7 +23,7 @@
     </tr>
     <tr>
         <th> Description: </th>
-        <td> {% if profile_user.desctiption %}
+        <td> {% if profile_user.description %}
                 {{ profile_user.description }}
             {% elif profile_user == request.user %}
                 <a href="{{profile_user.id}}/edit">Add a description</a>
