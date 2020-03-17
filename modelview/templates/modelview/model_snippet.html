@@ -3,11 +3,11 @@
     <td class="sheetlabel"> 
         {% assign_field_attr model field 'help_text' as vname %} 
         {% assign_field model field as val %} 
-        {% get_field_attr model field 'verbose_name'%} 
+        {% get_field_attr model field 'verbose_name'%}
         {% if vname %}
-            <a href='javascript://' data-toggle='popover' data-trigger="focus" title="" data-content="{{ vname }}">
+            <i data-toggle='tooltip' title="{{ vname }}">
                 <span class='fas fa-question'></span>
-            </a>
+            </i>
         {% endif %}
     </td>
     <td> 
