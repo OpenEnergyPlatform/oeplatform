@@ -590,6 +590,7 @@ class Energymodel(BasicFactsheet):
                 "more than a day",
             ]
         ),
+        null=True,
     )
 
     typical_computation_hardware = CharField(
