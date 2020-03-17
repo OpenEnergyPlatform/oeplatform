@@ -6,19 +6,22 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.css" rel="stylesheet"/>
 {% endblock %}
 {% block title %} - {{schema}}{% endblock %}
-{% block data_content %}
-{% load dataedit.taghandler %}
-<h3>Manage permissions on {{schema}}.{{table}}</h3>
-<div class="well">
-This page shows the users and user groups that have permissions to alter the contents of this table.
-</div>
-{% if is_admin %}
+
+{% block main-right-sidebar-content-additional %}
+    <h3>Permissions</h3>
+    This page shows the users and user groups that have permissions to alter the contents of this table. Only
+    admins of this dataset can alter these settings.<br><br>
+    {% if is_admin %}
     <b> You are allowed to administrate this table </b>
 {% else %}
     <div class="alert alert-danger" role="alert">
         You do not have permissions to alter these settings
     </div>
 {% endif %}
+{% endblock %}
+{% block data_content %}
+{% load dataedit.taghandler %}
+<h3>Manage permissions on {{schema}}.{{table}}</h3>
     <div class="card ">
         <div class="card-header">
 
@@ -56,6 +59,9 @@ This page shows the users and user groups that have permissions to alter the con
             });
         </script>
         {% endif %}
+        {% if not group_perms %}
+            No permissions for groups set, yet.
+        {% endif %}
         {% for perm in group_perms %}
             <div class="card-body">
                 <div>
@@ -85,6 +91,7 @@ This page shows the users and user groups that have permissions to alter the con
             </div>
         {% endfor %}
     </div>
+    <br>
     <div class="card ">
         <div class="card-header">
 
@@ -121,6 +128,9 @@ This page shows the users and user groups that have permissions to alter the con
                     });
                 });
             </script>
+        {% endif %}
+        {% if not user_perms %}
+            No permissions for users set, yet.
         {% endif %}
         {% for perm in user_perms %}
             <div class="card-body">
