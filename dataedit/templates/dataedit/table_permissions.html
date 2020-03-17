@@ -10,10 +10,15 @@
 {% load dataedit.taghandler %}
 <h3>Manage permissions on {{schema}}.{{table}}</h3>
 <div class="well">
-Now you are in the database schema you selected and see the list of all tables of this schema.
-You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
+This page shows the users and user groups that have permissions to alter the contents of this table.
 </div>
-{% if is_admin %}<b> You are allowed to administrate this table </b>{% endif %}
+{% if is_admin %}
+    <b> You are allowed to administrate this table </b>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        You do not have permissions to alter these settings
+    </div>
+{% endif %}
     <div class="card ">
         <div class="card-header">
 
