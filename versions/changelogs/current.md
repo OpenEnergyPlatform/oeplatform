@@ -10,6 +10,7 @@
 * API: Explicit column handling (#484)
 * API: Pass GIS-types in column descriptions (#507)
 * Require captcha in contact form
+* Include description for ontology (#542)
 
 ### Bugs
 * API: Fixed negation in where clauses
