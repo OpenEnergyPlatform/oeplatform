@@ -9,6 +9,7 @@
 * Factsheets: Make links clickable (#74)
 * API: Explicit column handling (#484)
 * API: Pass GIS-types in column descriptions (#507)
+* Require captcha in contact form
 
 ### Bugs
 * API: Fixed negation in where clauses
