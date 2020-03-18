@@ -2,11 +2,6 @@
     margin-bottom: 20px;
 }
 
-.container {
-    position: relative;
-    width:auto;
-}
-
 .mv-column-left{ float: left; width: 49.5%;overflow:auto;}
 
 .mv-column-right{ float: right; width: 49.5%; overflow:auto;}
@@ -14,8 +9,6 @@
 .mv-container{position: relative; display: inline;}
 
 .rowlabel{font-weight:bold;width:40%;vertical-align:top;}
-
-.profilebox{padding:15;overflow:auto;}
 
 .profiletable{
     border-collapse: separate;
@@ -60,7 +53,7 @@
     display: -webkit-flex; /* Safari */
     -webkit-flex-wrap: wrap; /* Safari 6.1+ */
     display: flex;
-    flex-wrap: wrap;
+    flex-flow: column;
 }
 
 .checkbox-item{
@@ -73,4 +66,16 @@
     margin: 10 px;
 }
 
+.card-container > *:not(:first-child) {
+    margin-top: 0.5em;
+}
+
+.card-container .card-header {
+    background: unset;
+    border: unset;
+}
+
+.card-container .card-body {
+    padding-top: 0.5em;
+}
 

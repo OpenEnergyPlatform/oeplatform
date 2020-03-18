@@ -442,6 +442,8 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.SMALLINT
         elif hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
+        elif dt_string in _POSTGIS_MAP:
+            dt = _POSTGIS_MAP[dt_string]
         elif hasattr(sqltypes, dt_string.upper()):
             dt = getattr(sqltypes, dt_string.upper())
         elif dt_string == "bigserial":
@@ -451,6 +453,10 @@ def parse_type(dt_string, **kwargs):
             raise APIError("Unknown type (%s)." % dt_string)
         return dt, autoincrement
 
+
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement, 'geography': geoalchemy2.types.Geography , 'geometry': geoalchemy2.types.Geometry, 'raster': geoalchemy2.types.Raster, 'rasterelement':geoalchemy2.types.RasterElement
+}
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
     # TODO: Implement

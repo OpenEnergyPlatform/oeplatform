@@ -13,7 +13,7 @@ from django.conf import settings as djangoSettings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
@@ -156,7 +156,7 @@ def show(request, sheettype, model_name):
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
-        {"model": model, "model_study": model_study, "gh_org": org, "gh_repo": repo},
+        {"model": model, "model_study": model_study, "gh_org": org, "gh_repo": repo, "displaySheetType": sheettype.capitalize()},
     )
 
 
@@ -329,7 +329,7 @@ class FSAdd(LoginRequiredMixin, View):
             if form.is_valid():
 
                 model = form.save()
-                if model.license:
+                if hasattr(model, "license") and model.license:
                     if model.license != 'Other':
                         model.license_other_text = None
                 ids = {
@@ -339,7 +339,7 @@ class FSAdd(LoginRequiredMixin, View):
                 }
 
                 if sheettype == "scenario":
-                    raise NotImplementedError
+                    pass
                 else:
                     model.tags = sorted(list(ids))
                     model.save()
@@ -369,81 +369,75 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
 
-    # Is the image already there and actual enough?
-    if (
-        False
-    ):  # os.path.exists(full_path) and int(time.time())-os.path.getmtime(full_path) < timedelta:
-        return static(path)
-    else:
-        # We have to replot the image
-        # Set plot font
-        font = {"family": "normal"}
-        matplotlib.rc("font", **font)
+    # We have to replot the image
+    # Set plot font
+    font = {"family": "normal"}
+    matplotlib.rc("font", **font)
 
-        # Query GitHub API for contributions
-        user_agent = {"user-agent": "oeplatform"}
-        http = urllib3.PoolManager(headers=user_agent)
-        try:
-            reply = http.request(
-                "GET",
-                "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(
-                    org, repo
+    # Query GitHub API for contributions
+    user_agent = {"user-agent": "oeplatform"}
+    http = urllib3.PoolManager(headers=user_agent)
+    try:
+        reply = http.request(
+            "GET",
+            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(
+                org, repo
+            ),
+        ).data.decode("utf8")
+    except:
+        pass
+
+    reply = json.loads(reply)
+
+    if not reply:
+        return None
+
+    # If there are more weeks than nessecary, truncate
+    if weeks_back < len(reply):
+        reply = reply[-weeks_back:]
+
+    # GitHub API returns a JSON dict with w: weeks, c: contributions
+    (times, commits) = zip(
+        *[
+            (
+                datetime.datetime.fromtimestamp(int(week["week"])).strftime(
+                    "%m-%d"
                 ),
-            ).data.decode("utf8")
-        except:
-            pass
+                sum(map(int, week["days"])),
+            )
+            for week in reply
+        ]
+    )
+    max_c = max(commits)
 
-        reply = json.loads(reply)
+    # generate a distribution wrt. to the commit numbers
+    commits_ids = [i for i in range(len(commits)) for _ in range(commits[i])]
 
-        if not reply:
-            return None
+    # transform the contribution distribution into a density function
+    # using a gaussian kernel estimator
+    if commits_ids:
+        density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
+    else:
+        # if there are no commits the density is a constant 0
+        density = lambda x: 0
+    # plot this distribution
+    x = numpy.arange(0.0, len(commits), 0.01)
+    c_real_max = max(density(xv) for xv in x)
+    fig1 = plt.figure(figsize=(4, 2))  # facecolor='white',
 
-        # If there are more weeks than nessecary, truncate
-        if weeks_back < len(reply):
-            reply = reply[-weeks_back:]
+    # replace labels by dates and numbers of commits
+    ax1 = plt.axes(frameon=False)
+    plt.fill_between(x, density(x), 0)
+    ax1.set_frame_on(False)
+    ax1.axes.get_xaxis().tick_bottom()
+    ax1.axes.get_yaxis().tick_left()
+    plt.yticks(numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small")
+    plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
 
-        # GitHub API returns a JSON dict with w: weeks, c: contributions
-        (times, commits) = zip(
-            *[
-                (
-                    datetime.datetime.fromtimestamp(int(week["week"])).strftime(
-                        "%m-%d"
-                    ),
-                    sum(map(int, week["days"])),
-                )
-                for week in reply
-            ]
-        )
-        max_c = max(commits)
-
-        # generate a distribution wrt. to the commit numbers
-        commits_ids = [i for i in range(len(commits)) for _ in range(commits[i])]
-
-        # transform the contribution distribution into a density function
-        # using a gaussian kernel estimator
-        if commits_ids:
-            density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
-        else:
-            # if there are no commits the density is a constant 0
-            density = lambda x: 0
-        # plot this distribution
-        x = numpy.arange(0.0, len(commits), 0.01)
-        c_real_max = max(density(xv) for xv in x)
-        fig1 = plt.figure(figsize=(4, 2))  # facecolor='white',
-
-        # replace labels by dates and numbers of commits
-        ax1 = plt.axes(frameon=False)
-        plt.fill_between(x, density(x), 0)
-        ax1.set_frame_on(False)
-        ax1.axes.get_xaxis().tick_bottom()
-        ax1.axes.get_yaxis().tick_left()
-        plt.yticks(numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small")
-        plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
-
-        # save the figure
-        plt.savefig(full_path, transparent=True, bbox_inches="tight")
-        url = static(path)
-        return url
+    # save the figure
+    plt.savefig(full_path, transparent=True, bbox_inches="tight")
+    url = finders.find(path)
+    return url
 
 
 BASE_VIEW_PROPS = OrderedDict(

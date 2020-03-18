@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% block main-content-body %}
 <h1> {{ profile_user.name }} </h1>
 <script>
@@ -23,7 +23,7 @@
     </tr>
     <tr>
         <th> Description: </th>
-        <td> {% if profile_user.desctiption %}
+        <td> {% if profile_user.description %}
                 {{ profile_user.description }}
             {% elif profile_user == request.user %}
                 <a href="{{profile_user.id}}/edit">Add a description</a>
@@ -62,8 +62,13 @@
 {% endblock %}
 {% block main-right-sidebar-content %}
 <hr>
+<h3>Manage Profile</h3>
+<div style="overflow: hidden;">
+	<a href="{{ user.id }}/edit" class="btn btn-secondary">Edit</a>
+</div>
+<hr>
 <h3>Manage Groups</h3>
 <div style="overflow: hidden;">
-	<a href="/user/groups/" class="btn btn-default">Manage Groups</a>
+	<a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
 </div>
 {% endblock %}

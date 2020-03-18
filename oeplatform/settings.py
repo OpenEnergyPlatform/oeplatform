@@ -29,7 +29,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap3",
+    "bootstrap4",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",
@@ -40,23 +40,25 @@ INSTALLED_APPS = (
     "widget_tweaks",
     "dataedit",
     "colorfield",
-    "django_ajax",
     "literature",
     "api",
+    "ontology",
     "axes",
+    "captcha",
     "django.contrib.postgres",
+    "fontawesome_5",
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.SessionAuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
+    "axes.middleware.AxesMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
