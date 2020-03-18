@@ -3,11 +3,13 @@
 * API: More fine grained handling of temporal data
 * Support metadata version 1.4
 * Metadata upload and download via API (#461)
+* Allow Metadata on table creation
 * Add contribute file (#469, #505)
 * Cover versioning tables in migrations
 * Factsheets: General remodeling of factsheets (#419)
 * Factsheets: Make links clickable (#74)
 * API: Explicit column handling (#484)
+* API: Handle metadata via API
 * API: Pass GIS-types in column descriptions (#507)
 * Require captcha in contact form
 * Include description for ontology (#542)
