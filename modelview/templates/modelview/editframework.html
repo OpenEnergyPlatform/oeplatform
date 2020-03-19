@@ -18,7 +18,7 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="tooltip"]').tooltip();
     });
  
       var confirmOnLeave = function(msg) {
@@ -92,7 +92,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Geographical Scope 
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What geographical scope was modelled with the framework?">
+                        <i data-toggle="tooltip"   title="What geographical scope was modelled with the framework?">
                             <span class='fas fa-question '></span>
                         </a>
                     </th>
@@ -108,7 +108,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Sectoral Scope 
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What sectoral scope was modelled with the framework?">
+                        <i data-toggle="tooltip"   title="What sectoral scope was modelled with the framework?">
                             <span class='fas fa-question '></span>
                         </a>
                     </th>
@@ -124,7 +124,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> General Problem Scope
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is the primary purpose of the framework?">
+                        <i data-toggle="tooltip"   title="What is the primary purpose of the framework?">
                             <span class='fas fa-question '></span>
                         </a>
                     </th>
@@ -138,7 +138,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Specific Problem Scope
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is/are the specific purpose(s) of the framework?">
+                        <i data-toggle="tooltip"   title="What is/are the specific purpose(s) of the framework?">
                             <span class='fas fa-question '></span>
                         </a>
                     </th>
@@ -192,7 +192,7 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.gui %}
         <table class="formtable">
                     <th> Programming Framework 
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="WWhich programming framework/language is used to develop the framework?">
+                        <i data-toggle="tooltip"   title="WWhich programming framework/language is used to develop the framework?">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -214,7 +214,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> External Solver                         
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="WWhich external optimizer(s) can the framework apply? Please list them.">
+                        <i data-toggle="tooltip"   title="WWhich external optimizer(s) can the framework apply? Please list them.">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -229,7 +229,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Input Data Format 
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="WWhich input format(s) can the framework apply? Please list">
+                        <i data-toggle="tooltip"   title="WWhich input format(s) can the framework apply? Please list">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -252,7 +252,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Output Data Format
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which output format(s) can the framework apply? Please list">
+                        <i data-toggle="tooltip"   title="Which output format(s) can the framework apply? Please list">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -275,7 +275,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> The analytical approach 
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is the analytical approach that your framework applies?">
+                        <i data-toggle="tooltip"   title="What is the analytical approach that your framework applies?">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -292,7 +292,7 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.interfaces %}
             <table class="formtable">
                     <th>The mathematical approach
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is the mathematical approach that your framework applies?">
+                        <i data-toggle="tooltip"   title="What is the mathematical approach that your framework applies?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
@@ -307,7 +307,7 @@ confirmOnLeave();
      
         <table class="formtable">
                     <th>The underlying methodology
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What underlying methodology(-y/-ies) is the FW based on?">
+                        <i data-toggle="tooltip"   title="What underlying methodology(-y/-ies) is the FW based on?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
@@ -327,7 +327,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th>Objective function type
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="If the FW is applying optimization, what objectives are commonly formulated?">
+                        <i data-toggle="tooltip"   title="If the FW is applying optimization, what objectives are commonly formulated?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
@@ -364,7 +364,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th>Support
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="Click the check box if there is a support or Q and A Forum for the Model">
+                        <i data-toggle="tooltip"  title="Click the check box if there is a support or Q and A Forum for the Model">
                             <span class='fas fa-question '></span>
                     </a>
                     <td>
@@ -401,7 +401,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th> Renewable Technology Inclusion                        
-            <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which renewable energy technologies were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which renewable energy technologies were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a>
         </th>
@@ -419,7 +419,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Storage Technology Inclusion
-            <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which storage technologies were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which storage technologies were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -433,7 +433,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Transport Demand
-            <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which transportation demands were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which transportation demands were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -449,7 +449,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Residential Demand
-            <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which residential demands were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which residential demands were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -464,7 +464,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Commercial Demand
-            <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which commercial demands were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which commercial demands were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -489,7 +489,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Cost Inclusion
-         <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="Which cost types were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="Which cost types were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -510,7 +510,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Commonly used time step
-         <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is/are commonly used time steps that were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="What is/are commonly used time steps that were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -525,7 +525,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Commonly modelled time horizon
-         <a href="javascript://" data-toggle="popover" data-trigger="focus"  title="What is/are commonly used time horizon that were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="What is/are commonly used time horizon that were already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>

@@ -16,11 +16,7 @@
 </style>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-    });
- 
-      var confirmOnLeave = function(msg) {
+    var confirmOnLeave = function(msg) {
  
       window.onbeforeunload = function (e) {
         e = e || window.event;
@@ -81,9 +77,9 @@ confirmOnLeave();
             <tr>
                 <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
                     {% if form.methodical_focus_1.help_text != "" %}
-                        <a href="javascript://" data-toggle="popover" data-trigger="focus" title="" data-content="{{ form.methodical_focus_1.help_text }}">
+                        <i data-toggle="tooltip" title="{{ form.methodical_focus_1.help_text }}">
                             <span class='fas fa-question'></span>
-                        </a>
+                        </i>
                     {% endif %}
                 </th>
                 <td>

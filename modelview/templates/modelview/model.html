@@ -25,10 +25,10 @@
           <tr>
             <td class="sheetlabel">
               {% get_field_attr model 'methodical_focus_1' 'verbose_name' %}
-              <a href='javascript://' data-toggle='popover' data-trigger="focus" title=""
-                 data-content="{{ model.methodical_focus_1.help_text }}">
+              <i data-toggle='tooltip'
+                 title="{% get_field_attr model 'methodical_focus_1' 'help_text' %}">
                 <span class='fas fa-question'></span>
-              </a>
+              </i>
             </td>
             <td>
               {{ model.methodical_focus_1 }}
