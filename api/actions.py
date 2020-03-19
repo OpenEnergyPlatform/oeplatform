@@ -10,6 +10,7 @@ import psycopg2
 import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
+from omi.dialects.oep.parser import JSONParser_1_4, ParserException
 from shapely import wkb, wkt
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
@@ -19,7 +20,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
-
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
 import api
 import login.models as login_models
 from api import DEFAULT_SCHEMA, references
@@ -119,6 +120,40 @@ def _translate_sqla_type(column):
         return column.udt_name
     else:
         return column.data_type
+
+def try_parse_metadata(inp):
+    """
+    :param inp: string or dict
+    :return: Tuple[OEPMetadata or None, string or None]:
+        The first component is the result of the parsing procedure or `None` if
+        the parsing failed. The second component is None, if the parsing failed,
+        otherwise an error message.
+
+    .. doctest::
+
+        >>> from api.actions import try_parse_metadata
+        >>> result, error = try_parse_metadata('{"id":"id"}')
+        >>> error is None
+        True
+
+    """
+
+    parser = JSONParser_1_4()
+    if isinstance(inp, dict):
+        jsn = inp
+    else:
+        try:
+            jsn = json.loads(inp)
+        except:
+            return None, "Could not parse json"
+    try:
+        metadata = parser.parse(jsn)
+    except ParserException as e:
+        return None, str(e)
+    except:
+        raise APIError("Metadata could not be parsed")
+    else:
+        return metadata, None
 
 
 def describe_columns(schema, table):
@@ -688,7 +723,7 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 
-def table_create(schema, table, columns, constraints_definitions, cursor):
+def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
     """
     Creates a new table.
     :param schema: schema
@@ -707,6 +742,16 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
     # cid = id_columns[0]
     # if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
+
+    if table_metadata is not None:
+        omi_dialect = OmiDialect()
+        try:
+            comment_on_table = omi_dialect._parser().parse(table_metadata)
+        except ParserException as e:
+            raise APIError(str(e))
+        comment_on_table = json.dumps(omi_dialect.compile(comment_on_table))
+    else:
+        comment_on_table = None
 
     metadata = MetaData()
 
@@ -741,7 +786,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor):
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
-    t = Table(table, metadata, *(columns + constraints), schema=schema)
+    t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
     return get_response_dict(success=True)

@@ -3,53 +3,20 @@
 {% block main-content-body %}
 {% load static %}
 <h3>OEP - Contact</h3> <br>
-
-<form class="form-horizontal" action="" method="post">
-    {% csrf_token %}
-    {% if success %}
-    <div class="alert alert-success">
-      <strong>Success!</strong> Your message has been sent.
-    </div>
-    {% endif %}
-    <div>
-
-        <div class="form-group">
-            <label class="col-form-label col-sm-2" for="id_contact_name">General Matter:</label>
-            <div class="col-sm-10">
-                 <select name="contact">
-                    <option value="other">Other Remarks</option>
-                    <option value="technical">Technical Remarks</option>
-                </select>
-            </div>
+<div style="padding:10px">
+    <form class="form form-horizontal" action="" method="post">
+        {% csrf_token %}
+        {% if success %}
+        <div class="alert alert-success">
+          <strong>Success!</strong> Your message has been sent.
         </div>
-
-        <div class="form-group">
-            <label class="col-form-label col-sm-2" for="id_contact_name">Name:</label>
-            <div class="col-sm-10">
-                <input class="form-control" id="id_contact_name" name="contact_name" type="text" required />
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-form-label col-sm-2" for="id_contact_topic">Subject:</label>
-            <div class="col-sm-10">
-                <input class="form-control" id="id_contact_topic" name="contact_topic" type="text" required />
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-form-label col-sm-2" for="id_contact_email">Email:</label>
-            <div class="col-sm-10">
-                <input class="form-control" id="id_contact_email" name="contact_email" type="email" required />
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-form-label col-sm-2" for="id_content">Content:</label>
-            <div class="col-sm-10">
-                <textarea class="form-control" cols="40" id="id_content" name="content" rows="10" required></textarea>
-            </div>
-        </div>
-    </div>
-    <button type="submit">Submit</button>
-</form>
+        {% endif %}
+        <table>
+            {% bootstrap_form form %}
+        </table>
+        <button type="submit">Submit</button>
+    </form>
+</div>
 <br>
 
 Or use the issue tracking system on <a href="https://github.com/openego/oeplatform">GitHub</a>.
