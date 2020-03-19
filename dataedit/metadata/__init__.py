@@ -173,9 +173,13 @@ def read_metadata_from_post(content_query, schema, table):
     :return: metadata dict
     """
     version = get_metadata_version(content_query)
+    if version is tuple and len(version) > 2:
+        template = METADATA_TEMPLATE[version[1]].copy()
+    else:
+        template = METADATA_TEMPLATE[4].copy()
     metadata = assign_content_values_to_metadata(
         content=content_query,
-        template=METADATA_TEMPLATE[version[1]].copy()
+        template=template
     )
     # TODO fill the "resource" field for v1.4
     # d["resources"] = [
