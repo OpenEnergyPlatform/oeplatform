@@ -126,13 +126,11 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
 }
 
-.logo-container{
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    width: 100%;
-    height: 250px;
+.logo{
+    .flex-fill;
+    max-width: 250px;
+    max-width: 250px;
+    margin: 10px;
 }
 
 .flex-item {
