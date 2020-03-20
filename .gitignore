@@ -65,9 +65,6 @@ docs/_build/
 # PyBuilder
 target/
 
-# Logos for legal reasons
-base/static/logos/
-
 # IDEs
 .idea/
 .vscode/

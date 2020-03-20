@@ -12,3 +12,11 @@
 
 {% endblock %}
 {% endblock %}
+
+{% block after-body-bottom-js %}
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+{% endblock %}

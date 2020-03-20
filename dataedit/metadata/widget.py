@@ -11,6 +11,7 @@ COLUMNS_KEY = 'fields'
 
 class MetaDataWidget:
     """Html display of metadata JSON variable"""
+    is_error = False
 
     def __init__(self, json):
         self.json = json
@@ -42,7 +43,6 @@ class MetaDataWidget:
             answer = format_html('{} {}', *items)
 
         return self.camel_case_split(answer)
-
 
     def __convert_to_html(self, data, level=0, parent=''):
         """Formats variables into html code
@@ -171,9 +171,9 @@ class MetaDataWidget:
 
         :param data: either a dict, a list or a string
         :param level: the level of indentation inside the JSON variable
+        :param parent ????
         :return:
         """
-
         if level == 0:
             # separate each item with a horizontal line
             html = mark_safe('')
@@ -185,7 +185,7 @@ class MetaDataWidget:
                     html += mark_safe('<div class="metahiddenfield">')
                     html += self.__convert_to_form(value, level + 1, parent=key)
                     html += mark_safe('</div>')
-                    html += format_html('<label>{}</label>',key)
+                    html += format_html('<label>{}</label>', key)
                     html += self.__convert_to_html(value, level + 1, parent=key)
                     html += mark_safe('<hr>')
 
@@ -194,7 +194,37 @@ class MetaDataWidget:
             label = parent.split('_')[-1]
             label = self.format_index_numbers(label)
             # between the horizontal lines the item can be a string, a list of objects or a dict
-            if isinstance(data, str):
+            if isinstance(data, str) and 'No json format' in data:
+                # simply an input field and a label within a div
+                self.is_error = True
+                html = mark_safe('<div class="form_group">')
+                html += format_html(
+                    '<label class="field-str-label" for="{}"> {} </label>',
+                    parent,
+                    label
+                )
+                html += format_html(
+                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',
+                    parent,
+                    parent,
+                    data)
+                html += mark_safe('</div>')
+            elif isinstance(data, str) and self.is_error is True:
+                self.is_error = False
+                # simply an input field and a label within a div
+                html = mark_safe('<div class="form_group">')
+                html += format_html(
+                    '<label class="field-str-label" for="{}"> {} </label>',
+                    parent,
+                    label
+                )
+                html += format_html(
+                    '<textarea class="form-control" id="{}" name="{}" type="text">"{}" </textarea>',
+                    parent,
+                    parent,
+                    data)
+                html += mark_safe('</div>')
+            elif isinstance(data, str):
                 # simply an input field and a label within a div
                 html = mark_safe('<div class="form_group">')
                 html += format_html(
