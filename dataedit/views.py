@@ -255,19 +255,20 @@ def listschemas(request):
     response = conn.execute(query)
 
     description = {
-        "boundaries": "legal land descriptions. examples: political and administrative boundaries",
-        "climate": "processes and phenomena of the atmosphere. examples: cloud cover, weather, climate, atmospheric conditions, climate change, precipitation",
-        "economy": "economic activities, conditions and employment. examples: production, labour, revenue, commerce, industry, tourism and ecotourism, forestry, fisheries, commercial or subsistence hunting, exploration and exploitation of resources such as minerals, oil and gas",
-        "demand": "consumption and use of energy. examples: peak loads, load curves",
-        "grid": "energy transmission infrastructure. examples: power lines, substation, pipelines",
-        "supply": "conversion (generation) of energy. examples: power stations, renewables",
+        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
+        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",
+        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",
+        "demand": "Data on demand. Demand can relate to commodities but also to services.",
+        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",
+        "supply": "Data on supply. Supply can relate to commodities but also to services.",
         "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
-        "society": "characteristics of society and cultures. examples: settlements, anthropology, archaeology, education, traditional beliefs, manners and customs, demographic data, recreational areas and activities, social impact assessments, crime and justice, census information",
-        "model_draft": "modelling sandbox, temp tables. examples: ego_grid_loadareas. !no version control!",
-        "scenario": "scenario data",
+        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
+        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
+        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
         "reference": "sources, literature",
-        "emission": "emissions, generally means the emission of particles, substances, (sound) waves or radiation into the environment. examples: Annual CO² emissions of Fossil fuel power station",
-        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License."
+        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
+        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."
     }
 
     schemas = sorted(
