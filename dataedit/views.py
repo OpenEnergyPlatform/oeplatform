@@ -862,20 +862,22 @@ class GraphView(View):
 
 
 class MapView(View):
-    def get(self, request, schema, table):
+    def get(self, request, schema, table, maptype):
         columns = [
             (c, c)
             for c in describe_columns(schema, table).keys()
         ]
-
-        latlonform = LatLonViewForm(columns=columns)
-        geomform = GeomViewForm(columns=columns)
+        if maptype=="latlon":
+            form = LatLonViewForm(columns=columns)
+        elif maptype=="geom":
+            form = GeomViewForm(columns=columns)
+        else:
+            raise Http404
 
         return render(request, 'dataedit/tablemap_form.html',
-                      {'latlonform': latlonform, 'geomform': geomform})
+                      {'form': form})
 
-    def post(self, request, schema, table):
-        maptype = request.POST.get('maptype')
+    def post(self, request, schema, table, maptype):
         columns = [
             (c, c)
             for c in describe_columns(schema, table).keys()
@@ -892,7 +894,8 @@ class MapView(View):
                 geom=request.POST.get('geom')
             )
         else:
-            return HttpResponse("Unknown map type:", status=401)
+            raise Http404
+
         form.schema = schema
         form.table = table
         form.options = options

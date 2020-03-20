@@ -10,18 +10,9 @@
 {% load static %}
 <form method="post">
     {% csrf_token %}
-    {% bootstrap_form latlonform %}
-    <input type="hidden" name="maptype" value="latlon">
+    {% bootstrap_form form %}
     <input class="btn btn-success" type="submit" value="Submit Form"/>
 </form>
 
-<hr>
-
-<form method="post">
-    {% csrf_token %}
-    {% bootstrap_form geomform %}
-    <input type="hidden" name="maptype" value="geom">
-    <input class="btn btn-success" type="submit" value="Submit Form"/>
-</form>
 
 {% endblock %}
