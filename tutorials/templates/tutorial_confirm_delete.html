@@ -1,0 +1,12 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+
+{% block main-content-body %}
+{% load static %}
+
+    <form method="post">{% csrf_token %}
+        <p>Möchten sie dieses Tutorial löschen: "{{ object.title }}"</p>
+        <input type="submit" value="Ok">
+    </form>
+
+{% endblock main-content-body %}
