@@ -5,7 +5,9 @@
 {% load static %}
 
 <span>Tutorials</span>
-<a href="{% url 'add_tutorial'%}"> Neues Tutorial </a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'add_tutorial'%}"> Neues Tutorial </a>
+    {% endif %}
 <table class="table">
     <thead>
       <tr>
