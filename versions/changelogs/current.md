@@ -17,3 +17,4 @@
 * Factsheets: Remove duplicates, typos, naming errors, display errors (#311, #401, #38, #100)  
 * Factsheets: Change or add field text or type (#311, #36, #50, #82, #84, #85, #95, #94, #90)
 
+### Bugs

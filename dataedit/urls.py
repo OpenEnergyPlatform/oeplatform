@@ -74,9 +74,18 @@ urlpatterns = [
         views.show_revision,
         name="input",
     ),
-    url(r"^search", views.SearchView.as_view()),
     url(r"^tags/?$", views.tag_overview),
     url(r"^tags/set/?$", views.change_tag),
     url(r"^tags/new/?$", views.tag_editor),
     url(r"^tags/(?P<id>[0-9]+)/?$", views.tag_editor),
+    url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
+            qual=pgsql_qualifier
+        ),
+        views.GraphView.as_view()
+    ),
+    url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(
+            qual=pgsql_qualifier
+        ),
+        views.MapView.as_view()
+    ),
 ]

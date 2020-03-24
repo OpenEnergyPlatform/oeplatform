@@ -6,16 +6,24 @@
     <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.css" rel="stylesheet"/>
 {% endblock %}
 {% block title %} - {{schema}}{% endblock %}
+
+{% block main-right-sidebar-content-additional %}
+    <h3>Permissions</h3>
+    This page shows the users and user groups that have permissions to alter the contents of this table. Only
+    admins of this dataset can alter these settings.<br><br>
+    {% if is_admin %}
+    <b> You are allowed to administrate this table </b>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        You do not have permissions to alter these settings
+    </div>
+{% endif %}
+{% endblock %}
 {% block data_content %}
 {% load dataedit.taghandler %}
 <h3>Manage permissions on {{schema}}.{{table}}</h3>
-<div class="well">
-Now you are in the database schema you selected and see the list of all tables of this schema.
-You if you are logged in, you can add tags to this schema to improve the searchability of this dataset.
-</div>
-{% if is_admin %}<b> You are allowed to administrate this table </b>{% endif %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <div class="card ">
+        <div class="card-header">
 
             {% if is_admin %}
                 <div style="position:relative;">
@@ -51,8 +59,11 @@ You if you are logged in, you can add tags to this schema to improve the searcha
             });
         </script>
         {% endif %}
+        {% if not group_perms %}
+            No permissions for groups set, yet.
+        {% endif %}
         {% for perm in group_perms %}
-            <div class="panel-body">
+            <div class="card-body">
                 <div>
                     {% if is_admin %}
                         <label for="group_level">{{ perm.holder.name }}</label>
@@ -80,8 +91,9 @@ You if you are logged in, you can add tags to this schema to improve the searcha
             </div>
         {% endfor %}
     </div>
-    <div class="panel panel-default">
-        <div class="panel-heading">
+    <br>
+    <div class="card ">
+        <div class="card-header">
 
             {% if is_admin %}
                 <div style="position:relative;">
@@ -117,8 +129,11 @@ You if you are logged in, you can add tags to this schema to improve the searcha
                 });
             </script>
         {% endif %}
+        {% if not user_perms %}
+            No permissions for users set, yet.
+        {% endif %}
         {% for perm in user_perms %}
-            <div class="panel-body">
+            <div class="card-body">
                 <div>
                     {% if is_admin %}
                         <label for="level">{{ perm.holder.name }}</label>

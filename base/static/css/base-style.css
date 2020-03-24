@@ -25,7 +25,12 @@ html {
 
 body {
     overflow: auto;
-    height: calc(100% - 52px);
+    height: calc(100% - 55px);
+}
+
+
+.alternative {
+    color: var(--grey1)
 }
 
 .base-navbar {
@@ -35,8 +40,19 @@ body {
     background-image: unset;
 }
 
+.site-header {
+    text-align: center;
+    width: 100%;
+
+    margin: 1em 0 1.5em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primaryColor2)
+}
+
 .base {
-    height: 100%;
+    height: calc(100% - 1em);
     box-sizing: border-box;
     padding-top: 1em;
 
@@ -110,15 +126,58 @@ body {
     margin: 0 auto;
 }
 
-.logo-container{
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    width: 100%;
-    height: 250px;
+.logo{
+    .flex-fill;
+    max-width: 250px;
+    max-width: 250px;
+    margin: 10px;
 }
 
 .flex-item {
     margin: 10px;
+}
+
+.navbar-footer {
+    border-top: 1em white solid;
+    width: calc(100% + 30px);
+    margin: auto -15px 0;
+
+    display: flex;
+    justify-content: flex-end;
+}
+
+.navbar-footer .navbar {
+    height: 71px;
+}
+
+/** Styling for OEP Tags **/
+
+.tag-checkbox {
+    display: none;
+}
+
+.tag-checkbox:before {
+    display: none;
+}
+
+.tag-checkbox-container {
+    padding: 0.25em 0.5em;
+    border-radius: 0.5em;
+
+    display: flex;
+    align-items: center;
+}
+
+.tag-checkbox-container:not(:last-child) {
+    margin-right: 0.5em;
+}
+
+.tag-checkbox-icon {
+    display: none;
+
+    margin-left: 0.5em;
+}
+
+.tag-checkbox-checked .tag-checkbox-icon {
+    display: block;
 }

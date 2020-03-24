@@ -1,0 +1,16 @@
+{% extends "dataedit/base.html" %}
+{% load bootstrap4 %}
+
+
+{% block site-header %}
+  <h2 class="site-header">Create Graph View</h2>
+{% endblock %}
+
+{% block data_content %}
+{% load static %}
+<form method="post">
+    {% csrf_token %}
+    {% bootstrap_form formset %}
+    <input class="btn btn-success" type="submit" value="Submit Form"/>
+</form>
+{% endblock %}

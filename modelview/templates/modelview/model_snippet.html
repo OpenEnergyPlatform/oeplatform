@@ -3,20 +3,20 @@
     <td class="sheetlabel"> 
         {% assign_field_attr model field 'help_text' as vname %} 
         {% assign_field model field as val %} 
-        {% get_field_attr model field 'verbose_name'%} 
+        {% get_field_attr model field 'verbose_name'%}
         {% if vname %}
-            <a href='javascript://' data-toggle='popover' data-trigger="focus" title="" data-content="{{ vname }}">
-                <span class='glyphicon glyphicon-question-sign'></span>
-            </a>
+            <i data-toggle='tooltip' title="{{ vname }}">
+                <span class='fas fa-question'></span>
+            </i>
         {% endif %}
     </td>
     <td> 
         {% if not add %} 
             {% if val != None %}
                 {% if val == False %}
-                    <span class='glyphicon glyphicon-remove'></span> 
+                    <span class='fas fa-times'></span>
                 {% elif val == True  %}
-                    <span class='glyphicon glyphicon-ok'></span> 
+                    <span class='fas fa-check'></span>
                 {% elif 'http://' in val or 'www.' in val or 'https://' in val %}
                     <a href="{% get_field model field %} ">{% get_field model field %}</a>
                 {% else %}

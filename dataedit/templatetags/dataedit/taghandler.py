@@ -7,7 +7,7 @@ from dataedit.views import get_all_tags, get_popular_tags
 register = template.Library()
 
 
-@register.assignment_tag
+@register.simple_tag
 def get_tags(schema=None, table=None, limit=None):
     if limit:
         return get_popular_tags(schema=schema, table=table, limit=limit)

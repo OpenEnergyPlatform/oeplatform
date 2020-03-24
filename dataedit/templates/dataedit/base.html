@@ -1,46 +1,29 @@
 {% extends "base/base.html" %}
-{% load staticfiles %}
-{% block main-right-sidebar-content %}
-    <hr>
+{% load static %}
+
+{% block after-head %}
     <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
-    {% load dataedit.taghandler %}
-    {% get_tags None None 10 as all_tags %}
-    <h3>Popular tags:</h3>
-    <div style="overflow: hidden;">
-    {% for t in all_tags %}
-        <div style="display:inline; padding:5px;float: left;">
-            <form action="/dataedit/search"  method="post">
-                {% csrf_token %}
-                <input type="submit" class="btn tag" style="background:{{ t.color }};color:{% readable_text_color t.color %}" value="{{ t.name }}">
-                <input type="hidden" name="select_{{t.id}}" value="on">
-            </form>
-        </div>
-    {% endfor %}
-    </ul>
-    </div>
-    <hr>
-    {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
-    <hr>
-    <h3>Manage Tags</h3>
-    <div style="overflow: hidden;">
-        <a href="/dataedit/tags" class="btn btn-default">Manage Tags</a>
-    </div>
-    <hr>
-    {% include "dataedit/admin.html" with data=data display_message=display_message display_items=display_items %}
+{% endblock after-head %}
+
+
+{% block main-right-sidebar-content %}
+    {% block main-right-sidebar-disclaimer %}
+    {% endblock main-right-sidebar-disclaimer %}
+
+    {% block main-right-sidebar-content-additional %}
+    {% endblock main-right-sidebar-content-additional %}
+
+
+    {% block main-right-sidebar-filter %}
+    {% endblock main-right-sidebar-filter %}
+
 {% endblock %}
 {% block main-content-body %}
-{% block data_search %}
-<div class="searchbox_container small">
-    <form action="/dataedit/search" method="post">{% csrf_token %}
-        <div class="inner-addon right-addon">
-            <a href="" type="submit" class="glyphicon glyphicon-search"></a>
-            <input type="text" name="string" placeholder="Search for datasets" class="form-control" />
-        </div>
-    </form>
-    <a href="/dataedit/search/">Advanced Search</a>
-</div>
-{% endblock %}
 {% block data_content %}
 
 {% endblock %}
 {% endblock %}
+
+{% block after-body-bottom-js %}
+    <script type="text/javascript" src="{% static '/dataedit/dataedit.js' %}"></script>
+{% endblock after-body-bottom-js %}

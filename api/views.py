@@ -14,6 +14,8 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from omi.dialects.oep.compiler import JSONCompiler
+from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -26,6 +28,9 @@ from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+
+
+import json
 
 logger = logging.getLogger("oeplatform")
 
@@ -67,7 +72,19 @@ def load_cursor(f):
                 if not result:
                     result = {}
                 if cursor.description:
-                    result["description"] = cursor.description
+                    description = [
+                        [
+                            col.name,
+                            col.type_code,
+                            col.display_size,
+                            col.internal_size,
+                            col.precision,
+                            col.scale,
+                            col.null_ok,
+                        ]
+                        for col in cursor.description
+                    ]
+                    result["description"] = description
                     result["rowcount"] = cursor.rowcount
                     result["data"] = (
                         list(map(actions._translate_fetched_cell, row))
@@ -145,7 +162,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_sequence(dict(schema=schema, sequence_name=sequence), {}):
             raise APIError("Sequence already exists")
@@ -158,7 +175,7 @@ class Sequence(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         return self.__delete_sequence(request, schema, sequence, request.data)
 
@@ -174,6 +191,37 @@ class Sequence(APIView):
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
+class Metadata(APIView):
+
+    @api_exception
+    def get(self, request, schema, table):
+        table_obj = actions._get_table(schema=schema, table=table)
+        comment = table_obj.comment
+        return JsonResponse(json.loads(comment) if comment else {})
+
+
+    @api_exception
+    @require_write_permission
+    @load_cursor
+    def post(self, request, schema, table):
+        table_obj = actions._get_table(schema=schema, table=table)
+        raw_input = request.data
+        metadata, error = actions.try_parse_metadata(raw_input)
+        if metadata is not None:
+            compiler = JSONCompiler()
+            table_obj.comment = json.dumps(compiler.visit(metadata))
+            cursor = actions.load_cursor_from_context(request.data)
+            # Surprisingly, SQLAlchemy does not seem to escape comment strings
+            # properly. Certain strings cause errors database errors.
+            # This MAY be a security issue. Therefore, we do not use
+            # SQLAlchemy's compiler here but do it manually.
+            sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+                schema=table_obj.schema,
+                table=table_obj.name)
+            cursor.execute(sql, (table_obj.comment, ))
+            return JsonResponse(raw_input)
+        else:
+            raise APIError(error)
 
 class Table(APIView):
     """
@@ -276,7 +324,7 @@ class Table(APIView):
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             raise PermissionDenied
         if actions.has_table(dict(schema=schema, table=table), {}):
             raise APIError("Table already exists")
@@ -295,9 +343,10 @@ class Table(APIView):
         for column_definition in json_data["columns"]:
             column_definition.update({"c_table": table, "c_schema": schema})
             column_definitions.append(column_definition)
+        metadata = json_data.get("metadata")
 
         result = self.__create_table(
-            request, schema, table, column_definitions, constraint_definitions
+            request, schema, table, column_definitions, constraint_definitions, metadata=metadata
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
@@ -317,8 +366,9 @@ class Table(APIView):
 
     @load_cursor
     def __create_table(
-        self, request, schema, table, column_definitions, constraint_definitions
+        self, request, schema, table, column_definitions, constraint_definitions, metadata=None
     ):
+
         self.validate_column_names(column_definitions)
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
@@ -326,7 +376,7 @@ class Table(APIView):
         }
         cursor = sessions.load_cursor_from_context(context)
         actions.table_create(
-            schema, table, column_definitions, constraint_definitions, cursor
+            schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
 
     @api_exception
@@ -759,24 +809,6 @@ class Rows(APIView):
 
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
-
-
-class Metadata(APIView):
-    @api_exception
-    def get(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        metadata = load_metadata_from_db(schema=schema, table=table)
-        response = {'metadata': metadata}
-        return stream(data=response)
-
-    @api_exception
-    @require_write_permission
-    def post(self, request, schema, table):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
-        metadata = request.data['metadata']
-        save_metadata_as_table_comment(schema=schema, table=table, metadata=metadata)
-        response = {'status': 'ok'}
-        return stream(data=response)
 
 class Session(APIView):
     def get(self, request, length=1):

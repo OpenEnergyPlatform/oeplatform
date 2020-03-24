@@ -5,13 +5,13 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.views import PasswordChangeView, PasswordResetView
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render, render_to_response
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
 
 import login.models as models
 
-from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm
+from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
@@ -61,15 +61,18 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
-        group = None
+
         if group_id:
             group = UserGroup.objects.get(id=group_id)
+            form = GroupForm(instance=group)
             membership = get_object_or_404(
                 GroupMembership, group=group, user=request.user
             )
             if membership.level < ADMIN_PERM:
                 raise PermissionDenied
-        return render(request, "login/group_create.html", {"group": group})
+        else:
+            form = GroupForm()
+        return render(request, "login/group_create.html", {"form": form})
 
     def post(self, request, group_id=None):
         """
@@ -81,25 +84,41 @@ class GroupCreate(View, LoginRequiredMixin):
         :param user_id: An group id
         :return: Profile renderer
         """
-
-        if group_id:
-            group = UserGroup.objects.get(id=group_id)
-            membership = get_object_or_404(
-                GroupMembership, group=group, user=request.user
-            )
-            if membership.level < ADMIN_PERM:
-                raise PermissionDenied
-            group.name = request.POST["name"]
-            group.description = request.POST["description"]
-            group.save()
+        group = UserGroup.objects.get(id=group_id) if group_id else None
+        form = GroupForm(request.POST, instance=group)
+        if form.is_valid():
+            if group_id:
+                membership = get_object_or_404(
+                    GroupMembership, group=group, user=request.user
+                )
+                if membership.level < ADMIN_PERM:
+                    raise PermissionDenied
+            else:
+                group = form.save()
+                membership = GroupMembership.objects.create(
+                    user=request.user, group=group, level=ADMIN_PERM
+                )
+                membership.save()
+            return redirect("/user/groups/{id}".format(id=group.id), {"group": group})
         else:
-            group = UserGroup.objects.create(name=request.POST["name"])
-            group.save()
-            membership = GroupMembership.objects.create(
-                user=request.user, group=group, level=ADMIN_PERM
-            )
-            membership.save()
-        return redirect("/user/groups/{id}/members".format(id=group.id))
+            return render(request, "login/group_create.html", {"form": form})
+
+
+class GroupView(View, LoginRequiredMixin):
+    def get(self, request, group_id):
+        """
+        Load the chosen action(create or edit) for a group.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :param user_id: An group id
+        :return: Profile renderer
+        """
+        group = get_object_or_404(UserGroup, pk=group_id)
+        return render(
+            request,
+            "login/group.html",
+            {"group": group},
+        )
 
 
 class GroupEdit(View, LoginRequiredMixin):
@@ -235,7 +254,7 @@ class CreateUserView(View):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            return redirect("/user/profile/{id}".format(id=user.id))
+            return redirect("activate")
         else:
             return render(request, "login/oepuser_create_form.html", {"form": form})
 
