@@ -19,20 +19,19 @@ from django.contrib import admin
 
 from oeplatform import settings
 
-# This is used for Markdown forms in the tutorials app
-from markdownx import urls as markdownx
-
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
 
 urlpatterns = [
     # This is used for Markdown forms in the tutorials app
-    url(r'^markdownx/', include(markdownx)),
+    url(r'^martor/', include('martor.urls')),
     url(r"^api/", include("api.urls")),
     url(r"^", include("base.urls")),
     url(r"^user/", include("login.urls")),
     url(r"^factsheets/", include("modelview.urls")),
     url(r"^dataedit/", include("dataedit.urls")),
     url(r"^literature/", include("literature.urls")),
+    url(r"^ontology/", include("ontology.urls")),
+    url(r"^captcha/", include("captcha.urls")),
     url(r"^tutorials/", include("tutorials.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

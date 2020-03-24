@@ -2,7 +2,6 @@ from datetime import datetime
 
 from colorfield.fields import ColorField
 from django.contrib.postgres.fields import JSONField
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import (
     BooleanField,
@@ -30,8 +29,8 @@ class Tag(models.Model):
     label = CharField(max_length=50, null=False, unique=True)
     color = ColorField(default="#FF0000")
 
-    def get_absolute_url(self):
-        return reverse("tag", kwargs={"pk": self.pk})
+    #def get_absolute_url(self):
+    #    return reverse("tag", kwargs={"pk": self.pk})
 
 
 class Tagable(models.Model):
@@ -48,7 +47,7 @@ class Schema(Tagable):
 
 
 class Table(Tagable):
-    schema = models.ForeignKey(Schema)
+    schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
 
     @classmethod
     def load(cls, schema, table):
@@ -70,6 +69,9 @@ class View(models.Model):
     type = CharField(max_length=10, null=False, choices=VIEW_TYPES)
     options = JSONField(null=False, default=dict)
     is_default = BooleanField(default=False)
+
+    def __str__(self):
+        return '{}/{}--"{}"({})'.format(self.schema, self.table, self.name, self.type.upper())
 
 
 class Filter(models.Model):

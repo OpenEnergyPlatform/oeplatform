@@ -1,456 +1,495 @@
-var OEP = {};
+"use strict";
 
-// backwards compatability for use in Recline
-var recline = recline || {};
-recline.Backend = recline.Backend || {};
-recline.Backend.OEP = OEP;
+var map;
+var tile_layer;
+var wkx = require('wkx');
+var buffer = require('buffer');
+var filters = [];
+var table_container;
+var query_builder;
+var where;
+var view;
 
-
-/*
-
-string (text): a string
-number (double, float, numeric): a number including floating point numbers.
-integer (int): an integer.
-date: a date. The preferred format is YYYY-MM-DD.
-time: a time without a date
-date-time (datetime, timestamp): a date-time. It is recommended this be in ISO 8601 format of YYYY-MM- DDThh:mm:ssZ in UTC time.
-boolean (bool)
-binary: base64 representation of binary data.
-geo_point: as per http://www.elasticsearch.org/guide/reference/mapping/geo-point-type.html. That is a field (in these examples named location) that has one of the following structures:
-geojson: as per http://geojson.org/
-array: an array
-object (json): an object
-any: value of field may be any type
-*/
-
-var typemap = {
-    BIGINT: 'integer',
-    BINARY: 'binary',
-    BLOB: 'binary',
-    BOOLEAN: 'boolean',
-    BigInteger: 'integer',
-    Boolean: 'boolean',
-    CHAR: 'boolean',
-    CLOB: 'binary',
-    Concatenable: 'any',
-    DATE: 'date',
-    DATETIME: 'date-time',
-    DECIMAL: 'number',
-    Date: 'date',
-    DateTime: 'date-time',
-    Enum: 'any',
-    FLOAT: 'number',
-    Float: 'number',
-    INT: 'integer',
-    INTEGER: 'integer',
-    Integer: 'integer',
-    Interval: 'any',
-    LargeBinary: 'binary',
-    MatchType: 'any',
-    NCHAR: 'string',
-    NVARCHAR: 'string',
-    Numeric: 'number',
-    PickleType: 'any',
-    REAL: 'number',
-    SMALLINT: 'integer',
-    SchemaType: 'any',
-    SmallInteger: 'integer',
-    String: 'string',
-    TEXT: 'string',
-    TIME: 'time',
-    TIMESTAMP: 'date-time',
-    Text: 'string',
-    Time: 'time',
-    TypeDecorator: 'any',
-    TypeEnginBases: 'any',
-    TypeEngine: 'any',
-    Unicode: 'string',
-    VARBINARY: 'binary',
-    VARCHAR: 'string',
-}
-
-
-function show_comment(e, schema, table, id){
-        e.stopPropagation();
-        query = {
-            from:{
-                type:'table',
-                table:'_'+table+'_cor',
-                schema:schema},
-            where:[condition_query('_id',id)]
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
-        var request = $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {query: JSON.stringify(query)}});
-        var dfd = new $.Deferred();
-
-         request.done(function(results) {
-                if (results.error) {
-                    dfd.reject(results.error);
-                }
-
-                results = results.content.data.map(function(raw_row){
-                    var row = {};
-                    for(i=0; i<raw_row.length; ++i)
-                    {
-                        var key = results.content.description[i][0];
-                        row[key] = raw_row[i];
-                    }
-                    return row;
-                });
-                if(results == undefined || results.length == 0){
-                    alert("Comment not found");
-                    dfd.reject("Comment not found");
-                }
-                else{
-                    var value = results[0];
-                    var $modal = bs_jQuery("#comment_modal");
-                    bs_jQuery('#modal_method').text(value.method);
-                    bs_jQuery('#modal_origin').text(value.origin);
-                    bs_jQuery('#modal_assumption').text(value.assumption);
-                    $modal.modal();
-
-                    dfd.resolve({});
-                }
-        });
-
-    return function(e){
-        console.log(e.target);
-
     }
+    return cookieValue;
 }
 
-function translate_filter(obj){
-    if(obj.type == "term"){
-        return condition_query(obj.field, obj.term)
+function fail_handler(jqXHR, exception) {
+    var msg = '';
+    if (jqXHR.status === 0) {
+        msg = 'Not connected.\n Verify Network.';
+    } else if (jqXHR.status == 404) {
+        msg = 'Requested page not found. [404]';
+    } else if (jqXHR.status == 500) {
+        msg = 'Internal Server Error [500].';
+    } else if (exception === 'parsererror') {
+        msg = 'Requested JSON parse failed.';
+    } else if (exception === 'timeout') {
+        msg = 'Time out error.';
+    } else if (exception === 'abort') {
+        msg = 'Ajax request aborted.';
+    } else {
+        msg = 'Uncaught Error.\n' + jqXHR.responseText;
     }
-    if(obj.type == "range"){
+    console.log(msg);
+}
+
+var table_info = {
+    columns: [],
+    rows: null,
+    name: null,
+    schema: null,
+};
+
+var geo_datatypes = [
+    "point", "polygon", "polygonwithhole", "collection", "linestring"
+];
+
+function request_data(data, callback, settings) {
+    $("#loading-indicator").show();
+
+    var base_query = {
+        "from": {
+            "type": "table",
+            "schema": schema,
+            "table": table
+        }
+    };
+    var count_query = JSON.parse(JSON.stringify(base_query));
+    count_query["fields"] = [{
+        type: "function",
+        function: "count",
+        operands: ["*"]
+    }];
+    count_query.where = where;
+    var select_query = JSON.parse(JSON.stringify(base_query));
+    select_query["order_by"] = data.order.map(function (c) {
         return {
-            type:'operator_binary',
-            left: {
-                type: 'column',
-                column: obj.field,
-            },
-            right:{
-                type:'operator_binary',
-                left: {
-                    type: 'value',
-                    value: obj.from,
-                },
-                right: {
-                    type: 'value',
-                    value: obj.to
-                },
-                operator: 'AND'
-            },
-            operator: 'between'
+            type: "column",
+            column: table_info.columns[c.column],
+            ordering: c.dir
+        }
+    });
+    select_query["fields"] = [];
+    for(var i in table_info.columns){
+        var col = table_info.columns[i];
+        var query = {
+            type: "column",
+            column: col
         };
-    }
-}
-
-function construct_comment_handler(schema, table){
-    if(!schema.startsWith('_')){
-        schema = '_' + schema
-    }
-
-
-    var grid_formatter = function (value, field, row){
-        if(value==null)
-            return "";
-        if(field.id=='_comment')
-        {
-            if(value == null)
-                return '';
-
-            return '<a class="glyphicon glyphicon-info-sign" onclick="show_comment(event, &quot;' + schema +'&quot;, &quot;' + table + '&quot;, '+ value + ');"></a>';
+        if(col == "geom"){
+            query = {
+                type: "label",
+                label: "geom",
+                element :{
+                    type: "function",
+                    function: "ST_Transform",
+                    operands: [
+                        query,
+                        4326
+                    ]
+                }
+            }
         }
-        if(field.id=='ref_id')
-        {
-            var ret = '<a href="/literature/entry/' + value + '">' + value + '</a>';
-            return ret
+        select_query["fields"].push(query);
+    }
+    select_query.offset = data.start;
+    select_query.limit = data.length;
+    if(where !== null){
+        select_query.where = where;
+    }
+    var draw = Number(data.draw);
+    $.when(
+        $.ajax({
+            type: 'POST',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                query: JSON.stringify(count_query)
+            }
+        }), $.ajax({
+            type: 'POST',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                query: JSON.stringify(select_query)
+            }
+        })
+    ).done(function (count_response, select_response) {
+        $("#loading-indicator").hide();
+        if(map !== undefined) {
+            build_map(select_response[0].data, select_response[0].description)
         }
-        return value;
-    }
 
-    return grid_formatter;
+        if(view.type === "map") {
+            build_map(select_response[0].data, select_response[0].description);
+        } else if(view.type === "graph") {
+            build_graph(select_response[0].data);
+        }
+        callback({
+            data: select_response[0].data,
+            draw: draw,
+            recordsFiltered: count_response[0].data[0][0],
+            recordsTotal: table_info.rows
+        });
+    }).fail(fail_handler);
 }
 
-function construct_field(dataset){
-    return function(el){
-        var type;
-        if(el.type in typemap)
-            type=typemap[el.type];
-        else
-            type=el.type;
-        var field = new recline.Model.Field({
-            id: el.name,
-            format: construct_comment_handler(dataset.schema, dataset.table),
-            type:type,
+function build_map(data, description){
+    map.eachLayer(function (layer) {
+        if(layer !== tile_layer){map.removeLayer(layer)}
+    });
+    var geo_columns = get_selected_geo_columns();
+    var col_idxs = description.reduce(function (l, r, i) {
+        if (geo_columns.includes(r[0])) {
+            l.push(i);
+        }
+        return l;
+    }, []);
+    var bounds = [];
+    for (var row_id in data) {
+        var row = data[row_id];
+        var geo_values = col_idxs.map(function (i) {
+            if(row[i] !== null) {
+                var buf = new buffer.Buffer(row[i], "hex");
+                var wkb = wkx.Geometry.parse(buf);
+                var gj = L.geoJSON(wkb.toGeoJSON());
+                gj.on("click", flash_handler(row_id));
+                gj.addTo(map);
+                return gj;
+            }
+        });
+        bounds.push(L.featureGroup(geo_values.filter(x => !!x)));
+    }
+    var b = L.featureGroup(bounds).getBounds();
+    map.fitBounds(b);
+}
 
-          });
-          /*if(el.name == '_comment'){
-            field.editor = buildCommentEditor(dataset.schema, dataset.table);
-          }*/
-          field.renderer = construct_comment_handler(dataset.schema, dataset.table);
-          return field;
+function get_selected_geo_columns(){
+    if(view.options.hasOwnProperty("geom")){
+        return [view.options.geom];
+    } else if (view.options.hasOwnProperty("lat") && view.options.hasOwnProperty("lon")){
+        return [view.options.lat, view.options.lon];
+    }
+    else {
+        console.log("Unrecognised map type")
     }
 }
 
+function build_graph(data){
+    // Get the div for the graph
+    var plotly_div = $("#datagraph")[0];
 
-(function($, my) {
-    my.__type__ = 'OEP-Backend'; // e.g. elasticsearch
-    my.max_rows = 1000;
-    // Initial load of dataset including initial set of records
-    my.fetch = function(dataset){
-        var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:'/api/v0/schema/' + dataset.schema + '/tables/' + dataset.table, type: "GET"});
-        var dfd = new $.Deferred();
+    // Load column names to use in plot
+    var x = view.options.x;
+    var y = view.options.y;
 
+    // Get ids of those columns
+    var x_id = table_info.columns.indexOf(x);
+    var y_id = table_info.columns.indexOf(y);
 
+    // Extract data from query results
+    var points = data.reduce(function(accumulator, row){
+        accumulator[0].push(row[x_id]);
+        accumulator[1].push(row[y_id]);
+        return accumulator}, [[],[]]);
 
-        request.done(function(results) {
-            if (results.error) {
-                dfd.reject(results.error);
-            }
-            var table_fields = [];
-            var pk_fields = [];
-            for(col in results.columns){
-                table_fields.push(col)
-            };
-            for(con in results.constraints){
-                if(con.constraint_type=='PRIMARY KEY') {
-                    pk_fields.push(con)
-                }
-            };
-            dfd.resolve({
-                fields: table_fields,
-                useMemoryStore: false,
-            });
-        });
-        request.fail(function( jqXHR, textStatus ) {
-            alert( "Request failed: " + textStatus );
-        });
+    // Remove possible older plots
+    Plotly.purge(plotly_div);
 
-        return dfd.promise()
+    // Plot it
+    Plotly.plot(
+        plotly_div,
+        [{
+          x: points[0],
+          y: points[1]
+        }],
+        {
+          margin: {t: 0},
+          xaxis: {
+            title: {text: x}
+          },
+          yaxis: {
+            title: {text: y}
+          }
+        }
+    );
+}
+
+function flash_handler(i){
+    return function (){
+        var tr = table_container.row(i).node();
+        $(tr).fadeOut(50).fadeIn(50);
     };
-
-    // Query the backend for records returning them in bulk.
-    // This method will be used by the Dataset.query method to search the backend
-    // for records, retrieving the results in bulk.
-    my.query = function(queryObj, dataset){
-        var query = {table: dataset.table, schema: dataset.schema}
-        var request = $.ajax({url:'/api/v0/schema/' + dataset.schema + '/tables/' + dataset.table + '/columns/', type: "GET"});
-        var dfd = new $.Deferred();
-        request.done(function(fields) {
-            $('#loading-indicator').show()
-
-            if (fields.error) {
-                dfd.reject(fields.error);
-            }
-            var table_fields = [];
-
-            for(col in fields){
-                fields[col].id = col
-                table_fields.push(fields[col])
-            };
-
-            var field_map = {};
-
-            for(i=0; i<table_fields.length; ++i)
-            {
-                field_map[table_fields[i].id] = get_field_query(table_fields[i]);
-            }
-
-            var table_query = {
-                        type:'table',
-                        schema: dataset.schema,
-                        table: dataset.table
-            };
-
-            if(!unchecked){
-                table_query.only = true;
-            }
-            table_query.type = 'table';
-            var field_query = [];
-
-            if(queryObj.fields){
-                field_query = queryObj.fields.map(function (el){return fieldmap[el];
-                            /*return {
-                                    type: 'column',
-                                    column: el
-                            };*/
-                    });
-            }
-            else
-            {
-                field_query = table_fields.map(get_field_query)
-            }
-
-            var query = {from : table_query, fields: field_query};
+}
 
 
+function load_graph(schema, table, csrftoken){
 
-            if(query.limit > my.max_rows){
-                query.limit = my.max_rows
-                alert("You can fetch at most " + my.max_rows + " rows in a single request. Your request will be truncated!")
-            }
-
-            console.log(queryObj)
-
-            if(queryObj.filters && queryObj.filters.length > 0){
-                query.where = queryObj.filters.map(translate_filter)
-            }
-
-            var count_query= $.extend(true, {}, query);
-            count_query.fields = [{
-                type:'function',
-                function:'count',
-                operands: [{type:'star'}]
-                }]
-
-            if(queryObj.sort){
-                query.order_by = queryObj.sort.map(function(obj){
-                    return {
-                        type:'column',
-                        column: obj.field,
-                        ordering: obj.order
-                    };
-                });
-            }
-
-            query.limit = queryObj.size;
-            query.offset = queryObj.from;
-
-            // This must be a POST-Request for now, even thought no changes should happen.
-            // Reason is, that geo-data must be transformed to geo-JSON and function calls
-            // are not available via get, yet.
-            var request = $.when(
-                $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(query)}}),
-                $.ajax({type: 'POST', url:'/api/v0/advanced/search', dataType:'json', data: {csrfmiddlewaretoken: csrftoken, query: JSON.stringify(count_query)}})
-            )
-            request.done(function(results, counts) {
-                $('#loading-indicator').hide();
-                results = results[0];
-                counts = counts[0];
-                if (results.error) {
-                    dfd.reject(results.error);
-                }
-
-                else
-                {
-                    var response = {
-                        hits: results.data.map(function(raw_row){
-                            var row = {};
-                            for(i=0; i<raw_row.length; ++i)
-                            {
-                                var key = results.content.description[i][0];
-                                row[key] = raw_row[i];
-                            }
-                            return row;
-                        }),
-                        total: counts.data[0][0],
-                    }
-                    dfd.resolve(response);
-                }
-            });
-
-            request.fail(function( jqXHR, textStatus ) {
-                // fail occurs if table has no data
-                $('#loading-indicator').replaceWith('<div>No Data</div>');
-                //alert( "Request failed: " + textStatus );
-            });
-
-        });
+}
 
 
-
-        request.fail(function( jqXHR, textStatus ) {
-                alert( "Request failed: " + textStatus );
-        });
-
-        return dfd.promise()
+function load_view(schema, table, csrftoken, current_view) {
+    view = current_view;
+    table_info.name = table;
+    table_info.schema = schema;
+    var count_query = {
+        from: {
+            type: "table",
+            schema: schema,
+            table: table
+        },
+        fields: [{
+            type: "function",
+            function: "count",
+            operands: ["*"]
+        }]
     };
+    $.when(
+        $.ajax({
+            url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns',
+        }), $.ajax({
+            type: 'POST',
+            url: '/api/v0/advanced/search',
+            dataType: 'json',
+            data: {
+                csrfmiddlewaretoken: csrftoken,
+                query: JSON.stringify(count_query)
+            }
+        })
+    ).done(function (column_response, count_response) {
 
-    my.save = function(changes, dataset){
-        var dfd = new $.Deferred();
-        var request = $.when(
-                changes.creates.map(
-                    insert_query(
-                        dataset.attributes.schema,
-                        dataset.attributes.table,
-                        $("#commit-message").val()
-                    )
-                )
-            ).then(
-                changes.updates.map(
-                    update_query(
-                        dataset.attributes.schema,
-                        dataset.attributes.table,
-                        $("#commit-message").val()
-                    )
-                )
+
+        for (var colname in column_response[0]){
+            var str = '<th>' + colname + '</th>';
+            $(str).appendTo('#datatable' + '>thead>tr');
+            table_info.columns.push(colname);
+            var dt = column_response[0][colname]["data_type"];
+            var mapped_dt;
+            if(dt in type_maps) {
+                mapped_dt = type_maps[dt];
+            } else {
+                if(valid_types.includes(dt)) {
+                    mapped_dt = dt;
+                } else {
+                    mapped_dt = "string";
+                }
+            }
+            filters.push({id: colname, type: mapped_dt});
+        }
+        if(view.type === "map"){
+            map = L.map('map');
+            tile_layer = L.tileLayer(
+                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    'attribution':  'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
+                    'useCache': true
+                }
             );
-
-        // We do not know the number of updates. Thus we set no arguments and
-        // obtain them via black magic called javascript
-        request.done(function()
-        {
-            for (var i=0; i<arguments.length; i++)
-                if(arguments[i].error)
-                    dfd.reject(arguments[i].error);
-            dfd.resolve({})
-        });
-
-        request.fail(function( jqXHR, textStatus ) {
-            alert( "Request failed: " + textStatus );
-        });
-    };
-
-    function insert_query(schema, table, message)
-    {
-        return function(record){
-            var query = {
-                schema: schema,
-                table: table,
-                values: record.additions
-            }
-
-            query['message'] = message
-
-            return $.ajax({type: 'POST',
-                url:'/api/v0/advanced/insert', dataType:'json',
-                data: {
-                    query: JSON.stringify(query)
-                }
-            });
+            tile_layer.addTo(map);
         }
-    };
 
-    function update_query(schema, table, message)
-    {
-        return function(record){
+        table_info.rows = count_response[0].data[0][0];
+        table_container = $('#datatable').DataTable({
+            ajax: request_data,
+            serverSide: true,
+            scrollY: true,
+            scrollX: true,
+            searching: false,
+            search: {}
+        });
+        query_builder = $('#builder').queryBuilder({
+            filters: filters
+        });
+        $('#btn-set').on('click', apply_filters);
 
-            var conditions = [];
-            for(var col in record._previousAttributes){
-                conditions.push(condition_query(col,record._previousAttributes[col]));
-            }
-            var query = {
-                schema: schema,
-                table: table,
-                where: conditions,
-                values: record.changed
-            }
+    }).fail(fail_handler)
+}
 
-            query['message'] = message
+function apply_filters(){
+    var rules = $('#builder').queryBuilder('getRules');
+    if(rules !== null) {
+        where = parse_filter(rules);
+        table_container.ajax.reload();
+    }
+}
 
-            return $.ajax({type: 'POST',
-                url:'/api/v0/advanced/update', dataType:'json',
-                data: {
-                    query: JSON.stringify(query)
-                }
+function parse_filter(f){
+    return {
+        type: "operator",
+        operator: f.condition.toLowerCase(),
+        operands: f.rules.map(parse_rule)
+    }
+}
+
+function negate(q){
+    return {
+        type: "operator",
+        operator: "not",
+        operands: [q]
+    }
+}
+
+function parse_rule(r){
+    switch(r.operator) {
+        case "equal":
+            return {
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_equal":
+            return negate({
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, r.value]
             });
-        }
-    };
+        case "in":
+            return {
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_in":
+            return negate({
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            });
+        case "less":
+            return {
+                type: "operator",
+                operator: "<",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "less_or_equal":
+            return {
+                type: "operator",
+                operator: "<=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "greater":
+            return {
+                type: "operator",
+                operator: ">",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "greater_or_equal":
+            return {
+                type: "operator",
+                operator: ">=",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "between":
+            return {
+                type: "operator",
+                operator: "and",
+                operands:
+                    [
+                        {
+                            type: "operator",
+                            operator: "<",
+                            operands: [r.value[0], {type:"column", column: r.field}]
+                        }, {
+                            type: "operator",
+                            operator: "<",
+                            operands: [{type:"column", column: r.field}, r.value[1]]
+                    }]
+            };
+        case "not_between":
+            return negate({
+                type: "operator",
+                operator: "and",
+                operands:
+                    [
+                        {
+                            type: "operator",
+                            operator: "<",
+                            operands: [r.value[0], {type:"column", column: r.field}]
+                        }, {
+                            type: "operator",
+                            operator: "<",
+                            operands: [{type:"column", column: r.field}, r.value[1]]
+                    }]
+            });
+        case "begins_with":
+            return {
+                type: "operator",
+                operator: "like",
+                operands: [{type:"column", column: r.field}, r.value+"%"]
+            };
+        case "not_begins_with":
+            return negate({
+                type: "operator",
+                operator: "like",
+                operands: [{type:"column", column: r.field}, r.value+"%"]
+            });
+        case "contains":
+            return {
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            };
+        case "not_contains":
+            return negate({
+                type: "operator",
+                operator: "in",
+                operands: [{type:"column", column: r.field}, r.value]
+            });
+        case "ends_with":
+            return {
+                type: "operator",
+                operator: "like",
+                operands: [{type:"column", column: r.field}, "%"+r.value]
+            };
+        case "not_ends_with":
+            return negate({
+                type: "operator",
+                operator: "like",
+                operands: [{type:"column", column: r.field}, "%"+r.value]
+            });
+        case "is_empty":
+            return {
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, '']
+            };
+        case "is_not_empty":
+            return negate({
+                type: "operator",
+                operator: "=",
+                operands: [{type:"column", column: r.field}, '']
+            });
+        case "is_null":
+            return {
+                type: "operator",
+                operator: "is",
+                operands: [{type:"column", column: r.field}, null]
+            };
+        case "is_not_null":
+            return negate({
+                type: "operator",
+                operator: "IS",
+                operands: [{type:"column", column: r.field}, null]
+            });
+    }
+}
 
+var type_maps = {
+    "double precision": "double",
+};
 
-}(jQuery, OEP));
-
-
+var valid_types = ["string", "integer", "double", "date", "time", "datetime", "boolean"];

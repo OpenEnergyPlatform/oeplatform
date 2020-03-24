@@ -10,47 +10,13 @@
   box-sizing: border-box;
 }
 
-
-
-/* enable absolute positioning */
-.inner-addon {
-    position: relative;
-}
-
-.searchbox_container{
-
-}
-
 .searchbox_container .small{
     width: 300px;
     float:right;
 }
 
-
-/* style icon */
-.inner-addon .glyphicon {
-  position: absolute;
-  padding: 10px;
-  pointer-events: none;
-}
-
-/* align icon */
-.left-addon .glyphicon  { left:  0px;}
-.right-addon .glyphicon { right: 0px;}
-
-
-/* add padding  */
-.left-addon input  { padding-left:  30px; }
-.right-addon input { padding-right: 30px; }
-
 .selecttable{
     width:100%
-
-}
-
-.selecttable th{
-
-
 }
 
 .selecter{
@@ -270,4 +236,49 @@ input[type="checkbox"]:checked+label{
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+.foldable-entry {
+
+    display: grid;
+
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+
+    align-items: center;
+
+    grid-template-areas:
+        "Title Caret"
+        "Content Content";
+
+
+}
+
+.foldable-entry > h5 {
+    margin: 0;
+}
+
+.foldable-entry > span {
+    margin-right: 0.5em;
+    transition: transform 0.3s ease-in-out;
+}
+
+.foldable-entry > span.collapsed {
+    transform: rotate(180deg);
+}
+
+.foldable-entry-body {
+    margin-top: 1em;
+    grid-area: Content;
+}
+
+/**
+This is a fix, because we use modals within a position:fixed context, which is not supported by Bootstrap 4.
+*/
+.modal {
+    z-index: 10000;
+}
+
+.modal * {
+    z-index: inherit!important;
 }

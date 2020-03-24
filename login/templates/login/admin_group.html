@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load bootstrap3 %}
+{% load bootstrap4 %}
 {% block main-content-body %}
 {% block title %} - {{group.name}} {% endblock %}
 
@@ -9,12 +9,12 @@
     	<a href="/user/{{ user.pk }}/group/new/" class="btn btn-info">Create new Group</a>
 	</div>
 	<div style="clear:right">
-	    <a style="padding-left:15px; clear:right" href="/user/profile/{{ user.pk }}" class="btn btn-default">Back to Profile</a>
+	    <a style="padding-left:15px; clear:right" href="/user/profile/{{ user.pk }}" class="btn btn-secondary">Back to Profile</a>
 	</div>
     <h3>Select Group to change:</h3>
 	<div class="list-group">
 	{% for group in groupresult %}
-	    <a class="list-group-item" href="/user/{{ user.pk }}/group/edit/{{group.id}}" >
+	    <a class="list-group-item list-group-item-action" href="/user/{{ user.pk }}/group/edit/{{group.id}}" >
 	        <div style="display: inline-block;">
 			    {{group}}
 			</div>
@@ -28,6 +28,6 @@
 <hr>
 <h3>Manage Groups</h3>
 <div style="overflow: hidden;">
-	<a href="/user/{{ user.pk }}/group/" class="btn btn-default">Manage Groups</a>
+	<a href="/user/{{ user.pk }}/group/" class="btn btn-secondary">Manage Groups</a>
 </div>
 {% endblock %}

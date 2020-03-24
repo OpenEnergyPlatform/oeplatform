@@ -1,13 +1,13 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
-{% load bootstrap3 %}
-{% load staticfiles %}
+{% load bootstrap4 %}
+{% load static %}
 
 <script type="text/javascript">
     <!--
     $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
+    $('[data-toggle="tooltip"]').tooltip();
     });
 
       var confirmOnLeave = function(msg) {

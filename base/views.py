@@ -57,10 +57,15 @@ def redir(request, target):
 
 
 class ContactView(View):
+    error_css_class = "error"
+    required_css_class = "required"
+
     def post(self, request):
         form = ContactForm(data=request.POST)
         if form.is_valid():
-            receps = sec.CONTACT_ADDRESSES[request.POST["contact"]]
+            receps = sec.CONTACT_ADDRESSES.get(
+                request.POST["contact_category"], "technical"
+            )
             send_mail(
                 request.POST.get("contact_topic"),
                 request.POST.get("contact_name")
@@ -94,7 +99,7 @@ def handler500(request):
     return response
 
 
-def handler404(request):
+def handler404(request, exception):
     response = render(request, "base/404.html", {})
     response.status_code = 404
     return response

@@ -69,7 +69,8 @@ In order to do so, we send the following PUT request::
                     "constraint_type": "PRIMARY KEY",
                     "constraint_parameter": "id",
                 }
-            ]
+            ],
+            "metadata": {"id": "sandbox.example_table"}
         }
     }
 
@@ -106,7 +107,8 @@ tool **curl**::
                             "constraint_type": "PRIMARY KEY",
                             "constraint_parameter": "id",
                         }
-                    ]
+                    ],
+                    "metadata": {"id": "sandbox.example_table"}
                 }
             }'
         oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
@@ -117,7 +119,7 @@ or **python**:
 .. doctest::
 
     >>> import requests
-    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ] } }
+    >>> data = { "query": { "columns": [ { "name":"id", "data_type": "bigserial", "is_nullable": "NO" },{ "name":"name", "data_type": "varchar", "character_maximum_length": "50" },{ "name":"geom", "data_type": "geometry(point)" } ], "constraints": [ { "constraint_type": "PRIMARY KEY", "constraint_parameter": "id" } ], "metadata": {"id": "sandbox.example_table"} } }
     >>> requests.put(oep_url+'/api/v0/schema/sandbox/tables/example_table/', json=data, headers={'Authorization': 'Token %s'%your_token} )
     <Response [201]>
 
@@ -137,7 +139,7 @@ been created.
     >>> json_result = result.json()
     >>> json_result['id'] == {'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': False, 'data_type': 'bigint', 'numeric_precision': 64, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '1', 'interval_precision': None, 'numeric_scale': 0, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 1, 'column_default': "nextval('sandbox.example_table_id_seq'::regclass)", 'numeric_precision_radix': 2}
     True
-    >>> json_result['geom'] == {'column_default': None, 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'USER-DEFINED', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'column_default': None, 'numeric_precision_radix': None}
+    >>> json_result['geom'] == {'column_default': None, 'character_maximum_length': None, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'geometry', 'numeric_precision': None, 'character_octet_length': None, 'interval_type': None, 'dtd_identifier': '3', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 3, 'numeric_precision_radix': None}
     True
     >>> json_result['name'] == {'character_maximum_length': 50, 'maximum_cardinality': None, 'is_nullable': True, 'data_type': 'character varying', 'numeric_precision': None, 'character_octet_length': 200, 'interval_type': None, 'dtd_identifier': '2', 'interval_precision': None, 'numeric_scale': None, 'is_updatable': True, 'datetime_precision': None, 'ordinal_position': 2, 'column_default': None, 'numeric_precision_radix': None}
     True
@@ -422,6 +424,83 @@ table. The permissions can be granted by an admin in the OEP web interface.
     >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/rows/1')
     >>> result.status_code
     404
+
+
+Metadata
+********
+
+The OEP gives the opportunity to publish datasets and annotate it with important
+information. You can query this metadata
+
+.. doctest::
+
+    >>> import requests
+    >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/')
+    >>> result.status_code
+    200
+    >>> result.json() == {'name': None, 'title': None, 'id': 'sandbox.example_table', 'description': None, 'language': None, 'keywords': None, 'publicationDate': None, 'context': None, 'spatial': None, 'temporal': None, 'sources': None, 'licenses': None, 'contributors': None, 'resources': None, 'review': None, 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}, '_comment': None}
+    True
+
+Note that the returned metadata differs from the metadata passed when creating
+the table. This is because the OEP autocompletes missing fields. You can fill
+those fields to make you data more easily accessible. You can also set metadata
+on existing tables via `POST`-requests (granted that you have write-permissions):
+
+.. doctest::
+
+    >>> import requests
+    >>> data = {
+    ... "id": "sandbox.example_table",
+    ... "name": "Human-readable name",
+    ... "description": "A verbose description of this dataset",
+    ... "language": [
+    ...     "eng-uk"
+    ...    ],
+    ...    "keywords": [
+    ...        "test"
+    ...    ],
+    ...    "publicationDate": "2020-02-06",
+    ...    "context": {
+    ...        "homepage": "example.com",
+    ...        "documentation": "doc.example.com",
+    ...        "sourceCode": "src.example.com",
+    ...        "contact": "example.com",
+    ...        "grantNo": "0",
+    ...        "fundingAgency": "test agency",
+    ...        "fundingAgencyLogo": "http://www.example.com/logo.png",
+    ...        "publisherLogo": "http://www.example.com/logo2.png"
+    ...    },
+    ...    "licenses": [
+    ...        {
+    ...            "name": "CC0-1.0",
+    ...            "title": "Creative Commons Zero v1.0 Universal",
+    ...            "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+    ...            "instruction": "You are free: To Share, To Create, To Adapt",
+    ...            "attribution": "© Reiner Lemoine Institut"
+    ...        }
+    ...    ],
+    ...    "metaMetadata": {
+    ...        "metadataVersion": "OEP-1.4.0",
+    ...        "metadataLicense": {
+    ...            "name": "CC0-1.0",
+    ...            "title": "Creative Commons Zero v1.0 Universal",
+    ...            "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+    ...        }
+    ...    },
+    ...    "_comment": {
+    ...        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
+    ...        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+    ...        "units": "Use a space between numbers and units (100 m)",
+    ...        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
+    ...        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
+    ...        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
+    ...        "null": "If not applicable use (null)"
+    ...    }
+    ... }
+    >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/', json=data, headers={'Authorization': 'Token %s'%your_token})
+    >>> result.status_code
+    200
+
 
 Delete tables
 *************

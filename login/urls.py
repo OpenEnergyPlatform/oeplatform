@@ -15,9 +15,18 @@ urlpatterns = [
     ),
     url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
     url(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/edit",
+        r"^groups/new/$",
         views.GroupCreate.as_view(),
         name="input",
+    ),
+    url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/edit$",
+        views.GroupCreate.as_view(),
+        name="input",
+    ),
+    url(
+        r"^groups/(?P<group_id>[\w\d_\s]+)/$",
+        views.GroupView.as_view(),
     ),
     url(
         r"^groups/(?P<group_id>[\w\d_\s]+)/members$",
@@ -28,5 +37,5 @@ urlpatterns = [
     url(r"^register$", views.CreateUserView.as_view()),
     url(r"^detach$", views.DetachView.as_view()),
     url(r"^activate/(?P<token>[\w\d\-\s]+)$", views.activate),
-    url(r"^activate$", views.ActivationNoteView.as_view()),
+    url(r"^activate/$", views.ActivationNoteView.as_view(), name="activate"),
 ]

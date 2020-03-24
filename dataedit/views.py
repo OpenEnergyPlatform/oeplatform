@@ -12,6 +12,7 @@ from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
 
+import numpy
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -25,6 +26,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -32,10 +34,14 @@ from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
+from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import TableRevision
+from .models import (
+    TableRevision,
+    View as DataViewModel
+)
 
 session = None
 
@@ -221,29 +227,73 @@ def listschemas(request):
     :return: Renders the schema list
     """
 
+    searchedQueryString = request.GET.get("query")
+    searchedTagIds = list(map(
+        lambda t: int(t),
+        request.GET.getlist("tags"),
+    ))
+
+    for tag_id in searchedTagIds:
+        increment_usage_count(tag_id)
+
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
     query = (
-        "SELECT schema_name, count(tablename) as tables "
-        "FROM pg_tables right join information_schema.schemata "
-        "ON schema_name=schemaname "
-        "WHERE tablename IS NULL "
+        "SELECT i.schema_name as schemaname, count(distinct p.tablename) as table_count, array_agg(p.tablename) as tables, array_agg(tg.id) as tag_ids FROM pg_tables p "
+        "right join information_schema.schemata i "
+        "ON p.schemaname=i.schema_name "
+        "left join table_tags t "
+        "ON p.schemaname=t.schema_name "
+        "left join tags tg "
+        "ON t.tag=tg.id "
+        "WHERE p.tablename IS NULL "
         "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
-        "       AND tablename NOT LIKE '\_%%') "
-        "GROUP BY schema_name;".format(user=sec.dbuser)
+        "       AND p.tablename NOT LIKE '\_%%') "
+        "GROUP BY i.schema_name;".format(user=sec.dbuser)
     )
     response = conn.execute(query)
+
+    description = {
+        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
+        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",
+        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",
+        "demand": "Data on demand. Demand can relate to commodities but also to services.",
+        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",
+        "supply": "Data on supply. Supply can relate to commodities but also to services.",
+        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
+        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
+        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
+        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
+        "reference": "sources, literature",
+        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
+        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."
+    }
+
     schemas = sorted(
         [
-            (row.schema_name, row.tables)
+            (row.schemaname, description.get(row.schemaname, "No description"), row.table_count, row.tag_ids)
             for row in response
-            if row.schema_name in schema_whitelist
-            and not row.schema_name.startswith("_")
+            if row.schemaname in schema_whitelist
+            and not row.schemaname.startswith("_")
+            and (not searchedQueryString or searchedQueryString in row.schemaname or list(filter(lambda tableName: tableName and searchedQueryString in tableName, row.tables)))
+            and (not searchedTagIds or numpy.intersect1d(searchedTagIds, list(filter(lambda x: x is not None, row.tag_ids))))
         ],
         key=lambda x: x[0],
     )
-    return render(request, "dataedit/dataedit_schemalist.html", {"schemas": schemas})
+
+    print(schemas)
+
+    return render(
+        request,
+        "dataedit/dataedit_schemalist.html",
+        {
+            "schemas": schemas,
+            "query": searchedQueryString,
+            "tags": searchedTagIds
+        }
+    )
 
 
 def overview(request):
@@ -302,6 +352,16 @@ def listtables(request, schema_name):
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
+
+    searchedQueryString = request.GET.get("query")
+    searchedTagIds = list(map(
+        lambda t: int(t),
+        request.GET.getlist("tags"),
+    ))
+
+    for tag_id in searchedTagIds:
+        increment_usage_count(tag_id)
+
     engine = actions._get_engine()
     conn = engine.connect()
     labels = get_readable_table_names(schema_name)
@@ -312,19 +372,33 @@ def listtables(request, schema_name):
         )
     )
     tables = conn.execute(query)
+
+
     tables = [
         (
             table.tablename,
             labels[table.tablename] if table.tablename in labels else None,
+            get_all_tags(schema_name, table.tablename)
         )
         for table in tables
         if not table.tablename.startswith("_")
+           and (not searchedQueryString or searchedQueryString in table.tablename)
     ]
+
+    # Apply tag filter later on, because I am not smart enough to do it inline.
+    tables = list(filter(
+        lambda tableEntry: not searchedTagIds or numpy.intersect1d(searchedTagIds, list(map(lambda tag: tag['id'], tableEntry[2]))),
+        tables
+    ))
+
     tables = sorted(tables, key=lambda x: x[0])
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
-        {"schema": schema_name, "tables": tables},
+        {
+            "schema": schema_name, "tables": tables,
+            "query": searchedQueryString, "tags": searchedTagIds
+        },
     )
 
 
@@ -758,6 +832,83 @@ def view_delete(request, schema, table):
     return redirect("/dataedit/view/" + schema + "/" + table)
 
 
+class GraphView(View):
+    def get(self, request, schema, table):
+        # get the columns id from the schema and the table
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        formset = GraphViewForm(columns=columns)
+
+        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+
+    def post(self, request, schema, table):
+        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
+        # options
+        opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
+        gview = DataViewModel.objects.create(
+            name=request.POST.get('name'),
+            table=table,
+            schema=schema,
+            type='graph',
+            options=opt,
+            is_default=request.POST.get('is_default', False)
+        )
+        gview.save()
+
+        return redirect(
+            "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
+        )
+
+
+class MapView(View):
+    def get(self, request, schema, table, maptype):
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        if maptype=="latlon":
+            form = LatLonViewForm(columns=columns)
+        elif maptype=="geom":
+            form = GeomViewForm(columns=columns)
+        else:
+            raise Http404
+
+        return render(request, 'dataedit/tablemap_form.html',
+                      {'form': form})
+
+    def post(self, request, schema, table, maptype):
+        columns = [
+            (c, c)
+            for c in describe_columns(schema, table).keys()
+        ]
+        if maptype == "latlon":
+            form = LatLonViewForm(request.POST, columns=columns)
+            options = dict(
+                lat=request.POST.get('lat'),
+                lon=request.POST.get('lon')
+            )
+        elif maptype == "geom":
+            form = GeomViewForm(request.POST, columns=columns)
+            options = dict(
+                geom=request.POST.get('geom')
+            )
+        else:
+            raise Http404
+
+        form.schema = schema
+        form.table = table
+        form.options = options
+        if form.is_valid():
+            view_id = form.save(commit=True)
+            return redirect(
+                "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=view_id)
+            )
+        else:
+            return self.get(request, schema, table)
+
+
 class DataView(View):
     """ This class handles the GET and POST requests for the main page of data edit.
 
@@ -806,7 +957,7 @@ class DataView(View):
         display_items = api_changes.get("display_items")
 
         is_admin = False
-        if request.user and not request.user.is_anonymous():
+        if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
@@ -824,7 +975,9 @@ class DataView(View):
             except ObjectDoesNotExist:
                 current_view = default
 
-        table_views = chain((default,), table_views)
+        table_views = list(chain((default,), table_views))
+
+
 
         context_dict = {
             "comment_on_table": dict(metadata),
@@ -846,7 +999,7 @@ class DataView(View):
 
         context_dict.update(current_view.options)
 
-        return render(request, "dataedit/dataedit_overview.html", context=context_dict)
+        return render(request, "dataedit/dataview.html", context=context_dict)
 
     def post(self, request, schema, table):
         """
@@ -1019,7 +1172,7 @@ class PermissionView(View):
         can_add = False
         can_remove = False
         level = login_models.NO_PERM
-        if not request.user.is_anonymous():
+        if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             is_admin = level >= login_models.ADMIN_PERM
             can_add = level >= login_models.WRITE_PERM
@@ -1043,7 +1196,7 @@ class PermissionView(View):
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
         if (
-            request.user.is_anonymous()
+            request.user.is_anonymous
             or request.user.get_table_permission_level(table_obj)
             < login_models.ADMIN_PERM
         ):
@@ -1243,66 +1396,3 @@ def increment_usage_count(tag_id):
     finally:
         session.close()
 
-
-class SearchView(View):
-    """
-
-    """
-
-    def get(self, request):
-        """
-        Renders an empty search field with a list of tags
-        :param request: A HTTP-request object sent by the Django framework
-        :return:
-        """
-        return render(
-            request, "dataedit/search.html", {"results": [], "tags": get_all_tags()}
-        )
-
-    def post(self, request):
-        """
-
-        :param request: A HTTP-request object sent by the Django framework. May contain a set of ids prefixed by *select_*
-        :return:
-        """
-        results = []
-        engine = actions._get_engine()
-        metadata = sqla.MetaData(bind=engine)
-        Session = sessionmaker()
-        session = Session(bind=engine)
-        search_view = sqla.Table("meta_search", metadata, autoload=True)
-
-        filter_tags = [
-            int(key[len("select_") :])
-            for key in request.POST
-            if key.startswith("select_")
-        ]
-
-        for tag_id in filter_tags:
-            increment_usage_count(tag_id)
-
-        tag_agg = array_agg(TableTags.tag)
-        query = session.query(
-            search_view.c.schema.label("schema"),
-            search_view.c.table.label("table"),
-            tag_agg,
-        ).outerjoin(
-            TableTags,
-            (search_view.c.table == TableTags.table_name)
-            and (search_view.c.table == TableTags.table_name),
-        )
-        if filter_tags:
-            query = query.having(
-                tag_agg.contains(sqla.cast(filter_tags, sqla.ARRAY(sqla.BigInteger)))
-            )
-
-        query = query.group_by(search_view.c.schema, search_view.c.table)
-        results = session.execute(query)
-
-        session.commit()
-        ret = [{"schema": r.schema, "table": r.table} for r in results]
-        return render(
-            request,
-            "dataedit/search.html",
-            {"results": ret, "tags": get_all_tags(), "selected": filter_tags},
-        )

@@ -20,6 +20,7 @@ from sqlalchemy import (
     select,
     util,
     cast,
+    null,
 )
 import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
@@ -67,7 +68,7 @@ def is_pg_qual(x):
 def read_pgvalue(x):
     # TODO: Implement check for valid values
     if x is None:
-        return "null"
+        return null()
     return x
 
 
@@ -441,6 +442,8 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.SMALLINT
         elif hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
+        elif dt_string in _POSTGIS_MAP:
+            dt = _POSTGIS_MAP[dt_string]
         elif hasattr(sqltypes, dt_string.upper()):
             dt = getattr(sqltypes, dt_string.upper())
         elif dt_string == "bigserial":
@@ -450,6 +453,10 @@ def parse_type(dt_string, **kwargs):
             raise APIError("Unknown type (%s)." % dt_string)
         return dt, autoincrement
 
+
+_POSTGIS_MAP = {
+    "compositeelement": geoalchemy2.types.CompositeElement, 'geography': geoalchemy2.types.Geography , 'geometry': geoalchemy2.types.Geometry, 'raster': geoalchemy2.types.Raster, 'rasterelement':geoalchemy2.types.RasterElement
+}
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
     # TODO: Implement
@@ -467,6 +474,8 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
                 return parse_expression(grouping)
         if dtype == "operator":
             return parse_operator(d)
+        if dtype == "case":
+            return parse_case(d)
         if dtype == "modifier":
             return parse_modifier(d)
         if dtype == "function":
@@ -555,6 +564,18 @@ def parse_condition(dl):
     clean_dl = _unpack_clauses(dl)
     return parse_expression(clean_dl)
 
+def parse_case(dl):
+    else_clause=parse_expression(dl["else"])
+    if "expression" in dl:
+        return sa.case(
+            {parse_expression(case["when"]): parse_expression(case["then"]) for case in dl.get("cases", [])},
+            value=parse_expression(dl["expression"]),
+            else_=else_clause
+        )
+    else:
+        return sa.case(
+            [(parse_expression(case["when"]), parse_expression(case["then"])) for case in dl.get("cases", [])],
+            else_=else_clause)
 
 def parse_operator(d):
     query = parse_sqla_operator(
@@ -717,6 +738,9 @@ def parse_sqla_operator(raw_key, *operands):
                 % (key, len(operands))
             )
         x, y = operands
+        if x is None:
+            x = null()
+
         if key in ["equals", "="]:
             return x == y
         if key in ["greater", ">"]:
@@ -739,8 +763,12 @@ def parse_sqla_operator(raw_key, *operands):
             return x / y
         if key in ["concatenate", "||"]:
             return fun.concat(x, y)
+        if key in ["is"]:
+            return x is y
         if key in ["is not"]:
             return x.isnot(y)
+        if key in ["like"]:
+            return x.match(y)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:
