@@ -16,6 +16,10 @@ try:
     from .securitysettings import *
 except:
     raise Exception("No securitysettings found")
+try:
+    from .martor_settings import *
+except:
+    raise Exception("No martor_settings found")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -47,7 +51,6 @@ INSTALLED_APPS = (
     "captcha",
     "django.contrib.postgres",
     "fontawesome_5",
-    "tutorials"
     "tutorials",
     "martor"
 )
