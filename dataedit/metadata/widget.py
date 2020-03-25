@@ -108,12 +108,12 @@ class MetaDataWidget:
                 for item in data:
                     if isinstance(item, dict):
                         item = item.copy()
-                        name = item.pop('title', None)
+                        name = item.get('title', None)
                         if name is None or name == '':
-                            name = item.pop('name', None)
+                            name = item.get('name', None)
                         else:
-                            item.pop('name', None)
-                        url = item.pop('url', '')
+                            item.get('name', None)
+                        url = item.get('url', '')
                         if url != '':
                             name = format_html('<a href="{}">{}</a>', url, name)
                         if name is not None and name != '':
@@ -147,14 +147,14 @@ class MetaDataWidget:
             html += mark_safe('<p class="metaproperty">')
             item = item.copy()
 
-            name = item.pop('name')
-            unit = item.pop('unit', '')
+            name = item.get('name')
+            unit = item.get('unit', '')
             if unit != '':
                 html += format_html('{} ({})', name, unit)
             else:
                 html += conditional_escape(str(name))
             html += mark_safe('</p>')
-            descr = item.pop('description', '')
+            descr = item.get('description', '')
             if descr != '':
                 html += conditional_escape(str(descr))
             else:
