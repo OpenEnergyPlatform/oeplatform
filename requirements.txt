@@ -20,5 +20,4 @@ django-simple-captcha
 django-bootstrap4
 git+http://github.com/frague59/django-fontawesome-5.git@master
 omi
-git+https://github.com/solar-c/django-bootstrap3.git
 martor
