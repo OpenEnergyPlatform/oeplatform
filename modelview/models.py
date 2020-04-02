@@ -56,7 +56,7 @@ class BasicFactsheet(models.Model):
     contact_phone = CharField(
         max_length=200,
         verbose_name="Phone",
-        help_text="If a website for the model exists please put the link here",
+        help_text="WWhat is the website of the framework? Please provide a link!",
         null=True,
     )
     website = CharField(
@@ -120,7 +120,11 @@ class BasicFactsheet(models.Model):
         help_text="What is the main source of funding for the development of the model?",
         null=True,
     )
-    open_source = BooleanField(default=False, verbose_name="Open Source")
+    open_source = BooleanField(
+        default=False,
+        verbose_name="Open Source",
+        help_text="Is the framework published under an open source license?"
+    )
     open_up = BooleanField(
         default=False,
         verbose_name="Planned to open up in the future",
@@ -729,6 +733,7 @@ class Energyframework(BasicFactsheet):
     gs_national = BooleanField(verbose_name="National", default=False)
     gs_local = BooleanField(verbose_name="Local/community", default=False)
     gs_single_project = BooleanField(verbose_name="Single-project", default=False)
+    gs_other = CharField(verbose_name="Other", null=True, default=False, max_length=50)
     # SECTORAL SCOPE
     ss_electricity = BooleanField(verbose_name="Electricity", default=False)
     ss_heat = BooleanField(verbose_name="Heat/Cooling", default=False)
@@ -933,7 +938,7 @@ class Energystudy(models.Model):
     )
     contact_email = EmailField(
         verbose_name="Contact (e-mail)",
-        help_text="Please provide the mailadress of the contact person.",
+        help_text="What is the e-mail contact of the developer (group)",
         null=True,
     )
     client = CharField(
