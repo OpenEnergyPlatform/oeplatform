@@ -15,7 +15,7 @@
         <h5>Tags</h5>
         <span class="fa fa-caret-up" data-toggle="collapse" data-target="#tags"></span>
         <div id="tags" class="collapse show foldable-entry-body">
-            <div style="display: flex; flex-flow: wrap">
+            <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
                 {% for t in all_tags %}
                     <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
                         <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" value="{{ t.id }}">
@@ -24,10 +24,10 @@
                     </label>
                 {% endfor %}
             </div>
-            <button type="submit" class="btn btn-secondary">
+            <button type="submit" class="btn btn-success">
                 Apply Filters
             </button>
-            <a class="btn btn-secondary" href="{{ request.path }}" >
+            <a class="btn btn-danger" href="{{ request.path }}" >
                 Reset Filters
             </a>
         </div>
