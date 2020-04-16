@@ -11,7 +11,17 @@ visible to the public for testing and production.
 
 ## Release Cycle
 We make a new release every first monday of a month. All features and bugfixes which are integrated 
-in the develop branch until then will be released.
+in the develop branch until then will
+be released.
+
+## Release Contend Management
+We use projects on github to organize the release. Issues and pull requests can be assigned to a 
+[release-project](https://github.com/OpenEnergyPlatform/oeplatform/projects) on github by linking 
+the project in the issue/pr. With the project feature of github, all tasks that are linked to 
+the project are organized via a Kanban board.
+
+The project can be linked in an issue or pull request via the menu "Projects"
+
 
 ## Required accounts and admin privileges
 
