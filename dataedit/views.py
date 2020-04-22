@@ -1075,7 +1075,14 @@ class MetaView(LoginRequiredMixin, View):
         """
         columns = actions.analyze_columns(schema, table)
 
+        old_metadata = load_metadata_from_db(schema, table)
         comment = read_metadata_from_post(request.POST, schema, table)
+        old_review = old_metadata.get("review")
+        old_badge = old_review.get("badge") if isinstance(old_review, dict) else None
+        review = comment.get("review")
+        badge = review.get("badge") if isinstance(review, dict) else None
+        if badge != old_badge and not request.user.is_reviewer():
+            raise PermissionDenied("Only registered reviewers can change the badge field")
         save_metadata_as_table_comment(schema, table, metadata=comment)
 
         return redirect(
