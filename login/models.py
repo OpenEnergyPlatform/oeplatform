@@ -21,6 +21,7 @@ from rest_framework.authtoken.models import Token
 
 import dataedit.models as datamodels
 import oeplatform.securitysettings as sec
+from oeplatform.settings import METADATA_PERM_GROUP
 from login.mail import send_verification_mail
 
 NO_PERM = 0
@@ -157,6 +158,14 @@ class myuser(AbstractBaseUser, PermissionHolder):
     @property
     def is_staff(self):
         return self.is_admin
+
+    @property
+    def is_reviewer(self):
+        try:
+            GroupMembership.objects.get(user=self, group__name=METADATA_PERM_GROUP)
+        except GroupMembership.DoesNotExist:
+            return False
+        return True
 
     def get_table_permission_level(self, table):
         # Check admin permissions for user
