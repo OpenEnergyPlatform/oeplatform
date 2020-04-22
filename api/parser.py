@@ -771,6 +771,10 @@ def parse_sqla_operator(raw_key, *operands):
             return x.like(y)
         if key in ["contains"]:
             return x.contains(y)
+        if key in ["startswith"]:
+            return x.startswith(y)
+        if key in ["endswith"]:
+            return x.endswith(y)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:
