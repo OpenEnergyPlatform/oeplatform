@@ -48,6 +48,7 @@ class Schema(Tagable):
 
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
+    metadata = JSONField(null=True)
 
     @classmethod
     def load(cls, schema, table):
@@ -80,3 +81,4 @@ class Filter(models.Model):
     type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
     value = JSONField(null=False)
     view = ForeignKey(View, on_delete=models.CASCADE, related_name="filter")
+
