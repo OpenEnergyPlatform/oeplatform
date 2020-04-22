@@ -101,6 +101,8 @@ AUTH_USER_MODEL = "login.myuser"
 LOGIN_URL = "/user/login"
 LOGIN_REDIRECT_URL = "/"
 
+METADATA_PERM_GROUP = "Metadata review"
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.BasicAuthentication",
