@@ -580,7 +580,8 @@ def parse_case(dl):
 def parse_operator(d):
     query = parse_sqla_operator(
         get_or_403(d, "operator"),
-        *list(map(parse_expression, get_or_403(d, "operands")))
+        *list(map(parse_expression, get_or_403(d, "operands"))),
+        kwargs=d.get("keywords")
     )
     return query
 
@@ -718,7 +719,7 @@ def parse_sql_operator(key: str) -> str:
     return sql_operators.get(key)
 
 
-def parse_sqla_operator(raw_key, *operands):
+def parse_sqla_operator(raw_key, *operands, kwargs=None):
     key = raw_key.lower().strip()
     if not operands:
         raise APIError("Missing arguments for '%s'." % (key))
@@ -769,12 +770,17 @@ def parse_sqla_operator(raw_key, *operands):
             return x.isnot(y)
         if key in ["like"]:
             return x.like(y)
-        if key in ["contains"]:
-            return x.contains(y)
-        if key in ["startswith"]:
-            return x.startswith(y)
-        if key in ["endswith"]:
-            return x.endswith(y)
+        if key in ["contains", "startswith", "endswith"]:
+            esc_kwargs = dict()
+            if kwargs:
+                escape = kwargs.get("escape")
+                esc_kwargs["escape"] = parse_single(escape, str) if escape is not None else None
+            if key in ["contains"]:
+                return x.contains(y, **esc_kwargs)
+            if key in ["startswith"]:
+                return x.startswith(y, **esc_kwargs)
+            if key in ["endswith"]:
+                return x.endswith(y, **esc_kwargs)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:
@@ -787,6 +793,11 @@ def parse_sqla_operator(raw_key, *operands):
 
     raise APIError("Operator '%s' not supported" % key)
 
+def get_escape_kwargs(kwargs):
+    autoescape = parse_single(kwargs.get("autoescape", False), bool)
+    escape = kwargs.get("escape")
+    escape = parse_single(escape, str) if escape is not None else None
+    return dict(autoescape=autoescape, escape=escape)
 
 def parse_sqla_modifier(raw_key, *operands):
     key = raw_key.lower().strip()
