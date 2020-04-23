@@ -29,7 +29,6 @@ from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
-
 import json
 
 logger = logging.getLogger("oeplatform")
@@ -40,11 +39,19 @@ WHERE_EXPRESSION = re.compile(
     + ")\s*(?P<second>(?![>=]).+)$"
 )
 
+def transform_results(cursor, triggers, trigger_args):
+    row = cursor.fetchone() if not cursor.closed else None
+    while row is not None:
+        yield list(map(actions._translate_fetched_cell, row))
+        row = cursor.fetchone()
+    for t in triggers:
+        t(*trigger_args)
 
 def load_cursor(f):
     def wrapper(*args, **kwargs):
         artificial_connection = "connection_id" not in args[1].data
         fetch_all = "cursor_id" not in args[1].data
+        triggered_close = False
         if fetch_all:
 
             # django_restframework passes different data dictionaries depending
@@ -62,7 +69,7 @@ def load_cursor(f):
             if "cursor_id" in args[1].data:
                 context["cursor_id"] = args[1].data["cursor_id"]
             else:
-                context.update(actions.open_cursor({}, context))
+                context.update(actions.open_cursor({}, context, named=True))
                 args[1].data["cursor_id"] = context["cursor_id"]
         try:
             result = f(*args, **kwargs)
@@ -71,32 +78,32 @@ def load_cursor(f):
                 session = actions.load_session_from_context(context)
                 if not result:
                     result = {}
-                if cursor.description:
-                    description = [
-                        [
-                            col.name,
-                            col.type_code,
-                            col.display_size,
-                            col.internal_size,
-                            col.precision,
-                            col.scale,
-                            col.null_ok,
-                        ]
-                        for col in cursor.description
+                triggers = [actions.close_cursor, actions.close_raw_connection]
+                trigger_args = [{}, context]
+                first = map(actions._translate_fetched_cell, cursor.fetchone())
+                description = [
+                    [
+                        col.name,
+                        col.type_code,
+                        col.display_size,
+                        col.internal_size,
+                        col.precision,
+                        col.scale,
+                        col.null_ok,
                     ]
-                    result["description"] = description
-                    result["rowcount"] = cursor.rowcount
-                    result["data"] = (
-                        list(map(actions._translate_fetched_cell, row))
-                        for row in cursor.fetchall()
-                    )
-                if artificial_connection:
-                    session.connection.commit()
+                    for col in cursor.description
+                ]
+                result["data"] = itertools.chain([first],transform_results(cursor, triggers, trigger_args))
+                result["description"] = description
+
+                result["rowcount"] = cursor.rowcount
+                triggered_close=True
         finally:
-            if fetch_all:
-                actions.close_cursor({}, context)
-            if artificial_connection:
-                actions.close_raw_connection({}, context)
+            if not triggered_close:
+                if fetch_all and not artificial_connection:
+                    actions.close_cursor({}, context)
+                if artificial_connection:
+                    actions.close_raw_connection({}, context)
         return result
 
     return wrapper
