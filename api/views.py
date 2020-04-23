@@ -75,29 +75,37 @@ def load_cursor(f):
             result = f(*args, **kwargs)
             if fetch_all:
                 cursor = actions.load_cursor_from_context(context)
-                session = actions.load_session_from_context(context)
                 if not result:
                     result = {}
+                # Initial server-side cursors do not contain any description before
+                # the first row is fetched. Therefore, we have to try to fetch the
+                # first one - if successful, we a description if not, nothing is returned.
+                # But: After the last row the cursor will 'forget' its description.
+                # Therefore we have to fetch the remaining data later.
+
+                # Set of triggers after all the data was fetched. The cursor must not be closed earlier!
                 triggers = [actions.close_cursor, actions.close_raw_connection]
                 trigger_args = [{}, context]
-                first = map(actions._translate_fetched_cell, cursor.fetchone())
-                description = [
-                    [
-                        col.name,
-                        col.type_code,
-                        col.display_size,
-                        col.internal_size,
-                        col.precision,
-                        col.scale,
-                        col.null_ok,
+                first = cursor.fetchone()
+                if first:
+                    first = map(actions._translate_fetched_cell, first)
+                    description = [
+                        [
+                            col.name,
+                            col.type_code,
+                            col.display_size,
+                            col.internal_size,
+                            col.precision,
+                            col.scale,
+                            col.null_ok,
+                        ]
+                        for col in cursor.description
                     ]
-                    for col in cursor.description
-                ]
-                result["data"] = itertools.chain([first],transform_results(cursor, triggers, trigger_args))
-                result["description"] = description
+                    result["data"] = itertools.chain([first],transform_results(cursor, triggers, trigger_args))
+                    result["description"] = description
 
-                result["rowcount"] = cursor.rowcount
-                triggered_close=True
+                    result["rowcount"] = cursor.rowcount
+                    triggered_close=True
         finally:
             if not triggered_close:
                 if fetch_all and not artificial_connection:
