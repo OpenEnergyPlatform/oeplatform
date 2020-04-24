@@ -3,7 +3,7 @@ import re
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape, format_html, format_html_join
 
-from dataedit.metadata import METADATA_HIDDEN_FIELDS
+from api.metadata import METADATA_HIDDEN_FIELDS
 
 LICENSE_KEY = 'license'
 COLUMNS_KEY = 'fields'

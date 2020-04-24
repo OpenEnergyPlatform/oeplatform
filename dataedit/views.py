@@ -22,15 +22,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
-from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
-from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
-from dataedit.metadata.widget import MetaDataWidget
+from api.metadata import load_metadata_from_db, read_metadata_from_post
+from dataedit.widgets.metadata import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
@@ -1075,15 +1074,7 @@ class MetaView(LoginRequiredMixin, View):
         """
         columns = actions.analyze_columns(schema, table)
 
-        old_metadata = load_metadata_from_db(schema, table)
         comment = read_metadata_from_post(request.POST, schema, table)
-        old_review = old_metadata.get("review")
-        old_badge = old_review.get("badge") if isinstance(old_review, dict) else None
-        review = comment.get("review")
-        badge = review.get("badge") if isinstance(review, dict) else None
-        if badge != old_badge and not request.user.is_reviewer():
-            raise PermissionDenied("Only registered reviewers can change the badge field")
-        save_metadata_as_table_comment(schema, table, metadata=comment)
 
         return redirect(
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
@@ -1130,35 +1121,6 @@ class MetaView(LoginRequiredMixin, View):
             }
             for col in columns
         ]
-
-
-def save_metadata_as_table_comment(schema, table, metadata):
-    """Save metadata as comment string on a database table
-    :param schema (string):
-    :param table (string):
-    :param metadata: structured data according to metadata specifications
-    """
-    # TODO: validate metadata!
-    # metadata = validate(metadata)
-
-    engine = actions._get_engine()
-    conn = engine.connect()
-    trans = conn.begin()
-    try:
-        conn.execute(
-            sqla.text(
-                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                    schema=schema, table=table
-                )
-            ),
-            comment=json.dumps(metadata),
-        )
-    except Exception as e:
-        raise e
-    else:
-        trans.commit()
-    finally:
-        conn.close()
 
 
 class PermissionView(View):
@@ -1402,4 +1364,3 @@ def increment_usage_count(tag_id):
         session.commit()
     finally:
         session.close()
-

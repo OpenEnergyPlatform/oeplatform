@@ -1,29 +1,25 @@
-import itertools
 import json
 import logging
 import re
-import traceback
 from datetime import datetime
 
 import geoalchemy2  # Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, JsonResponse
+from django.http import Http404
 from omi.dialects.oep.parser import JSONParser_1_4, ParserException
-from shapely import wkb, wkt
-from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
+from shapely import wkb
+from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, sql, text
 from sqlalchemy import types as sqltypes
-from sqlalchemy import util
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
 from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
 import api
 import login.models as login_models
-from api import DEFAULT_SCHEMA, references
+from api import DEFAULT_SCHEMA
 from api.connection import _get_engine
 from api.error import APIError
 from api.parser import get_or_403, read_bool, read_pgid, parse_type
@@ -35,6 +31,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
+from api.metadata import load_metadata_from_db
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")

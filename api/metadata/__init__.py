@@ -1,8 +1,12 @@
 from api import actions
-from dataedit.metadata import v1_4 as __LATEST
+from api.metadata import v1_4 as __LATEST
+from api.metadata.v1_3 import TEMPLATE_v1_3
+from api.metadata.v1_4 import TEMPLATE_V1_4
 
-from dataedit.metadata.v1_3 import TEMPLATE_v1_3
-from dataedit.metadata.v1_4 import TEMPLATE_V1_4
+from django.core.exceptions import PermissionDenied
+
+from sqlalchemy import text
+import json
 
 METADATA_TEMPLATE = {
     4: TEMPLATE_V1_4,
@@ -161,6 +165,44 @@ def load_metadata_from_db(schema, table):
                 else str(me.error),
             }
     return metadata
+
+
+def save_metadata_as_table_comment(schema, table, metadata, user):
+    """Save metadata as comment string on a database table
+    :param schema (string):
+    :param table (string):
+    :param metadata: structured data according to metadata specifications
+    """
+    # TODO: validate metadata!
+    # metadata = validate(metadata)
+
+    old_metadata = load_metadata_from_db(schema, table)
+    old_review = old_metadata.get("review")
+    old_badge = old_review.get("badge") if isinstance(old_review, dict) else None
+    review = metadata.get("review")
+    badge = review.get("badge") if isinstance(review, dict) else None
+    if badge != old_badge and not user.is_reviewer():
+        raise PermissionDenied("Only registered reviewers can change the badge field")
+    save_metadata_as_table_comment(schema, table, metadata=metadata)
+
+    engine = actions._get_engine()
+    conn = engine.connect()
+    trans = conn.begin()
+    try:
+        conn.execute(
+            text(
+                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
+                    schema=schema, table=table
+                )
+            ),
+            comment=json.dumps(metadata),
+        )
+    except Exception as e:
+        raise e
+    else:
+        trans.commit()
+    finally:
+        conn.close()
 
 
 def read_metadata_from_post(content_query, schema, table):
