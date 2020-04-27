@@ -4,10 +4,10 @@ from django.test import Client, TestCase
 from rest_framework.authtoken.models import Token
 
 from api import actions
-from login.models import myuser
+from login.models import myuser, GroupMembership, UserGroup
 
 from .util import content2json, load_content, load_content_as_json
-
+from oeplatform.settings import METADATA_PERM_GROUP
 # Create your tests here.
 
 
@@ -38,7 +38,10 @@ class APITestCase(TestCase):
         cls.user, _ = myuser.objects.get_or_create(
             name="MrTest", email="mrtest@test.com"
         )
+        g = UserGroup.objects.get(name=METADATA_PERM_GROUP)
+        gm, created = GroupMembership.objects.get_or_create(user=cls.user, group=g)
         cls.user.save()
+        gm.save()
         cls.token = Token.objects.get(user=cls.user)
 
         cls.other_user, _ = myuser.objects.get_or_create(
