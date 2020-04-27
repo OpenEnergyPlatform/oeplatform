@@ -19,14 +19,14 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 import api.parser
-import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
+from api.metadata import save_metadata_as_table_comment
+import login.models as login_models
 from dataedit.models import Table as DBTable
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
-
 
 import json
 
@@ -202,24 +202,13 @@ class Metadata(APIView):
     @require_write_permission
     @load_cursor
     def post(self, request, schema, table):
-        table_obj = actions._get_table(schema=schema, table=table)
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
         if metadata is not None:
-            compiler = JSONCompiler()
-            table_obj.comment = json.dumps(compiler.visit(metadata))
-            cursor = actions.load_cursor_from_context(request.data)
-            # Surprisingly, SQLAlchemy does not seem to escape comment strings
-            # properly. Certain strings cause errors database errors.
-            # This MAY be a security issue. Therefore, we do not use
-            # SQLAlchemy's compiler here but do it manually.
-            sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-                schema=table_obj.schema,
-                table=table_obj.name)
-            cursor.execute(sql, (table_obj.comment, ))
-            return JsonResponse(raw_input)
+            save_metadata_as_table_comment(schema, table, JSONCompiler().visit(metadata), user=request.user)
         else:
             raise APIError(error)
+        return JsonResponse({}, status=status.HTTP_200_OK)
 
 class Table(APIView):
     """
