@@ -41,6 +41,7 @@ WHERE_EXPRESSION = re.compile(
     + ")\s*(?P<second>(?![>=]).+)$"
 )
 
+
 def transform_results(cursor, triggers, trigger_args):
     row = cursor.fetchone() if not cursor.closed else None
     while row is not None:
@@ -48,6 +49,17 @@ def transform_results(cursor, triggers, trigger_args):
         row = cursor.fetchone()
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
+
+
+class OEPStream(StreamingHttpResponse):
+
+    def __init__(self, *args, session=None, **kwargs):
+        self.session = session
+        super(OEPStream, self).__init__(*args, **kwargs)
+
+    def __del__(self):
+        if self.session:
+            self.session.close()
 
 
 def load_cursor(named=False):
@@ -117,7 +129,7 @@ def load_cursor(named=False):
                             ]
                             result["data"] = (x for x in itertools.chain([first],transform_results(cursor, triggers, trigger_args)))
                             result["description"] = description
-
+                            result["context"] = context
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
@@ -593,6 +605,7 @@ class Rows(APIView):
         }
 
         return_obj = self.__get_rows(request, data)
+        session = sessions.load_session_from_context(return_obj["context"]) if "context" in return_obj else None
         # Extract column names from description
         if "description" in return_obj:
             cols = [col[0] for col in return_obj["description"]]
@@ -603,12 +616,14 @@ class Rows(APIView):
         if format == "csv":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
-            response = StreamingHttpResponse(
+
+            response = OEPStream(
                 (
                     writer.writerow(x)
                     for x in itertools.chain([cols], return_obj["data"])
                 ),
                 content_type="text/csv",
+                session=session,
             )
             response[
                 "Content-Disposition"
@@ -627,7 +642,7 @@ class Rows(APIView):
                 # TODO: Figure out what JsonResponse does different.
                 return JsonResponse(dict_list, safe=False)
 
-            return stream((dict(zip(cols, row)) for row in return_obj["data"]))
+            return stream((dict(zip(cols, row)) for row in return_obj["data"]), session=session)
 
     @api_exception
     @require_write_permission
@@ -949,13 +964,15 @@ class FetchView(APIView):
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
             "user": request.user,
         }
-        return StreamingHttpResponse(
+        session = sessions.load_session_from_context(context)
+        return OEPStream(
             (
                 part
                 for row in fetch(context)
                 for part in (self.transform_row(row), "\n")
             ),
             content_type="application/json",
+            session=session,
         )
 
     def transform_row(self, row):
@@ -965,10 +982,10 @@ class FetchView(APIView):
         )
 
 
-def stream(data, allow_cors=False, status_code=status.HTTP_200_OK):
+def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
     encoder = GeneratorJSONEncoder()
-    response = StreamingHttpResponse(
-        encoder.iterencode(data), content_type="application/json", status=status_code
+    response = OEPStream(
+        encoder.iterencode(data), content_type="application/json", status=status_code, session=session,
     )
     if allow_cors:
         response["Access-Control-Allow-Origin"] = "*"
