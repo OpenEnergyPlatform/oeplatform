@@ -605,7 +605,7 @@ class Rows(APIView):
         }
 
         return_obj = self.__get_rows(request, data)
-        session = sessions.load_session_from_context(return_obj["context"]) if "context" in return_obj else None
+        session = sessions.load_session_from_context(return_obj.pop("context")) if "context" in return_obj else None
         # Extract column names from description
         if "description" in return_obj:
             cols = [col[0] for col in return_obj["description"]]
@@ -903,7 +903,8 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
         @api_exception
         def post(self, request):
             result = self.execute(request)
-            return stream(result, allow_cors=allow_cors and request.user.is_anonymous)
+            session = sessions.load_session_from_context(result.pop("context")) if "context" in result else None
+            return stream(result, allow_cors=allow_cors and request.user.is_anonymous, session=session)
 
         def execute(self, request):
             if requires_cursor:
