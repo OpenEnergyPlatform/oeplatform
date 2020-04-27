@@ -965,7 +965,6 @@ class FetchView(APIView):
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
             "user": request.user,
         }
-        session = sessions.load_session_from_context(context)
         return OEPStream(
             (
                 part
@@ -973,7 +972,6 @@ class FetchView(APIView):
                 for part in (self.transform_row(row), "\n")
             ),
             content_type="application/json",
-            session=session,
         )
 
     def transform_row(self, row):
