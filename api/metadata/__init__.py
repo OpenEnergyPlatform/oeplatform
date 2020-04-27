@@ -1,4 +1,5 @@
-from api import actions
+from api.connection import _get_engine
+from api.actions import read_pgid
 from api.metadata import v1_4 as __LATEST
 from api.metadata.v1_3 import TEMPLATE_v1_3
 from api.metadata.v1_4 import TEMPLATE_V1_4
@@ -22,6 +23,27 @@ METADATA_HIDDEN_FIELDS = [
     'metadata_version'  # v1.3
 ]
 
+def get_comment_table(schema, table):
+    engine = _get_engine()
+    schema = read_pgid(schema)
+    table = read_pgid(table)
+    # https://www.postgresql.org/docs/9.5/functions-info.html
+    sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
+        schema=schema, table=table
+    )
+    res = engine.execute(sql_string)
+    if res:
+        jsn = res.first().obj_description
+        if jsn:
+            jsn = jsn.replace("\n", "")
+        else:
+            return {}
+        try:
+            return json.loads(jsn)
+        except ValueError:
+            return {"error": "No json format", "description": jsn}
+    else:
+        return {}
 
 def format_content_key(parent, k):
     if parent != '':
@@ -122,7 +144,7 @@ def load_metadata_from_db(schema, table):
     :param table: name of the OEP table in the OEP schema
     :return:
     """
-    metadata = actions.get_comment_table(schema, table)
+    metadata = get_comment_table(schema, table)
     if "error" in metadata:
         return metadata
     if not metadata:
@@ -181,11 +203,10 @@ def save_metadata_as_table_comment(schema, table, metadata, user):
     old_badge = old_review.get("badge") if isinstance(old_review, dict) else None
     review = metadata.get("review")
     badge = review.get("badge") if isinstance(review, dict) else None
-    if badge != old_badge and not user.is_reviewer():
+    if badge != old_badge and not user.is_reviewer:
         raise PermissionDenied("Only registered reviewers can change the badge field")
-    save_metadata_as_table_comment(schema, table, metadata=metadata)
 
-    engine = actions._get_engine()
+    engine = _get_engine()
     conn = engine.connect()
     trans = conn.begin()
     try:

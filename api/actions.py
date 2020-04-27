@@ -31,7 +31,6 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
-from api.metadata import load_metadata_from_db
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -1360,29 +1359,6 @@ def create_meta(schema, table):
     get_edit_table_name(schema, table)
     # Table for inserts
     get_insert_table_name(schema, table)
-
-
-def get_comment_table(schema, table):
-    engine = _get_engine()
-
-    # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
-        schema=schema, table=table
-    )
-    res = engine.execute(sql_string)
-    if res:
-        jsn = res.first().obj_description
-        if jsn:
-            jsn = jsn.replace("\n", "")
-        else:
-            return {}
-        try:
-            return json.loads(jsn)
-        except ValueError:
-            return {"error": "No json format", "description": jsn}
-    else:
-        return {}
-
 
 def data_info(request, context=None):
     return request
