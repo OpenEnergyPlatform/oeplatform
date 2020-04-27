@@ -12,10 +12,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
+
 from omi.dialects.oep.compiler import JSONCompiler
-from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
+
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -26,7 +25,6 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
-from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 
