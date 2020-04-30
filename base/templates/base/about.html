@@ -13,13 +13,13 @@
 <h3 id="general-introduction">General Introduction</h3>
 <p>The Open Energy Family aims to ensure quality, transparency and reproducibility in energy
     system research. It is a collection of various tools and information and that help working
-    with energy related data.</p>
+    with energy related data. It is a collaborative community effort, everything is
+    openly developed and therefore constantly evolving.</p>
 
 <p>The main module is the Open Energy Platform (OEP),
     a web interface to access most of the modules, especially the community database.
     It provides a way to publish data with proper documentation (metadata), and link it to source
-    code and underlying assumptions. The OEP is a community effort, it is
-    developed openly and therefore is constantly evolving.</p>
+    code and underlying assumptions.</p>
 
 <h3 id="what-energy-system-modelling">What? Energy System Modelling</h3>
 
@@ -34,9 +34,9 @@
     application, scope, level of detail, sophistication, and shortcomings.</p>
 <p>The OEP considers the entire modelling process from the preprocessing of the
     raw data, the simulations, the postprocessing of the result data. The heart
-    of the OEP is the underlying <a
-            href="https://openenergy-platform.org/dataedit/schemas">open energy database</a>, which can be used by
-    everyone and is maintained by a team of developers from different
+    of the OEP is the underlying
+    <a href="https://openenergy-platform.org/dataedit/schemas/">open energy database</a>,
+    which can be used by everyone and is maintained by a team of developers from different
     institutes.</p>
 
 <h3 id="how-open-science">How? Open Science</h3>
@@ -44,53 +44,91 @@
     <a href="{% static 'img/flow.png' %}">
         <img style="width:50%" class="mx-auto d-block" src="{% static 'img/flow.png' %}" alt="OEP circle simple"/>
     </a>
-<p>The OEP follows the principles of Open Science and offers an open
-    infrastructure for energy system research. The focus is on Open Data and the
-    provision of modelling results under open licenses. The OEP uses an <a
-            href="https://github.com/OpenEnergyPlatform/metadata">extensive
-        metadata set</a> based on the <a
-            href="https://frictionlessdata.io/specs/tabular-data-package/">tabular
-        data package</a> specifications and the <a
-            href="https://www.go-fair.org/fair-principles/">FAIR principles</a>
+<p>We follow and promote the principles of
+    <a href="https://en.wikipedia.org/wiki/Open_science/">Open Science</a>
+    and offer an open infrastructure for energy system research.
+    The focus is on Open Data and the provision of modelling results under open licenses.
+    The OEP uses an
+    <a href="https://github.com/OpenEnergyPlatform/metadata/">extensive metadata set</a>
+    based on the
+    <a href="https://frictionlessdata.io/specs/tabular-data-package/">tabular data package</a>
+    specifications and the
+    <a href="https://www.go-fair.org/fair-principles/">FAIR principles</a>
     to improve the findability, accessibility, interoperability, and reuse of
     digital assets.</p>
 
 <h3 id="who-oep-community">Who? OEP-Community</h3>
-<p>The OEP is a cross-research project that is continuously being developed by
-    various universities and institutes. The entire source code of the OEP is
-    open source and is located on GitHub. Get involved and contribute!</p>
+<p>The OEP is a cross-project research project that is continuously being developed by
+    various universities and institutes. The entire source code of the OEP and
+    all other members of the Open Energy Family is
+    open source and accessible on <a href="https://github.com/OpenEnergyPlatform/">GitHub</a>.
+    Get involved and contribute!</p>
 
+<h4 id="who-projects">Research Projects</h4>
 <div class="d-flex justify-content-between flex-md-wrap">
+        <a class="logo" href="https://github.com/openego" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/open_eGo_Header.png' %}"
+                 alt="open_eGo" width="275" height="85"
+                 border="0"/>
+        </a>
+        <a class="logo" href="https://github.com/open-fred" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/open_eGo_Header.png' %}"
+                 alt="open_FRED" width="275" height="85"
+                 border="0"/>
+        </a>
+        <a class="logo" href="https://reiner-lemoine-institut.de/en/szenariendb/" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/open_eGo_Header.png' %}"
+                 alt="SzenarienDB" width="275" height="85"
+                 border="0"/>
+        </a>
+</div>
+
+<h4 id="who-partners">Partners</h4>
+<div class="d-flex justify-content-between flex-md-wrap">
+        <a class="logo" href="http://iks.cs.ovgu.de/IKS.html" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/OvGU.png' %}"
+                 alt="Otto von Guericke Universität Magdeburg - IKS" width="245" height="85"
+                 border="0"/>
+        </a>
         <a class="logo" href="http://reiner-lemoine-institut.de/en/" target="_blank">
             <img class="flex-item"
                  src="{% static 'logos/RLI.png' %}"
-                 alt="RLI" width="140" height="102" border="0"/>
-        </a>
-        <a class="logo" href="http://www.ovgu.de/en/University.html" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/OvGU.png' %}"
-                 alt="Uni Magdeburg" width="245" height="85"
-                 border="0"/>
-        </a>
-        <a class="logo" href="https://www.next-energy.de/en/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/NE.png' %}"
-                 alt="NEXT Energy" width="268" height="109" border="0"/>
+                 alt="Reiner Lemoine Institut" width="140" height="102" border="0"/>
         </a>
         <a class="logo" href="https://www.uni-flensburg.de/en/" target="_blank">
             <img class="flex-item"
                  src="{% static 'logos/EUF.png' %}"
-                 width="250px"/>
+                 alt="Europa-Universität Flensburg" width="250px"/>
         </a>
-        <a class="logo" href="https://www.oeko.de/en/" target="_blank">
+        <a class="logo" href="http://www.znes-flensburg.de/" target="_blank">
             <img class="flex-item"
-                 src="{% static 'logos/OEI.png' %}"
-                 width="250px"/>
+                 src="{% static 'logos/ZNES.png' %}"
+                 alt="Zentrum für nachhaltige Energiesysteme" width="250px"/>
+        </a>
+        <a class="logo" href="https://www.dlr.de/ve/" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/DLR-VE.png' %}"
+                 alt="DLR-VE (NEXT Energy)" width="268" height="109" border="0"/>
+        </a>
+        <a class="logo" href="https://www.hzg.de/" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/HZG.png' %}"
+                 alt="Helmholtz-Zentrum Geesthacht" width="268" height="109" border="0"/>
         </a>
         <a class="logo" href="https://www.iee.fraunhofer.de/en.html" target="_blank">
             <img class="flex-item"
                  src="{% static 'logos/IEE.png' %}"
-                 width="250px"/>
+                 alt="Fraunhofer IEE" width="250px"/>
         </a>
+        <a class="logo" href="https://www.oeko.de/en/" target="_blank">
+            <img class="flex-item"
+                 src="{% static 'logos/OEI.png' %}"
+                 alt="Öko Institut" width="250px"/>
+        </a>
+
 </div>
 {% endblock %}
