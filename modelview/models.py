@@ -808,7 +808,7 @@ class Energyframework(BasicFactsheet):
     odf_GAMS = BooleanField(verbose_name="GAMS data exchange format (gdx)", default=False)
     odf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    auto_model_generator = BooleanField(verbose_name="Auto model generator", help_text="Is an auto-model generator available that transfers an input file into a model?", default=False)
+    auto_model_generator = BooleanField(verbose_name="Auto model generator", help_text="Is an auto-Model generator available that transfers an input file into a Model?", default=False)
     data_preprocessing = BooleanField(verbose_name="data preprocessing", help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available", default=False)
     data_postprocessing = BooleanField(verbose_name="data postprocessing",
                                        help_text="Which output format(s) can the framework apply? Please list!",
@@ -922,9 +922,13 @@ class Energyframework(BasicFactsheet):
 
     fixed_units = BooleanField(verbose_name="Fixed units", help_text="Is the framework build on fixed base units?", default=False)
     agricultural_demand = BooleanField(verbose_name="Agricultural demand", help_text="Which agricultural demands are already modelled with the framework?",default=False)
-    new_components = BooleanField(verbose_name="New components", help_text="Is the framework build to allow for the implementation of new components?",default=False)
-    variable_time_step = BooleanField(verbose_name="Variable time step", help_text="Is it possible to model variable time steps with the framework?",default=False)
-    variable_rolling_horizon = BooleanField(verbose_name="Variable rolling", help_text="Is it possible to model a variable Rolling Horizon with the framework?", default=False)
+    new_components = BooleanField(verbose_name="New components",
+                                  help_text="Is the framework build to allow for the implementation of new components?",
+                                  default=False)
+    variable_time_step = BooleanField(verbose_name="Variable time step", help_text="Is it possible to Model variable time steps with the framework?",default=False)
+    variable_rolling_horizon = BooleanField(verbose_name="Variable rolling",
+                                            help_text="Is it possible to Model a variable Rolling Horizon with the framework?",
+                                            default=False)
 
     how_to_cite = CharField(
         verbose_name="Citation",
