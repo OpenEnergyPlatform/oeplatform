@@ -1740,9 +1740,9 @@ def close_all_connections(request, context):
     return __response_success()
 
 
-def open_cursor(request, context):
+def open_cursor(request, context, named=False):
     session_context = load_session_from_context(context)
-    cursor_id = session_context.open_cursor()
+    cursor_id = session_context.open_cursor(named=named)
     return {"cursor_id": cursor_id}
 
 
