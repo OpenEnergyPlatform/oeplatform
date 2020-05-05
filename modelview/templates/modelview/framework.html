@@ -61,7 +61,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "gs_global,gs_regional,gs_national,gs_local,gs_single_project,gs_other" %}
+                  {% checklist model "gs_global,gs_regional,gs_national,gs_local,gs_single_project,gs_other=gs_other" %}
 
                 </table>
               </td>
@@ -72,7 +72,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ss_electricity,ss_heat,ss_transport,ss_other,ss_overall" %}
+                  {% checklist model "ss_electricity,ss_heat,ss_transport,ss_other,ss_overall,ss_other_text=ss_other_text" %}
                 </table>
               </td>
             </tr>
@@ -82,7 +82,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "gps_forecast,gps_explore,gps_backcast" %}
+                  {% checklist model "gps_forecast,gps_explore,gps_backcast,gps_other=gps_other" %}
                 </table>
               </td>
             </tr>
@@ -92,7 +92,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "sps_energydemand,sps_energysupply,sps_impacts,sps_environmental,sps_appraisal,sps_integrated_approach,sps_modular_buildup,sps_energy_dispatch,sps_capacity_expansion,sps_unit_commitment,sps_rule_based,sps_sector_coupling" %}
+                  {% checklist model "sps_energydemand,sps_energysupply,sps_impacts,sps_environmental,sps_appraisal,sps_integrated_approach,sps_modular_buildup,sps_energy_dispatch,sps_capacity_expansion,sps_unit_commitment,sps_rule_based,sps_sector_coupling,sps_other=sps_other" %}
                 </table>
               </td>
             </tr>
@@ -123,7 +123,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "pf_Python,pf_C,pf_PHP,pf_GNU,pf_R,pf_VBA,pf_Java,pf_Fortran,pf_Modelica,pf_Matlab,pf_Ruby,pf_GAMS" %}
+                  {% checklist model "pf_Python,pf_C,pf_PHP,pf_GNU,pf_R,pf_VBA,pf_Java,pf_Fortran,pf_Modelica,pf_Matlab,pf_Ruby,pf_GAMS,pf_other=pf_other" %}
                 </table>
               </td>
             </tr>
@@ -133,7 +133,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "es_CPLEX,es_Gurobi,es_Coin,es_GLPK,es_MOSEK,es_other" %}
+                  {% checklist model "es_CPLEX,es_Gurobi,es_Coin,es_GLPK,es_MOSEK,es_other=es_other" %}
                 </table>
               </td>
             </tr>
@@ -143,7 +143,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "idf_Python_dicts,idf_XLSX,idf_Plots,idf_CSV,idf_XML,idf_txt,idf_db,idf_GAMS" %}
+                  {% checklist model "idf_Python_dicts,idf_XLSX,idf_Plots,idf_CSV,idf_XML,idf_txt,idf_db,idf_GAMS,idf_other=idf_other" %}
                 </table>
               </td>
             </tr>
@@ -155,11 +155,11 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "odf_Python_dicts,odf_XLSX,odf_Plots,odf_CSV,odf_XML,odf_txt,odf_db,odf_GAMS" %}
+                  {% checklist model "odf_Python_dicts,odf_XLSX,odf_Plots,odf_CSV,odf_XML,odf_txt,odf_db,odf_GAMS,odf_other=odf_other" %}
                 </table>
               </td>
             </tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_postprocessing' %}</tr>
+            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_postprocessing' add=model.data_postprocessing_other %}</tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='plotting_functionalities' %}</tr>
             <tr>
               <td class="sheetlabel">
@@ -179,7 +179,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ma_mip,ma_dp,ma_fl,ma_abp,ma_lp" %}
+                  {% checklist model "ma_mip,ma_dp,ma_fl,ma_abp,ma_lp,ma_other=ma_other" %}
                 </table>
               </td>
             </tr>
@@ -189,7 +189,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "um_econometric,um_me,um_ee,um_optimization,um_simulation,um_stochastic,um_gis,um_st,um_bc,um_mc,um_Accounting" %}
+                  {% checklist model "um_econometric,um_me,um_ee,um_optimization,um_simulation,um_stochastic,um_gis,um_st,um_bc,um_mc,um_Accounting,um_other=um_other" %}
                 </table>
               </td>
             </tr>
@@ -198,6 +198,9 @@
                 Objective function type
               </td>
               <td>
+               <table>
+                 {% checklist model "oft_mtsc,oft_mce,oft_mlce,oft_msw,oft_other=oft_other" %}
+               </table>
               </td>
             </tr>
           </table>
@@ -229,7 +232,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "support_forum,support_community,support_workshop,support_mail,support_modelExamples" %}
+                  {% checklist model "support_forum,support_community,support_workshop,support_mail,support_modelExamples,support_other_text=support_other_text" %}
                 </table>
               </td>
             </tr>
@@ -334,7 +337,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ts_Minutely,ts_Hourly,ts_Monthly,ts_Yearly,ts_FiveYearly" %}
+                  {% checklist model "ts_Minutely,ts_Hourly,ts_Monthly,ts_Yearly,ts_FiveYearly,ts_other=ts_other" %}
                 </table>
               </td>
             </tr>
@@ -344,7 +347,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "th_st,th_mt,th_lt" %}
+                  {% checklist model "th_st,th_mt,th_lt,th_other=th_other" %}
                 </table>
               </td>
             </tr>
