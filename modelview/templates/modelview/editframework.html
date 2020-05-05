@@ -279,7 +279,7 @@ confirmOnLeave();
                      </td>
         </table>
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.data_postprocessing %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.data_postprocessing add=form.data_postprocessing_other  %}
         {% include 'modelview/editmodel_snippet.html' with field=form.plotting_functionalities %}
         </table>
         <table class="formtable">
