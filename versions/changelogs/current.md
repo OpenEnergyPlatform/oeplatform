@@ -1,13 +1,3 @@
 ### Features
 
-* Consistent naming (#594)
-* Subpage for OEO Steering committee 
-* Add missing partners to about page
-
 ### Bugs
-
-* Use server-side cursors in search API
-* Use correct function in `like` queries
-* Fix bug when filtering several tags (#590)
-* Factsheets: Implementing general user-feedback on (#419) in (#599)
-
