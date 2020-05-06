@@ -290,7 +290,7 @@ class ActivationNoteView(FormView):
 
     def form_valid(self, form):
         if self.request.user.is_anonymous or self.request.user.is_mail_verified:
-            raise PermissionError
+            raise PermissionDenied
         form.save(self.request.user)
         return super(ActivationNoteView, self).form_valid(form)
 
