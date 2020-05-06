@@ -103,6 +103,8 @@ confirmOnLeave();
                             {% include 'modelview/editmodel_snippet.html' with field=form.gs_national %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.gs_local%}
                             {% include 'modelview/editmodel_snippet.html' with field=form.gs_single_project %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.gs_single_project %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.gs_other %}
                         </table>
                      </td>
         </table>
@@ -119,6 +121,7 @@ confirmOnLeave();
                             {% include 'modelview/editmodel_snippet.html' with field=form.ss_transport %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.ss_other %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.ss_overall %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ss_other_text %}
                         </table>
                      </td>
         </table>
@@ -133,6 +136,7 @@ confirmOnLeave();
                             {% include 'modelview/editmodel_snippet.html' with field=form.gps_forecast %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.gps_explore %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.gps_backcast %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.gps_other %}
                         </table>
                      </td>
         </table>
@@ -156,6 +160,7 @@ confirmOnLeave();
                             {% include 'modelview/editmodel_snippet.html' with field=form.sps_unit_commitment %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.sps_rule_based %}
                             {% include 'modelview/editmodel_snippet.html' with field=form.sps_sector_coupling %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.sps_other %}
                         </table>
                      </td>
         </table>
@@ -192,57 +197,60 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.gui %}
         <table class="formtable">
                     <th> Programming Framework 
-                        <i data-toggle="tooltip"   title="WWhich programming framework/language is used to develop the framework?">
+                        <i data-toggle="tooltip"   title="Which programming framework/language is used to develop the framework?">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_GAMS %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Python %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_C %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_PHP %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_GNU %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_R %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_VBA %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Java %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Fortran %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Modelica %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Matlab %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.pf_Ruby %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_GAMS %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Python %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_C %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_PHP %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_GNU %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_R %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_VBA %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Java %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Fortran %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Modelica %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Matlab %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_Ruby %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.pf_other %}
                         </table>
                      </td>
         </table>
         <table class="formtable">
                     <th> External Solver                         
-                        <i data-toggle="tooltip"   title="WWhich external optimizer(s) can the framework apply? Please list them.">
+                        <i data-toggle="tooltip"   title="Which external solver(s) can the framework apply? Please list!">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.es_CPLEX %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.es_Gurobi %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.es_Coin %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.es_GLPK %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.es_MOSEK %}    
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_CPLEX %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_Gurobi %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_Coin %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_GLPK %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_MOSEK %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.es_other %}
                         </table>
                      </td>
         </table>
         <table class="formtable">
                     <th> Input Data Format 
-                        <i data-toggle="tooltip"   title="WWhich input format(s) can the framework apply? Please list">
+                        <i data-toggle="tooltip"   title="Which input format(s) can the framework apply? Please list!">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_Pandas %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_Python_dicts %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_XLSX %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_Plots %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_CSV %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_XML %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_txt %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_db %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.idf_GAMS %}    
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_Pandas %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_Python_dicts %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_XLSX %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_Plots %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_CSV %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_XML %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_txt %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_db %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_GAMS %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.idf_other %}
                         </table>
                      </td>
         </table>
@@ -252,30 +260,31 @@ confirmOnLeave();
         </table>
         <table class="formtable">
                     <th> Output Data Format
-                        <i data-toggle="tooltip"   title="Which output format(s) can the framework apply? Please list">
+                        <i data-toggle="tooltip"   title="Which output format(s) can the framework apply? Please list!">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_Pandas %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_Python_dicts %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_XLSX %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_Plots %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_CSV %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_XML %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_txt %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_db %}    
-        {% include 'modelview/editmodel_snippet.html' with field=form.odf_GAMS %} 
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_Pandas %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_Python_dicts %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_XLSX %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_Plots %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_CSV %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_XML %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_txt %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_db %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_GAMS %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.odf_other %}
                         </table>
                      </td>
         </table>
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.data_postprocessing %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.data_postprocessing add=form.data_postprocessing_other  %}
         {% include 'modelview/editmodel_snippet.html' with field=form.plotting_functionalities %}
         </table>
         <table class="formtable">
                     <th> The analytical approach 
-                        <i data-toggle="tooltip"   title="What is the analytical approach that your framework applies?">
+                        <i data-toggle="tooltip"   title="What is the analytical approach that the framework applies?">
                             <span class='fas fa-question '></span>
                         </a></th>
                     <td>
@@ -292,49 +301,52 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.interfaces %}
             <table class="formtable">
                     <th>The mathematical approach
-                        <i data-toggle="tooltip"   title="What is the mathematical approach that your framework applies?">
+                        <i data-toggle="tooltip"   title="What is the mathematical approach that the framework applies?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.ma_lp %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.ma_mip %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.ma_dp %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.ma_fl %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.ma_abp %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_lp %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_mip %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_dp %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_fl %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_abp %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.ma_other %}
                         </table>
                      </td>
         </table>
      
         <table class="formtable">
                     <th>The underlying methodology
-                        <i data-toggle="tooltip"   title="What underlying methodology(-y/-ies) is the FW based on?">
+                        <i data-toggle="tooltip"   title="What underlying methodology(-y/-ies) is the framework based on?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_econometric %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_me %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_ee %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_optimization %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_simulation %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_stochastic %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_gis %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_st %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_bc %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_mc %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.um_Accounting %}        
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_econometric %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_me %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_ee %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_optimization %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_simulation %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_stochastic %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_gis %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_st %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_bc %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_mc %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_Accounting %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.um_other %}
                         </table>
                      </td>
         </table>
         <table class="formtable">
                     <th>Objective function type
-                        <i data-toggle="tooltip"   title="If the FW is applying optimization, what objectives are commonly formulated?">
+                        <i data-toggle="tooltip"   title="If the framework is applying optimization, what objectives are commonly formulated?">
                             <span class='fas fa-question '></span>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.oft_mtsc %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.oft_mce %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.oft_mlce %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.oft_msw %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.oft_mtsc %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.oft_mce %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.oft_mlce %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.oft_msw %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.oft_other %}
                         </table>
                      </td>
         </table>
@@ -369,11 +381,12 @@ confirmOnLeave();
                     </a>
                     <td>
                         <table class="checktable" align="center"> 
-        {% include 'modelview/editmodel_snippet.html' with field=form.support_forum %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.support_community %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.support_workshop %}        
-        {% include 'modelview/editmodel_snippet.html' with field=form.support_mail %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.support_modelExamples %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_forum %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_community %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_workshop %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_mail %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_modelExamples %}
+                            {% include 'modelview/editmodel_snippet.html' with field=form.support_other_text %}
                         </table>
                      </td>
         </table>
@@ -401,7 +414,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th> Renewable Technology Inclusion                        
-            <i data-toggle="tooltip"   title="Which renewable energy technologies were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which renewable energy technologies are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a>
         </th>
@@ -419,7 +432,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Storage Technology Inclusion
-            <i data-toggle="tooltip"   title="Which storage technologies were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which storage technologies are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -449,7 +462,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Residential Demand
-            <i data-toggle="tooltip"   title="Which residential demands were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which residential demands are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -464,7 +477,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Commercial Demand
-            <i data-toggle="tooltip"   title="Which commercial demands were already modelled with the framework?">
+            <i data-toggle="tooltip"   title="Which commercial demands are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -478,7 +491,9 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.agricultural_demand %}
         </table>
         <table class="formtable">
-        <th>Grid model</th>
+        <th>Grid model<i data-toggle="tooltip"   title="How is the (power) grid modelled?">
+                <span class='fas fa-question '></span>
+            </a></th>
             <td>
                 <table class="checktable" align="center"> 
                     {% include 'modelview/editmodel_snippet.html' with field=form.gm_singleNode %}
@@ -489,7 +504,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Cost Inclusion
-         <i data-toggle="tooltip"   title="Which cost types were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="Which cost types are already modelled are the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -510,7 +525,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         <th>Commonly used time step
-         <i data-toggle="tooltip"   title="What is/are commonly used time steps that were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="What is/are commonly used time step(s) that are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -520,12 +535,13 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.ts_Monthly %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.ts_Yearly %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.ts_FiveYearly %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.ts_other %}
                 </table>
             </td>
         </table>
         <table class="formtable">
         <th>Commonly modelled time horizon
-         <i data-toggle="tooltip"   title="What is/are commonly used time horizon that were already modelled with the framework?">
+         <i data-toggle="tooltip"   title="What is/are commonly used time horizon(S) that are already modelled with the framework?">
                 <span class='fas fa-question '></span>
             </a></th>
             <td>
@@ -533,6 +549,7 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.th_st %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.th_mt %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.th_lt %}
+                    {% include 'modelview/editmodel_snippet.html' with field=form.th_other %}
                 </table>
             </td>
         </table>
