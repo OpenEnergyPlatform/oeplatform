@@ -21,6 +21,7 @@ from sqlalchemy import (
     util,
     cast,
     null,
+    literal
 )
 import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
@@ -121,6 +122,11 @@ def parse_insert(d, context, message=None, mapper=None):
 
     query = table.insert()
 
+    if context["user"].is_anonymous:
+        raise APIError("Please login to upload data")
+    else:
+        username = context["user"].name
+
     if not "method" in d:
         d["method"] = "values"
     if d["method"] == "values":
@@ -141,10 +147,6 @@ def parse_insert(d, context, message=None, mapper=None):
         def clear_meta(vals):
             val_dict = dict(vals)
             # make sure meta fields are not compromised
-            if context["user"].is_anonymous:
-                username = "Anonymous"
-            else:
-                username = context["user"].name
             val_dict.update(set_meta_info("insert", username, message))
             return val_dict
 
@@ -152,8 +154,15 @@ def parse_insert(d, context, message=None, mapper=None):
 
         query = query.values(values)
     elif d["method"] == "select":
+        def inject_field(name,value):
+            return {"type": "value", "value": value, "as": name}
+
+        d["values"]["fields"].append(inject_field("_user", username))
+        d["values"]["fields"].append(inject_field("_type", "insert"))
+        d["values"]["fields"].append(inject_field("_message", message))
+
         values = parse_select(d["values"])
-        query = query.from_select(field_strings, values)
+        query = query.from_select(field_strings+["_user", "_type", "_message"], values)
     else:
         raise APIError("Unknown insert method: " + str(d["method"]))
 
@@ -211,6 +220,8 @@ def parse_select(d):
                     )
                 col = parse_expression(field)
                 if "as" in field:
+                    if isinstance(col, str) and field["type"] == "value":
+                        col = literal(col)
                     col.label(read_pgid(field["as"]))
                 L.append(col)
         if "from" in d:
