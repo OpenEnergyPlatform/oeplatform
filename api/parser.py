@@ -768,7 +768,7 @@ def parse_sqla_operator(raw_key, *operands):
         if key in ["is not"]:
             return x.isnot(y)
         if key in ["like"]:
-            return x.match(y)
+            return x.like(y)
         if key in ["<->"]:
             return x.distance_centroid(y)
         if key in ["getitem"]:

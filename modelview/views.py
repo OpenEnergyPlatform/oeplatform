@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from scipy import stats
@@ -85,9 +85,8 @@ def listsheets(request, sheettype):
     if sheettype == "scenario":
         models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
     elif sheettype == "studie":
-        models = [(m.pk, m.name_of_the_study) for m in c.objects.all()]
+        raise Http404
     else:
-
         fields = FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
         defaults = (
             FRAMEWORK_DEFAULT_COLUMNS

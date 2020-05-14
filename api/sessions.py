@@ -70,9 +70,13 @@ class SessionContext:
         except KeyError:
             raise APIError("Cursor not found %s" % cursor_id)
 
-    def open_cursor(self):
-        cursor = self.connection.cursor()
-        cursor_id = _add_entry(cursor, self.cursors)
+    def open_cursor(self, named=False):
+        cursor_id = _get_new_key(self.cursors)
+        if named:
+            cursor = self.connection.cursor(name=str(cursor_id))
+        else:
+            cursor = self.connection.cursor()
+        self.cursors[cursor_id] = cursor
         return cursor_id
 
     def close_cursor(self, cursor_id):
@@ -125,9 +129,14 @@ def load_session_from_context(context):
         return SessionContext(connection_id=connection_id, owner=user)
 
 
-def _add_entry(value, dictionary):
+def _get_new_key(dictionary):
     key = randrange(0, sys.maxsize)
     while key in dictionary:
         key = randrange(0, sys.maxsize)
+    return key
+
+def _add_entry(value, dictionary, key=None):
+    if key is None:
+        key = _get_new_key(dictionary)
     dictionary[key] = value
     return key

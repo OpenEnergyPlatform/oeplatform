@@ -131,6 +131,8 @@ class MetaDataWidget:
             html += format_html('<a href="{}">{}</a>', data, data)
         elif isinstance(data, str):
             html += conditional_escape(data)
+        elif data is None:
+            html += mark_safe("-")
         else:
             html += conditional_escape(str(type(data)))
 

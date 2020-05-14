@@ -1,6 +1,7 @@
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType
-
+import itertools as it
+    
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -90,7 +91,8 @@ def _make_iterencode(
             if markerid in markers:
                 raise ValueError("Circular reference detected")
             markers[markerid] = lst
-        buf = "["
+        yield "["
+        buf = ""
         if _indent is not None:
             _current_indent_level += 1
             newline_indent = "\n" + _indent * _current_indent_level
@@ -123,7 +125,7 @@ def _make_iterencode(
                 yield buf + _floatstr(value)
             else:
                 yield buf
-                if isinstance(value, (list, tuple, GeneratorType)):
+                if isinstance(value, (list, tuple, GeneratorType, map, it.chain)):
                     chunks = _iterencode_list(value, _current_indent_level)
                 elif isinstance(value, dict):
                     chunks = _iterencode_dict(value, _current_indent_level)
@@ -202,7 +204,7 @@ def _make_iterencode(
                 # see comment for int/float in _make_iterencode
                 yield _floatstr(value)
             else:
-                if isinstance(value, (list, tuple, GeneratorType)):
+                if isinstance(value, (list, tuple, GeneratorType, map)):
                     chunks = _iterencode_list(value, _current_indent_level)
                 elif isinstance(value, dict):
                     chunks = _iterencode_dict(value, _current_indent_level)
