@@ -12,10 +12,10 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse
 from omi.dialects.oep.parser import JSONParser_1_4, ParserException
 from shapely import wkb, wkt
-from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
+from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql, cast
 from sqlalchemy import types as sqltypes
 from sqlalchemy import util
-from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.dialects.postgresql import TSVECTOR, array, ARRAY
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
@@ -1740,9 +1740,9 @@ def close_all_connections(request, context):
     return __response_success()
 
 
-def open_cursor(request, context):
+def open_cursor(request, context, named=False):
     session_context = load_session_from_context(context)
-    cursor_id = session_context.open_cursor()
+    cursor_id = session_context.open_cursor(named=named)
     return {"cursor_id": cursor_id}
 
 
@@ -1968,15 +1968,18 @@ def apply_changes(schema, table, cursor=None):
         table_obj = Table(table, MetaData(bind=engine), autoload=True, schema=schema)
 
         # ToDo: This may require some kind of dependency tree resolution
+        prev_type = None
+        change_batch = []
         for change in sorted(changes, key=lambda x: x["_submitted"]):
             distilled_change = {k: v for k, v in change.items() if k in columns}
-            if change["_type"] == "insert":
-                apply_insert(cursor, table_obj, distilled_change, change["_id"])
-            elif change["_type"] == "update":
-                apply_update(cursor, table_obj, distilled_change, change["_id"])
-            elif change["_type"] == "delete":
-                apply_deletion(cursor, table_obj, distilled_change, change["_id"])
-
+            if prev_type and change["_type"] != prev_type:
+                _apply_stack(cursor, table_obj, change_batch, prev_type)
+                change_batch = []
+            else:
+                change_batch.append((distilled_change, change["_id"]))
+            prev_type = change["_type"]
+        if prev_type:
+            _apply_stack(cursor, table_obj, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
     except:
@@ -1989,7 +1992,17 @@ def apply_changes(schema, table, cursor=None):
             connection.close()
 
 
-def set_applied(session, table, rid, mode):
+def _apply_stack(cursor, table_obj, changes, change_type):
+    distilled_change, rids = zip(*changes)
+    if change_type == "insert":
+        apply_insert(cursor, table_obj, distilled_change, rids)
+    elif change_type == "update":
+        apply_update(cursor, table_obj, distilled_change, rids)
+    elif change_type == "delete":
+        apply_deletion(cursor, table_obj, distilled_change, rids)
+
+
+def set_applied(session, table, rids, mode):
     if mode == __INSERT:
         name_map = get_insert_table_name
     elif mode == __DELETE:
@@ -2006,33 +2019,35 @@ def set_applied(session, table, rid, mode):
     )
     update_query = (
         meta_table.update()
-        .where(meta_table.c._id == rid)
+        .where(sql.or_(*(meta_table.c._id == i for i in rids)))
         .values(_applied=True)
         .compile()
     )
     session.execute(str(update_query), update_query.params)
 
 
-def apply_insert(session, table, row, rid):
-    logger.info("apply insert " + str(row))
-    query = table.insert().values(row)
+def apply_insert(session, table, rows, rids):
+    logger.info("apply inserts " + str(rids))
+    query = table.insert().values(rows)
     _execute_sqla(query, session)
-    set_applied(session, table, rid, __INSERT)
+    set_applied(session, table, rids, __INSERT)
 
 
-def apply_update(session, table, row, rid):
-    logger.info("apply update " + str(row))
-    pks = [c.name for c in table.columns if c.primary_key]
-    query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row)
-    _execute_sqla(query, session)
-    set_applied(session, table, rid, __UPDATE)
+def apply_update(session, table, rows, rids):
+    for row, rid in zip(rows,rids):
+        logger.info("apply update " + str(row))
+        pks = [c.name for c in table.columns if c.primary_key]
+        query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row)
+        _execute_sqla(query, session)
+        set_applied(session, table, [rid], __UPDATE)
 
 
-def apply_deletion(session, table, row, rid):
-    logger.info("apply deletion " + str(row))
-    query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
-    _execute_sqla(query, session)
-    set_applied(session, table, rid, __DELETE)
+def apply_deletion(session, table, rows, rids):
+    for row, rid in zip(rows, rids):
+        logger.info("apply deletion " + str(row))
+        query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
+        _execute_sqla(query, session)
+        set_applied(session, table, [rid], __DELETE)
 
 
 def update_meta_search(session, table, schema, insert_only=False):

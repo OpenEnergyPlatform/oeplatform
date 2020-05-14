@@ -5,13 +5,14 @@ from .error import MetadataException
 
 def from_v0(comment_on_table, schema, table):
     columns = actions.analyze_columns(schema, table)
+    refdate = comment_on_table["Reference date"]
     try:
         if "resources" not in comment_on_table:
             comment_on_table = {
                 "title": comment_on_table["Name"],
                 "description": "; ".join(comment_on_table["Description"]),
                 "language": [],
-                "reference_date": comment_on_table["Reference date"],
+                "reference_date": refdate[0] if isinstance(refdate, list) else refdate,
                 "spatial": [
                     {"extent": x, "resolution": ""}
                     for x in comment_on_table["Spatial resolution"]
@@ -60,7 +61,7 @@ def from_v0(comment_on_table, schema, table):
                                 "description": x["Description"],
                                 "unit": x["Unit"],
                             }
-                            for x in comment_on_table["Column"]
+                            for x in comment_on_table.get("Column", [])
                         ],
                     }
                 ],

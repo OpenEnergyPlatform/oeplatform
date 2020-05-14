@@ -7,4 +7,7 @@ from oeplatform import settings
 
 urlpatterns = [
     url(r"^$", TemplateView.as_view(template_name="ontology/about.html")),
+    url(r"^ontology/oeo-steering-committee$",
+        TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
+        name="oeo-s-c"),
 ]

@@ -19,7 +19,9 @@ django.setup()
 
 
 alembic_cfg = Config()
-alembic_cfg.set_main_option("url", get_connection_string())
+db_url = get_connection_string()
+db_url = db_url.replace('%', '%%')
+alembic_cfg.set_main_option("url", db_url)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
