@@ -47,7 +47,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Announce it on our mailing list: https://groups.io/g/pyam
    - again, copy the rendered HTML from the Github release directly in the email
 
-1. Deploy on webserver: https://docs.djangoproject.com/en/3.0/howto/deployment/
+1. As stated in the [django deployment documentation](https://docs.djangoproject.com/en/3.0/howto/deployment/), every django app has to be served by an external web server. Please make sure to follow the security advise given in the deployment documentation, if you want to host your own version of the Open Energy Platform.
    1. ???
 
 And that's it! Whew... 
