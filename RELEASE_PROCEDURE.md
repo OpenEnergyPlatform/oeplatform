@@ -30,7 +30,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 
 1. Make a release candidate branch (e.g., `release/vx.x.x`)
    and pull request it into `master` with the following updates:
-   1. Update the oeplatform/versions/changelogs/ `current.md` (see the examples of previous releases)
+   1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
 	  - Change filename to release version (x_x_x.md)
   1. Confirm that the PR passes all tests and checks
   1. Tag the release number
