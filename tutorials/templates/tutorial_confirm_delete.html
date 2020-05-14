@@ -1,12 +1,16 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
 
+{% block site-header %}
+  <h2 class="site-header"> Delete Tutorial: {{tutorial.title}}</h2>
+{% endblock site-header %}
+
 {% block main-content-body %}
 {% load static %}
-
-    <form method="post">{% csrf_token %}
-        <p>Möchten sie dieses Tutorial löschen: "{{ object.title }}"</p>
-        <input type="submit" value="Ok">
+    <form method="post">
+        {% csrf_token %}
+        <p>Do you really want to delete this tutorial?</p>
+        <input type="submit" class="btn btn-danger" value="Delete Tutorial">
     </form>
 
 {% endblock main-content-body %}

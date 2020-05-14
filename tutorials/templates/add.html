@@ -1,16 +1,24 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
 
+{% block site-header %}
+  <h2 class="site-header">
+    {% if tutorial.id %}
+      Tutorial: {{tutorial.title}}
+    {% else %}
+      New Tutorial
+    {% endif %}
+  </h2>
+{% endblock site-header %}
+
 {% block main-content-body %}
 {% load static %}
-
-<span>Neues Tutorial:</span>
 
     <form method="POST" action="">
         {% csrf_token %}
         {{ form.as_p }}
 
-        <button type="submit">Erstellen</button>
+        <button class="btn btn-success" type="submit">Create Tutorial</button>
     </form>
 
 {#Preview for markdown field in form#}

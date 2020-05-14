@@ -1,13 +1,22 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
 
+{% block site-header %}
+  <h2 class="site-header">Tutorials</h2>
+{% endblock site-header %}
+
+{% block main-right-sidebar-content  %}
+  {% if user.is_authenticated %}
+    <hr>
+    <h4>Actions</h4>
+    <a href="{% url 'add_tutorial'%}" type="button" class="btn btn-sm btn-success">Add Tutorial</a>
+  {% endif %}
+
+{% endblock main-right-sidebar-content  %}
+
 {% block main-content-body %}
 {% load static %}
 
-<span>Tutorials</span>
-    {% if user.is_authenticated %}
-        <a href="{% url 'add_tutorial'%}"> Neues Tutorial </a>
-    {% endif %}
 <table class="table">
     <thead>
       <tr>
