@@ -43,11 +43,15 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Make a new release on Github
    - make sure that you choose the tag name defined above
    - copy the release summary from changelog into the description box
-1. Add a new line "# Next Release" at the top of `RELEASE_NOTES.md` and commit to `master`
-1. Announce it on our mailing list: https://groups.io/g/pyam
+1. Add a new line "# Next Release" at the top of `RELEASE_PROCEDURE.md` and commit to `master`
+1. Announce it on our mailing list: insert@oep-mailinglist.org
    - again, copy the rendered HTML from the Github release directly in the email
 
-1. As stated in the [django deployment documentation](https://docs.djangoproject.com/en/3.0/howto/deployment/), every django app has to be served by an external web server. Please make sure to follow the security advise given in the deployment documentation, if you want to host your own version of the Open Energy Platform.
-   1. ???
+1. As stated in the [django deployment documentation](https://docs.djangoproject.com/en/3.0/howto/deployment/), 
+   every django app has to be served by an external web server. Please make sure to follow the security advise 
+   given in the deployment documentation, if you want to host your own version of the Open Energy Platform.
 
 And that's it! Whew... 
+
+Further Notes on how to deploy the OEP are documented [here](https://github.com/OpenEnergyPlatform/oeplatform-deploy) 
+we also try to make this procedure more userfriendly by introducing [docker](https://www.docker.com/). 
