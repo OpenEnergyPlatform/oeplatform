@@ -10,8 +10,10 @@ urlpatterns = [
   url(r"^ontology/oeo-steering-committee$",
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),
-] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red)) for path, red in
+] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red), name=path) for path, red in
    [
+       ("oeo/oeo.omn",
+        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/oeo.omn"),
        ("oeo/oeo-physical.omn",
         "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-physical.omn"),
        ("oeo/oeo-model.omn",
