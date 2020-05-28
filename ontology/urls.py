@@ -10,6 +10,9 @@ urlpatterns = [
   url(r"^ontology/oeo-steering-committee$",
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),
+  url(r"^ontology/oeo$",
+      TemplateView.as_view(template_name="ontology/oeo.html"),
+      name="oeo"),
 ] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red), name=path) for path, red in
    [
        ("oeo/oeo.omn",
