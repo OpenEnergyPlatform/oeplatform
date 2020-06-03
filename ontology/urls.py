@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
 
-from modelview import views
+from ontology import views
 from oeplatform import settings
 
 urlpatterns = [
@@ -11,7 +11,7 @@ urlpatterns = [
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),
   url(r"^oeo$",
-      TemplateView.as_view(template_name="ontology/oeo.html"),
+      views.OntologyOverview.as_view(),
       name="oeo"),
 ] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red), name=path) for path, red in
    [

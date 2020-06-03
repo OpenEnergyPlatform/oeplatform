@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
-
+{% load ontology.rdf %}
 {% block main-content-body %}
 {% load static %}
 
@@ -26,4 +26,73 @@
     </tr>
 </table>
 
-{% endblock main-content-body %}
+<div id="accordion">
+
+  <div class="card">
+    <div class="card-header">
+      <a class="card-link" data-toggle="collapse" href="#collapseOne">
+        Classes
+      </a>
+    </div>
+    <div id="collapseOne" class="collapse show" data-parent="#accordion">
+      <div class="card-body">
+        <table id="table_classes" class="display">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Definition</th>
+                </tr>
+            </thead>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <a class="card-link" data-toggle="collapse" href="#collapseTwo">
+        Object Properties
+      </a>
+    </div>
+    <div id="collapseTwo" class="collapse" data-parent="#accordion">
+      <div class="card-body">
+        <table id="table_op" class="display">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Definition</th>
+                </tr>
+            </thead>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block after-head %}
+
+  <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
+
+{% endblock after-head %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script>
+    let class_data = [
+        {% for row in classes %}
+            ['{{ row | render_individual}}', '{{ row.def.value | linebreaksbr }}'],
+        {% endfor %}
+    ]
+    $('#table_classes').DataTable( { data: class_data } );
+
+    let op_data = [
+        {% for row in object_properties %}
+            ['{{ row | render_individual}}', '{{ row.def.value | linebreaksbr }}'],
+        {% endfor %}
+    ]
+    $('#table_op').DataTable( { data: op_data } );
+
+</script>
+{% endblock after-body-bottom-js %}
