@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
-
+from os import walk
 from ontology import views
 from oeplatform import settings
 
@@ -13,20 +13,6 @@ urlpatterns = [
   url(r"^oeo$",
       views.OntologyOverview.as_view(),
       name="oeo"),
-] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red), name=path) for path, red in
-   [
-       ("oeo/oeo.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/oeo.omn"),
-       ("oeo/oeo-physical.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-physical.omn"),
-       ("oeo/oeo-model.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-model.omn"),
-       ("oeo/oeo-social.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-social.omn"),
-       ("oeo/imports/iao-annotation-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/iao-annotation-module.owl"),
-       ("oeo/imports/iao-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/iao-module.owl"),
-       ("imports/ro-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/ro-module.owl")
-   ]]
+  url(r"^releases\/(?P<ontology>[\w_-]+)(\/(?P<version>[\d\.]+))?\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
+      views.OntologyStatics.as_view()),
+]

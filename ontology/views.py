@@ -1,35 +1,71 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse, redirect
 from django.views import View
-from SPARQLWrapper import SPARQLWrapper, JSON
+from rdflib import Graph, RDFS
+from oeplatform.settings import ONTOLOGY_FOLDER
+from collections import OrderedDict
 
-# Create your views here.
+import os
+import re
 
-s = SPARQLWrapper("http://localhost:3030/oeo/sparql", "utf-8", "GET")
-s.setReturnFormat(JSON)
 
-def _query(q):
-    fullquery = """
-    PREFIX owl: <http://www.w3.org/2002/07/owl#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX obo: <http://purl.obolibrary.org/obo/>
-    
-    SELECT ?subject ?label ?def
-    WHERE {{ """ + q + """ 
-    } OPTIONAL { ?subject rdfs:label ?label } OPTIONAL { ?subject obo:IAO_0000115 ?def }
-    FILTER (strstarts(str(?subject),
-          "http://openenergy-platform.org/ontology/oeo")) }
-    """
-    print(fullquery)
-    s.setQuery(fullquery)
-    result = s.query().convert()
-    return result["results"]["bindings"]
-
+def collect_modules(path):
+    modules = dict()
+    for file in os.listdir(path):
+        if not os.path.isdir(os.path.join(path,file)):
+            match = re.match("^(?P<filename>.*)\.(?P<extension>\w+)$", file)
+            filename, extension = match.groups()
+            if filename not in modules:
+                modules[filename] = dict(extensions=[], comment="No description found")
+            if extension == "owl":
+                g = Graph()
+                g.parse(os.path.join(path, file))
+                root = dict(g.namespaces())['']
+                comment = next(g.objects(root, RDFS.comment))
+                modules[filename]["comment"] = comment
+            modules[filename]["extensions"].append(extension)
+    return modules
 
 class OntologyOverview(View):
-    def get(self, request):
-        classes = _query("?subject a owl:Class .")
-        object_properties = _query("?subject a owl:ObjectProperty .")
-        return render(request, "ontology/oeo.html", dict(
-            classes=classes,
-            object_properties=object_properties
-        ))
+    def get(self, request, version=None):
+        ontology = "oeo"
+        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        if not version:
+            version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
+        if request.headers.get("Accept") == "application/rdf+xml":
+            return redirect(f"/ontology/releases/oeo/{version}/oeo.owl")
+        else:
+
+            main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
+            main_module_name = list(main_module.keys())[0]
+            main_module = main_module[main_module_name]
+            main_module["name"] = main_module_name
+            submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
+            # Collect all file names
+
+
+            return render(request, "ontology/oeo.html", dict(
+                ontology=ontology,
+                version=version,
+                main_module=main_module,
+                submodules=submodules.items()
+            ))
+
+
+class OntologyStatics(View):
+    def get(self, request, ontology, file, version=None, extension=None):
+        """
+        Returns the requested file `{file}.{extension}` of version `version`
+        of ontology `ontology`
+
+        :param version: default: highest version in folder
+        :param extension: default: `.owl`
+        :return:
+        """
+
+        if not extension:
+            extension = "owl"
+        if not version:
+            version = max((d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")), key=lambda d:[int(x) for x in d.split(".")])
+        file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+        with open(file_path) as f:
+            return HttpResponse(f, content_type="application/rdf+xml")
