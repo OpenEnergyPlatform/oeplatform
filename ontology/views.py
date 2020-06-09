@@ -67,5 +67,14 @@ class OntologyStatics(View):
         if not version:
             version = max((d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")), key=lambda d:[int(x) for x in d.split(".")])
         file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
-        with open(file_path) as f:
-            return HttpResponse(f, content_type="application/rdf+xml")
+        if os.path.exists(file_path):
+            with open(file_path) as f:
+                response = HttpResponse(f, content_type="application/rdf+xml")
+                response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
+                return response
+        else:
+            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
+            with open(file_path) as f:
+                response = HttpResponse(f, content_type="application/rdf+xml")
+                response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
+                return response
