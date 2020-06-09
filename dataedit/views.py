@@ -354,8 +354,7 @@ def listtables(request, schema_name):
     """
 
     searchedQueryString = request.GET.get("query")
-    searchedTagIds = list(map(
-        lambda t: int(t),
+    searchedTagIds = list(map(int,
         request.GET.getlist("tags"),
     ))
 
@@ -377,19 +376,17 @@ def listtables(request, schema_name):
     tables = [
         (
             table.tablename,
-            labels[table.tablename] if table.tablename in labels else None,
+            labels.get(table.tablename),
             get_all_tags(schema_name, table.tablename)
         )
         for table in tables
         if not table.tablename.startswith("_")
-           and (not searchedQueryString or searchedQueryString in table.tablename)
+           and (searchedQueryString is None or searchedQueryString in table.tablename)
     ]
 
     # Apply tag filter later on, because I am not smart enough to do it inline.
-    tables = list(filter(
-        lambda tableEntry: not searchedTagIds or set(map(lambda tag: tag['id'], tableEntry[2])).issuperset(searchedTagIds),
-        tables
-    ))
+    tables = [tableEntry for tableEntry in tables
+              if {tag['id'] for tag in tableEntry[2]}.issuperset(searchedTagIds or set())]
 
     tables = sorted(tables, key=lambda x: x[0])
     return render(
