@@ -20,13 +20,16 @@ def collect_modules(path):
                 g = Graph()
                 g.parse(os.path.join(path, file))
                 root = dict(g.namespaces())['']
-                comment = next(g.objects(root, RDFS.comment))
-                modules[filename]["comment"] = comment
+                comments = g.objects(root, RDFS.comment)
+                try:
+                    modules[filename]["comment"] = next(comments)
+                except StopIteration:
+                    modules[filename]["comment"] = "No description found"
             modules[filename]["extensions"].append(extension)
     return modules
 
 class OntologyOverview(View):
-    def get(self, request, ontology, module_or_id=None, version=None, imports=True):
+    def get(self, request, ontology, module_or_id=None, version=None, imports=False):
         versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
@@ -40,6 +43,10 @@ class OntologyOverview(View):
                 # If module_or_id is the name of a valid submodule, use this module
                 if module_or_id in submodules:
                     module_name = module_or_id
+                if imports:
+                    return redirect(f"/ontology/{ontology}/releases/{version}/imports/{module_name}.owl")
+                else:
+                    return redirect(f"/ontology/{ontology}/releases/{version}/{module_name}.owl")
             # If no module was requested or the requested id was not a module, serve main ontology
             if module_name is None:
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
@@ -53,17 +60,19 @@ class OntologyOverview(View):
             submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
             # Collect all file names
 
+            imports = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
 
             return render(request, "ontology/oeo.html", dict(
                 ontology=ontology,
                 version=version,
                 main_module=main_module,
-                submodules=submodules.items()
+                submodules=submodules.items(),
+                imports=imports.items()
             ))
 
 
 class OntologyStatics(View):
-    def get(self, request, ontology, file, version=None, extension=None):
+    def get(self, request, ontology, file, version=None, extension=None, imports=False):
         """
         Returns the requested file `{file}.{extension}` of version `version`
         of ontology `ontology`
@@ -77,7 +86,10 @@ class OntologyStatics(View):
             extension = "owl"
         if not version:
             version = max((d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")), key=lambda d:[int(x) for x in d.split(".")])
-        file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+        if imports:
+            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports/{file}.{extension}"
+        else:
+            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
         if os.path.exists(file_path):
             with open(file_path) as f:
                 response = HttpResponse(f, content_type="application/rdf+xml")

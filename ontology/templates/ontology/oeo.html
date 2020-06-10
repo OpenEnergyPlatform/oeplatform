@@ -41,5 +41,32 @@
     {% endfor %}
 </div>
 
+<hr>
+<h3>Imports</h3><br>
+
+<div id="imports_accordion">
+    {% for module, about in imports %}
+        <div class="card">
+            <div class="card-header">
+                <a class="card-link" data-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
+                    {{module}}
+                </a>
+                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    {% for ex in about.extensions %}
+                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/imports/{{module}}.{{ex}}">
+                            {{ex}}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-parent="#imports_accordion">
+                <div class="card-body">
+                    {{ about.comment }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
 
 {% endblock %}
