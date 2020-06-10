@@ -26,14 +26,17 @@ def collect_modules(path):
     return modules
 
 class OntologyOverview(View):
-    def get(self, request, ontology, module_or_id=None, version=None):
+    def get(self, request, ontology, module_or_id=None, version=None, imports=True):
         versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
         if request.headers.get("Accept") == "application/rdf+xml":
             module_name = None
             if module_or_id:
-                submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
+                if imports:
+                    submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
+                else:
+                    submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
                 # If module_or_id is the name of a valid submodule, use this module
                 if module_or_id in submodules:
                     module_name = module_or_id
@@ -41,7 +44,7 @@ class OntologyOverview(View):
             if module_name is None:
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
                 module_name = list(main_module.keys())[0]
-            return redirect(f"/ontology/releases/{ontology}/{version}/{module_name}.owl")
+            return redirect(f"/ontology/{ontology}/releases/{version}/{module_name}.owl")
         else:
             main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
             main_module_name = list(main_module.keys())[0]

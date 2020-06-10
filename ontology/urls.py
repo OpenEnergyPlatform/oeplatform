@@ -10,8 +10,13 @@ urlpatterns = [
   url(r"^ontology/oeo-steering-committee$",
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),
-  url(r"^releases\/(?P<ontology>[\w_-]+)(\/(?P<version>[\d\.]+))?\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
+  url(r"^(?P<ontology>[\w_-]+)\/releases(\/(?P<version>[\d\.]+))?\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
       views.OntologyStatics.as_view()),
+
+  url(r"^(?P<ontology>[\w_-]+)\/imports\/(?P<module_or_id>[\w\d_-]+)",
+      views.OntologyOverview.as_view(), {"import": True},
+      name="oeo"),
+
   url(r"^(?P<ontology>[\w_-]+)(/(?P<module_or_id>[\w\d_-]+))?",
       views.OntologyOverview.as_view(),
       name="oeo"),
