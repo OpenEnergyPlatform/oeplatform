@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, Http404
 from django.views import View
 from rdflib import Graph, RDFS
 from oeplatform.settings import ONTOLOGY_FOLDER
@@ -97,6 +97,8 @@ class OntologyStatics(View):
                 return response
         else:
             file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
+            if not os.path.exists(file_path):
+                raise Http404
             with open(file_path, "br") as f:
                 response = HttpResponse(f, content_type="application/rdf+xml; charset=utf-8")
                 response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
