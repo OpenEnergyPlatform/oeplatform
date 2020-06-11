@@ -33,7 +33,25 @@ class OntologyOverview(View):
         versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
-        if request.headers.get("Accept") == "application/rdf+xml":
+
+        if "text/html" in request.headers.get("accept","").split(","):
+            main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
+            main_module_name = list(main_module.keys())[0]
+            main_module = main_module[main_module_name]
+            main_module["name"] = main_module_name
+            submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
+            # Collect all file names
+
+            imports = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
+
+            return render(request, "ontology/oeo.html", dict(
+                ontology=ontology,
+                version=version,
+                main_module=main_module,
+                submodules=submodules.items(),
+                imports=imports.items()
+            ))
+        else:
             module_name = None
             if module_or_id:
                 if imports:
@@ -52,23 +70,6 @@ class OntologyOverview(View):
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
                 module_name = list(main_module.keys())[0]
             return redirect(f"/ontology/{ontology}/releases/{version}/{module_name}.owl")
-        else:
-            main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
-            main_module_name = list(main_module.keys())[0]
-            main_module = main_module[main_module_name]
-            main_module["name"] = main_module_name
-            submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
-            # Collect all file names
-
-            imports = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
-
-            return render(request, "ontology/oeo.html", dict(
-                ontology=ontology,
-                version=version,
-                main_module=main_module,
-                submodules=submodules.items(),
-                imports=imports.items()
-            ))
 
 
 class OntologyStatics(View):
