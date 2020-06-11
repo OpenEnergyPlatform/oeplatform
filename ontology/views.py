@@ -91,13 +91,13 @@ class OntologyStatics(View):
         else:
             file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
         if os.path.exists(file_path):
-            with open(file_path) as f:
+            with open(file_path, "br") as f:
                 response = HttpResponse(f, content_type="application/rdf+xml; charset=utf-8")
                 response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
                 return response
         else:
             file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
-            with open(file_path) as f:
+            with open(file_path, "br") as f:
                 response = HttpResponse(f, content_type="application/rdf+xml; charset=utf-8")
                 response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
                 return response
