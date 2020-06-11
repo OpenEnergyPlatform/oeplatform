@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
+from django.utils.encoding import smart_str
 from django.views import View
 from rdflib import Graph, RDFS
 from oeplatform.settings import ONTOLOGY_FOLDER
@@ -91,13 +92,13 @@ class OntologyStatics(View):
         else:
             file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
         if os.path.exists(file_path):
-            with open(file_path) as f:
-                response = HttpResponse(f, content_type="application/rdf+xml; charset=UTF-8 ")
-                response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
-                return response
+            response = HttpResponse(content_type="application/rdf+xml")
+            response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
+            response['X-Sendfile'] = smart_str(file_path)
+            return response
         else:
             file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
-            with open(file_path) as f:
-                response = HttpResponse(f, content_type="application/rdf+xml; charset=UTF-8")
-                response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
-                return response
+            response = HttpResponse(content_type="application/rdf+xml")
+            response["Content-Disposition"] = f'attachment; filename="{file}.{extension}"'
+            response['X-Sendfile'] = smart_str(file_path)
+            return response
