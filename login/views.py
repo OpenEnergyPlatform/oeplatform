@@ -15,6 +15,7 @@ from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, Gr
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
+from oeplatform.settings import URL
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -281,6 +282,7 @@ class DetachView(LoginRequiredMixin, View):
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = "login/generic_form.html"
     success_url = "/"
+    extra_context = {"site_name": URL}
 
 
 class ActivationNoteView(FormView):
