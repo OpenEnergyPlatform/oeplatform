@@ -3,6 +3,9 @@ from django.conf.urls import include, url
 from login import views
 
 urlpatterns = [
+    url("^password_reset/$", views.PasswordResetView.as_view(
+        html_email_template_name="registration/password_reset_email.html",
+        email_template_name="registration/password_reset_email.txt")),
     url("^", include("django.contrib.auth.urls")),
     url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
     url(
