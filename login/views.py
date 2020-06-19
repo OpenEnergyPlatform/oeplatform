@@ -282,7 +282,6 @@ class DetachView(LoginRequiredMixin, View):
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = "login/generic_form.html"
     success_url = "/"
-    extra_context = {"site_name": URL}
 
 
 class ActivationNoteView(FormView):
