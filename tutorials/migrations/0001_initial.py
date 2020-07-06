@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import martor.models
 
 
 class Migration(migrations.Migration):
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(blank=True, choices=[('io', 'I/O'), ('intro', 'Introduction')], max_length=15)),
                 ('title', models.TextField()),
                 ('html', models.TextField()),
-                ('markdown', martor.models.MartorField()),
+                ('markdown', models.TextField()),
                 ('level', models.IntegerField(choices=[(1, 'Beginners'), (2, 'Intermediates'), (3, 'Advanced')], null=True)),
             ],
         ),
