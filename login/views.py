@@ -15,6 +15,7 @@ from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, Gr
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
+from oeplatform.settings import URL
 
 class ProfileView(View):
     def get(self, request, user_id):

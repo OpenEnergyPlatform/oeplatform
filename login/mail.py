@@ -8,7 +8,7 @@ from oeplatform.settings import DEFAULT_FROM_EMAIL, URL
 def send_verification_mail(recipient, token):
     veri_url = "https://{host}/user/activate/{token}".format(host=URL, token=token)
     html_content = render_to_string(
-        "mails/verification_mail.html", {"url": veri_url, "base_url": URL}
+        "mails/verification_mail.html", {"url": veri_url, "site_name": URL}
     )
     send_mail(
         "OEP account - E-Mail validation",
