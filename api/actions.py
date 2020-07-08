@@ -789,6 +789,8 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
     t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
+    # Create Metatables
+    get_edit_table_name(schema, table)
     return get_response_dict(success=True)
 
 
