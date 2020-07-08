@@ -30,6 +30,8 @@ def collect_modules(path):
 
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
+        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+            raise Http404
         versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])

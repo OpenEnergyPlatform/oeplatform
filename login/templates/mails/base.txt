@@ -1,0 +1,11 @@
+Hello
+
+{% block message %}
+
+{% endblock %}
+
+If you have any questions, please do not hesitate to get in touch with us via the contact form
+https://{{ site_name }}/contact
+
+Best regards,
+the {{ site_name }} Team<br>
