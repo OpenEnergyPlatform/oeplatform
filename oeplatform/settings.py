@@ -52,7 +52,6 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "martor"
 )
 
 MIDDLEWARE = (
@@ -86,6 +85,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
+
+ONTOLOGY_FOLDER = "/tmp"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
