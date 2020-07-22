@@ -1,29 +1,72 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
-
+{% load ontology.rdf %}
 {% block main-content-body %}
 {% load static %}
 
-<h2>Open Energy Ontology</h2> <br>
+<h2>{{ main_module.name }}<div class="btn-group float-right" role="group" aria-label="Basic example">
+                    {% for ex in main_module.extensions %}
+                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
+                            {{ex}}
+                        </a>
+                    {% endfor %}
+                </div> </h2> <br>
+<span>
+    {{ main_module.comment }}
+</span>
+<br><br>
+<h3>Modules</h3><br>
 
-<h3>Modules</h3>
-<table class="table">
-    <tr>
-        <th>Name</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td><a href="{% url 'oeo/oeo.omn'%}">OEO</a></td>
-    </tr>
-    <tr>
-        <td><a href="{% url 'oeo/oeo-physical.omn'%}">OEO-Physical</a></td>
-    </tr>
-    <tr>
-        <td><a href="{% url 'oeo/oeo-model.omn'%}">OEO-Model</a></td>
-    </tr>
-    <tr>
-        <td><a href="{% url 'oeo/oeo-social.omn'%}">OEO-Social</a></td>
-    </tr>
-</table>
+<div id="accordion">
+    {% for module, about in submodules %}
+        <div class="card">
+            <div class="card-header">
+                <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                    {{module}}
+                </a>
+                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    {% for ex in about.extensions %}
+                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{module}}.{{ex}}">
+                            {{ex}}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#accordion">
+                <div class="card-body">
+                    {{ about.comment }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 
-{% endblock main-content-body %}
+<hr>
+<h3>Imports</h3><br>
+
+<div id="imports_accordion">
+    {% for module, about in imports %}
+        <div class="card">
+            <div class="card-header">
+                <a class="card-link" data-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
+                    {{module}}
+                </a>
+                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    {% for ex in about.extensions %}
+                        <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/imports/{{module}}.{{ex}}">
+                            {{ex}}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-parent="#imports_accordion">
+                <div class="card-body">
+                    {{ about.comment }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

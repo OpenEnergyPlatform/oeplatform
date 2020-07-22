@@ -1,32 +1,27 @@
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView, RedirectView
-
-from modelview import views
+from os import walk
+from ontology import views
 from oeplatform import settings
 
 urlpatterns = [
   url(r"^$", TemplateView.as_view(template_name="ontology/about.html")),
-  url(r"^ontology/oeo-steering-committee$",
+  url(r"^ontology/$", TemplateView.as_view(template_name="ontology/about.html")),
+  url(r"^oeo-steering-committee/$",
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),
-  url(r"^oeo$",
-      TemplateView.as_view(template_name="ontology/oeo.html"),
-      name="oeo"),
-] + [url(r"^{path}$".format(path=path), RedirectView.as_view(url=red), name=path) for path, red in
-   [
-       ("oeo/oeo.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/oeo.omn"),
-       ("oeo/oeo-physical.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-physical.omn"),
-       ("oeo/oeo-model.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-model.omn"),
-       ("oeo/oeo-social.omn",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/edits/oeo-social.omn"),
-       ("oeo/imports/iao-annotation-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/iao-annotation-module.owl"),
-       ("oeo/imports/iao-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/iao-module.owl"),
-       ("imports/ro-module.owl",
-        "https://raw.githubusercontent.com/OpenEnergyPlatform/ontology/dev/src/ontology/imports/ro-module.owl")
-   ]]
+  url(r"^ontology/oeo-steering-committee/$", TemplateView.as_view(template_name="ontology/oeo-steering-committee.html")),
+  url(r"^(?P<ontology>[\w_-]+)\/releases(\/v?(?P<version>[\d\.]+))?\/imports\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
+      views.OntologyStatics.as_view(), {"imports": True}),
+
+  url(r"^(?P<ontology>[\w_-]+)\/releases(\/v?(?P<version>[\d\.]+))?\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
+      views.OntologyStatics.as_view()),
+
+  url(r"^(?P<ontology>[\w_-]+)\/imports\/(?P<module_or_id>[\w\d_-]+)",
+      views.OntologyOverview.as_view(), {"imports": True}),
+
+  url(r"^(?P<ontology>[\w_-]+)(/(?P<module_or_id>[\w\d_-]+))?",
+      views.OntologyOverview.as_view()),
+
+]
