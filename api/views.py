@@ -5,6 +5,7 @@ import logging
 import re
 import time
 import psycopg2
+import zipstream
 
 from decimal import Decimal
 
@@ -616,7 +617,6 @@ class Rows(APIView):
         if format == "csv":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
-
             response = OEPStream(
                 (
                     writer.writerow(x)
@@ -631,7 +631,28 @@ class Rows(APIView):
                 schema=schema, table=table
             )
             return response
-
+        elif format == "datapackage":
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
+            zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+            zf.write_iter("data.csv", (
+                writer.writerow(x).encode("utf-8")
+                for x in itertools.chain([cols], return_obj["data"])
+            ))
+            table_obj = actions._get_table(schema=schema, table=table)
+            if table_obj.comment:
+                zf.writestr("metadata.json", table_obj.comment.encode("utf-8"))
+            response = OEPStream(
+                (chunk for chunk in zf),
+                content_type="application/zip",
+                session=session,
+            )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
+            )
+            return response
         else:
             if row_id:
                 dict_list = [dict(zip(cols, row)) for row in return_obj["data"]]
