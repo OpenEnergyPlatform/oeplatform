@@ -18,7 +18,11 @@
         {% csrf_token %}
         {% bootstrap_form form %}
 
-        <button class="btn btn-success" type="submit">Create Tutorial</button>
+        {% if tutorial.id %}
+            <button class="btn btn-success" type="submit">Save Tutorial</button>
+        {% else %}
+            <button class="btn btn-success" type="submit">Create Tutorial</button>
+        {% endif %}
     </form>
 
 {#Preview for markdown field in form#}
