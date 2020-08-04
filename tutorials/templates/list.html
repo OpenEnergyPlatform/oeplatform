@@ -1,0 +1,39 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+
+{% block site-header %}
+  <h2 class="site-header">Tutorials</h2>
+{% endblock site-header %}
+
+{% block main-right-sidebar-content  %}
+  {% if user.is_authenticated %}
+    <hr>
+    <h4>Actions</h4>
+    <a href="{% url 'add_tutorial'%}" type="button" class="btn btn-sm btn-success">Add Tutorial</a>
+  {% endif %}
+
+{% endblock main-right-sidebar-content  %}
+
+{% block main-content-body %}
+{% load static %}
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tutorial in tutorials %}
+        <tr>
+          <td>
+            <a href="{{tutorial.id}}">{{ tutorial.title }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock main-content-body %}
+
+
