@@ -32,7 +32,7 @@
 {% block after-body-bottom-js %}
     <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
     <script>
-        var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false});
+        var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false, forceSync: true});
     </script>
 
 
