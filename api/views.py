@@ -5,6 +5,7 @@ import logging
 import re
 import time
 import psycopg2
+from io import StringIO
 
 from decimal import Decimal
 
@@ -649,11 +650,27 @@ class Rows(APIView):
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
         schema, table = actions.get_table_name(schema, table)        
-        column_data = request.data["query"]
-        format = request.GET.get("form")
+        
+        # check if data is regular json data or csv
+        format = request.GET.get("form")        
         if format == 'csv':
-            column_data = parse_csv(column_data)
-        logger.warning(column_data)
+            if action != "new":
+                # csv upload only works with "new"
+                raise APIError("Invalid csv upload")
+            if "query" in request.data:
+                # csv string is wrapped in json payload
+                str_buffer = StringIO(request.data["query"])
+            elif "csvUploadFile" in request.FILES: # NOTE: is also in request.data:
+                # csv is raw uploaded csv file
+                upload_file = request.FILES["csvUploadFile"]                
+                str_buffer = upload_file.open()
+            else:
+                raise APIError("Invalid csv upload")
+            column_data = parse_csv(str_buffer)
+        else:        
+            # regular json data
+            column_data = request.data["query"]
+        
         status_code = status.HTTP_200_OK
         if row_id:
             response = self.__update_rows(request, schema, table, column_data, row_id)

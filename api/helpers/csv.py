@@ -1,16 +1,14 @@
 import logging
 import re
-from io import StringIO
 import pandas as pd
 from numpy import nan
 
 logger = logging.getLogger("oeplatform")
 
 
-def parse_csv(text):
-    buffered_text = StringIO(text)
+def parse_csv(str_buffer):
     df = pd.read_csv(
-                buffered_text,
+                str_buffer,
                 # encoding=encoding,
                 # sep=delimiter,
                 na_values=[""],
