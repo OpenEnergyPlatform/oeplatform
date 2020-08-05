@@ -27,6 +27,7 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
+from api.helpers.csv import parse_csv
 from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -647,8 +648,12 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_table_name(schema, table)        
         column_data = request.data["query"]
+        format = request.GET.get("form")
+        if format == 'csv':
+            column_data = parse_csv(column_data)
+        logger.warning(column_data)
         status_code = status.HTTP_200_OK
         if row_id:
             response = self.__update_rows(request, schema, table, column_data, row_id)
