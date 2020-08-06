@@ -5,7 +5,6 @@ import logging
 import re
 import time
 import psycopg2
-from io import StringIO
 
 from decimal import Decimal
 
@@ -28,7 +27,6 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from api.helpers.csv import parse_csv
 from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -649,31 +647,8 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
-        schema, table = actions.get_table_name(schema, table)        
-        
-        # check if data is regular json data or csv
-        format = request.GET.get("form")        
-        if format == 'csv':
-            if action != "new":
-                # csv upload only works with "new"
-                raise APIError("Invalid csv upload")
-            if "query" in request.data:
-                # csv string is wrapped in json payload
-                str_buffer = StringIO(request.data["query"])
-            elif "csvUploadFile" in request.FILES: # NOTE: is also in request.data:
-                # csv is raw uploaded csv file
-                upload_file = request.FILES["csvUploadFile"]                
-                str_buffer = upload_file.open()
-            else:
-                raise APIError("Invalid csv upload")
-            try:
-                column_data = parse_csv(str_buffer)
-            except Exception:
-                raise APIError("Invalid csv upload")
-        else:        
-            # regular json data
-            column_data = request.data["query"]
-        
+        schema, table = actions.get_table_name(schema, table)
+        column_data = request.data["query"]
         status_code = status.HTTP_200_OK
         if row_id:
             response = self.__update_rows(request, schema, table, column_data, row_id)
