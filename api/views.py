@@ -666,7 +666,10 @@ class Rows(APIView):
                 str_buffer = upload_file.open()
             else:
                 raise APIError("Invalid csv upload")
-            column_data = parse_csv(str_buffer)
+            try:
+                column_data = parse_csv(str_buffer)
+            except Exception:
+                raise APIError("Invalid csv upload")
         else:        
             # regular json data
             column_data = request.data["query"]

@@ -164,6 +164,7 @@ for row in result.json():
         var file_data = $('#csvUploadFile').prop('files')[0];
         var form_data = new FormData();
         form_data.append('csvUploadFile', file_data);
+        $('#csvUploadMsgAlert').addClass("invisible"); // hide warning
         $('#csvUploadSpinner').removeClass("invisible"); // start spinner
         $.ajax({
             url: 'http://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows/new?form=csv',
@@ -177,17 +178,25 @@ for row in result.json():
             data: form_data,
             type: 'post',
             success: function(response) {
-                // TODO: action on success: reload, so new data is visible
-                $('#csvUploadSpinner').addClass("invisible"); // stop spinner
+                // TODO: action on success: reload, so new data is visible                
                 $('#csvUploadClose').click(); // close modal
+                location.reload(); // reload so we can see the new data
                 var response = JSON.parse(response);
-                console.log(response)
+                var rowcount = response.rowcount
+
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 $('#csvUploadSpinner').addClass("invisible"); // stop spinner
-                $('#csvUploadMsgAlert').html(thrownError) // set warning
-                $('#csvUploadMsgAlert').removeClass("invisible"); // show warning                
-                //console.log(xhr.status);
+                var message;
+                try {
+                    message = JSON.parse(xhr.responseText);
+                    message = message.detail || message.reason
+                } catch (err) {
+                    message = xhr.statusText || thrownError;
+                }
+
+                $('#csvUploadMsgAlert').html(message) // set warning
+                $('#csvUploadMsgAlert').removeClass("invisible"); // show warning                                
             }
         });
     });
@@ -205,6 +214,8 @@ for row in result.json():
     $('#csvUploadClose').on('click', function() {
         $('#csvUploadSpinner').addClass("invisible"); // stop spinner
         $('#csvUploadMsgAlert').addClass("invisible"); // hide warning
+        $('#csvUploadFile').val(''); // remove selected file
+        $('#csvUploadFile').next('.custom-file-label').html('');
     })
 </script>
 
