@@ -89,12 +89,12 @@ for row in result.json():
 <h4>Uploads</h4>
 
 
-<div class="modal fade" id="modalFormUploadCsv" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="csvUploadForm" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header text-center">
+            <div class="modal-header text-center" style="margin-bottom: 10px;">
                 <h4 class="modal-title w-100 font-weight-bold">Upload CSV</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button id="csvUploadClose" type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -103,18 +103,25 @@ for row in result.json():
                 <div class="md-form mb-5">
                     <input type="file" class="custom-file-input" id="csvUploadFile" aria-describedby="inputGroupFileAddon01">
                     <label class="custom-file-label" for="csvUploadFile"></label>
-                    <button id="csvUploadBtn" data-dismiss="modal">Upload</button>
-
+                    <button id="csvUploadBtn" class="btn btn-success">Upload</button>
                 </div>
             </div>
 
+            <!-- info section -->
+            <div class="modal-body mx-3">
+                <div id="csvUploadSpinner" class="spinner-border invisible" role="status">
+                    <span class="sr-only"></span>
+                </div>
+                <div id="csvUploadMsgAlert" class="alert alert-danger invisible" role="alert">
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <!--  TODO: hide if not logged in as owner   -->
 <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-    <a href="" type="button" class="btn btn-success" data-toggle="modal" data-target="#modalFormUploadCsv">Upload CSV</a>
+    <a href="" type="button" class="btn btn-success" data-toggle="modal" data-target="#csvUploadForm">Upload CSV</a>
 </div>
 <hr>
 
@@ -157,7 +164,7 @@ for row in result.json():
         var file_data = $('#csvUploadFile').prop('files')[0];
         var form_data = new FormData();
         form_data.append('csvUploadFile', file_data);
-        // TODO: start spinner
+        $('#csvUploadSpinner').removeClass("invisible"); // start spinner
         $.ajax({
             url: 'http://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows/new?form=csv',
             headers: {
@@ -171,11 +178,16 @@ for row in result.json():
             type: 'post',
             success: function(response) {
                 // TODO: action on success: reload, so new data is visible
+                $('#csvUploadSpinner').addClass("invisible"); // stop spinner
+                $('#csvUploadClose').click(); // close modal
+                var response = JSON.parse(response);
+                console.log(response)
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                console.error(thrownError);
-                console.error(xhr.status);
-                // TODO: action on fail
+                $('#csvUploadSpinner').addClass("invisible"); // stop spinner
+                $('#csvUploadMsgAlert').html(thrownError) // set warning
+                $('#csvUploadMsgAlert').removeClass("invisible"); // show warning                
+                //console.log(xhr.status);
             }
         });
     });
@@ -187,6 +199,12 @@ for row in result.json():
         var fileName = filePath[filePath.length - 1];
         // TODO: warn if not .csv
         $(this).next('.custom-file-label').html(fileName);
+    })
+
+    // cleanup on modal close
+    $('#csvUploadClose').on('click', function() {
+        $('#csvUploadSpinner').addClass("invisible"); // stop spinner
+        $('#csvUploadMsgAlert').addClass("invisible"); // hide warning
     })
 </script>
 
