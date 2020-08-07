@@ -38,6 +38,7 @@ urlpatterns = [
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
         views.Rows.as_view(),
         {"action": "new"},
+        name='api_rows_new'
     ),
     url(
         r"^v0/advanced/search",

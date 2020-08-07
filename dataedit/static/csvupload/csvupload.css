@@ -1,0 +1,23 @@
+#csvupload-form .modal-content {
+    overflow: scroll;
+    margin: 1vw;
+    padding: 0;
+    width: 97vw;
+    font-size: 80%;
+}
+
+#csvupload-form .modal-dialog {
+    margin: 0;
+    padding: 0;
+}
+
+#csvupload-form td {
+    max-width: 50px;
+    overflow: hidden;
+}
+
+#csvupload-form td,
+#csvupload-form th {
+    border-right: 1px solid #dee2e6;
+    border-left: 1px solid #dee2e6;
+}
