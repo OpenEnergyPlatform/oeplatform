@@ -641,7 +641,7 @@ class Rows(APIView):
             ))
             table_obj = actions._get_table(schema=schema, table=table)
             if table_obj.comment:
-                zf.writestr("metadata.json", table_obj.comment.encode("utf-8"))
+                zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
             response = OEPStream(
                 (chunk for chunk in zf),
                 content_type="application/zip",
