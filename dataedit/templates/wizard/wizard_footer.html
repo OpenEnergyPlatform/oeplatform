@@ -1,0 +1,12 @@
+<script src="/static/wizard/papaparse.min.js"></script>
+<script src="/static/wizard/wizard.js"></script>
+<script>    
+    var wizard = Wizard({
+        //protocol: "{% if request.is_secure %}https{% else %}http{% endif %}",
+        schema: "{{ schema }}",
+        table: "{{ table }}",
+        csrfToken: getCookie('csrftoken'),
+        wrapperId: 'wizard-wrapper',
+    });
+</script>
+

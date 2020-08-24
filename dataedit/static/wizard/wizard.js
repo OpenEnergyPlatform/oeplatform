@@ -1,4 +1,6 @@
-var CSVUpload = function(config) {
+var Wizard = function(config) {
+
+    console.log('Wizard', config)
 
     var state = {
         file: undefined,
@@ -19,17 +21,118 @@ var CSVUpload = function(config) {
 
         previewSizeRecords: 10,
         batchSizeRecords: 100,
-
-        postURL: config.postURL,
+        
+        /* user config */
         csrfToken: config.csrfToken,
-        $dialog: $('#' + config.dialogId),
-        $file: $('#' + config.dialogId + ' #csvupload-file')
+        schema: config.schema,
+        table: config.table,
+        $wrapper: $('#' + config.wrapperId),
+        $dialog: $('#' + config.wrapperId + ' #wizard-dialog'),
+        $file: $('#' + config.wrapperId + ' #wizard-file'),
+    }
+
+    function getTableUrl(){
+        return "/api/v0/schema/" + state.schema + "/tables/" + state.table
+    }
+
+    function getNewRowsUrl(){
+        return getTableUrl() + "/rows/new"
     }
 
 
+    function getColumns() {
+        return new Promise(function(resolve, reject){
+            $.ajax({
+                url: getTableUrl(),
+                headers: {
+                    'X-CSRFToken': state.csrfToken
+                },
+                cache: false,
+                processData: false,
+                type: 'get',
+                async: true,
+                success: function(res){
+                    // sort by ordinal_position
+                    var names =  Object.keys(res.columns);
+                    var columns = [];
+                    for (var i=0; i<names.length; i++){
+                        var col = res.columns[names[i]];
+                        col.name = names[i];
+                        columns[i] = col;
+                        /*
+                        character_maximum_length: null​​
+                        character_octet_length: null
+                        column_default: "nextval('model_draft.table1_id_seq'::regclass)"
+                        data_type: "bigint"
+                        datetime_precision: null
+                        dtd_identifier: "1"
+                        interval_precision: null
+                        interval_type: null
+                        is_nullable: false
+                        is_updatable: true
+                        maximum_cardinality: null
+                        name: "id"
+                        numeric_precision: 64
+                        numeric_precision_radix: 2
+                        numeric_scale: 0
+                        ordinal_position: 1
+                        */
+                    }
+                    console.log(columns)
+                    resolve(columns)
+                },
+                error: function(res){
+                    reject('Could not load column info.')
+                }
+            });
+        });
+    }
+    
+        
+    
+
+    function hasWritePermission() {
+        // TODO: this is a stupid way to do this. either create api endpoint or django view
+        return new Promise(function(resolve, reject){
+            $.ajax({
+                url: getNewRowsUrl(),
+                headers: {
+                    'X-CSRFToken': state.csrfToken
+                },
+                dataType: 'json',
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                processData: false,
+                data: JSON.stringify({ "query": [] }), // purposefully empty
+                type: 'post',
+                async: true,
+                success: function(res){resolve()},
+                error: function(res){                    
+                    if (res.status == 403){
+                        reject('No writing access')
+                    } else {
+                        resolve()
+                    }
+                }
+            });
+        });
+    }
+
+
+    function init(){
+        console.log('Wizard init');        
+        state.$wrapper.removeClass('d-none'); // show        
+        state.$wrapper.find('#wizard-btn-show').bind('click', function(evt) {
+            console.log('start');
+        });        
+    }    
+
+
+    hasWritePermission().then(getColumns).then(init).catch(function(x){console.error(x)});
+
     function setUploadState() {
         var disabled = !(state.file && state.columns && !state.uploadInProgress);
-        state.$dialog.find('#csvupload-submit').prop("disabled", disabled);
+        state.$dialog.find('#wizard-submit').prop("disabled", disabled);
     }
 
     function disableInputs() {
@@ -40,38 +143,38 @@ var CSVUpload = function(config) {
         state.$dialog.find('.modal-body :input').prop("disabled", false);
     }
 
-    function init() {
-        state.$dialog.find('#csvupload-file').val("").bind('change', function(evt) {
+    function __init() {
+        state.$dialog.find('#wizard-file').val("").bind('change', function(evt) {
             state.file = $(evt.target)[0].files[0];
             update()
         });
 
-        state.$dialog.find("#csvupload-encoding").val(state.encoding).bind('change', function(evt) {
+        state.$dialog.find("#wizard-encoding").val(state.encoding).bind('change', function(evt) {
             state.encoding = $(evt.target).find(":selected").val();
             update()
         });
 
-        state.$dialog.find("#csvupload-separator").val(state.separator).bind('change', function(evt) {
+        state.$dialog.find("#wizard-separator").val(state.separator).bind('change', function(evt) {
             state.delimiter = $(evt.target).find(":selected").val();
             update()
         });
 
-        state.$dialog.find("#csvupload-header").prop("checked", state.header).bind('change', function(evt) {
+        state.$dialog.find("#wizard-header").prop("checked", state.header).bind('change', function(evt) {
             state.header = $(evt.target).prop("checked")
             update()
         });
 
-        state.$dialog.find("#csvupload-submit").bind('click', function(_evt) {
+        state.$dialog.find("#wizard-submit").bind('click', function(_evt) {
             upload();
             console.log('done')
         });
 
-        state.$dialog.find("#csvupload-show").bind('click', function(_evt) {
+        state.$dialog.find("#wizard-show").bind('click', function(_evt) {
             reset();
             state.$dialog.modal('show');
         });
 
-        state.$dialog.find("#csvupload-close").bind('click', function(_evt) {
+        state.$dialog.find("#wizard-close").bind('click', function(_evt) {
             state.$dialog.modal('hide');
             if (state.uploadProgress == 100) {
                 location.reload();
@@ -124,7 +227,7 @@ var CSVUpload = function(config) {
 
 
     function updateColumnMapping() {
-        var $cols = state.$dialog.find('#csvupload-preview-table tbody tr')
+        var $cols = state.$dialog.find('#wizard-preview-table tbody tr')
         for (var i = 0; i < state.columns.length; i++) {
             var $r = $($cols[i]);
             var mapper = $r.find('.colum-mapper').val();
@@ -184,7 +287,7 @@ var CSVUpload = function(config) {
             $tbody.append($r);
         }
 
-        state.$dialog.find('#csvupload-preview-table').empty().append($thead, $tbody);
+        state.$dialog.find('#wizard-preview-table').empty().append($thead, $tbody);
         updateColumnMapping();
 
 
@@ -242,7 +345,7 @@ var CSVUpload = function(config) {
             state.data.push(rowOut);
         }
 
-        $('#csvupload-submit').prop("disabled", state.data.length > 0 ? false : true);
+        $('#wizard-submit').prop("disabled", state.data.length > 0 ? false : true);
 
         updatePreview2();
     }
@@ -262,7 +365,7 @@ var CSVUpload = function(config) {
         state.uploadInProgress = false
         state.uploadHeaderSkipped = false
         state.uploadProgress = 0
-        $('#csvupload-progress .progress-bar').css('width', state.uploadProgress + '%');
+        $('#wizard-progress .progress-bar').css('width', state.uploadProgress + '%');
         state.uploadBatch = []
         enableInputs();
     }
@@ -278,10 +381,10 @@ var CSVUpload = function(config) {
         if (status == 'info') status = 'success';
         if (status == 'warning') status = 'warning';
         if (status == 'error') status = 'danger';
-        $('#csvupload-alert').removeClass();
-        $('#csvupload-alert').html(msg || '');
+        $('#wizard-alert').removeClass();
+        $('#wizard-alert').html(msg || '');
         if (msg) {
-            $('#csvupload-alert').addClass('alert alert-' + status).html(msg);
+            $('#wizard-alert').addClass('alert alert-' + status).html(msg);
         }
     }
 
@@ -290,7 +393,7 @@ var CSVUpload = function(config) {
         var res = $.ajax({
             url: state.postURL,
             headers: {
-                'X-CSRFToken': state.csrTtoken
+                'X-CSRFToken': state.csrfToken
             },
             dataType: 'json',
             cache: false,
@@ -305,7 +408,7 @@ var CSVUpload = function(config) {
                 console.log(_responseJson);
                 // progress bar
 
-                $('#csvupload-progress .progress-bar').css('width', state.uploadProgress + '%');
+                $('#wizard-progress .progress-bar').css('width', state.uploadProgress + '%');
 
             },
             error: function(xhr, _ajaxOptions, thrownError) {
@@ -319,7 +422,7 @@ var CSVUpload = function(config) {
                 }
                 // TODO
                 console.error(message)
-                $('#csvupload-progress .progress-bar').css('width', state.uploadProgress + '%');
+                $('#wizard-progress .progress-bar').css('width', state.uploadProgress + '%');
             }
         });
 
@@ -409,8 +512,8 @@ var CSVUpload = function(config) {
 
 
 
-    init();
-    reset();
+    //init();
+    //reset();
 
     return {
         //reset: reset,

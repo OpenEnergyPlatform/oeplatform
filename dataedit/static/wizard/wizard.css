@@ -1,4 +1,4 @@
-#csvupload-form .modal-content {
+#wizard-form .modal-content {
     overflow: scroll;
     margin: 1vw;
     padding: 0;
@@ -6,23 +6,23 @@
     font-size: 80%;
 }
 
-#csvupload-form .modal-dialog {
+#wizard-form .modal-dialog {
     margin: 0;
     padding: 0;
 }
 
-#csvupload-form td {
+#wizard-form td {
     max-width: 50px;
     overflow: hidden;
 }
 
-#csvupload-form td,
-#csvupload-form th {
+#wizard-form td,
+#wizard-form th {
     border-right: 1px solid #dee2e6;
     border-left: 1px solid #dee2e6;
 }
 
-#csvupload-progress {
+#wizard-progress {
     width: 100%;
     height: 5px;
 }

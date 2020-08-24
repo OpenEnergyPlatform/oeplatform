@@ -96,7 +96,9 @@
     <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
   </div>
   <hr>
-
+  
+  {% include "wizard/wizard_body.html" %}
+  
   <h4>API Usage</h4>
   <textarea
     class="form-control" rows="6" cols="50"
@@ -125,7 +127,7 @@ for row in result.json():
         integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
         crossorigin=""/>
   <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
-
+  {% include "wizard/wizard_header.html" %}
 {% endblock after-head %}
 
 {% block after-body-bottom-js %}
@@ -153,6 +155,8 @@ for row in result.json():
       };
       load_view(schema, table, csrftoken, view);
   </script>
+
+  {% include "wizard/wizard_footer.html" %}
 {% endblock after-body-bottom-js %}
 
 
