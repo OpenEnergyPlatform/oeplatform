@@ -1,243 +1,160 @@
-{% extends "dataedit/base.html" %} {% load dataedit.metadata %} {% load static %} {% load bootstrap4 %} {% block site-header %}
-<h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
-{% endblock site-header %} {% block data_content %}
+{% extends "dataedit/base.html" %}
+{% load dataedit.metadata %}
+{% load static %}
+{% load bootstrap4 %}
 
 
-<ul class="nav nav-tabs">
+{% block site-header %}
+  <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
+{% endblock site-header %}
+
+{% block data_content %}
+
+
+  <ul class="nav nav-tabs">
     <li class="nav-item">
-        <a class="nav-link {% if current_view.type == " table " %}active{% endif %}" href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
+      <a class="nav-link {% if current_view.type == "table" %}active{% endif %}"
+         href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
     </li>
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if current_view.type == " graph " %}active{% endif %}" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
-        <div class="dropdown-menu">
-            {% for view in views %} {% if view.type == "graph" %}
-            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a> {% endif %} {% endfor %}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
-        </div>
+      <a class="nav-link dropdown-toggle {% if current_view.type == "graph" %}active{% endif %}" data-toggle="dropdown"
+         href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
+      <div class="dropdown-menu">
+        {% for view in views %}
+          {% if view.type == "graph" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+          {% endif %}
+        {% endfor %}
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
+      </div>
     </li>
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if current_view.type == " map " %}active{% endif %}" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
-        <div class="dropdown-menu">
-            {% for view in views %} {% if view.type == "map" %}
-            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a> {% endif %} {% endfor %}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
-            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
-        </div>
+      <a class="nav-link dropdown-toggle {% if current_view.type == "map" %}active{% endif %}" data-toggle="dropdown"
+         href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
+      <div class="dropdown-menu">
+        {% for view in views %}
+          {% if view.type == "map" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+          {% endif %}
+        {% endfor %}
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
+        <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
+      </div>
     </li>
-</ul>
+  </ul>
 
-<div class="">
+  <div class="">
     <div class="datatable">
-        <table class="display" id="datatable" style="width:100%">
-            <thead>
-                <tr></tr>
-            </thead>
-        </table>
-        <div>
-            <div id="builder"></div>
-            <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
-        </div>
-        {% if current_view.type == "map" %}
+      <table class="display" id="datatable" style="width:100%">
+        <thead>
+        <tr></tr>
+        </thead>
+      </table>
+      <div>
+        <div id="builder"></div>
+        <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
+      </div>
+      {% if current_view.type == "map" %}
         <div style='height: 800px; width: 100%;' id="map"></div>
-        {% endif %} {% if current_view.type == "graph" %}
+      {% endif %}
+      {% if current_view.type == "graph" %}
         <div id="datagraph"></div>
-        {% endif %}
-        <div id="loading-indicator" class="sk-fading-circle">
-            <div class="sk-circle1 sk-circle"></div>
-            <div class="sk-circle2 sk-circle"></div>
-            <div class="sk-circle3 sk-circle"></div>
-            <div class="sk-circle4 sk-circle"></div>
-            <div class="sk-circle5 sk-circle"></div>
-            <div class="sk-circle6 sk-circle"></div>
-            <div class="sk-circle7 sk-circle"></div>
-            <div class="sk-circle8 sk-circle"></div>
-            <div class="sk-circle9 sk-circle"></div>
-            <div class="sk-circle10 sk-circle"></div>
-            <div class="sk-circle11 sk-circle"></div>
-            <div class="sk-circle12 sk-circle"></div>
-        </div>
+      {% endif %}
+      <div id="loading-indicator" class="sk-fading-circle">
+        <div class="sk-circle1 sk-circle"></div>
+        <div class="sk-circle2 sk-circle"></div>
+        <div class="sk-circle3 sk-circle"></div>
+        <div class="sk-circle4 sk-circle"></div>
+        <div class="sk-circle5 sk-circle"></div>
+        <div class="sk-circle6 sk-circle"></div>
+        <div class="sk-circle7 sk-circle"></div>
+        <div class="sk-circle8 sk-circle"></div>
+        <div class="sk-circle9 sk-circle"></div>
+        <div class="sk-circle10 sk-circle"></div>
+        <div class="sk-circle11 sk-circle"></div>
+        <div class="sk-circle12 sk-circle"></div>
+      </div>
     </div>
-</div>
+  </div>
+{% endblock %}
 
-<div class="modal fade" id="csvupload-form" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
-        <div id="csvupload-enabled" class="modal-content">
-            <div class="modal-header text-center" style="margin-bottom: 10px;">
-                <h4 class="modal-title w-100 font-weight-bold">Upload CSV</h4>
-                <button id="csvupload-close" type="button" class="close" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
+{% block main-right-sidebar-content-additional %}
 
-            </div>
+  <h4>Tags</h4>
 
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div id="csvupload-alert" class="alert" role="alert"></div>
-                    </div>
+  {% load dataedit.taghandler %}
+  {% get_tags table=table schema=schema as table_tags %}
+  {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
 
-                    <div class="form-row">
-                        <h4>Auswahl Datei</h4>
-                    </div>
+  <hr>
 
-                    <div class="row">
-                        <form>
-                            <div class="form-row">
-                                <div class="col">
-                                    <div class="form-group">
-                                        <div class="custom-file">
-                                            <input id="csvupload-file" type="file" class="custom-file-input form-control form-control-sm" required/>
-                                            <label class="custom-file-label" for="csvupload-file"></label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col">
-                                    <div class="form-group">
-                                        <label class="form-check-label" for="csvupload-encoding">Character encoding</label>
-                                        <select id="csvupload-encoding" name="encoding" class="form-control form-control-sm">
-                                            <option value="iso-8859-1">ISO-8859-1</option>
-                                            <option value="utf-8">UTF-8</option>          
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col">
-                                    <div class="form-group">
-                                        <label class="form-check-label" for="csvupload-separator">Separator</label>
-                                        <select id="csvupload-separator" name="separator" class="form-control form-control-sm">
-                                            <option value=";">semicolon</option>
-                                            <option value=",">comma</option>          
-                                    </select>
-                                    </div>
-                                </div>
-
-                                <div class="col">
-                                    <div class="form-group">
-                                        <label class="form-check-label" for="csvupload-header">Column names</label>
-                                        <input id="csvupload-header" type="checkbox" class="form-check-input form-control form-control-sm" />
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="row">
-                        <form>
-
-                            <div class="form-row">
-                                <h4>Preview text</h4>
-                            </div>
-                            <div class="form-row">
-                                <div id="csvupload-preview"></div>
-                            </div>
-
-                            <div class="form-row">
-                                <h4>Preview table</h4>
-                            </div>
-                            <div class="form-row">
-                                <table class="table table-responsive table-striped table-condensed">
-                                    <thead id="csvupload-columns"></thead>
-                                    <tbody id="csvupload-preview2"></tbody>
-                                </table>
-                            </div>
-
-                        </form>
-                    </div>
-                    <!-- .row -->
-                </div>
-                <!-- .container-fluid -->
-            </div>
-            <!-- .modal-body -->
-            <div class="modal-footer">
-                <button id="csvupload-submit" class="btn btn-success">Upload</button>
-            </div>
-        </div>
-        <!-- .modal-content -->
-    </div>
-    <!-- .modal-dialog -->
-</div>
-<!-- .modal -->
-
-{% endblock %} {% block main-right-sidebar-content-additional %}
-
-<h4>Tags</h4>
-
-{% load dataedit.taghandler %} {% get_tags table=table schema=schema as table_tags %} {% include 'dataedit/taggable_setting.html' with table=table schema=schema selected=table_tags %}
-
-<hr>
-
-<h4>Downloads</h4>
-<div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+  <h4>Downloads</h4>
+  <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download CSV</a>
     <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
-</div>
-<hr>
+  </div>
+  <hr>
 
-<h4>API Usage</h4>
-<textarea class="form-control" rows="6" cols="50" style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;">
+  <h4>API Usage</h4>
+  <textarea
+    class="form-control" rows="6" cols="50"
+    style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;"
+  >
 from requests import get
 
 result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
 for row in result.json():
   # Process the row
   </textarea>
-<hr>
-
-<h4>Uploads</h4>
-<div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-    <button id="csvupload-show" class="btn btn-success">Upload CSV</button>
-</div>
-
-<hr>
-
-<h4>
+  <hr>
+  <h4>
     Meta Information
-</h4> <a href="{{table}}/meta_edit"> Edit</a> {{ meta_widget }} {% endblock main-right-sidebar-content-additional %} {% block after-head %}
+  </h4> <a href="{{table}}/meta_edit"> Edit</a>
+  {{ meta_widget }}
+{% endblock main-right-sidebar-content-additional %}
 
-<link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
-<link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
-<link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
-<link href="{% static 'dataedit/query-builder.default.min.css' %}" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="" />
-<link href="{% static 'csvupload/csvupload.css' %}" rel="stylesheet">
-<link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet"> {% endblock after-head %} {% block after-body-bottom-js %}
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<script src="{% static 'dataedit/wkx.min.js' %}"></script>
-<script src="{% static 'dataedit/proj4.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
-<script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
+{% block after-head %}
 
-<!-- Make sure you put this AFTER Leaflet's CSS -->
-<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+  <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
+  <link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
+  <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
+  <link href="{% static 'dataedit/query-builder.default.min.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin=""/>
+  <link href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css" rel="stylesheet">
+
+{% endblock after-head %}
+
+{% block after-body-bottom-js %}
+  <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+  <script src="{% static 'dataedit/wkx.min.js' %}"></script>
+  <script src="{% static 'dataedit/proj4.js' %}"></script>
+  <script type="text/javascript" src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
+  <script type="text/javascript" src="{% static 'dataedit/backend.js' %}"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
+
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+          integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+          crossorigin=""></script>
 
 
-<script>
-    var csrftoken = getCookie('csrftoken');
-    var table = '{{table}}';
-    var schema = '{{schema}}';
-    var view = {
-        type: "{{ current_view.type }}",
-        options: JSON5.parse("{{ current_view.options | escapejs }}")
-    };
-    load_view(schema, table, csrftoken, view);
-</script>
-
-<!-- uploadcsv scritps -->
-<script src="{% static 'csvupload/jquery.csv.min.js' %}"></script>
-<script src="{% static 'csvupload/csvupload.js' %}"></script>
-<script>
-    var csvUpload = CSVUpload({
-        postURL: "{% url 'api_rows_new' schema table %}",
-        csrftoken: getCookie('csrftoken')
-    });
-</script>
-<!-- end uploadcsv scritps -->
-
+  <script>
+      var csrftoken = getCookie('csrftoken');
+      var table = '{{table}}';
+      var schema = '{{schema}}';
+      var view = {
+          type: "{{ current_view.type }}",
+          options: JSON5.parse("{{ current_view.options | escapejs }}")
+      };
+      load_view(schema, table, csrftoken, view);
+  </script>
 {% endblock after-body-bottom-js %}
+
+
+
+
