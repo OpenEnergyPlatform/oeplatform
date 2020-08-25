@@ -1,10 +1,10 @@
 var Wizard = function(config) {
 
-    console.log('Wizard', config)
+    
 
     var state = {
         file: undefined,
-        columns: [],
+        //columns: [],
         previewRows: [],
 
 
@@ -21,14 +21,42 @@ var Wizard = function(config) {
 
         previewSizeRecords: 10,
         batchSizeRecords: 100,
-        
+
         /* user config */
-        csrfToken: config.csrfToken,
+        //csrfToken: config.csrfToken,
+        csrfToken: getCsrfToken(),
+        
         schema: config.schema,
         table: config.table,
+        can_add: config.can_add,
+        columns: config.columns,
+
         $wrapper: $('#' + config.wrapperId),
         $dialog: $('#' + config.wrapperId + ' #wizard-dialog'),
         $file: $('#' + config.wrapperId + ' #wizard-file'),
+    }
+
+    console.log('Wizard', state)
+
+    function getCookie(name) { // https://docs.djangoproject.com/en/3.1/ref/csrf/
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }    
+
+    function getCsrfToken(){
+        // return Cookies.get('csrftoken');
+        return getCookie('csrftoken');
     }
 
     function getTableUrl(){
@@ -88,38 +116,10 @@ var Wizard = function(config) {
         });
     }
     
-        
-    
-
-    function hasWritePermission() {
-        // TODO: this is a stupid way to do this. either create api endpoint or django view
-        return new Promise(function(resolve, reject){
-            $.ajax({
-                url: getNewRowsUrl(),
-                headers: {
-                    'X-CSRFToken': state.csrfToken
-                },
-                dataType: 'json',
-                cache: false,
-                contentType: "application/json; charset=utf-8",
-                processData: false,
-                data: JSON.stringify({ "query": [] }), // purposefully empty
-                type: 'post',
-                async: true,
-                success: function(res){resolve()},
-                error: function(res){                    
-                    if (res.status == 403){
-                        reject('No writing access')
-                    } else {
-                        resolve()
-                    }
-                }
-            });
-        });
-    }
+  
 
 
-    function init(){
+    function init(){        
         console.log('Wizard init');        
         state.$wrapper.removeClass('d-none'); // show        
         state.$wrapper.find('#wizard-btn-show').bind('click', function(evt) {
@@ -128,7 +128,7 @@ var Wizard = function(config) {
     }    
 
 
-    hasWritePermission().then(getColumns).then(init).catch(function(x){console.error(x)});
+    //hasWritePermission().then(getColumns).then(init).catch(function(x){console.error(x)});
 
     function setUploadState() {
         var disabled = !(state.file && state.columns && !state.uploadInProgress);

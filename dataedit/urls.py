@@ -88,4 +88,14 @@ urlpatterns = [
         ),
         views.MapView.as_view()
     ),
+    url(
+        r"^upload/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
+        views.WizardView.as_view(),
+        name="wizard_upload",
+    ),
+    url(
+        r"^upload/$",
+        views.WizardView.as_view(),
+        name="wizard_create",
+    ),
 ]

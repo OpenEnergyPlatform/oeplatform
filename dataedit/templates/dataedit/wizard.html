@@ -1,0 +1,42 @@
+{% extends "dataedit/base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block after-head %}
+<link href="/static/wizard/wizard.css" rel="stylesheet">
+{% endblock after-head %}
+
+{% block site-header %}
+  <h2 class="site-header"><i class="fa fa-hat-wizard"></i>{% if config.table %}{{ config.schema }}.{{ config.table }}{% else %}New Table{% endif %}</h2>
+  {{ config.can_add }} {{ config.can_create }} {{ config.columns }}
+  {{ config }}
+{% endblock site-header %}
+{% block data_content %}<!-- inside bootstrap column -->
+
+<div id="wizard-container" class="container-fluid">
+<!--{% csrf_token %}-->
+
+<div class="row">
+  <input type="text" class="form-control" placeholder="table name" />
+</div>
+
+
+
+
+</div><!-- id="wizard-container" class="container-fluid" -->
+
+{% endblock data_content %}
+
+
+{% block after-body-bottom-js %}
+<script src="/static/wizard/papaparse.min.js"></script>
+<script src="/static/wizard/wizard.js"></script>
+<script>  
+  var config = JSON.parse("{{ config|escapejs }}");
+  var wizard = Wizard(config);
+</script>
+{% endblock after-body-bottom-js %}
+
+
+
+

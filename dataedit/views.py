@@ -1393,3 +1393,48 @@ def increment_usage_count(tag_id):
     finally:
         session.close()
 
+
+
+class WizardView(LoginRequiredMixin, View):
+    """ 
+    """
+        
+    def get(self, request, schema='model_draft', table=None):
+        """        
+        """        
+        engine = actions._get_engine()
+
+        can_add = False
+        columns = None
+        if table:
+            # if upload: table must exist in schema model_draft
+            if schema != 'model_draft':
+                raise Http404('Can only upload to schema model_draft')
+            if not engine.dialect.has_table(engine, table, schema=schema):
+                raise Http404('Table does not exist')
+            table_obj = Table.load(schema, table)                        
+            if not request.user.is_anonymous:
+                user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+                level = request.user.get_table_permission_level(table_obj)
+                can_add = level >= login_models.WRITE_PERM
+            _columns = actions.describe_columns(schema, table)
+            # order by ordinal_position
+            columns = []
+            for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):                
+                columns.append({
+                    'name': name,
+                    'data_type': col['data_type']
+                })
+
+        context = {
+            "schema": schema,
+            "table": table,
+            "config": json.dumps({ # pass as json string
+                "can_add": can_add,
+                "columns": columns,
+                "schema": schema,
+                "table": table,
+            })
+        }
+
+        return render(request, "dataedit/wizard.html", context=context)
