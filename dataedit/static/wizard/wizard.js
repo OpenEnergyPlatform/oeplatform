@@ -1,6 +1,61 @@
 var Wizard = function(config) {
 
+    var SCHEMA = 'model_draft';
+    var API_VERSION = 'v0';
+
+    function getDomItem(name){
+        var elem = $("#wizard-container").find('#wizard-' + name);
+        if (!elem.length) throw "Element not found: #wizard-" + name
+        return elem
+    }
+
+    function addColumn(name, type){
+        var columns = getDomItem('columns');
+        var n = columns.find('.wizard-column').length;        
+        var column = getDomItem('column-template').clone().attr('id', 'wizard-column-' + n).appendTo(columns).removeClass('invisible')
+        column.find('.wizard-column-name').val(name);
+        column.find('.wizard-column-type').val(type);
+        console.log(column.find('.wizard-column-drop'))
+        
+        column.find('.wizard-column-drop').bind('click', function(evnt){
+            evnt.target.closest('.wizard-column').remove()
+        })
+        
+    }
+
+    function getColumnDefinition(colElement){
+        return {
+            name: colElement.find('.wizard-column-name').val(),
+            data_type: colElement.find('.wizard-column-type').val(),
+            is_nullable: true // TODO
+        }
+    }
     
+    getDomItem('column-add').bind('click', function(_evnt){addColumn();})
+
+    
+    getDomItem('table-create').bind('click', function(_evnt){
+        /* post */
+
+        var colDefs = []
+        getDomItem('columns').find('.wizard-column').each(function(_i, e){            
+            colDefs.push(getColumnDefinition($(e)));
+        });
+        
+        var tablename = getDomItem('tablename').val();
+        var url = "/api/" + API_VERSION + "/schema/" + SCHEMA + "/tables/" + tablename + "/";
+
+        var query = {
+            "columns": colDefs,
+            "constraints": [
+                // {"constraint_type": "PRIMARY KEY", "constraint_parameter": "id"}
+            ]
+        }
+
+        console.log(url, query);
+        // TODO POST
+    })
+
 
     var state = {
         file: undefined,
