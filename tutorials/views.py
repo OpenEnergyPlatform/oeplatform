@@ -16,8 +16,11 @@ from markdown2 import Markdown
 
 from .forms import TutorialForm
 from .models import Tutorial
+
+import re
 # Create your views here.
 
+youtubeUrlRegex = re.compile('^.*youtube\.com\/watch\?v=(?P<id>[A-z0-9]+)$')
 
 staticTutorials = [
     {
@@ -190,6 +193,17 @@ def _gatherTutorials(id=None):
 
     return tutorials
 
+def _processFormInput(form):
+    tutorial = form.save(commit=False)
+    # Add more information to the dataset like date, time, contributor ...
+
+    if tutorial.media_src:
+        matchResult = youtubeUrlRegex.match(tutorial.media_src)
+        videoId = matchResult.group(1) if matchResult else None
+        if videoId:
+            tutorial.media_src = "https://www.youtube.com/embed/" + videoId
+
+    return tutorial
 
 def formattedMarkdown(markdown):
     """
@@ -257,8 +271,7 @@ class CreateNewTutorial(LoginRequiredMixin, CreateView):
         :return:
         """
 
-        tutorial = form.save(commit=False)
-        # Add more information to the dataset like date, time, contributor ...
+        tutorial = _processFormInput(form)
         tutorial.save()
 
         # Convert markdown to HTML and save to db
@@ -290,9 +303,9 @@ class EditTutorials(LoginRequiredMixin, UpdateView):
         :param form:
         :return:
         """
-        tutorial = form.save(commit=False)
-        # Add more information to the dataset like date, time, contributor ...
+        tutorial = _processFormInput(form)
         tutorial.save()
+
         _html = formattedMarkdown(tutorial.markdown)
         addHtml = Tutorial.objects.get(pk=tutorial.id)
         addHtml.html = _html
