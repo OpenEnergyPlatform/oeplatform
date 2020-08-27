@@ -131,6 +131,67 @@ class TestPut(APITestCase):
         )
         self.checkStructure()
 
+    def test_create_and_drop_uppercase_table(self):
+        self._structure_data = {
+            "constraints": [
+                {
+                    "constraint_type": "PRIMARY KEY",
+                    "constraint_parameter": "id",
+                    "reference_table": None,
+                    "reference_column": None,
+                }
+            ],
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "bigserial",
+                    "is_nullable": False,
+                    "character_maximum_length": None,
+                },
+                {
+                    "name": "col_varchar123",
+                    "data_type": "character varying",
+                    "is_nullable": True,
+                    "character_maximum_length": 123,
+                },
+                {"name": "col_intarr", "data_type": "integer[]", "is_nullable": True},
+            ]
+        }
+        self.test_table = "Table_all_columns"
+
+        c_basic_resp = self.__class__.client.put(
+            "/api/v0/schema/{schema}/tables/{table}/".format(
+                schema=self.test_schema, table=self.test_table
+            ),
+            data=json.dumps({"query": self._structure_data}),
+            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
+            content_type="application/json",
+        )
+
+        self.assertEqual(
+            c_basic_resp.status_code,
+            201,
+            c_basic_resp.json().get("reason", "No reason returned"),
+        )
+
+        self.checkStructure()
+
+        c_basic_resp = self.__class__.client.delete(
+            "/api/v0/schema/{schema}/tables/{table}/".format(
+                schema=self.test_schema, table=self.test_table
+            ),
+            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
+            content_type="application/json",
+        )
+
+        self.assertEqual(
+            c_basic_resp.status_code,
+            200,
+            c_basic_resp.json().get("reason", "No reason returned"),
+        )
+
+
+
     def test_create_table_defaults(self):
         self._structure_data = {
             "constraints": [
