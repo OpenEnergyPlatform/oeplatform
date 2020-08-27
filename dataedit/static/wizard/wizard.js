@@ -2,6 +2,8 @@ var Wizard = function(config) {
 
     var SCHEMA = 'model_draft';
     var API_VERSION = 'v0';
+    var previewSizeRecords = 10;
+    var csvColumnPrefix = "Column_";
 
     function getDomItem(name){
         var elem = $("#wizard-container").find('#wizard-' + name);
@@ -9,52 +11,287 @@ var Wizard = function(config) {
         return elem
     }
 
-    function addColumn(name, type){
+    function addColumn(columnDef){
+        columnDef = columnDef || {};        
         var columns = getDomItem('columns');
         var n = columns.find('.wizard-column').length;        
         var column = getDomItem('column-template').clone().attr('id', 'wizard-column-' + n).appendTo(columns).removeClass('invisible')
-        column.find('.wizard-column-name').val(name);
-        column.find('.wizard-column-type').val(type);
-        console.log(column.find('.wizard-column-drop'))
-        
-        column.find('.wizard-column-drop').bind('click', function(evnt){
-            evnt.target.closest('.wizard-column').remove()
+        column.find('.wizard-column-name').val(columnDef.name);
+        column.find('.wizard-column-type').val(columnDef.data_type);
+        column.find('.wizard-column-nullable').prop("checked", columnDef.is_nullable);
+        column.find('.wizard-column-pk').prop("checked", columnDef.is_pk);        
+        column.find('.wizard-column-drop').bind('click', function(evnt){            
+            evnt.currentTarget.closest('.wizard-column').remove()
+        })
+        column.find('.wizard-column-pk').bind('change', function(evnt){
+            // if pk: set nullable to false
+            var tgt = $(evnt.currentTarget);
+            if (tgt.prop('checked')){
+                tgt.closest('.wizard-column').find('.wizard-column-nullable').prop('checked', false);
+            }
         })
         
+    }
+
+    function addColumnCsv(columnDef){
+        columnDef = columnDef || {};        
+        var columns = getDomItem('csv-columns');
+        var n = columns.find('.wizard-csv-column').length;        
+        var column = getDomItem('csv-column-template').clone().attr('id', 'wizard-csv-column-' + n).appendTo(columns).removeClass('invisible')        
+        column.find('.wizard-csv-column-name').val(columnDef.name);
+        column.find('.wizard-csv-column-name-new').bind('change', validateColumnMapping);
+        column.find('.wizard-csv-column-preview').val(columnDef.preview);
+        column.find('.wizard-csv-column-parse').bind('change', changeColumnParser).change();
     }
 
     function getColumnDefinition(colElement){
         return {
             name: colElement.find('.wizard-column-name').val(),
             data_type: colElement.find('.wizard-column-type').val(),
-            is_nullable: true // TODO
+            is_nullable: colElement.find('.wizard-column-nullable').prop("checked"),
+            is_pk: colElement.find('.wizard-column-pk').prop("checked")
         }
     }
-    
-    getDomItem('column-add').bind('click', function(_evnt){addColumn();})
+
+    function validateColumnMapping(){
+        console.log('TODO')
+    }
+
+    function getApiTableUrl(tablename){
+        return "/api/" + API_VERSION + "/schema/" + SCHEMA + "/tables/" + tablename;
+    }
+    function getApiAdvancedUrl(path){
+        return "/api/" + API_VERSION + "/advanced/" + path;
+    }    
+
+    function getApiRowsUrl(tablename){
+        return getApiTableUrl(tablename) + "/rows/new";
+    }
+
+    function getWizardUrl(tablename){
+        return "/dataedit/upload/" + SCHEMA + "/" + tablename; // TODO: get base url from django
+    }
+    function getErrorMsg(xhr){
+        if (xhr.responseJSON && xhr.responseJSON.reason){
+            return xhr.responseJSON.reason
+        } else {
+            return xhr.statusText
+        }
+    }
+
+    function sendJson(method, url, data, async, success, error) {
+        console.log(url)
+        return $.ajax({
+            url: url,
+            headers: {
+                'X-CSRFToken': getCsrfToken()
+            },
+            dataType: 'json',
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            data: JSON.stringify(data),
+            type: method,
+            async: async,
+            success: success,
+            error: error
+        });
+    }
 
     
+    function getCookie(name) { // https://docs.djangoproject.com/en/3.1/ref/csrf/
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }    
+
+    function getCsrfToken(){
+        // return Cookies.get('csrftoken');
+        return getCookie('csrftoken');
+    }
+
+
+
+
+
+
+    
+    /* bind functions */    
+    getDomItem('column-add').bind('click', function(_evnt){addColumn();})
     getDomItem('table-create').bind('click', function(_evnt){
         /* post */
 
-        var colDefs = []
+        var colDefs = [];
+        var constraints = [];
+        var pk = undefined; // NOTE: currently only single field PK
         getDomItem('columns').find('.wizard-column').each(function(_i, e){            
-            colDefs.push(getColumnDefinition($(e)));
+            var c = getColumnDefinition($(e));
+            colDefs.push(c);
+            if (c.is_pk){
+                constraints.push({"constraint_type": "PRIMARY KEY", "constraint_parameter": c.name})
+            }
         });
         
-        var tablename = getDomItem('tablename').val();
-        var url = "/api/" + API_VERSION + "/schema/" + SCHEMA + "/tables/" + tablename + "/";
+        var tablename = getDomItem('tablename').val();        
+        var url = getApiTableUrl(tablename);
+        var urlSuccess = getWizardUrl(tablename);
 
-        var query = {
-            "columns": colDefs,
-            "constraints": [
-                // {"constraint_type": "PRIMARY KEY", "constraint_parameter": "id"}
-            ]
+        var data = {
+            query: {
+                "columns": colDefs,
+                "constraints": constraints            
+            }
         }
+        
+        sendJson('PUT', url, data, true, function(_res){
+            window.location = urlSuccess
+        }, function(xhr){
+            // TODO
+            getErrorMsg(xhr)
+        });        
+    });
 
-        console.log(url, query);
-        // TODO POST
+    /* load existing columns */
+    if (config.table){
+        getDomItem('tablename').val(config.table)
+        for (var i=0; i<config.columns.length; i++){
+            addColumn(config.columns[i])
+        }        
+    }
+    
+    function changeColumnParser(evt){
+        var col = $(evt.currentTarget).closest('.wizard-csv-column');
+        var text = col.find('.wizard-csv-column-preview').val();
+        var parse = col.find('.wizard-csv-column-parse').val();        
+        col.find('.wizard-csv-column-preview-parsed').val(parse + ": " + text);
+
+    }
+ 
+    function changeFileSettings(){
+        var fileConf = {
+            file: getDomItem('file'), // [0].files[0],
+            encoding: getDomItem('encoding').find(":selected").val(),
+            delimiter: getDomItem('delimiter').find(":selected").val(),
+            header: getDomItem('header').prop("checked")
+        };
+        
+        /* update example */
+
+        getDomItem('csv-example').text(JSON.stringify(config));
+
+        getDomItem('csv-columns').empty();        
+        if (fileConf.file) {
+            fileConf.file.parse({
+                config: {
+                    encoding: fileConf.encoding,
+                    skipEmptyLines: true,
+                    preview: previewSizeRecords + (fileConf.header ? 1 : 0),
+                    delimiter: fileConf.delimiter,
+                    complete: function(result, _file) {
+                        // result = {data, errors, meta}                        
+                        if (result.data.length) {
+                                                        
+                            var columns = [];
+                            var nColumns = result.data[0].length;
+                            var previewRows;
+                            if (fileConf.header) {
+                                for (var i = 0; i < nColumns; i++) {
+                                    columns.push({ 'name': result.data[0][i] });
+                                }
+                                previewRows = result.data.slice(1, previewSizeRecords + 1);
+                            } else {
+                                for (var i = 0; i < nColumns; i++) {
+                                    columns.push({ 'name': csvColumnPrefix + (i + 1) });
+                                }
+                                previewRows = result.data;
+                            }
+                            for (var i = 0; i < nColumns; i++) {
+                                var previewColumn = [];
+                                for (var j = 0; j < previewRows.length; j++) {
+                                    previewColumn.push(previewRows[j][i]);
+                                }
+                                columns[i].preview = previewColumn.join(' | ');
+                                addColumnCsv(columns[i]);
+                            }
+                        } else {
+                             // no data                            
+                        }
+                    },
+                    error: function(error) {
+                        // TODO error
+                        console.error(error)
+                    },
+                }
+            });
+        } else {
+            // TODO no file
+        }        
+    }
+
+
+    getDomItem('file').val("").bind('change', changeFileSettings);
+    getDomItem("encoding").bind('change', changeFileSettings);
+    getDomItem("delimiter").bind('change', changeFileSettings);
+    getDomItem("header").bind('change', changeFileSettings);
+    changeFileSettings();
+    
+    
+    var context = {
+        query: {
+            schema: config.schema,
+            table: config.table,
+            fields: config.columns.map(function(e){return e.name}),
+            values: undefined
+        }
+    };    
+    sendJson('POST', getApiAdvancedUrl("connection/open"), undefined, true)
+    .then(function(res){
+        console.log(res)
+        context.connection_id =  res.content.connection_id;        
+        return sendJson('POST', getApiAdvancedUrl("cursor/open"), context, true)        
     })
+    .then(function(res){
+        console.log(res)
+        context.cursor_id =  res.content.cursor_id;        
+        context.query.values = []
+        console.log(context)
+        return sendJson('POST', getApiAdvancedUrl("insert"), context, true)
+    })
+    .then(function(res){
+        console.log(res)
+        return sendJson('POST', getApiAdvancedUrl("connection/commit"), context, true)
+    })
+    /*.then(function(){
+        return sendJson('POST', getApiAdvancedUrl("cursor/close"), context, true)
+    })
+    */
+    .then(function(res){
+        console.log(res)
+        return sendJson('POST', getApiAdvancedUrl("connection/close"), context, true)
+    })
+    .then(function(res){console.log("THEN", res)})
+    .catch(function(err){
+        console.error(getErrorMsg(err));
+        if (context.connection_id) {
+            sendJson('POST', getApiAdvancedUrl("connection/rollback"), context, true)
+            .then(function(){
+                return sendJson('POST', getApiAdvancedUrl("connection/close"), context, true)
+            })
+        }        
+    })
+    
+    
+    
 
 
     var state = {
@@ -91,37 +328,10 @@ var Wizard = function(config) {
         $file: $('#' + config.wrapperId + ' #wizard-file'),
     }
 
-    console.log('Wizard', state)
+    
+   
 
-    function getCookie(name) { // https://docs.djangoproject.com/en/3.1/ref/csrf/
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }    
-
-    function getCsrfToken(){
-        // return Cookies.get('csrftoken');
-        return getCookie('csrftoken');
-    }
-
-    function getTableUrl(){
-        return "/api/v0/schema/" + state.schema + "/tables/" + state.table
-    }
-
-    function getNewRowsUrl(){
-        return getTableUrl() + "/rows/new"
-    }
-
+    
 
     function getColumns() {
         return new Promise(function(resolve, reject){
@@ -199,25 +409,7 @@ var Wizard = function(config) {
     }
 
     function __init() {
-        state.$dialog.find('#wizard-file').val("").bind('change', function(evt) {
-            state.file = $(evt.target)[0].files[0];
-            update()
-        });
-
-        state.$dialog.find("#wizard-encoding").val(state.encoding).bind('change', function(evt) {
-            state.encoding = $(evt.target).find(":selected").val();
-            update()
-        });
-
-        state.$dialog.find("#wizard-separator").val(state.separator).bind('change', function(evt) {
-            state.delimiter = $(evt.target).find(":selected").val();
-            update()
-        });
-
-        state.$dialog.find("#wizard-header").prop("checked", state.header).bind('change', function(evt) {
-            state.header = $(evt.target).prop("checked")
-            update()
-        });
+        
 
         state.$dialog.find("#wizard-submit").bind('click', function(_evt) {
             upload();
@@ -238,47 +430,7 @@ var Wizard = function(config) {
     }
 
 
-    function update() {
-        if (state.file) {
-            state.columns = [];
-            state.previewRows = [];
-            state.$file.parse({
-                config: {
-                    encoding: state.encoding,
-                    skipEmptyLines: true,
-                    preview: state.previewSizeRecords + (state.header ? 1 : 0),
-                    delimiter: state.delimiter,
-                    complete: function(results, file) {
-                        if (results.data.length) {
-                            var nColumns = results.data[0].length;
-                            if (state.header) {
-                                for (var i = 0; i < nColumns; i++) {
-                                    state.columns.push({ 'name': results.data[0][i] });
-                                }
-                                state.previewRows = results.data.slice(1, state.previewSizeRecords + 1);
-                            } else {
-                                for (var i = 0; i < nColumns; i++) {
-                                    state.columns.push({ 'name': state.colPrexix + (i + 1) });
-                                }
-                                state.previewRows = results.data;
-                            }
-                            updatePreviewTable()
-                        } else { // no data
-                            setMessage('no data', 'error')
-                            reset()
-                        }
-                    },
-                    error: function(error) {
-                        setMessage(error, 'error')
-                        reset()
-                    },
-                }
-            });
-        } else {
-            // no file
-            reset()
-        }
-    }
+    
 
 
     function updateColumnMapping() {

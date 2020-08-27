@@ -1398,7 +1398,45 @@ def increment_usage_count(tag_id):
 class WizardView(LoginRequiredMixin, View):
     """ 
     """
-        
+    
+    @staticmethod
+    def get_datatype_str(column_def):        
+        """
+        I want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128).        
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def['data_type'].lower()
+        precisions = None
+        if dt == 'character varying':
+            dt = 'varchar'
+            precisions = [column_def['character_maximum_length']]
+        elif dt.endswith(' without time zone'): # this is the default
+            dt =  dt.replace(' without time zone', '')
+        elif re.match('(numeric|decimal)', dt):
+            precisions = [column_def['numeric_precision'], column_def['numeric_scale']]
+        elif dt == 'interval':
+            precisions = [column_def['interval_precision']]
+        elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default', '')):
+            dt = dt.replace('int', 'serial')
+        if precisions:
+            dt += '(%s)' % ', '.join(str(x) for x in precisions)
+        return dt
+
+    @staticmethod
+    def get_pk_fields(constraints):
+        """
+        NOTE: Currently, the api to create tables only allows single fields primary keys
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition", ""))
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(',')]
+        return pk_fields
+
+
     def get(self, request, schema='model_draft', table=None):
         """        
         """        
@@ -1406,6 +1444,8 @@ class WizardView(LoginRequiredMixin, View):
 
         can_add = False
         columns = None
+        pk_fields = None
+        n_rows = None
         if table:
             # if upload: table must exist in schema model_draft
             if schema != 'model_draft':
@@ -1418,22 +1458,29 @@ class WizardView(LoginRequiredMixin, View):
                 level = request.user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
             _columns = actions.describe_columns(schema, table)
+            _constraints = actions.describe_constraints(schema, table)
+            pk_fields = self.get_pk_fields(_constraints)
             # order by ordinal_position
             columns = []
             for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):                
                 columns.append({
                     'name': name,
-                    'data_type': col['data_type']
+                    'data_type': self.get_datatype_str(col),
+                    'is_nullable': col['is_nullable'],
+                    'is_pk': name in pk_fields
                 })
+            # get number ow rows
+            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)                    
+            res = actions.perform_sql(sql)
+            n_rows = res['result'].fetchone()[0]
 
         context = {
-            "schema": schema,
-            "table": table,
             "config": json.dumps({ # pass as json string
                 "can_add": can_add,
-                "columns": columns,
+                "columns": columns,                
                 "schema": schema,
                 "table": table,
+                "n_rows": n_rows
             })
         }
 
