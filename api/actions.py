@@ -1371,7 +1371,7 @@ def get_comment_table(schema, table):
     engine = _get_engine()
 
     # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
+    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table
     )
     res = engine.execute(sql_string)
