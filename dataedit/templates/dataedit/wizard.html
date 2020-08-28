@@ -5,7 +5,6 @@
 <!-- inside bootstrap column -->
 
 <div id="wizard-container" class="container-fluid">
-    <!--{% csrf_token %}-->
 
 
     <div>
@@ -134,22 +133,22 @@
                     <input type="text" class="form-control wizard-csv-column-name" placeholder="column name in file" />
                 </div>
                 <div class="col">
-                <select class="colum-parser form-control form-control-sm wizard-csv-column-parse">
-                    <option value="parseStr"></option>
-                    <option value="parseFloat2">Number (Englisch)</option>
-                    <option value="parseFloatGerman">Number (German)</option>
+                <select class="form-control form-control-sm wizard-csv-column-parse">
+                    
                 </select>
                 </div>
                 <div class="col">
                     <input type="text" class="form-control wizard-csv-column-name-new" placeholder="column name in database" />
-                </div>
-                <div class="col invisible">                    
-                    <input type="text" class="form-control wizard-csv-column-preview" />
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control wizard-csv-column-preview-parsed" />
-                </div>
-
+                </div>                
+            </div>
+            
+            <div class="row">
+                
+                    <table id="wizard-csv-preview">
+                        <thead><tr></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                
             </div>
 
             <div class="row">

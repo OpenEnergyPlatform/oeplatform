@@ -1407,8 +1407,9 @@ class WizardView(LoginRequiredMixin, View):
         # for reverse validation, see also api.parser.parse_type(dt_string)
         dt = column_def['data_type'].lower()
         precisions = None
-        if dt == 'character varying':
-            dt = 'varchar'
+        if dt.startswith('character'):
+            if dt == 'character varying':
+                dt = 'varchar'
             precisions = [column_def['character_maximum_length']]
         elif dt.endswith(' without time zone'): # this is the default
             dt =  dt.replace(' without time zone', '')
@@ -1416,7 +1417,7 @@ class WizardView(LoginRequiredMixin, View):
             precisions = [column_def['numeric_precision'], column_def['numeric_scale']]
         elif dt == 'interval':
             precisions = [column_def['interval_precision']]
-        elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default', '')):
+        elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default') or ''):
             dt = dt.replace('int', 'serial')
         if precisions:
             dt += '(%s)' % ', '.join(str(x) for x in precisions)
@@ -1430,7 +1431,7 @@ class WizardView(LoginRequiredMixin, View):
         pk_fields = []
         for _name, constraint in constraints.items():
             if constraint.get("constraint_type") == "PRIMARY KEY":
-                m = re.match(r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition", ""))
+                m = re.match(r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or "")
                 if m:
                     # "f1, f2" -> ["f1", "f2"]
                     pk_fields = [x.strip() for x in m.groups()[0].split(',')]
@@ -1476,11 +1477,11 @@ class WizardView(LoginRequiredMixin, View):
 
         context = {
             "config": json.dumps({ # pass as json string
-                "can_add": can_add,
+                "canAdd": can_add,
                 "columns": columns,                
                 "schema": schema,
                 "table": table,
-                "n_rows": n_rows
+                "nRows": n_rows
             })
         }
 
