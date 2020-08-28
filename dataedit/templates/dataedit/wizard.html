@@ -7,7 +7,7 @@
 <div id="wizard-container" class="container-fluid">
 
 
-    <div>
+    <div id="wizard-container-create">
         <!-- create -->
 
 
@@ -27,7 +27,7 @@
 
             <div class="row invisible wizard-column" id="wizard-column-template">
                 <div class="col">
-                    <button class="btn btn-primary wizard-column-drop"><i class="fa fa-minus"></i></button>
+                    <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                 </div>
                 <div class="col">
                     <input type="text" class="form-control wizard-column-name" placeholder="column name" />
@@ -38,16 +38,13 @@
                 <div class="col">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input wizard-column-nullable">
-                        <label class="form-check-label">nullable</label>
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-check">
                         <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                         <input class="form-check-input wizard-column-pk" type="radio" name="wizard-column-pk" value="">
-                        <label class="form-check-label">
-                  primary key
-                </label>
+
                     </div>
                 </div>
             </div>
@@ -70,7 +67,7 @@
     </div>
     <!-- create -->
 
-    <div>
+    <div id="wizard-container-upload">
         <!-- upload -->
 
         <div class="row">
@@ -133,29 +130,39 @@
                     <input type="text" class="form-control wizard-csv-column-name" placeholder="column name in file" />
                 </div>
                 <div class="col">
-                <select class="form-control form-control-sm wizard-csv-column-parse">
+                    <select class="form-control form-control-sm wizard-csv-column-parse">
                     
                 </select>
                 </div>
                 <div class="col">
                     <input type="text" class="form-control wizard-csv-column-name-new" placeholder="column name in database" />
-                </div>                
+                </div>
             </div>
-            
+
             <div class="row">
-                
-                    <table id="wizard-csv-preview">
-                        <thead><tr></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                
+
+                <table id="wizard-csv-preview">
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
             </div>
 
             <div class="row">
                 <div class="col">
+                    <div class="progress" id="wizard-upload-progress">
+                        <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"></div>
+                    </div>
+                    <label id="wizard-upload-progress-label"></label>
+                </div>
+                <div class="col">
                     <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i></button>
+                    <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i></button>
                 </div>
             </div>
+
 
         </div>
 

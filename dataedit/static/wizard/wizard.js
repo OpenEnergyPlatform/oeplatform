@@ -28,6 +28,7 @@ var Wizard = function(config) {
         uploadProgressBytes: null,
         fileSizeBytes: null,
         uploadedRows: null,
+        cancel: null,
     }
 
     /* available column parser */
@@ -104,7 +105,7 @@ var Wizard = function(config) {
         var values = ['???']; // fallback        
         if (/.*int/.exec(data_type) || /.*serial/.exec(data_type)) {
             values = [10, 342, 0, -892, 231, 51, 2, 5]
-        } else if (/real/.exec(data_type) || /double/.exec(data_type)) {
+        } else if (/(real|double|float)/.exec(data_type)) {
             values = [0.1, -3.1, 1.5e-2, .34, -.821678, 234.3242]
         } else if (/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)) {
             var prec = parseInt(/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)[2]);
@@ -117,8 +118,8 @@ var Wizard = function(config) {
             values = ["2020-01-01", "1970-10-11", "1981-09-07"]
         } else if (/text/.exec(data_type)) {
             values = ["lorem", "ipsum", "blablabla", "hello world", '"quoted' + delimiter + ' text with delimiter"']
-        } else if (/character[ ]*\(([0-9]+)\)/.exec(data_type)) {
-            var prec = parseInt(/character[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
+        } else if (/char[ ]*\(([0-9]+)\)/.exec(data_type)) {
+            var prec = parseInt(/char[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
             return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", prec, prec)
         } else if (/varchar[ ]*\(([0-9]+)\)/.exec(data_type)) {
             var prec = parseInt(/varchar[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
@@ -423,6 +424,10 @@ var Wizard = function(config) {
         }
     }
 
+    function cancelUpload(){
+        state.cancel = true;
+    }
+
     function csvUpload() {
         updateFile();
         if (!state.file) return;
@@ -433,6 +438,7 @@ var Wizard = function(config) {
         state.skippedHeader = state.header ? false : true; // only if csv has header
         state.fileSizeBytes = state.file[0].files[0].size;
         state.uploadedRows = 0;
+        state.cancel = false;
 
         sendJson('POST', getApiAdvancedUrl("connection/open"))
             .then(function(res) {
@@ -475,7 +481,7 @@ var Wizard = function(config) {
                                 sendJson('POST', getApiAdvancedUrl("insert"), createContext(insertData)).then(function(res) {
                                     var nRows = JSON.parse(res).content.rowcount;
                                     state.uploadedRows += nRows
-
+                                    updateProgress();
                                     state.csvParser.resume()
                                 }).catch(rollback);
                             }
@@ -529,6 +535,15 @@ var Wizard = function(config) {
 
     }
 
+    function updateProgress(){
+        var p = state.uploadProgressBytes / state.fileSizeBytes * 100;
+        p = p || 0;
+        p = Math.round(p);
+        console.log('progress: ' + p);
+        getDomItem('upload-progress .progress-bar').css('width', p + '%')
+
+        getDomItem('upload-progress-label').text(p + "% rows: " + state.uploadedRows)
+    }
 
 
     (function init() {
@@ -552,7 +567,9 @@ var Wizard = function(config) {
         getDomItem("delimiter").bind('change', changeFileSettings);
         getDomItem("header").bind('change', changeFileSettings);
         getDomItem("table-upload").bind('click', csvUpload);
-
+        getDomItem("table-upload-cancel").bind('click', cancelUpload);
+        
+        
         changeFileSettings();
     })();
 

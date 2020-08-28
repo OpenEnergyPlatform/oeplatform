@@ -23,8 +23,9 @@
     border-left: 1px solid #dee2e6;
 }
 
-#wizard-progress {
-    width: 100%;
-    height: 5px;
-}
 */
+
+#wizard-upload-progress {
+    width: 200px;
+    height: 8px;
+}

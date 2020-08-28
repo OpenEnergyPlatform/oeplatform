@@ -1410,6 +1410,8 @@ class WizardView(LoginRequiredMixin, View):
         if dt.startswith('character'):
             if dt == 'character varying':
                 dt = 'varchar'
+            else:
+                dt = 'char'
             precisions = [column_def['character_maximum_length']]
         elif dt.endswith(' without time zone'): # this is the default
             dt =  dt.replace(' without time zone', '')
@@ -1418,7 +1420,10 @@ class WizardView(LoginRequiredMixin, View):
         elif dt == 'interval':
             precisions = [column_def['interval_precision']]
         elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default') or ''):
-            dt = dt.replace('int', 'serial')
+            #dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith('double'):
+            dt = 'float'
         if precisions:
             dt += '(%s)' % ', '.join(str(x) for x in precisions)
         return dt
