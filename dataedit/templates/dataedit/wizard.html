@@ -4,162 +4,267 @@
 {% endblock site-header %} {% block main %}
 <!-- inside bootstrap column -->
 
-<div id="wizard-container" class="container-fluid">
+<div class="container-fluid">
 
 
-    <div id="wizard-container-create">
-        <!-- create -->
 
+    <div id="wizard-container" class="accordion">
 
-        <div class="row">
-            <div class="col">
-                <input type="text" class="form-control" placeholder="table name" id="wizard-tablename" />
-            </div>
-        </div>
+        <div id="wizard-notifications" class="row invisible">
+            <div class="col-12">
 
-        <div class="row">
-            <div class="col">
-                <div id="wizard-columns" class="row">
-
-
-                </div>
-            </div>
-
-            <div class="row invisible wizard-column" id="wizard-column-template">
-                <div class="col">
-                    <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control wizard-column-name" placeholder="column name" />
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control wizard-column-type" placeholder="column type" />
-                </div>
-                <div class="col">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input wizard-column-nullable">
+                <div id="wizard-notification-load" class="alert alert-light wizard-notification" role="alert">
+                    <div class="spinner-border text-primary" role="status">
                     </div>
+                    <span class="message"></span>
                 </div>
-                <div class="col">
-                    <div class="form-check">
-                        <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
-                        <input class="form-check-input wizard-column-pk" type="radio" name="wizard-column-pk" value="">
 
-                    </div>
+                <div id="wizard-notification-error" class="alert alert-danger wizard-notification" role="alert">
+                    <span class="message"></span>
                 </div>
-            </div>
-
-
-            <div class="row">
-                <div class="col">
-                    <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i></button>
+                <div id="wizard-notification-success" class="alert alert-success wizard-notification" role="alert">
+                    <span class="message"></span>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col">
-                    <button class="btn btn-primary" id="wizard-table-create"><i class="fa fa-table"></i></button>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-    <!-- create -->
-
-    <div id="wizard-container-upload">
-        <!-- upload -->
-
-        <div class="row">
-            <div class="col">
-                <textarea type="text" class="form-control" id="wizard-csv-example"></textarea>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <div class="form-group">
-                    <div class="custom-file">
-                        <input id="wizard-file" type="file" class="custom-file-input form-control form-control-sm" />
-                        <label class="custom-file-label" for="wizard-file"></label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <div class="form-group">
-                    <label class="form-check-label" for="wizard-encoding">Encoding</label>
-                    <select id="wizard-encoding" name="encoding" class="form-control form-control-sm">
-            <option value="iso-8859-1">ISO-8859-1</option>
-            <option value="utf-8">UTF-8</option>          
-        </select>
-                </div>
-            </div>
-
-            <div class="col">
-                <div class="form-group">
-                    <label class="form-check-label" for="wizard-delimiter">Delimiter</label>
-                    <select id="wizard-delimiter" name="delimiter" class="form-control form-control-sm">
-                <option value="">(auto)</option>
-                <option value=";">semicolon</option>
-                <option value=",">comma</option>
-                <option value="\t">tab</option>
-                <option value="|">bar</option>                                         
-            </select>
-                </div>
-            </div>
-            <div class="col">
-                <div class="form-group">
-                    <label class="form-check-label" for="wizard-header">Column names</label>
-                    <input id="wizard-header" type="checkbox" class="form-check-input form-control form-control-sm" />
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <div id="wizard-csv-columns" class="row">
-
-
-                </div>
-            </div>
-
-            <div class="row invisible wizard-csv-column" id="wizard-csv-column-template">
-                <div class="col">
-                    <input type="text" class="form-control wizard-csv-column-name" placeholder="column name in file" />
-                </div>
-                <div class="col">
-                    <select class="form-control form-control-sm wizard-csv-column-parse">
-                    
-                </select>
-                </div>
-                <div class="col">
-                    <input type="text" class="form-control wizard-csv-column-name-new" placeholder="column name in database" />
-                </div>
-            </div>
-
-            <div class="row">
-
-                <table id="wizard-csv-preview">
-                    <thead>
-                        <tr></tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-            </div>
-
-            <div class="row">
-                <div class="col">
+                <div id="wizard-notification-progress" class="wizard-notification">
                     <div class="progress" id="wizard-upload-progress">
                         <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"></div>
                     </div>
-                    <label id="wizard-upload-progress-label"></label>
+                    <label id="wizard-upload-progress-label" class="message"></label>
                 </div>
+
+
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-container-create">
+                1) create table
+              </button>
+                </h5>
+            </div>
+
+            <div id="wizard-container-create" class="collapse" data-parent="#wizard-container">
+                <div class="card-body">
+
+
+
+
+
+                    <div class="row my-2">
+                        <div class="col">
+                            <input type="text" class="form-control col-auto" placeholder="table name" id="wizard-tablename" />
+                        </div>
+                    </div>
+
+                    <div class="row my-2">
+                        <div class="col">
+                            <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i> add column</button>
+                        </div>
+                    </div>
+
+                    <div class="row wizard-column">
+                        <div class="col-1">
+                        </div>
+                        <div class="col-5">
+                            column name
+                        </div>
+                        <div class="col-4">
+                            column type
+                        </div>
+                        <div class="col-1">
+                            NULL
+                        </div>
+                        <div class="col-1">
+                            PK
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center wizard-column" id="wizard-column-template">
+                        <div class="col-1">
+                            <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
+                        </div>
+
+                        <div class="col-5">
+
+                            <input type="text" class="form-control wizard-column-name" placeholder="" />
+
+                        </div>
+
+                        <div class="col-4">
+
+                            <input type="text" class="form-control wizard-column-type" placeholder="" />
+
+                        </div>
+
+                        <div class="col-1">
+
+                            <input class="wizard-column-nullable" type="checkbox" />
+
+                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
+                        </div>
+
+                        <div class="col-1">
+
+                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" />
+
+                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
+                        </div>
+
+                    </div>
+
+
+                    <div id="wizard-columns" class="">
+                        <!-- placeholder for dynamic items -->
+                    </div>
+
+                    <div class="row my-2">
+                        <div class="col">
+                            <button class="btn btn-primary" id="wizard-table-create"><i class="fa fa-table"></i> Create table</button>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-container-upload">
+            2) upload csv
+          </button>
+            </h5>
+        </div>
+
+        <div id="wizard-container-upload" class="collapse" data-parent="#wizard-container">
+            <div class="card-body">
+                <div class="row my-2">
+                    <h4>2.1 Select csv options</h4>
+                </div>
+
+
+                <div class="row align-items-left">
+                    <div class="col-5">Encoding</div>
+                    <div class="col-5">Delimiter</div>
+                    <div class="col-2">Header</div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-5">
+
+                        <select id="wizard-encoding" name="encoding" class="form-control col-xs-3 ">
+                        <option value="iso-8859-1">ISO-8859-1</option>
+                        <option value="utf-8">UTF-8</option>          
+                    </select>
+
+                    </div>
+                    <div class="col-5">
+
+                        <select id="wizard-delimiter" name="delimiter" class="form-control col-xs-3 ">
+                        <option value="">(auto)</option>
+                        <option value=";">semicolon</option>
+                        <option value=",">comma</option>
+                        <option value="\t">tab</option>
+                        <option value="|">bar</option>                                         
+                    </select>
+
+                    </div>
+                    <div class="col-2">
+
+                        <input id="wizard-header" type="checkbox" class="form-check-input col-xs-1 form-control " />
+
+                    </div>
+                </div>
+
+                <div class="row my-2">
+
+                    <h5>Example csv</h5>
+                </div>
+
+                <div class="row">
+                    <textarea type="text" class="form-control" id="wizard-csv-example" readonly></textarea>
+
+                </div>
+
+            <div class="row my-2">
+                <h4>2.3 Select csv file</h4>
+            </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group custom">
+                            <input id="wizard-file" type="file" class="custom-file-input" />
+                            <label id="wizard-file-label" class="custom-file-label" for="wizard-file"></label>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="row my-2">
+                    <h4>2.4 Configure column mapping</h4>
+                </div>
+                <div class="row wizard-csv-column" id="wizard-csv-column-template">
+                    <div class="col-4">
+
+                        <input type="text" class="form-control wizard-csv-column-name" placeholder="" />
+
+                    </div>
+                    <div class="col-4">
+                        <input type="text" class="form-control wizard-csv-column-name-new" placeholder="" />
+                        
+
+                    </div>
+                    <div class="col-4">
+                        <select class="form-control wizard-csv-column-parse"></select>
+                        
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        column name (in csv file)
+                    </div>                    
+                    <div class="col-4">
+                        column name in database
+                    </div>
+                    <div class="col-4">
+                        (optional) converter
+                    </div>
+                </div>
+
+                <div id="wizard-csv-columns">
+                    <!-- placeholder for dynamic items -->
+                </div>
+            </div>
+
+            <h4>2.5 Preview and upload</h4>
+            <table id="wizard-csv-preview" class="table table-striped">
+                <thead>
+                    <tr></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+
+            
+            <div class="row my-2">
                 <div class="col">
-                    <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i></button>
-                    <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i></button>
+                    <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</button>
+                    <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i> Cancel</button>
+
+
+
                 </div>
             </div>
 
@@ -167,10 +272,19 @@
         </div>
 
 
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-container-meta">
+            3) edit metadata
+          </button>
+            </h5>
+        </div>
+
+        <div id="wizard-container-meta" class="collapse" data-parent="#wizard-container">
+            <div class="card-body">
+            </div>
+        </div>
     </div>
-    <!-- upload -->
-
-
 </div>
 <!-- id="wizard-container" class="container-fluid" -->
 

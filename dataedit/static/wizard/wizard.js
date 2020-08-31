@@ -28,6 +28,7 @@ var Wizard = function(config) {
         uploadProgressBytes: null,
         fileSizeBytes: null,
         uploadedRows: null,
+        fileName: null,
         cancel: null,
     }
 
@@ -41,7 +42,7 @@ var Wizard = function(config) {
     /* get element from dom with wizard-prefix*/
     function getDomItem(name) {
         var elem = $("#wizard-container").find('#wizard-' + name);
-        if (!elem.length) throw "Element not found: #wizard-" + name
+        if (!elem.length) console.error("Element not found: #wizard-" + name)
         return elem
     }
 
@@ -91,17 +92,21 @@ var Wizard = function(config) {
     }
 
 
-    function getRandom(pool, minLength, maxLength){
-        var length = Math.floor(Math.random() * (maxLength - minLength)) + minLength;
-        var res = "";
-        for (var i=0; i<length; i++){
-            var j = Math.floor(Math.random() * pool.length);
-            res += pool[j];
-        }
-        return res
-    }
+
 
     function getExampleData(data_type, i, delimiter) {
+
+        function getRandom(pool, minLength, maxLength) {
+            var length = Math.floor(Math.random() * (maxLength - minLength)) + minLength;
+            var res = "";
+            for (var i = 0; i < length; i++) {
+                var j = Math.floor(Math.random() * pool.length);
+                res += pool[j];
+            }
+            return res
+        }
+
+
         var values = ['???']; // fallback        
         if (/.*int/.exec(data_type) || /.*serial/.exec(data_type)) {
             values = [10, 342, 0, -892, 231, 51, 2, 5]
@@ -109,7 +114,7 @@ var Wizard = function(config) {
             values = [0.1, -3.1, 1.5e-2, .34, -.821678, 234.3242]
         } else if (/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)) {
             var prec = parseInt(/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)[2]);
-            values = ["-23.", "273.", "29.", "-55.", "."].map(function(x){return x + getRandom("1234567890000000", prec, prec)})
+            values = ["-23.", "273.", "29.", "-55.", "."].map(function(x) { return x + getRandom("1234567890000000", prec, prec) })
         } else if (/timestamp/.exec(data_type)) {
             values = ["2020-01-01 10:38:00", "1970-10-11 12:00:00", "1981-09-07 12:30:01"]
         } else if (/time/.exec(data_type)) {
@@ -118,18 +123,22 @@ var Wizard = function(config) {
             values = ["2020-01-01", "1970-10-11", "1981-09-07"]
         } else if (/text/.exec(data_type)) {
             values = ["lorem", "ipsum", "blablabla", "hello world", '"quoted' + delimiter + ' text with delimiter"']
-        } else if (/char[ ]*\(([0-9]+)\)/.exec(data_type)) {
-            var prec = parseInt(/char[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
-            return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", prec, prec)
         } else if (/varchar[ ]*\(([0-9]+)\)/.exec(data_type)) {
             var prec = parseInt(/varchar[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
             // cap
-            prec = Math.min(prec, 10);
-            return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 0, prec) 
+            prec = Math.min(prec, 16);
+            values = ["lorem", "ipsum", "blablabla", "hello world"]
+            values = values.map(function(t) {
+                var l = Math.floor(Math.random() * prec);
+                return t.slice(0, l);
+            })
+        } else if (/char[ ]*\(([0-9]+)\)/.exec(data_type)) {
+            var prec = parseInt(/char[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
+            return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", prec, prec)
         } else if (/bool/.exec(data_type)) {
             values = [true, false]
-        } else{
-            console.error(console.log(data_type))
+        } else {
+            // TODO
         }
         i = i % values.length;
         return values[i];
@@ -199,15 +208,14 @@ var Wizard = function(config) {
         return "/dataedit/upload/" + state.schema + "/" + tablename; // TODO: get base url from django
     }
 
-    function getErrorMsg(xhr) {
-        var msg;
-        if (xhr.responseJSON && xhr.responseJSON.reason) {
-            msg = xhr.responseJSON.reason
-        } else {
-            msg = xhr.statusText
+    function getErrorMsg(x) {
+        if (x.responseJSON && x.responseJSON.reason) {
+            x = x.responseJSON.reason
+        } else if (x.statusText) {
+            x = x.statusText
         }
-        console.error(msg)
-        return msg
+        console.error(x)
+        return x
     }
 
     function sendJson(method, url, data, success, error) {
@@ -297,6 +305,19 @@ var Wizard = function(config) {
         state.encoding = getDomItem('encoding').find(":selected").val();
         state.delimiter = getDomItem('delimiter').find(":selected").val();
         state.header = getDomItem('header').prop("checked");
+
+        if (state.file && state.file[0] && state.file[0].files && state.file[0].files[0]) {
+            state.fileSizeBytes = state.file[0].files[0].size;
+            state.fileName = state.file[0].files[0].name;
+            getDomItem('file-label').text(state.fileName + " (" + state.fileSizeBytes + " bytes)");
+        } else {
+            state.fileSizeBytes = null;
+            state.fileName = null;
+            getDomItem('file-label').text("");
+        }
+
+
+
     }
 
     function findColumnName(name) {
@@ -415,21 +436,28 @@ var Wizard = function(config) {
 
 
 
-    function rollback() {
+    function rollback(message) {
+        message = message || 'upload failed'
+        setNotification('error', message)
         if (state.connection_id) {
             sendJson('POST', getApiAdvancedUrl("connection/rollback"), createContext())
                 .then(function() {
                     return sendJson('POST', getApiAdvancedUrl("connection/close"), createContext())
-                });
+                }).then(resetUpload).catch(
+                    // TODO
+                )
         }
     }
 
-    function cancelUpload(){
+    function cancelUpload() {
+        setNotification('load', 'cancel upload...')
         state.cancel = true;
     }
 
     function csvUpload() {
         updateFile();
+
+
         if (!state.file) return;
         state.csvParser = null;
         state.connection_id = null;
@@ -439,6 +467,11 @@ var Wizard = function(config) {
         state.fileSizeBytes = state.file[0].files[0].size;
         state.uploadedRows = 0;
         state.cancel = false;
+
+        getDomItem('table-upload').hide();
+        getDomItem('table-upload-cancel').show();
+
+        setNotification("progress", 'starting upload...').find('.progress-bar').css('width', '0' + '%')
 
         sendJson('POST', getApiAdvancedUrl("connection/open"))
             .then(function(res) {
@@ -456,6 +489,11 @@ var Wizard = function(config) {
                         newline: state.newline,
                         chunkSize: state.uploadChunkSize,
                         chunk: function(data, parser) {
+                            if (state.cancel) {
+                                rollback('cancel');
+                                return;
+                            }
+
                             state.uploadProgressBytes = data.meta.cursor;
                             removeNewline(data.data)
 
@@ -481,33 +519,48 @@ var Wizard = function(config) {
                                 sendJson('POST', getApiAdvancedUrl("insert"), createContext(insertData)).then(function(res) {
                                     var nRows = JSON.parse(res).content.rowcount;
                                     state.uploadedRows += nRows
-                                    updateProgress();
+                                    var p = state.uploadProgressBytes / state.fileSizeBytes * 100;
+                                    p = p || 0;
+                                    p = Math.round(p);
+                                    var status = p + "% rows: " + state.uploadedRows;
+                                    setNotification("progress", status).find('.progress-bar').css('width', p + '%')
                                     state.csvParser.resume()
-                                }).catch(rollback);
+                                }).catch(function(err) { rollback(getErrorMsg(err)) });
                             }
 
                         },
                         complete: function() {
                             // commit
+                            if (state.cancel) {
+                                rollback('cancel');
+                                return
+                            }
+                            setNotification("progress", 'finishing upload').find('.progress-bar').css('width', '100' + '%')
                             sendJson('POST', getApiAdvancedUrl("connection/commit"), createContext())
                                 .then(function() {
                                     return sendJson('POST', getApiAdvancedUrl("connection/close"), createContext())
-                                });
+                                }).then(function() {
+                                    setNotification("success", 'upload ok');
+                                    resetUpload();
+                                })
+
                         },
                         error: function(error) {
-                            // TODO error
-                            rollback()
-                            console.error(error)
+                            rollback(getErrorMsg(error))
+
                         },
                     }
                 });
 
+            }).catch(function(err) {
+                console.error('catch', err)
             });
     }
 
 
     function createTable() {
         /* post */
+        setNotification('load', 'creating table...');
         var colDefs = [];
         var constraints = [];
         getDomItem('columns').find('.wizard-column').each(function(_i, e) {
@@ -527,50 +580,80 @@ var Wizard = function(config) {
             }
         }
         sendJson('PUT', url, JSON.stringify(data)).then(function() {
+            setNotification('load', 'ok, reloading page...');
             window.location = urlSuccess
         }).catch(function(err) {
-            getErrorMsg(err);
+            setNotification('error', getErrorMsg(err));
         });
 
 
     }
 
-    function updateProgress(){
-        var p = state.uploadProgressBytes / state.fileSizeBytes * 100;
-        p = p || 0;
-        p = Math.round(p);
-        console.log('progress: ' + p);
-        getDomItem('upload-progress .progress-bar').css('width', p + '%')
 
-        getDomItem('upload-progress-label').text(p + "% rows: " + state.uploadedRows)
+    function resetUpload() {
+        state.cancel = null;
+        getDomItem('table-upload').show();
+        getDomItem('table-upload-cancel').hide();
     }
 
+    function showCreate() {
+        getDomItem('container-upload').collapse('hide') //.find("*").prop('disabled', true);
+        getDomItem('container-create').collapse('show') //.find("*").prop('disabled', false);
+        getDomItem('container-upload').find('.btn').hide();
+        getDomItem('container-upload').find('input').prop('readonly', true)
+
+    }
+
+    function showUpload() {
+        getDomItem('container-create').collapse('hide') //.find("*").prop('disabled', true);        
+        getDomItem('container-upload').collapse('show') //.find("*").prop('disabled', false);
+        getDomItem('container-create').find('.btn').hide();
+        getDomItem('container-create').find('input').prop('readonly', true)
+    }
+
+    function setNotification(cls, text) {
+        getDomItem('notifications').find('.wizard-notification').hide();
+        var e = getDomItem('notifications').find('#wizard-notification-' + cls);
+        e.show().find(' .message').text(text);
+        return e;
+    }
 
     (function init() {
-        /*add column parser options*/
+        setNotification();
+        getDomItem('notifications').removeClass('invisible');
+
+
+        /* add column parser options */
         var cParseDiv = getDomItem('csv-column-template').find('.wizard-csv-column-parse');
         Object.keys(columnParsers).map(function(k) {
-                cParseDiv.append('<option value="' + k + '">' + columnParsers[k].label + '</option>')
-            })
-            /* load existing columns */
-        if (state.table) {
-            getDomItem('tablename').val(state.table)
-            for (var i = 0; i < state.columns.length; i++) {
-                addColumn(state.columns[i])
-            }
-        }
-        /*bind logic */
+            cParseDiv.append('<option value="' + k + '">' + columnParsers[k].label + '</option>')
+        })
+
+        /* bind logic */
         getDomItem('column-add').bind('click', function() { addColumn(); })
         getDomItem('table-create').bind('click', createTable);
-        getDomItem('file').val("").bind('change', changeFileSettings);
+        getDomItem('file').bind('change', changeFileSettings);
         getDomItem("encoding").bind('change', changeFileSettings);
         getDomItem("delimiter").bind('change', changeFileSettings);
         getDomItem("header").bind('change', changeFileSettings);
         getDomItem("table-upload").bind('click', csvUpload);
         getDomItem("table-upload-cancel").bind('click', cancelUpload);
-        
-        
+
+
         changeFileSettings();
+        resetUpload();
+
+        /* load existing columns */
+        if (state.table) {
+            getDomItem('tablename').val(state.table)
+            for (var i = 0; i < state.columns.length; i++) {
+                addColumn(state.columns[i])
+            }
+            showUpload()
+        } else {
+            showCreate()
+        }
+
     })();
 
     return {

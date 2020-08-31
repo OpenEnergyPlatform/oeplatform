@@ -29,3 +29,16 @@
     width: 200px;
     height: 8px;
 }
+
+#wizard-column-template,#wizard-csv-column-template {
+    display: none;    
+}
+
+
+#wizard-container-create,#wizard-container-upload{
+    max-width: 850px;
+}
+
+#wizard-csv-example{
+    min-height: 10em;
+}
