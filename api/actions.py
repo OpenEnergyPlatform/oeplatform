@@ -1274,6 +1274,7 @@ def _execute_sqla(query, cursor):
             "42P01",  # undefined_table
             "42P02",  # undefined_parameter
             "42704",  # undefined_object
+            "42804",  # datatype mismatch
         ]:
             # Return only `function does not exists` errors
             raise APIError(e.diag.message_primary)
