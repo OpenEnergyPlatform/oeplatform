@@ -725,6 +725,12 @@ def column_add(schema, table, column, description):
 def assert_valid_table_name(table):
     if len(table) > 63:
         raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
+    if len(table) == 0:
+        raise APIError("Empty table name")
+    if not re.match(r"[a-z][a-z0-9_]*", table):
+        raise APIError("Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "
+                       "and start with a letter.")
+
 
 def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
     """

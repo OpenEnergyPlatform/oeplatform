@@ -170,27 +170,9 @@ class TestPut(APITestCase):
 
         self.assertEqual(
             c_basic_resp.status_code,
-            201,
+            400,
             c_basic_resp.json().get("reason", "No reason returned"),
         )
-
-        self.checkStructure()
-
-        c_basic_resp = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_basic_resp.status_code,
-            200,
-            c_basic_resp.json().get("reason", "No reason returned"),
-        )
-
-
 
     def test_create_table_defaults(self):
         self._structure_data = {
