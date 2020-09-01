@@ -13,7 +13,8 @@ class Tutorial(models.Model):
     category = models.CharField(max_length=15, choices=CATEGORY_OPTIONS, blank=True)
     title = models.CharField(max_length=255)
     html = models.TextField()
-    # media = models.TextField()
+    # make sure to use official embed links
+    media_src = models.URLField(null=True, blank=True)
     markdown = models.TextField()
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
 
