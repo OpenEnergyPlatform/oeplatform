@@ -722,6 +722,9 @@ def column_add(schema, table, column, description):
     perform_sql(s.format(schema=meta_schema, table=insert_table))
     return get_response_dict(success=True)
 
+def assert_valid_table_name(table):
+    if len(table) > 63:
+        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
 
 def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
     """
@@ -786,6 +789,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
+    assert_valid_table_name(table)
     t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
