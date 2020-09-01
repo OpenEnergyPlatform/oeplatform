@@ -214,7 +214,7 @@ def formattedMarkdown(markdown):
     :return:
     """
 
-    markdowner = Markdown()
+    markdowner = Markdown(safe_mode="escape")
 
     return markdowner.convert(markdown)
 
