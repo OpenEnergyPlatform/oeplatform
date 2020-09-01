@@ -1,30 +1,3 @@
-/*
-#wizard-form .modal-content {
-    overflow: scroll;
-    margin: 1vw;
-    padding: 0;
-    width: 97vw;
-    font-size: 80%;
-}
-
-#wizard-form .modal-dialog {
-    margin: 0;
-    padding: 0;
-}
-
-#wizard-form td {
-    max-width: 50px;
-    overflow: hidden;
-}
-
-#wizard-form td,
-#wizard-form th {
-    border-right: 1px solid #dee2e6;
-    border-left: 1px solid #dee2e6;
-}
-
-*/
-
 #wizard-upload-progress {
     width: 200px;
     height: 8px;
@@ -34,10 +7,11 @@
     display: none;    
 }
 
-
+/*
 #wizard-container-create,#wizard-container-upload{
     max-width: 850px;
 }
+*/
 
 #wizard-csv-example{
     min-height: 10em;
