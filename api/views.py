@@ -432,27 +432,27 @@ class Table(APIView):
 
         edit_table = actions.get_edit_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE {schema}.{table} CASCADE;".format(
+            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         edit_table = actions.get_insert_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE {schema}.{table} CASCADE;".format(
+            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         edit_table = actions.get_delete_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE {schema}.{table} CASCADE;".format(
+            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         actions._get_engine().execute(
-            "DROP TABLE {schema}.{table} CASCADE;".format(schema=schema, table=table)
+            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(schema=schema, table=table)
         )
 
         return JsonResponse({}, status=status.HTTP_200_OK)

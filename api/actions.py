@@ -1274,6 +1274,7 @@ def _execute_sqla(query, cursor):
             "42P01",  # undefined_table
             "42P02",  # undefined_parameter
             "42704",  # undefined_object
+            "42804",  # datatype mismatch
         ]:
             # Return only `function does not exists` errors
             raise APIError(e.diag.message_primary)
@@ -1371,7 +1372,7 @@ def get_comment_table(schema, table):
     engine = _get_engine()
 
     # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
+    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table
     )
     res = engine.execute(sql_string)
