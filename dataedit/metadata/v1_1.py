@@ -5,16 +5,17 @@ from .error import MetadataException
 
 def from_v0(comment_on_table, schema, table):
     columns = actions.analyze_columns(schema, table)
+    refdate = comment_on_table.get("Reference date")
     try:
         if "resources" not in comment_on_table:
             comment_on_table = {
-                "title": comment_on_table["Name"],
-                "description": "; ".join(comment_on_table["Description"]),
+                "title": comment_on_table.get("Name"),
+                "description": "; ".join(comment_on_table.get("Description",[])),
                 "language": [],
-                "reference_date": comment_on_table["Reference date"],
+                "reference_date": refdate[0] if isinstance(refdate, list) else refdate,
                 "spatial": [
                     {"extent": x, "resolution": ""}
-                    for x in comment_on_table["Spatial resolution"]
+                    for x in comment_on_table.get("Spatial resolution")
                 ],
                 "temporal": [
                     {"start": x, "end": "", "resolution": ""}
@@ -22,9 +23,9 @@ def from_v0(comment_on_table, schema, table):
                 ],
                 "sources": [
                     {
-                        "name": x["Name"],
+                        "name": x.get("Name"),
                         "description": "",
-                        "url": x["URL"],
+                        "url": x.get("URL"),
                         "license": " ",
                         "copyright": " ",
                     }
@@ -56,34 +57,34 @@ def from_v0(comment_on_table, schema, table):
                         "format": "sql",
                         "fields": [
                             {
-                                "name": x["Name"],
-                                "description": x["Description"],
+                                "name": x.get("Name"),
+                                "description": x.get("Description"),
                                 "unit": x["Unit"],
                             }
-                            for x in comment_on_table["Column"]
+                            for x in comment_on_table.get("Column", [])
                         ],
                     }
                 ],
                 "meta_version": "1.1",
             }
 
-            comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
+            comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
 
-            commented_cols = [col["name"] for col in comment_on_table["fields"]]
+            commented_cols = [col.get("name") for col in comment_on_table.get("fields", [])]
         else:
-            comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
+            comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
 
-            if "fields" not in comment_on_table["resources"][0]:
+            if "fields" not in comment_on_table.get("resources",[{}])[0]:
                 comment_on_table["fields"] = []
             else:
-                comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
+                comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
 
-            commented_cols = [col["name"] for col in comment_on_table["fields"]]
+            commented_cols = [col.get("name") for col in comment_on_table.get("fields", [])]
     except Exception as e:
         raise MetadataException(comment_on_table, e)
 
     for col in columns:
-        if not col["id"] in commented_cols:
+        if not col.get("id") in commented_cols:
             comment_on_table["fields"].append(
                 {"name": col["id"], "description": "", "unit": ""}
             )

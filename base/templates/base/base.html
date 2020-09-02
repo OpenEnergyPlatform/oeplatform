@@ -37,7 +37,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/dataedit">Databases</a>
+                    <a class="nav-link" href="/dataedit">Data</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -49,6 +49,17 @@
                         <a class="dropdown-item" href="/factsheets/models/">Models</a>
                         <a class="dropdown-item" href="/factsheets/frameworks/">Frameworks</a>
                         <a class="dropdown-item" href="/factsheets/scenarios/">Scenarios</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Ontology
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/ontology/">Overview</a>
+                        <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
+                        <a class="dropdown-item" href="/ontology/oeo/">OEO</a>
                     </div>
                 </li>
                 <li class="nav-item">

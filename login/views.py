@@ -15,6 +15,7 @@ from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, Gr
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
+from oeplatform.settings import URL
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -290,7 +291,7 @@ class ActivationNoteView(FormView):
 
     def form_valid(self, form):
         if self.request.user.is_anonymous or self.request.user.is_mail_verified:
-            raise PermissionError
+            raise PermissionDenied
         form.save(self.request.user)
         return super(ActivationNoteView, self).form_valid(form)
 

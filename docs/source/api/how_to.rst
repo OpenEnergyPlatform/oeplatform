@@ -438,7 +438,7 @@ information. You can query this metadata
     >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/')
     >>> result.status_code
     200
-    >>> result.json() == {'name': None, 'title': None, 'id': 'sandbox.example_table', 'description': None, 'language': None, 'keywords': None, 'publicationDate': None, 'context': None, 'spatial': None, 'temporal': None, 'sources': None, 'licenses': None, 'contributors': None, 'resources': None, 'review': None, 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}, '_comment': None}
+    >>> result.json() == {'id': 'sandbox.example_table', 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}}
     True
 
 Note that the returned metadata differs from the metadata passed when creating

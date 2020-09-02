@@ -106,13 +106,6 @@ class TestAliasesTracking(APITestCase):
             }
         }
 
-        resp = self.__class__.client.post(
-            "/api/v0/advanced/search",
-            data=json.dumps(data),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
         self.check_api_post("/api/v0/advanced/search", data=data, expected_result=[[1]])
 
     def tearDown(self):

@@ -31,4 +31,5 @@ urlpatterns = [
     url(r"^literature/", include("literature.urls")),
     url(r"^ontology/", include("ontology.urls")),
     url(r"^captcha/", include("captcha.urls")),
+    url(r"^tutorials/", include("tutorials.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
