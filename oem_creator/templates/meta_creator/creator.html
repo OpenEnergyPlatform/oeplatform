@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+
+{% block main-content-body %}
+{% load static %}
+
+<form>
+{{form}}
+</form>
+
+{% endblock main-content-body %}
+<!-- zuerst wird die Form geladen -->
+<!-- danach jquery -->
+
+
+
+{% block after-head %}
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+{% endblock %}
+
+{% block after-body-bottom-js %}
+
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script>
+        var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false});
+    </script>
+{{form.media}}
+
+
+{% endblock %}
