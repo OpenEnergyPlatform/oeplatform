@@ -1,5 +1,5 @@
 {
-  "title": "oep_metadata_table_example_v140",
+  "title": "OEP_Metadata_Input_Version.1.4.0",
   "type": "object",
   "properties": {
     "name": {
@@ -18,7 +18,7 @@
         "description": "(e.g. example metadata for example data)"
     },
     "language": {
-      "type": "array",
+      "type": "string",
       "enum": [ "en-GB", "en-US", "de-DE", "fr-FR" ]
     },
     "keywords": {
@@ -36,7 +36,9 @@
         },
     "context": {
       "type": "object",
+
       "required": [],
+
       "properties": {
         "homepage": {
           "type": "string",
@@ -185,6 +187,7 @@
       "type": "array",
       "items": {
         "type": "object",
+         "title": "licenses",
         "required": [],
         "properties": {
           "name": {
@@ -214,6 +217,7 @@
       "type": "array",
       "items": {
         "type": "object",
+         "title": "contributor",
         "required": [],
         "properties": {
           "title": {
@@ -245,6 +249,7 @@
       "type": "array",
       "items": {
         "type": "object",
+         "title": "resources",
         "required": [],
         "properties": {
           "profile": {

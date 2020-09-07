@@ -5,7 +5,14 @@
 
 <form>
 {{form}}
+
 </form>
+
+    <a id="dlcsv" role="button"  class="btn btn-info" href="download">
+      <span class="fas fa-download"></span> Download JSON
+    </a>
+
+
 
 {% endblock main-content-body %}
 <!-- zuerst wird die Form geladen -->
@@ -15,6 +22,7 @@
 
 {% block after-head %}
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+
 {% endblock %}
 
 {% block after-body-bottom-js %}

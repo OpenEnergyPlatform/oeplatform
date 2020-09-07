@@ -13,6 +13,7 @@ urlpatterns = [
     #url(r"^$", TemplateView.as_view(name='creator')),
     #url(r"^3$", RedirectView.as_view(pattern_name='oem_creator:form')), #leitet nur weiter
     url(r"^$", views.CreatorView.as_view(), name='form'),
+    url(r"^download$",  views.CreatorView.as_view(), name='form'),
     #url(r"^1/$", views.CreatorView_some.as_view(), name='some'),
     #path('', views.CreatorView_some(), name='some'),
     #path('', views.CreatorView_some("test"))
