@@ -148,7 +148,7 @@
               </td>
             </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='auto_model_generator' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' %}</tr>
+            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' add=model.data_preprocessing_other %}</tr>
             <tr>
               <td class="sheetlabel">
                 Output Data Format
