@@ -108,12 +108,12 @@
           "properties": {
             "start": {
               "type": "string",
-                "format": "date",
+
                 "description": "(e.g. 2017-01-01T23:00+01)"
             },
             "end": {
                 "type": "string",
-                "format": "date",
+
                 "description": "(e.g. 2017-12-31T23:00+01)"
             },
             "resolution": {
