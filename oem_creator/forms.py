@@ -5,7 +5,7 @@ from django_jsonforms.forms import JSONSchemaField
 
 
 options = {
-        'theme': 'bootstrap3',
+        'theme': 'bootstrap4',
         'disable_collapse': True,
         'disable_properties': True
 }
