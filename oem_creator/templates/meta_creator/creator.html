@@ -1,16 +1,18 @@
 {% extends "base/base.html" %}
-
+{% load bootstrap4 %}
 {% block main-content-body %}
 {% load static %}
 
 <form>
-{{form}}
-
-</form>
+    {% csrf_token %}
+    {% bootstrap_form form %}
 
     <a id="dlcsv" role="button"  class="btn btn-info" href="download">
-      <span class="fas fa-download"></span> Download JSON
-    </a>
+        <span class="fas fa-download"></span> Download JSON
+      </a>
+</form>
+
+   
 
 
 
