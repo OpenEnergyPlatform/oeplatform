@@ -256,7 +256,7 @@ confirmOnLeave();
         </table>
         <table class="formtable">
         {% include 'modelview/editmodel_snippet.html' with field=form.auto_model_generator %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.data_preprocessing %}
+        {% include 'modelview/editmodel_snippet.html' with field=form.data_preprocessing add=form.data_preprocessing_other %}
         </table>
         <table class="formtable">
                     <th> Output Data Format
