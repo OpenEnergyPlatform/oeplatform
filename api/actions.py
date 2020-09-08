@@ -722,6 +722,15 @@ def column_add(schema, table, column, description):
     perform_sql(s.format(schema=meta_schema, table=insert_table))
     return get_response_dict(success=True)
 
+def assert_valid_table_name(table):
+    if len(table) > 63:
+        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
+    if len(table) == 0:
+        raise APIError("Empty table name")
+    if not re.match(r"[a-z][a-z0-9_]*", table):
+        raise APIError("Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "
+                       "and start with a letter.")
+
 
 def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
     """
@@ -786,6 +795,7 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
+    assert_valid_table_name(table)
     t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
@@ -1274,6 +1284,7 @@ def _execute_sqla(query, cursor):
             "42P01",  # undefined_table
             "42P02",  # undefined_parameter
             "42704",  # undefined_object
+            "42804",  # datatype mismatch
         ]:
             # Return only `function does not exists` errors
             raise APIError(e.diag.message_primary)
@@ -1371,7 +1382,7 @@ def get_comment_table(schema, table):
     engine = _get_engine()
 
     # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('{schema}.{table}'::regclass::oid, 'pg_class');".format(
+    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(
         schema=schema, table=table
     )
     res = engine.execute(sql_string)
