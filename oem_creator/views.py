@@ -16,3 +16,9 @@ class CreatorView(TemplateView):
 
     def get_context_data(self, **kwargs):
         return {'form': CreatorForm()}
+
+
+# Create your views here.
+def home_view(request):
+    print(request.GET)
+    return render(request, "meta_creator/creator.html")

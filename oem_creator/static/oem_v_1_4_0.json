@@ -408,30 +408,37 @@
       "properties": {
         "metadata": {
           "type": "string",
+          "default": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
           "description": "(e.g. Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata))"
         },
         "dates": {
           "type": "string",
+           "default": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
           "description": "(e.g. Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh))"
         },
         "units": {
           "type": "string",
+           "default": "Use a space between numbers and units (100 m)",
           "description": "(e.g. Use a space between numbers and units (100 m))"
         },
         "languages": {
           "type": "string",
+           "default": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
           "description": "(e.g. Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE))"
         },
         "licenses": {
           "type": "string",
+           "default": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
           "description": "(e.g. License name must follow the SPDX License List (https://spdx.org/licenses/))"
         },
         "review": {
           "type": "string",
+           "default": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
           "description": "(e.g. Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki))"
         },
         "null": {
           "type": "string",
+           "default": "If not applicable use (null)",
           "description": "(e.g. If not applicable use (null))"
         }
       }
