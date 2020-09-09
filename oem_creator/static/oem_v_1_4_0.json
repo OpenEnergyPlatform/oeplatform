@@ -18,8 +18,12 @@
         "description": "(e.g. example metadata for example data)"
     },
     "language": {
-      "type": "string",
-      "enum": [ "en-GB", "en-US", "de-DE", "fr-FR" ]
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["en-GB", "en-US", "de-DE", "fr-FR"]
+    }
+
     },
     "keywords": {
       "type": "array",
@@ -41,36 +45,36 @@
 
       "properties": {
         "homepage": {
-          "type": "string",
+          "type": ["string", "null"],
             "description": "(e.g. https://reiner-lemoine-institut.de/szenariendb/)"
         },
         "documentation": {
-          "type": "string",
+          "type":["string", "null"],
              "description": "(e.g. https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)"
 
         },
         "sourceCode": {
-          "type": "string",
+          "type":  ["string", "null"],
              "description": "(e.g. https://github.com/OpenEnergyPlatform/examples/tree/master/metadata)"
         },
         "contact": {
-          "type": "string",
+          "type": ["string", "null"],
              "description": "(e.g. https://github.com/Ludee)"
         },
         "grantNo": {
-          "type": "string",
+          "type": ["string", "null"],
              "description": "(e.g. 03ET4057)"
         },
         "fundingAgency": {
-          "type": "string",
+          "type":["string", "null"],
              "description": "(e.g. Bundesministerium für Wirtschaft und Energie)"
         },
         "fundingAgencyLogo": {
-          "type": "string",
+          "type": ["string", "null"],
              "description": "(e.g. https://www.innovation-beratung-foerderung.de/INNO/Redaktion/DE/Bilder/Titelbilder/titel_foerderlogo_bmwi.jpg?__blob=poster&v=2)"
         },
         "publisherLogo": {
-          "type": "string",
+          "type": ["string", "null"],
              "description": "(e.g. https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png)"
         }
       }
@@ -80,15 +84,15 @@
       "required": [],
       "properties": {
         "location": {
-          "type": "string",
+          "type": ["string", "null"],
           "description": "(e.g. null)"
         },
         "extent": {
-          "type": "string",
+          "type": ["string", "null"],
           "description": "(e.g. europe)"
         },
         "resolution": {
-          "type": "string",
+          "type":["string", "null"],
           "description": "(e.g. 100 m)"
         }
       }
@@ -225,7 +229,7 @@
             "description": "(e.g. Ludee)"
           },
           "email": {
-            "type": "string",
+            "type": ["string", "null"],
             "format": "email",
             "description": "(e.g. null)"
           },
@@ -295,7 +299,7 @@
                       "description": "(e.g. serial)"
                     },
                     "unit": {
-                      "type": "string",
+                      "type": ["string", "null"],
                       "description": "(e.g. null)"
                     }
                   }
@@ -380,6 +384,7 @@
       "properties": {
         "metadataVersion": {
           "type": "string",
+           "default": " OEP-1.4.0",
           "description": "(e.g. OEP-1.4.0)"
         },
         "metadataLicense": {
@@ -388,14 +393,17 @@
           "properties": {
             "name": {
               "type": "string",
+              "default": "CC0-1.0",
               "description": "(e.g. CC0-1.0)"
             },
             "title": {
               "type": "string",
+              "default": "Creative Commons Zero v1.0 Universal",
               "description": "(e.g. Creative Commons Zero v1.0 Universal)"
             },
             "path": {
               "type": "string",
+              "default": "https://creativecommons.org/publicdomain/zero/1.0/",
               "description": "(e.g. https://creativecommons.org/publicdomain/zero/1.0/)"
             }
           }
