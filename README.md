@@ -4,7 +4,7 @@
 
 # Open Energy Family - Open Energy Platform (OEP)
 
-Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md) 
+Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
 
 ## License / Copyright
 
@@ -24,7 +24,7 @@ Clone the repository locally
 
 Move to the cloned repository
 
-    cd oep-website 
+    cd oep-website
 
 
 ### Setup virtual environment
@@ -50,9 +50,9 @@ After you have activated your virtual environment, install the required python l
 
 ### Setup the databases
 
-The OEP website relies on two different databases: 
+The OEP website relies on two different databases:
 1. One that is managed by django itself (django internal database)
-This database contains all information that is needed for the website (user management, factsheets and api token for connection to the second database). 
+This database contains all information that is needed for the website (user management, factsheets and api token for connection to the second database).
 2. The second one
 will contain the data that the user can access from the website (primary database)
 
@@ -134,7 +134,7 @@ For default settings, you can type the following commands
       set LOCAL_DB_USER=oep_db_user
       set LOCAL_DB_PASSWORD=<oep_db_password>
       set LOCAL_DB_NAME=oep_db
-    
+
 
 - On linux
 
@@ -153,12 +153,21 @@ We use `alembic` to keep track of changes in those tables. To create all tables 
 
     python manage.py alembic upgrade head
 
+#### 3. Tutorials
+
+##### 3.1 Rendering Jupyter Notebooks
+
+Tutorials needs an additional build step to download and build the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
+
+    python manage.py notebooks download
+    python manage.py notebooks build
+
 ### Deploy locally
-  
+
 You can run your local copy of the OEP website with
 
     python manage.py runserver
-    
+
 By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
 
 
