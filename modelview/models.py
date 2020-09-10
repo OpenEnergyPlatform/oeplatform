@@ -820,7 +820,7 @@ class Energyframework(BasicFactsheet):
     ap_TopDown = BooleanField(verbose_name="Top Down", default=False)
     ap_BottomUp = BooleanField(verbose_name="Bottom up", default=False)
     ap_Hybrid = BooleanField(verbose_name="Hybrid", default=False)
-    ap_Other = BooleanField(verbose_name="Other", default=False)
+    ap_Other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
     interfaces = CharField(verbose_name="interfaces", max_length=200, help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ", null=True)
 
