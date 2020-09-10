@@ -167,7 +167,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ap_BottomUp,ap_Hybrid,ap_Other,ap_TopDown" %}
+                  {% checklist model "ap_BottomUp,ap_Hybrid,ap_Other=ap_Other,ap_TopDown" %}
                 </table>
               </td>
             </tr>
@@ -236,11 +236,12 @@
                 </table>
               </td>
             </tr>
+            <!-- Seems like the following does not belong in the openness section moree liek mathematical description? 
             {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' %}
             {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
-            {% include 'modelview/model_snippet.html' with model=model field='gui' %}
+            {% include 'modelview/model_snippet.html' with model=model field='gui' %} -->
           </table>
 
         </div>
