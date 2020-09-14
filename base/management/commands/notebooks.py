@@ -3,6 +3,7 @@ import os
 import glob
 import re
 import json
+import uuid
 
 class Command(BaseCommand):
     help = 'Closes the specified poll for voting'
@@ -29,7 +30,7 @@ class Command(BaseCommand):
             # This is no special regex, i just looked at the HTML and figured out how they are generated
             htmlMatchPattern = '<h[12] [^>]*>(.*?)<'
 
-            metaData = {}
+            metaData = []
             for htmlFileName in glob.glob('./examples/build/*.html'):
                 with open(os.path.join(os.getcwd(), htmlFileName), 'r') as htmlFile:
                     htmlFileContent = htmlFile.read()
@@ -49,9 +50,11 @@ class Command(BaseCommand):
                             validMatchForFile = matchEntry
                     print('fileName=%s,generatedTitle=%s' % (htmlFileName, validMatchForFile))
                     shortFileName = htmlFileName.split("/")[-1]
-                    metaData[shortFileName] = {
-                        'title': validMatchForFile,
-                    }
+                    metaData.append({
+                        'title': validMatchForFile if not None else shortFileName,
+                        'id': str(uuid.uuid4()),
+                        'fileName': shortFileName
+                    })
 
             with open(os.path.join(os.getcwd(), './examples/build/meta.json'), 'w') as jsonFile:
                 json.dump(metaData, jsonFile, ensure_ascii=False, indent=4)
