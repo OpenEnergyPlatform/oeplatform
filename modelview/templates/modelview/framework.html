@@ -27,7 +27,7 @@
             {% include 'modelview/model_snippet.html' with model=model field='logo' %}
             <tr>
               <th>
-                Logo
+                Logo:
               </th>
               <td>
                 {% if model.logo %}
@@ -274,7 +274,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "Hydro,Solar,Geothermal,Wind,Wave,Biomass,Tidal" %}
+                  {% checklist model "st_hydro,st_battery,st_air,st_hydrogen" %}
                 </table>
               </td>
             </tr>
