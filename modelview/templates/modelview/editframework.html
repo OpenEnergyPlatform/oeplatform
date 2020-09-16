@@ -73,11 +73,11 @@ confirmOnLeave();
 <div class="tab-content">
     <div id="Overview" class="tab-pane fade in active">
         <table class="formtable">
-        {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
+        <!-- {% include 'modelview/editmodel_snippet.html' with field=form.model_name %} -->
         {% include 'modelview/editmodel_snippet.html' with field=form.last_updated %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.version %}
+        <!-- {% include 'modelview/editmodel_snippet.html' with field=form.version %}
         {% include 'modelview/editmodel_snippet.html' with field=form.open_source %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.license %}  
+        {% include 'modelview/editmodel_snippet.html' with field=form.license %}   -->
         {% include 'modelview/editmodel_snippet.html' with field=form.logo %}  
         </table>
     </div>
