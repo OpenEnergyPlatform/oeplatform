@@ -48,7 +48,8 @@ class BasicFactsheet(models.Model):
         help_text="Who is the main contact person?",
         null=True,
     )
-    contact_email = EmailField(
+    contact_email = ArrayField(
+        EmailField(),
         verbose_name="Contact (e-mail)",
         help_text="Please provide the mailadress of the contact person.",
         null=False,
@@ -94,12 +95,13 @@ class BasicFactsheet(models.Model):
     )
     framework_yes_text = CharField(max_length=1000, null=True)
 
-    user_documentation = CharField(
-        max_length=200,
+    user_documentation = ArrayField(
+        CharField(max_length=200),
         verbose_name="Link to User Documentation",
         help_text="Is an user documentation available for the framework? Please insert the link",
         null=True,
     )
+    
     code_documentation = CharField(
         max_length=200,
         verbose_name="Link to Developer/Code Documentation",
