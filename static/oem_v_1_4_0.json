@@ -1,13 +1,15 @@
 {
-  "type": "object",
   "title": "OEP_Metadata_Input_Version.1.4.0",
-
+  "type": "object",
   "properties": {
     "name": {
       "type": "string"
     },
     "title": {
       "type": "string",
+       "options": {
+          "infoText": "Your full name"
+        },
       "description": "(e.g. Good example title)"
     },
     "id": {
@@ -41,11 +43,6 @@
         },
     "context": {
       "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
 
       "required": [],
 
@@ -87,11 +84,6 @@
     },
     "spatial": {
       "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "required": [],
       "properties": {
         "location": {
@@ -110,11 +102,6 @@
     },
     "temporal": {
       "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "required": [],
       "properties": {
         "referenceDate": {
@@ -124,11 +111,6 @@
         },
         "timeseries": {
           "type": "object",
-                        "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
           "required": [],
           "properties": {
             "start": {
@@ -159,18 +141,8 @@
     },
     "sources": {
       "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "items": {
         "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
          "title": "source",
         "required": [],
         "properties": {
@@ -188,18 +160,8 @@
           },
           "licenses": {
             "type": "array",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
             "items": {
               "type": "object",
-                            "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
               "required": [],
               "properties": {
                 "name": {
@@ -230,18 +192,8 @@
     },
     "licenses": {
       "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "items": {
         "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
          "title": "licenses",
         "required": [],
         "properties": {
@@ -270,18 +222,8 @@
     },
     "contributors": {
       "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "items": {
         "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
          "title": "contributor",
         "required": [],
         "properties": {
@@ -312,18 +254,8 @@
     },
     "resources": {
       "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "items": {
         "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
          "title": "resources",
         "required": [],
         "properties": {
@@ -349,24 +281,12 @@
           },
           "schema": {
             "type": "object",
-            "format": "categories",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
             "required": [],
             "properties": {
               "fields": {
                 "type": "array",
-
                 "items": {
                   "type": "object",
-                                "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
                   "required": [],
                   "properties": {
                     "name": {
@@ -397,18 +317,8 @@
               },
               "foreignKeys": {
                 "type": "array",
-                              "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
                 "items": {
                   "type": "object",
-                                "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
                   "required": [],
                   "properties": {
                     "fields": {
@@ -442,11 +352,6 @@
           },
           "dialect": {
             "type": "object",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
             "required": [],
             "properties": {
               "delimiter": {
@@ -464,11 +369,6 @@
     },
     "review": {
       "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "required": [],
       "properties": {
         "path": {
@@ -483,12 +383,6 @@
     },
     "metaMetadata": {
       "type": "object",
-      "format": "categories",
-      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
       "required": [],
       "properties": {
         "metadataVersion": {
@@ -498,11 +392,6 @@
         },
         "metadataLicense": {
           "type": "object",
-                        "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
           "required": [],
           "properties": {
             "name": {
@@ -526,11 +415,6 @@
     },
     "_comment": {
       "type": "object",
-      "options": {
-          "disable_collapse": false,
-          "disable_edit_json": true,
-          "disable_properties": true
-              },
       "required": [],
       "properties": {
         "metadata": {
@@ -571,5 +455,4 @@
       }
     }
   }
-
 }
