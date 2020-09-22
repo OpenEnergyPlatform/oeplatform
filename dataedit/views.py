@@ -1487,7 +1487,9 @@ class WizardView(LoginRequiredMixin, View):
                 "schema": schema,
                 "table": table,
                 "nRows": n_rows
-            })
+            }),
+            "schema": schema, 
+            "table": table
         }
 
         return render(request, "dataedit/wizard.html", context=context)
