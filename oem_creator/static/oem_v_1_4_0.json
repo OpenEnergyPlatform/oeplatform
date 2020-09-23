@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "OEP_Metadata_Input_Version.1.4.0",
+  "title": "Metadata Creator Version 1.4.0",
 
   "properties": {
     "name": {
