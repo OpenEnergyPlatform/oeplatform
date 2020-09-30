@@ -29,8 +29,7 @@ var Wizard = function(config) {
     };
 
     var columnParsers = {
-        "parseFloat2": { parse: parseFloat2, label: "Number (Englisch)" },
-        "parseFloatGerman": { parse: parseFloatGerman, label: "Number (German)" },
+        "parseFloatCommaDecimal": { parse: parseFloatCommaDecimal, label: "Number with comma as decimal" },
         "": {
             parse: function(x) {
                 return x;
@@ -55,10 +54,7 @@ var Wizard = function(config) {
         var n = columns.find(".wizard-column").length;
         var column = getDomItem("column-template").clone().attr("id", "wizard-column-" + n).appendTo(columns).removeClass("invisible");
         column.find(".wizard-column-name").val(columnDef.name);
-
         column.find(".wizard-column-type").val(columnDef.data_type);
-
-
         column.find(".wizard-column-nullable").prop("checked", columnDef.is_nullable);
         column.find(".wizard-column-pk").prop("checked", columnDef.is_pk);
         column.find(".wizard-column-drop").bind("click", function(evnt) {
@@ -264,7 +260,8 @@ var Wizard = function(config) {
         return v2;
     }
 
-    function parseFloatGerman(v) {
+    function parseFloatCommaDecimal(v) {
+        v = v.replace(".", "");
         v = v.replace(",", ".");
         return parseFloat2(v);
     }
