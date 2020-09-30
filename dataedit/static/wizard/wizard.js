@@ -47,7 +47,7 @@ var Wizard = function(config) {
         }
         return elem;
     }
-    
+
 
     function addColumn(columnDef) {
         columnDef = columnDef || {};
@@ -55,7 +55,7 @@ var Wizard = function(config) {
         var n = columns.find(".wizard-column").length;
         var column = getDomItem("column-template").clone().attr("id", "wizard-column-" + n).appendTo(columns).removeClass("invisible");
         column.find(".wizard-column-name").val(columnDef.name);
-        
+
         column.find(".wizard-column-type").val(columnDef.data_type);
 
 
@@ -101,55 +101,42 @@ var Wizard = function(config) {
             }
             return res;
         }
-        var values = ["???"];
+        var values;
         if (/.*int/.exec(data_type) || /.*serial/.exec(data_type)) {
             values = [10, 342, 0, -892, 231, 51, 2, 5];
-        } else {
-            if (/(real|double|float)/.exec(data_type)) {
-                values = [0.1, -3.1, 1.5e-2, .34, -.821678, 234.3242];
-            } else {
-                if (/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)) {
-                    var prec = parseInt(/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)[2]);
-                    values = ["-23.", "273.", "29.", "-55.", "."].map(function(x) {
-                        return x + getRandom("1234567890000000", prec, prec);
-                    });
-                } else {
-                    if (/timestamp/.exec(data_type)) {
-                        values = ["2020-01-01 10:38:00", "1970-10-11 12:00:00", "1981-09-07 12:30:01"];
-                    } else {
-                        if (/time/.exec(data_type)) {
-                            values = ["10:38:00", "12:00:00", "12:30:01"];
-                        } else {
-                            if (/date/.exec(data_type)) {
-                                values = ["2020-01-01", "1970-10-11", "1981-09-07"];
-                            } else {
-                                if (/text/.exec(data_type)) {
-                                    values = ["lorem", "ipsum", "blablabla", "hello world", '"quoted' + delimiter + ' text with delimiter"'];
-                                } else {
-                                    if (/varchar[ ]*\(([0-9]+)\)/.exec(data_type)) {
-                                        var prec = parseInt(/varchar[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
-                                        prec = Math.min(prec, 16);
-                                        values = ["lorem", "ipsum", "blablabla", "hello world"];
-                                        values = values.map(function(t) {
-                                            var l = Math.floor(Math.random() * prec);
-                                            return t.slice(0, l);
-                                        });
-                                    } else {
-                                        if (/char[ ]*\(([0-9]+)\)/.exec(data_type)) {
-                                            var prec = parseInt(/char[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
-                                            return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", prec, prec);
-                                        } else {
-                                            if (/bool/.exec(data_type)) {
-                                                values = [true, false];
-                                            } else {}
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        } else if (/(real|double|float)/.exec(data_type)) {
+            values = [0.1, -3.1, 1.5e-2, .34, -.821678, 234.3242];
+        } else if (/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)) {
+            var prec = parseInt(/numeric[ ]*\(([0-9]+),[ ]*([0-9]+)\)/.exec(data_type)[2]);
+            values = ["-23.", "273.", "29.", "-55.", "."].map(function(x) {
+                return x + getRandom("1234567890000000", prec, prec);
+            });
+        } else if (/timestamp/.exec(data_type)) {
+            values = ["2020-01-01 10:38:00", "1970-10-11 12:00:00", "1981-09-07 12:30:01"];
+        } else if (/time/.exec(data_type)) {
+            values = ["10:38:00", "12:00:00", "12:30:01"];
+        } else if (/date/.exec(data_type)) {
+            values = ["2020-01-01", "1970-10-11", "1981-09-07"];
+        } else if (/varchar[ ]*\(([0-9]+)\)/.exec(data_type)) {
+            var prec = parseInt(/varchar[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
+            prec = Math.min(prec, 16);
+            values = ["lorem", "ipsum", "dolor", "hello world"];
+            values = values.map(function(t) {
+                var l = Math.floor(Math.random() * prec);
+                return t.slice(0, l);
+            });
+        } else if (/char[ ]*\(([0-9]+)\)/.exec(data_type)) {
+            var prec = parseInt(/char[ ]*\(([0-9]+)\)/.exec(data_type)[1]);
+            return getRandom("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", prec, prec);
+        } else if (/bool/.exec(data_type)) {
+            values = [true, false];
+        } else if (/text|varchar|char/.exec(data_type)) {
+            values = ["Lorem ipsum dolor sit amet", "consectetur adipiscing elit", "sed do eiusmod tempor incididunt"];
+        }
+
+        if (values === undefined) {
+            values = ['<no_example>'];
+            console.log('no example for type: ' + data_type)
         }
         i = i % values.length;
         return values[i];
@@ -328,6 +315,7 @@ var Wizard = function(config) {
         var exampleText = "";
         if (state.columns) {
             var delim = state.delimiter || ",";
+
             if (state.header) {
                 exampleText += state.columns.map(function(c) {
                     return c.name;
@@ -627,7 +615,7 @@ var Wizard = function(config) {
         getDomItem("table-upload").bind("click", csvUpload);
         getDomItem("table-upload-cancel").bind("click", cancelUpload);
 
-                
+
         changeFileSettings();
         resetUpload();
 
@@ -651,6 +639,6 @@ var Wizard = function(config) {
 
     $('#wizard-loading').hide();
 
-    
+
     return { state: state };
 };
