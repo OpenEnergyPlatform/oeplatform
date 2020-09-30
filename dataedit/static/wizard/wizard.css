@@ -10,3 +10,7 @@
 #wizard-csv-example{
     min-height: 10em;
 }
+
+.label{
+    font-weight: bolder;
+}

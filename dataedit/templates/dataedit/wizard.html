@@ -15,7 +15,7 @@
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename" />
+                            <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename" title="Valid table name (only lower case letters, numbers and underscore)"/>
                         </div>
                     </div>
                     <div class="row my-2">
@@ -46,17 +46,17 @@
                                     <tr>
                                         <td>
                                         </td>
-                                        <td>
-                                            column name
+                                        <td class="label" title="Valid column name (only lower case letters, numbers and underscore)">
+                                            Column name
                                         </td>
-                                        <td>
-                                            column type
+                                        <td class="label" title="Valid sql data type for this column">
+                                            Column type
                                         </td>
-                                        <td>
-                                            nullable
+                                        <td class="label" title="Allow column values to be empty (NULL)">
+                                            Nullable
                                         </td>
-                                        <td>
-                                            primary key
+                                        <td class="label" title="Column is the primary key (index/id) of this table.">
+                                            Primary key
                                         </td>
                                     </tr>
                                     <tr class="wizard-column" id="wizard-column-template">
@@ -64,18 +64,18 @@
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name" placeholder="" />
+                                            <input type="text" class="form-control wizard-column-name" placeholder=""  title="Valid column name (only lower case letters, numbers and underscore)"/>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" />                                            
+                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" title="Valid sql data type for this column"/>                                            
                                         </td>
                                         <td>
-                                            <input class="wizard-column-nullable" type="checkbox" />
+                                            <input class="wizard-column-nullable" type="checkbox"  title="Allow column values to be empty (NULL)"/>
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
 
                                         <td>
-                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" />
+                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" title="Column is the primary key (index/id) of this table."/>
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
                                     </tr>
@@ -112,20 +112,25 @@
                         <h4>Select csv options</h4>
                     </div>
                     <div class="row align-items-left">
-                        <div class="col-5">Encoding</div>
-                        <div class="col-5">Delimiter</div>
-                        <div class="col-2">Column names in first row</div>
+                        <div class="col-5 label" title="Character encoding of the csv file.">Encoding</div>
+                        <div class="col-5 label" title="Field separation character of the csv file.">Delimiter</div>
+                        <div class="col-2 label" title="First row of the csv file contains column names.">Header</div>
                     </div>
                     <div class="row">
                         <div class="col-5">
-                            <select id="wizard-encoding" name="encoding" class="form-control ">
-                        <option value="iso-8859-1">ISO-8859-1</option>
-                        <option value="utf-8">UTF-8</option>          
+                        
+                            <select id="wizard-encoding" name="encoding" class="form-control" title="Character encoding of the csv file.">
+                                <option value=""></option>
+                                <option value="iso-8859-1">ISO-8859-1</option>
+                                <option value="utf-8">UTF-8</option>
                     </select>
+
+                   
+
                         </div>
                         <div class="col-5">
-                            <select id="wizard-delimiter" name="delimiter" class="form-control  ">
-                                <option value="">(auto)</option>
+                            <select id="wizard-delimiter" name="delimiter" class="form-control" title="Field separation character of the csv file.">
+                                <option value="">(autodetect)</option>
                                 <option value=";">semicolon</option>
                                 <option value=",">comma</option>
                                 <option value="\t">tab</option>
@@ -133,7 +138,7 @@
                             </select>
                         </div>
                         <div class="col-2">
-                            <input id="wizard-header" type="checkbox" checked />
+                            <input id="wizard-header" type="checkbox" checked  title="First row of the csv file contains column names."/>
                         </div>
                     </div>
                     <div class="row my-2">
@@ -169,7 +174,7 @@
                     </div>
                     <div class="row my-2">
                         <h4>Configure column mapping</h4>
-                    </div>
+                    </div>                    
                     <div class="row wizard-csv-column" id="wizard-csv-column-template">
                         <div class="col-4">
                             <input type="text" class="form-control wizard-csv-column-name" placeholder="" />
@@ -182,14 +187,14 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-4">
-                            column name (in csv file)
+                        <div class="col-4 label">
+                            Column name (in csv file)
                         </div>
-                        <div class="col-4">
-                            column name in database
+                        <div class="col-4 label">
+                            Column name in database
                         </div>
-                        <div class="col-4">
-                            (optional) converter
+                        <div class="col-4 label" title="Modify values in this column before upload">
+                            (optional) Converter
                         </div>
                     </div>
                     <div id="wizard-csv-columns">

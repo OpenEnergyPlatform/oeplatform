@@ -627,7 +627,7 @@ var Wizard = function(config) {
         getDomItem("table-upload").bind("click", csvUpload);
         getDomItem("table-upload-cancel").bind("click", cancelUpload);
 
-       
+                
         changeFileSettings();
         resetUpload();
 
@@ -650,5 +650,7 @@ var Wizard = function(config) {
     })();
 
     $('#wizard-loading').hide();
+
+    
     return { state: state };
 };
