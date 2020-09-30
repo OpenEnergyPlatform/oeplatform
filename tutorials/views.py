@@ -16,8 +16,11 @@ from markdown2 import Markdown
 
 from .forms import TutorialForm
 from .models import Tutorial
+
+import re
 # Create your views here.
 
+youtubeUrlRegex = re.compile('^.*youtube\.com\/watch\?v=(?P<id>[A-z0-9]+)$')
 
 staticTutorials = [
     {
@@ -136,7 +139,7 @@ def _resolveDynamicTutorial(evaluatedQs):
     """
 
     # Initialize dict that stores a tutorial
-    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'level': ''}
+    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'media_src': '', 'level': ''}
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
@@ -144,6 +147,7 @@ def _resolveDynamicTutorial(evaluatedQs):
                            html=evaluatedQs.html,
                            markdown=evaluatedQs.markdown,
                            category= evaluatedQs.category,
+                           media_src= evaluatedQs.media_src,
                            level=evaluatedQs.level)
 
     return currentTutorial
@@ -189,6 +193,17 @@ def _gatherTutorials(id=None):
 
     return tutorials
 
+def _processFormInput(form):
+    tutorial = form.save(commit=False)
+    # Add more information to the dataset like date, time, contributor ...
+
+    if tutorial.media_src:
+        matchResult = youtubeUrlRegex.match(tutorial.media_src)
+        videoId = matchResult.group(1) if matchResult else None
+        if videoId:
+            tutorial.media_src = "https://www.youtube.com/embed/" + videoId
+
+    return tutorial
 
 def formattedMarkdown(markdown):
     """
@@ -199,7 +214,7 @@ def formattedMarkdown(markdown):
     :return:
     """
 
-    markdowner = Markdown()
+    markdowner = Markdown(safe_mode="escape")
 
     return markdowner.convert(markdown)
 
@@ -256,8 +271,7 @@ class CreateNewTutorial(LoginRequiredMixin, CreateView):
         :return:
         """
 
-        tutorial = form.save(commit=False)
-        # Add more information to the dataset like date, time, contributor ...
+        tutorial = _processFormInput(form)
         tutorial.save()
 
         # Convert markdown to HTML and save to db
@@ -289,9 +303,9 @@ class EditTutorials(LoginRequiredMixin, UpdateView):
         :param form:
         :return:
         """
-        tutorial = form.save(commit=False)
-        # Add more information to the dataset like date, time, contributor ...
+        tutorial = _processFormInput(form)
         tutorial.save()
+
         _html = formattedMarkdown(tutorial.markdown)
         addHtml = Tutorial.objects.get(pk=tutorial.id)
         addHtml.html = _html
