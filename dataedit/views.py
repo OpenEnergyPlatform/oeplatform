@@ -1425,6 +1425,8 @@ class WizardView(LoginRequiredMixin, View):
         elif dt.startswith('double'):
             dt = 'float'
         if precisions:
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
             dt += '(%s)' % ', '.join(str(x) for x in precisions)
         return dt
 
