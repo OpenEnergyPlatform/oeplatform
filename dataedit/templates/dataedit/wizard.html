@@ -1,5 +1,4 @@
 {% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
-<link href="/static/wizard/lib/bootstrap-combobox.min.css" rel="stylesheet">
 <link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %} {% block site-header %}
 <h2 class="site-header"><span class="spinner-border text-primary" role="status" id="wizard-loading"></span><i class="fa fa-hat-wizard"></i>Wizard</h2>
 {% endblock site-header %} {% block main %}
@@ -26,6 +25,22 @@
                     </div>
                     <div class="row wizard-column">
                         <div class="col-12">
+                            <datalist id="wizard-column-types">
+                                <option value="boolean"></option>
+                                <option value="smallint"></option>
+                                <option value="integer"></option>
+                                <option value="bigint"></option>
+                                <option value="float"></option>
+                                <option value="real"></option>
+                                <option value="date"></option>
+                                <option value="time"></option>
+                                <option value="datetime"></option>
+                                <option value="char(5)"></option>
+                                <option value="varchar(128)"></option>
+                                <option value="text"></option>
+                                <option value="decimal(9, 6)"></option>
+                            </datalist>
+                            
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -52,7 +67,7 @@
                                             <input type="text" class="form-control wizard-column-name" placeholder="" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type" placeholder="" />
+                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" />                                            
                                         </td>
                                         <td>
                                             <input class="wizard-column-nullable" type="checkbox" />
@@ -223,9 +238,7 @@
 <!-- id="wizard-container" class="container-fluid" -->
 {% endblock main %} {% block after-body-bottom-js %}
 
-<script src="/static/wizard/lib/papaparse.min.js"></script>
-<script src="/static/wizard/lib/bootstrap-combobox.min.js"></script>
-<!--<script src="/static/wizard/wizard.min.js"></script>-->
+<script src="/static/wizard/lib/papaparse-5.0.2/papaparse.min.js"></script>
 <script src="/static/wizard/wizard.js"></script>
 <script>
     var config = JSON.parse("{{ config|escapejs }}");

@@ -27,6 +27,7 @@ var Wizard = function(config) {
         fileName: null,
         cancel: null,
     };
+
     var columnParsers = {
         "parseFloat2": { parse: parseFloat2, label: "Number (Englisch)" },
         "parseFloatGerman": { parse: parseFloatGerman, label: "Number (German)" },
@@ -46,7 +47,7 @@ var Wizard = function(config) {
         }
         return elem;
     }
-    var examplesTypes = ['boolean', 'smallint', 'integer', 'bigint', 'float', 'real', 'date', 'time', 'datetime', 'char(5)', 'varchar(128)', 'text', 'decimal(9, 6)']
+    
 
     function addColumn(columnDef) {
         columnDef = columnDef || {};
@@ -54,14 +55,9 @@ var Wizard = function(config) {
         var n = columns.find(".wizard-column").length;
         var column = getDomItem("column-template").clone().attr("id", "wizard-column-" + n).appendTo(columns).removeClass("invisible");
         column.find(".wizard-column-name").val(columnDef.name);
-        var ct = column.find(".wizard-column-type");
+        
+        column.find(".wizard-column-type").val(columnDef.data_type);
 
-        if (columnDef.data_type) {
-            ct.append('<option selected>' + columnDef.data_type + '</option>')
-            ct.val(columnDef.data_type);
-        } else {
-            ct.combobox({ clearIfNoMatch: false }); // make combobox
-        }
 
         column.find(".wizard-column-nullable").prop("checked", columnDef.is_nullable);
         column.find(".wizard-column-pk").prop("checked", columnDef.is_pk);
@@ -484,6 +480,7 @@ var Wizard = function(config) {
                             state.csvParser = parser;
                             state.csvParser.pause();
                             var insertData = data.data.map(state.rowMapper);
+                            console.log(insertData, data.data, data.meta)
                             sendJson("POST", getApiAdvancedUrl("insert"), createContext(insertData)).then(function(res) {
                                 if (state.cancel) {
                                     rollback("cancel");
@@ -630,12 +627,7 @@ var Wizard = function(config) {
         getDomItem("table-upload").bind("click", csvUpload);
         getDomItem("table-upload-cancel").bind("click", cancelUpload);
 
-        var ct = getDomItem("column-template .wizard-column-type");
-        ct.append('<option selected></option>')
-        examplesTypes.map(function(t) {
-            ct.append('<option>' + t + '</option>')
-        })
-
+       
         changeFileSettings();
         resetUpload();
 
