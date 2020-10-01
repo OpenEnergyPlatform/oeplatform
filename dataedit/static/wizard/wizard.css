@@ -7,7 +7,7 @@
     display: none;    
 }
 
-#wizard-csv-example{
+#wizard-csv-example, #wizard-csv-text{
     min-height: 10em;
 }
 
