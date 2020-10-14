@@ -1396,13 +1396,15 @@ def increment_usage_count(tag_id):
 
 
 class WizardView(LoginRequiredMixin, View):
-    """ 
+    """View for the upload wizard (create tables, upload csv).
     """
     
     @staticmethod
     def get_datatype_str(column_def):        
-        """
-        I want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128).        
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128), 
+        so we need to combine the various fields (type, numeric_precision, numeric_scale, ...)
         """
         # for reverse validation, see also api.parser.parse_type(dt_string)
         dt = column_def['data_type'].lower()
@@ -1432,8 +1434,9 @@ class WizardView(LoginRequiredMixin, View):
 
     @staticmethod
     def get_pk_fields(constraints):
-        """
-        NOTE: Currently, the api to create tables only allows single fields primary keys
+        """Get the column names that make up the primary key from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports single fields primary keys (which is advisable anyways)
         """
         pk_fields = []
         for _name, constraint in constraints.items():
@@ -1446,7 +1449,7 @@ class WizardView(LoginRequiredMixin, View):
 
 
     def get(self, request, schema='model_draft', table=None):
-        """        
+        """Handle GET request (render the page).
         """        
         engine = actions._get_engine()
 
@@ -1454,13 +1457,14 @@ class WizardView(LoginRequiredMixin, View):
         columns = None
         pk_fields = None
         n_rows = None
-        if table:
+        if table: 
+            # get information about the table
             # if upload: table must exist in schema model_draft
             if schema != 'model_draft':
                 raise Http404('Can only upload to schema model_draft')
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404('Table does not exist')
-            table_obj = Table.load(schema, table)                        
+            table_obj = Table.load(schema, table)                                    
             if not request.user.is_anonymous:
                 user_perms = login_models.UserPermission.objects.filter(table=table_obj)
                 level = request.user.get_table_permission_level(table_obj)
@@ -1477,7 +1481,7 @@ class WizardView(LoginRequiredMixin, View):
                     'is_nullable': col['is_nullable'],
                     'is_pk': name in pk_fields
                 })
-            # get number ow rows
+            # get number of rows
             sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)                    
             res = actions.perform_sql(sql)
             n_rows = res['result'].fetchone()[0]
