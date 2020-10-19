@@ -169,6 +169,7 @@ var Wizard = function(config) {
         column.find(".wizard-csv-column-name").val(columnDef.name);
         column.find(".wizard-csv-column-name-new").val(columnDef.nameDB).bind("change", updateColumnMapping);
         column.find(".wizard-csv-column-parse").val("").bind("change", updateColumnMapping);
+        column.find(".wizard-null-value").val("").bind("change", updateColumnMapping);
     }
 
     /**
@@ -255,36 +256,36 @@ var Wizard = function(config) {
         $("#wizard-csv-columns").find(".wizard-csv-column").each(function(idxCsv, e) {
             var nameDB = $(e).find(".wizard-csv-column-name-new").val();
             var parseName = $(e).find(".wizard-csv-column-parse").val();
+            var nullValue = $(e).find(".wizard-null-value").val() || "";
             var parseFun = columnParsers[parseName].parse;
             var idxDB = name2idx[nameDB];
             state.csvColumns[idxCsv].nameDB = nameDB;
             state.csvColumns[idxCsv].idxDB = idxDB;
             state.csvColumns[idxCsv].parse = parseFun;
+            state.csvColumns[idxCsv].nullValue = nullValue;
             if (idxDB !== undefined) {
                 state.columns[idxDB].idxCsv = idxCsv;
                 state.columns[idxDB].parseName = parseName;
                 state.columns[idxDB].parse = function() {
-                    var _i = idxCsv;
-                    var _f = parseFun;
-                    return function(row) {
-                        var v = row[_i];
-                        var v2 = null;
+                    return function(v) {
+                        if (v === nullValue) {
+                            return null;
+                        }
                         try {
-                            v2 = _f(v);
+                            return parseFun(v);
                         } catch (e$0) {
                             console.error(e$0);
+                            return null
                         }
-                        return v2;
                     };
                 }();
             }
         });
         // row mapper: converts input row from csv into upload row, applies column mapping and conversions
         state.rowMapper = function(row) {
-            return state.columns.map(function(c) {
-                var v = c.parse(row);
-                v = v === "" ? null : v;
-                return v;
+            return state.columns.map(function(c, i) {
+                var v = row[i];
+                return c.parse(v);
             });
         };
         updatePreview();

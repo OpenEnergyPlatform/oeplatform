@@ -187,26 +187,40 @@
                     </div>
 
                     <div class="row wizard-csv-column" id="wizard-csv-column-template">
-                        <div class="col-4">
+                        <div class="col-3">
                             <input type="text" class="form-control wizard-csv-column-name" placeholder="" />
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <select class="form-control wizard-csv-column-name-new"></select>
                         </div>
-                        <div class="col-4">
+                        <div class="col-3">
                             <select class="form-control wizard-csv-column-parse"></select>
                         </div>
+                        <div class="col-3">
+                            <input type="text" class="form-control wizard-null-value" list="wizard-null-values"/>
+                        </div>
+
                     </div>
 
                     <div class="row my-3">
-                        <div class="col-4 label">
+                        <div class="col-3 label">
                             Column name (in csv file)
                         </div>
-                        <div class="col-4 label">
+                        <div class="col-3 label">
                             Column name in database
                         </div>
-                        <div class="col-4 label help-title" title="Modify values in this column before upload">
+                        <div class="col-3 label help-title" title="Modify values in this column before upload">
                             (optional) Converter
+                        </div>
+                        <div class="col-3 label help-title" title="String that should be interpreted as NULL (missing value)">
+                            (optional) Null value
+                            <datalist id="wizard-null-values">
+                                <option value=""></option>
+                                <option value="-"></option>
+                                <option value="n.a."></option>
+                                <option value="null"></option>
+                                <option value="None"></option>
+                            </datalist>
                         </div>
                     </div>
 
