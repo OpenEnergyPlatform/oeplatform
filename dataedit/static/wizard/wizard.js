@@ -28,7 +28,7 @@ var Wizard = function(config) {
     };
 
     var columnParsers = {
-        "parseFloatCommaDecimal": { // replace 
+        "parseFloatCommaDecimal": { // replace
             parse: function parseFloatCommaDecimal(v) {
                 v = v.replace(".", "");
                 v = v.replace(",", ".");
@@ -51,7 +51,7 @@ var Wizard = function(config) {
     };
 
     /**************************************
-     * Helper functions to use the API 
+     * Helper functions to use the API
      ***************************************/
 
     function getApiTableUrl(tablename) {
@@ -124,14 +124,14 @@ var Wizard = function(config) {
         return token1;
     }
 
-    
+
     /**************************************
-     * UI functions 
+     * UI functions
      ***************************************/
 
 
     /**
-     * add a new column in the create table section     
+     * add a new column in the create table section
      */
     function addColumn(columnDef) {
         //console.log('addColumn', columnDef)
@@ -158,7 +158,7 @@ var Wizard = function(config) {
     }
 
     /**
-     * add a new column in the csv upload section     
+     * add a new column in the csv upload section
      */
     function addColumnCsv(columnDef) {
         //console.log("add column csv", columnDef)
@@ -244,7 +244,7 @@ var Wizard = function(config) {
      */
     function updateColumnMapping() {
         //console.log('updateColumnMapping')
-        var name2idx = {};        
+        var name2idx = {};
         for (var i = 0; i < state.columns.length; i++) {
             name2idx[state.columns[i].name] = i;
             state.columns[i].idxCsv = undefined;
@@ -289,7 +289,7 @@ var Wizard = function(config) {
         };
         updatePreview();
     }
-    
+
 
     /**
      * Update the upload  preview table
@@ -297,7 +297,7 @@ var Wizard = function(config) {
     function updatePreview() {
         //console.log('updatePreview', state)
         var tbody = $("#wizard-csv-preview").find("tbody");
-        tbody.empty();        
+        tbody.empty();
         var rows = state.previewRows.length ? state.previewRows.map(state.rowMapper): []
         rows.map(function(row) {
             var tr = $("<tr>").appendTo(tbody);
@@ -415,7 +415,7 @@ var Wizard = function(config) {
         } else {
             updateColumnMapping();
         }
-        
+
     }
 
 
@@ -467,7 +467,7 @@ var Wizard = function(config) {
         state.cancel = true;
     }
 
-    
+
     /***
      * NOTE: the api returns Bigints as connection/cursor ids, and the normal JSON.parse truncates those
      *       so we need to parse those manually to extract the id and keep it as string
@@ -480,11 +480,11 @@ var Wizard = function(config) {
 
     /**
      * start the upload process cia advanced api
-     * 
+     *
      * First we open a new advanced connection and cursor
      * We read the csv in chunks (set size in state variable)
-     *   on each chunk we pause and and post the data. on success we resume the csv parser     
-     * 
+     *   on each chunk we pause and and post the data. on success we resume the csv parser
+     *
      */
     function csvUpload() {
         // update/reset file stats
@@ -605,9 +605,26 @@ var Wizard = function(config) {
         });
     }
 
+    /**
+     * delete table
+     */
+    function deleteTable() {
+        $('#wizard-confirm-delete').modal('hide');
+        setStatusCreate("primary", true, "deleting table...");
+        var tablename = $("#wizard-tablename").val();
+        var url = getApiTableUrl(tablename) + "/";
+        var urlSuccess = '/dataedit/wizard';
+        sendJson("DELETE", url).then(function() {
+            setStatusCreate("success", true, "ok, reloading page...");
+            window.location = urlSuccess;
+        }).catch(function(err) {
+            setStatusCreate("danger", false, getErrorMsg(err));
+        });
+    }
+
 
     function resetUpload() {
-        state.cancel = null;        
+        state.cancel = null;
         $("#wizard-table-upload").show();
         $("#wizard-table-upload-cancel").hide();
         $("#wizard-file").val("");
@@ -618,6 +635,7 @@ var Wizard = function(config) {
     function showCreate() {
         $("#wizard-container-upload").collapse("hide");
         $("#wizard-container-create").collapse("show");
+        $("#wizard-table-delete").hide();
         $("#wizard-container-upload").find(".btn").hide();
         $("#wizard-container-upload").find("input").prop("readonly", true);
     }
@@ -627,6 +645,7 @@ var Wizard = function(config) {
         $("#wizard-container-create").collapse("hide");
         $("#wizard-container-upload").collapse("show");
         $("#wizard-container-create").find(".btn").hide();
+        $("#wizard-table-delete").show();
         $("#wizard-container-create").find("input").prop("readonly", true);
         $("#wizard-container-create").find("input,select,.combobox-container").not("[type=text]").prop("disabled", true);
         if (!state.canAdd) {
@@ -663,9 +682,9 @@ var Wizard = function(config) {
         var p = e.find(".progress");
         e.addClass("text-" + alertCls);
         e.find(".message").text(msg);
-        if (progress === true) {            
+        if (progress === true) {
             p.hide();
-        } else {            
+        } else {
             if (progress !== false) {
                 p.show();
                 p.find(".progress-bar").css("width", progress + "%");
@@ -679,7 +698,6 @@ var Wizard = function(config) {
             e.find(".spinner").hide();
         }
     }
-
 
     (function init() {
         //console.log('init')
@@ -696,7 +714,7 @@ var Wizard = function(config) {
         $("#wizard-delimiter").bind("change", changeFileSettings);
         $("#wizard-header").bind("change", changeFileSettings);
         $("#wizard-table-upload").bind("click", csvUpload);
-        $("#wizard-table-upload-cancel").bind("click", cancelUpload);        
+        $("#wizard-table-upload-cancel").bind("click", cancelUpload);
         resetUpload();
         if (state.table) {
             $("#wizard-tablename").val(state.table);
@@ -709,6 +727,22 @@ var Wizard = function(config) {
             state.columns.map(function(c) {
                 cN.append("<option>" + c.name + "</option>");
             });
+
+
+            var del = function() {
+                // replace button with spinner
+                UI.hideModal();
+                btn.replaceWith('<span id="spinner" class="record-action spinner-border spinner-border-sm text-dark mr-2" role="status"></span>')
+                record.is_deleted = true
+                return app.reqUpdateRecord(record).then(populateUI)
+            };
+
+            /* delete table */
+            $("#wizard-table-delete").bind("click", function(){$('#wizard-confirm-delete').modal('show');});
+            $("#wizard-confirm-delete-cancel").bind("click", function(){$('#wizard-confirm-delete').modal('hide');});
+            $("#wizard-confirm-delete-delete").bind("click", deleteTable);
+
+
             showUpload();
         } else {
             showCreate();
