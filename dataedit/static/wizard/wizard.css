@@ -4,7 +4,7 @@
 }
 
 #wizard-column-template,#wizard-csv-column-template {
-    display: none;    
+    display: none;
 }
 
 #wizard-csv-example, #wizard-csv-text{
@@ -15,3 +15,16 @@
     font-weight: bolder;
 }
 
+.help-title{
+    text-decoration: none;
+  }
+
+.help-title::after{
+    color: var(--primary);
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f059";
+    vertical-align: super;
+    font-size: 70%;
+    margin-left: 2px
+  }
