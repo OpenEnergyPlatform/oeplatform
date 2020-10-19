@@ -109,11 +109,18 @@ Once logged into your psql session (for linux: `sudo -u postgres psql`, for wind
     create user oep_db_user with password '<oep_db_password>';
     create database oep_db with owner = oep_db_user;
 
-Then enter in `oep_db` (`\c oep_db;`) and type the additional commands:
+For the creation of spatial objects we use [PostGIS](https://postgis.net/install/) for PostgreSQL.
+
+- On Windows, We recommend installing the postgis for your local PostgreSQL installation from [Application Stack Builder](https://www.enterprisedb.com/edb-docs/d/postgresql/installation-getting-started/installation-guide-installers/9.6/PostgreSQL_Installation_Guide.1.09.html) under ``Spatial Extensions``. There should automatically be an entry for ``PostGIS bundle ...``  based on the installed version of PostgreSQL, please make sure it is checked and click next. The stack builder will then continue to download and install PostGIS. Alternately PostGIS can also be downloaded from [this official ftp server](http://ftp.postgresql.org/pub/postgis/) by PostgreSQL. Proceed to install the package. (Flag it as safe in the downloads if prompted, and select Run anyway from the Windows SmartScreen Application Blocked Window)
+
+- On Linux/Unix based systems the installation could be specific to the package manager being employed and the operating system, so please refer to the official installation instructions [here](https://postgis.net/install/). The section ``Binary Installers`` covers the installation instructions for various operating systems.
+
+After successfully installing PostGIS,  enter in `oep_db` (`\c oep_db;`) and type the additional commands:
 
     create extension postgis;
     create extension postgis_topology;
     create extension hstore;
+
 
 ##### 2.2 Database connection setup
 
