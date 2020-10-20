@@ -18,7 +18,7 @@
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename" title="Valid table name (only lower case letters, numbers and underscore)" />
+                            <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
                         </div>
                     </div>
                     <div class="row my-2">
@@ -49,36 +49,36 @@
                                     <tr>
                                         <td>
                                         </td>
-                                        <td class="label help-title" title="Valid column name (only lower case letters, numbers and underscore)">
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
                                             Column name
-                                        </td>
-                                        <td class="label help-title" title="Valid sql data type for this column">
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid sql data type for this column">
                                             Column type
-                                        </td>
-                                        <td class="label help-title" title="Allow column values to be empty (NULL)">
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Allow column values to be empty (NULL)">
                                             Nullable
-                                        </td>
-                                        <td class="label help-title" title="Column is the primary key (index/id) of this table.">
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
                                             Primary key
-                                        </td>
+                                        </span></td>
                                     </tr>
                                     <tr class="wizard-column" id="wizard-column-template">
                                         <td>
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name" placeholder="" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                            <input type="text" class="form-control wizard-column-name" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" title="Valid sql data type for this column" />
+                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
                                         </td>
                                         <td>
-                                            <input class="wizard-column-nullable" type="checkbox" title="Allow column values to be empty (NULL)" />
+                                            <input class="wizard-column-nullable" type="checkbox" data-toggle="tooltip" title="Allow column values to be empty (NULL)" />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
 
                                         <td>
-                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" title="Column is the primary key (index/id) of this table." />
+                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
                                     </tr>
@@ -120,21 +120,21 @@
                     </div>
 
                     <div class="row align-items-left">
-                        <div class="col-5 label help-title" title="Character encoding of the csv file.">Encoding</div>
-                        <div class="col-5 label help-title" title="Field separation character of the csv file.">Delimiter</div>
-                        <div class="col-2 label help-title" title="First row of the csv file contains column names.">Header</div>
+                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Character encoding of the csv file.">Encoding</span></div>
+                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Field separation character of the csv file.">Delimiter</span></div>
+                        <div class="col-2"><span class="label help-title" data-toggle="tooltip" title="First row of the csv file contains column names.">Header</span></div>
                     </div>
 
                     <div class="row my-3">
                         <div class="col-5">
-                            <select id="wizard-encoding" name="encoding" class="form-control" title="Character encoding of the csv file.">
+                            <select id="wizard-encoding" name="encoding" class="form-control" data-toggle="tooltip" title="Character encoding of the csv file.">
                                 <option value=""></option>
                                 <option value="iso-8859-1">ISO-8859-1</option>
                                 <option value="utf-8">UTF-8</option>
                             </select>
                         </div>
                         <div class="col-5">
-                            <select id="wizard-delimiter" name="delimiter" class="form-control" title="Field separation character of the csv file.">
+                            <select id="wizard-delimiter" name="delimiter" class="form-control" data-toggle="tooltip" title="Field separation character of the csv file.">
                                 <option value="">(autodetect)</option>
                                 <option value=";">semicolon</option>
                                 <option value=",">comma</option>
@@ -143,7 +143,7 @@
                             </select>
                         </div>
                         <div class="col-2">
-                            <input id="wizard-header" type="checkbox" checked title="First row of the csv file contains column names." />
+                            <input id="wizard-header" type="checkbox" checked data-toggle="tooltip" title="First row of the csv file contains column names." />
                         </div>
                     </div>
 
@@ -203,16 +203,16 @@
                     </div>
 
                     <div class="row my-3">
-                        <div class="col-3 label">
+                        <div class="col-3"><span class="label">
                             Column name (in csv file)
-                        </div>
-                        <div class="col-3 label">
+                        </span></div>
+                        <div class="col-3"><span class="label">
                             Column name in database
-                        </div>
-                        <div class="col-3 label help-title" title="Modify values in this column before upload">
+                        </span></div>
+                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="Modify values in this column before upload">
                             (optional) Converter
-                        </div>
-                        <div class="col-3 label help-title" title="String that should be interpreted as NULL (missing value)">
+                        </span></div>
+                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="String that should be interpreted as NULL (missing value)">
                             (optional) Null value
                             <datalist id="wizard-null-values">
                                 <option value=""></option>
@@ -221,7 +221,7 @@
                                 <option value="null"></option>
                                 <option value="None"></option>
                             </datalist>
-                        </div>
+                        </span></div>
                     </div>
 
                     <div id="wizard-csv-columns">
@@ -294,5 +294,9 @@
 <script>
     var config = JSON.parse("{{ config|escapejs }}");
     var wizard = Wizard(config);
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
 </script>
 {% endblock after-body-bottom-js %}
