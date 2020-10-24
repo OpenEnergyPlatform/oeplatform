@@ -23,6 +23,17 @@
         <span class="fas fa-download"></span> Download JSON
       </a>
 -->
+<script src="{% static 'download_meta.js' %}"></script>
+  <div class="btn-group btn-group-sm">
+    <button class="btn btn-success" onclick="download_json_meta();">Download JSON</button>
+  </div>
+
+
+<script>
+function download_json_meta() {
+const value = editor.getValue();
+}
+</script>
 
 
 
@@ -48,3 +59,4 @@
 
 
 {% endblock %}
+
