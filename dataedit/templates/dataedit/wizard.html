@@ -1,6 +1,6 @@
 {% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
 <link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %} {% block site-header %}
-<h2 class="site-header"><span class="spinner-border text-primary" role="status" id="wizard-loading"></span>
+<h2 class="site-header"><span class="spinner-border text-primary" id="wizard-loading"></span>
     <i class="fa fa-hat-wizard"></i>Wizard</span>
 </h2>
 {% endblock site-header %} {% block main %}
@@ -21,11 +21,7 @@
                             <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
                         </div>
                     </div>
-                    <div class="row my-2">
-                        <div class="col-4">
-                            <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i> Add column</button>
-                        </div>
-                    </div>
+
                     <div class="row wizard-column">
                         <div class="col-12">
                             <datalist id="wizard-column-types">
@@ -89,13 +85,18 @@
                             </table>
                         </div>
                     </div>
+                    <div class="row my-2">
+                        <div class="col-4">
+                            <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i> Add column</button>
+                        </div>
+                    </div>
                     <div class="row mt-5">
                         <div class="col-2">
                             <button class="btn btn-success mt-2" id="wizard-table-create"><i class="fa fa-table mr-2"></i>Create table</button>
                             <button class="btn btn-danger mt-2" id="wizard-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
                         </div>
-                        <div class="col-10">
-                            <div id="wizard-table-create-msg" class="invisible">
+                        <div class="col-10 align-self-end">
+                            <div id="wizard-table-create-msg" class="invisible wizard-status">
                                 <span class="spinner spinner-border spinner-border-sm"></span>
                                 <span class="message"></span>
                             </div>
@@ -246,12 +247,12 @@
                             <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</button>
                             <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i> Cancel</button>
                         </div>
-                        <div class="col-10">
-                            <div id="wizard-table-upload-msg" class="invisible" role="alert">
+                        <div class="col-10 align-self-end">
+                            <div id="wizard-table-upload-msg" class="invisible wizard-status">
                                 <span class="spinner spinner-border spinner-border-sm"></span>
-                                <span class="message" role="status"></span>
+                                <span class="message"></span>
                                 <span class="progress">
-                                    <span class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"></span>
+                                    <span class="progress-bar progress-bar-animated progress-bar-striped"></span>
                                 </span>
                             </div>
                         </div>
@@ -276,7 +277,7 @@
 
 <!-- dialog: keep outside of main container -->
 <div id="wizard-confirm-delete" class="modal fade">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 Do you want to delete the table (including data and metadata)?
