@@ -49,7 +49,7 @@ $('document').ready(function() {
 
             optionsresult.schema = schemaresult;
             // console.log(options);
-            editor = new JSONEditor(element, optionsresult);
+            var editor = new JSONEditor(element, optionsresult);
 
             if (form) {
                 $(form).submit(function() {
