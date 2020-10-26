@@ -176,7 +176,7 @@ for row in result.json():
             a.download = '{{ table }}.metadata.json';
             a.click();
             // cleanup
-            URL.revokeObjectURL(url);
+            URL.revokeObjectURL(dataUrl);
             a.parentNode.removeChild(a);
           })
       };
