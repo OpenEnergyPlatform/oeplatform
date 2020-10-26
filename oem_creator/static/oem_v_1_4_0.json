@@ -1,575 +1,601 @@
 {
-  "type": "object",
-  "title": "Metadata Creator Version 1.4.0",
+   "type":"object",
+   "title":"Metadata Creator Version 1.4.0",
+   "description": "<p> Metadata Creator is a tool to provide a metadata template. After filling the necessary information, as a result a metadata json schema is going to be created. Finally through the Edit JSON the OUTPUT can be copied into a self created .txt file.</p>",
+   "properties":{
+      "name":{
+         "type":"string"
+      },
 
-  "properties": {
-    "name": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string",
-      "description": "(e.g. Good example title)"
-    },
-    "id": {
-      "type": "string",
-        "default": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v14"
-    },
-    "description": {
-      "type": "string",
-        "description": "(e.g. example metadata for example data)"
-    },
-    "language": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": ["en-GB", "en-US", "de-DE", "fr-FR"]
-    }
 
-    },
-    "keywords": {
-      "type": "array",
-      "items": {
-          "type": "string",
-        "title": "keyword",
-        "description": "(e.g. example/template/test)"
-      }
-    },
-    "publicationDate": {
-          "type": "string",
-          "format": "date",
-          "description": "(e.g. 2018-06-12)"
-        },
-    "context": {
-      "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
+      "title":{
+         "type":"string"
+      },
+      "id":{
+         "type":"string"
+      },
+      "description":{
+         "type":"string"
+      },
+      "language":{
+         "options":{
+            "array_controls_top":true
+         },
+         "type":"array",
+         "items":{
+            "title":"language",
+            "type":"string",
+            "enum":[
+               "en-GB",
+               "en-US",
+               "de-DE",
+               "fr-FR"
+            ]
+         }
+      },
+      "keywords":{
+         "options":{
+            "array_controls_top":true
+         },
+         "type":"array",
+         "items":{
+            "type":"string",
+            "title":"keyword"
+         }
+      },
+      "publicationDate":{
+         "type":"string",
+         "format":"date"
+      },
+      "context":{
+         "type":"object",
+         "options":{
+           "collapsed": true,
+            "disable_collapse":false,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
 
-      "required": [],
-
-      "properties": {
-        "homepage": {
-          "type": ["string", "null"],
-            "description": "(e.g. https://reiner-lemoine-institut.de/szenariendb/)"
-        },
-        "documentation": {
-          "type":["string", "null"],
-             "description": "(e.g. https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)"
-
-        },
-        "sourceCode": {
-          "type":  ["string", "null"],
-             "description": "(e.g. https://github.com/OpenEnergyPlatform/examples/tree/master/metadata)"
-        },
-        "contact": {
-          "type": ["string", "null"],
-             "description": "(e.g. https://github.com/Ludee)"
-        },
-        "grantNo": {
-          "type": ["string", "null"],
-             "description": "(e.g. 03ET4057)"
-        },
-        "fundingAgency": {
-          "type":["string", "null"],
-             "description": "(e.g. Bundesministerium für Wirtschaft und Energie)"
-        },
-        "fundingAgencyLogo": {
-          "type": ["string", "null"],
-             "description": "(e.g. https://www.innovation-beratung-foerderung.de/INNO/Redaktion/DE/Bilder/Titelbilder/titel_foerderlogo_bmwi.jpg?__blob=poster&v=2)"
-        },
-        "publisherLogo": {
-          "type": ["string", "null"],
-             "description": "(e.g. https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png)"
-        }
-      }
-    },
-    "spatial": {
-      "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "required": [],
-      "properties": {
-        "location": {
-          "type": ["string", "null"],
-          "description": "(e.g. null)"
-        },
-        "extent": {
-          "type": ["string", "null"],
-          "description": "(e.g. europe)"
-        },
-        "resolution": {
-          "type":["string", "null"],
-          "description": "(e.g. 100 m)"
-        }
-      }
-    },
-    "temporal": {
-      "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "required": [],
-      "properties": {
-        "referenceDate": {
-          "type": "string",
-          "format": "date",
-          "description": "(e.g. 2016-01-01)"
-        },
-        "timeseries": {
-          "type": "object",
-                        "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-          "required": [],
-          "properties": {
-            "start": {
-              "type": "string",
-
-                "description": "(e.g. 2017-01-01T23:00+01)"
+         ],
+         "properties":{
+            "homepage":{
+               "type":"string"
             },
-            "end": {
-                "type": "string",
-
-                "description": "(e.g. 2017-12-31T23:00+01)"
+            "documentation":{
+               "type":"string"
             },
-            "resolution": {
-              "type": "string",
-              "description": "(e.g. 1 h)"
+            "sourceCode":{
+               "type":"string"
             },
-            "alignment": {
-              "type": "string",
-              "description": "(e.g. left)"
+            "contact":{
+               "type":"string"
             },
-            "aggregationType": {
-              "type": "string",
-              "description": "(e.g. sum)"
+            "grantNo":{
+               "type":"string"
+            },
+            "fundingAgency":{
+               "type":"string"
+            },
+            "fundingAgencyLogo":{
+               "type":"string"
+            },
+            "publisherLogo":{
+               "type":"string"
             }
-          }
-        }
-      }
-    },
-    "sources": {
-      "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "items": {
-        "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-         "title": "source",
-        "required": [],
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "(e.g. OpenEnergyPlatform Metadata Example)"
-          },
-          "description": {
-            "type": "string",
-            "description": "(e.g. Metadata description)"
-          },
-          "path": {
-            "type": "string",
-            "description": "(e.g. https://github.com/OpenEnergyPlatform)"
-          },
-          "licenses": {
-            "type": "array",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-            "items": {
-              "type": "object",
-                            "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-              "required": [],
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "(e.g. CC0-1.0)"
-                },
-                "title": {
-                  "type": "string",
-                  "description": "(e.g. Creative Commons Zero v1.0 Universal)"
-                },
-                "path": {
-                  "type": "string",
-                  "description": "(e.g. https://creativecommons.org/publicdomain/zero/1.0/legalcode)"
-                },
-                "instruction": {
-                  "type": "string",
-                  "description": "(e.g. You are free: To Share, To Create, To Adapt)"
-                },
-                "attribution": {
-                  "type": "string",
-                  "description": "(e.g. © Reiner Lemoine Institut)"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "licenses": {
-      "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "items": {
-        "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-         "title": "licenses",
-        "required": [],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "(e.g. ODbL-1.0)"
-          },
-          "title": {
-            "type": "string",
-            "description": "(e.g. Open Data Commons Open Database License 1.0)"
-          },
-          "path": {
-            "type": "string",
-            "description": "(e.g. https://opendatacommons.org/licenses/odbl/1.0/)"
-          },
-          "instruction": {
-            "type": "string",
-            "description": "(e.g. You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!)"
-          },
-          "attribution": {
-            "type": "string",
-            "description": "(e.g. © Reiner Lemoine Institut © OpenStreetMap contributors)"
-          }
-        }
-      }
-    },
-    "contributors": {
-      "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "items": {
-        "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-         "title": "contributor",
-        "required": [],
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "(e.g. Ludee)"
-          },
-          "email": {
-            "type": ["string", "null"],
-            "format": "email",
-            "description": "(e.g. null)"
-          },
-          "date": {
-            "type": "string",
-            "format": "date",
-            "description": "(e.g. 2016-11-22)"
-          },
-          "object": {
-            "type": "string",
-            "description": "(e.g. metadata)"
-          },
-          "comment": {
-            "type": "string",
-            "description": "(e.g. Update metadata)"
-          }
-        }
-      }
-    },
-    "resources": {
-      "type": "array",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "items": {
-        "type": "object",
-                      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-         "title": "resources",
-        "required": [],
-        "properties": {
-          "profile": {
-            "type": "string",
-            "description": "(e.g. tabular-data-resource)"
-          },
-          "name": {
-            "type": "string",
-            "description": "(e.g. model_draft.oep_metadata_table_example_v140)"
-          },
-          "path": {
-            "type": "string",
-            "description": "(e.g. http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v140)"
-          },
-          "format": {
-            "type": "string",
-            "description": "(e.g. PostgreSQL)"
-          },
-          "encoding": {
-            "type": "string",
-            "description": "(e.g. UTF-8)"
-          },
-          "schema": {
-            "type": "object",
-            "format": "categories",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-            "required": [],
-            "properties": {
-              "fields": {
-                "type": "array",
+         }
+      },
+      "spatial": {
+         "type":"object",
+         "options":
+         {"collapsed": true,
+            "disable_collapse":false,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
 
-                "items": {
-                  "type": "object",
-                                "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-                  "required": [],
-                  "properties": {
-                    "name": {
-                      "type": "string",
-                      "description": "(e.g. id)"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "(e.g. Unique identifier)"
-                    },
-                    "type": {
-                      "type": "string",
-                      "description": "(e.g. serial)"
-                    },
-                    "unit": {
-                      "type": ["string", "null"],
-                      "description": "(e.g. null)"
-                    }
+         ],
+         "properties":{
+            "location":{
+               "type":"string"
+            },
+            "extent":{
+               "type":"string"
+            },
+            "resolution":{
+               "type":"string"
+            }
+         }
+      },
+      "temporal":{
+         "type":"object",
+         "options":{
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
+
+         ],
+         "properties":{
+            "referenceDate":{
+               "type":"string",
+               "format":"date"
+            },
+            "timeseries":{
+               "type":"object",
+               "options":{
+                  "disable_collapse":true,
+                  "disable_edit_json":true,
+                  "disable_properties":true
+               },
+               "required":[
+
+               ],
+               "properties":{
+                  "start":{
+                     "type":["string","null"],
+                     "description":"example: 2011-01-01T00:00:00"
+                  },
+                  "end":{
+                      "type":["string","null"],
+                     "description":"example: 2011-01-01T00:00:00"
+                  },
+                  "resolution":{
+                      "type":["string","null"]
+                  },
+                  "alignment":{
+                     "type":["string","null"]
+                  },
+                  "aggregationType":{
+                      "type":["string","null"]
                   }
-                }
-              },
-              "primaryKey": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "description": "(e.g. id)"
-                }
-              },
-              "foreignKeys": {
-                "type": "array",
-                              "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-                "items": {
-                  "type": "object",
-                                "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-                  "required": [],
-                  "properties": {
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                           "description": "(e.g. year)"
-                      }
-                    },
-                    "reference": {
-                      "type": "object",
-                      "required": [],
-                      "properties": {
-                        "resource": {
-                          "type": "string",
-                          "description": "(e.g. schema.table)"
+               }
+            }
+         }
+      },
+      "sources":{
+         "type":"array",
+         "options":{
+            "array_controls_top":true,
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "items":{
+            "type":"object",
+            "options":{
+               "array_controls_top":true,
+               "disable_collapse":true,
+               "disable_edit_json":true,
+               "disable_properties":true
+            },
+            "title":"source",
+            "required":[
+
+            ],
+            "properties":{
+               "title":{
+                  "type":"string"
+               },
+               "description":{
+                  "type":"string"
+               },
+               "path":{
+                  "type":"string"
+               },
+               "licenses":{
+                  "type":"array",
+                  "options":{
+                     "array_controls_top":true,
+                     "disable_collapse":true,
+                     "disable_edit_json":true,
+                     "disable_properties":true
+                  },
+                  "items":{
+                     "type":"object",
+                     "options":{
+                        "array_controls_top":true,
+                        "disable_collapse":true,
+                        "disable_edit_json":true,
+                        "disable_properties":true
+                     },
+                     "title":"licenses",
+                     "required":[
+
+                     ],
+                     "properties":{
+                        "name":{
+                           "type":"string"
                         },
-                        "fields": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "description": "(e.g. year)"
-                          }
+                        "title":{
+                           "type":"string"
+                        },
+                        "path":{
+                           "type":"string"
+                        },
+                        "instruction":{
+                           "type":"string"
+                        },
+                        "attribution":{
+                           "type":"string"
                         }
-                      }
-                    }
+                     }
                   }
-                }
-              }
+               }
             }
-          },
-          "dialect": {
-            "type": "object",
-                          "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-            "required": [],
-            "properties": {
-              "delimiter": {
-                "type": "string",
-                "description": "(e.g. null)"
-              },
-              "decimalSeparator": {
-                "type": "string",
-                "description": "(e.g. .)"
-              }
-            }
-          }
-        }
-      }
-    },
-    "review": {
-      "type": "object",
-                    "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "required": [],
-      "properties": {
-        "path": {
-          "type": "string",
-          "description": "(e.g. https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)"
-        },
-        "badge": {
-          "type": "string",
-          "description": "(e.g. platin)"
-        }
-      }
-    },
-    "metaMetadata": {
-      "type": "object",
-      "format": "categories",
-      "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-      "required": [],
-      "properties": {
-        "metadataVersion": {
-          "type": "string",
-           "default": " OEP-1.4.0",
-          "description": "(e.g. OEP-1.4.0)"
-        },
-        "metadataLicense": {
-          "type": "object",
-                        "options": {
-                "disable_collapse": true,
-                "disable_edit_json": true,
-                "disable_properties": true
-              },
-          "required": [],
-          "properties": {
-            "name": {
-              "type": "string",
-              "default": "CC0-1.0",
-              "description": "(e.g. CC0-1.0)"
+         }
+      },
+      "licenses":{
+         "type":"array",
+         "options":{
+            "array_controls_top":true,
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "items":{
+            "type":"object",
+            "options":{
+               "disable_collapse":true,
+               "disable_edit_json":true,
+               "disable_properties":true
             },
-            "title": {
-              "type": "string",
-              "default": "Creative Commons Zero v1.0 Universal",
-              "description": "(e.g. Creative Commons Zero v1.0 Universal)"
-            },
-            "path": {
-              "type": "string",
-              "default": "https://creativecommons.org/publicdomain/zero/1.0/",
-              "description": "(e.g. https://creativecommons.org/publicdomain/zero/1.0/)"
-            }
-          }
-        }
-      }
-    },
-    "_comment": {
-      "type": "object",
-      "options": {
-          "disable_collapse": false,
-          "disable_edit_json": true,
-          "disable_properties": true
-              },
-      "required": [],
-      "properties": {
-        "metadata": {
-          "type": "string",
-          "default": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
-          "description": "(e.g. Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata))"
-        },
-        "dates": {
-          "type": "string",
-           "default": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
-          "description": "(e.g. Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh))"
-        },
-        "units": {
-          "type": "string",
-           "default": "Use a space between numbers and units (100 m)",
-          "description": "(e.g. Use a space between numbers and units (100 m))"
-        },
-        "languages": {
-          "type": "string",
-           "default": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-          "description": "(e.g. Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE))"
-        },
-        "licenses": {
-          "type": "string",
-           "default": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
-          "description": "(e.g. License name must follow the SPDX License List (https://spdx.org/licenses/))"
-        },
-        "review": {
-          "type": "string",
-           "default": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
-          "description": "(e.g. Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki))"
-        },
-        "null": {
-          "type": "string",
-           "default": "If not applicable use (null)",
-          "description": "(e.g. If not applicable use (null))"
-        }
-      }
-    }
-  }
+            "title":"licenses",
+            "required":[
 
+            ],
+            "properties":{
+               "name":{
+                  "type":"string"
+               },
+               "title":{
+                  "type":"string"
+               },
+               "path":{
+                  "type":"string"
+               },
+               "instruction":{
+                  "type":"string"
+               },
+               "attribution":{
+                  "type":"string"
+               }
+            }
+         }
+      },
+      "contributors":{
+         "type":"array",
+         "options":{
+            "array_controls_top":true,
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "items":{
+            "type":"object",
+            "options":{
+               "array_controls_top":true,
+               "disable_collapse":true,
+               "disable_edit_json":true,
+               "disable_properties":true
+            },
+            "title":"contributor",
+            "required":[
+
+            ],
+            "properties":{
+               "title":{
+                  "type":"string"
+               },
+               "email":{
+                  "type":"string",
+                  "format":"email"
+               },
+               "date":{
+                  "type":"string",
+                  "format":"date"
+               },
+               "object":{
+                  "type":"string"
+               },
+               "comment":{
+                  "type":"string"
+               }
+            }
+         }
+      },
+      "resources":{
+         "type":"array",
+         "options":{
+            "array_controls_top":true,
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "items":{
+            "type":"object",
+            "options":{
+               "array_controls_top":true,
+               "disable_collapse":true,
+               "disable_edit_json":true,
+               "disable_properties":true
+            },
+            "title":"profile",
+            "required":[
+            ],
+            "properties":{
+               "profile":{
+                  "type":"string"
+               },
+               "name":{
+                  "type":"string"
+               },
+               "path":{
+                  "type":"string"
+               },
+               "format":{
+                  "type":"string"
+               },
+               "encoding":{
+                  "type":"string"
+               },
+               "schema":{
+                  "type":"object",
+                  "format":"categories",
+                  "options":{
+                     "array_controls_top":true,
+                     "disable_collapse":true,
+                     "disable_edit_json":true,
+                     "disable_properties":true
+                  },
+                  "required":[
+
+                  ],
+                  "properties":{
+                     "fields":{
+                        "type":"array",
+                        "options":{
+                           "array_controls_top":true
+                        },
+                        "items":{
+                           "type":"object",
+                           "options":{
+                              "array_controls_top":true,
+                              "disable_collapse":true,
+                              "disable_edit_json":true,
+                              "disable_properties":true,
+                              "disable_array_add":true
+                           },
+                           "title":"column",
+                           "required":[
+
+                           ],
+                           "properties":{
+                              "name":{
+                                 "type":"string"
+                              },
+                              "description":{
+                                 "type":"string"
+                              },
+                              "type":{
+                                 "type":"string",
+                                  "enum": [
+                                  "integer",
+                                  "bigint",
+                                  "int",
+                                  "float",
+                                  "decimal",
+                                  "text",
+                                  "string",
+                                  "varchar",
+                                  "json",
+                                  "hstore",
+                                  "timestamp",
+                                  "interval",
+                                  "date",
+                                  "boolean",
+                                  "geometry point",
+                                  "geom",
+                                  "geometry"
+                                ]
+
+
+                              },
+                              "unit":{
+                                 "type":[
+                                    "string",
+                                    "null"
+                                 ]
+                              }
+                           }
+                        }
+                     },
+                     "primaryKey":{
+                        "type":"array",
+                        "options":{
+                           "array_controls_top":true
+                        },
+                        "items":{
+                           "title":"primaryKey",
+                           "type":"string"
+                        }
+                     },
+                     "foreignKeys":{
+                        "type":"array",
+                        "options":{
+                           "array_controls_top":true,
+                           "disable_collapse":true,
+                           "disable_edit_json":true,
+                           "disable_properties":true
+                        },
+                        "items":{
+                           "title":"foreignKeys",
+                           "type":"object",
+                           "options":{
+                              "disable_collapse":true,
+                              "disable_edit_json":true,
+                              "disable_properties":true
+                           },
+                           "required":[
+
+                           ],
+                           "properties":{
+                              "fields":{
+                                 "type":"array",
+                                 "options":{
+                                    "array_controls_top":true
+                                 },
+                                 "items":{
+                                    "type":"string"
+                                 }
+                              },
+                              "reference":{
+                                 "type":"object",
+                                 "options":{
+                                    "disable_collapse":true,
+                                    "disable_edit_json":true,
+                                    "disable_properties":true
+                                 },
+                                 "required":[
+
+                                 ],
+                                 "properties":{
+                                    "resource":{
+                                       "type":"string"
+                                    },
+                                    "fields":{
+                                       "type":"array",
+                                       "options":{
+                                          "array_controls_top":true
+                                       },
+                                       "items":{
+                                          "type":"string"
+                                       }
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               },
+               "dialect":{
+                  "type":"object",
+                  "options":{
+                     "disable_collapse":true,
+                     "disable_edit_json":true,
+                     "disable_properties":true
+                  },
+                  "required":[
+
+                  ],
+                  "properties":{
+                     "delimiter":{
+                        "type":"string"
+                     },
+                     "decimalSeparator":{
+                        "type":"string"
+                     }
+                  }
+               }
+            }
+         }
+      },
+      "review":{
+         "type":"object",
+         "options":{
+           "collapsed": true,
+            "disable_collapse":false,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
+
+         ],
+         "properties":{
+            "path":{
+               "type":"string"
+            },
+            "badge":{
+               "type":"string"
+            }
+         }
+      },
+      "metaMetadata":{
+         "type":"object",
+         "format":"categories",
+         "options":{
+            "disable_collapse":true,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
+
+         ],
+         "properties":{
+            "metadataVersion":{
+               "type":"string"
+            },
+            "metadataLicense":{
+               "type":"object",
+               "options":{
+                  "disable_collapse":true,
+                  "disable_edit_json":true,
+                  "disable_properties":true
+               },
+               "required":[
+
+               ],
+               "properties":{
+                  "name":{
+                     "type":"string"
+                  },
+                  "title":{
+                     "type":"string"
+                  },
+                  "path":{
+                     "type":"string"
+                  }
+               }
+            }
+         }
+      },
+      "_comment":{
+         "type":"object",
+         "options":{
+           "collapsed": true,
+            "disable_collapse":false,
+            "disable_edit_json":true,
+            "disable_properties":true
+         },
+         "required":[
+
+         ],
+         "properties":{
+            "metadata":{
+               "type":"string"
+            },
+            "dates":{
+               "type":"string"
+            },
+            "units":{
+               "type":"string"
+            },
+            "languages":{
+               "type":"string"
+            },
+            "licenses":{
+               "type":"string"
+            },
+            "review":{
+               "type":"string"
+            },
+            "null":{
+               "type":"string"
+            }
+         }
+      }
+   }
 }
