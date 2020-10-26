@@ -49,7 +49,7 @@ $('document').ready(function() {
 
             optionsresult.schema = schemaresult;
             // console.log(options);
-            var editor = new JSONEditor(element, optionsresult);
+            editor = new JSONEditor(element, optionsresult);
 
             if (form) {
                 $(form).submit(function() {
@@ -58,6 +58,34 @@ $('document').ready(function() {
                     // Disable the editor so it's values wont be submitted
                     editor.disable();
                 })
+
+                /**
+                 monkey patch a download button: TODO better way of adding controls to form
+                */
+
+                // create download button
+                $('[data-schemaid="root"] h3 textarea').parent().append('<button type="button" id="json-editor-download", class="btn btn-secondary json-editor-btn-copy json-editor-btntype-copy"><span>Download</span></button>')
+
+                // bind download function
+                $('#json-editor-download').bind('click', function downloadMetadata(){
+                    var json = editor.getValue();
+                    // create data url
+                    var json = JSON.stringify(json, null, 1);
+                    blob = new Blob([json], {type: "application/json"}),
+                    dataUrl = URL.createObjectURL(blob);
+                    // create link
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    // assign url and click
+                    a.style = "display: none";
+                    a.href = dataUrl;
+                    a.download = 'metadata.json';
+                    a.click();
+                    // cleanup
+                    URL.revokeObjectURL(dataUrl);
+                    a.parentNode.removeChild(a);
+                })
+
             }
         })
     });
