@@ -729,15 +729,6 @@ var Wizard = function(config) {
                 cN.append("<option>" + c.name + "</option>");
             });
 
-
-            var del = function() {
-                // replace button with spinner
-                UI.hideModal();
-                btn.replaceWith('<span id="spinner" class="record-action spinner-border spinner-border-sm text-dark mr-2" role="status"></span>')
-                record.is_deleted = true
-                return app.reqUpdateRecord(record).then(populateUI)
-            };
-
             /* delete table */
             $("#wizard-table-delete").bind("click", function(){$('#wizard-confirm-delete').modal('show');});
             $("#wizard-confirm-delete-cancel").bind("click", function(){$('#wizard-confirm-delete').modal('hide');});
