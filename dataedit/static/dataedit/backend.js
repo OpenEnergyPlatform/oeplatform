@@ -277,15 +277,20 @@ function load_view(schema, table, csrftoken, current_view) {
         })
     ).done(function (column_response, count_response, meta) {
         var columnDescription = {}; // name -> description
-        meta[0]['resources'][0]['schema']['fields'].map(function(fld){
-            columnDescription[fld.name] = fld.description || "";
-            if (fld.unit) {
-                if (columnDescription[fld.name]) {
-                    columnDescription[fld.name] += '<hr>'
+        try {
+            meta[0]['resources'][0]['schema']['fields'].map(function(fld){
+                columnDescription[fld.name] = fld.description || "";
+                if (fld.unit) {
+                    if (columnDescription[fld.name]) {
+                        columnDescription[fld.name] += '<hr>'
+                    }
+                    columnDescription[fld.name] += 'Unit: ' + fld.unit
                 }
-                columnDescription[fld.name] += 'Unit: ' + fld.unit
-            }
-        });
+            });
+        } catch(err){
+            // metadata for ['resources'][0]['schema']['fields'] missing
+            // do nothing, there will be no popovers
+        }
         for (var colname in column_response[0]){
             // add description popover
             var popover = columnDescription[colname];
