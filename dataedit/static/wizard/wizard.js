@@ -149,8 +149,10 @@ var Wizard = function(config) {
         column.find(".wizard-column-pk").bind("change", function(evnt) {
             var tgt = $(evnt.currentTarget);
             if (tgt.prop("checked")) {
-                tgt.closest(".wizard-column").find(".wizard-column-nullable").prop("checked", false);
+                $("#wizard-columns").find(".wizard-column-nullable").attr('disabled', false); // re-enable checkboxes
+                tgt.closest(".wizard-column").find(".wizard-column-nullable").prop("checked", false).attr('disabled', true);
             }
+
         });
         if (columnDef.name) {
             $("#wizard-csv-preview").find("thead tr").append("<th>" + columnDef.name + "</th>");
