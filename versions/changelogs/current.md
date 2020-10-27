@@ -1,6 +1,5 @@
 ### Features
 
-* Add tutorials app (#489)
 * Add `form=datapackage` option to simple API
   * Returns  `{schema}_{ŧable}.zip` containing
     * `data.csv`: result of `form=csv"
