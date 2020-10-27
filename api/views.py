@@ -18,7 +18,7 @@ from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpRespon
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from omi.dialects.oep.compiler import JSONCompiler
-from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
+from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -635,13 +635,18 @@ class Rows(APIView):
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
             zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
-            zf.write_iter("data.csv", (
+            csv_name = "{schema}__{table}.csv".format(
+                schema=schema, table=table
+            )
+            zf.write_iter(csv_name, (
                 writer.writerow(x).encode("utf-8")
                 for x in itertools.chain([cols], return_obj["data"])
             ))
             table_obj = actions._get_table(schema=schema, table=table)
             if table_obj.comment:
-                zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
+                zf.writestr("metadata.json", table_obj.comment.encode("utf-8"))
+            else:
+                zf.writestr("metadata.json", json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"))
             response = OEPStream(
                 (chunk for chunk in zf),
                 content_type="application/zip",
