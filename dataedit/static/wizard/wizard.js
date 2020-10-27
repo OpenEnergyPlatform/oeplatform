@@ -139,8 +139,22 @@ var Wizard = function(config) {
         var columns = $("#wizard-columns");
         var n = columns.find(".wizard-column").length;
         var column = $("#wizard-column-template").clone().attr("id", "wizard-column-" + n).appendTo(columns).removeClass("invisible");
-        column.find(".wizard-column-name").val(columnDef.name);
-        column.find(".wizard-column-type").val(columnDef.data_type);
+        column.find(".wizard-column-name").val(columnDef.name).bind("change", function(evnt) {
+            var tgt = $(evnt.currentTarget);
+            if (isValidIdentifier(tgt.val())){
+                tgt.removeClass('is-invalid')
+            } else {
+                tgt.addClass('is-invalid')
+            }
+        });
+        column.find(".wizard-column-type").val(columnDef.data_type).bind("change", function(evnt) {
+            var tgt = $(evnt.currentTarget);
+            if (isValidIdentifier(tgt.val())){
+                tgt.removeClass('is-invalid')
+            } else {
+                tgt.addClass('is-invalid')
+            }
+        });;
         column.find(".wizard-column-nullable").prop("checked", columnDef.is_nullable);
         column.find(".wizard-column-pk").prop("checked", columnDef.is_pk);
         column.find(".wizard-column-drop").bind("click", function(evnt) {
@@ -152,7 +166,6 @@ var Wizard = function(config) {
                 $("#wizard-columns").find(".wizard-column-nullable").attr('disabled', false); // re-enable checkboxes
                 tgt.closest(".wizard-column").find(".wizard-column-nullable").prop("checked", false).attr('disabled', true);
             }
-
         });
         if (columnDef.name) {
             $("#wizard-csv-preview").find("thead tr").append("<th>" + columnDef.name + "</th>");
@@ -442,6 +455,21 @@ var Wizard = function(config) {
         return c;
     }
 
+    function isValidIdentifier(str){
+        if (typeof str == 'string') {
+            return Boolean(str.match(/^[a-z][a-z0-9_]*$/));
+        } else {
+            return false;
+        }
+    }
+
+    function isValidDatatype(str){
+        if (typeof str == 'string' && str) {
+            return true; // TODO: we only check for not empty, maybe add some more checks later?
+        } else {
+            return false;
+        }
+    }
 
     function removeNewline(arr) {
         arr.map(function(row) {
@@ -718,6 +746,14 @@ var Wizard = function(config) {
         $("#wizard-header").bind("change", changeFileSettings);
         $("#wizard-table-upload").bind("click", csvUpload);
         $("#wizard-table-upload-cancel").bind("click", cancelUpload);
+        $("#wizard-tablename").bind("change", function(evnt) {
+            var tgt = $(evnt.currentTarget);
+            if (isValidIdentifier(tgt.val())){
+                tgt.removeClass('is-invalid')
+            } else {
+                tgt.addClass('is-invalid')
+            }
+        });
         resetUpload();
         if (state.table) {
             $("#wizard-tablename").val(state.table);

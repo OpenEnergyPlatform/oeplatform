@@ -18,7 +18,7 @@
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
+                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
                         </div>
                     </div>
 
@@ -63,10 +63,10 @@
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
+                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
                                         </td>
                                         <td>
                                             <input class="wizard-column-nullable" type="checkbox" data-toggle="tooltip" title="Allow column values to be empty (NULL)" />
