@@ -149,7 +149,7 @@ var Wizard = function(config) {
         });
         column.find(".wizard-column-type").val(columnDef.data_type).bind("change", function(evnt) {
             var tgt = $(evnt.currentTarget);
-            if (isValidIdentifier(tgt.val())){
+            if (isValidDatatype(tgt.val())){
                 tgt.removeClass('is-invalid')
             } else {
                 tgt.addClass('is-invalid')
