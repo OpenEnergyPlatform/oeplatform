@@ -88,8 +88,10 @@ $('document').ready(function() {
 
                 // create
                 var convertDescriptionIntoPopover = function(){
+                    // find all descriptions
                     $('[data-schemaid="root"] .form-group > p.form-text').each(function(i, e){
-                        var description = $(e).text();
+                        var description = $(e).text(); // get description text
+                        // find all title elements and add description as popover
                         $(e).parent().find('.form-control-label')
                         .attr('data-content', description)
                         .attr('data-toggle', "popover")
@@ -98,13 +100,13 @@ $('document').ready(function() {
                             trigger: 'hover',
                             template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
                         });
+                        // popover with bootstrap: https://getbootstrap.com/docs/4.0/components/popovers/
                         $(e).hide() // hide original description
                     });
                 }
                 // update when click on button (because they create new form elements)
                 $('[data-schemaid="root"] button').bind('click', convertDescriptionIntoPopover);
                 convertDescriptionIntoPopover();
-
 
             }
         })
