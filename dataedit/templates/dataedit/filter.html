@@ -34,4 +34,11 @@
     </div>
 </form>
 
+<!-- extending the filter block to add wizard button -->
+<hr>
+<h3><i class="fa fa-hat-wizard"></i> Wizard</h3>
+<a class="btn btn-secondary" href="{% url 'wizard_create' %}" >
+    Create new table
+</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+
 {% endblock main-right-sidebar-filter %}
