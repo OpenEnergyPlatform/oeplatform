@@ -646,7 +646,7 @@ class Rows(APIView):
             if table_obj.comment:
                 zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
             else:
-                zf.writestr("metadata.json", json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"))
+                zf.writestr("datapackage.json", json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"))
             response = OEPStream(
                 (chunk for chunk in zf),
                 content_type="application/zip",
