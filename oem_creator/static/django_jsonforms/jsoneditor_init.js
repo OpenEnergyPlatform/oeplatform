@@ -86,6 +86,26 @@ $('document').ready(function() {
                     a.parentNode.removeChild(a);
                 })
 
+                // create
+                var convertDescriptionIntoPopover = function(){
+                    $('[data-schemaid="root"] .form-group > p.form-text').each(function(i, e){
+                        var description = $(e).text();
+                        $(e).parent().find('.form-control-label')
+                        .attr('data-content', description)
+                        .attr('data-toggle', "popover")
+                        .popover({
+                            placement: 'top',
+                            trigger: 'hover',
+                            template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
+                        });
+                        $(e).hide() // hide original description
+                    });
+                }
+                // update when click on button (because they create new form elements)
+                $('[data-schemaid="root"] button').bind('click', convertDescriptionIntoPopover);
+                convertDescriptionIntoPopover();
+
+
             }
         })
     });
