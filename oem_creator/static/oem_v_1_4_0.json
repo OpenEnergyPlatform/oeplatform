@@ -1,21 +1,24 @@
 {
    "type":"object",
    "title":"Metadata Creator Version 1.4.0",
-   "description": "<p> Metadata Creator is a tool to provide a metadata template. After filling the necessary information, as a result a metadata json schema is going to be created. Finally through the Edit JSON the OUTPUT can be copied into a self created .txt file.</p>",
    "properties":{
       "name":{
-         "type":"string"
+         "type":"string",
+         "description" : "File name or database table name"
       },
 
 
       "title":{
-         "type":"string"
+         "type":"string",
+         "description" : "Human readable title"
       },
       "id":{
-         "type":"string"
+         "type":"string",
+          "description" : "Uniform Resource Identifier (URI) that unambiguously identifies the resource. This can be a URL on the data set. It can also be a Digital Object Identifier (DOI)."
       },
       "description":{
-         "type":"string"
+         "type":"string",
+          "description" : "A description of the package. It should be usable as summary information for the entire package that is described by the metadata."
       },
       "language":{
          "options":{
@@ -24,6 +27,7 @@
          "type":"array",
          "items":{
             "title":"language",
+            "description" : "Language used within the described data structures (e.g. titles, descriptions). The language key can be repeated if more languages are used. Standard: IETF (BCP47)",
             "type":"string",
             "enum":[
                "en-GB",
@@ -40,15 +44,18 @@
          "type":"array",
          "items":{
             "type":"string",
+            "description" : "An Array of string keywords to assist users searching for the package in catalogs.",
             "title":"keyword"
          }
       },
       "publicationDate":{
          "type":"string",
+          "description" : "Date of publishing. Date Format is ISO 8601 (YYYY-MM-DD)",
          "format":"date"
       },
       "context":{
          "type":"object",
+          "description" : "Describe the general setting, evironment or project leading to the creation or maintenance of this dataset.",
          "options":{
            "collapsed": true,
             "disable_collapse":false,
@@ -60,33 +67,42 @@
          ],
          "properties":{
             "homepage":{
-               "type":"string"
+               "type":"string",
+                "description" : "URL of Project"
             },
             "documentation":{
-               "type":"string"
+               "type":"string",
+                "description" : "URL of the projects source code"
             },
             "sourceCode":{
-               "type":"string"
+               "type":"string",
+                "description" : "URL of Project"
             },
             "contact":{
-               "type":"string"
+               "type":"string",
+                "description" : "Reference to the creator or maintainer of the data set"
             },
             "grantNo":{
-               "type":"string"
+               "type":"string",
+                "description" : "In a publicly funded Project: the identifying grant number"
             },
             "fundingAgency":{
-               "type":"string"
+               "type":"string",
+                "description" : "In a funded Project: The name of the funding agency"
             },
             "fundingAgencyLogo":{
-               "type":"string"
+               "type":"string",
+                "description" : "In a publicly funded Project: A link to the Logo of the funding agency"
             },
             "publisherLogo":{
-               "type":"string"
+               "type":"string",
+                "description" : "Link to the logo of the publishing institution"
             }
          }
       },
       "spatial": {
          "type":"object",
+         "description" : "Describing the spatial context of the contained data.",
          "options":
          {"collapsed": true,
             "disable_collapse":false,
@@ -98,18 +114,22 @@
          ],
          "properties":{
             "location":{
-               "type":"string"
+               "type":"string",
+                "description" : "In the case of data where the location can be described as a point. May come as coordinates, URI or addresses with street, house number and zip code"
             },
             "extent":{
-               "type":"string"
+               "type":"string",
+                "description" : "Covered area. May be the name of a region, or the geometry of a bounding box."
             },
             "resolution":{
-               "type":"string"
+               "type":"string",
+                "description" : "Pixel size in case of a regular raster image. Reference to administrative level or other spatial division that is present as the smallest spatially distinguished unit size."
             }
          }
       },
       "temporal":{
          "type":"object",
+         "description" : "Time period covered in the data. Use null for the ones that don't apply.",
          "options":{
             "disable_collapse":true,
             "disable_edit_json":true,
@@ -121,6 +141,7 @@
          "properties":{
             "referenceDate":{
                "type":"string",
+                "description" : "Base year, month or day. Point in time for which the data is meant to be accurate. A census will generally have a reference year. A satellite image will have a reference date. Date Format is ISO 8601.",
                "format":"date"
             },
             "timeseries":{
@@ -136,20 +157,23 @@
                "properties":{
                   "start":{
                      "type":["string","null"],
-                     "description":"example: 2011-01-01T00:00:00"
+                     "description":"The beginning point in time of a time series. example: 2011-01-01T00:00:00"
                   },
                   "end":{
                       "type":["string","null"],
-                     "description":"example: 2011-01-01T00:00:00"
+                     "description":"The end point in time of a time series. example: 2011-01-01T00:00:00"
                   },
                   "resolution":{
-                      "type":["string","null"]
+                      "type":["string","null"],
+                      "description" : "The time span between individual points of information in a time series."
                   },
                   "alignment":{
-                     "type":["string","null"]
+                     "type":["string","null"],
+                      "description" : "Indicator whether stamps in a time series are left, right or middle. null if there is no time series."
                   },
                   "aggregationType":{
-                      "type":["string","null"]
+                      "type":["string","null"],
+                      "description" : "Indicates whether the values are a sum, average or current."
                   }
                }
             }
@@ -177,13 +201,16 @@
             ],
             "properties":{
                "title":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Human readable title of the source, e.g. document title or organisation name"
                },
                "description":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Free text description of the data set."
                },
                "path":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "URL to original source"
                },
                "licenses":{
                   "type":"array",
@@ -207,19 +234,24 @@
                      ],
                      "properties":{
                         "name":{
-                           "type":"string"
+                           "type":"string",
+                            "description" : "SPDX identifier"
                         },
                         "title":{
-                           "type":"string"
+                           "type":"string",
+                            "description" : "Official (human readable) title"
                         },
                         "path":{
-                           "type":"string"
+                           "type":"string",
+                            "description" : "A link to the license"
                         },
                         "instruction":{
-                           "type":"string"
+                           "type":"string",
+                            "description" : "short description of rights and restrictionse"
                         },
                         "attribution":{
-                           "type":"string"
+                           "type":"string",
+                            "description" : "copyrightholder of the source"
                         }
                      }
                   }
@@ -248,25 +280,31 @@
             ],
             "properties":{
                "name":{
-                  "type":"string"
+                  "type":"string",
+                   "description" : "SPDX identifier"
                },
                "title":{
-                  "type":"string"
+                  "type":"string",
+                   "description" : "Official (human readable) title"
                },
                "path":{
-                  "type":"string"
+                  "type":"string",
+                   "description" : "A url-or-path string, that is a fully qualified HTTP address, or a relative POSIX path (see the url-or-path definition in Data Resource for details)."
                },
                "instruction":{
-                  "type":"string"
+                  "type":"string",
+                   "description" : "short description of rights and restrictions"
                },
                "attribution":{
-                  "type":"string"
+                  "type":"string",
+                   "description" : "copyrightholder of the produced data set"
                }
             }
          }
       },
       "contributors":{
          "type":"array",
+          "description" : "The people or organizations who contributed to this Data Package. This has to be a list. Each object refers to one contributor. Every contributor must have a title and property. A path, email, role and organization properties are optional extras.",
          "options":{
             "array_controls_top":true,
             "disable_collapse":true,
@@ -287,21 +325,26 @@
             ],
             "properties":{
                "title":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Name/title of the contributor (name for a person, name or title for an organization)"
                },
                "email":{
                   "type":"string",
+                  "description" : "E-mail address of the contributor",
                   "format":"email"
                },
                "date":{
                   "type":"string",
+                  "description" : "Date of the contribution. If the contribution took more than a day, use the date of the final contribiution. Date Format is ISO 8601.",
                   "format":"date"
                },
                "object":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Target of contribution. Which part of the package was supplied/changed"
                },
                "comment":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Free text comment on what's been done"
                }
             }
          }
@@ -327,22 +370,28 @@
             ],
             "properties":{
                "profile":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "A string identifying the profile of this descriptor as per the profiles specification. This information is retained in order to comply with the \"Tabular Data Package\" standard. If at all in doubt the value should read \"tabular-data-resource\"."
                },
                "name":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "A resource MUST contain a name unique to amongst all resources in this data package. To comply with the data package standard it must consist of only lowercase alphanumeric character plus \".\", \"-\" and \"_\". It may not start with a number. In a database this will be the name of the table within its containing schema. It would be usual for the name to correspond to the file name (minus the file-extension) of the data file the resource describes."
                },
                "path":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "A url-or-path string, that should be a permanent http(s) address or other path directly linking to the resource."
                },
                "format":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "'csv', 'xls', 'json' etc. would be expected to be the standard file extension for this type of resource. When you upload your data to the OEDB, in the shown metadata string, the format will be changed accordingly to 'PostgreSQL', since the data there are stored in a data base."
                },
                "encoding":{
-                  "type":"string"
+                  "type":"string",
+                  "description" : "Specifies the character encoding of the resource's data file. The values should be one of the \"Preferred MIME Names\" for a character encoding registered with IANA. If no value for this key is specified then the default is UTF-8."
                },
                "schema":{
                   "type":"object",
+                  "description" : "Object containing fields and primary key. Describes the structure of the present data.",
                   "format":"categories",
                   "options":{
                      "array_controls_top":true,
@@ -356,6 +405,7 @@
                   "properties":{
                      "fields":{
                         "type":"array",
+                        "description" : "List of objects. Every object describes a column and provides name, description, type and unit.",
                         "options":{
                            "array_controls_top":true
                         },
@@ -374,13 +424,16 @@
                            ],
                            "properties":{
                               "name":{
-                                 "type":"string"
+                                 "type":"string",
+                                 "description" : "Name string unique within its scope."
                               },
                               "description":{
-                                 "type":"string"
+                                 "type":"string",
+                                 "description" : "Free-text describing the field."
                               },
                               "type":{
                                  "type":"string",
+                                 "description" : "Data type of the field. In case of a geom-column in a database, also indicate the shape and CRS.",
                                   "enum": [
                                   "integer",
                                   "bigint",
@@ -404,6 +457,7 @@
 
                               },
                               "unit":{
+                                 "description" : "Unit, preferably SI-Unit, that values in this field are mapped to. If 'unit' doesn't apply to a field, use 'none'",
                                  "type":[
                                     "string",
                                     "null"
@@ -419,6 +473,7 @@
                         },
                         "items":{
                            "title":"primaryKey",
+                           "description" : "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns.",
                            "type":"string"
                         }
                      },
@@ -433,6 +488,7 @@
                         "items":{
                            "title":"foreignKeys",
                            "type":"object",
+                            "description" : "A foreign key is a field that refers to a column in another table.",
                            "options":{
                               "disable_collapse":true,
                               "disable_edit_json":true,
@@ -448,11 +504,14 @@
                                     "array_controls_top":true
                                  },
                                  "items":{
-                                    "type":"string"
+                                    "type":"string",
+                                    "title": "fields",
+                                    "description" : "The column in the table that is constrainted by the foreign key."
                                  }
                               },
                               "reference":{
                                  "type":"object",
+                                  "description" : "The reference to the foreign table.",
                                  "options":{
                                     "disable_collapse":true,
                                     "disable_edit_json":true,
@@ -463,7 +522,8 @@
                                  ],
                                  "properties":{
                                     "resource":{
-                                       "type":"string"
+                                       "type":"string",
+                                        "description" : "The foreign resource (table)"
                                     },
                                     "fields":{
                                        "type":"array",
@@ -471,7 +531,10 @@
                                           "array_controls_top":true
                                        },
                                        "items":{
-                                          "type":"string"
+                                          "title": "fields",
+                                          "type":"string",
+                                           "description" : "The foreign resource column"
+
                                        }
                                     }
                                  }
@@ -483,6 +546,7 @@
                },
                "dialect":{
                   "type":"object",
+                  "description" : "A CSV Dialect defines a simple format to describe the various dialects of CSV files in a language agnostic manner. In case of a database, the values in the containing fields are \"none\".",
                   "options":{
                      "disable_collapse":true,
                      "disable_edit_json":true,
@@ -493,10 +557,12 @@
                   ],
                   "properties":{
                      "delimiter":{
-                        "type":"string"
+                        "type":"string",
+                        "description" : "Specifies the character sequence which should separate fields (aka columns). Common characters are \",\" (comma), \".\" (point) and \"\\t\" (tab)."
                      },
                      "decimalSeparator":{
-                        "type":"string"
+                        "type":"string",
+                        "description" : "Symbol used to separate the integer part from the fractional part of a number written in decimal form. Depending on language and region this symbol can be \".\" or \",\"."
                      }
                   }
                }
@@ -505,6 +571,7 @@
       },
       "review":{
          "type":"object",
+         "description" : "Data uploaded through the OEP needs to go through review. The review will cover the areas described <a href=\"https://github.com/OpenEnergyPlatform/data-preprocessing/wiki\">Here</a> and carried out by a team of the platform. The review itself is documented at the specified path and a badge is rewarded with regards to completeness.",
          "options":{
            "collapsed": true,
             "disable_collapse":false,
@@ -516,15 +583,18 @@
          ],
          "properties":{
             "path":{
-               "type":"string"
+               "type":"string",
+               "description" : "A URL or path string, that should be a permanent http(s) address directly linking to the documented review."
             },
             "badge":{
-               "type":"string"
+               "type":"string",
+               "description" : "A badge of either Bronze, Silver, Gold or Platinum is used to label the given metadata based on its quality."
             }
          }
       },
       "metaMetadata":{
          "type":"object",
+          "description" : "Description about the metadata themselves, their format, version and license. These fields should already be provided when you’re filling out your metadata.",
          "format":"categories",
          "options":{
             "disable_collapse":true,
@@ -536,7 +606,8 @@
          ],
          "properties":{
             "metadataVersion":{
-               "type":"string"
+               "type":"string",
+               "description" : "Type and version number of the metadata"
             },
             "metadataLicense":{
                "type":"object",
@@ -550,13 +621,16 @@
                ],
                "properties":{
                   "name":{
-                     "type":"string"
+                     "type":"string",
+                     "description" : "SPDX identifier"
                   },
                   "title":{
-                     "type":"string"
+                     "type":"string",
+                     "description" : "Official (human readable) license title"
                   },
                   "path":{
-                     "type":"string"
+                     "type":"string",
+                     "description" : "Url or path string, that is a fully qualified HTTP address"
                   }
                }
             }
@@ -564,6 +638,7 @@
       },
       "_comment":{
          "type":"object",
+         "description" : "The “_comment”-section is used as a self-description of the final metadata-file. It is text, intended for humans and can include a link to the metadata documentation(s), required value formats and similar remarks. The comment section has no fix structure or mandatory values, but a useful self-description, similar to the one depicted here, is encouraged.",
          "options":{
            "collapsed": true,
             "disable_collapse":false,
@@ -575,25 +650,32 @@
          ],
          "properties":{
             "metadata":{
-               "type":"string"
+               "type":"string",
+               "description" : "Reference to the metadata documentation in use."
             },
             "dates":{
-               "type":"string"
+               "type":"string",
+               "description" : "Comment on data/time format"
             },
             "units":{
-               "type":"string"
+               "type":"string",
+               "description" : "Comment on units"
             },
             "languages":{
-               "type":"string"
+               "type":"string",
+               "description" : "Comment on language format"
             },
             "licenses":{
-               "type":"string"
+               "type":"string",
+               "description" : "Comment on language format"
             },
             "review":{
-               "type":"string"
+               "type":"string",
+               "description" : "Reference to review documentation"
             },
             "null":{
-               "type":"string"
+               "type":"string",
+               "description" : "Feel free to add more descriptive comments. Like \"none\""
             }
          }
       }
