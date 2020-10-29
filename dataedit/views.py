@@ -1041,7 +1041,7 @@ class MetaEditView(LoginRequiredMixin, View):
                 "schema": schema,
                 "table": table,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
-                "url_view_table": reverse('input', kwargs={"schema": schema, "table": table}),
+                "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
             })
         }
 

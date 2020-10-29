@@ -7,15 +7,27 @@
 {% endblock after-head %}
 
 {% block site-header %}
-<h2 class="site-header"><span class="spinner-border text-primary" id="metaedit-loading"></span>
-    <i class="fa fa-tags"></i>Metadata</span>
+<h2 class="site-header"><span class="spinner-border text-primary d-none" id="metaedit-loading"></span>
+    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>Metadata</span>
 </h2>
 {% endblock site-header %}
 
 {% block main %}
-<div id="metaedit-form">
-
+<div class="row">
+    <div class="col">
+        <div id="metaedit-form">
+            <!-- placeholder -->
+        </div>
+    </div>
 </div>
+<div class="row d-none" id="metaedit-controls">
+    <div class="col">
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-submit"><span class="spinner-border text-primary d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>Submit</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">Download</buttton>
+    </div>
+</div>
+
 {% endblock main %}
 
 {% block after-body-bottom-js %}

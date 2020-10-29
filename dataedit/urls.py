@@ -19,7 +19,7 @@ urlpatterns = [
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
         views.DataView.as_view(),
-        name="input",
+        name="view",
     ),
     url(r"^tags/add/$".format(qual=pgsql_qualifier), views.add_table_tags),
     url(
@@ -41,7 +41,7 @@ urlpatterns = [
             qual=pgsql_qualifier
         ),
         views.MetaEditView.as_view(),
-        name="input",
+        name="meta_edit",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view$".format(

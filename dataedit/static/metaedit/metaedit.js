@@ -1,7 +1,5 @@
 var MetaEdit = function(config) {
 
-
-
     /*
     TODO: consolidate functions (same as in wizard and other places)
     */
@@ -26,15 +24,6 @@ var MetaEdit = function(config) {
         return token1;
     }
 
-    function getApiMetaUrl(schema, tablename) {
-        var apiVersion = "v0";
-        return "/api/" + apiVersion + "/schema/" + schema + "/tables/" + tablename + "/meta/"; // must have trailing slash
-    }
-
-    function getTableUrl(schema, tablename) {
-        return "/dataedit/view/" + schema + "/" + tablename;
-    }
-
     function sendJson(method, url, data, success, error) {
         var token = getCsrfToken();
         return $.ajax({
@@ -51,24 +40,32 @@ var MetaEdit = function(config) {
         });
     }
 
-    function validate(json) {
+    function fixProblems(json) {
         // TODO use schema validator, like https://github.com/korzio/djv
         return json
     }
 
-    function initialize(json) {
-        json = json || {};
-        return null;
+    function convertDescriptionIntoPopover() {
+        config.form.find('.form-group > .form-text').each(function(i, e) {
+            var description = $(e).text(); // get description text
+            // find all title elements and add description as popover
+            $(e).parent().find('label')
+                .attr('data-content', description)
+                .attr('data-toggle', "popover")
+                .popover({
+                    placement: 'top',
+                    trigger: 'hover',
+                    template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
+                });
+            // popover with bootstrap: https://getbootstrap.com/docs/4.0/components/popovers/
+            $(e).hide() // hide original description
+        });
     }
 
-    function _todo() {
-
-        // create download button
-        $('[data-schemaid="root"] h3 textarea').parent().append('<button type="button" id="json-editor-download", class="btn btn-secondary json-editor-btn-copy json-editor-btntype-copy"><span>Download</span></button>')
-
-        // bind download function
-        $('#json-editor-download').bind('click', function downloadMetadata() {
-            var json = editor.getValue();
+    function bindButtons() {
+        // download
+        $('#metaedit-download').bind('click', function downloadMetadata() {
+            var json = config.editor.getValue();
             // create data url
             json = JSON.stringify(json, null, 1);
             blob = new Blob([json], { type: "application/json" }),
@@ -79,66 +76,45 @@ var MetaEdit = function(config) {
             // assign url and click
             a.style = "display: none";
             a.href = dataUrl;
-            a.download = 'metadata.json';
+            a.download = config.table + '.metadata.json';
             a.click();
             // cleanup
             URL.revokeObjectURL(dataUrl);
             a.parentNode.removeChild(a);
+        });
+
+        // submit
+        $('#metaedit-submit').bind('click', function sumbmitMetadata() {
+            $('#metaedit-submitting').removeClass('d-none');
+            var json = config.editor.getValue();
+            json = fixProblems(json);
+            json = JSON.stringify(json);
+            sendJson("POST", config.url_api_meta, json).then(function() {
+                window.location = config.url_view_table;
+            }).catch(function(err) {
+                // TODO evaluate error, show user message
+                $('#metaedit-submitting').addClass('d-none');
+                alert(err)
+            });
+        });
+
+        // Cancel
+        $('#metaedit-cancel').bind('click', function cancel() {
+            alert(config.url_view_table)
+            window.location = config.url_view_table;
         })
-
-
-        var buttonRow = $('<div class="">').appendTo('form');
-        // Submit
-        $('<div class="btn btn-primary">Submit</div>').bind('click', function submit() {
-                var url = getApiMetaUrl(config.schema, config.table);
-                var urlSuccess = getTableUrl(config.schema, config.table);
-                var json = editor.getValue();
-                json = validate(json);
-                json = JSON.stringify(json);
-                sendJson("POST", url, json).then(function() {
-                    window.location = urlSuccess;
-                }).catch(function(err) {
-                    // TODO evaluate error, show user message
-                    console.error(err)
-                });
-            }).appendTo(buttonRow)
-            // Cancel
-        $('<div class="btn btn-primary">Cancel</div>').bind('click', function cancel() {
-            var urlCancel = getTableUrl(config.schema, config.table);
-            window.location = urlCancel
-        }).appendTo(buttonRow)
-
-        // create popovers instead of descriptions
-        var convertDescriptionIntoPopover = function() {
-                // find all descriptions
-                $('[data-schemaid="root"] .form-group > p.form-text').each(function(i, e) {
-                    var description = $(e).text(); // get description text
-                    // find all title elements and add description as popover
-                    $(e).parent().find('.form-control-label')
-                        .attr('data-content', description)
-                        .attr('data-toggle', "popover")
-                        .popover({
-                            placement: 'top',
-                            trigger: 'hover',
-                            template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
-                        });
-                    // popover with bootstrap: https://getbootstrap.com/docs/4.0/components/popovers/
-                    $(e).hide() // hide original description
-                });
-            }
-            // update when click on button (because they create new form elements)
-        $('[data-schemaid="root"] button').bind('click', convertDescriptionIntoPopover);
-        convertDescriptionIntoPopover();
 
     }
 
     (function init() {
+        $('#metaedit-loading').removeClass('d-none');
+
         config.form = $('#metaedit-form');
 
         $.when(
             $.getJSON(config.url_api_meta),
             $.getJSON('/static/metaedit/oem_v_1_4_0.json')
-        ).done(function(schema, data) {
+        ).done(function(data, schema) {
             options = {
                 startval: data[0],
                 schema: schema[0],
@@ -147,14 +123,28 @@ var MetaEdit = function(config) {
                 disable_collapse: true,
                 disable_properties: true,
                 compact: true,
-                disable_array_reorder: true
+                disable_array_reorder: true,
+                required_by_default: true
             }
-            console.log(options);
 
             config.editor = new JSONEditor(config.form[0], options);
+            config.mainEditBox = config.form.find('.je-object__controls').first().find('.je-modal');
+
+            config.mainEditBox.find('.json-editor-btntype-save').text('Apply');
+            config.mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
+            config.mainEditBox.find('.json-editor-btntype-cancel').text('Close');
+
+            bindButtons();
+            convertDescriptionIntoPopover();
+
+            // update when click on button (because they create new form elements)
+            config.form.find('button').bind('click', convertDescriptionIntoPopover);
+
+            $('#metaedit-loading').addClass('d-none');
+            $('#metaedit-icon').removeClass('d-none');
+            $('#metaedit-controls').removeClass('d-none');
 
         });
-
 
     })();
 
