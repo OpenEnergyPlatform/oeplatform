@@ -1031,28 +1031,6 @@ class DataView(View):
         )
 
 
-class MetaEditView(LoginRequiredMixin, View):
-    """Metadata editor (cliet side json forms)."""
-
-    def get(self, request, schema, table):
-
-        context_dict = {
-            "config": json.dumps({
-                "schema": schema,
-                "table": table,
-                "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
-                "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
-            })
-        }
-
-        return render(
-            request,
-            "dataedit/meta_edit.html",
-            context=context_dict,
-        )
-
-
-
 class PermissionView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -1296,12 +1274,17 @@ def increment_usage_count(tag_id):
         session.close()
 
 
+def get_column_description(schema, table):
+    """Return list of column descriptions:
+     [{
+        "name": str,
+        "data_type": str,
+        "is_nullable': bool,
+        "is_pk": bool
+     }]
 
-class WizardView(LoginRequiredMixin, View):
-    """View for the upload wizard (create tables, upload csv).
     """
 
-    @staticmethod
     def get_datatype_str(column_def):
         """get single string sql type definition.
 
@@ -1334,7 +1317,6 @@ class WizardView(LoginRequiredMixin, View):
             dt += '(%s)' % ', '.join(str(x) for x in precisions)
         return dt
 
-    @staticmethod
     def get_pk_fields(constraints):
         """Get the column names that make up the primary key from the constraints definitions.
 
@@ -1349,6 +1331,24 @@ class WizardView(LoginRequiredMixin, View):
                     pk_fields = [x.strip() for x in m.groups()[0].split(',')]
         return pk_fields
 
+    _columns = actions.describe_columns(schema, table)
+    _constraints = actions.describe_constraints(schema, table)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):
+        columns.append({
+            'name': name,
+            'data_type': get_datatype_str(col),
+            'is_nullable': col['is_nullable'],
+            'is_pk': name in pk_fields
+        })
+    return columns
+
+
+class WizardView(LoginRequiredMixin, View):
+    """View for the upload wizard (create tables, upload csv).
+    """
 
     def get(self, request, schema='model_draft', table=None):
         """Handle GET request (render the page).
@@ -1371,18 +1371,7 @@ class WizardView(LoginRequiredMixin, View):
                 user_perms = login_models.UserPermission.objects.filter(table=table_obj)
                 level = request.user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
-            _columns = actions.describe_columns(schema, table)
-            _constraints = actions.describe_constraints(schema, table)
-            pk_fields = self.get_pk_fields(_constraints)
-            # order by ordinal_position
-            columns = []
-            for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):
-                columns.append({
-                    'name': name,
-                    'data_type': self.get_datatype_str(col),
-                    'is_nullable': col['is_nullable'],
-                    'is_pk': name in pk_fields
-                })
+            columns = get_column_description(schema, table)
             # get number of rows
             sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)
             res = actions.perform_sql(sql)
@@ -1401,3 +1390,27 @@ class WizardView(LoginRequiredMixin, View):
         }
 
         return render(request, "dataedit/wizard.html", context=context)
+
+
+class MetaEditView(LoginRequiredMixin, View):
+    """Metadata editor (cliet side json forms)."""
+
+    def get(self, request, schema, table):
+
+        columns = get_column_description(schema, table)
+
+        context_dict = {
+            "config": json.dumps({
+                "schema": schema,
+                "table": table,
+                "columns": columns,
+                "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
+                "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
+            })
+        }
+
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )

@@ -41,7 +41,30 @@ var MetaEdit = function(config) {
     }
 
     function fixProblems(json) {
-        // TODO use schema validator, like https://github.com/korzio/djv
+        // TODO use schema validator, like https://github.com/korzio/djv ?
+
+        // MUST have ID
+        json["id"] = json["id"] || config.table;
+
+        // MUST have one resource with name == id == tablename
+        json["resources"] = json["resources"] || [{}];
+        json["resources"][0]["name"] = json["resources"][0]["name"] || config.table;
+
+        // auto set / correct columns
+        json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
+        json["resources"][0]["schema"]["fields"] = json["resources"][0]["schema"]["fields"] || [];
+        var fieldsByName = {};
+        json["resources"][0]["schema"]["fields"].map(function(field){
+            fieldsByName[field.name] = field
+        })
+
+        json["resources"][0]["schema"]["fields"] = [];
+        config.columns.map(function(column){
+            var field = fieldsByName[column.name] || {name: column.name};
+            field.type = field.type || column.data_type;
+            json["resources"][0]["schema"]["fields"].push(field);
+        })
+
         return json
     }
 
@@ -123,11 +146,13 @@ var MetaEdit = function(config) {
             $.getJSON(config.url_api_meta),
             $.getJSON('/static/metaedit/oem_v_1_4_0.json')
         ).done(function(data, schema) {
+            data = fixProblems(data[0]);
+            schema = schema[0];
+
             /*  https://github.com/json-editor/json-editor */
             options = {
-                startval: data[0],
-                schema: schema[0],
-                form_name_root: 'NAME',
+                startval: data,
+                schema: schema,
                 theme: 'bootstrap4',
                 disable_collapse: true,
                 disable_properties: true,
