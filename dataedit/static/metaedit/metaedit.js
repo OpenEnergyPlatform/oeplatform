@@ -40,7 +40,45 @@ var MetaEdit = function(config) {
         });
     }
 
-    function fixProblems(json) {
+    function fixSchema(json) {
+        /* recursively remove null types */
+        function fixRecursive(elem){
+            Object.keys(elem).map(function(key){
+                var prop = elem[key];
+                if (prop.type == 'array') {
+                    prop.items = prop.items || {};
+                    prop.items.title = prop.items.title || key; // missing title, otherwise the form label is just "item 1, ..."
+                    fixRecursive({"": prop.items});
+                } else if (prop.type == 'object') {
+                    prop.properties = prop.properties || {};
+                    //prop.required = prop.required || []; // missing required
+                    fixRecursive(prop.properties);
+                } else if (typeof prop.type == 'object') {
+                    // find and remove "null"
+                    var index = prop.type.indexOf("null");
+                    if (index >= 0) {
+                        prop.type.splice(index, 1);
+                    }
+                    // if only one type --> str
+                    if (prop.type.length == 1) {
+                        prop.type = prop.type[0];
+                    }
+                }
+            })
+        }
+        fixRecursive(json.properties);
+
+
+        json["options"] = {
+            "disable_edit_json": false, // show only for entire form
+        }
+        json["title"] = "Metadata for " + config.table
+
+
+        return json
+    }
+
+    function fixData(json) {
         // TODO use schema validator, like https://github.com/korzio/djv ?
 
         // MUST have ID
@@ -78,10 +116,10 @@ var MetaEdit = function(config) {
     }
 
     function convertDescriptionIntoPopover() {
-        config.form.find('.form-group > .form-text').each(function(i, e) {
-            var description = $(e).text(); // get description text
-            // find all title elements and add description as popover
-            $(e).parent().find('label')
+        function convert(descr, label){
+            var description = $(descr).text(); // get description text
+            if (description && label) {
+                label
                 .attr('data-content', description)
                 .attr('data-toggle', "popover")
                 .popover({
@@ -89,9 +127,22 @@ var MetaEdit = function(config) {
                     trigger: 'hover',
                     template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
                 });
-            // popover with bootstrap: https://getbootstrap.com/docs/4.0/components/popovers/
-            $(e).hide() // hide original description
+
+                descr.hide()
+            }
+        }
+
+        // headings
+        config.form.find('.card-title').parent().find('>p').each(function(i, e) {
+            convert($(e), $(e).parent().find('>.card-title>label'))
         });
+
+        // inputs
+        config.form.find('.form-group>.form-text').each(function(_i, e) {
+            convert($(e), $(e).parent().find('>label'))
+        });
+
+
     }
 
     function bindButtons() {
@@ -119,7 +170,7 @@ var MetaEdit = function(config) {
         $('#metaedit-submit').bind('click', function sumbmitMetadata() {
             $('#metaedit-submitting').removeClass('d-none');
             var json = config.editor.getValue();
-            json = fixProblems(json);
+            json = fixData(json);
             json = JSON.stringify(json);
             sendJson("POST", config.url_api_meta, json).then(function() {
                 window.location = config.url_view_table;
@@ -146,25 +197,35 @@ var MetaEdit = function(config) {
             $.getJSON(config.url_api_meta),
             $.getJSON('/static/metaedit/oem_v_1_4_0.json')
         ).done(function(data, schema) {
-            data = fixProblems(data[0]);
-            schema = schema[0];
+            data = fixData(data[0]);
+            schema = fixSchema(schema[0]);
 
             /*  https://github.com/json-editor/json-editor */
             options = {
                 startval: data,
                 schema: schema,
                 theme: 'bootstrap4',
+                iconlib: 'fontawesome5',
+                remove_button_labels: true,
                 disable_collapse: true,
+                prompt_before_delete: false,
+                object_layout: "normal",
                 disable_properties: true,
-                compact: true,
+                disable_edit_json: true,
+                disable_array_delete_last_row: true,
+                disable_array_delete_all_rows: true,
                 disable_array_reorder: true,
-                disable_edit_json: false,
-                required_by_default: true,
-                remove_empty_properties: true,
+                array_controls_top: true,
+                required_by_default: true, // don't remove, otherwise we can not initialize with data and still show empty fields
+                remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on teh server
             }
 
+            console.log(options)
+
             config.editor = new JSONEditor(config.form[0], options);
+
             config.mainEditBox = config.form.find('.je-object__controls').first();
+
 
             /* patch labels */
             config.mainEditBox.find('.json-editor-btntype-save').text('Apply');
