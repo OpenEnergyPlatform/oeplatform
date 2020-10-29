@@ -239,19 +239,34 @@ def listschemas(request):
     insp = actions.connect()
     engine = actions._get_engine()
     conn = engine.connect()
+
+
+
     query = (
-        "SELECT i.schema_name as schemaname, count(distinct p.tablename) as table_count, array_agg(p.tablename) as tables, array_agg(tg.id) as tag_ids FROM pg_tables p "
+        "SELECT "
+        "   i.schema_name as schemaname, "
+        "   count(distinct p.tablename) as table_count, "
+        "   array_agg(p.tablename) as tables, "
+        "   array_agg(tg.id) as tag_ids,"
+        "   bool_or(ms.comment @@ to_tsquery('{search}')) as match "
+        "FROM pg_tables p "
         "right join information_schema.schemata i "
         "ON p.schemaname=i.schema_name "
         "left join table_tags t "
         "ON p.schemaname=t.schema_name "
         "left join tags tg "
         "ON t.tag=tg.id "
+        "left join meta_search AS ms "
+        "ON p.schemaname = ms.schema AND p.tablename = ms.table "
         "WHERE p.tablename IS NULL "
         "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
         "       AND p.tablename NOT LIKE '\_%%') "
-        "GROUP BY i.schema_name;".format(user=sec.dbuser)
+        "GROUP BY i.schema_name;"
+    ).format(
+        user=sec.dbuser,
+        search=" & ".join(p + ":*" for p in re.findall("[A-Za-z]+", searchedQueryString)) if searchedQueryString else ""
     )
+
     response = conn.execute(query)
 
     description = {
@@ -276,14 +291,13 @@ def listschemas(request):
             (row.schemaname, description.get(row.schemaname, "No description"), row.table_count, row.tag_ids)
             for row in response
             if row.schemaname in schema_whitelist
+            and (not searchedQueryString or row.match)
             and not row.schemaname.startswith("_")
-            and (not searchedQueryString or searchedQueryString in row.schemaname or list(filter(lambda tableName: tableName and searchedQueryString in tableName, row.tables)))
+            #and (not searchedQueryString or searchedQueryString in row.schemaname or list(filter(lambda tableName: tableName and searchedQueryString in tableName, row.tables)))
             and (not searchedTagIds or set(filter(lambda x: x is not None, row.tag_ids)).issuperset(searchedTagIds))
         ],
         key=lambda x: x[0],
     )
-
-    print(schemas)
 
     return render(
         request,
@@ -361,9 +375,11 @@ def listtables(request, schema_name):
     conn = engine.connect()
     labels = get_readable_table_names(schema_name)
     query = (
-        "SELECT tablename FROM pg_tables WHERE schemaname = '{schema}' "
-        "AND pg_has_role('{user}', tableowner, 'MEMBER');".format(
-            schema=schema_name, user=sec.dbuser
+        ("SELECT tablename FROM pg_tables left join meta_search AS ms ON ms.table=tablename AND ms.schema = schemaname WHERE schemaname = '{schema}' "
+        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ to_tsquery('{search}')));").format(
+            schema=schema_name,
+            user=sec.dbuser,
+            search=" & ".join(p + ":*" for p in re.findall("[A-Za-z]+", searchedQueryString)) if searchedQueryString else ""
         )
     )
     tables = conn.execute(query)
@@ -377,7 +393,7 @@ def listtables(request, schema_name):
         )
         for table in tables
         if not table.tablename.startswith("_")
-           and (searchedQueryString is None or searchedQueryString in table.tablename)
+           #and (searchedQueryString is None or searchedQueryString in table.tablename)
     ]
 
     # Apply tag filter later on, because I am not smart enough to do it inline.

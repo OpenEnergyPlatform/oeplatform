@@ -2070,11 +2070,12 @@ def update_meta_search(session, table, schema, insert_only=False):
     if not insert_only:
         # If it is not known whether the table is already registered,
         # we have to check whether it is.
-        exists = session.bind().has_table(table, schema=schema)
+        exists = session.query(MetaSearch).filter(MetaSearch.schema==schema, MetaSearch.table==table).first()
     if not exists:
         meta = MetaData(bind=session.bind)
         t = sa.Table(table, meta, schema=schema, autoload=True)
-        comment = t.comment
+        comment = t.comment or ""
+        comment = re.sub("[^A-Za-z]\s*", " ", comment)
         session.execute(
             sa.insert(
                 MetaSearch,
@@ -2083,7 +2084,7 @@ def update_meta_search(session, table, schema, insert_only=False):
                         table=table,
                         schema=schema,
                         comment=sa.cast(
-                            " ".join((schema, table, comment if comment else "")),
+                            " ".join((*re.findall("[A-Za-z]*", schema), (*re.findall("[A-Za-z]*",table)) , comment)),
                             TSVECTOR,
                         ),
                     )
