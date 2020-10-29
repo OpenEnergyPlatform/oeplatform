@@ -20,6 +20,7 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.views.generic import View
 from django.views.generic.base import TemplateView
@@ -36,7 +37,6 @@ from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
 from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
-from dataedit.forms import MetaEditForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
@@ -1032,16 +1032,17 @@ class DataView(View):
 
 
 class MetaEditView(LoginRequiredMixin, View):
-    """Metadata editor based on django_jsonforms."""
+    """Metadata editor (cliet side json forms)."""
 
     def get(self, request, schema, table):
 
-        meta_edit_form = MetaEditForm()
-
         context_dict = {
-            "schema": schema,
-            "table": table,
-            "meta_edit_form": MetaEditForm()
+            "config": json.dumps({
+                "schema": schema,
+                "table": table,
+                "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
+                "url_view_table": reverse('input', kwargs={"schema": schema, "table": table}),
+            })
         }
 
         return render(
@@ -1049,8 +1050,6 @@ class MetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
-
-
 
 
 

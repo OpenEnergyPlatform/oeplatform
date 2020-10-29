@@ -48,9 +48,7 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "jquery",
-    "django_jsonforms",
-
+    "jquery"
 
 )
 
@@ -122,4 +120,3 @@ AUTHENTICATION_BACKENDS = [
     # Django ModelBackend is the default authentication backend.
     'django.contrib.auth.backends.ModelBackend',
 ]
-JSONFORMS_SCHEMA_DIR = 'static'

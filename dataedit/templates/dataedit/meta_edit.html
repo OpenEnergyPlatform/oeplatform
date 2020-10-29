@@ -1,41 +1,28 @@
 {% extends "dataedit/base.html" %}
-{% load bootstrap4 %}
 {% load static %}
-
-{% block data_content %}
-
-
-<form>
-    {% csrf_token %}
-    {% bootstrap_form meta_edit_form %}
-</form>
-
-
-{% endblock data_content %}
-
-
+{% load bootstrap4 %}
 
 {% block after-head %}
-    <!--
-    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-    -->
+<link href="/static/metaedit/metaedit.css" rel="stylesheet">
 {% endblock after-head %}
 
+{% block site-header %}
+<h2 class="site-header"><span class="spinner-border text-primary" id="metaedit-loading"></span>
+    <i class="fa fa-tags"></i>Metadata</span>
+</h2>
+{% endblock site-header %}
+
+{% block main %}
+<div id="metaedit-form">
+
+</div>
+{% endblock main %}
+
 {% block after-body-bottom-js %}
-    <!--
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script src="/static/metaedit/vendor/jsoneditor-2.5.1/jsoneditor.min.js"></script>
+    <script src="/static/metaedit/metaedit.js"></script>
     <script>
-        var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false});
+        var config = JSON.parse("{{ config|escapejs }}");
+        MetaEdit(config);
     </script>
-    -->
-    <script>
-        var config = {
-            schema: "{{ schema }}",
-            table: "{{ table }}"
-        }
-    </script>
-
-    <!-- load form javascript -->
-    {{meta_edit_form.media}}
-
 {% endblock after-body-bottom-js %}

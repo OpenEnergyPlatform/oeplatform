@@ -2,9 +2,6 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 from django.forms import Form
-
-from django_jsonforms.forms import JSONSchemaField
-
 from dataedit.models import Tag, View
 
 
@@ -174,17 +171,3 @@ class TagForm(ModelForm):
     class Meta:
         model = Tag
         fields = ["label"]
-
-
-class MetaEditForm(Form):
-    """Metadata editor based on django_jsonforms."""
-    Meta_v_1_4_0 = JSONSchemaField(
-        schema='django_jsonforms/oem_v_1_4_0.json',
-        options = {
-            'theme': 'bootstrap4',
-            'disable_collapse': True,
-            'disable_properties': True,
-            'compact': True,
-            'disable_array_reorder': True
-        }
-    )

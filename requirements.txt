@@ -22,4 +22,3 @@ git+http://github.com/frague59/django-fontawesome-5.git@master
 omi
 rdflib
 django-jquery
-django_jsonforms
