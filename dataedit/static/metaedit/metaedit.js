@@ -45,6 +45,15 @@ var MetaEdit = function(config) {
         return json
     }
 
+    function getErrorMsg(x) {
+        try {
+            x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
+        } catch (e) {
+            x = x.statusText;
+        }
+        return x;
+    }
+
     function convertDescriptionIntoPopover() {
         config.form.find('.form-group > .form-text').each(function(i, e) {
             var description = $(e).text(); // get description text
@@ -94,7 +103,7 @@ var MetaEdit = function(config) {
             }).catch(function(err) {
                 // TODO evaluate error, show user message
                 $('#metaedit-submitting').addClass('d-none');
-                alert(err)
+                alert(getErrorMsg(err))
             });
         });
 
@@ -115,6 +124,7 @@ var MetaEdit = function(config) {
             $.getJSON(config.url_api_meta),
             $.getJSON('/static/metaedit/oem_v_1_4_0.json')
         ).done(function(data, schema) {
+            /*  https://github.com/json-editor/json-editor */
             options = {
                 startval: data[0],
                 schema: schema[0],
@@ -124,15 +134,20 @@ var MetaEdit = function(config) {
                 disable_properties: true,
                 compact: true,
                 disable_array_reorder: true,
-                required_by_default: true
+                disable_edit_json: false,
+                required_by_default: true,
+                remove_empty_properties: true,
             }
 
             config.editor = new JSONEditor(config.form[0], options);
-            config.mainEditBox = config.form.find('.je-object__controls').first().find('.je-modal');
+            config.mainEditBox = config.form.find('.je-object__controls').first();
 
+            /* patch labels */
             config.mainEditBox.find('.json-editor-btntype-save').text('Apply');
             config.mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
             config.mainEditBox.find('.json-editor-btntype-cancel').text('Close');
+            config.mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+
 
             bindButtons();
             convertDescriptionIntoPopover();
