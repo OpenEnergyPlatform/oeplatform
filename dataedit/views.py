@@ -22,6 +22,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
+from django.views.generic.base import TemplateView
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -35,6 +36,7 @@ from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
 from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
+from dataedit.forms import MetaEditForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
@@ -1027,6 +1029,19 @@ class DataView(View):
         return redirect(
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
+
+
+class MetaEditView(TemplateView):
+    """Metadata editor based on django_jsonforms.
+
+      TODO: why TemplateView and not View?
+    """
+    template_name = 'dataedit/meta_edit.html'
+
+    def get_context_data(self, **kwargs):
+        return {
+            'meta_edit_form': MetaEditForm()
+        }
 
 
 class MetaView(LoginRequiredMixin, View):

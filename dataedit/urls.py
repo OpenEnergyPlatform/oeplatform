@@ -40,7 +40,7 @@ urlpatterns = [
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/meta_edit$".format(
             qual=pgsql_qualifier
         ),
-        views.MetaView.as_view(),
+        views.MetaEditView.as_view(),
         name="input",
     ),
     url(

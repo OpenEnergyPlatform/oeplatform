@@ -1,21 +1,35 @@
 {% extends "dataedit/base.html" %}
+{% load bootstrap4 %}
+{% load static %}
 
 {% block data_content %}
-{% load static %}
-<script type="text/javascript" src="{% static 'dataedit/metadata.js' %}"></script>
-<link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
-<script type="text/javascript">
 
-</script>
 
-<div>
-    <h4>Metadata</h4>
-    <div class="table table-hover">
-        <form action="" role="form" method="post">{% csrf_token %}
-            {{meta_widget}}
-            <input class="btn btn-success" type="submit" value="Submit" />
-        </form>
-    </div>
-</div>
+<form>
+    {% csrf_token %}
+    {% bootstrap_form meta_edit_form %}
+</form>
 
-{% endblock %}
+
+{% endblock data_content %}
+
+
+
+{% block after-head %}
+    <!--
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    -->
+{% endblock after-head %}
+
+{% block after-body-bottom-js %}
+    <!--
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script>
+        var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false});
+    </script>
+    -->
+
+    <!-- load form javascript -->
+    {{meta_edit_form.media}}
+
+{% endblock after-body-bottom-js %}
