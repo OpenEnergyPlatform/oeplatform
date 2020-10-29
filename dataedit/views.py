@@ -1031,42 +1031,17 @@ class DataView(View):
         )
 
 
-class MetaEditView(TemplateView):
-    """Metadata editor based on django_jsonforms.
-
-      TODO: why TemplateView and not View?
-    """
-    template_name = 'dataedit/meta_edit.html'
-
-    def get_context_data(self, **kwargs):
-        return {
-            'meta_edit_form': MetaEditForm()
-        }
-
-
-class MetaView(LoginRequiredMixin, View):
-    """
-
-    """
+class MetaEditView(LoginRequiredMixin, View):
+    """Metadata editor based on django_jsonforms."""
 
     def get(self, request, schema, table):
-        """
-        Loads the metadata of the passed table and its columns.
-        :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
-        :return: Renders a form that contains a form with the tables metadata
-        """
 
-        metadata = load_metadata_from_db(schema, table)
-
-        meta_widget = MetaDataWidget(metadata)
+        meta_edit_form = MetaEditForm()
 
         context_dict = {
             "schema": schema,
             "table": table,
-            "meta_widget": meta_widget.render_editmode(),
-            "comment_on_table": metadata
+            "meta_edit_form": MetaEditForm()
         }
 
         return render(
@@ -1075,95 +1050,8 @@ class MetaView(LoginRequiredMixin, View):
             context=context_dict,
         )
 
-    def post(self, request, schema, table):
-        """
-        Handles the send event of the form created in the get-method. The
-        metadata is transformed into a JSON-dictionary and stored in the tables
-        comment inside the database.
-        :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
-        :return: Redirects to the view of the specified table
-        """
-        columns = actions.analyze_columns(schema, table)
-
-        comment = read_metadata_from_post(request.POST, schema, table)
-        save_metadata_as_table_comment(schema, table, metadata=comment)
-
-        return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-        )
 
 
-    name_pattern = r"[\w\s]*"
-
-    def loadName(self, name):
-        """
-        Checks whether the `name` contains only alphanumeric symbols and whitespaces
-        :param name: A string
-        :return: If the string is valid it is returned. Otherwise an AssertionError is raised.
-        """
-        assert re.match(self.name_pattern, name)
-        return name
-
-    def _load_list(self, request, name):
-
-        pattern = r"%s_(?P<index>\d*)" % name
-        return [
-            request.POST[key].replace("'", "'")
-            for key in request.POST
-            if re.match(pattern, key)
-        ]
-
-    def _load_url_list(self, request, name):
-        pattern = r"%s_name_(?P<index>\d*)" % name
-        return [
-            {
-                "Name": request.POST[key].replace("'", "'"),
-                "URL": request.POST[key.replace("_name_", "_url_")].replace("'", "'"),
-            }
-            for key in request.POST
-            if re.match(pattern, key)
-        ]
-
-    def _load_col_list(self, request, columns):
-        return [
-            {
-                "Name": col["id"],
-                "Description": request.POST["col_" + col["id"] + "_descr"],
-                "Unit": request.POST["col_" + col["id"] + "_unit"],
-            }
-            for col in columns
-        ]
-
-
-def save_metadata_as_table_comment(schema, table, metadata):
-    """Save metadata as comment string on a database table
-    :param schema (string):
-    :param table (string):
-    :param metadata: structured data according to metadata specifications
-    """
-    # TODO: validate metadata!
-    # metadata = validate(metadata)
-
-    engine = actions._get_engine()
-    conn = engine.connect()
-    trans = conn.begin()
-    try:
-        conn.execute(
-            sqla.text(
-                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                    schema=schema, table=table
-                )
-            ),
-            comment=json.dumps(metadata),
-        )
-    except Exception as e:
-        raise e
-    else:
-        trans.commit()
-    finally:
-        conn.close()
 
 
 class PermissionView(View):
@@ -1413,12 +1301,12 @@ def increment_usage_count(tag_id):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv).
     """
-    
+
     @staticmethod
-    def get_datatype_str(column_def):        
+    def get_datatype_str(column_def):
         """get single string sql type definition.
 
-        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128), 
+        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128),
         so we need to combine the various fields (type, numeric_precision, numeric_scale, ...)
         """
         # for reverse validation, see also api.parser.parse_type(dt_string)
@@ -1465,21 +1353,21 @@ class WizardView(LoginRequiredMixin, View):
 
     def get(self, request, schema='model_draft', table=None):
         """Handle GET request (render the page).
-        """        
+        """
         engine = actions._get_engine()
 
         can_add = False
         columns = None
         pk_fields = None
         n_rows = None
-        if table: 
+        if table:
             # get information about the table
             # if upload: table must exist in schema model_draft
             if schema != 'model_draft':
                 raise Http404('Can only upload to schema model_draft')
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404('Table does not exist')
-            table_obj = Table.load(schema, table)                                    
+            table_obj = Table.load(schema, table)
             if not request.user.is_anonymous:
                 user_perms = login_models.UserPermission.objects.filter(table=table_obj)
                 level = request.user.get_table_permission_level(table_obj)
@@ -1489,7 +1377,7 @@ class WizardView(LoginRequiredMixin, View):
             pk_fields = self.get_pk_fields(_constraints)
             # order by ordinal_position
             columns = []
-            for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):                
+            for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):
                 columns.append({
                     'name': name,
                     'data_type': self.get_datatype_str(col),
@@ -1497,19 +1385,19 @@ class WizardView(LoginRequiredMixin, View):
                     'is_pk': name in pk_fields
                 })
             # get number of rows
-            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)                    
+            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)
             res = actions.perform_sql(sql)
             n_rows = res['result'].fetchone()[0]
 
         context = {
             "config": json.dumps({ # pass as json string
                 "canAdd": can_add,
-                "columns": columns,                
+                "columns": columns,
                 "schema": schema,
                 "table": table,
                 "nRows": n_rows
             }),
-            "schema": schema, 
+            "schema": schema,
             "table": table
         }
 
