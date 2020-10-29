@@ -33,6 +33,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
+from dataedit.metadata import load_metadata_from_db
 from dataedit.models import Table as DBTable
 from dataedit.structures import MetaSearch
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -2074,8 +2075,8 @@ def update_meta_search(session, table, schema, insert_only=False):
     if not exists:
         meta = MetaData(bind=session.bind)
         t = sa.Table(table, meta, schema=schema, autoload=True)
-        comment = t.comment or ""
-        comment = re.sub("[^A-Za-z]\s*", " ", comment)
+        comment = str(load_metadata_from_db(schema, table))
+        comment = re.sub(u"[^\w]\s*", " ", comment)
         session.execute(
             sa.insert(
                 MetaSearch,
@@ -2083,9 +2084,8 @@ def update_meta_search(session, table, schema, insert_only=False):
                     dict(
                         table=table,
                         schema=schema,
-                        comment=sa.cast(
-                            " ".join((*re.findall("[A-Za-z]*", schema), (*re.findall("[A-Za-z]*",table)) , comment)),
-                            TSVECTOR,
+                        comment=sa.func.to_tsvector(
+                            " ".join((*re.findall("\w+", schema), (*re.findall("\w+",table)) , comment))
                         ),
                     )
                 ],

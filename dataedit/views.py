@@ -248,7 +248,7 @@ def listschemas(request):
         "   count(distinct p.tablename) as table_count, "
         "   array_agg(p.tablename) as tables, "
         "   array_agg(tg.id) as tag_ids,"
-        "   bool_or(ms.comment @@ to_tsquery('{search}')) as match "
+        "   bool_or(ms.comment @@ plainto_tsquery('simple', '{search}')) as match "
         "FROM pg_tables p "
         "right join information_schema.schemata i "
         "ON p.schemaname=i.schema_name "
@@ -264,8 +264,10 @@ def listschemas(request):
         "GROUP BY i.schema_name;"
     ).format(
         user=sec.dbuser,
-        search=" & ".join(p + ":*" for p in re.findall("[A-Za-z]+", searchedQueryString)) if searchedQueryString else ""
+        search=u" & ".join(p + u":*" for p in re.findall("[\w]+", searchedQueryString)) if searchedQueryString else ""
     )
+
+    print(query)
 
     response = conn.execute(query)
 
@@ -376,10 +378,10 @@ def listtables(request, schema_name):
     labels = get_readable_table_names(schema_name)
     query = (
         ("SELECT tablename FROM pg_tables left join meta_search AS ms ON ms.table=tablename AND ms.schema = schemaname WHERE schemaname = '{schema}' "
-        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ to_tsquery('{search}')));").format(
+        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ plainto_tsquery('simple', '{search}')));").format(
             schema=schema_name,
             user=sec.dbuser,
-            search=" & ".join(p + ":*" for p in re.findall("[A-Za-z]+", searchedQueryString)) if searchedQueryString else ""
+            search=" & ".join(p + ":*" for p in re.findall("[\w]+", searchedQueryString)) if searchedQueryString else ""
         )
     )
     tables = conn.execute(query)
