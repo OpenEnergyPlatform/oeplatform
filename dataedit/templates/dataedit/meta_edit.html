@@ -28,6 +28,12 @@
         var easyMDE = new EasyMDE({element: document.getElementById('id_markdown'), nativeSpellcheck: false});
     </script>
     -->
+    <script>
+        var config = {
+            schema: "{{ schema }}",
+            table: "{{ table }}"
+        }
+    </script>
 
     <!-- load form javascript -->
     {{meta_edit_form.media}}

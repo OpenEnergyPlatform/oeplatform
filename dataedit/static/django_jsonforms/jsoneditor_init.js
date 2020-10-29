@@ -1,54 +1,91 @@
+/* this replaces the original from djangoform package */
+
 $('document').ready(function() {
 
-    // Get value from either a json string or url pointing to a json file
-    function process(value) {
-        var isjson=true;
-        var result;
+    /*
+    TODO: consolidate functions (same as in wizard and other places)
+    */
 
-        try {
-          result = JSON.parse(value);
-        } catch(e) {
-          isjson=false;
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = $.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
+        return cookieValue;
+    }
 
-        if (isjson) {
-          return result;
-        } else {
-          return $.getJSON(value)
-            .then(function (response) {
-                return response;
-            });
-        }
+    function getCsrfToken() {
+        var token1 = getCookie("csrftoken");
+        return token1;
+    }
+
+    function getApiMetaUrl(schema, tablename) {
+        var apiVersion = "v0";
+        return "/api/" + apiVersion + "/schema/" + schema + "/tables/" + tablename + "/meta/"; // must have trailing slash
+    }
+    function getTableUrl(schema, tablename) {
+        return "/dataedit/view/" + schema + "/" + tablename;
+    }
+
+    function sendJson(method, url, data, success, error) {
+        var token = getCsrfToken();
+        return $.ajax({
+            url: url,
+            headers: { "X-CSRFToken": token },
+            data_type: "json",
+            cache: false,
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            data: data,
+            type: method,
+            success: success,
+            error: error
+        });
+    }
+
+    function validate(json){
+        // TODO use schema validator, like https://github.com/korzio/djv
+
+        return json
+    }
+
+    function initialize(json){
+        json = json || {};
+
+        return null;
     }
 
     $('.editor_holder').each(function() {
         // Get the DOM Element
         var element = $(this).get(0);
-
-        var options_text = $(this).attr('options')
-        var schema_text = $(this).attr('schema')
-
-        var schema = process(schema_text);
-        var options = process(options_text);
-
         var name = $(this).attr('name');
-        var hidden_identifier = 'input[name=' + name + ']';
-        var initial = $(hidden_identifier).val();
+
+        var startval = $.getJSON(getApiMetaUrl(config.schema, config.table)).then(function (response) {return response;});
+        var schema = $.getJSON($(this).attr('schema')).then(function (response) {return response;});
+        var options = JSON.parse($(this).attr('options'));
+
 
         // Check if editor is within form
         var form = $(this).closest('form')
 
         //Wait for any ajax requests to complete
-        $.when(schema, options).done(function(schemaresult, optionsresult) {
+        $.when(schema, options, startval).done(function(schemaresult, optionsresult, startvalresults) {
             optionsresult.form_name_root = name;
+            startvalresults = initialize(startvalresults);
 
             // Pass initial value though to editor
-            if (initial) {
-                optionsresult.startval = JSON.parse(initial);
-            }
-
+            // optionsresult.startval = startvalresults;
             optionsresult.schema = schemaresult;
-            // console.log(options);
+
+            console.log(optionsresult);
+
             var editor = new JSONEditor(element, optionsresult);
 
             if (form) {
@@ -70,7 +107,7 @@ $('document').ready(function() {
                 $('#json-editor-download').bind('click', function downloadMetadata(){
                     var json = editor.getValue();
                     // create data url
-                    var json = JSON.stringify(json, null, 1);
+                    json = JSON.stringify(json, null, 1);
                     blob = new Blob([json], {type: "application/json"}),
                     dataUrl = URL.createObjectURL(blob);
                     // create link
@@ -86,7 +123,29 @@ $('document').ready(function() {
                     a.parentNode.removeChild(a);
                 })
 
-                // create
+
+                var buttonRow = $('<div class="">').appendTo('form');
+                // Submit
+                $('<div class="btn btn-primary">Submit</div>').bind('click', function submit(){
+                    var url = getApiMetaUrl(config.schema, config.table);
+                    var urlSuccess = getTableUrl(config.schema, config.table);
+                    var json = editor.getValue();
+                    json = validate(json);
+                    json = JSON.stringify(json);
+                    sendJson("POST", url, json).then(function() {
+                        window.location = urlSuccess;
+                    }).catch(function(err){
+                        // TODO evaluate error, show user message
+                        console.error(err)
+                    });
+                }).appendTo(buttonRow)
+                // Cancel
+                $('<div class="btn btn-primary">Cancel</div>').bind('click', function cancel(){
+                    var urlCancel = getTableUrl(config.schema, config.table);
+                    window.location = urlCancel
+                }).appendTo(buttonRow)
+
+                // create popovers instead of descriptions
                 var convertDescriptionIntoPopover = function(){
                     // find all descriptions
                     $('[data-schemaid="root"] .form-group > p.form-text').each(function(i, e){
