@@ -48,7 +48,6 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "oem_creator",
     "jquery",
     "django_jsonforms",
 
