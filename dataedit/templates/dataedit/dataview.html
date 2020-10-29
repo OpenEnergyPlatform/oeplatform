@@ -97,6 +97,14 @@
   </div>
   <hr>
 
+  {% if schema == "model_draft" %}
+  <h4><i class="fa fa-hat-wizard"></i> Wizard</h4>
+  <a class="btn btn-sm btn-success" href="{% url 'wizard_upload' schema=schema table=table %}" >
+      Upload CSV
+  </a>
+  <hr>
+  {% endif %}
+
   <h4>API Usage</h4>
   <textarea
     class="form-control" rows="6" cols="50"
