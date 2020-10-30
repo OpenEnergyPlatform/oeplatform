@@ -76,9 +76,13 @@ var MetaEdit = function(config) {
         json.properties.resources.items.properties.profile.options = {hidden: true};
         json.properties.resources.items.properties.encoding.options = {hidden: true};
         json.properties.resources.items.properties.dialect.options = {hidden: true};
-
         json.properties.review.options = {hidden: true};
         json.properties.metaMetadata.options = {hidden: true};
+
+        // add formats
+        json.properties.publicationDate.format = 'date';
+        json.properties.temporal.properties.referenceDate.format = 'date';
+        json.properties.context.properties.homepage.format = 'url';
 
         json["options"] = {
             "disable_edit_json": false, // show only for entire form
