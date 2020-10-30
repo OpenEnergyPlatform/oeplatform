@@ -46,12 +46,11 @@ var MetaEdit = function(config) {
             Object.keys(elem).map(function(key){
                 var prop = elem[key];
                 if (prop.type == 'array') {
-                    prop.items = prop.items || {};
+                    //prop.items = prop.items || {};
                     prop.items.title = prop.items.title || key; // missing title, otherwise the form label is just "item 1, ..."
                     fixRecursive({"": prop.items});
                 } else if (prop.type == 'object') {
-                    prop.properties = prop.properties || {};
-                    //prop.required = prop.required || []; // missing required
+                    //prop.properties = prop.properties || {};
                     fixRecursive(prop.properties);
                 } else if (typeof prop.type == 'object') {
                     // find and remove "null"
@@ -79,8 +78,6 @@ var MetaEdit = function(config) {
     }
 
     function fixData(json) {
-        // TODO use schema validator, like https://github.com/korzio/djv ?
-
         // MUST have ID
         json["id"] = json["id"] || config.table;
 
@@ -102,6 +99,47 @@ var MetaEdit = function(config) {
             field.type = field.type || column.data_type;
             json["resources"][0]["schema"]["fields"].push(field);
         })
+
+        // add empty value for all missing so they show up in editor
+        // these will be removed at the end
+
+        function isObject(obj){
+            return ;
+        }
+
+
+        function fixRecursive(schemaProps, elemObject, path){
+            // is object ?
+            if (typeof elemObject != 'object' || $.isArray(elemObject)){
+                return;
+            }
+            // for each key: fill missing (recursively)
+            Object.keys(schemaProps).map(function(key){
+                var prop = schemaProps[key];
+                //console.log(path + '.' + key, prop.type)
+                if (prop.type == 'object'){
+                    elemObject[key] = elemObject[key] || {};
+                    fixRecursive(prop.properties, elemObject[key], path + '.' + key);
+                }
+                else if (prop.type == 'array'){
+                    elemObject[key] = elemObject[key] || [];
+                    // if non empty array
+                    if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
+                        elemObject[key].map(function(elem, i) {
+                            fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
+                        })
+                    }
+                }
+                else { // value
+                    if (elemObject[key] === undefined){
+                        console.log('adding empty value: ' + path + '.' + key)
+                        elemObject[key] = null;
+                    }
+                }
+            });
+        }
+
+        fixRecursive(config.schema.properties, json, 'root')
 
         return json
     }
@@ -127,18 +165,17 @@ var MetaEdit = function(config) {
                     trigger: 'hover',
                     template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
                 });
-
-                descr.hide()
+                descr.addClass('d-none')
             }
         }
 
         // headings
-        config.form.find('.card-title').parent().find('>p').each(function(i, e) {
+        config.form.find('.card-title').parent().find('>p').not('.d-none').each(function(i, e) {
             convert($(e), $(e).parent().find('>.card-title>label'))
         });
 
         // inputs
-        config.form.find('.form-group>.form-text').each(function(_i, e) {
+        config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
             convert($(e), $(e).parent().find('>label'))
         });
 
@@ -197,13 +234,14 @@ var MetaEdit = function(config) {
             $.getJSON(config.url_api_meta),
             $.getJSON('/static/metaedit/oem_v_1_4_0.json')
         ).done(function(data, schema) {
-            data = fixData(data[0]);
-            schema = fixSchema(schema[0]);
+            config.schema = fixSchema(schema[0]);
+            config.initialData = fixData(data[0]);
+
 
             /*  https://github.com/json-editor/json-editor */
             options = {
-                startval: data,
-                schema: schema,
+                startval: config.initialData,
+                schema: config.schema,
                 theme: 'bootstrap4',
                 iconlib: 'fontawesome5',
                 remove_button_labels: true,
@@ -216,33 +254,36 @@ var MetaEdit = function(config) {
                 disable_array_delete_all_rows: true,
                 disable_array_reorder: true,
                 array_controls_top: true,
-                required_by_default: true, // don't remove, otherwise we can not initialize with data and still show empty fields
-                remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on teh server
+                no_additional_properties: false,
+                required_by_default: false,
+                remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
             }
 
-            console.log(options)
+            //console.log(options)
 
             config.editor = new JSONEditor(config.form[0], options);
 
-            config.mainEditBox = config.form.find('.je-object__controls').first();
-
-
             /* patch labels */
-            config.mainEditBox.find('.json-editor-btntype-save').text('Apply');
-            config.mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-            config.mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-            config.mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
-
+            var mainEditBox = config.form.find('.je-object__controls').first();
+            mainEditBox.find('.json-editor-btntype-save').text('Apply');
+            mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
+            mainEditBox.find('.json-editor-btntype-cancel').text('Close');
+            mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
 
             bindButtons();
+
             convertDescriptionIntoPopover();
+            // check for new items in dom
+            (new MutationObserver(function(_mutationsList, _observer) {
+                convertDescriptionIntoPopover()
+            })).observe(config.form[0], { attributes: false, childList: true, subtree: true });
 
-            // update when click on button (because they create new form elements)
-            config.form.find('button').bind('click', convertDescriptionIntoPopover);
-
+            // all done
             $('#metaedit-loading').addClass('d-none');
             $('#metaedit-icon').removeClass('d-none');
             $('#metaedit-controls').removeClass('d-none');
+
+            // TODO catch init error
 
         });
 
