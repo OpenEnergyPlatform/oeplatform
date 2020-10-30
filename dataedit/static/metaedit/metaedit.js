@@ -67,6 +67,18 @@ var MetaEdit = function(config) {
         }
         fixRecursive(json.properties);
 
+        // make some readonly
+        json.properties.id.readonly =  true;
+        json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
+        json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+
+        // hide some
+        json.properties.resources.items.properties.profile.options = {hidden: true};
+        json.properties.resources.items.properties.encoding.options = {hidden: true};
+        json.properties.resources.items.properties.dialect.options = {hidden: true};
+
+        json.properties.review.options = {hidden: true};
+        json.properties.metaMetadata.options = {hidden: true};
 
         json["options"] = {
             "disable_edit_json": false, // show only for entire form
@@ -159,6 +171,7 @@ var MetaEdit = function(config) {
             if (description && label) {
                 label
                 .attr('data-content', description)
+                .attr('title', label.text())
                 .attr('data-toggle', "popover")
                 .popover({
                     placement: 'top',
@@ -178,6 +191,9 @@ var MetaEdit = function(config) {
         config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
             convert($(e), $(e).parent().find('>label'))
         });
+
+        // remove button groups
+        config.form.find('.btn-group').removeClass('btn-group');
 
 
     }
@@ -244,6 +260,8 @@ var MetaEdit = function(config) {
                 schema: config.schema,
                 theme: 'bootstrap4',
                 iconlib: 'fontawesome5',
+                mode: 'form',
+                compact: true,
                 remove_button_labels: true,
                 disable_collapse: true,
                 prompt_before_delete: false,
