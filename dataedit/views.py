@@ -248,7 +248,7 @@ def listschemas(request):
         "   count(distinct p.tablename) as table_count, "
         "   array_agg(p.tablename) as tables, "
         "   array_agg(tg.id) as tag_ids,"
-        "   bool_or(ms.comment @@ plainto_tsquery('simple', '{search}')) as match "
+        "   bool_or(ms.comment @@ to_tsquery('{search}')) as match "
         "FROM pg_tables p "
         "right join information_schema.schemata i "
         "ON p.schemaname=i.schema_name "
@@ -376,12 +376,13 @@ def listtables(request, schema_name):
     engine = actions._get_engine()
     conn = engine.connect()
     labels = get_readable_table_names(schema_name)
+    query_parts = list(re.findall("[\w]+", searchedQueryString))  if searchedQueryString else ""
     query = (
         ("SELECT tablename FROM pg_tables left join meta_search AS ms ON ms.table=tablename AND ms.schema = schemaname WHERE schemaname = '{schema}' "
-        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ plainto_tsquery('simple', '{search}')));").format(
+        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ to_tsquery('{search}')));").format(
             schema=schema_name,
             user=sec.dbuser,
-            search=" & ".join(p + ":*" for p in re.findall("[\w]+", searchedQueryString)) if searchedQueryString else ""
+            search=" & ".join(p + ":*" for p in query_parts)
         )
     )
     tables = conn.execute(query)
@@ -395,7 +396,6 @@ def listtables(request, schema_name):
         )
         for table in tables
         if not table.tablename.startswith("_")
-           #and (searchedQueryString is None or searchedQueryString in table.tablename)
     ]
 
     # Apply tag filter later on, because I am not smart enough to do it inline.
