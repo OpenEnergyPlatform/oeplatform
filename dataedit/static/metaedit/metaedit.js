@@ -1,3 +1,7 @@
+
+// e.preventDefault(), e.stopPropagation(), t.saveJSON()
+
+
 var MetaEdit = function(config) {
 
     /*
@@ -40,14 +44,16 @@ var MetaEdit = function(config) {
         });
     }
 
+
     function fixSchema(json) {
         /* recursively remove null types */
         function fixRecursive(elem){
             Object.keys(elem).map(function(key){
                 var prop = elem[key];
+                prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1)
                 if (prop.type == 'array') {
                     //prop.items = prop.items || {};
-                    prop.items.title = prop.items.title || key; // missing title, otherwise the form label is just "item 1, ..."
+                    prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
                     fixRecursive({"": prop.items});
                 } else if (prop.type == 'object') {
                     //prop.properties = prop.properties || {};
@@ -142,10 +148,11 @@ var MetaEdit = function(config) {
                 }
                 else { // value
                     if (elemObject[key] === undefined){
-                        console.log('adding empty value: ' + path + '.' + key)
+                        //console.log('adding empty value: ' + path + '.' + key)
                         elemObject[key] = null;
                     }
                 }
+
             });
         }
 
@@ -246,8 +253,8 @@ var MetaEdit = function(config) {
 
         $.when(
             $.getJSON(config.url_api_meta),
-            //$.getJSON('/static/metaedit/oem_v_1_4_0.json'),
-            $.getJSON('https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/develop/metadata/v140/schema.json')
+            $.getJSON('/static/metaedit/schema.json'),
+            //$.getJSON('https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/develop/metadata/v140/schema.json')
 
         ).done(function(data, schema) {
             config.schema = fixSchema(schema[0]);
@@ -266,13 +273,13 @@ var MetaEdit = function(config) {
                 disable_collapse: true,
                 prompt_before_delete: false,
                 object_layout: "normal",
-                disable_properties: true,
+                disable_properties: false,
                 disable_edit_json: true,
                 disable_array_delete_last_row: true,
                 disable_array_delete_all_rows: true,
                 disable_array_reorder: true,
                 array_controls_top: true,
-                no_additional_properties: false,
+                no_additional_properties: true,
                 required_by_default: false,
                 remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
             }
