@@ -118,12 +118,6 @@ var MetaEdit = function(config) {
 
         // add empty value for all missing so they show up in editor
         // these will be removed at the end
-
-        function isObject(obj){
-            return ;
-        }
-
-
         function fixRecursive(schemaProps, elemObject, path){
             // is object ?
             if (typeof elemObject != 'object' || $.isArray(elemObject)){
@@ -252,7 +246,9 @@ var MetaEdit = function(config) {
 
         $.when(
             $.getJSON(config.url_api_meta),
-            $.getJSON('/static/metaedit/oem_v_1_4_0.json')
+            //$.getJSON('/static/metaedit/oem_v_1_4_0.json'),
+            $.getJSON('https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/develop/metadata/v140/schema.json')
+
         ).done(function(data, schema) {
             config.schema = fixSchema(schema[0]);
             config.initialData = fixData(data[0]);
