@@ -12,7 +12,6 @@ from django.db.models import (
 )
 from django.utils import timezone
 from django.contrib.postgres.search import SearchVector, SearchVectorField
-import tsvector_field
 
 # Create your models here.
 
