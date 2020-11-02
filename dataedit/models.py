@@ -11,6 +11,8 @@ from django.db.models import (
     IntegerField,
 )
 from django.utils import timezone
+from django.contrib.postgres.search import SearchVector, SearchVectorField
+import tsvector_field
 
 # Create your models here.
 
@@ -48,7 +50,7 @@ class Schema(Tagable):
 
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
-
+    search = SearchVectorField(default="")
     @classmethod
     def load(cls, schema, table):
         table_obj, _ = Table.objects.get_or_create(

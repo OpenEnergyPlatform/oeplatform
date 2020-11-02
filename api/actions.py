@@ -9,6 +9,8 @@ import geoalchemy2  # Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
+from django.contrib.postgres.search import SearchVector
+from django.db.models import Func, Value
 from django.http import Http404, JsonResponse
 from omi.dialects.oep.parser import JSONParser_1_4, ParserException
 from shapely import wkb, wkt
@@ -34,8 +36,8 @@ from api.sessions import (
     load_session_from_context,
 )
 from dataedit.metadata import load_metadata_from_db
-from dataedit.models import Table as DBTable
-from dataedit.structures import MetaSearch
+from dataedit.models import Table as DBTable, Schema as DBSchema
+from dataedit.structures import TableTags as OEDBTableTags, Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -2064,30 +2066,13 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(session, table, schema, insert_only=False):
-    exists = False
-    if not schema:
-        schema = "public"
-    if not insert_only:
-        # If it is not known whether the table is already registered,
-        # we have to check whether it is.
-        exists = session.query(MetaSearch).filter(MetaSearch.schema==schema, MetaSearch.table==table).first()
-    if not exists:
-        meta = MetaData(bind=session.bind)
-        t = sa.Table(table, meta, schema=schema, autoload=True)
-        comment = str(load_metadata_from_db(schema, table))
-        comment = re.sub(u"[^\w]\s*", " ", comment)
-        session.execute(
-            sa.insert(
-                MetaSearch,
-                values=[
-                    dict(
-                        table=table,
-                        schema=schema,
-                        comment=sa.func.to_tsvector(
-                            " ".join((*re.findall("\w+", schema), (*re.findall("\w+",table)) , comment))
-                        ),
-                    )
-                ],
-            )
-        )
+def update_meta_search(table, schema):
+    schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
+    t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
+    comment = str(load_metadata_from_db(schema, table))
+    session = sessionmaker()(bind=_get_engine())
+    tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table)
+    s = (" ".join((*re.findall("\w+", schema), *re.findall("\w+", table), *re.findall(u"\w+", comment), *(tag[0] for tag in tags))))
+
+    t.search = Func(Value(s), function="to_tsvector")
+    t.save()

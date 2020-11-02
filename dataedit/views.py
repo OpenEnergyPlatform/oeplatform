@@ -16,7 +16,10 @@ import numpy
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.db.models import Count, Aggregate
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -236,40 +239,15 @@ def listschemas(request):
     for tag_id in searchedTagIds:
         increment_usage_count(tag_id)
 
-    insp = actions.connect()
+    filter_kwargs = dict(search=SearchQuery(" & ".join(p + ":*" for p in re.findall("[\w]+", searchedQueryString)),
+                                            search_type="raw")) if searchedQueryString else {}
+    response = Table.objects.filter(**filter_kwargs).values("schema__name").annotate(tables_count=Count("name"))
+
     engine = actions._get_engine()
     conn = engine.connect()
-
-
-
-    query = (
-        "SELECT "
-        "   i.schema_name as schemaname, "
-        "   count(distinct p.tablename) as table_count, "
-        "   array_agg(p.tablename) as tables, "
-        "   array_agg(tg.id) as tag_ids,"
-        "   bool_or(ms.comment @@ to_tsquery('{search}')) as match "
-        "FROM pg_tables p "
-        "right join information_schema.schemata i "
-        "ON p.schemaname=i.schema_name "
-        "left join table_tags t "
-        "ON p.schemaname=t.schema_name "
-        "left join tags tg "
-        "ON t.tag=tg.id "
-        "left join meta_search AS ms "
-        "ON p.schemaname = ms.schema AND p.tablename = ms.table "
-        "WHERE p.tablename IS NULL "
-        "   OR (pg_has_role('{user}', tableowner, 'MEMBER') "
-        "       AND p.tablename NOT LIKE '\_%%') "
-        "GROUP BY i.schema_name;"
-    ).format(
-        user=sec.dbuser,
-        search=u" & ".join(p + u":*" for p in re.findall("[\w]+", searchedQueryString)) if searchedQueryString else ""
-    )
-
-    print(query)
-
-    response = conn.execute(query)
+    Session = sessionmaker()
+    session = Session(bind=conn)
+    tags = { r[0]: r[1] for r in session.query(TableTags.schema_name, array_agg(TableTags.tag)).group_by(TableTags.schema_name)}
 
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
@@ -290,13 +268,9 @@ def listschemas(request):
 
     schemas = sorted(
         [
-            (row.schemaname, description.get(row.schemaname, "No description"), row.table_count, row.tag_ids)
+            (row["schema__name"], description.get(row["schema__name"], "No description"), row["tables_count"], tags.get(row["schema__name"], []))
             for row in response
-            if row.schemaname in schema_whitelist
-            and (not searchedQueryString or row.match)
-            and not row.schemaname.startswith("_")
-            #and (not searchedQueryString or searchedQueryString in row.schemaname or list(filter(lambda tableName: tableName and searchedQueryString in tableName, row.tables)))
-            and (not searchedTagIds or set(filter(lambda x: x is not None, row.tag_ids)).issuperset(searchedTagIds))
+            if row["schema__name"] in schema_whitelist
         ],
         key=lambda x: x[0],
     )
@@ -373,34 +347,28 @@ def listtables(request, schema_name):
     for tag_id in searchedTagIds:
         increment_usage_count(tag_id)
 
+    labels = get_readable_table_names(schema_name)
+    filter_kwargs = dict(search=SearchQuery(" & ".join(p+":*" for p in re.findall("[\w]+", searchedQueryString)), search_type="raw")) if searchedQueryString else {}
+
     engine = actions._get_engine()
     conn = engine.connect()
-    labels = get_readable_table_names(schema_name)
-    query_parts = list(re.findall("[\w]+", searchedQueryString))  if searchedQueryString else ""
-    query = (
-        ("SELECT tablename FROM pg_tables left join meta_search AS ms ON ms.table=tablename AND ms.schema = schemaname WHERE schemaname = '{schema}' "
-        "AND pg_has_role('{user}', tableowner, 'MEMBER') AND ('{search}' = '' OR (ms.comment @@ to_tsquery('{search}')));").format(
-            schema=schema_name,
-            user=sec.dbuser,
-            search=" & ".join(p + ":*" for p in query_parts)
-        )
-    )
-    tables = conn.execute(query)
-
+    Session = sessionmaker()
+    session = Session(bind=conn)
+    tags = {r[0]: [dict(id=ident, name=label, color="#" + format(color, "06X")) for ident, label, color in zip(r[1], r[2], r[3])] for r in
+            session.query(TableTags.table_name, array_agg(sqla.distinct(TableTags.tag)), array_agg(sqla.distinct(Tag.name)), array_agg(sqla.distinct(Tag.color))).filter(TableTags.schema_name==schema_name).group_by(TableTags.table_name)}
 
     tables = [
         (
-            table.tablename,
-            labels.get(table.tablename),
-            get_all_tags(schema_name, table.tablename)
+            table.name,
+            labels.get(table.name),
+            tags.get(table.name, [])
         )
-        for table in tables
-        if not table.tablename.startswith("_")
+        for table in Table.objects.filter(schema__name=schema_name, **filter_kwargs)
     ]
 
     # Apply tag filter later on, because I am not smart enough to do it inline.
     tables = [tableEntry for tableEntry in tables
-              if {tag['id'] for tag in tableEntry[2]}.issuperset(searchedTagIds or set())]
+              if {tag["id"] for tag in tableEntry[2]}.issuperset(searchedTagIds or set())]
 
     tables = sorted(tables, key=lambda x: x[0])
     return render(
