@@ -32,17 +32,10 @@ def upgrade():
     conn = op.get_bind()
     meta = sa.MetaData(bind=conn)
     meta.reflect()
-    Session = sessionmaker()
-    session = Session(bind=conn)
-    try:
-        for table in meta.tables.values():
-            update_meta_search(session, table.name, table.schema, insert_only=True)
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+
+    for table in meta.tables.values():
+        update_meta_search(table.name, table.schema)
+
 
 
 def downgrade():

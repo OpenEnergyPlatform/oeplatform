@@ -247,7 +247,7 @@ def listschemas(request):
     conn = engine.connect()
     Session = sessionmaker()
     session = Session(bind=conn)
-    tags = { r[0]: r[1] for r in session.query(TableTags.schema_name, array_agg(TableTags.tag)).group_by(TableTags.schema_name)}
+    tags = {r[0]: set(r[1]) for r in session.query(TableTags.schema_name, array_agg(TableTags.tag)).group_by(TableTags.schema_name)}
 
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
@@ -271,6 +271,7 @@ def listschemas(request):
             (row["schema__name"], description.get(row["schema__name"], "No description"), row["tables_count"], tags.get(row["schema__name"], []))
             for row in response
             if row["schema__name"] in schema_whitelist
+            and tags.get(row["schema__name"], set()).issuperset(searchedTagIds or set())
         ],
         key=lambda x: x[0],
     )
@@ -354,8 +355,11 @@ def listtables(request, schema_name):
     conn = engine.connect()
     Session = sessionmaker()
     session = Session(bind=conn)
-    tags = {r[0]: [dict(id=ident, name=label, color="#" + format(color, "06X")) for ident, label, color in zip(r[1], r[2], r[3])] for r in
-            session.query(TableTags.table_name, array_agg(sqla.distinct(TableTags.tag)), array_agg(sqla.distinct(Tag.name)), array_agg(sqla.distinct(Tag.color))).filter(TableTags.schema_name==schema_name).group_by(TableTags.table_name)}
+    tag_query = session.query(TableTags.table_name, array_agg(sqla.distinct(TableTags.tag)), array_agg(sqla.distinct(Tag.name)), array_agg(sqla.distinct(Tag.color))).filter(
+        TableTags.schema_name==schema_name, TableTags.tag==Tag.id).group_by(TableTags.table_name)
+    tags = {r[0]: [dict(id=ident, name=label, color="#" + format(color, "06X"))
+                   for ident, label, color in zip(r[1], r[2], r[3])]
+            for r in tag_query}
 
     tables = [
         (

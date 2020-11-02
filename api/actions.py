@@ -2071,7 +2071,7 @@ def update_meta_search(table, schema):
     t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
     comment = str(load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
-    tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table)
+    tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)
     s = (" ".join((*re.findall("\w+", schema), *re.findall("\w+", table), *re.findall(u"\w+", comment), *(tag[0] for tag in tags))))
 
     t.search = Func(Value(s), function="to_tsvector")
