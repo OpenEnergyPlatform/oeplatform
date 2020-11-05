@@ -606,7 +606,6 @@ def tag_editor(request, id=""):
             engine = actions._get_engine()
             Session = sessionmaker()
             session = Session(bind=engine)
-
             assigned = (
                 session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
             )
@@ -1133,6 +1132,7 @@ def save_metadata_as_table_comment(schema, table, metadata):
         raise e
     else:
         trans.commit()
+        actions.update_meta_search(table, schema)
     finally:
         conn.close()
 
@@ -1279,6 +1279,7 @@ def add_table_tags(request):
         t = TableTags(**{"schema_name": schema, "table_name": table, "tag": id})
         session.add(t)
     session.commit()
+    actions.update_meta_search(table, schema)
     return redirect(request.META["HTTP_REFERER"])
 
 

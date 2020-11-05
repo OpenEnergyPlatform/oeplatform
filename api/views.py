@@ -264,6 +264,7 @@ class Metadata(APIView):
                 schema=table_obj.schema,
                 table=table_obj.name)
             cursor.execute(sql, (table_obj.comment, ))
+            actions.update_meta_search(table,schema)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
