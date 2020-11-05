@@ -52,14 +52,12 @@ def _resolveStaticTutorials():
                     'html': rTut['html'],
                 })
 
-            return resolvedTutorials
+            return sorted(resolvedTutorials, key=lambda x: x.title)
     except Exception as e:
         print('Static tutorials could not be loaded, error=%s' % e)
         # If we do not have a generated meta.json or we cannot read them, we just do not return any static
         # tutorials. This is completly fine and dynamic tutorials can be used like normal.
         return []
-
-
 
 
 def _resolveDynamicTutorial(evaluatedQs):
