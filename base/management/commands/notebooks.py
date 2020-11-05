@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
         if options["command"] == "build":
             # We need to generate the HTML files from the python notebooks.
-            os.system('jupyter nbconvert examples/**/*.ipynb --output-dir=examples/build --to html --template examples/templates/openenergyplatform.tpl')
+            os.system('jupyter nbconvert examples/**/*.ipynb --output-dir=examples/build --to html --template examples/template/openenergyplatform.tpl')
             # We need to parse the titles from the HTML files to be able to show them within the overview.
 
 
