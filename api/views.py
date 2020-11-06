@@ -29,7 +29,7 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
-from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
+from dataedit.views import load_metadata_from_db
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 import json
