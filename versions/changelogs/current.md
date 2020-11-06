@@ -15,5 +15,8 @@
 * Schema name in data view leads to schema list
 * Improved table highlighting 
 * Remove display limits on tags
+* Re-enable search index for metadata
+* Make search index persistent
+* Update search index on change of metadata or tags
 
 ### Bugs
