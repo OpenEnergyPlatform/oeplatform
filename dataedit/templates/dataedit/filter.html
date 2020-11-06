@@ -36,7 +36,7 @@
         <h5>How to work with Tags and Filter</h6>
         <span class="fa fa-caret-up" data-toggle="collapse" data-target="#howto"></span>
         <div id="howto" class="collapse show foldable-entry-body">
-        
+
         <ul class="list-group">
             <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p> <li class="list-group-item">Tags can be added when viewing a table.</li>
             <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p> <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
@@ -57,6 +57,11 @@
 
 </form>
 
-
+<!-- extending the filter block to add wizard button -->
+<hr>
+<h3><i class="fa fa-hat-wizard"></i> Wizard</h3>
+<a class="btn btn-secondary" href="{% url 'wizard_create' %}" >
+    Create new table
+</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
 
 {% endblock main-right-sidebar-filter %}

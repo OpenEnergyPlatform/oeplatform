@@ -93,9 +93,18 @@
   <h4>Downloads</h4>
   <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download CSV</a>
+    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="btn btn-warning">Download Datapackage</a>
     <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
   </div>
   <hr>
+
+  {% if schema == "model_draft" %}
+  <h4><i class="fa fa-hat-wizard"></i> Wizard</h4>
+  <a class="btn btn-sm btn-success" href="{% url 'wizard_upload' schema=schema table=table %}" >
+      Upload CSV
+  </a>
+  <hr>
+  {% endif %}
 
   <h4>API Usage</h4>
   <textarea
@@ -111,7 +120,12 @@ for row in result.json():
   <hr>
   <h4>
     Meta Information
-  </h4> <a href="{{table}}/meta_edit"> Edit</a>
+  </h4>
+  <div class="btn-group btn-group-sm">
+    <button class="btn btn-success" onclick="downloadMetadata();">Download JSON</button>
+  </div>
+  <hr>
+  <a href="{{table}}/meta_edit"> Edit</a>
   {{ meta_widget }}
 {% endblock main-right-sidebar-content-additional %}
 
@@ -152,6 +166,30 @@ for row in result.json():
           options: JSON5.parse("{{ current_view.options | escapejs }}")
       };
       load_view(schema, table, csrftoken, view);
+
+      var downloadMetadata = function () {
+          var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
+          $.get(metaUrl).then(function(json){
+            console.log(json);
+            // create data url
+            var json = JSON.stringify(json, null, 1);
+            console.log(json);
+            blob = new Blob([json], {type: "application/json"}),
+            dataUrl = URL.createObjectURL(blob);
+            // create link
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            // assign url and click
+            a.style = "display: none";
+            a.href = dataUrl;
+            a.download = '{{ table }}.metadata.json';
+            a.click();
+            // cleanup
+            URL.revokeObjectURL(dataUrl);
+            a.parentNode.removeChild(a);
+          })
+      };
+
   </script>
 {% endblock after-body-bottom-js %}
 

@@ -1,0 +1,303 @@
+{% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
+<link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %} {% block site-header %}
+<h2 class="site-header"><span class="spinner-border text-primary" id="wizard-loading"></span>
+    <i class="fa fa-hat-wizard"></i>Wizard</span>
+</h2>
+{% endblock site-header %} {% block main %}
+
+<!-- inside bootstrap column -->
+<div id="wizard-container">
+    <div class="accordion">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <a href="" data-toggle="collapse" data-target="#wizard-container-create">Create Table</a>
+                </h2>
+            </div>
+            <div id="wizard-container-create" class="collapse" data-parent="#wizard-container">
+                <div class="card-body container-fluid">
+                    <div class="row my-2">
+                        <div class="col">
+                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
+                        </div>
+                    </div>
+
+                    <div class="row wizard-column">
+                        <div class="col-12">
+                            <datalist id="wizard-column-types">
+                                <option value="boolean"></option>
+                                <option value="smallint"></option>
+                                <option value="integer"></option>
+                                <option value="bigint"></option>
+                                <option value="float"></option>
+                                <option value="real"></option>
+                                <option value="date"></option>
+                                <option value="time"></option>
+                                <option value="datetime"></option>
+                                <option value="char(5)"></option>
+                                <option value="varchar(128)"></option>
+                                <option value="text"></option>
+                                <option value="decimal(9, 6)"></option>
+                            </datalist>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>
+                                        </td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
+                                            Column name
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid sql data type for this column">
+                                            Column type
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Allow column values to be empty (NULL)">
+                                            Nullable
+                                        </span></td>
+                                        <td><span class="label help-title" data-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
+                                            Primary key
+                                        </span></td>
+                                    </tr>
+                                    <tr class="wizard-column" id="wizard-column-template">
+                                        <td>
+                                            <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
+                                        </td>
+                                        <td>
+                                            <input class="wizard-column-nullable" type="checkbox" data-toggle="tooltip" title="Allow column values to be empty (NULL)" />
+                                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
+                                        </td>
+
+                                        <td>
+                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
+                                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody id="wizard-columns">
+                                    <!-- placeholder for dynamic items -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row my-2">
+                        <div class="col-4">
+                            <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i> Add column</button>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-2">
+                            <button class="btn btn-success mt-2" id="wizard-table-create"><i class="fa fa-table mr-2"></i>Create table</button>
+                            <button class="btn btn-danger mt-2" id="wizard-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+                        </div>
+                        <div class="col-10 align-self-end">
+                            <div id="wizard-table-create-msg" class="invisible wizard-status">
+                                <span class="spinner spinner-border spinner-border-sm"></span>
+                                <span class="message"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <a href="" data-toggle="collapse" data-target="#wizard-container-upload">Upload CSV</a>
+                    <span id="wizard-title-table"></span>
+                </h2>
+            </div>
+
+            <div id="wizard-container-upload" class="collapse" data-parent="#wizard-container">
+                <div class="card-body container-fluid">
+                    <div class="row my-2">
+                        <h4>Select csv options</h4>
+                    </div>
+
+                    <div class="row align-items-left">
+                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Character encoding of the csv file.">Encoding</span></div>
+                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Field separation character of the csv file.">Delimiter</span></div>
+                        <div class="col-2"><span class="label help-title" data-toggle="tooltip" title="First row of the csv file contains column names.">Header</span></div>
+                    </div>
+
+                    <div class="row my-3">
+                        <div class="col-5">
+                            <select id="wizard-encoding" name="encoding" class="form-control" data-toggle="tooltip" title="Character encoding of the csv file.">
+                                <option value=""></option>
+                                <option value="iso-8859-1">ISO-8859-1</option>
+                                <option value="utf-8">UTF-8</option>
+                            </select>
+                        </div>
+                        <div class="col-5">
+                            <select id="wizard-delimiter" name="delimiter" class="form-control" data-toggle="tooltip" title="Field separation character of the csv file.">
+                                <option value="">(autodetect)</option>
+                                <option value=";">semicolon</option>
+                                <option value=",">comma</option>
+                                <option value="\t">tab</option>
+                                <option value="|">bar</option>
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <input id="wizard-header" type="checkbox" checked data-toggle="tooltip" title="First row of the csv file contains column names." />
+                        </div>
+                    </div>
+
+                    <div class="row my-2">
+                        <h5>
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-csv-example-container">
+                            Show example csv for current configuration
+                            </button>
+                        </h5>
+                    </div>
+
+                    <div class="row collapse my-3" id="wizard-csv-example-container">
+                        <textarea class="form-control mx-3" id="wizard-csv-example" readonly></textarea>
+                    </div>
+
+                    <div class="row my-3">
+                        <h4>Select csv file</h4>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <input id="wizard-file" type="file" class="custom-file-input" />
+                            <label id="wizard-file-label" class="custom-file-label mx-3" for="wizard-file"></label>
+                        </div>
+                    </div>
+
+                    <div class="row my-2">
+                        <h5>
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-csv-text-container">
+                            Show preview
+                        </button>
+                        </h5>
+                    </div>
+
+                    <div class="row collapse" id="wizard-csv-text-container">
+                        <textarea class="form-control mx-3" id="wizard-csv-text" readonly></textarea>
+                    </div>
+
+                    <div class="row my-3">
+                        <h4>Configure column mapping</h4>
+                    </div>
+
+                    <div class="row wizard-csv-column" id="wizard-csv-column-template">
+                        <div class="col-3">
+                            <input type="text" class="form-control wizard-csv-column-name" placeholder="" />
+                        </div>
+                        <div class="col-3">
+                            <select class="form-control wizard-csv-column-name-new"></select>
+                        </div>
+                        <div class="col-3">
+                            <select class="form-control wizard-csv-column-parse"></select>
+                        </div>
+                        <div class="col-3">
+                            <input type="text" class="form-control wizard-null-value" list="wizard-null-values"/>
+                        </div>
+
+                    </div>
+
+                    <div class="row my-3">
+                        <div class="col-3"><span class="label">
+                            Column name (in csv file)
+                        </span></div>
+                        <div class="col-3"><span class="label">
+                            Column name in database
+                        </span></div>
+                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="Modify values in this column before upload">
+                            (optional) Converter
+                        </span></div>
+                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="String that should be interpreted as NULL (missing value)">
+                            (optional) Null value
+                            <datalist id="wizard-null-values">
+                                <option value=""></option>
+                                <option value="-"></option>
+                                <option value="n.a."></option>
+                                <option value="null"></option>
+                                <option value="None"></option>
+                            </datalist>
+                        </span></div>
+                    </div>
+
+                    <div id="wizard-csv-columns">
+                        <!-- placeholder for dynamic items -->
+                    </div>
+
+                    <div class="row my-3">
+                        <h4>Preview and upload</h4>
+                    </div>
+
+                    <div class="row">
+                        <table id="wizard-csv-preview" class="table table-striped">
+                            <thead>
+                                <tr></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="row my-3">
+                        <div class="col-2">
+                            <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</button>
+                            <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i> Cancel</button>
+                        </div>
+                        <div class="col-10 align-self-end">
+                            <div id="wizard-table-upload-msg" class="invisible wizard-status">
+                                <span class="spinner spinner-border spinner-border-sm"></span>
+                                <span class="message"></span>
+                                <span class="progress">
+                                    <span class="progress-bar progress-bar-animated progress-bar-striped"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <!-- go to existing form -->
+                    <a id="editMetadata" href="{% if schema and table %}{% url 'input' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- id="wizard-container" class="container-fluid" -->
+{% endblock main %} {% block after-body-bottom-js %}
+
+<!-- dialog: keep outside of main container -->
+<div id="wizard-confirm-delete" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Do you want to delete the table (including data and metadata)?
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">delete</buttton>
+                <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">cancel</buttton>
+            </div>
+        </div>
+    </di>
+</div>
+
+<script src="/static/wizard/vendor/papaparse-5.0.2/papaparse.min.js"></script>
+<script src="/static/wizard/wizard.js"></script>
+<script>
+    var config = JSON.parse("{{ config|escapejs }}");
+    var wizard = Wizard(config);
+
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+</script>
+{% endblock after-body-bottom-js %}
