@@ -128,7 +128,7 @@ for row in result.json():
   </h4>
   <div class="mb-2">
     <button class="btn btn-sm btn-success" onclick="downloadMetadata();">Download JSON</button>
-    <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm ">Edit</a>
+    <a href="{{table}}/meta_edit" type="button"  class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
   </div>
 
   {{ meta_widget }}
@@ -197,7 +197,6 @@ for row in result.json():
 
   </script>
 {% endblock after-body-bottom-js %}
-
 
 
 
