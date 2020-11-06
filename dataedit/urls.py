@@ -1,12 +1,13 @@
 from django.conf.urls import url
 
 from dataedit import views
+from django.views.generic import RedirectView
 
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
     url(r"^schemas$", views.listschemas, name="index"),
-    url(r"^$", views.overview, name="index"),
+    url(r"^$", RedirectView.as_view(url='/dataedit/schemas')),
     # url(r'^admin/$', views.admin, name='index'),
     url(r"^admin/columns/", views.admin_columns, name="input"),
     url(r"^admin/constraints/", views.admin_constraints, name="input"),
