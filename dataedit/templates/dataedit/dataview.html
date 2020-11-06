@@ -127,7 +127,7 @@ for row in result.json():
     Meta Information
   </h4>
   <div class="mb-2">
-    <button class="btn btn-sm btn-success" onclick="downloadMetadata();">Download JSON</button>
+    <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
     <a href="{{table}}/meta_edit" type="button"  class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
   </div>
 
@@ -197,6 +197,5 @@ for row in result.json():
 
   </script>
 {% endblock after-body-bottom-js %}
-
 
 
