@@ -296,10 +296,6 @@ def listschemas(request):
     )
 
 
-def overview(request):
-    return render(request, "dataedit/dataedit_choices.html", {})
-
-
 def read_label(table, comment):
     """
     Extracts the readable name from @comment and appends the real name in parens.
