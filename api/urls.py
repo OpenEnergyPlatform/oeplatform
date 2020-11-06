@@ -8,7 +8,7 @@ structures = r"table|sequence"
 urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
-        views.Table.as_view(),    
+        views.Table.as_view(),
         name='api_table',
     ),
     url(
@@ -18,6 +18,7 @@ urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
         views.Metadata.as_view(),
+        name='api_table_meta',
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",

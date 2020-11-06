@@ -1,21 +1,40 @@
 {% extends "dataedit/base.html" %}
-
-{% block data_content %}
 {% load static %}
-<script type="text/javascript" src="{% static 'dataedit/metadata.js' %}"></script>
-<link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
-<script type="text/javascript">
+{% load bootstrap4 %}
 
-</script>
+{% block after-head %}
+<link href="/static/metaedit/metaedit.css" rel="stylesheet">
+{% endblock after-head %}
 
-<div>
-    <h4>Metadata</h4>
-    <div class="table table-hover">
-        <form action="" role="form" method="post">{% csrf_token %}
-            {{meta_widget}}
-            <input class="btn btn-success" type="submit" value="Submit" />
+{% block site-header %}
+<h2 class="site-header"><span class="spinner-border text-primary d-none" id="metaedit-loading"></span>
+    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>Metadata</span>
+</h2>
+{% endblock site-header %}
+
+{% block main %}
+<div class="row">
+    <div class="col">
+        <form iv id="metaedit-form">
+            <!-- placeholder -->
         </form>
     </div>
 </div>
+<div class="row d-none" id="metaedit-controls">
+    <div class="col">
+        <button class="btn btn-sm btn-success mr-2" id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>Submit</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">Download</buttton>
+    </div>
+</div>
 
-{% endblock %}
+{% endblock main %}
+
+{% block after-body-bottom-js %}
+    <script src="/static/metaedit/vendor/jsoneditor-2.5.1/jsoneditor.min.js"></script>
+    <script src="/static/metaedit/metaedit.js"></script>
+    <script>
+        var config = JSON.parse("{{ config|escapejs }}");
+        MetaEdit(config);
+    </script>
+{% endblock after-body-bottom-js %}

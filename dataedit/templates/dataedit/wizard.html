@@ -265,7 +265,7 @@
             <div class="card-header">
                 <h2 class="mb-0">
                     <!-- go to existing form -->
-                    <a id="editMetadata" href="{% if schema and table %}{% url 'input' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
+                    <a id="editMetadata" href="{% if schema and table %}{% url 'meta_edit' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
                 </h2>
             </div>
         </div>
