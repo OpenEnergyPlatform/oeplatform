@@ -1,6 +1,5 @@
 ### Features
 
-
 * Reworked meta data editor using jsoneditor and the platform API, fixes #161, #642, #643, #644, #645
 * Add RELEASE_PROCEDURE.md to repository.
 * Added wizard to create/delete tables, upload data from csv file, download metadata as json file [#346](https://github.com/OpenEnergyPlatform/oeplatform/issues/346)
@@ -22,3 +21,5 @@
 * Update search index on change of metadata or tags
 
 ### Bugs
+
+* Fix framework factsheet bugs (#625)

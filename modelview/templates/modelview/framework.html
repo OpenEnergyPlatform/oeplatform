@@ -27,11 +27,11 @@
             {% include 'modelview/model_snippet.html' with model=model field='logo' %}
             <tr>
               <th>
-                Logo
+                Logo:
               </th>
               <td>
                 {% if model.logo %}
-                  <img src="{% static model.logo.url %}" alt="{{ model.logo.url }}"
+                  <img src="{{ model.logo.url }}" alt="{{ model.logo.url }}"
                        style="max-width:30%;max-height:500px;">
                 {% endif %}
               </td>
@@ -148,7 +148,7 @@
               </td>
             </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='auto_model_generator' %}</tr>
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' %}</tr>
+            <tr>{% include 'modelview/model_snippet.html' with model=model field='data_preprocessing' add=model.data_preprocessing_other %}</tr>
             <tr>
               <td class="sheetlabel">
                 Output Data Format
@@ -167,7 +167,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ap_BottomUp,ap_Hybrid,ap_Other,ap_TopDown" %}
+                  {% checklist model "ap_BottomUp,ap_Hybrid,ap_Other=ap_Other,ap_TopDown" %}
                 </table>
               </td>
             </tr>
@@ -236,11 +236,12 @@
                 </table>
               </td>
             </tr>
+            <!-- Seems like the following does not belong in the openness section moree liek mathematical description? 
             {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' %}
             {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
-            {% include 'modelview/model_snippet.html' with model=model field='gui' %}
+            {% include 'modelview/model_snippet.html' with model=model field='gui' %} -->
           </table>
 
         </div>
@@ -273,7 +274,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "Hydro,Solar,Geothermal,Wind,Wave,Biomass,Tidal" %}
+                  {% checklist model "st_hydro,st_battery,st_air,st_hydrogen" %}
                 </table>
               </td>
             </tr>
