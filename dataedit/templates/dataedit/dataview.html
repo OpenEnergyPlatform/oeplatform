@@ -93,7 +93,7 @@
   <h4>Downloads</h4>
   <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download CSV</a>
-    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="btn btn-warning">Download Datapackage</a>    
+    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="btn btn-warning">Download Datapackage</a>
   </div>
   <hr>
 
@@ -195,6 +195,10 @@ for row in result.json():
             a.parentNode.removeChild(a);
           })
       };
+
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
 
   </script>
 {% endblock after-body-bottom-js %}
