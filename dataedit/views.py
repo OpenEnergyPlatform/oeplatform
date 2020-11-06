@@ -20,8 +20,10 @@ from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.urls import reverse
 from django.utils.encoding import smart_str
 from django.views.generic import View
+from django.views.generic.base import TemplateView
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -294,10 +296,6 @@ def listschemas(request):
             "tags": searchedTagIds
         }
     )
-
-
-def overview(request):
-    return render(request, "dataedit/dataedit_choices.html", {})
 
 
 def read_label(table, comment):
@@ -1029,128 +1027,6 @@ class DataView(View):
         )
 
 
-class MetaView(LoginRequiredMixin, View):
-    """
-
-    """
-
-    def get(self, request, schema, table):
-        """
-        Loads the metadata of the passed table and its columns.
-        :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
-        :return: Renders a form that contains a form with the tables metadata
-        """
-
-        metadata = load_metadata_from_db(schema, table)
-
-        meta_widget = MetaDataWidget(metadata)
-
-        context_dict = {
-            "schema": schema,
-            "table": table,
-            "meta_widget": meta_widget.render_editmode(),
-            "comment_on_table": metadata
-        }
-
-        return render(
-            request,
-            "dataedit/meta_edit.html",
-            context=context_dict,
-        )
-
-    def post(self, request, schema, table):
-        """
-        Handles the send event of the form created in the get-method. The
-        metadata is transformed into a JSON-dictionary and stored in the tables
-        comment inside the database.
-        :param request: A HTTP-request object sent by the Django framework
-        :param schema: Name of a schema
-        :param table: Name of a table
-        :return: Redirects to the view of the specified table
-        """
-        columns = actions.analyze_columns(schema, table)
-
-        comment = read_metadata_from_post(request.POST, schema, table)
-        save_metadata_as_table_comment(schema, table, metadata=comment)
-
-        return redirect(
-            "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
-        )
-
-
-    name_pattern = r"[\w\s]*"
-
-    def loadName(self, name):
-        """
-        Checks whether the `name` contains only alphanumeric symbols and whitespaces
-        :param name: A string
-        :return: If the string is valid it is returned. Otherwise an AssertionError is raised.
-        """
-        assert re.match(self.name_pattern, name)
-        return name
-
-    def _load_list(self, request, name):
-
-        pattern = r"%s_(?P<index>\d*)" % name
-        return [
-            request.POST[key].replace("'", "'")
-            for key in request.POST
-            if re.match(pattern, key)
-        ]
-
-    def _load_url_list(self, request, name):
-        pattern = r"%s_name_(?P<index>\d*)" % name
-        return [
-            {
-                "Name": request.POST[key].replace("'", "'"),
-                "URL": request.POST[key.replace("_name_", "_url_")].replace("'", "'"),
-            }
-            for key in request.POST
-            if re.match(pattern, key)
-        ]
-
-    def _load_col_list(self, request, columns):
-        return [
-            {
-                "Name": col["id"],
-                "Description": request.POST["col_" + col["id"] + "_descr"],
-                "Unit": request.POST["col_" + col["id"] + "_unit"],
-            }
-            for col in columns
-        ]
-
-
-def save_metadata_as_table_comment(schema, table, metadata):
-    """Save metadata as comment string on a database table
-    :param schema (string):
-    :param table (string):
-    :param metadata: structured data according to metadata specifications
-    """
-    # TODO: validate metadata!
-    # metadata = validate(metadata)
-
-    engine = actions._get_engine()
-    conn = engine.connect()
-    trans = conn.begin()
-    try:
-        conn.execute(
-            sqla.text(
-                "COMMENT ON TABLE {schema}.{table} IS :comment ;".format(
-                    schema=schema, table=table
-                )
-            ),
-            comment=json.dumps(metadata),
-        )
-    except Exception as e:
-        raise e
-    else:
-        trans.commit()
-    finally:
-        conn.close()
-
-
 class PermissionView(View):
     """ This method handles the GET requests for the main page of data edit.
         Initialises the session data (if necessary)
@@ -1392,4 +1268,146 @@ def increment_usage_count(tag_id):
         session.commit()
     finally:
         session.close()
+
+
+def get_column_description(schema, table):
+    """Return list of column descriptions:
+     [{
+        "name": str,
+        "data_type": str,
+        "is_nullable': bool,
+        "is_pk": bool
+     }]
+
+    """
+
+    def get_datatype_str(column_def):
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128),
+        so we need to combine the various fields (type, numeric_precision, numeric_scale, ...)
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def['data_type'].lower()
+        precisions = None
+        if dt.startswith('character'):
+            if dt == 'character varying':
+                dt = 'varchar'
+            else:
+                dt = 'char'
+            precisions = [column_def['character_maximum_length']]
+        elif dt.endswith(' without time zone'): # this is the default
+            dt =  dt.replace(' without time zone', '')
+        elif re.match('(numeric|decimal)', dt):
+            precisions = [column_def['numeric_precision'], column_def['numeric_scale']]
+        elif dt == 'interval':
+            precisions = [column_def['interval_precision']]
+        elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default') or ''):
+            #dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith('double'):
+            dt = 'float'
+        if precisions:  # remove None
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
+            dt += '(%s)' % ', '.join(str(x) for x in precisions)
+        return dt
+
+    def get_pk_fields(constraints):
+        """Get the column names that make up the primary key from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports single fields primary keys (which is advisable anyways)
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or "")
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(',')]
+        return pk_fields
+
+    _columns = actions.describe_columns(schema, table)
+    _constraints = actions.describe_constraints(schema, table)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):
+        columns.append({
+            'name': name,
+            'data_type': get_datatype_str(col),
+            'is_nullable': col['is_nullable'],
+            'is_pk': name in pk_fields
+        })
+    return columns
+
+
+class WizardView(LoginRequiredMixin, View):
+    """View for the upload wizard (create tables, upload csv).
+    """
+
+    def get(self, request, schema='model_draft', table=None):
+        """Handle GET request (render the page).
+        """
+        engine = actions._get_engine()
+
+        can_add = False
+        columns = None
+        pk_fields = None
+        n_rows = None
+        if table:
+            # get information about the table
+            # if upload: table must exist in schema model_draft
+            if schema != 'model_draft':
+                raise Http404('Can only upload to schema model_draft')
+            if not engine.dialect.has_table(engine, table, schema=schema):
+                raise Http404('Table does not exist')
+            table_obj = Table.load(schema, table)
+            if not request.user.is_anonymous:
+                user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+                level = request.user.get_table_permission_level(table_obj)
+                can_add = level >= login_models.WRITE_PERM
+            columns = get_column_description(schema, table)
+            # get number of rows
+            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)
+            res = actions.perform_sql(sql)
+            n_rows = res['result'].fetchone()[0]
+
+        context = {
+            "config": json.dumps({ # pass as json string
+                "canAdd": can_add,
+                "columns": columns,
+                "schema": schema,
+                "table": table,
+                "nRows": n_rows
+            }),
+            "schema": schema,
+            "table": table
+        }
+
+        return render(request, "dataedit/wizard.html", context=context)
+
+
+class MetaEditView(LoginRequiredMixin, View):
+    """Metadata editor (cliet side json forms)."""
+
+    def get(self, request, schema, table):
+
+        columns = get_column_description(schema, table)
+
+        context_dict = {
+            "config": json.dumps({
+                "schema": schema,
+                "table": table,
+                "columns": columns,
+                "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
+                "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
+            })
+        }
+
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )
 

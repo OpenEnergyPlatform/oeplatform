@@ -1,12 +1,13 @@
 from django.conf.urls import url
 
 from dataedit import views
+from django.views.generic import RedirectView
 
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
     url(r"^schemas$", views.listschemas, name="index"),
-    url(r"^$", views.overview, name="index"),
+    url(r"^$", RedirectView.as_view(url='/dataedit/schemas')),
     # url(r'^admin/$', views.admin, name='index'),
     url(r"^admin/columns/", views.admin_columns, name="input"),
     url(r"^admin/constraints/", views.admin_constraints, name="input"),
@@ -19,7 +20,7 @@ urlpatterns = [
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
         views.DataView.as_view(),
-        name="input",
+        name="view",
     ),
     url(r"^tags/add/$".format(qual=pgsql_qualifier), views.add_table_tags),
     url(
@@ -40,8 +41,8 @@ urlpatterns = [
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/meta_edit$".format(
             qual=pgsql_qualifier
         ),
-        views.MetaView.as_view(),
-        name="input",
+        views.MetaEditView.as_view(),
+        name="meta_edit",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view$".format(
@@ -87,5 +88,15 @@ urlpatterns = [
             qual=pgsql_qualifier
         ),
         views.MapView.as_view()
+    ),
+    url(
+        r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
+        views.WizardView.as_view(),
+        name="wizard_upload",
+    ),
+    url(
+        r"^wizard/$",
+        views.WizardView.as_view(),
+        name="wizard_create",
     ),
 ]
