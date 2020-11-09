@@ -48,7 +48,8 @@ class BasicFactsheet(models.Model):
         help_text="Who is the main contact person?",
         null=True,
     )
-    contact_email = EmailField(
+    contact_email = ArrayField(
+        EmailField(),
         verbose_name="Contact (e-mail)",
         help_text="Please provide the mailadress of the contact person.",
         null=False,
@@ -94,12 +95,13 @@ class BasicFactsheet(models.Model):
     )
     framework_yes_text = CharField(max_length=1000, null=True)
 
-    user_documentation = CharField(
-        max_length=200,
+    user_documentation = ArrayField(
+        CharField(max_length=200),
         verbose_name="Link to User Documentation",
         help_text="Is an user documentation available for the framework? Please insert the link",
         null=True,
     )
+    
     code_documentation = CharField(
         max_length=200,
         verbose_name="Link to Developer/Code Documentation",
@@ -723,7 +725,7 @@ class Energyframework(BasicFactsheet):
     )
     inital_purpose = CharField(verbose_name="Inital purpose", null=True, help_text="What was the initial purpose/task/motivation to start the development?", max_length=1000)
     inital_purpose_change = CharField(verbose_name="Inital purpose change", null=True, help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?", max_length=1000)
-    inital_release_date = DateField(verbose_name="Inital Release Date", null=True, help_text="When [mm-yyyy] was the framework initially released?", max_length=30)
+    inital_release_date = DateField(verbose_name="Inital Release Date", null=True, help_text="When [YYYY-MM-DD] was the framework initially released?", max_length=30)
     research_questions = ArrayField(
         CharField(max_length=1000), verbose_name="Research questions", null=True, help_text="What are 3 typical research questions that are answered by applying the FW?"
     )
@@ -762,7 +764,7 @@ class Energyframework(BasicFactsheet):
     sps_sector_coupling = BooleanField(verbose_name="Sector-coupling ", default=False)
     sps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    last_updated = DateField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated?", null=True)
+    last_updated = DateField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].", null=True)
     version = CharField(verbose_name="Version", max_length=200, help_text="To which version of the framework does the factsheet refer?", null=True)
     #PROGRAMMING FRAMEWORK 
     pf_GAMS = BooleanField(verbose_name="GAMS", default=False)
@@ -810,6 +812,7 @@ class Energyframework(BasicFactsheet):
 
     auto_model_generator = BooleanField(verbose_name="Auto model generator", help_text="Is an auto-Model generator available that transfers an input file into a Model?", default=False)
     data_preprocessing = BooleanField(verbose_name="data preprocessing", help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available", default=False)
+    data_preprocessing_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
     data_postprocessing = BooleanField(verbose_name="data postprocessing",
                                        help_text="Which output format(s) can the framework apply? Please list!",
                                        default=False)
@@ -819,7 +822,7 @@ class Energyframework(BasicFactsheet):
     ap_TopDown = BooleanField(verbose_name="Top Down", default=False)
     ap_BottomUp = BooleanField(verbose_name="Bottom up", default=False)
     ap_Hybrid = BooleanField(verbose_name="Hybrid", default=False)
-    ap_Other = BooleanField(verbose_name="Other", default=False)
+    ap_Other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
     interfaces = CharField(verbose_name="interfaces", max_length=200, help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ", null=True)
 

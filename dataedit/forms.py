@@ -1,8 +1,9 @@
 from django import forms
 from django.db import models
 from django.forms import ModelForm
-
+from django.forms import Form
 from dataedit.models import Tag, View
+
 
 # This structure maps postgresql data types to django forms
 typemap = [
