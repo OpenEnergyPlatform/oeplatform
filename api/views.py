@@ -20,6 +20,9 @@ from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.exceptions import ParseError
+from django.core.validators import validate_image_file_extension
+from django.core.files.storage import FileSystemStorage
 
 import api.parser
 import login.models as login_models
@@ -29,9 +32,12 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
 from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
+from api.models import UploadedImages
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 import json
+
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 
 logger = logging.getLogger("oeplatform")
 
@@ -1011,3 +1017,36 @@ def get_groups(request):
         Q(name__trigram_similar=string) | Q(name__istartswith=string)
     )
     return JsonResponse([user.name for user in users], safe=False)
+
+
+class ImageUpload(APIView):
+    """
+    Image File upload view handel post requests to "v0/image/upload".
+
+    :param
+    :return Response contains path to image.
+    """
+    parser_classes = (MultiPartParser,)
+
+    # TODO: PUT might be better in this case?
+    def post(self, request):
+        if request.method == "POST":
+
+            f = request.data['image']
+            # attempt to validate image format
+            try:
+                from PIL import Image
+
+                img = Image.open(f)
+                img.verify()
+
+                upload = UploadedImages(image=f)
+                upload.save()
+                # relative path
+                img_rel_url = upload.image.url
+                process_url = img_rel_url.strip("/")
+
+                return JsonResponse({"data": {"filePath": process_url}})
+
+            except:
+                raise ParseError("Unsupported image type")
