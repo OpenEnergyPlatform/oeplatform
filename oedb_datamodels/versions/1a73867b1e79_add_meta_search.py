@@ -11,6 +11,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm.session import sessionmaker
 
 from api.actions import update_meta_search
+from dataedit.views import schema_whitelist
 
 # revision identifiers, used by Alembic.
 revision = "1a73867b1e79"
@@ -32,17 +33,11 @@ def upgrade():
     conn = op.get_bind()
     meta = sa.MetaData(bind=conn)
     meta.reflect()
-    Session = sessionmaker()
-    session = Session(bind=conn)
-    try:
-        for table in meta.tables.values():
-            update_meta_search(session, table.name, table.schema, insert_only=True)
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+
+    for table in meta.tables.values():
+        if table.schema in schema_whitelist:
+            update_meta_search(table.name, table.schema)
+
 
 
 def downgrade():

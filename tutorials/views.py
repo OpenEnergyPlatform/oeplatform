@@ -214,7 +214,11 @@ def formattedMarkdown(markdown):
     :return:
     """
 
-    markdowner = Markdown(safe_mode="escape")
+    # escapes html but also escapes html code blocks lke "exampel code:
+    #                                                    (1 tab)  code"
+    # checkbox also not rendered as expected "- [ ]"
+    markdowner = Markdown(safe_mode=True)
+    markdowner.html_removed_text = ""
 
     return markdowner.convert(markdown)
 

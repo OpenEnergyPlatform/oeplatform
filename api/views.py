@@ -5,6 +5,7 @@ import logging
 import re
 import time
 import psycopg2
+import zipstream
 
 from decimal import Decimal
 
@@ -17,7 +18,7 @@ from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpRespon
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from omi.dialects.oep.compiler import JSONCompiler
-from omi.dialects.oep.parser import JSONParser_1_4 as OmiParser
+from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
@@ -30,9 +31,9 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from dataedit.models import Table as DBTable
-from dataedit.views import load_metadata_from_db, save_metadata_as_table_comment
 from api.models import UploadedImages
+from dataedit.models import Table as DBTable
+from dataedit.views import load_metadata_from_db
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 import json
@@ -269,6 +270,7 @@ class Metadata(APIView):
                 schema=table_obj.schema,
                 table=table_obj.name)
             cursor.execute(sql, (table_obj.comment, ))
+            actions.update_meta_search(table,schema)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -622,7 +624,6 @@ class Rows(APIView):
         if format == "csv":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
-
             response = OEPStream(
                 (
                     writer.writerow(x)
@@ -637,7 +638,33 @@ class Rows(APIView):
                 schema=schema, table=table
             )
             return response
-
+        elif format == "datapackage":
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
+            zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+            csv_name = "{schema}__{table}.csv".format(
+                schema=schema, table=table
+            )
+            zf.write_iter(csv_name, (
+                writer.writerow(x).encode("utf-8")
+                for x in itertools.chain([cols], return_obj["data"])
+            ))
+            table_obj = actions._get_table(schema=schema, table=table)
+            if table_obj.comment:
+                zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
+            else:
+                zf.writestr("datapackage.json", json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"))
+            response = OEPStream(
+                (chunk for chunk in zf),
+                content_type="application/zip",
+                session=session,
+            )
+            response[
+                "Content-Disposition"
+            ] = 'attachment; filename="{schema}__{table}.zip"'.format(
+                schema=schema, table=table
+            )
+            return response
         else:
             if row_id:
                 dict_list = [dict(zip(cols, row)) for row in return_obj["data"]]
