@@ -48,11 +48,11 @@ def _resolveStaticTutorials():
                 resolvedTutorials.append({
                     'id': tutorial['id'],
                     'fileName': tutorial['fileName'],
-                    'title': tutorial['title'],
+                    'title': tutorial['title'] or tutorial['fileName'],
                     'html': rTut['html'],
                 })
 
-            return sorted(resolvedTutorials, key=lambda x: x.title)
+            return sorted(resolvedTutorials, key=lambda x: x["title"])
     except Exception as e:
         print('Static tutorials could not be loaded, error=%s' % e)
         # If we do not have a generated meta.json or we cannot read them, we just do not return any static
