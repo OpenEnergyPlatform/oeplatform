@@ -84,7 +84,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
-ONTOLOGY_FOLDER = "/tmp"
+try:
+    ONTOLOGY_FOLDER
+except NameError:
+    ONTOLOGY_FOLDER = "/tmp"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
