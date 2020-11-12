@@ -142,13 +142,16 @@ def load_metadata_from_db(schema, table):
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        metadata["fields"] = metadata["resources"][0]["fields"]
-
+                        res = metadata.get("resources", [])
+                        if res:
+                            metadata["fields"] = res[0].get("fields", [])
                     elif version[1] == 4:
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        metadata["fields"] = metadata["resources"][0]["schema"]["fields"]
+                        res = metadata.get("resources", [])
+                        if res:
+                            metadata["fields"] = res[0].get("schema",{}).get("fields", [])
                 elif version[0] == 0:
                     metadata = __LATEST.from_v0(metadata, schema, table)
             else:
