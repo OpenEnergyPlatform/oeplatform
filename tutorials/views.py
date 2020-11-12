@@ -40,7 +40,7 @@ def _resolveStaticTutorials():
     # Load list of static tutorials
 
     try:
-        with open(os.path.join(os.getcwd(), "examples", "build", 'meta.json'), 'r') as metaFile:
+        with open(os.path.join(settings.BASE_DIR, "examples", "build", 'meta.json'), 'r') as metaFile:
             metaContent = json.load(metaFile)
 
             for tutorial in metaContent:
