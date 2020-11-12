@@ -119,6 +119,10 @@ def load_metadata_from_db(schema, table):
     :return:
     """
     metadata = actions.get_comment_table(schema, table)
+    metadata = parse_meta_data(metadata, schema, table)
+    return metadata
+
+def parse_meta_data(metadata, schema, table):
     if "error" in metadata:
         return metadata
     if not metadata:
@@ -142,16 +146,13 @@ def load_metadata_from_db(schema, table):
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        res = metadata.get("resources", [])
-                        if res:
-                            metadata["fields"] = res[0].get("fields", [])
+                        metadata["fields"] = metadata["resources"][0]["fields"]
+
                     elif version[1] == 4:
                         # This is not part of the actual metadata-schema. We move the fields to
                         # a higher level in order to avoid fetching the first resource in the
                         # templates.
-                        res = metadata.get("resources", [])
-                        if res:
-                            metadata["fields"] = res[0].get("schema",{}).get("fields", [])
+                        metadata["fields"] = metadata["resources"][0]["schema"]["fields"]
                 elif version[0] == 0:
                     metadata = __LATEST.from_v0(metadata, schema, table)
             else:
