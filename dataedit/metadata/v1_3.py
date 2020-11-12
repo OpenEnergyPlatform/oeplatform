@@ -65,7 +65,11 @@ TEMPLATE_v1_3 = {
 
 def from_v1_2(comment_on_table):
     if comment_on_table.get("spatial", False):
-        comment_on_table["spatial"] = comment_on_table["spatial"][0]
+        s = comment_on_table.get("spatial")
+        if isinstance(s, dict):
+           comment_on_table["spatial"] = s
+        else:
+           comment_on_table["spatial"] = s[0] if s else None
     else:
         comment_on_table["spatial"] = (
             {"location": "", "extent": "", "resolution": ""},
@@ -99,7 +103,7 @@ def from_v1_2(comment_on_table):
         comment_on_table["resources"][i] = {
             "name": "",
             "format": "PostgreSQL",
-            "fields": comment_on_table["resources"][i]["schema"]["fields"],
+            "fields": comment_on_table["resources"][i]["schema"].get("fields", []),
         }
 
     comment_on_table["metadata_version"] = "1.3"
