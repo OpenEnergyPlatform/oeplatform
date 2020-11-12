@@ -424,8 +424,8 @@ class Table(APIView):
         actions.table_create(
             schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
-        schema_object = DBSchema.objects.get_or_create(name=schema)
-        table_object = DBTable.objects.get_or_create(name=table, schema=schema_object)
+        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
+        table_object, _ = DBTable.objects.get_or_create(name=table, schema=schema_object)
         table_object.save()
 
     @api_exception
