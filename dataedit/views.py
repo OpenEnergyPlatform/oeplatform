@@ -941,8 +941,10 @@ class DataView(View):
         display_items = api_changes.get("display_items")
 
         is_admin = False
+        can_write = False
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
+            can_write = request.user.has_write_permissions(schema, table)
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
@@ -978,6 +980,7 @@ class DataView(View):
             "filter": current_view.filter.all(),
             "current_view": current_view,
             "is_admin": is_admin,
+            "can_add": can_write,
             "host": request.get_host(),
         }
 
