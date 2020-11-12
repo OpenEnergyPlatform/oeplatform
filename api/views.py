@@ -28,7 +28,7 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from dataedit.models import Table as DBTable
+from dataedit.models import Table as DBTable, Schema as DBSchema
 from dataedit.views import load_metadata_from_db
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
@@ -424,6 +424,9 @@ class Table(APIView):
         actions.table_create(
             schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
+        schema_object = DBSchema.objects.get_or_create(name=schema)
+        table_object = DBTable.objects.get_or_create(name=table, schema=schema_object)
+        table_object.save()
 
     @api_exception
     @require_delete_permission
