@@ -941,8 +941,12 @@ class DataView(View):
         display_items = api_changes.get("display_items")
 
         is_admin = False
+        can_add = False # can upload data
+        table_obj = Table.load(schema, table)
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
+            level = request.user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
 
         table_views = DBView.objects.filter(table=table).filter(schema=schema)
 
@@ -978,6 +982,7 @@ class DataView(View):
             "filter": current_view.filter.all(),
             "current_view": current_view,
             "is_admin": is_admin,
+            "can_add": can_add,
             "host": request.get_host(),
         }
 
@@ -1372,7 +1377,8 @@ class WizardView(LoginRequiredMixin, View):
                 "nRows": n_rows
             }),
             "schema": schema,
-            "table": table
+            "table": table,
+            "can_add": can_add
         }
 
         return render(request, "dataedit/wizard.html", context=context)
@@ -1385,6 +1391,12 @@ class MetaEditView(LoginRequiredMixin, View):
 
         columns = get_column_description(schema, table)
 
+        can_add = False
+        table_obj = Table.load(schema, table)
+        if not request.user.is_anonymous:
+            level = request.user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
+
         context_dict = {
             "config": json.dumps({
                 "schema": schema,
@@ -1392,7 +1404,8 @@ class MetaEditView(LoginRequiredMixin, View):
                 "columns": columns,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
-            })
+            }),
+            "can_add": can_add
         }
 
         return render(

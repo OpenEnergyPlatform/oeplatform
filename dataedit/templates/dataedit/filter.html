@@ -43,6 +43,7 @@
             <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Find data resources:</p> <li class="list-group-item"> Use the Filters on Tags or try searching for strings that occur in table names. You can combine text and Tags filters to get more precise results. If you filter for multiple Tags, only tables containing all filtered Tags will be displayed. </li>
         </ul>
     </div>
+    </div>
 
     <!-- <div class="foldable-entry">
         <div class="list-group">
@@ -59,9 +60,8 @@
 
 <!-- extending the filter block to add wizard button -->
 <hr>
-<h3><i class="fa fa-hat-wizard"></i> Wizard</h3>
-<a class="btn btn-secondary" href="{% url 'wizard_create' %}" >
+<h3>Create Table</h3>
+<a class="btn btn-success" href="{% url 'wizard_create' %}" >
     Create new table
 </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
-
 {% endblock main-right-sidebar-filter %}

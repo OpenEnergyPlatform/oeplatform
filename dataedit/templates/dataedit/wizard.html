@@ -244,7 +244,9 @@
 
                     <div class="row my-3">
                         <div class="col-2">
-                            <button class="btn btn-primary" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</button>
+                            <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+                                <a href="#wizard-table-upload" class="btn btn-primary {% if not can_add %} disabled {% endif %}" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
+                            </span>
                             <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i> Cancel</button>
                         </div>
                         <div class="col-10 align-self-end">

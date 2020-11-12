@@ -680,8 +680,6 @@ var Wizard = function(config) {
         $("#wizard-container-create").find("input").prop("readonly", true);
         $("#wizard-container-create").find("input,select,.combobox-container").not("[type=text]").prop("disabled", true);
         if (!state.canAdd) {
-            setStatusUpload("danger", false, "You have no permission to upload to this table");
-            $("#wizard-container-upload").find(".btn").hide();
             $("#wizard-container-upload").find("input").prop("readonly", true);
             $("#wizard-container-upload").find("input,select,.combobox-container").not("[type=text]").prop("disabled", true);
         }
