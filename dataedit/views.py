@@ -422,72 +422,9 @@ def _type_json(json_obj):
 
 pending_dumps = {}
 
-
 class RevisionView(View):
     def get(self, request, schema, table):
-        revisions = TableRevision.objects.filter(schema=schema, table=table)
-        pending = [
-            (schema, table, date)
-            for (schema, table, date) in pending_dumps
-            if schema == schema and table == table
-        ]
-        return render(
-            request,
-            "dataedit/dataedit_revision.html",
-            {
-                "schema": schema,
-                "table": table,
-                "revisions": revisions,
-                "pending": pending,
-            },
-        )
-
-    def post(self, request, schema, table, date=None):
-        """
-        This method handles an ajax request for a data revision of a specific table.
-        On success the TableRevision-object will be stored to mark that the corresponding
-        revision is available.
-
-        :param request:
-        :param schema:
-        :param table:
-        :param date:
-        :return:
-        """
-
-        # date = time.strftime('%Y-%m-%d %H:%M:%S')
-        # fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
-
-        date = time.strftime("%Y-%m-%d %H:%M:%S")
-        # fname = time.strftime(schema+'_' + table + '%Y%m%d_%H%M%S', time.gmtime())
-
-        fname = "20170814_000000"
-
-        original = True  # marks whether this method initialised the revision creation
-
-        # If some user already requested this dataset wait for this thread to finish
-        if (schema, table, date) in pending_dumps:
-            t = pending_dumps[(schema, table, date)]
-            original = False
-        else:
-            t = threading.Thread(target=create_dump, args=(schema, table, fname))
-            t.start()
-            pending_dumps[(schema, table, date)] = t
-
-        while t.is_alive():
-            time.sleep(10)
-
-        pending_dumps.pop((schema, table, date))
-        if original:
-            path = "/dumps/{schema}/{table}/{fname}.dump".format(
-                fname=fname, schema=schema, table=table
-            )
-            size = os.path.getsize(sec.MEDIA_ROOT + path)
-            rev = TableRevision(
-                schema=schema, table=table, date=date, path="/media" + path, size=size
-            )
-            rev.save()
-        return JsonResponse({})
+        return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
 def get_dependencies(schema, table, found=None):
