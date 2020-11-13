@@ -302,9 +302,17 @@ def read_label(table, comment):
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        return (
-            json.loads(comment.replace("\n", ""))["Name"].strip() + " (" + table + ")"
-        )
+        if comment.get("Name") is not None:
+            return (
+                json.loads(comment.replace("\n", ""))["Name"].strip() + " (" + table + ")"
+            )
+        elif comment.get("Title") is None:
+            return (
+                    json.loads(comment.replace("\n", ""))["Title"].strip() + " (" + table + ")"
+            )
+        else:
+            return None
+
     except Exception as e:
         return None
 
@@ -322,7 +330,7 @@ def get_readable_table_names(schema):
     conn = engine.connect()
     try:
         res = conn.execute(
-            "SELECT table_name as TABLE, obj_description((('\"{table_schema}\".\"' || table_name || '\"' ))::regclass) as COMMENT "
+            "SELECT table_name as TABLE"
             "FROM information_schema.tables where table_schema='{table_schema}';".format(
                 table_schema=schema
             )
@@ -332,8 +340,7 @@ def get_readable_table_names(schema):
         return {}
     finally:
         conn.close()
-    return {table: read_label(table, comment) for (table, comment) in res}
-
+    return {table: read_label(table, load_metadata_from_db(schema, table)) for table in res}
 
 def listtables(request, schema_name):
     """
