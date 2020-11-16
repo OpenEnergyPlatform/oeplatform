@@ -31,7 +31,7 @@ data sources.
 App: dataedit
 *************
 
-One aim ot the OpenEnergyPlatform is the visual and understandable presentation
+One aim of the OpenEnergyPlatform is the visual and understandable presentation
 of such datasets. The underlying OpenEnergyDatabase (OEDB) stores datasets of different
 open-data projects. The visual presentation is implemented in the **dataedit** app.
 
@@ -53,6 +53,7 @@ the **api** app:
 
    api
    api/how_to
+   api/advanced
 
 
 App: modelview
