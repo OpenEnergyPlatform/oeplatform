@@ -54,6 +54,7 @@ the **api** app:
    api
    api/how_to
    api/advanced
+   errors
 
 
 App: modelview
