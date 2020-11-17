@@ -83,17 +83,17 @@ function request_data(data, callback, settings) {
         }
     });
     select_query["fields"] = [];
-    for(var i in table_info.columns){
+    for (var i in table_info.columns) {
         var col = table_info.columns[i];
         var query = {
             type: "column",
             column: col
         };
-        if(col == "geom"){
+        if (col == "geom") {
             query = {
                 type: "label",
                 label: "geom",
-                element :{
+                element: {
                     type: "function",
                     function: "ST_Transform",
                     operands: [
@@ -107,7 +107,7 @@ function request_data(data, callback, settings) {
     }
     select_query.offset = data.start;
     select_query.limit = data.length;
-    if(where !== null){
+    if (where !== null) {
         select_query.where = where;
     }
     var draw = Number(data.draw);
@@ -131,13 +131,13 @@ function request_data(data, callback, settings) {
         })
     ).done(function (count_response, select_response) {
         $("#loading-indicator").hide();
-        if(map !== undefined) {
+        if (map !== undefined) {
             build_map(select_response[0].data, select_response[0].description)
         }
 
-        if(view.type === "map") {
+        if (view.type === "map") {
             build_map(select_response[0].data, select_response[0].description);
-        } else if(view.type === "graph") {
+        } else if (view.type === "graph") {
             build_graph(select_response[0].data);
         }
         callback({
@@ -149,9 +149,9 @@ function request_data(data, callback, settings) {
     }).fail(fail_handler);
 }
 
-function build_map(data, description){
+function build_map(data, description) {
     map.eachLayer(function (layer) {
-        if(layer !== tile_layer){map.removeLayer(layer)}
+        if (layer !== tile_layer) { map.removeLayer(layer) }
     });
     var geo_columns = get_selected_geo_columns();
     var col_idxs = description.reduce(function (l, r, i) {
@@ -164,7 +164,7 @@ function build_map(data, description){
     for (var row_id in data) {
         var row = data[row_id];
         var geo_values = col_idxs.map(function (i) {
-            if(row[i] !== null) {
+            if (row[i] !== null) {
                 var buf = new buffer.Buffer(row[i], "hex");
                 var wkb = wkx.Geometry.parse(buf);
                 var gj = L.geoJSON(wkb.toGeoJSON());
@@ -179,10 +179,10 @@ function build_map(data, description){
     map.fitBounds(b);
 }
 
-function get_selected_geo_columns(){
-    if(view.options.hasOwnProperty("geom")){
+function get_selected_geo_columns() {
+    if (view.options.hasOwnProperty("geom")) {
         return [view.options.geom];
-    } else if (view.options.hasOwnProperty("lat") && view.options.hasOwnProperty("lon")){
+    } else if (view.options.hasOwnProperty("lat") && view.options.hasOwnProperty("lon")) {
         return [view.options.lat, view.options.lon];
     }
     else {
@@ -190,7 +190,7 @@ function get_selected_geo_columns(){
     }
 }
 
-function build_graph(data){
+function build_graph(data) {
     // Get the div for the graph
     var plotly_div = $("#datagraph")[0];
 
@@ -203,10 +203,11 @@ function build_graph(data){
     var y_id = table_info.columns.indexOf(y);
 
     // Extract data from query results
-    var points = data.reduce(function(accumulator, row){
+    var points = data.reduce(function (accumulator, row) {
         accumulator[0].push(row[x_id]);
         accumulator[1].push(row[y_id]);
-        return accumulator}, [[],[]]);
+        return accumulator
+    }, [[], []]);
 
     // Remove possible older plots
     Plotly.purge(plotly_div);
@@ -215,30 +216,30 @@ function build_graph(data){
     Plotly.plot(
         plotly_div,
         [{
-          x: points[0],
-          y: points[1]
+            x: points[0],
+            y: points[1]
         }],
         {
-          margin: {t: 0},
-          xaxis: {
-            title: {text: x}
-          },
-          yaxis: {
-            title: {text: y}
-          }
+            margin: { t: 0 },
+            xaxis: {
+                title: { text: x }
+            },
+            yaxis: {
+                title: { text: y }
+            }
         }
     );
 }
 
-function flash_handler(i){
-    return function (){
+function flash_handler(i) {
+    return function () {
         var tr = table_container.row(i).node();
         $(tr).fadeOut(50).fadeIn(50);
     };
 }
 
 
-function load_graph(schema, table, csrftoken){
+function load_graph(schema, table, csrftoken) {
 
 }
 
@@ -262,8 +263,7 @@ function load_view(schema, table, csrftoken, current_view) {
     $.when(
         $.ajax({
             url: '/api/v0/schema/' + schema + '/tables/' + table + '/columns',
-        }),
-        $.ajax({
+        }), $.ajax({
             type: 'POST',
             url: '/api/v0/advanced/search',
             dataType: 'json',
@@ -271,56 +271,34 @@ function load_view(schema, table, csrftoken, current_view) {
                 csrfmiddlewaretoken: csrftoken,
                 query: JSON.stringify(count_query)
             }
-        }),
-        $.ajax({ // get metadata for column description / units
-            url: '/api/v0/schema/' + schema + '/tables/' + table + '/meta'
         })
-    ).done(function (column_response, count_response, meta) {
-        var columnDescription = {}; // name -> description
-        try {
-            meta[0]['resources'][0]['schema']['fields'].map(function(fld){
-                columnDescription[fld.name] = fld.description || "";
-                if (fld.unit) {
-                    if (columnDescription[fld.name]) {
-                        columnDescription[fld.name] += '<hr>'
-                    }
-                    columnDescription[fld.name] += 'Unit: ' + fld.unit
-                }
-            });
-        } catch(err){
-            // metadata for ['resources'][0]['schema']['fields'] missing
-            // do nothing, there will be no popovers
-        }
-        for (var colname in column_response[0]){
-            // add description popover
-            var popover = columnDescription[colname];
-            if (popover) {
-                popover = 'title="' + colname + '" data-content="' + popover + '" data-toggle="popover" data-html="true"';
-            }
-            var str = '<th ' + popover + '>' + colname + '</th>';
-            $(str).appendTo('#datatable' + '>thead>tr')
-            .popover({ trigger: "hover", placement: "left"}); // activate popover
+    ).done(function (column_response, count_response) {
+
+
+        for (var colname in column_response[0]) {
+            var str = '<th>' + colname + '</th>';
+            $(str).appendTo('#datatable' + '>thead>tr');
             table_info.columns.push(colname);
             var dt = column_response[0][colname]["data_type"];
             var mapped_dt;
-            if(dt in type_maps) {
+            if (dt in type_maps) {
                 mapped_dt = type_maps[dt];
             } else {
-                if(valid_types.includes(dt)) {
+                if (valid_types.includes(dt)) {
                     mapped_dt = dt;
                 } else {
                     mapped_dt = "string";
                 }
             }
-            filters.push({id: colname, type: mapped_dt});
+            filters.push({ id: colname, type: mapped_dt });
         }
-        if(view.type === "map"){
+        if (view.type === "map") {
             map = L.map('map');
             tile_layer = L.tileLayer(
                 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    'attribution':  'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
-                    'useCache': true
-                }
+                'attribution': 'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende',
+                'useCache': true
+            }
             );
             tile_layer.addTo(map);
         }
@@ -338,19 +316,115 @@ function load_view(schema, table, csrftoken, current_view) {
             filters: filters
         });
         $('#btn-set').on('click', apply_filters);
+        $('#btn-download-view').on('click', parse_download);
 
     }).fail(fail_handler)
 }
-
-function apply_filters(){
+// uses the basic api.
+/* 
+function parse_download(){
+    var url = '/api/v0/schema/' + schema + '/tables/' + table + '/rows/'
     var rules = $('#builder').queryBuilder('getRules');
-    if(rules !== null) {
+    if(rules == null) {
+        window.alert("No Filters applied");
+        return;
+    }
+    where = parse_filter(rules);
+
+    if(where.operator == "or") {
+        var mids = 0;
+        var operands = where.operands;
+        var enrichment = "";
+        operands.forEach( operand => {
+            var firstFlag = false;
+            operand.operands.forEach( participant => {
+                if(participant.constructor == Object){
+                    enrichment += participant.column;
+                    firstFlag = true;
+                }
+                if(participant.constructor == String && firstFlag) enrichment += operand.operator + participant; 
+            });
+            if(enrichment.length !== 0 && mids != operands.length - 1) { enrichment += '||'; mids += 1;}
+        });
+            url += '?where=' + enrichment + '&form=csv';
+    }
+    else if(where.operator == "and") {
+        var mids = 0;
+        var operands = where.operands;
+        var enrichment = "";
+        operands.forEach( operand => {
+            var firstFlag = false;
+            operand.operands.forEach( participant => {
+                if(participant.constructor == Object){
+                    enrichment += participant.column;
+                    firstFlag = true;
+                }
+                if(participant.constructor == String && firstFlag) enrichment += operand.operator + participant; 
+            });
+            if(enrichment.length !== 0 && mids != operands.length - 1) { enrichment += '&'; mids += 1;}
+        });
+        url += '?where=' + enrichment + '&form=csv';
+    }
+    downloadFile(url);
+
+}
+*/
+
+function parse_download() {
+    var base_query = {
+        "fields": [
+        ],
+        "from": {
+            "type": "table",
+            "schema": schema,
+            "table": table
+        }
+    };
+    var rules = $('#builder').queryBuilder('getRules');
+    if (rules == null) {
+        window.alert("Please check for invalid Rules");
+        return;
+    }
+    base_query.where = parse_filter(rules);
+    $.ajax({
+        type: 'POST',
+        url: '/api/v0/advanced/search',
+        dataType: 'json',
+        data: {
+            csrfmiddlewaretoken: csrftoken,
+            query: JSON.stringify(base_query)
+        }
+    }).done((response) => {
+        var regex = new RegExp(/\[|\]/, "gmi");
+        var temp = [];
+        var head = [];
+        response.content.description.forEach(col_id => {
+            head.push(col_id[0]);
+        });
+        temp.push(JSON.stringify(head).replace(regex, ''));
+        temp.push("\n");
+        response.data.forEach(element => {
+            temp.push(JSON.stringify(element).replace(regex, ''));
+            temp.push("\n");
+        });
+        var responseBlob = new Blob(temp);
+        var tempElement = document.createElement('a');
+        tempElement.href = window.URL.createObjectURL(responseBlob);
+        tempElement.download = 'Partial_' + schema + '_' + table + '.csv';
+        tempElement.click();
+        tempElement.remove();
+    });
+}
+
+function apply_filters() {
+    var rules = $('#builder').queryBuilder('getRules');
+    if (rules !== null) {
         where = parse_filter(rules);
         table_container.ajax.reload();
     }
 }
 
-function parse_filter(f){
+function parse_filter(f) {
     return {
         type: "operator",
         operator: f.condition.toLowerCase(),
@@ -358,7 +432,7 @@ function parse_filter(f){
     }
 }
 
-function negate(q){
+function negate(q) {
     return {
         type: "operator",
         operator: "not",
@@ -366,55 +440,55 @@ function negate(q){
     }
 }
 
-function parse_rule(r){
-    switch(r.operator) {
+function parse_rule(r) {
+    switch (r.operator) {
         case "equal":
             return {
                 type: "operator",
                 operator: "=",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "not_equal":
             return negate({
                 type: "operator",
                 operator: "=",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             });
         case "in":
             return {
                 type: "operator",
                 operator: "in",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "not_in":
             return negate({
                 type: "operator",
                 operator: "in",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             });
         case "less":
             return {
                 type: "operator",
                 operator: "<",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "less_or_equal":
             return {
                 type: "operator",
                 operator: "<=",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "greater":
             return {
                 type: "operator",
                 operator: ">",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "greater_or_equal":
             return {
                 type: "operator",
                 operator: ">=",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "between":
             return {
@@ -425,12 +499,12 @@ function parse_rule(r){
                         {
                             type: "operator",
                             operator: "<",
-                            operands: [r.value[0], {type:"column", column: r.field}]
+                            operands: [r.value[0], { type: "column", column: r.field }]
                         }, {
                             type: "operator",
                             operator: "<",
-                            operands: [{type:"column", column: r.field}, r.value[1]]
-                    }]
+                            operands: [{ type: "column", column: r.field }, r.value[1]]
+                        }]
             };
         case "not_between":
             return negate({
@@ -441,72 +515,72 @@ function parse_rule(r){
                         {
                             type: "operator",
                             operator: "<",
-                            operands: [r.value[0], {type:"column", column: r.field}]
+                            operands: [r.value[0], { type: "column", column: r.field }]
                         }, {
                             type: "operator",
                             operator: "<",
-                            operands: [{type:"column", column: r.field}, r.value[1]]
-                    }]
+                            operands: [{ type: "column", column: r.field }, r.value[1]]
+                        }]
             });
         case "begins_with":
             return {
                 type: "operator",
                 operator: "like",
-                operands: [{type:"column", column: r.field}, r.value+"%"]
+                operands: [{ type: "column", column: r.field }, r.value + "%"]
             };
         case "not_begins_with":
             return negate({
                 type: "operator",
                 operator: "like",
-                operands: [{type:"column", column: r.field}, r.value+"%"]
+                operands: [{ type: "column", column: r.field }, r.value + "%"]
             });
         case "contains":
             return {
                 type: "operator",
                 operator: "in",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             };
         case "not_contains":
             return negate({
                 type: "operator",
                 operator: "in",
-                operands: [{type:"column", column: r.field}, r.value]
+                operands: [{ type: "column", column: r.field }, r.value]
             });
         case "ends_with":
             return {
                 type: "operator",
                 operator: "like",
-                operands: [{type:"column", column: r.field}, "%"+r.value]
+                operands: [{ type: "column", column: r.field }, "%" + r.value]
             };
         case "not_ends_with":
             return negate({
                 type: "operator",
                 operator: "like",
-                operands: [{type:"column", column: r.field}, "%"+r.value]
+                operands: [{ type: "column", column: r.field }, "%" + r.value]
             });
         case "is_empty":
             return {
                 type: "operator",
                 operator: "=",
-                operands: [{type:"column", column: r.field}, '']
+                operands: [{ type: "column", column: r.field }, '']
             };
         case "is_not_empty":
             return negate({
                 type: "operator",
                 operator: "=",
-                operands: [{type:"column", column: r.field}, '']
+                operands: [{ type: "column", column: r.field }, '']
             });
         case "is_null":
             return {
                 type: "operator",
                 operator: "is",
-                operands: [{type:"column", column: r.field}, null]
+                operands: [{ type: "column", column: r.field }, null]
             };
         case "is_not_null":
             return negate({
                 type: "operator",
                 operator: "IS",
-                operands: [{type:"column", column: r.field}, null]
+                operands: [{ type: "column", column: r.field }, null]
             });
     }
 }
