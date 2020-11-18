@@ -320,55 +320,6 @@ function load_view(schema, table, csrftoken, current_view) {
 
     }).fail(fail_handler)
 }
-// uses the basic api.
-/* 
-function parse_download(){
-    var url = '/api/v0/schema/' + schema + '/tables/' + table + '/rows/'
-    var rules = $('#builder').queryBuilder('getRules');
-    if(rules == null) {
-        window.alert("No Filters applied");
-        return;
-    }
-    where = parse_filter(rules);
-
-    if(where.operator == "or") {
-        var mids = 0;
-        var operands = where.operands;
-        var enrichment = "";
-        operands.forEach( operand => {
-            var firstFlag = false;
-            operand.operands.forEach( participant => {
-                if(participant.constructor == Object){
-                    enrichment += participant.column;
-                    firstFlag = true;
-                }
-                if(participant.constructor == String && firstFlag) enrichment += operand.operator + participant; 
-            });
-            if(enrichment.length !== 0 && mids != operands.length - 1) { enrichment += '||'; mids += 1;}
-        });
-            url += '?where=' + enrichment + '&form=csv';
-    }
-    else if(where.operator == "and") {
-        var mids = 0;
-        var operands = where.operands;
-        var enrichment = "";
-        operands.forEach( operand => {
-            var firstFlag = false;
-            operand.operands.forEach( participant => {
-                if(participant.constructor == Object){
-                    enrichment += participant.column;
-                    firstFlag = true;
-                }
-                if(participant.constructor == String && firstFlag) enrichment += operand.operator + participant; 
-            });
-            if(enrichment.length !== 0 && mids != operands.length - 1) { enrichment += '&'; mids += 1;}
-        });
-        url += '?where=' + enrichment + '&form=csv';
-    }
-    downloadFile(url);
-
-}
-*/
 
 function parse_download() {
     var base_query = {
