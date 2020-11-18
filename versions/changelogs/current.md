@@ -4,3 +4,5 @@
 - Done by adding a Download View to the Data-Edit view under `<host:port>/dataedit/view/<schema>/<table>`
 
 ### Bugs
+
+- Fixes formatting in the backend.js
