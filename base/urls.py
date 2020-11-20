@@ -9,7 +9,7 @@ urlpatterns = [
     url(r"^faq/$", views.redir, {"target": "faq"}, name="index"),
     url(r"^discussion/$", views.redir, {"target": "discussion"}, name="index"),
     url(r"^contact/$", views.ContactView.as_view(), name="index"),
-    url(r"^legal/impressum/$", views.redir, {"target": "impressum"}, name="index"),
+    url(r"^legal/privacy_policy/$", views.redir, {"target": "privacy_policy"}, name="index"),
     url(r"^legal/datasec/$", views.redir, {"target": "datasecurity"}, name="index"),
     url(r"^legal/tou/$", views.redir, {"target": "terms_of_use"}, name="index"),
 ]
