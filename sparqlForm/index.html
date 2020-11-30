@@ -1,0 +1,51 @@
+<!--
+Filename: index.html,
+Created: Venkatesh Murugadas,
+Date : 08/11/2020
+Change history:
+    1.
+    2.
+-->
+
+<!DOCTYPE html>
+<html>
+    <title>SPARQL Form</title>
+    <div id="page-wrapper">
+
+        <h1 align='center'>SPARQL form</h1>
+            <label for="default">Query DBpedia on SPARQL endpoint</label>
+            <input
+                type="text"
+                id="ajax"
+                list="datalist_pred"
+                placeholder="Predicate"
+            />
+            <datalist id="datalist_pred"></datalist>
+            <button class="btn-primary" type="button" onclick="getObjectValue();">Submit</button>
+
+            <p style="text-decoration: underline;">Chosen RDF Property from the DBpedia dataset</p>
+            <p id="predicate"></p>
+            <p style="text-decoration: underline;">Number of Objects for the chosen Predicate</p>
+            <p id ="num_object"></p>
+
+            <label for="default">Object for the chosen predicate from DBpedia</label>
+            <input
+                type="text"
+                id="ajax_obj"
+                list="datalist_obj"
+                placeholder="Object"
+            />
+            <datalist id="datalist_obj"></datalist>
+            <button class="btn-primary" type="button" onclick="setValue();">Submit</button>
+            <p style="text-decoration: underline;">Chosen Object from the RDF property </p>
+            <p id="object"></p>
+
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+        <script src="sparql_script.js"></script>
+
+        <link
+            href="index.css"
+            rel="stylesheet"
+        />
+    </div>
+</html>
