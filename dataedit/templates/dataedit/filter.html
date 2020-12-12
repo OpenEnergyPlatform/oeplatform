@@ -2,36 +2,21 @@
 
 
 {% block main-right-sidebar-filter %}
+<!-- extending the filter block to add wizard button -->
 
-<h3>Filters</h3>
-<form action="{{ request.path }}" method="get">
+    <h3>Create Table</h3>
+    <a class="btn btn-success" href="{% url 'wizard_create' %}" >
+        Create new table
+    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+    <hr>
+    <h3>Filters</h3>
+    <form action="{{ request.path }}" method="get">
     <div class="searchbox_container small">
         <input type="text" name="query" placeholder="Search" value="{% firstof query "" %}" class="form-control" />
     </div>
     <hr>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <div class="foldable-entry">
-        <h5>Tags</h5>
-        <span class="fa fa-caret-up" data-toggle="collapse" data-target="#tags"></span>
-        <div id="tags" class="collapse show foldable-entry-body">
-            <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-                {% for t in all_tags %}
-                    <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
-                        <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" value="{{ t.id }}">
-                        <span>{{ t.name }}</span>
-                        <span class="tag-checkbox-icon fas fa-check"></span>
-                    </label>
-                {% endfor %}
-            </div>
-            <button type="submit" class="btn btn-success">
-                Apply Filters
-            </button>
-            <a class="btn btn-danger" href="{{ request.path }}" >
-                Reset Filters
-            </a>
-        </div>
-    </div>
     <div class="foldable-entry" style="padding-top: 15px;">
         <h5>How to work with Tags and Filter</h6>
         <span class="fa fa-caret-up" data-toggle="collapse" data-target="#howto"></span>
@@ -42,6 +27,30 @@
             <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p> <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
             <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Find data resources:</p> <li class="list-group-item"> Use the Filters on Tags or try searching for strings that occur in table names. You can combine text and Tags filters to get more precise results. If you filter for multiple Tags, only tables containing all filtered Tags will be displayed. </li>
         </ul>
+    </div>
+    <div class="foldable-entry" style="padding-top: 15px;">
+        <h5>Tags</h5>
+        <span class="fa fa-caret-up" data-toggle="collapse" data-target="#tags"></span>
+        <div id="tags" class="collapse show foldable-entry-body">
+            <div style="padding-bottom: 15px;">
+            <button type="submit" class="btn btn-success">
+                Apply Filters
+            </button>
+            <a class="btn btn-danger" href="{{ request.path }}" >
+                Reset Filters
+            </a>
+            </div>
+            <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
+                {% for t in all_tags %}
+                    <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
+                        <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" value="{{ t.id }}">
+                        <span>{{ t.name }}</span>
+                        <span class="tag-checkbox-icon fas fa-check"></span>
+                    </label>
+                {% endfor %}
+            </div>
+            
+        </div>
     </div>
     </div>
 
@@ -58,10 +67,5 @@
 
 </form>
 
-<!-- extending the filter block to add wizard button -->
-<hr>
-<h3>Create Table</h3>
-<a class="btn btn-success" href="{% url 'wizard_create' %}" >
-    Create new table
-</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+
 {% endblock main-right-sidebar-filter %}
