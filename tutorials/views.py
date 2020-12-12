@@ -147,7 +147,7 @@ def formattedMarkdown(markdown):
     # escapes html but also escapes html code blocks lke "exampel code:
     #                                                    (1 tab)  code"
     # checkbox also not rendered as expected "- [ ]"
-    markdowner = Markdown(safe_mode=True)
+    markdowner = Markdown( extras=["break-on-newline", "fenced-code-blocks"], safe_mode=True)
     markdowner.html_removed_text = ""
 
     return markdowner.convert(markdown)
@@ -210,6 +210,7 @@ class CreateNewTutorial(LoginRequiredMixin, CreateView):
 
         # Convert markdown to HTML and save to db
         _html = formattedMarkdown(tutorial.markdown)
+        print(_html)
         addHtml = Tutorial.objects.get(pk=tutorial.id)
         addHtml.html = _html
         addHtml.save()
