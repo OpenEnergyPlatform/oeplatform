@@ -1,5 +1,18 @@
 @charset "UTF-8";
 
+.btn-custom {
+    width: 70px;
+    font-size: 12px;
+    padding-top: 10px;
+}
+.btn-custom:hover {
+    box-shadow: 0 12px 14px 0 rgba(0,0,0,0.24);
+  }
+  
+.panel-description {
+    font-size: 10;
+}
+
 .index-home {
 
     height: 100%;
@@ -53,21 +66,29 @@
 }
 
 .index-tile {
-    height: 150px;
-    width: 150px;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    grid-template-columns: 100%;
-    justify-content: center;
+    height: 350px;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
-
     padding: 0.5em;
+}
+
+.inner-index-tile {
+    padding-left: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-around;
 }
 
 .index-tile img {
     align-self: center;
-    justify-self: center;
-    height: 50px;
+    height: 60px;
+    width: 60px;
+    padding-top: 15px;
+    padding-left: 15px;
 }
 
 .index-tile a {
@@ -99,7 +120,9 @@
 }
 
 .index-tile-colored {
-    background-color: var(--secondaryColor1);
+    background-color: white;
+    border: 2px groove var(--primaryColor1);
+    border-radius: 5px;
 }
 
 .index-tile-bordered a {
@@ -164,6 +187,23 @@
     justify-items: center;
 
 }
+
+/*  
+.index-tile .hovertext {
+    visibility: hidden;
+    width: auto;
+    height: auto;
+    background-color: var(--secondaryColor1);
+    color: var(--primaryColor2);
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    z-index: 1;
+  }
+  
+  .index-tile:hover .hovertext {
+    visibility: visible;
+  } */
 
 @media screen and (max-width: 800px) {
     .index-tile-container {

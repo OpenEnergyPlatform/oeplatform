@@ -23,11 +23,29 @@
                 <div class="index-tile-container">
                     <div class="index-tile index-tile-colored index-tile-color-1">
                         <img src="/static/img/welcome/database.png" alt="">
-                        <a role="button" class="btn btn-secondary" href="/dataedit/schemas">Database</a>
+                        <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Databases </h2>
+                                <p class = "alternative">
+                                    Are you interested in data? Visualize the database to explore it. All contributors publish datasets under an open license, so you can securely download and work with it. Are you interested in sharing your own data? This is the place to upload it. 
+                                </p>
+                            </div>
+                            <a role="button" class="btn btn-secondary btn-custom pull-right" href="/dataedit/schemas">Database</a>
+                        </div>
+                        {% comment %} <div class ="hovertext"> This text will be trimmed down to what is visible in the div </div> {% endcomment %}
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-2">
                         <img src="/static/img/welcome/factsheets.png" alt="">
-                        <a role="button" class="btn btn-secondary" href="/factsheets/overview/">Factsheets</a>
+                        <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Factsheets </h2>
+                                <p class = "alternative">
+                                    Do you want to learn more about scenarios and models related to the data? Then, this is the right place to look. Also if you contributed data and want to provide more context, Create your own factsheet here.
+                                </p>
+                            </div>
+                            
+                        </div>
+                        <a role="button" class="btn btn-secondary btn-custom" href="/factsheets/overview/">Factsheets</a>
                     </div>
                     {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
                     {#    <img src="/static/img/welcome/bundles.png" alt="">#}
@@ -35,11 +53,30 @@
                     {#    </div>#}
                     <div class="index-tile index-tile-colored index-tile-color-4">
                         <img src="/static/img/welcome/ontology.svg" alt="">
-                        <a role="button" class="btn btn-secondary" href="/ontology">Ontology</a>
+                        <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Ontology </h2>
+                                <p class = "alternative">
+                                    Ontology referes to a collection of domain specific terminology and their relationships. Come here to learn more about the Open Energy Ontology (OEO), which helps with data annotation and management.
+                                </p>
+                            </div>
+                        </div>
+                        <a role="button" class="btn btn-secondary btn-custom" href="/ontology">Ontology</a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-5">
                         <img src="/static/img/welcome/documentation.png" alt="">
-                        <a role="button" class="btn btn-secondary" href="https://oep-data-interface.readthedocs.io/en/latest/">Documentation</a>
+                        <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Documentation </h2>
+                                <p class="alternative">
+                                    Cant find what you are looking for? Click the button below to explore documentation of the entire application.
+                                    You can also learn more about the Open Energy Platform (OEP) and its mission statement here.
+                                
+                                </p>
+                            </div>
+            
+                        </div>
+                        <a role="button" class="btn btn-secondary btn-custom" href="https://oep-data-interface.readthedocs.io/en/latest/">Documentation</a>
                     </div>
                 </div>
             </div>
@@ -47,7 +84,7 @@
                 <h4>Tutorials</h4>
                 <span class="alternative">
                     There is something you'd like to do on the platform, but you don't know how?<br/>
-                    Check out the tutorials! They are available for all levels, and in the form of texts, videos and markdowns.<br/>
+                    Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.<br/>
                 </span>
                 <a role="button" class="btn btn-default btn-sm" href="{% url 'list_tutorials'%}">See tutorials</a>
             </div>
@@ -57,11 +94,11 @@
             <div class="index-about-container">
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-process-modelling.svg" alt="">
-                    <b>API</b>
+                    <b>Research Data Management</b>
                     <span class="alternative">
-                        Learn how to download and publish open datasets on the OEP via its API.
+                        Organise, download, and publish open datasets in a shared database.
                     </span>
-                    <a role="button" class="btn btn-secondary btn-sm" href="https://oep-data-interface.readthedocs.io/en/latest/api/how_to.html">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm" href="/dataedit/">Learn more</a>
                 </div>
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-openscience.svg" alt="">
@@ -75,7 +112,7 @@
                     <img src="/static/img/welcome/about-community.svg" alt="">
                     <b>Open Energy Community</b>
                     <span class="alternative">
-                        Collaborate and contribute to the development on GitHub.
+                        Collaborate and contribute to the development.
                     </span>
                     <a role="button" class="btn btn-secondary btn-sm" href="https://github.com/OpenEnergyPlatform">Learn more</a>
                 </div>
