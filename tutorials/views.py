@@ -147,7 +147,8 @@ def formattedMarkdown(markdown):
     # escapes html but also escapes html code blocks lke "exampel code:
     #                                                    (1 tab)  code"
     # checkbox also not rendered as expected "- [ ]"
-    markdowner = Markdown(safe_mode=True)
+    # TODO: Add syntax highliting, add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks 
+    markdowner = Markdown( extras=["break-on-newline", "fenced-code-blocks"], safe_mode=True)
     markdowner.html_removed_text = ""
 
     return markdowner.convert(markdown)
