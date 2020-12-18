@@ -13,6 +13,7 @@
         {% if user.is_authenticated %}
               <a type="button" class="btn btn-sm btn-success" href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}">Edit</a>
               <a type="button" class="btn btn-sm btn-danger" href="{% url 'delete_tutorial' tutorial_id=tutorial.id %}">Delete</a>
+              <a type="button" class="btn btn-sm btn-danger" href="/tutorials/">Back</a>
         {% endif %}
     {% else %}
          <a type="button" class="btn btn-sm btn-success" href="https://github.com/OpenEnergyPlatform/examples">Edit</a>
