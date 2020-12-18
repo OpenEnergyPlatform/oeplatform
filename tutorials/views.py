@@ -211,7 +211,6 @@ class CreateNewTutorial(LoginRequiredMixin, CreateView):
 
         # Convert markdown to HTML and save to db
         _html = formattedMarkdown(tutorial.markdown)
-        print(_html)
         addHtml = Tutorial.objects.get(pk=tutorial.id)
         addHtml.html = _html
         addHtml.save()
