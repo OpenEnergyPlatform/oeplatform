@@ -17,7 +17,7 @@
     </thead>
     <tbody>
         {% for schema, description, tables, tag_ids in schemas %}
-            <tr onclick="window.location='/dataedit/view/{{ schema }}'">
+            <tr onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
                 <td>{{schema}}</td>
                 <td>{{description}}</td>
                 <td>{{tables}}</td>

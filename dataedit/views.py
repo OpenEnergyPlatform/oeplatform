@@ -262,7 +262,7 @@ def listschemas(request):
         "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
         "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
         "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
-        "reference": "sources, literature",
+        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",
         "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
         "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."

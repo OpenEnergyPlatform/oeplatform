@@ -26,7 +26,7 @@
                 {% endif %}
                 <td>
                     {% for tag in tags %}
-                        <a class="btn tag" href="/dataedit/tags" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
+                        <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
                     {% endfor %}
                 </td>
             </tr>
