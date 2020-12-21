@@ -3,7 +3,7 @@ from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import exceptions, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.shortcuts import Http404
 import os
 import json
 
@@ -118,8 +118,11 @@ def _gatherTutorials(id=None):
     tutorials.extend(_resolveDynamicTutorials(dynamicTutorialsQs))
 
     if id:
-        filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
-        return filteredElement
+        filtered_elements = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))
+        if filtered_elements:
+            return filtered_elements[0]
+        else:
+            raise Http404
 
     return tutorials
 
