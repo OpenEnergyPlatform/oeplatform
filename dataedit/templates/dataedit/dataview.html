@@ -5,7 +5,7 @@
 
 
 {% block site-header %}
-  <h2 class="site-header"><a href="/dataedit/schemas">Schema</a>: <a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
+  <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
 {% endblock site-header %}
 
 {% block data_content %}
@@ -55,6 +55,7 @@
       <div>
         <div id="builder"></div>
         <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
+        <button id="btn-download-view" class="btn btn-success set-json" data-target="basic">Download View</button>
       </div>
       {% if current_view.type == "map" %}
         <div style='height: 800px; width: 100%;' id="map"></div>
@@ -89,7 +90,7 @@
     <span class="mb-2" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
       <a href="{{table}}/meta_edit" type="button"  class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
     </span>
-  
+
     {{ meta_widget }}
   </div>
 {% endblock %}
@@ -107,20 +108,9 @@
   <h4>Downloads</h4>
   <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download CSV</a>
-    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="btn btn-warning">Download Datapackage</a>
+    <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
   </div>
   <hr>
-
-
-  {% if schema == "model_draft" %}
-  <h4>Uploads</h4>
-  <span class="mb-2" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
-    <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}" href="{% url 'wizard_upload' schema=schema table=table %}" >
-      Upload CSV (Wizard)
-  </a>
-  </span>
-  <hr>
-  {% endif %}
 
   <h4>API Usage</h4>
   <textarea
@@ -180,34 +170,9 @@ for row in result.json():
           options: JSON5.parse("{{ current_view.options | escapejs }}")
       };
       load_view(schema, table, csrftoken, view);
-
-      var downloadMetadata = function () {
-          var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
-          $.get(metaUrl).then(function(json){
-            console.log(json);
-            // create data url
-            var json = JSON.stringify(json, null, 1);
-            console.log(json);
-            blob = new Blob([json], {type: "application/json"}),
-            dataUrl = URL.createObjectURL(blob);
-            // create link
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            // assign url and click
-            a.style = "display: none";
-            a.href = dataUrl;
-            a.download = '{{ table }}.metadata.json';
-            a.click();
-            // cleanup
-            URL.revokeObjectURL(dataUrl);
-            a.parentNode.removeChild(a);
-          })
-      };
-
-      $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-      })
-
   </script>
 {% endblock after-body-bottom-js %}
+
+
+
 
