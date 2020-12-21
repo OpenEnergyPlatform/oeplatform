@@ -79,6 +79,20 @@
       </div>
     </div>
   </div>
+
+  <div>
+    <br>
+    <br>
+    <h4>
+      Meta Information
+    </h4>
+    <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
+    <span class="mb-2" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
+      <a href="{{table}}/meta_edit" type="button"  class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
+    </span>
+
+    {{ meta_widget }}
+  </div>
 {% endblock %}
 
 {% block main-right-sidebar-content-additional %}
@@ -110,10 +124,13 @@ for row in result.json():
   # Process the row
   </textarea>
   <hr>
-  <h4>
-    Meta Information
-  </h4> <a href="{{table}}/meta_edit"> Edit</a>
-  {{ meta_widget }}
+
+  <h4>Permissions</h4>
+  <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+    <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
+  </div>
+  <hr>
+
 {% endblock main-right-sidebar-content-additional %}
 
 {% block after-head %}

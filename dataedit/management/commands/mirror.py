@@ -19,6 +19,6 @@ class Command(BaseCommand):
         print("---")
         for schema, table in real_tables.difference(table_objects):
             print(schema, table)
-            s=Schema.objects.get(name=schema)
+            s, _ = Schema.objects.get_or_create(name=schema)
             t=Table(name=table, schema=s)
             t.save()

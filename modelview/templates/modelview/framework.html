@@ -21,13 +21,13 @@
           <table class="profiletable">
             {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
             {% include 'modelview/model_snippet.html' with model=model field='last_updated' %}
-            {% include 'modelview/model_snippet.html' with model=model field='version' %}
+{#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
             {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
-            {% include 'modelview/model_snippet.html' with model=model field='license' %}
+            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
             {% include 'modelview/model_snippet.html' with model=model field='logo' %}
             <tr>
               <th>
-                Logo:
+
               </th>
               <td>
                 {% if model.logo %}
@@ -167,7 +167,7 @@
               </td>
               <td>
                 <table>
-                  {% checklist model "ap_BottomUp,ap_Hybrid,ap_Other=ap_Other,ap_TopDown" %}
+                  {% checklist model "ap_TopDown,ap_BottomUp,ap_Hybrid,ap_Other=ap_Other" %}
                 </table>
               </td>
             </tr>
