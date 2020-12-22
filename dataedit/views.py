@@ -310,6 +310,10 @@ def read_label(table, comment):
             return (
                     comment["Title"].strip() + " (" + table + ")"
             )
+        elif comment.get("title"):
+            return (
+                    comment["title"].strip() + " (" + table + ")"
+            )
         elif comment.get("name"):
             return (
                     comment["name"].strip() + " (" + table + ")"
