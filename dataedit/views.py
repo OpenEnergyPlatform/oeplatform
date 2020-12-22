@@ -262,7 +262,7 @@ def listschemas(request):
         "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
         "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
         "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
-        "reference": "sources, literature",
+        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",
         "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
         "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."
@@ -302,9 +302,25 @@ def read_label(table, comment):
     :return: Readable name appended by the true table name as string or None
     """
     try:
-        return (
-            json.loads(comment.replace("\n", ""))["Name"].strip() + " (" + table + ")"
-        )
+        if comment.get("Name"):
+            return (
+                comment["Name"].strip() + " (" + table + ")"
+            )
+        elif comment.get("Title"):
+            return (
+                    comment["Title"].strip() + " (" + table + ")"
+            )
+        elif comment.get("title"):
+            return (
+                    comment["title"].strip() + " (" + table + ")"
+            )
+        elif comment.get("name"):
+            return (
+                    comment["name"].strip() + " (" + table + ")"
+            )
+        else:
+            return None
+
     except Exception as e:
         return None
 
@@ -322,7 +338,7 @@ def get_readable_table_names(schema):
     conn = engine.connect()
     try:
         res = conn.execute(
-            "SELECT table_name as TABLE, obj_description((('\"{table_schema}\".\"' || table_name || '\"' ))::regclass) as COMMENT "
+            "SELECT table_name as TABLE "
             "FROM information_schema.tables where table_schema='{table_schema}';".format(
                 table_schema=schema
             )
@@ -332,8 +348,7 @@ def get_readable_table_names(schema):
         return {}
     finally:
         conn.close()
-    return {table: read_label(table, comment) for (table, comment) in res}
-
+    return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
 
 def listtables(request, schema_name):
     """
@@ -422,72 +437,9 @@ def _type_json(json_obj):
 
 pending_dumps = {}
 
-
 class RevisionView(View):
     def get(self, request, schema, table):
-        revisions = TableRevision.objects.filter(schema=schema, table=table)
-        pending = [
-            (schema, table, date)
-            for (schema, table, date) in pending_dumps
-            if schema == schema and table == table
-        ]
-        return render(
-            request,
-            "dataedit/dataedit_revision.html",
-            {
-                "schema": schema,
-                "table": table,
-                "revisions": revisions,
-                "pending": pending,
-            },
-        )
-
-    def post(self, request, schema, table, date=None):
-        """
-        This method handles an ajax request for a data revision of a specific table.
-        On success the TableRevision-object will be stored to mark that the corresponding
-        revision is available.
-
-        :param request:
-        :param schema:
-        :param table:
-        :param date:
-        :return:
-        """
-
-        # date = time.strftime('%Y-%m-%d %H:%M:%S')
-        # fname = time.strftime('%Y%m%d_%H%M%S', time.gmtime())
-
-        date = time.strftime("%Y-%m-%d %H:%M:%S")
-        # fname = time.strftime(schema+'_' + table + '%Y%m%d_%H%M%S', time.gmtime())
-
-        fname = "20170814_000000"
-
-        original = True  # marks whether this method initialised the revision creation
-
-        # If some user already requested this dataset wait for this thread to finish
-        if (schema, table, date) in pending_dumps:
-            t = pending_dumps[(schema, table, date)]
-            original = False
-        else:
-            t = threading.Thread(target=create_dump, args=(schema, table, fname))
-            t.start()
-            pending_dumps[(schema, table, date)] = t
-
-        while t.is_alive():
-            time.sleep(10)
-
-        pending_dumps.pop((schema, table, date))
-        if original:
-            path = "/dumps/{schema}/{table}/{fname}.dump".format(
-                fname=fname, schema=schema, table=table
-            )
-            size = os.path.getsize(sec.MEDIA_ROOT + path)
-            rev = TableRevision(
-                schema=schema, table=table, date=date, path="/media" + path, size=size
-            )
-            rev.save()
-        return JsonResponse({})
+        return redirect(f"/api/v0/schema/{schema}/tables/{table}/rows")
 
 
 def get_dependencies(schema, table, found=None):

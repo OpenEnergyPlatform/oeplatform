@@ -1,3 +1,10 @@
 ### Features
 
+* Changed dataedit/views.py file to contain the new description "Contains sources, literature and auxiliary/helper tables that can help you in your work." (#635)
+* Tutorials: Improve UI by adding buttons to navigate back, markdown editor: enable fenced code blocks [PR#699]
+* Adds the UI-feature that lets the user download the filtered datasets as a csv.
+* Done by adding a Download View to the Data-Edit view under `<host:port>/dataedit/view/<schema>/<table>`
+
 ### Bugs
+
+* Fixes formatting in the backend.js
