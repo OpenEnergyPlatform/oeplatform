@@ -112,6 +112,16 @@
   </div>
   <hr>
 
+  {% if schema == "model_draft" %}
+    <h4>Uploads</h4>
+    <span class="mb-2" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+      <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}" href="{% url 'wizard_upload' schema=schema table=table %}" >
+        Upload CSV (Wizard)
+    </a>
+    </span>
+    <hr>
+  {% endif %}
+
   <h4>API Usage</h4>
   <textarea
     class="form-control" rows="6" cols="50"
@@ -170,6 +180,33 @@ for row in result.json():
           options: JSON5.parse("{{ current_view.options | escapejs }}")
       };
       load_view(schema, table, csrftoken, view);
+
+      var downloadMetadata = function () {
+          var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
+          $.get(metaUrl).then(function(json){
+            console.log(json);
+            // create data url
+            var json = JSON.stringify(json, null, 1);
+            console.log(json);
+            blob = new Blob([json], {type: "application/json"}),
+            dataUrl = URL.createObjectURL(blob);
+            // create link
+            var a = document.createElement("a");
+            document.body.appendChild(a);
+            // assign url and click
+            a.style = "display: none";
+            a.href = dataUrl;
+            a.download = '{{ table }}.metadata.json';
+            a.click();
+            // cleanup
+            URL.revokeObjectURL(dataUrl);
+            a.parentNode.removeChild(a);
+          })
+      };
+
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
   </script>
 {% endblock after-body-bottom-js %}
 
