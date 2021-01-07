@@ -126,38 +126,6 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#References">References</a>
-      </div>
-      <div id="References" class="card-body collapse  ">
-        <div>
-          <table class="profiletable">
-            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
-            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
-            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
-
-            <tr>
-              <td class="sheetlabel">
-                Model validation
-              </td>
-              <td>
-                <table>
-                  {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
-
-                </table>
-              </td>
-            </tr>
-
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
-            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="card ">
-      <div class="card-header">
         <a data-toggle="collapse" href="#Coverage">Coverage</a>
       </div>
       <div id="Coverage" class="card-body collapse  ">
@@ -385,6 +353,38 @@
           {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
           {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
         </table>
+      </div>
+    </div>
+    <div class="card ">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#References">References</a>
+      </div>
+      <div id="References" class="card-body collapse  ">
+        <div>
+          <table class="profiletable">
+            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
+            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
+            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
+
+            <tr>
+              <td class="sheetlabel">
+                Model validation
+              </td>
+              <td>
+                <table>
+                  {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
+
+                </table>
+              </td>
+            </tr>
+
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
+            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
+          </table>
+        </div>
       </div>
     </div>
   </div>
