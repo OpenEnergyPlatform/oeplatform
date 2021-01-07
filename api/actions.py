@@ -1386,8 +1386,18 @@ def move(from_schema, table, to_schema):
         except DBSchema.DoesNotExist:
             raise APIError("No schema register found")
         t.schema = to_schema_reg
-        session.execute("ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-            from_schema=from_schema, table=table, to_schema=to_schema))
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [(from_schema, table, to_schema),
+                     (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
+                     (meta_from_schema, get_insert_table_name(from_schema, table), meta_to_schema),
+                     (meta_from_schema, get_delete_table_name(from_schema, table), meta_to_schema)]
+
+        for fr, tab, to in movements:
+            session.execute("ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                from_schema=fr, table=tab, to_schema=to))
         session.query(OEDBTableTags).filter(OEDBTableTags.schema_name == from_schema,
                                             OEDBTableTags.table_name == table).update(
             {OEDBTableTags.schema_name:to_schema})
