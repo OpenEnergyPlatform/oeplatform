@@ -76,11 +76,11 @@ confirmOnLeave();
     <form action="/factsheets/scenarios/add/" method="post" role="form">
 {% endif %}
 {% csrf_token %}
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#Basic">Study</a></li>
-  <li><a data-toggle="tab" href="#Empirical">Empirical Data</a></li>
-  <li><a data-toggle="tab" href="#Assumtions">Assumptions</a></li>
-  <li><a data-toggle="tab" href="#Results">Results</a></li>
+<ul class="nav nav-tabs" style="width:100%">
+  <li class="active" style="padding-right: 5px; padding-left: 5px; border: solid"><a data-toggle="tab" href="#Basic">Study</a></li>
+  <li style="padding-right: 5px; padding-left: 5px; border: solid; border-left: transparent"><a data-toggle="tab" href="#Empirical">Empirical Data</a></li>
+  <li style="padding-right: 5px; padding-left: 5px; border: solid; border-left: transparent"><a data-toggle="tab" href="#Assumtions">Assumptions</a></li>
+  <li style="padding-right: 5px; padding-left: 5px; border: solid; border-left: transparent"><a data-toggle="tab" href="#Results">Results</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
