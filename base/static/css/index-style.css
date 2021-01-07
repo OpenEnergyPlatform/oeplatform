@@ -1,18 +1,5 @@
 @charset "UTF-8";
 
-.btn-custom {
-    width: 70px;
-    font-size: 12px;
-    padding-top: 10px;
-}
-.btn-custom:hover {
-    box-shadow: 0 12px 14px 0 rgba(0,0,0,0.24);
-  }
-  
-.panel-description {
-    font-size: 10;
-}
-
 .index-home {
 
     height: 100%;
@@ -66,6 +53,9 @@
 }
 
 .index-tile {
+    scale: 0.85;
+    margin: -1.8em;
+    margin-bottom: 1em;
     height: 350px;
     width: 350px;
     display: flex;

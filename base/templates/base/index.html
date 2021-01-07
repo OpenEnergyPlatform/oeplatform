@@ -30,7 +30,7 @@
                                     Are you interested in data? Visualize the database to explore it. All contributors publish datasets under an open license, so you can securely download and work with it. Are you interested in sharing your own data? This is the place to upload it. 
                                 </p>
                             </div>
-                            <a role="button" class="btn btn-secondary btn-custom pull-right" href="/dataedit/schemas">Database</a>
+                            <a role="button" class="btn btn-secondary pull-right" href="/dataedit/schemas">Database</a>
                         </div>
                         {% comment %} <div class ="hovertext"> This text will be trimmed down to what is visible in the div </div> {% endcomment %}
                     </div>
@@ -45,7 +45,7 @@
                             </div>
                             
                         </div>
-                        <a role="button" class="btn btn-secondary btn-custom" href="/factsheets/overview/">Factsheets</a>
+                        <a role="button" class="btn btn-secondary" href="/factsheets/overview/">Factsheets</a>
                     </div>
                     {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
                     {#    <img src="/static/img/welcome/bundles.png" alt="">#}
@@ -61,35 +61,24 @@
                                 </p>
                             </div>
                         </div>
-                        <a role="button" class="btn btn-secondary btn-custom" href="/ontology">Ontology</a>
+                        <a role="button" class="btn btn-secondary " href="/ontology"> Ontology </a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-5">
                         <img src="/static/img/welcome/documentation.png" alt="">
                         <div class="inner-index-tile">
                             <div class= "panel-description">
-                                <h2> Documentation </h2>
+                                <h2> Tutorials </h2>
                                 <p class="alternative">
-                                    Cant find what you are looking for? Click the button below to explore documentation of the entire application.
-                                    You can also learn more about the Open Energy Platform (OEP) and its mission statement here.
-                                
+                                    There is something you'd like to do on the platform, but you don't know how?Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.
                                 </p>
                             </div>
-            
                         </div>
-                        <a role="button" class="btn btn-secondary btn-custom" href="https://oep-data-interface.readthedocs.io/en/latest/">Documentation</a>
+                        <a role="button" class="btn btn-secondary " href="{% url 'list_tutorials'%}">Tutorials</a>
                     </div>
                 </div>
             </div>
-            <div class="index-tutorial">
-                <h4>Tutorials</h4>
-                <span class="alternative">
-                    There is something you'd like to do on the platform, but you don't know how?<br/>
-                    Check out the tutorials! They ware available for all levels, and in the form of texts, videos and markdowns.<br/>
-                </span>
-                <a role="button" class="btn btn-default btn-sm" href="{% url 'list_tutorials'%}">See tutorials</a>
-            </div>
-        </div>
-
+        </div>   
+        
         <div class="index-about-container-background">
             <div class="index-about-container">
                 <div class="index-about-column">
