@@ -21,6 +21,11 @@ urlpatterns = [
         name='api_table_meta',
     ),
     url(
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",
+        views.Move.as_view(),
+        name='move',
+    ),
+    url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",
         views.Column.as_view(),
     ),

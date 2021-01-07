@@ -1370,6 +1370,36 @@ def clear_dict(d):
     }
 
 
+def move(from_schema, table, to_schema):
+
+    table = read_pgid(table)
+    engine = _get_engine()
+    Session = sessionmaker(engine)
+    session = Session()
+    try:
+        try:
+            t = DBTable.objects.get(name=table, schema__name=from_schema)
+        except DBTable.DoesNotExist:
+            raise APIError("Table register not found")
+        try:
+            to_schema_reg = DBSchema.objects.get(name=to_schema)
+        except DBSchema.DoesNotExist:
+            raise APIError("No schema register found")
+        t.schema = to_schema_reg
+        session.execute("ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+            from_schema=from_schema, table=table, to_schema=to_schema))
+        session.query(OEDBTableTags).filter(OEDBTableTags.schema_name == from_schema,
+                                            OEDBTableTags.table_name == table).update(
+            {OEDBTableTags.schema_name:to_schema})
+        session.commit()
+        t.save()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
 def create_meta(schema, table):
     meta_schema = get_meta_schema_name(schema)
 
