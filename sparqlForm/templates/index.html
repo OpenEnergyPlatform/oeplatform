@@ -1,0 +1,120 @@
+<!--
+Filename: index.html,
+Created: Venkatesh Murugadas,
+Date : 08/11/2020
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="shortcut icon" href="#">
+    </head>
+    <title>SPARQL Form</title>
+    <div id="page-wrapper">
+
+        <h1 align='center'>SPARQL form</h1>
+            <label for="default">Query Jena local SPARQL endpoint - File KG.ttl</label>
+            <label for="default">Predicate of the triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="ajax"
+                list="datalist_pred"
+                placeholder="Predicate"
+            />
+            <datalist id="datalist_pred"></datalist>
+            <button class="btn-primary" type="button" onclick="getSubjectValue();">Get Subject</button>
+
+            <p style="text-decoration: underline;">Chosen Predicate from the dataset</p>
+            <p id="predicate"></p>
+
+            <p style="text-decoration: underline;">Number of Subjects for the chosen Predicate</p>
+            <p id ="num_subject"></p>
+
+            <label for="default">Subject of the triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="ajax_sub"
+                list="datalist_sub"
+                placeholder="Subject"
+            />
+            <datalist id="datalist_sub"></datalist>
+            <button class="btn-primary" type="button" onclick="getObjectValue();">Get Object</button>
+
+            <p style="text-decoration: underline;">Chosen Subject from the dataset</p>
+            <p id="subject"></p>
+
+            <p style="text-decoration: underline;">Number of Objects for the chosen Predicate</p>
+            <p id ="num_object"></p>
+
+            <label for="default">Object of the triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="ajax_obj"
+                list="datalist_obj"
+                placeholder="Object"
+            />
+            <datalist id="datalist_obj"></datalist>
+            <input class = "radio_input" type="radio" name="type" value="URI"/>URI
+            <input class = "radio_input" type="radio" name="type" value="String"/>String
+            <br>
+            <br>
+            <button class="btn-primary" type="button" onclick="setValue();">Submit</button>
+            <p style="text-decoration: underline;">Chosen Object from the Dataset </p>
+            <p id="object"></p>
+            <br>
+            <br>
+            <button class="btn-primary" id = "ask" type="button" onclick="askTriple()">ASK</button>
+            <button class="btn-primary" id = "insert" type="button" onclick="insertTriple()">INSERT</button>
+            <button class="btn-primary" id = "delete" type="button" onclick="deleteTriple()">DELETE</button>
+            <button class="btn-primary" id = "loadOldTriples" type="button" onclick="loadOldTriples()">Get Triples</button>
+            <p id="result"></p>
+
+            <hr>
+        <h1 align='center'>SPARQL Update form</h1>
+            <label for="default">Old Predicate</label>
+            <p id="oldPredicate"></p>
+            <label for="default">Old Subject</label>
+            <p id="oldSubject"></p>
+            <label for="default">Old Object</label>
+            <p id="oldObject"></p>
+
+            <label for="default">Predicate of the New triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="newPredicate"
+                placeholder="New Predicate"
+            />
+
+            <label for="default">Subject of the New triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="newSubject"
+                placeholder="New Subject"
+            />
+
+            <label for="default">Object of the New triple</label>
+            <input
+                class = "text_input"
+                type="text"
+                id="newObject"
+                placeholder="New Object"
+            />
+            <button class="btn-primary" id = "update" type="button" onclick="updateTriple()">UPDATE</button>
+            <p id="update_result"></p>
+            <hr>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="static/sparql_script_local_query.js"></script>
+    <link
+            href="static/index.css"
+            rel="stylesheet"
+        />
+
+</html>
+
