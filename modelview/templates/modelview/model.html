@@ -118,7 +118,7 @@
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
           {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
-          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' add=model.external_optimizer_yes_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer_yes_text' %}
           {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
           {% include 'modelview/model_snippet.html' with model=model field='gui' %}
         </table>
