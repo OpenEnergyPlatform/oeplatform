@@ -95,8 +95,7 @@ class BasicFactsheet(models.Model):
     )
     framework_yes_text = CharField(max_length=1000, null=True)
 
-    user_documentation = ArrayField(
-        CharField(max_length=200),
+    user_documentation = CharField(max_length=500,
         verbose_name="Link to User Documentation",
         help_text="Is an user documentation available for the framework? Please insert the link",
         null=True,
