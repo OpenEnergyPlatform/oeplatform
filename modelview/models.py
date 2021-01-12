@@ -245,7 +245,7 @@ class BasicFactsheet(models.Model):
         default=list,
         null=True,
     )
-
+    #TODO: external_optimizer is not used anymore since the form adds a array element, a boolean field is not needed anymore
     external_optimizer = BooleanField(
         default=False,
         verbose_name="External optimizer",
@@ -253,7 +253,11 @@ class BasicFactsheet(models.Model):
         null=False,
     )
     external_optimizer_yes_text = ArrayField(
-        models.CharField(max_length=1000), default=list, null=True
+        models.CharField(max_length=1000), 
+        verbose_name="External optimizer",
+        help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+        default=list,
+        null=True
     )
 
     additional_software = ArrayField(
