@@ -24,3 +24,4 @@ rdflib
 django-jquery
 zipstream-new
 Pygments
+nbconvert==5.6.1
