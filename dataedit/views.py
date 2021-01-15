@@ -372,7 +372,7 @@ def listtables(request, schema_name):
     conn = engine.connect()
     Session = sessionmaker()
     session = Session(bind=conn)
-    tag_query = session.query(TableTags.table_name, array_agg(sqla.distinct(TableTags.tag)), array_agg(sqla.distinct(Tag.name)), array_agg(sqla.distinct(Tag.color))).filter(
+    tag_query = session.query(TableTags.table_name, array_agg(TableTags.tag), array_agg(Tag.name), array_agg(Tag.color)).filter(
         TableTags.schema_name==schema_name, TableTags.tag==Tag.id).group_by(TableTags.table_name)
     tags = {r[0]: [dict(id=ident, name=label, color="#" + format(color, "06X"))
                    for ident, label, color in zip(r[1], r[2], r[3])]
