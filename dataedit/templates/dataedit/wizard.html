@@ -1,7 +1,7 @@
 {% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
 <link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %} {% block site-header %}
 <h2 class="site-header"><span class="spinner-border text-primary" id="wizard-loading"></span>
-    <i class="fa fa-hat-wizard"></i>Wizard</span>
+    <i class="fa fa-table mr-2"></i>Table Upload</span>
 </h2>
 {% endblock site-header %} {% block main %}
 
@@ -267,7 +267,16 @@
             <div class="card-header">
                 <h2 class="mb-0">
                     <!-- go to existing form -->
-                    <a id="editMetadata" href="{% if schema and table %}{% url 'meta_edit' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
+                    <a id="editMetadata" target="_blank" href="{% if schema and table %}{% url 'meta_edit' schema=schema table=table %}{% else %}#{% endif %}">Edit metadata</a>
+                </h2>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <!-- go to existing form -->
+                    <a id="viewData" target="_blank" href="{% if schema and table %}{% url 'view' schema=schema table=table %}{% else %}#{% endif %}">View data</a>
                 </h2>
             </div>
         </div>

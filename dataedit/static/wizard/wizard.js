@@ -259,8 +259,8 @@ var Wizard = function(config) {
      * so we need to update our row mapping function and the preview
      */
     function updateColumnMapping() {
-        //console.log('updateColumnMapping')
         var name2idx = {};
+        // clear previous mapping
         for (var i = 0; i < state.columns.length; i++) {
             name2idx[state.columns[i].name] = i;
             state.columns[i].idxCsv = undefined;
@@ -268,16 +268,24 @@ var Wizard = function(config) {
                 return null;
             };
         }
+
         $("#wizard-csv-columns").find(".wizard-csv-column").each(function(idxCsv, e) {
+            // iterate over column in csv file
+
+            // mapped column name in db (can be empty)
             var nameDB = $(e).find(".wizard-csv-column-name-new").val();
+            // mapped column index in database (can be empty)
+            var idxDB = name2idx[nameDB];
+
+            // name of additional parser function
             var parseName = $(e).find(".wizard-csv-column-parse").val();
             var nullValue = $(e).find(".wizard-null-value").val() || "";
             var parseFun = columnParsers[parseName].parse;
-            var idxDB = name2idx[nameDB];
             state.csvColumns[idxCsv].nameDB = nameDB;
             state.csvColumns[idxCsv].idxDB = idxDB;
             state.csvColumns[idxCsv].parse = parseFun;
             state.csvColumns[idxCsv].nullValue = nullValue;
+
             if (idxDB !== undefined) {
                 state.columns[idxDB].idxCsv = idxCsv;
                 state.columns[idxDB].parseName = parseName;
@@ -295,12 +303,19 @@ var Wizard = function(config) {
                     };
                 }();
             }
+
         });
         // row mapper: converts input row from csv into upload row, applies column mapping and conversions
         state.rowMapper = function(row) {
-            return state.columns.map(function(c, i) {
-                var v = row[i];
-                return c.parse(v);
+            return state.columns.map(function(colDB) {
+                var v;
+                if (colDB.idxCsv !== undefined){
+                    v = row[colDB.idxCsv];
+                    v = colDB.parse(v);
+                } else { // no mapping
+                    v = null;
+                }
+                return v
             });
         };
         updatePreview();
