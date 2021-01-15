@@ -134,7 +134,6 @@ var Wizard = function(config) {
      * add a new column in the create table section
      */
     function addColumn(columnDef) {
-        //console.log('addColumn', columnDef)
         columnDef = columnDef || {};
         var columns = $("#wizard-columns");
         var n = columns.find(".wizard-column").length;
@@ -170,6 +169,9 @@ var Wizard = function(config) {
         if (columnDef.name) {
             $("#wizard-csv-preview").find("thead tr").append("<th>" + columnDef.name + "</th>");
         }
+        // trigger change for auto validation
+        column.find(".wizard-column-name").trigger("change");
+        column.find(".wizard-column-type").trigger("change");
     }
 
     /**
@@ -629,6 +631,12 @@ var Wizard = function(config) {
      * create a new table
      */
     function createTable() {
+        // check if validation errors
+        if ($("#wizard-columns .is-invalid").length > 0 || $("#wizard-tablename.is-invalid").length > 0) {
+            setStatusCreate("danger", false, "invalid definitions.");
+            return;
+        }
+
         setStatusCreate("primary", true, "creating table...");
         var colDefs = [];
         var constraints = [];
@@ -679,6 +687,8 @@ var Wizard = function(config) {
 
 
     function showCreate() {
+        // create default id column
+        addColumn({"name": "id", "data_type": "bigint", "is_nullable": false, "is_pk": true});
         $("#wizard-container-upload").collapse("hide");
         $("#wizard-container-create").collapse("show");
         $("#wizard-table-delete").hide();
