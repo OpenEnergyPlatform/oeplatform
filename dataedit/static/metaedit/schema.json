@@ -17,8 +17,7 @@
         "id": {
             "description": "Uniform Resource Identifier (URI) that unambiguously identifies the resource. This can be a URL on the data set. It can also be a Digital Object Identifier (DOI). Example: https://example.com",
             "type": "string",
-            "title": "Id",
-            "readonly": true
+            "title": "Id"
         },
         "description": {
             "description": "A description of the package. It should be usable as summary information for the entire package that is described by the metadata. Example: Example table used to illustrate the metadata structure and meaning",
