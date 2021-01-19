@@ -236,7 +236,7 @@ def editModel(request, model_name, sheettype):
     model = get_object_or_404(c, pk=model_name)
 
     tags = []
-    if sheettype in ["scenario", "study"]:
+    if sheettype in ["scenario", "studie"]:
         pass
     else:
         d = load_tags()
