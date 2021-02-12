@@ -5,7 +5,8 @@
 
 
 {% block site-header %}
-  <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
+  <h2 class="site-header">{{ title }}</h2>
+  <h3 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h3>
 {% endblock site-header %}
 
 {% block data_content %}

@@ -917,6 +917,7 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
+        title_name = metadata["title"]
 
 
 
@@ -936,6 +937,7 @@ class DataView(View):
             "current_view": current_view,
             "is_admin": is_admin,
             "can_add": can_add,
+            "title": title_name,
             "host": request.get_host(),
         }
 
