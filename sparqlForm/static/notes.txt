@@ -1,0 +1,23 @@
+To Do:
+Create a query to fetch all the study names from the triple dataset
+Display them in the study name user input field as a dropdown menu
+user provides input for the study
+once the study is chosen then query the sparql endpoint with the SPARQL query "Describe" to
+fetch the details about the study.
+Once the details are fetched parse through the query output and map the values to relevant keys.
+    Example : title - title name
+              published year - year
+    Inside this function, I have to map the Ontology terms to their respective String values
+        Example: OEOXXXXXX - has_author
+    Once these mappings are done, then return these values to the form variables.
+Use the form variables to display in the output.
+
+
+Method:
+1. Fetch the study names by calling th endpoint directly from JS.Once entered, click button for submit.
+2. Map this button to python function:
+    1. Calls the endpoint to fetch the study details
+    2. Parse the response and maps into respective keys (function)
+        3. Parse the Ontology terms to respective string values. (function)
+    4. Return the dictionary or values.
+5. Display the values in the form

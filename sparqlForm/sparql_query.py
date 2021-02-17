@@ -1,6 +1,7 @@
-from SPARQLWrapper import SPARQLWrapper, JSON, POST
+from SPARQLWrapper import SPARQLWrapper, JSON, POST, GET
 from flask import Flask, request, render_template, jsonify
 import os
+import urllib.request
 
 
 app = Flask(__name__, template_folder="templates")
