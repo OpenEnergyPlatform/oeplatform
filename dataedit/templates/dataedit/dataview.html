@@ -5,8 +5,11 @@
 
 
 {% block site-header %}
-  <h2 class="site-header">{{ title }}</h2>
+  {% if title %}
+  <h2 class="site-header">{{ schema }}: {{ title }}</h2>
+  {% else  %}
   <h3 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h3>
+  {% endif %}
 {% endblock site-header %}
 
 {% block data_content %}
@@ -226,7 +229,3 @@ for row in result.json():
       })
   </script>
 {% endblock after-body-bottom-js %}
-
-
-
-

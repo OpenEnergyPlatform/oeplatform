@@ -917,7 +917,9 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
-        title_name = metadata["title"]
+        title_name = None
+        if "title" in metadata:
+            title_name = metadata["title"]
 
 
 
