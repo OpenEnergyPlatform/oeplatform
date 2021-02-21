@@ -2,14 +2,12 @@
 // Filename: sparql_script_local_query.js
 // Created: Venkatesh Murugadas
 // Date : 01/01/2021
-// Change history:
-//      1.
-//      2.
+// Recent changes : 20/02/2021
 /****************************************************/
 
 // Variable for the Datalist HTML elements
 var dataList = document.getElementById("datalist_pred");
-
+var dataList_study = document.getElementById("datalist_study_name");
 
 function loadOldTriples() {
 
@@ -44,27 +42,44 @@ select distinct predicates in the triples
         { ?s ?p ?o }
 
 */
-$(document).ready(function ()
-{
+$(document).ready(function () {
     //specific URL form of the SPARQL query to get output in JSON
     var endpoint = "http://localhost:3030/ds/sparql";
     var pred_query = "?query=select distinct ?item where {?s ?item ?o}";
     var result_json = "&format=json";
 
     $.when(
-    $.ajax({
-        type: 'POST',
-        url: endpoint+pred_query+result_json,
-        dataType: 'json',
-        success: function (result) {
+        $.ajax({
+            type: 'POST',
+            url: endpoint + pred_query + result_json,
+            dataType: 'json',
+            success: function (result) {
 
-            var dataList = document.getElementById("datalist_pred");
-            dataList.innerHTML = "";
-            console.log(result['results']['bindings'].length);
-            // Variable for the Datalist HTML elements
-            dataList.innerHTML = append_datalist(result);
-        }
-    })
+                var dataList = document.getElementById("datalist_pred");
+                dataList.innerHTML = "";
+                console.log(result['results']['bindings'].length);
+                // Variable for the Datalist HTML elements
+                dataList.innerHTML = append_datalist(result);
+            }
+        })
+    )
+
+})
+/*
+Ajax call to extract the Study/Scenario names from the Database
+*/
+$(document).ready(function () {
+    $.when(
+        $.ajax({
+            type: 'GET',
+            url: "/studyName",
+            success: function (data) {
+                var dataList_study = document.getElementById("datalist_study_name");
+                var study_str = '';
+                Object.values(data).forEach(item => study_str += '<option value="'+ item +'" />')
+                dataList_study.innerHTML = study_str;
+            }
+        })
     )
 })
 
@@ -315,5 +330,74 @@ function updateTriple() {
                 })
                 )
             })
+}
+
+/*
+Functions to get the details of the study.
+*/
+function getStudyReportDetails() {
+
+
+    var study_report_name = document.querySelector("#ajax_study_name").value;
+    if (!study_report_name) {
+        document.getElementById("studyStatus").innerHTML = "Enter a study report name"
+    }
+    else if (study_report_name != "") {
+        getStudyReport();
+    }
+
+}
+
+function getStudyReport() {
+    let study_report_name = document.querySelector("#ajax_study_name").value;
+    document.getElementById("studyReportStatus").textContent = study_report_name;
+    $.ajax({
+        data: {
+            'studyReportName': study_report_name
+        },
+        type: 'GET',
+        beforeSend: function(){
+            $("#loading_label").show();
+          },
+        url: "/getStudyReport",
+        complete: function(){
+            $("#loading_label").hide();
+        },
+        success: function (results) {
+            document.getElementById("reportDetails").innerHTML = ""
+            studyReport = JSON.stringify(results,null,2);
+            studyReport_JSON = JSON.parse(studyReport)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Title: " + JSON.stringify(studyReport_JSON['title'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Subtitle : " + JSON.stringify(studyReport_JSON['subtitle'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Type  :  " + JSON.stringify(studyReport_JSON['type'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Publication Year : " + JSON.stringify(studyReport_JSON['publicationYear'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Abstract : " + JSON.stringify(studyReport_JSON['abstract'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "About : " + JSON.stringify(studyReport_JSON['IAO_0000136'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "Authors"
+            for (var i = 0; i < studyReport_JSON.has_authors.length; i++) {
+                var counter = studyReport_JSON.has_authors[i];
+                document.getElementById("reportDetails").innerHTML += "</br>"
+                document.getElementById("reportDetails").innerHTML += "Name : " + counter.givenName + " " + counter.familyName;
+                document.getElementById("reportDetails").innerHTML += "</br>"
+                document.getElementById("reportDetails").innerHTML += "Affiliation : " + counter.affiliation;
+                document.getElementById("reportDetails").innerHTML += "</br>"
+            }
+            document.getElementById("reportDetails").innerHTML += "</br>"
+            document.getElementById("reportDetails").innerHTML += "URL Scheme : " + JSON.stringify(studyReport_JSON['url'], null, 2)
+            document.getElementById("reportDetails").innerHTML += "</br>"
+        },
+    })
 }
 

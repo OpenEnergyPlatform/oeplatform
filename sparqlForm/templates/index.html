@@ -2,6 +2,7 @@
 Filename: index.html,
 Created: Venkatesh Murugadas,
 Date : 08/11/2020
+Recent changes : 20/02/2021
 -->
 
 <!DOCTYPE html>
@@ -12,6 +13,31 @@ Date : 08/11/2020
     </head>
     <title>SPARQL Form</title>
     <div id="page-wrapper">
+
+        <h1 align='center'>SPARQL View form</h1>
+            <label for="default">Query Jena local SPARQL endpoint - File KG.ttl</label>
+            <label for="default">Name of the Study Report</label>
+            <p id='dummy'></p>
+            <input
+                class = "text_input"
+                type="text"
+                id="ajax_study_name"
+                list="datalist_study_name"
+                placeholder="Study Report"
+            />
+            <datalist id="datalist_study_name"></datalist>
+
+            <button class="btn-primary" id = "studyReport_btn" type="button" onclick="getStudyReportDetails();" >
+                Get Study Report
+            </button>
+            <p id='studyStatus'></p>
+            <span id="studyReport" style="display:block;">
+                <label >Chosen Study Report </label>
+                <p id="studyReportStatus"></p>
+                <label id="loading_label">Loading...</label>
+                <label style="display:block;"> Report details</label>
+                <p id="reportDetails" style="display:block;"></p>
+            </span>
 
         <h1 align='center'>SPARQL form</h1>
             <label for="default">Query Jena local SPARQL endpoint - File KG.ttl</label>
