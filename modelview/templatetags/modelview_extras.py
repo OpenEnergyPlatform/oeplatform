@@ -9,7 +9,7 @@ from django.contrib.postgres.forms.array import SimpleArrayField
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from scipy import stats
-
+import modelview.rdfstructures as rs
 register = template.Library()
 
 
@@ -203,3 +203,4 @@ def assignClass(field, css):
 @register.filter
 def addClass(value, arg):
     return value.as_widget(attrs={"class": arg})
+

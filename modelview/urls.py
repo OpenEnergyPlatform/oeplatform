@@ -5,6 +5,7 @@ from modelview import views
 from oeplatform import settings
 
 urlpatterns = [
+    url(r"study/(?P<identifier>[\w\d_]*)", views.StudyRDFView.as_view()),
     url(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),
     url(r"^overview/$", views.overview, {}),
     url(
@@ -13,6 +14,7 @@ urlpatterns = [
         {"method": "add"},
         name="modellist",
     ),
+
     url(r"^(?P<sheettype>[\w\d_]+)s/download/$", views.model_to_csv, {}, name="index"),
     url(
         r"^(?P<sheettype>[\w\d_]+)s/(?P<model_name>[\d]+)/$",

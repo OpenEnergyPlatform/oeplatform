@@ -31,7 +31,6 @@ from .forms import (
 )
 from .models import Energyframework, Energymodel, Energyscenario, Energystudy
 
-
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
@@ -437,6 +436,71 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
+
+from modelview import rdfstructures as rs
+from typing import Type
+
+
+class RDFFactoryView(View):
+    _cls = None
+    _template = None
+
+    def get(self, request, identifier):
+        context = rs.ConnectionContext()
+        i = str(getattr(rs.OEO_KG, identifier))
+        results = self._cls._load([i], context)
+        try:
+            obj = results[i]
+        except KeyError:
+            raise Http404
+        return render(
+            request,
+            self._template,
+            {"obj": obj},
+        )
+
+
+class RDFFactoryFormView(View):
+    _cls = None
+    _template = None
+
+    def get(self, request, identifier):
+        context = rs.ConnectionContext()
+        i = str(getattr(rs.OEO_KG, identifier))
+        results = self._cls._load([i], context)
+        try:
+            obj = results[i]
+        except KeyError:
+            raise Http404
+        return render(
+            request,
+            self._template,
+            {"obj": obj},
+        )
+
+    def post(self, request, identifier):
+        context = rs.ConnectionContext()
+        i = str(getattr(rs.OEO_KG, identifier))
+        results = self._cls._load([i], context)
+        try:
+            obj = results[i]
+        except KeyError:
+            raise Http404
+        return render(
+            request,
+            self._template,
+            {"obj": obj},
+        )
+
+
+class StudyRDFView(RDFFactoryView):
+    _cls = rs.Study
+    _template = "modelview/study.html"
+
+
+class ScenarioRDFView(RDFFactoryView):
+    _cls = rs.Scenario
+    _template = "modelview/scenario.html"
 
 
 BASE_VIEW_PROPS = OrderedDict(

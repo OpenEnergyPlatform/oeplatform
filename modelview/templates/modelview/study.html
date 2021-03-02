@@ -1,0 +1,17 @@
+{% extends "modelview/detail_view.html" %}
+{% load bootstrap4 %}
+{% load static %}
+{% load modelview_extras %}
+
+{% block main-right-sidebar-content-actions %}
+
+{% endblock main-right-sidebar-content-actions %}
+
+{% block factsheets_content %}
+
+<h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
+
+<table>
+    {{ obj.render_table }}
+</table>
+{% endblock factsheets_content %}
