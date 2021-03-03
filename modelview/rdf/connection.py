@@ -11,27 +11,31 @@ class ConnectionContext:
         self.connection.setReturnFormat(JSON)
 
     def execute(self, entities):
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" \
+        s = (
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             "SELECT ?s ?p ?o ?lo ?lp WHERE "
-        s += " UNION ".join(f"{{ ?s ?p ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}" for e in entities)
+        )
+        s += " UNION ".join(
+            f"{{ ?s ?p ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}"
+            for e in entities
+        )
         self.connection.setQuery(s)
         return self.connection.query().convert()
 
     def describe(self, entities):
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" \
+        s = (
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             f"DESCRIBE <{' '.join(entities)}>"
+        )
         self.connection.setQuery(s)
         res = self.connection.query().convert()
         return res
 
     def labels(self, entities):
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" \
-          "SELECT ?o WHERE "
+        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" "SELECT ?o WHERE "
         s += " UNION ".join(
             f"{{ ?s rdfs:label ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}"
-            for e in entities)
+            for e in entities
+        )
         self.connection.setQuery(s)
         return self.connection.query().convert()
-
-
-

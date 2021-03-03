@@ -4,11 +4,18 @@ from typing import Type
 
 from modelview.rdf import handler
 
+
 class Field(handler.Rederable):
     _handler = handler.DefaultHandler
     _widged = TextInput
 
-    def __init__(self, rdf_name, verbose_name=None, handler: handler.Handler = None, help_text: str = None):
+    def __init__(
+        self,
+        rdf_name,
+        verbose_name=None,
+        handler: handler.Handler = None,
+        help_text: str = None,
+    ):
         self.rdf_name = rdf_name
         self.verbose_name = verbose_name
         self.handler = handler if handler else self._handler()
@@ -30,8 +37,14 @@ class Field(handler.Rederable):
 
         vals = [(f(v),) for v in it]
 
-        s = format_html(mark_safe("<tr><th><a href=\"{rdfname}\">{vname}</a></th><td>{vals}</td></tr>"), rdfname=self.rdf_name,
-                    vname=self.verbose_name, vals=format_html_join(" ", "<li class=\"list-group-item\">{}</li>", vals))
+        s = format_html(
+            mark_safe(
+                '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
+            ),
+            rdfname=self.rdf_name,
+            vname=self.verbose_name,
+            vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
+        )
         return s
 
     def _render_atomic_field(self, obj, **kwargs):

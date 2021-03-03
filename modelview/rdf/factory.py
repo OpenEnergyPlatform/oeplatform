@@ -19,10 +19,10 @@ class RDFFactory(handler.Rederable, ABC):
 
 """
         for f in self.iter_field_names():
-            field = getattr(self,f)
+            field = getattr(self, f)
             s += f"* `{f} <{field.rdf_name}>`_"
             if field.help_text is not None:
-                s+= ": " + field.help_text
+                s += ": " + field.help_text
             s += "\n"
         s += "\n"
         return s
@@ -76,15 +76,31 @@ class RDFFactory(handler.Rederable, ABC):
                 obj[p].append(o)
             except KeyError:
                 obj[p] = [o]
-        res = cache[identifier] = cls(**{p: cls._field_handler.get(p, handler.DefaultHandler())(os, context, graph) for p, os in obj.items()})
+        res = cache[identifier] = cls(
+            **{
+                p: cls._field_handler.get(p, handler.DefaultHandler())(
+                    os, context, graph
+                )
+                for p, os in obj.items()
+            }
+        )
         return res
 
     def save(self, context):
-        triples = chain(*(k.to_triples(self.iri) for k in self.iter_fields()), (f"{self.iri} {k} {v}" for k, vs in self.additional_fields.items() for v in vs))
+        triples = chain(
+            *(k.to_triples(self.iri) for k in self.iter_fields()),
+            (
+                f"{self.iri} {k} {v}"
+                for k, vs in self.additional_fields.items()
+                for v in vs
+            ),
+        )
         print("\n".join(triples))
 
     def render(self, **kwargs):
-        return format_html(mark_safe("<table class=\"table\">{}</table>"), self.render_table())
+        return format_html(
+            mark_safe('<table class="table">{}</table>'), self.render_table()
+        )
 
     def render_table(self):
         s = format_html_join("\n", "{}", ((f.render(),) for f in self.iter_fields()))
@@ -97,8 +113,16 @@ class RDFFactory(handler.Rederable, ABC):
 
 class Scenario(RDFFactory):
     abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
-    abstract = field.Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="A short description of this scenario")
-    name = field.Field(rdf_name=foaf.name, verbose_name="Abstract", help_text="A short description of this scenario")
+    abstract = field.Field(
+        rdf_name=dbo.abstract,
+        verbose_name="Abstract",
+        help_text="A short description of this scenario",
+    )
+    name = field.Field(
+        rdf_name=foaf.name,
+        verbose_name="Abstract",
+        help_text="A short description of this scenario",
+    )
 
 
 class AnalysisScope(RDFFactory):
@@ -108,13 +132,33 @@ class AnalysisScope(RDFFactory):
 
 
 class Publication(RDFFactory):
-    title = field.Field(rdf_name=dc.title, verbose_name="Title", help_text="Title of the publication")
+    title = field.Field(
+        rdf_name=dc.title, verbose_name="Title", help_text="Title of the publication"
+    )
     subtitle = field.Field(rdf_name=dbo.subtitle, verbose_name="Subtitle")
-    publication_year = field.Field(rdf_name=npg.publicationYear, verbose_name="Publication year", help_text="Year this publication was published in")
-    abstract = field.Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="Abstract of the publication")
-    url = field.Field(rdf_name=schema.url, verbose_name="URL", help_text="Link to this publication")
-    authors = field.Field(rdf_name=OEO.OEO_00000506, verbose_name="Authors", help_text="Authors of this publication")
-    about = field.Field(rdf_name=obo.IAO_0000136, verbose_name="About", help_text="Elements of this publication")
+    publication_year = field.Field(
+        rdf_name=npg.publicationYear,
+        verbose_name="Publication year",
+        help_text="Year this publication was published in",
+    )
+    abstract = field.Field(
+        rdf_name=dbo.abstract,
+        verbose_name="Abstract",
+        help_text="Abstract of the publication",
+    )
+    url = field.Field(
+        rdf_name=schema.url, verbose_name="URL", help_text="Link to this publication"
+    )
+    authors = field.Field(
+        rdf_name=OEO.OEO_00000506,
+        verbose_name="Authors",
+        help_text="Authors of this publication",
+    )
+    about = field.Field(
+        rdf_name=obo.IAO_0000136,
+        verbose_name="About",
+        help_text="Elements of this publication",
+    )
 
 
 class Institution(RDFFactory):
@@ -124,10 +168,18 @@ class Institution(RDFFactory):
 
 class Study(RDFFactory):
     _direct_parent = OEO.OEO_00020011
-    funding_source = field.Field(rdf_name=OEO.OEO_00000509, verbose_name="Funding source", handler=handler.FactoryHandler(Institution))
+    funding_source = field.Field(
+        rdf_name=OEO.OEO_00000509,
+        verbose_name="Funding source",
+        handler=handler.FactoryHandler(Institution),
+    )
     has_part = field.Field(rdf_name=obo.BFO_0000051, verbose_name="Has part")
-    covers_energy_carrier = field.Field(rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers")
-    model_calculations = field.Field(rdf_name=schema.affiliation, verbose_name="Model Calculations")
+    covers_energy_carrier = field.Field(
+        rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers"
+    )
+    model_calculations = field.Field(
+        rdf_name=schema.affiliation, verbose_name="Model Calculations"
+    )
 
 
 class Person(RDFFactory):
@@ -146,4 +198,8 @@ class Model(RDFFactory):
 class ModelCalculation(RDFFactory):
     has_input = field.Field(rdf_name=obo.RO_0002233, verbose_name="Inputs")
     has_output = field.Field(rdf_name=obo.RO_0002234, verbose_name="Outputs")
-    uses = field.Field(rdf_name=OEO.OEO_00000501, verbose_name="Involved Models", handler=handler.FactoryHandler(Model))
+    uses = field.Field(
+        rdf_name=OEO.OEO_00000501,
+        verbose_name="Involved Models",
+        handler=handler.FactoryHandler(Model),
+    )

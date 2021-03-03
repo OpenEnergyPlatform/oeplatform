@@ -21,17 +21,19 @@ class NamedIRI(Rederable):
         self.label = label
 
     def render(self, **kwargs):
-        return format_html("<a href=\"{iri}\">{label}</a>", iri=self.iri, label=self.label)
+        return format_html(
+            '<a href="{iri}">{label}</a>', iri=self.iri, label=self.label
+        )
 
 
 class DefaultHandler(Handler):
     def __call__(self, value, context, graph: Graph, **kwargs):
         if isinstance(value, URIRef):
-                label = graph.label(value, None)
-                if label is not None:
-                    return NamedIRI(value, label)
-                else:
-                    return value
+            label = graph.label(value, None)
+            if label is not None:
+                return NamedIRI(value, label)
+            else:
+                return value
         elif isinstance(value, list):
             return [self.__call__(v, context, graph) for v in value]
         elif isinstance(value, str):
