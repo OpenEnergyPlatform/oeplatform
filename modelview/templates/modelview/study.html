@@ -11,7 +11,7 @@
 
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
-<table>
+<table class="table">
     {{ obj.render_table }}
 </table>
 {% endblock factsheets_content %}

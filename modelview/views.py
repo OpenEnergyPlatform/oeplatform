@@ -19,6 +19,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
+from rdflib import Graph
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
@@ -437,8 +438,8 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     url = finders.find(path)
     return url
 
-from modelview import rdfstructures as rs
-from typing import Type
+
+from .rdf import rdfstructures as rs
 
 
 class RDFFactoryView(View):
@@ -447,12 +448,15 @@ class RDFFactoryView(View):
 
     def get(self, request, identifier):
         context = rs.ConnectionContext()
-        i = str(getattr(rs.OEO_KG, identifier))
-        results = self._cls._load([i], context)
-        try:
-            obj = results[i]
-        except KeyError:
-            raise Http404
+        # Build URI, assuming that this is part of this knowledge graph
+        uri = getattr(rs.OEO_KG, identifier)
+        g = Graph()
+        # Load instance from graph
+        # TODO: Error handling:
+        #  * What if it is not part of the graph?
+        #  * What if it is not of this class?
+        #  * Probably: 404 in both cases!?
+        obj = self._cls._load_one(uri, context, g)
         return render(
             request,
             self._template,
@@ -463,34 +467,37 @@ class RDFFactoryView(View):
 class RDFFactoryFormView(View):
     _cls = None
     _template = None
+    _success_url = None
 
     def get(self, request, identifier):
         context = rs.ConnectionContext()
-        i = str(getattr(rs.OEO_KG, identifier))
-        results = self._cls._load([i], context)
-        try:
-            obj = results[i]
-        except KeyError:
-            raise Http404
+        # Build URI, assuming that this is part of this knowledge graph
+        uri = getattr(rs.OEO_KG, identifier)
+        g = Graph()
+        # Load instance from graph
+        # TODO: Error handling:
+        #  * What if it is not part of the graph?
+        #  * What if it is not of this class?
+        #  * Probably: 404 in both cases!?
+        obj = self._cls._load_one(uri, context, g)
         return render(
             request,
             self._template,
             {"obj": obj},
         )
 
-    def post(self, request, identifier):
-        context = rs.ConnectionContext()
-        i = str(getattr(rs.OEO_KG, identifier))
-        results = self._cls._load([i], context)
+    def post(self, request, identifier=None):
         try:
-            obj = results[i]
-        except KeyError:
-            raise Http404
-        return render(
-            request,
-            self._template,
-            {"obj": obj},
-        )
+            obj = self._cls(**request.data["POST"])
+        except Exception as e:
+            # TODO: This has to be refined!
+            return render(
+                request,
+                self._template,
+                {"obj": obj, "error": str(e)},
+            )
+        else:
+            return redirect(self._success_url)
 
 
 class StudyRDFView(RDFFactoryView):

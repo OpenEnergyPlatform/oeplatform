@@ -1,15 +1,8 @@
-import datetime
-import json
-
-import matplotlib.pyplot as plt
-import numpy
-import urllib3
 from django import template
 from django.contrib.postgres.forms.array import SimpleArrayField
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
-from scipy import stats
-import modelview.rdfstructures as rs
+
 register = template.Library()
 
 
