@@ -1,11 +1,7 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-from rdflib.serializer import Serializer
-
 from oeplatform.settings import RDF_DATABASES
-from django.utils.html import conditional_escape, format_html, format_html_join, mark_safe
 
-from typing import Type
 
 class ConnectionContext:
     def __init__(self):

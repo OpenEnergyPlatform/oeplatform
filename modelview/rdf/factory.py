@@ -3,15 +3,14 @@ from django.utils.html import format_html, format_html_join, mark_safe
 from itertools import chain
 from rdflib import Graph
 
-from modelview.rdf.fields import Field
-from modelview.rdf.handler import DefaultHandler, FactoryHandler, Rederable
+from modelview.rdf import handler, field
 from modelview.rdf.namespace import *
 
 
-class RDFFactory(Rederable, ABC):
+class RDFFactory(handler.Rederable, ABC):
     _field_handler = {}
     _direct_parent = None
-    classes = Field(rdf_name=rdf.type, verbose_name="Classes")
+    classes = field.Field(rdf_name=rdf.type, verbose_name="Classes")
     _label_iri = rdfs.label
 
     @classmethod
@@ -35,7 +34,7 @@ class RDFFactory(Rederable, ABC):
 
     def __init__(self, **kwargs):
         self.additional_fields = {}
-        default_handler = DefaultHandler()
+        default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
         for k0, v in kwargs.items():
             k = self._field_map.get(k0, k0)
@@ -53,7 +52,7 @@ class RDFFactory(Rederable, ABC):
     def iter_field_names(cls):
         """Returns an iterator of all field names in this factory"""
         for k in dir(cls):
-            if isinstance(getattr(cls, k, None), Field):
+            if isinstance(getattr(cls, k, None), field.Field):
                 yield k
 
     @classmethod
@@ -77,7 +76,7 @@ class RDFFactory(Rederable, ABC):
                 obj[p].append(o)
             except KeyError:
                 obj[p] = [o]
-        res = cache[identifier] = cls(**{p: cls._field_handler.get(p, DefaultHandler())(os, context, graph) for p, os in obj.items()})
+        res = cache[identifier] = cls(**{p: cls._field_handler.get(p, handler.DefaultHandler())(os, context, graph) for p, os in obj.items()})
         return res
 
     def save(self, context):
@@ -97,54 +96,54 @@ class RDFFactory(Rederable, ABC):
 
 
 class Scenario(RDFFactory):
-    abbreviation = Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
-    abstract = Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="A short description of this scenario")
-    name = Field(rdf_name=foaf.name, verbose_name="Abstract", help_text="A short description of this scenario")
+    abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
+    abstract = field.Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="A short description of this scenario")
+    name = field.Field(rdf_name=foaf.name, verbose_name="Abstract", help_text="A short description of this scenario")
 
 
 class AnalysisScope(RDFFactory):
-    is_defined_by = Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by")
-    covers_sector = Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors")
-    covers = Field(rdf_name=OEO.OEO_00000522, verbose_name="Covers")
+    is_defined_by = field.Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by")
+    covers_sector = field.Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors")
+    covers = field.Field(rdf_name=OEO.OEO_00000522, verbose_name="Covers")
 
 
 class Publication(RDFFactory):
-    title = Field(rdf_name=dc.title, verbose_name="Title", help_text="Title of the publication")
-    subtitle = Field(rdf_name=dbo.subtitle, verbose_name="Subtitle")
-    publication_year = Field(rdf_name=npg.publicationYear, verbose_name="Publication year", help_text="Year this publication was published in")
-    abstract = Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="Abstract of the publication")
-    url = Field(rdf_name=schema.url, verbose_name="URL", help_text="Link to this publication")
-    authors = Field(rdf_name=OEO.OEO_00000506, verbose_name="Authors", help_text="Authors of this publication")
-    about = Field(rdf_name=obo.IAO_0000136, verbose_name="About", help_text="Elements of this publication")
+    title = field.Field(rdf_name=dc.title, verbose_name="Title", help_text="Title of the publication")
+    subtitle = field.Field(rdf_name=dbo.subtitle, verbose_name="Subtitle")
+    publication_year = field.Field(rdf_name=npg.publicationYear, verbose_name="Publication year", help_text="Year this publication was published in")
+    abstract = field.Field(rdf_name=dbo.abstract, verbose_name="Abstract", help_text="Abstract of the publication")
+    url = field.Field(rdf_name=schema.url, verbose_name="URL", help_text="Link to this publication")
+    authors = field.Field(rdf_name=OEO.OEO_00000506, verbose_name="Authors", help_text="Authors of this publication")
+    about = field.Field(rdf_name=obo.IAO_0000136, verbose_name="About", help_text="Elements of this publication")
 
 
 class Institution(RDFFactory):
     _direct_parent = OEO.OEO_00000238
-    name = Field(rdf_name=foaf.name, verbose_name="Name")
+    name = field.Field(rdf_name=foaf.name, verbose_name="Name")
 
 
 class Study(RDFFactory):
     _direct_parent = OEO.OEO_00020011
-    funding_source = Field(rdf_name=OEO.OEO_00000509, verbose_name="Funding source", handler=FactoryHandler(Institution))
-    has_part = Field(rdf_name=obo.BFO_0000051, verbose_name="Has part")
-    covers_energy_carrier = Field(rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers")
-    model_calculations = Field(rdf_name=schema.affiliation, verbose_name="Model Calculations")
+    funding_source = field.Field(rdf_name=OEO.OEO_00000509, verbose_name="Funding source", handler=handler.FactoryHandler(Institution))
+    has_part = field.Field(rdf_name=obo.BFO_0000051, verbose_name="Has part")
+    covers_energy_carrier = field.Field(rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers")
+    model_calculations = field.Field(rdf_name=schema.affiliation, verbose_name="Model Calculations")
 
 
 class Person(RDFFactory):
     _direct_parent = OEO.OEO_00000323
-    first_name = Field(rdf_name=foaf.givenName, verbose_name="First name")
-    last_name = Field(rdf_name=foaf.familyName, verbose_name="Last name")
-    affiliation = Field(rdf_name=schema.affiliation, verbose_name="Affiliation")
+    first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name")
+    last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name")
+    affiliation = field.Field(rdf_name=schema.affiliation, verbose_name="Affiliation")
 
 
 class Model(RDFFactory):
     _direct_parent = OEO.OEO_00020011
-    url = Field(rdf_name=schema.url, verbose_name="URL")
-    name = Field(rdf_name=dc.title, verbose_name="Name")
+    url = field.Field(rdf_name=schema.url, verbose_name="URL")
+    name = field.Field(rdf_name=dc.title, verbose_name="Name")
 
 
 class ModelCalculation(RDFFactory):
-    has_input = Field(rdf_name=obo.RO_0002233, verbose_name="Inputs")
-    has_output = Field(rdf_name=obo.RO_0002234, verbose_name="Outputs")
-    uses = Field(rdf_name=OEO.OEO_00000501, verbose_name="Involved Models", handler=FactoryHandler(Model))
+    has_input = field.Field(rdf_name=obo.RO_0002233, verbose_name="Inputs")
+    has_output = field.Field(rdf_name=obo.RO_0002234, verbose_name="Outputs")
+    uses = field.Field(rdf_name=OEO.OEO_00000501, verbose_name="Involved Models", handler=handler.FactoryHandler(Model))

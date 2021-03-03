@@ -2,14 +2,13 @@ from django.forms.widgets import TextInput
 from django.utils.html import format_html, format_html_join, mark_safe
 from typing import Type
 
-from modelview.rdf.factories import RDFFactory
-from modelview.rdf.handler import Handler, DefaultHandler, Rederable
+from modelview.rdf import handler
 
-class Field(Rederable):
-    _handler = DefaultHandler
+class Field(handler.Rederable):
+    _handler = handler.DefaultHandler
     _widged = TextInput
 
-    def __init__(self, rdf_name, verbose_name=None, handler: Handler = None, help_text: str = None):
+    def __init__(self, rdf_name, verbose_name=None, handler: handler.Handler = None, help_text: str = None):
         self.rdf_name = rdf_name
         self.verbose_name = verbose_name
         self.handler = handler if handler else self._handler()
@@ -36,7 +35,7 @@ class Field(Rederable):
         return s
 
     def _render_atomic_field(self, obj, **kwargs):
-        if isinstance(obj, Rederable):
+        if isinstance(obj, handler.Rederable):
             return obj.render()
         elif isinstance(obj, list):
             return [self._render_atomic_field(o, **kwargs) for o in obj]
@@ -48,7 +47,7 @@ class Field(Rederable):
             raise ValueError(obj)
 
     def _render_atomic_form_field(self, obj, **kwargs):
-        if isinstance(obj, Rederable):
+        if isinstance(obj, handler.Rederable):
             return obj.render()
         elif isinstance(obj, list):
             return [self._render_atomic_form_field(o, **kwargs) for o in obj]
@@ -57,7 +56,8 @@ class Field(Rederable):
         else:
             raise ValueError(obj)
 
+
 class FactoryField(Field):
-    def __init__(self, factory: Type[RDFFactory], **kwargs):
+    def __init__(self, factory, **kwargs):
         self.factory = factory
         super(FactoryField, self).__init__(**kwargs)
