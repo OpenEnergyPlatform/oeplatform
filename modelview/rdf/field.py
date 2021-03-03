@@ -6,6 +6,14 @@ from modelview.rdf import handler
 
 
 class Field(handler.Rederable):
+    """
+    :ivar rdf_name: IRI of this property
+    :ivar verbose_name: A readable label (not `rdfs:label`)
+    :ivar handler: A handler used to parse this field. Defaults to `handler.DefaultHandler`
+    :ivar values: A list of values that the related subject is in relation with
+    :ivar help_text: Some helpful text
+    """
+
     _handler = handler.DefaultHandler
     _widged = TextInput
 

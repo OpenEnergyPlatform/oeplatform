@@ -439,7 +439,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     return url
 
 
-from .rdf import rdfstructures as rs
+from .rdf import factory, connection, namespace
 
 
 class RDFFactoryView(View):
@@ -447,9 +447,9 @@ class RDFFactoryView(View):
     _template = None
 
     def get(self, request, identifier):
-        context = rs.ConnectionContext()
+        context = connection.ConnectionContext()
         # Build URI, assuming that this is part of this knowledge graph
-        uri = getattr(rs.OEO_KG, identifier)
+        uri = getattr(namespace.OEO_KG, identifier)
         g = Graph()
         # Load instance from graph
         # TODO: Error handling:
@@ -470,9 +470,9 @@ class RDFFactoryFormView(View):
     _success_url = None
 
     def get(self, request, identifier):
-        context = rs.ConnectionContext()
+        context = connection.ConnectionContext()
         # Build URI, assuming that this is part of this knowledge graph
-        uri = getattr(rs.OEO_KG, identifier)
+        uri = getattr(namespace.OEO_KG, identifier)
         g = Graph()
         # Load instance from graph
         # TODO: Error handling:
@@ -488,7 +488,12 @@ class RDFFactoryFormView(View):
 
     def post(self, request, identifier=None):
         try:
-            obj = self._cls(**request.data["POST"])
+            graph = Graph()
+            graph.parse(request.data["POST"]["graph"])
+            if identifier is None:
+                raise NotImplementedError
+            context = connection.ConnectionContext()
+            obj = self._cls._parse(identifier=identifier, context=context, graph=graph)
         except Exception as e:
             # TODO: This has to be refined!
             return render(
@@ -501,12 +506,12 @@ class RDFFactoryFormView(View):
 
 
 class StudyRDFView(RDFFactoryView):
-    _cls = rs.Study
+    _cls = factory.Study
     _template = "modelview/study.html"
 
 
 class ScenarioRDFView(RDFFactoryView):
-    _cls = rs.Scenario
+    _cls = factory.Scenario
     _template = "modelview/scenario.html"
 
 

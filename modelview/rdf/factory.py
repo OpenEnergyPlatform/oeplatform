@@ -20,7 +20,7 @@ class RDFFactory(handler.Rederable, ABC):
 """
         for f in self.iter_field_names():
             field = getattr(self, f)
-            s += f"* `{f} <{field.rdf_name}>`_"
+            s += f"* `{f} <{field.rdf_name}>`_ ({field.rdf_name})"
             if field.help_text is not None:
                 s += ": " + field.help_text
             s += "\n"
