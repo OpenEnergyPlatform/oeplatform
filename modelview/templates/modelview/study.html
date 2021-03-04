@@ -11,7 +11,48 @@
 
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
-<table class="table">
-    {{ obj.render_table }}
-</table>
+<form class="form" >
+
+    <h3>Funding Source</h3>
+
+    <div id = "funding_source_div">
+    <div id = "funding_source">
+    Name : <input class = "funding_source_input" type="text" list="funding_source_name">
+    <datalist id="funding_source_name">
+        <option>{% for institute_object in obj.funding_source.values %}
+            {% for institute_name in institute_object.name.values %}
+                {{institute_name}}
+            {% endfor %}
+        {% endfor %}
+        </option>
+    </datalist>
+    <br>
+    Address : <input class = "funding_source_input" type="text" list="funding_source_address">
+    <datalist id="funding_source_address">
+        <option>
+        </option>
+    </datalist>
+    <br>
+    <input type = "button" id = "add_funding_source" onClick = "duplicate();" value = "Add new Source"></button>
+    <br>
+    </div>
+    </div>
+    <input type="submit" value="Submit">
+
+</form>
+
+
+<script>
+
+    var i = 0;
+    var original = document.getElementById('funding_source');
+
+    function duplicate() {
+        var clone = original.cloneNode(true); // "deep" clone
+        clone.id = "funding_source" + ++i;
+        original.parentNode.appendChild(clone);
+    }
+
+</script>
+
 {% endblock factsheets_content %}
