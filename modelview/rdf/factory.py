@@ -121,7 +121,7 @@ class RDFFactory(handler.Rederable, ABC):
                 help_text=field.help_text,
             )
             t = field._widget.get_structure()
-            if t is isinstance(t, str):
+            if isinstance(t, str):
                 d["template"] = t
             else:
                 d["substructure"] = t
