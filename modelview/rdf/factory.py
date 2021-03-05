@@ -164,11 +164,13 @@ class Publication(RDFFactory):
 class Institution(RDFFactory):
     _direct_parent = OEO.OEO_00000238
     name = field.Field(rdf_name=foaf.name, verbose_name="Name")
+    address = field.Field(rdf_name=foaf.address, verbose_name="Address")
 
 
 class Study(RDFFactory):
     _direct_parent = OEO.OEO_00020011
-    funding_source = field.Field(
+    funding_source = field.FactoryField(
+        Institution,
         rdf_name=OEO.OEO_00000509,
         verbose_name="Funding source",
         handler=handler.FactoryHandler(Institution),
@@ -180,6 +182,7 @@ class Study(RDFFactory):
     model_calculations = field.Field(
         rdf_name=schema.affiliation, verbose_name="Model Calculations"
     )
+    # is_referenced_by = field.Field()
 
 
 class Person(RDFFactory):

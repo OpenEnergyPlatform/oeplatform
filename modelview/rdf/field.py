@@ -1,8 +1,10 @@
 from django.forms.widgets import TextInput
 from django.utils.html import format_html, format_html_join, mark_safe
-from typing import Type
+import json
 
-from modelview.rdf import handler
+from modelview.rdf import handler, widget
+
+from modelview.rdf.widget import DynamicFactoryArrayWidget
 
 
 class Field(handler.Rederable):
@@ -15,7 +17,6 @@ class Field(handler.Rederable):
     """
 
     _handler = handler.DefaultHandler
-    _widged = TextInput
 
     def __init__(
         self,
@@ -23,12 +24,14 @@ class Field(handler.Rederable):
         verbose_name=None,
         handler: handler.Handler = None,
         help_text: str = None,
+        widget_cls=TextInput,
     ):
-        self.rdf_name = rdf_name
+        self.rdf_name = rdf_name  # Some IRI
         self.verbose_name = verbose_name
         self.handler = handler if handler else self._handler()
         self.values = None
         self.help_text = help_text
+        self._widget = DynamicFactoryArrayWidget(subwidget_form=widget_cls)
 
     def to_triples(self, subject):
         if self.values is not None:
@@ -40,20 +43,26 @@ class Field(handler.Rederable):
 
         if mode == "display":
             f = self._render_atomic_field
+
+            vals = [(f(v),) for v in it]
+
+            s = format_html(
+                mark_safe(
+                    '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
+                ),
+                rdfname=self.rdf_name,
+                vname=self.verbose_name,
+                vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
+            )
+            return s
         else:
-            f = self._render_atomic_form_field
+            return self._widget.render("Name", self, {"id": "field", "level": 0})
 
-        vals = [(f(v),) for v in it]
+    def render_fields(self):
+        return self.render(mode="form")
 
-        s = format_html(
-            mark_safe(
-                '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
-            ),
-            rdfname=self.rdf_name,
-            vname=self.verbose_name,
-            vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
-        )
-        return s
+    def structure(self):
+        return self._widget()
 
     def _render_atomic_field(self, obj, **kwargs):
         if isinstance(obj, handler.Rederable):
@@ -67,18 +76,14 @@ class Field(handler.Rederable):
         else:
             raise ValueError(obj)
 
-    def _render_atomic_form_field(self, obj, **kwargs):
-        if isinstance(obj, handler.Rederable):
-            return obj.render()
-        elif isinstance(obj, list):
-            return [self._render_atomic_form_field(o, **kwargs) for o in obj]
-        elif isinstance(obj, str):
-            return obj
-        else:
-            raise ValueError(obj)
-
 
 class FactoryField(Field):
     def __init__(self, factory, **kwargs):
-        self.factory = factory
         super(FactoryField, self).__init__(**kwargs)
+        self.factory = factory
+        self._widget = DynamicFactoryArrayWidget(
+            subwidget_form=widget._factory_field(factory)
+        )
+
+    def structure(self):
+        return json.dumps(self._widget.get_structure())
