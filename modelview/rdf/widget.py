@@ -14,21 +14,7 @@ class FactoryWidget(MultiWidget):
         return [f for f in value.iter_fields()]
 
     def get_structure(self):
-        l = []
-        for f in self.factory.iter_field_names():
-            field = getattr(self.factory, f)
-            d = dict(
-                id=f,
-                verbose_name=field.verbose_name,
-                help_text=field.help_text,
-            )
-            t = self.widget_dict[f].get_structure()
-            if t is isinstance(t, str):
-                d["template"] = t
-            else:
-                d["substructure"] = t
-            l.append(d)
-        return l
+        return self.factory.build_structure_spec()
 
 
 def _factory_field(factory):

@@ -2,7 +2,7 @@ from abc import ABC
 from django.utils.html import format_html, format_html_join, mark_safe
 from itertools import chain
 from rdflib import Graph
-
+import json
 from modelview.rdf import handler, field
 from modelview.rdf.namespace import *
 
@@ -105,6 +105,28 @@ class RDFFactory(handler.Rederable, ABC):
     def render_table(self):
         s = format_html_join("\n", "{}", ((f.render(),) for f in self.iter_fields()))
         return s
+
+    @classmethod
+    def structure_spec(cls):
+        return json.dumps(cls.build_structure_spec())
+
+    @classmethod
+    def build_structure_spec(cls):
+        l = []
+        for f in cls.iter_field_names():
+            field = getattr(cls, f)
+            d = dict(
+                id=f,
+                verbose_name=field.verbose_name,
+                help_text=field.help_text,
+            )
+            t = field._widget.get_structure()
+            if t is isinstance(t, str):
+                d["template"] = t
+            else:
+                d["substructure"] = t
+            l.append(d)
+        return l
 
     @property
     def label(self):

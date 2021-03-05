@@ -86,4 +86,4 @@ class FactoryField(Field):
         )
 
     def structure(self):
-        return json.dumps(self._widget.get_structure())
+        return self._widget.get_structure()
