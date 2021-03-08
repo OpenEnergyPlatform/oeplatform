@@ -11,48 +11,129 @@
 
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
-<form class="form" >
+<form id="form" >
 
     <h3>Funding Source</h3>
 
     <div id = "funding_source_div">
     <div id = "funding_source">
-    Name : <input class = "funding_source_input" type="text" list="funding_source_name">
-    <datalist id="funding_source_name">
-        <option>{% for institute_object in obj.funding_source.values %}
-            {% for institute_name in institute_object.name.values %}
-                {{institute_name}}
-            {% endfor %}
-        {% endfor %}
+    Name : <input type="text" list="funding_source_name_1"  id = "funding_source.0.name">
+    <datalist id="funding_source_name_1">
+        <option>FOUNDING_SOURCE_NAME_1
         </option>
     </datalist>
     <br>
-    Address : <input class = "funding_source_input" type="text" list="funding_source_address">
-    <datalist id="funding_source_address">
-        <option>
+    Address : <input  type="text" list="funding_source_address_1"  id = "funding_source.0.address">
+    <datalist id="funding_source_address_1">
+        <option>FOUNDING_SOURCE_ADDRESS_1
         </option>
     </datalist>
     <br>
-    <input type = "button" id = "add_funding_source" onClick = "duplicate();" value = "Add new Source"></button>
+    <input type = "button" id = "add_funding_source" value = "Add new Source">
     <br>
     </div>
+    <div id = "funding_source_1">
+        Name : <input  type="text" list="funding_source_name" id = "funding_source.1.name">
+        <datalist id="funding_source_name">
+            <option>FOUNDING_SOURCE_NAME_2
+            </option>
+        </datalist>
+        <br>
+        Address : <input class = "funding_source_input" type="text" list="funding_source_address" id = "funding_source.1.address">
+        <datalist id="funding_source_address">
+            <option>FOUNDING_SOURCE_ADDRESS_2
+            </option>
+        </datalist>
+        <br>
+        <input type = "button" id = "add_funding_source" value = "Add new Source"></button>
+        <br>
+        </div>
     </div>
+
+
+
+
+    <div id = "publication_div">
+        <div id = "publication">
+        Name : <input type="text" list="publication_name_1"  id = "publication.0.name">
+        <datalist id="publication_name_1">
+            <option>PUBLICATION_NAME_1
+            </option>
+        </datalist>
+        <br>
+        Address : <input  type="text" list="publication_address_1"  id = "publication.0.address">
+        <datalist id="publication_address_1">
+            <option>PUBLICATION_ADDRESS_1
+            </option>
+        </datalist>
+        <br>
+        <input type = "button" id = "add_funding_source" value = "Add new Publication">
+        <br>
+        </div>
+        <div id = "publication_1">
+            Name : <input  type="text" list="publication_name" id = "publication.1.name">
+            <datalist id="publication_name">
+                <option>PUBLICATION_NAME_2
+                </option>
+            </datalist>
+            <br>
+            Address : <input class = "funding_source_input" type="text" list="publication_address" id = "publication.1.address">
+            <datalist id="publication_address">
+                <option>PUBLICATION_ADDRESS_2
+                </option>
+            </datalist>
+            <br>
+            <input type = "button" id = "add_funding_source" value = "Add new Publication">
+            <br>
+            </div>
+        </div>
     <input type="submit" value="Submit">
+    <p id='result'></p>
 
 </form>
-
-
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
 <script>
 
-    var i = 0;
-    var original = document.getElementById('funding_source');
-
-    function duplicate() {
-        var clone = original.cloneNode(true); // "deep" clone
-        clone.id = "funding_source" + ++i;
-        original.parentNode.appendChild(clone);
+    function sendData(id_list){
+        let value_dict = {}
+        let data_list = []
+        let counter = 0
+        for (var k = 0; k < id_list.length ; k++){
+        let id = id_list[k]
+        let temp_varDict = {};
+        let data_list = []
+        let input_elements = document.querySelectorAll(`input[id^=${id}]`);
+        for(var i = 0; i < input_elements.length ; i++){
+          id_string = input_elements[i]
+          let element_id = document.getElementById(id_string.id).id;
+          list_elements = element_id.split('.')
+          let element = document.getElementById(id_string.id).value;
+          if(list_elements[2] in temp_varDict){
+            temp_varDict = {}
+            temp_varDict[list_elements[2]] = element;
+          }
+          else{
+            temp_varDict[list_elements[2]] = element;
+          }
+          data_list.push(temp_varDict)
+        }
+        var set1 = new Set(data_list);
+        let array = Array.from(set1);
+        value_dict[id] = array;
+        }
+    return value_dict;
     }
 
+    $(function() {
+        $('form').submit(function(e){
+            e.preventDefault();
+            id_list = ["funding_source",'publication']
+            return_dictionary = sendData(id_list)
+            console.log(return_dictionary)
+            let result_view = document.getElementById('result')
+            result_view.innerHTML = JSON.stringify(return_dictionary)
+    });
+    });
 </script>
 
 {% endblock factsheets_content %}
