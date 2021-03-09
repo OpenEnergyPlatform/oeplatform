@@ -51,13 +51,13 @@
     </div>
     <div id = "publication_div">
         <div id = "publication">
-        Name : <input type="text" list="publication_name_1"  id = "publication.0.name">
+        Name : <input type="text" list="publication_name_1"  id = "publication_name.0">
         <datalist id="publication_name_1">
             <option>PUBLICATION_NAME_1
             </option>
         </datalist>
         <br>
-        Address : <input  type="text" list="publication_address_1"  id = "publication.0.address">
+        Address : <input  type="text" list="publication_address_1"  id = "publication_address.0">
         <datalist id="publication_address_1">
             <option>PUBLICATION_ADDRESS_1
             </option>
@@ -67,13 +67,13 @@
         <br>
         </div>
         <div id = "publication_1">
-            Name : <input  type="text" list="publication_name" id = "publication.1.name">
+            Name : <input  type="text" list="publication_name" id = "publication_name.1">
             <datalist id="publication_name">
                 <option>PUBLICATION_NAME_2
                 </option>
             </datalist>
             <br>
-            Address : <input class = "funding_source_input" type="text" list="publication_address" id = "publication.1.address">
+            Address : <input class = "funding_source_input" type="text" list="publication_address" id = "publication_address.1">
             <datalist id="publication_address">
                 <option>PUBLICATION_ADDRESS_2
                 </option>
@@ -104,12 +104,18 @@
           let element_id = document.getElementById(id_string.id).id;
           list_elements = element_id.split('.')
           let element = document.getElementById(id_string.id).value;
-          if(list_elements[2] in temp_varDict){
-            temp_varDict = {}
-            temp_varDict[list_elements[2]] = element;
+          if(list_elements.length == 2){
+              key = list_elements[0]
           }
           else{
-            temp_varDict[list_elements[2]] = element;
+              key = list_elements[2]
+          }
+          if(key in temp_varDict){
+            temp_varDict = {}
+            temp_varDict[key] = element;
+          }
+          else{
+            temp_varDict[key] = element;
           }
           data_list.push(temp_varDict)
         }

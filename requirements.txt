@@ -23,3 +23,6 @@ omi
 rdflib
 django-jquery
 zipstream-new
+rdflib
+rdblib-jsonld
+django_better_admin_arrayfield
