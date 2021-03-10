@@ -150,6 +150,7 @@ def _gatherTutorials(id=None):
 
     return tutorials
 
+
 def _processFormInput(form):
     tutorial = form.save(commit=False)
     # Add more information to the dataset like date, time, contributor ...
@@ -161,6 +162,7 @@ def _processFormInput(form):
             tutorial.media_src = "https://www.youtube.com/embed/" + videoId
 
     return tutorial
+
 
 def formattedMarkdown(markdown):
     """
