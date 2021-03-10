@@ -11,131 +11,198 @@
 
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
-<form id="form" >
-
-    <h3>Funding Source</h3>
-
-    <div id = "funding_source_div">
-    <div id = "funding_source">
-    Name : <input type="text" list="funding_source_name_1"  id = "funding_source.0.name">
-    <datalist id="funding_source_name_1">
-        <option>FOUNDING_SOURCE_NAME_1
-        </option>
-    </datalist>
-    <br>
-    Address : <input  type="text" list="funding_source_address_1"  id = "funding_source.0.address">
-    <datalist id="funding_source_address_1">
-        <option>FOUNDING_SOURCE_ADDRESS_1
-        </option>
-    </datalist>
-    <br>
-    <input type = "button" id = "add_funding_source" value = "Add new Source">
-    <br>
-    </div>
-    <div id = "funding_source_1">
-        Name : <input  type="text" list="funding_source_name" id = "funding_source.1.name">
-        <datalist id="funding_source_name">
-            <option>FOUNDING_SOURCE_NAME_2
-            </option>
-        </datalist>
-        <br>
-        Address : <input class = "funding_source_input" type="text" list="funding_source_address" id = "funding_source.1.address">
-        <datalist id="funding_source_address">
-            <option>FOUNDING_SOURCE_ADDRESS_2
-            </option>
-        </datalist>
-        <br>
-        <input type = "button" id = "add_funding_source" value = "Add new Source"></button>
-        <br>
-        </div>
-    </div>
-    <div id = "publication_div">
-        <div id = "publication">
-        Name : <input type="text" list="publication_name_1"  id = "publication_name.0">
-        <datalist id="publication_name_1">
-            <option>PUBLICATION_NAME_1
-            </option>
-        </datalist>
-        <br>
-        Address : <input  type="text" list="publication_address_1"  id = "publication_address.0">
-        <datalist id="publication_address_1">
-            <option>PUBLICATION_ADDRESS_1
-            </option>
-        </datalist>
-        <br>
-        <input type = "button" id = "add_funding_source" value = "Add new Publication">
-        <br>
-        </div>
-        <div id = "publication_1">
-            Name : <input  type="text" list="publication_name" id = "publication_name.1">
-            <datalist id="publication_name">
-                <option>PUBLICATION_NAME_2
-                </option>
-            </datalist>
-            <br>
-            Address : <input class = "funding_source_input" type="text" list="publication_address" id = "publication_address.1">
-            <datalist id="publication_address">
-                <option>PUBLICATION_ADDRESS_2
-                </option>
-            </datalist>
-            <br>
-            <input type = "button" id = "add_funding_source" value = "Add new Publication">
-            <br>
-            </div>
-        </div>
-    <input type="submit" value="Submit">
-    <p id='result'></p>
-
+<form id="study-form">
 </form>
-<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-<script>
 
-    function sendData(id_list){
-        let value_dict = {}
-        let data_list = []
-        let counter = 0
-        for (var k = 0; k < id_list.length ; k++){
-        let id = id_list[k]
-        let temp_varDict = {};
-        let data_list = []
-        let input_elements = document.querySelectorAll(`input[id^=${id}]`);
-        for(var i = 0; i < input_elements.length ; i++){
-          id_string = input_elements[i]
-          let element_id = document.getElementById(id_string.id).id;
-          list_elements = element_id.split('.')
-          let element = document.getElementById(id_string.id).value;
-          if(list_elements.length == 2){
-              key = list_elements[0]
-          }
-          else{
-              key = list_elements[2]
-          }
-          if(key in temp_varDict){
-            temp_varDict = {}
-            temp_varDict[key] = element;
-          }
-          else{
-            temp_varDict[key] = element;
-          }
-          data_list.push(temp_varDict)
-        }
-        var set1 = new Set(data_list);
-        let array = Array.from(set1);
-        value_dict[id] = array;
-        }
-    return value_dict;
+<script>
+    structure = {{ obj.structure_spec | safe }};
+    var clickCache = []; // stores button clicks
+
+    var createLeaf = function (each, addButton, flag, outer_id) {
+        let value = 0;
+        clickCache.forEach((button) => {
+            if(button.key == addButton) value = button.value;
+        })
+        let tempHTML = document.createElement('input');
+        tempHTML.innerHTML = each.template;
+        tempHTML.id = flag? outer_id + '.' + value + '.' + each.id : each.id + '.' + value; 
+        tempHTML.className = 'form-control'
+
+        let smallElement = document.createElement('small');
+        smallElement.className = 'form-text text-muted';
+        smallElement.innerHTML = each.help_text;  //flag? outer_id + '.' + value + '.' + each.id : each.id + '.' + value; 
+
+        let tempHeading = flag? document.createElement('h3'): document.createElement('h2');
+        tempHeading.innerHTML = each.verbose_name;
+
+        let element = document.createElement('div');
+        element.className = flag? 'form-group rounded border bg-light p-2 m-1': 'form-group rounded border bg-light p-2'; 
+        if(tempHTML.id.includes('0')) { element.appendChild(tempHeading); }
+        element.appendChild(tempHTML);
+        element.appendChild(smallElement);
+        
+        return element; 
+    }
+    
+    {% comment %} var createSubstructure = function (each, addButton) {
+        let subElement = document.createElement('div');
+        subElement.className = 'form-group border p-3 border rounded bg-light';
+        
+        // gets the button value
+        let value = 0;
+        clickCache.forEach((button) => {
+            if(button.key == addButton) value = button.value;
+        });
+
+        each.substructure.forEach((innereach, i) => {
+            let tempHTML = document.createElement('input');
+            tempHTML.innerHTML = innereach.template;
+            tempHTML.id = each.id  + '.' + value + '.' + innereach.id;
+            tempHTML.className = 'form-control'
+
+            let smallElement = document.createElement('small');
+            smallElement.className = 'form-text text-muted';
+            smallElement.innerHTML = each.id  + '.' + value + '.' + innereach.id; // innereach.help_text;
+
+            let tempHeading = document.createElement('h3');
+            tempHeading.innerHTML = innereach.verbose_name;
+
+            let element = document.createElement('div');
+            element.className = 'form-group'; 
+            element.appendChild(tempHeading);
+            element.appendChild(tempHTML);
+            element.appendChild(smallElement);
+            
+            subElement.appendChild(element);
+        });
+        return subElement;
+    } {% endcomment %}
+
+    // check if structure is truthy
+    if(structure) {
+        let studyForm = document.getElementById('study-form');
+        structure.forEach((each) => {
+            if(each.substructure) {
+                let masterDiv = document.createElement('div');
+                masterDiv.className = 'form-group border p-3 bg-light rounded'; 
+
+                let tempHeading = document.createElement('h2');
+                tempHeading.className = 'form-group';
+                tempHeading.innerHTML = each.verbose_name;
+                masterDiv.appendChild(tempHeading);
+
+                each.substructure.forEach((innereach) => {
+                    if(!innereach.id.includes('classes')) {
+                        let element = createLeaf(innereach, null, true, each.id);
+                        let addButton = document.createElement('div');
+                        addButton.className = 'form-group btn btn-secondary p-2 m-1';
+                        addButton.innerHTML = 'Add new';
+                        addButton.onclick = async function() {
+                        clickCache.forEach((button) => {
+                            if(button.key == addButton) button.value += 1;
+                            });
+                            let newElem = createLeaf(innereach, addButton, true, each.id);
+                            masterDiv.insertBefore(newElem, addButton);
+                        };
+                        clickCache.push({
+                            'key' : addButton,
+                            'value' : 0
+                        });
+                        
+                        masterDiv.appendChild(element);          
+                        masterDiv.appendChild(addButton);
+                        studyForm.appendChild(masterDiv);
+                    }
+                });
+            }
+            else { // leaf
+                let masterDiv = document.createElement('div');
+                masterDiv.className = 'form-group'; 
+                if(!each.id.includes('classes')) {
+                    element = createLeaf(each);
+                    let addButton = document.createElement('div');
+                    addButton.className = 'btn btn-secondary';
+                    addButton.innerHTML = 'Add new';
+                    addButton.onclick = async function() {
+                    clickCache.forEach((button) => {
+                        if(button.key == addButton) button.value += 1;
+                        });
+                        let newElem = createLeaf(each, addButton);
+                        masterDiv.insertBefore(newElem, addButton);
+                    };
+                    clickCache.push({
+                        'key' : addButton,
+                        'value' : 0
+                    });
+                    
+                    masterDiv.appendChild(element);          
+                    masterDiv.appendChild(addButton);
+                    studyForm.appendChild(masterDiv);
+                }  
+            } 
+        });
+
+        let submitButton = document.createElement('div');
+        submitButton.className = 'btn btn-primary';
+        submitButton.innerHTML = 'Submit';
+        submitButton.onclick = async function() { 
+            // insert code here
+            id_list = [];
+            structure.forEach(each => {
+                if(!each.id.includes('classes')) id_list.push(each.id);
+            });
+            return_dictionary = {}; 
+            let value_dict = {};
+            let data_list = [];
+            let counter = 0;
+            for (var k = 0; k < id_list.length ; k++) {
+                let id = id_list[k];
+                let temp_varDict = {};
+                let data_list = [];
+                let input_elements = document.querySelectorAll(`input[id^=${id}]`);
+                for(var i = 0; i < input_elements.length ; i++) {
+                    id_string = input_elements[i];
+                    let element_id = document.getElementById(id_string.id).id;
+                    list_elements = element_id.split('.');
+                    let element = document.getElementById(id_string.id).value;
+                    if(list_elements.length == 2){
+                        key = list_elements[0]
+                    }
+                    else {
+                        key = list_elements[2]
+                    }
+                    if(key in temp_varDict) {
+                        temp_varDict = {}
+                        temp_varDict[key] = element;
+                    }
+                    else {
+                        temp_varDict[key] = element;
+                    }
+                    data_list.push(temp_varDict);
+                }
+                var set1 = new Set(data_list);
+                let array = Array.from(set1);
+                value_dict[id] = array;
+            }
+            return_dictionary = value_dict;
+        };
+        
+        studyForm.appendChild(submitButton);
+    }
+    else {
+        let studyForm = document.getElementById('study-form');
+        
+        let masterDiv = document.createElement('div');
+        masterDiv.className = 'rounded form-group alert alert-danger alert-dismissible fade show';
+        masterDiv.innerHTML = 'Error!'.bold() + ' Data received was found to be invalid';
+
+        let closeButton = document.createElement('html');
+        closeButton.innerHTML = '<button type="button" class="close" data-dismiss="alert">&times;</button>';
+        
+        masterDiv.appendChild(closeButton);
+        studyForm.appendChild(masterDiv);
     }
 
-    $(function() {
-        $('form').submit(function(e){
-            e.preventDefault();
-            id_list = ["funding_source",'publication']
-            return_dictionary = sendData(id_list)
-            console.log(return_dictionary)
-            let result_view = document.getElementById('result')
-            result_view.innerHTML = JSON.stringify(return_dictionary)
-    });
-    });
 </script>
 
 {% endblock factsheets_content %}

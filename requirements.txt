@@ -24,5 +24,6 @@ rdflib
 django-jquery
 zipstream-new
 rdflib
-rdblib-jsonld
+rdflib-jsonld
 django_better_admin_arrayfield
+git+https://github.com/rdflib/sparqlwrapper#egg=sparqlwrapper
