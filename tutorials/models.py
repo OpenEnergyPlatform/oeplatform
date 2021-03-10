@@ -22,9 +22,9 @@ class Tutorial(models.Model):
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
     language = models.CharField(choices=LANGUAGE, null=True, max_length=20)
     medium = models.CharField(choices=MEDIUM, null=True, max_length=20)
-    email_contact = models.EmailField(verbose_name='email contact', max_length=255)
-    github = models.CharField(verbose_name='github name', max_length=50)
-
+    creator = models.CharField(verbose_name='creator/copyright', null=True, max_length=254)
+    email_contact = models.EmailField(verbose_name='email contact', max_length=255, null=True)
+    github = models.CharField(verbose_name='github name', max_length=50, blank=True)
 
     def get_absolute_url (self):
         return reverse('detail_tutorial', args=[self.id])
