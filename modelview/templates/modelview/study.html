@@ -145,44 +145,58 @@
         let submitButton = document.createElement('div');
         submitButton.className = 'btn btn-primary';
         submitButton.innerHTML = 'Submit';
-        submitButton.onclick = async function() { 
+        submitButton.onclick = async function() {
             // insert code here
             id_list = [];
             structure.forEach(each => {
                 if(!each.id.includes('classes')) id_list.push(each.id);
             });
-            return_dictionary = {}; 
+            return_dictionary = {};
             let value_dict = {};
             let data_list = [];
             let counter = 0;
             for (var k = 0; k < id_list.length ; k++) {
                 let id = id_list[k];
-                let temp_varDict = {};
                 let data_list = [];
                 let input_elements = document.querySelectorAll(`input[id^=${id}]`);
+                let num_fields = []
+                // get the number of fields in the sub form
                 for(var i = 0; i < input_elements.length ; i++) {
                     id_string = input_elements[i];
                     let element_id = document.getElementById(id_string.id).id;
                     list_elements = element_id.split('.');
-                    let element = document.getElementById(id_string.id).value;
-                    if(list_elements.length == 2){
-                        key = list_elements[0]
+                    id_num = list_elements[1]
+                    if (num_fields.includes(id_num)) {
+                        continue;
                     }
-                    else {
-                        key = list_elements[2]
+                    else{
+                        num_fields.push(id_num)
                     }
-                    if(key in temp_varDict) {
-                        temp_varDict = {}
-                        temp_varDict[key] = element;
+                }
+                //iterate through the number of fields in each sub form
+                for(var i = 0; i < num_fields.length ; i++){
+                    let temp_varDict = {};
+                    for (var j = 0; j < input_elements.length; j++){
+                        id_string_inner = input_elements[j];
+                        let element_id_inner = document.getElementById(id_string_inner.id).id;
+                        list_elements_inner = element_id_inner.split('.');
+                        id_num_inner = Number(list_elements_inner[1]);
+                        let element_value = document.getElementById(id_string_inner.id).value;
+                        if(id_num_inner == i){
+                            if(list_elements_inner.length == 2){
+                                key = list_elements_inner[0];
+                            }
+                            else {
+                                key = list_elements_inner[2];
+                            }
+                            temp_varDict[key] = element_value;
+                        }
+                        data_list.push(temp_varDict);
                     }
-                    else {
-                        temp_varDict[key] = element;
-                    }
-                    data_list.push(temp_varDict);
                 }
                 var set1 = new Set(data_list);
                 let array = Array.from(set1);
-                value_dict[id] = array;
+                value_dict[id] = data_list;
             }
             return_dictionary = value_dict;
         };
