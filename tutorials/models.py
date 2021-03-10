@@ -20,8 +20,8 @@ class Tutorial(models.Model):
     media_src = models.URLField(verbose_name='youtube video url', null=True, blank=True)
     markdown = models.TextField()
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
-    language = models.CharField(choices=LANGUAGE, null=True)
-    medium = models.CharField(choices=MEDIUM, null=True)
+    language = models.CharField(choices=LANGUAGE, null=True, max_length=20)
+    medium = models.CharField(choices=MEDIUM, null=True, max_length=20)
     email_contact = models.EmailField(verbose_name='email contact', max_length=255)
     github = models.CharField(verbose_name='github name', max_length=50)
 
