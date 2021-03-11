@@ -80,7 +80,7 @@ def _resolveStaticTutorials():
                 'level': handleKeyNotInJson(jsonContent, 'level'),
                 'language': handleKeyNotInJson(jsonContent,  'language'),
                 'medium': handleKeyNotInJson(jsonContent, 'medium'),
-                'license': handleKeyNotInJson(jsonContent, 'license')
+                'license': handleKeyNotInJson(jsonContent, 'license'),
                 'creator': handleKeyNotInJson(jsonContent, 'creator'),
                 'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
                 'github': handleKeyNotInJson(jsonContent, 'github'),
