@@ -45,17 +45,33 @@
     </li>
   </ul>
 
-  <div class="">
+  <div>
     <div class="datatable">
       <table class="display" id="datatable" style="width:100%">
         <thead>
         <tr></tr>
         </thead>
       </table>
+
+       <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
+              </h4>
+            </div>
+            <div id="collapseBuilder" class="panel-collapse collapse">
+              <div class="panel-body">
+                <div id="builder" style="width: 100%"></div>
+                <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
+                <button id="btn-download-view" class="btn btn-success set-json" data-target="basic">Download View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       <div>
-        <div id="builder"></div>
-        <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
-        <button id="btn-download-view" class="btn btn-success set-json" data-target="basic">Download View</button>
+
       </div>
       {% if current_view.type == "map" %}
         <div style='height: 800px; width: 100%;' id="map"></div>
@@ -108,7 +124,7 @@
   <h4>Downloads</h4>
   <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
     <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=csv" type="button" class="btn btn-success">Download CSV</a>
-    <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
+    <a href="/api/v0/schema/{{ schema }}/tables/{{ table }}/rows?form=datapackage" type="button" class="btn btn-warning">Download Datapackage</a>
   </div>
   <hr>
 

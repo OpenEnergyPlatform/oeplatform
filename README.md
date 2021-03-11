@@ -164,10 +164,10 @@ We use `alembic` to keep track of changes in those tables. To create all tables 
 
 ##### 3.1 Rendering Jupyter Notebooks
 
-Tutorials needs an additional build step to download and build the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
+Tutorials needs an additional step to display the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
+This basically recursivly clones the submodule, which is linked within `/examples`.
 
     python manage.py notebooks download
-    python manage.py notebooks build
 
 ### Deploy locally
 
