@@ -93,7 +93,20 @@ def _resolveDynamicTutorial(evaluatedQs):
     """
 
     # Initialize dict that stores a tutorial
-    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'media_src': '', 'level': ''}
+    currentTutorial =   {
+                            'id': '', 
+                            'title': '', 
+                            'html': '', 
+                            'markdown': '', 
+                            'category': '', 
+                            'media_src': '', 
+                            'level': '',
+                            'language': '',
+                            'medium': '',
+                            'creator': '',
+                            'email_contact': '',
+                            'github': ''
+                        }
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
@@ -102,7 +115,13 @@ def _resolveDynamicTutorial(evaluatedQs):
                            markdown=evaluatedQs.markdown,
                            category= evaluatedQs.category,
                            media_src= evaluatedQs.media_src,
-                           level=evaluatedQs.level)
+                           level=evaluatedQs.level,
+                           language=evaluatedQs.language,
+                           medium=evaluatedQs.medium,
+                           creator=evaluatedQs.creator,
+                           email_contact=evaluatedQs.email_contact,
+                           github=evaluatedQs.github
+                           )
 
     return currentTutorial
 
