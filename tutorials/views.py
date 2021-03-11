@@ -54,6 +54,12 @@ def _resolveStaticTutorials():
 
     jsonPaths = Path().rglob('*.json')
 
+    def handleKeyNotInJson(json_dict, key_val):
+        if key_val in json_dict:
+            return json_dict[key_val]
+        else:
+            return ''
+
     try:
         for jsonPath in jsonPaths:
             neededNotebookPath = os.path.splitext(jsonPath)[0]+'.ipynb'
@@ -68,8 +74,15 @@ def _resolveStaticTutorials():
             rTut = _resolveStaticTutorial(neededNotebookPath)
 
             resolvedTutorials.append({
-                'id': jsonContent['name'],
-                'title': jsonContent['displayName'],
+                'id': handleKeyNotInJson(jsonContent, 'name'),
+                'title': handleKeyNotInJson(jsonContent, 'displayName'),
+                'category': handleKeyNotInJson(jsonContent, 'category'),
+                'level': handleKeyNotInJson(jsonContent, 'level'),
+                'language': handleKeyNotInJson(jsonContent,  'language'),
+                'medium': handleKeyNotInJson(jsonContent, 'medium'),
+                'creator': handleKeyNotInJson(jsonContent, 'creator'),
+                'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
+                'github': handleKeyNotInJson(jsonContent, 'github'),
                 'html': rTut['html'],
                 'isStatic': True,
             })
