@@ -2,7 +2,12 @@ from django.db import models
 from django.urls import reverse
 
 # add options if needed
-CATEGORY_OPTIONS = [('io', 'I/O'), ('intro', 'Introduction')]
+CATEGORY_OPTIONS = [('publication', 'Publication'), 
+                    ('io', 'I/O'), 
+                    ('intro', 'OEP Introduction'), 
+                    ('ontology', 'Ontology'), 
+                    ('other', 'Other')]
+
 LEVEL_OPTIONS = [(1, 'Beginner'), (2, 'Intermediate'), (3, 'Expert')]
 LANGUAGE = [('de', 'german'), ('en', 'english'), ('fr', 'french')]
 LICENSE = [('none', 'No'), ('cc0', 'CC0'), ('agpl', 'AGPL')]
