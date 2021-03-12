@@ -133,6 +133,7 @@ def _resolveDynamicTutorial(evaluatedQs):
                            level=evaluatedQs.level,
                            language=evaluatedQs.language,
                            medium=evaluatedQs.medium,
+                           license=evaluatedQs.license,
                            creator=evaluatedQs.creator,
                            email_contact=evaluatedQs.email_contact,
                            github=evaluatedQs.github
