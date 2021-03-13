@@ -43,5 +43,6 @@ class ConnectionContext:
 
     def apply_diff(self, inserts: Graph, deletes: Graph):
         s = f"DELETE {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
-        s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
+        s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in inserts) } }} "
         s += "WHERE {}"
+        print(s)

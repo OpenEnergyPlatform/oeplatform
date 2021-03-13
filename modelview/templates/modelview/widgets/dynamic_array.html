@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% spaceless %}
-<div class="related-widget-wrapper">
+<div class="related-widget-wrapper" {% if widget.is_hidden %} hidden {% endif %}>
     <div class="dynamic-array-widget">
         <div class="form-group" id="container_{{ widget.attrs.id }}">
             {% for subwidget in widget.subwidgets %}

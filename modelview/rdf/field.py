@@ -1,4 +1,4 @@
-from django.forms.widgets import TextInput
+from django.forms.widgets import TextInput, HiddenInput
 from django.utils.html import format_html, format_html_join, mark_safe
 import rdflib as rl
 
@@ -34,8 +34,14 @@ class Field:
         return self._widget
 
 
+class IRIField(Field):
+
+    def __init__(self, rdf_name, **kwargs):
+        super().__init__(rdf_name, widget_cls=HiddenInput, handler=handler.IRIHandler(), **kwargs)
+
+
 class PredefinedInstanceField(Field):
-    pass
+    _handler = handler.IRIHandler
 
 
 class FactoryField(Field):
@@ -56,12 +62,12 @@ class Container(handler.Rederable):
         self.values = []
 
     def to_triples(self, subject):
-        if self.values is not None:
+        if self.field.rdf_name and self.values is not None:
             for v in self.values:
                 if isinstance(v, (rl.Literal, rl.URIRef)):
                     yield subject, self.field.rdf_name, v
                 elif isinstance(v, factory.RDFFactory):
-                    yield subject, self.field.rdf_name, v.iri
+                    yield subject, self.field.rdf_name, v.iri.values[0]
                     for t in v.to_triples():
                         yield t
                 else:

@@ -38,7 +38,7 @@ class DefaultHandler(Handler):
             else:
                 return value
         elif isinstance(value, list):
-            return [self.__call__(v, context, graph) for v in value]
+            return [self.__call__(v, context, graph) for v in value if v]
         elif isinstance(value, str):
             return value
         else:
@@ -48,7 +48,7 @@ class DefaultHandler(Handler):
         if isinstance(value, URIRef):
             return value
         elif isinstance(value, list):
-            return [self.from_structure(v, **kwargs) for v in value]
+            return [self.from_structure(v, **kwargs) for v in value if v]
         elif isinstance(value, str):
             return Literal(value)
         else:
@@ -60,6 +60,14 @@ class LabelHandler(DefaultHandler):
         pass
 
 
+class IRIHandler(DefaultHandler):
+    def __call__(self, value, context, graph: Graph, **kwargs):
+        return value
+
+    def from_structure(self, value, **kwargs):
+        return [URIRef(v) for v in value if v]
+
+
 class FactoryHandler(Handler):
     def __init__(self, factory, filter_class=False):
         self.factory = factory
@@ -67,7 +75,7 @@ class FactoryHandler(Handler):
 
     def __call__(self, value, context, graph, **kwargs):
         d = self.factory._load_many(value, context, graph)
-        return [d[v] for v in value]
+        return [d[v] for v in value if v]
 
     def from_structure(self, value, **kwargs):
         if isinstance(value, list):

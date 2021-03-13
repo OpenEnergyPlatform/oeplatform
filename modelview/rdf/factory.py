@@ -10,7 +10,6 @@ from modelview.rdf.namespace import *
 class RDFFactory(handler.Rederable, ABC):
     _field_handler = {}
     _direct_parent = None
-    classes = field.Field(rdf_name=rdf.type, verbose_name="Classes")
     _label_iri = rdfs.label
     _fields = {}
 
@@ -29,13 +28,21 @@ class RDFFactory(handler.Rederable, ABC):
         return s
 
     def __init_subclass__(cls, **kwargs):
+        cls._fields["classes"] = field.IRIField(rdf_name=rdf.type, verbose_name="Classes")
         cls._field_handler = {f.rdf_name: f.handler for k, f in cls._fields.items()}
         cls._field_map = {f.rdf_name: k for k, f in cls._fields.items()}
+        cls._fields["iri"] = field.IRIField(None)
+
 
     def __init__(self, iri=None, **kwargs):
         for fld_name, fld in self._fields.items():
             setattr(self, fld_name, field.Container(fld))
-        self.iri = iri if iri is not None else BNode()
+        if iri:
+            if isinstance(iri, list):
+                assert len(iri) <= 1, "Too many IRIs"
+                iri = iri[0]
+        self.iri.values = [iri] if iri else []
+        self.classes.values = kwargs.get("classes", [])
         self.additional_fields = {}
         default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
@@ -91,7 +98,7 @@ class RDFFactory(handler.Rederable, ABC):
     def _parse_from_structure(cls, structure:dict, identifier=None, cache=None):
         res = cls(
             **{
-                p: getattr(cls, p).handler.from_structure(
+                p: cls._fields[p].handler.from_structure(
                     structure[p],
                 )
                 for p in structure
@@ -113,7 +120,7 @@ class RDFFactory(handler.Rederable, ABC):
         first_field.merge(second_field, iri, path)
 
     def to_triples(self, iri=None):
-        iri = iri or self.iri
+        iri = iri or self.iri.values[0]
         return list(chain(
             *(k.to_triples(iri) for k in self.iter_fields()),
             (
@@ -173,7 +180,10 @@ class RDFFactory(handler.Rederable, ABC):
 
     @property
     def label(self):
-        return getattr(self, self._label_iri)
+        try:
+            return getattr(self, self._label_iri)
+        except:
+            return None
 
 
 class IRIFactory(RDFFactory):
@@ -250,7 +260,7 @@ class Study(RDFFactory):
             verbose_name="Funding source",
             handler=handler.FactoryHandler(Institution),
         ),
-        has_part = field.Field(rdf_name=obo.BFO_0000051, verbose_name="Has part"),
+        has_part = field.PredefinedInstanceField(rdf_name=obo.BFO_0000051, verbose_name="Has part"),
         covers_energy_carrier = field.PredefinedInstanceField(
             rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers"
         ),

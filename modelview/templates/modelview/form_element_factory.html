@@ -2,10 +2,13 @@
      <h2 class="form-group">
         {{ obj.verbose_name }}
      </h2>
+    <input value="{{obj.iri}}" type="hidden"/>
     {% for f in obj.iter_fields %}
-        <div>
+
+        <div {% if not f.field.verbose_name %} hidden {% endif %}>
             <h3>{{ f.field.verbose_name }}</h3>
             {{ f.to_form_element }}
         </div>
+
     {% endfor %}
 </div>

@@ -20,7 +20,7 @@ from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 from rdflib import Graph
-from rdflib.compare import graph_diff
+from rdflib.compare import graph_diff, to_canonical_graph
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
@@ -513,7 +513,7 @@ class RDFFactoryFormView(View):
                 {"obj": obj, "error": str(e)},
             )
         else:
-            return redirect(f"/factsheets/study/{obj.iri.split('/')[-1]}")
+            return redirect(f"/factsheets/study/{obj.iri.values[0].split('/')[-1]}")
 
 
 class StudyRDFView(RDFFactoryView):

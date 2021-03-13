@@ -11,7 +11,7 @@ class FactoryWidget(MultiWidget):
         self.widget_dict = {
             fn: f._widget for fn, f in factory._fields.items()
         }
-        self.verbose_names = {('_%s' % fn): f.verbose_name for fn, f in factory._fields.items()}
+        self.verbose_names = {('_%s' % fn): f.verbose_name for fn, f in factory._fields.items() if f.verbose_name}
         super().__init__(widgets=self.widget_dict)
 
     def decompress(self, value):
@@ -41,7 +41,7 @@ class FactoryWidget(MultiWidget):
         id_ = final_attrs.get('id')
         subwidgets = []
         for i, (widget_name, widget) in enumerate(zip(self.widgets_names, self.widgets)):
-            vname = self.verbose_names[widget_name]
+            vname = self.verbose_names.get(widget_name)
             if input_type is not None:
                 widget.input_type = input_type
             widget_name = name + widget_name
@@ -54,7 +54,8 @@ class FactoryWidget(MultiWidget):
                 widget_attrs['id'] = '%s.%s' % (id_, widget_value.field_name)
             else:
                 widget_attrs = final_attrs
-            widget_attrs['verbose_name'] = vname
+            if vname:
+                widget_attrs['verbose_name'] = vname
             subcontext = widget.get_context(widget_name, widget_value, widget_attrs)['widget']
             subwidgets.append(subcontext)
         context['widget']['subwidgets'] = subwidgets
@@ -75,6 +76,10 @@ class DynamicFactoryArrayWidget(forms.TextInput):
     def __init__(self, *args, **kwargs):
         self.subwidget_form = kwargs.pop("subwidget_form", forms.TextInput)
         super().__init__(*args, **kwargs)
+
+    @property
+    def is_hidden(self):
+        return self.subwidget_form().is_hidden
 
     def get_context(self, name, value, attrs):
         if value and value.values:

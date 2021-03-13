@@ -9,7 +9,7 @@
 
 {% block factsheets_content %}
 
-<h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
+<h1>{% if obj.label %}{{ obj.label }}{% else %}{{ obj.iri.values.0 }}{% endif %}</h1>
 
 <form id="study-form" onsubmit="">
     {% include 'modelview/form_element_factory.html' %}
@@ -151,7 +151,7 @@
             // insert code here
             id_list = [];
             structure.forEach(each => {
-                if(!each.id.includes('classes')) id_list.push(each.id);
+                id_list.push(each.id);
             });
             return_dictionary = {}; 
             let value_dict = {};
