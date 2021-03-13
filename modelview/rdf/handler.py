@@ -1,5 +1,5 @@
 from django.utils.html import format_html
-from rdflib import Graph, URIRef
+from rdflib import Graph, URIRef, Literal
 
 
 class Rederable:
@@ -12,6 +12,9 @@ class Rederable:
 
 class Handler:
     def __call__(self, value, context, graph, **kwargs):
+        raise NotImplementedError
+
+    def from_structure(self, value, **kwargs):
         raise NotImplementedError
 
 
@@ -41,6 +44,16 @@ class DefaultHandler(Handler):
         else:
             raise Exception(value)
 
+    def from_structure(self, value, **kwargs):
+        if isinstance(value, URIRef):
+            return value
+        elif isinstance(value, list):
+            return [self.from_structure(v, **kwargs) for v in value]
+        elif isinstance(value, str):
+            return Literal(value)
+        else:
+            raise Exception(value)
+
 
 class LabelHandler(DefaultHandler):
     def __call__(self, value, context, graph: Graph, **kwargs):
@@ -55,3 +68,9 @@ class FactoryHandler(Handler):
     def __call__(self, value, context, graph, **kwargs):
         d = self.factory._load_many(value, context, graph)
         return [d[v] for v in value]
+
+    def from_structure(self, value, **kwargs):
+        if isinstance(value, list):
+            return [self.from_structure(v, **kwargs) for v in value]
+        else:
+            return self.factory._parse_from_structure(value, **kwargs)

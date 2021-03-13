@@ -1,7 +1,7 @@
 from abc import ABC
 from django.utils.html import format_html, format_html_join, mark_safe
 from itertools import chain
-from rdflib import Graph
+from rdflib import Graph, BNode
 import json
 from modelview.rdf import handler, field
 from modelview.rdf.namespace import *
@@ -32,7 +32,8 @@ class RDFFactory(handler.Rederable, ABC):
         cls._field_map = {getattr(cls, k).rdf_name: k for k in cls.iter_field_names()}
         cls.__doc__ = cls.doc()
 
-    def __init__(self, **kwargs):
+    def __init__(self, iri=None, **kwargs):
+        self.iri = iri if iri is not None else BNode()
         self.additional_fields = {}
         default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
@@ -76,7 +77,7 @@ class RDFFactory(handler.Rederable, ABC):
                 obj[p].append(o)
             except KeyError:
                 obj[p] = [o]
-        res = cache[identifier] = cls(
+        res = cache[identifier] = cls(iri=identifier,
             **{
                 p: cls._field_handler.get(p, handler.DefaultHandler())(
                     os, context, graph
@@ -86,16 +87,52 @@ class RDFFactory(handler.Rederable, ABC):
         )
         return res
 
-    def save(self, context):
-        triples = chain(
-            *(k.to_triples(self.iri) for k in self.iter_fields()),
+    @classmethod
+    def _parse_from_structure(cls, structure:dict, identifier=None, cache=None):
+        res = cls(
+            **{
+                p: getattr(cls, p).handler.from_structure(
+                    structure[p],
+                )
+                for p in structure
+            }
+        )
+
+        if identifier:
+            res.iri = identifier
+            cache[identifier] = res
+        return res
+
+
+    def _insert(self, d):
+        s0 = self.__class__(**d)
+
+    def merge(self, second, path):
+        head, iri = path.pop()
+        first_field = getattr(self, head)
+        second_field = getattr(second, head)
+        first_field.merge(second_field, iri, path)
+
+    def to_triples(self, iri=None):
+        iri = iri or self.iri
+        return list(chain(
+            *(k.to_triples(iri) for k in self.iter_fields()),
             (
-                f"{self.iri} {k} {v}"
+                (iri, k, v)
                 for k, vs in self.additional_fields.items()
                 for v in vs
             ),
-        )
-        print("\n".join(triples))
+        ))
+
+    def to_graph(self):
+        g = Graph()
+        for t in self.to_triples():
+            g.add(t)
+        return g
+
+    def save(self, context):
+
+        print("\n".join(self.to_triples()))
 
     def render(self, **kwargs):
         return format_html(
@@ -132,6 +169,9 @@ class RDFFactory(handler.Rederable, ABC):
     def label(self):
         return getattr(self, self._label_iri)
 
+
+class IRIFactory(RDFFactory):
+    iri = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
 
 class Scenario(RDFFactory):
     abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
@@ -198,7 +238,7 @@ class Study(RDFFactory):
         handler=handler.FactoryHandler(Institution),
     )
     has_part = field.Field(rdf_name=obo.BFO_0000051, verbose_name="Has part")
-    covers_energy_carrier = field.Field(
+    covers_energy_carrier = field.PredefinedInstanceField(
         rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers"
     )
     model_calculations = field.Field(

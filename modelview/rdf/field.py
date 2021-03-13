@@ -1,8 +1,8 @@
 from django.forms.widgets import TextInput
 from django.utils.html import format_html, format_html_join, mark_safe
-import json
+import rdflib as rl
 
-from modelview.rdf import handler, widget
+from modelview.rdf import handler, widget, factory
 
 from modelview.rdf.widget import DynamicFactoryArrayWidget
 
@@ -36,7 +36,15 @@ class Field(handler.Rederable):
     def to_triples(self, subject):
         if self.values is not None:
             for v in self.values:
-                yield f"{subject} {self.rdf_name} {v} ."
+                if isinstance(v, (rl.Literal, rl.URIRef)):
+                    yield subject, self.rdf_name, v
+                elif isinstance(v, factory.RDFFactory):
+                    yield subject, self.rdf_name, v.iri
+                    for t in v.to_triples():
+                        yield t
+                else:
+                    raise Exception(v)
+
 
     def render(self, mode="display", **kwargs):
         it = list(self.values if self.values else ["-"])
@@ -76,6 +84,14 @@ class Field(handler.Rederable):
         else:
             raise ValueError(obj)
 
+    def merge(self, values, iri, path):
+        assert not path, "Path should be empty"
+        self.values += values
+
+
+class PredefinedInstanceField(Field):
+    pass
+
 
 class FactoryField(Field):
     def __init__(self, factory, **kwargs):
@@ -87,3 +103,15 @@ class FactoryField(Field):
 
     def structure(self):
         return self._widget.get_structure()
+
+    def merge(self, values, iri, path):
+        if not path:
+            self.values += values
+        else:
+            done = False
+            for v in self.values:
+                if v.iri == iri:
+                    done = True
+                    v.merge(values, path)
+            if not done:
+                raise Exception(f"IRI {iri} found in {self}")

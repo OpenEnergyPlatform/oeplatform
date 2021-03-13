@@ -11,10 +11,38 @@
 
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
-<form id="study-form">
+<form id="study-form" onsubmit="">
 </form>
 
 <script>
+
+    function group_by_first(xs) {
+        if (xs.length === 1 && xs[0].path.length === 0)
+            return xs[0].value;
+        let children = {};
+        for(let x of xs){
+            let path = x.path.shift();
+            let ident;
+            if (x.path.length === 0) {
+                ident = 0;
+            } else {
+                ident = x.path.shift();
+            }
+            children[path] = (children[path] || []);
+            children[path][ident] = (children[path][ident] || []);
+            children[path][ident].push(x);
+        }
+        for(let key of Object.keys(children)){
+            children[key] = children[key].map(group_by_first);
+        }
+        return children;
+
+    }
+
+    function get_dict(elements){
+        return group_by_first(elements);
+    }
+
     structure = {{ obj.structure_spec | safe }};
     var clickCache = []; // stores button clicks
 
@@ -145,60 +173,31 @@
         let submitButton = document.createElement('div');
         submitButton.className = 'btn btn-primary';
         submitButton.innerHTML = 'Submit';
-        submitButton.onclick = async function() {
+        submitButton.onclick = async function() { 
             // insert code here
             id_list = [];
             structure.forEach(each => {
                 if(!each.id.includes('classes')) id_list.push(each.id);
             });
-            return_dictionary = {};
+            return_dictionary = {}; 
             let value_dict = {};
-            let data_list = [];
+            let data_dict = {};
             let counter = 0;
             for (var k = 0; k < id_list.length ; k++) {
                 let id = id_list[k];
-                let data_list = [];
                 let input_elements = document.querySelectorAll(`input[id^=${id}]`);
-                let num_fields = []
-                // get the number of fields in the sub form
-                for(var i = 0; i < input_elements.length ; i++) {
-                    id_string = input_elements[i];
-                    let element_id = document.getElementById(id_string.id).id;
-                    list_elements = element_id.split('.');
-                    id_num = list_elements[1]
-                    if (num_fields.includes(id_num)) {
-                        continue;
-                    }
-                    else{
-                        num_fields.push(id_num)
-                    }
-                }
-                //iterate through the number of fields in each sub form
-                for(var i = 0; i < num_fields.length ; i++){
-                    let temp_varDict = {};
-                    for (var j = 0; j < input_elements.length; j++){
-                        id_string_inner = input_elements[j];
-                        let element_id_inner = document.getElementById(id_string_inner.id).id;
-                        list_elements_inner = element_id_inner.split('.');
-                        id_num_inner = Number(list_elements_inner[1]);
-                        let element_value = document.getElementById(id_string_inner.id).value;
-                        if(id_num_inner == i){
-                            if(list_elements_inner.length == 2){
-                                key = list_elements_inner[0];
-                            }
-                            else {
-                                key = list_elements_inner[2];
-                            }
-                            temp_varDict[key] = element_value;
-                        }
-                        data_list.push(temp_varDict);
-                    }
-                }
-                var set1 = new Set(data_list);
-                let array = Array.from(set1);
-                value_dict[id] = data_list;
+                Object.assign(value_dict, get_dict(Array.prototype.map.call(input_elements, function(ie){
+                    let el = document.getElementById(ie.id);
+                    return {path:el.id.split("."),  value:el.value}
+                })));
             }
-            return_dictionary = value_dict;
+            var url = "edit";
+            var form = $('<form action="' + url + '" method="post">' +
+              '<input type="text" name="data" value=\'' + JSON.stringify(value_dict) + '\'/>' + '{% csrf_token %}' +
+              '</form>');
+            $('body').append(form);
+            form.submit();
+            //return_dictionary = value_dict;
         };
         
         studyForm.appendChild(submitButton);

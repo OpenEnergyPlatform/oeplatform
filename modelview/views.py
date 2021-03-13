@@ -20,6 +20,7 @@ from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 from rdflib import Graph
+from rdflib.compare import graph_diff
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
@@ -488,13 +489,24 @@ class RDFFactoryFormView(View):
 
     def post(self, request, identifier=None):
         try:
-            graph = Graph()
-            graph.parse(request.data["POST"]["graph"])
-            if identifier is None:
-                raise NotImplementedError
+            data = json.loads(request.POST["data"])
+        except:
+            raise PermissionError
+        try:
             context = connection.ConnectionContext()
-            obj = self._cls._parse(identifier=identifier, context=context, graph=graph)
+            if identifier is None:
+                obj = self._cls(data)
+                obj.save(context)
+            else:
+                graph = Graph()
+                uri = getattr(namespace.OEO_KG, identifier)
+                obj = self._cls._load_one(uri, context, graph)
+                new_obj = self._cls._parse_from_structure(data)
+                diff = graph_diff(obj.to_graph(), new_obj.to_graph())
+                print(diff)
+                #TODO: Implementa alterations
         except Exception as e:
+            raise e
             # TODO: This has to be refined!
             return render(
                 request,
@@ -502,12 +514,17 @@ class RDFFactoryFormView(View):
                 {"obj": obj, "error": str(e)},
             )
         else:
-            return redirect(self._success_url)
+            return redirect(f"/factsheets/study/{obj.iri.split('/')[-1]}")
 
 
 class StudyRDFView(RDFFactoryView):
     _cls = factory.Study
-    _template = "modelview/study.html"
+    _template = "modelview/display_rdf.html"
+
+
+class StudyRDFFormView(RDFFactoryFormView):
+    _cls = factory.Study
+    _template = "modelview/study_edit.html"
 
 
 class ScenarioRDFView(RDFFactoryView):
