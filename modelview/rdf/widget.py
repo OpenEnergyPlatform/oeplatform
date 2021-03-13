@@ -112,7 +112,7 @@ class DynamicFactoryArrayWidget(forms.TextInput):
         if isinstance(self.subwidget_form, type) and issubclass(
             self.subwidget_form, Widget
         ):
-            d = {prefix: self.subwidget_form().render("", None, attrs={"id": "{prefix}"})}
+            d = {prefix: self.subwidget_form().render("", None, attrs={"id": "{prefix}", "class":  "form-control"})}
         else:
             d = self.subwidget_form().build_template_structure(prefix)
         return d

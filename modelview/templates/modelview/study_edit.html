@@ -70,10 +70,10 @@
             carry[1] = !carry[1];
             return carry
         }, [[],true])[0].join(".");
-        let element = document.createElement('li');
+        let element = document.createElement('div');
         // Does JS not have a .format() method!?
         let tempHTML = templates[reduced_path].replaceAll("{prefix}", path+"."+value);
-        element.className = "list-group-item";
+        element.className = "form-group";
         element.innerHTML = tempHTML;
         parent.appendChild(element);
         return element; 
