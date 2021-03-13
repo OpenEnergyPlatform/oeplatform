@@ -18,8 +18,9 @@
 <script>
 
     function group_by_first(xs) {
-        if (xs.length === 1 && xs[0].path.length === 0)
+        if (xs.length === 1 && xs[0].path.length === 0){
             return xs[0].value;
+        }
         let children = {};
         for(let x of xs){
             let path = x.path.shift();
