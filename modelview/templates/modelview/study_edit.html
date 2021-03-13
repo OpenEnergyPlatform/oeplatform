@@ -82,68 +82,6 @@
 
     // check if structure is truthy
     if(structure) {
-        /*
-        structure.forEach((each) => {
-            if(each.substructure) {
-                let masterDiv = document.createElement('div');
-                masterDiv.className = 'form-group border p-3 bg-light rounded'; 
-
-                let tempHeading = document.createElement('h2');
-                tempHeading.className = 'form-group';
-                tempHeading.innerHTML = each.verbose_name;
-                masterDiv.appendChild(tempHeading);
-
-                each.substructure.forEach((innereach) => {
-                    if(!innereach.id.includes('classes')) {
-                        let element = document.createElement('div');// createLeaf(innereach, null, true, each.id);
-                        let addButton = document.createElement('div');
-                        addButton.className = 'form-group btn btn-secondary p-2 m-1';
-                        addButton.innerHTML = 'Add new';
-                        addButton.onclick = async function() {
-                        clickCache.forEach((button) => {
-                            if(button.key == addButton) button.value += 1;
-                            });
-                            let newElem = createLeaf(innereach, addButton, true, each.id);
-                            masterDiv.insertBefore(newElem, addButton);
-                        };
-                        clickCache.push({
-                            'key' : addButton,
-                            'value' : 0
-                        });
-                        
-                        masterDiv.appendChild(element);          
-                        masterDiv.appendChild(addButton);
-                        studyForm.appendChild(masterDiv);
-                    }
-                });
-            }
-            else { // leaf
-                let masterDiv = document.createElement('div');
-                masterDiv.className = 'form-group'; 
-                if(!each.id.includes('classes')) {
-                    element = createLeaf(each);
-                    let addButton = document.createElement('div');
-                    addButton.className = 'btn btn-secondary';
-                    addButton.innerHTML = 'Add new';
-                    addButton.onclick = async function() {
-                    clickCache.forEach((button) => {
-                        if(button.key == addButton) button.value += 1;
-                        });
-                        let newElem = createLeaf(each, addButton);
-                        masterDiv.insertBefore(newElem, addButton);
-                    };
-                    clickCache.push({
-                        'key' : addButton,
-                        'value' : 0
-                    });
-                    
-                    masterDiv.appendChild(element);          
-                    masterDiv.appendChild(addButton);
-                    studyForm.appendChild(masterDiv);
-                }  
-            } 
-        });*/
-
         let submitButton = document.createElement('div');
         submitButton.className = 'btn btn-primary';
         submitButton.innerHTML = 'Submit';
