@@ -502,9 +502,8 @@ class RDFFactoryFormView(View):
                 uri = getattr(namespace.OEO_KG, identifier)
                 obj = self._cls._load_one(uri, context, graph)
                 new_obj = self._cls._parse_from_structure(data)
-                diff = graph_diff(obj.to_graph(), new_obj.to_graph())
-                print(diff)
-                #TODO: Implementa alterations
+                _, deletes, inserts = graph_diff(obj.to_graph(), new_obj.to_graph())
+                context.apply_diff(inserts, deletes)
         except Exception as e:
             raise e
             # TODO: This has to be refined!

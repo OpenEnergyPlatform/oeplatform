@@ -1,4 +1,5 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
+from rdflib import Graph
 
 from oeplatform.settings import RDF_DATABASES
 
@@ -39,3 +40,8 @@ class ConnectionContext:
         )
         self.connection.setQuery(s)
         return self.connection.query().convert()
+
+    def apply_diff(self, inserts: Graph, deletes: Graph):
+        s = f"DELETE {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
+        s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
+        s += "WHERE {}"
