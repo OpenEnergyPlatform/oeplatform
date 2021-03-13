@@ -54,7 +54,7 @@
         let tempHTML = document.createElement('input');
         tempHTML.innerHTML = each.template;
         tempHTML.id = flag? outer_id + '.' + value + '.' + each.id : each.id + '.' + value; 
-        tempHTML.className = 'form-control'
+        tempHTML.className = 'form-control';
 
         let smallElement = document.createElement('small');
         smallElement.className = 'form-text text-muted';
@@ -70,41 +70,7 @@
         element.appendChild(smallElement);
         
         return element; 
-    }
-    
-    {% comment %} var createSubstructure = function (each, addButton) {
-        let subElement = document.createElement('div');
-        subElement.className = 'form-group border p-3 border rounded bg-light';
-        
-        // gets the button value
-        let value = 0;
-        clickCache.forEach((button) => {
-            if(button.key == addButton) value = button.value;
-        });
-
-        each.substructure.forEach((innereach, i) => {
-            let tempHTML = document.createElement('input');
-            tempHTML.innerHTML = innereach.template;
-            tempHTML.id = each.id  + '.' + value + '.' + innereach.id;
-            tempHTML.className = 'form-control'
-
-            let smallElement = document.createElement('small');
-            smallElement.className = 'form-text text-muted';
-            smallElement.innerHTML = each.id  + '.' + value + '.' + innereach.id; // innereach.help_text;
-
-            let tempHeading = document.createElement('h3');
-            tempHeading.innerHTML = innereach.verbose_name;
-
-            let element = document.createElement('div');
-            element.className = 'form-group'; 
-            element.appendChild(tempHeading);
-            element.appendChild(tempHTML);
-            element.appendChild(smallElement);
-            
-            subElement.appendChild(element);
-        });
-        return subElement;
-    } {% endcomment %}
+    };
 
     // check if structure is truthy
     if(structure) {
@@ -181,8 +147,6 @@
             });
             return_dictionary = {}; 
             let value_dict = {};
-            let data_dict = {};
-            let counter = 0;
             for (var k = 0; k < id_list.length ; k++) {
                 let id = id_list[k];
                 let input_elements = document.querySelectorAll(`input[id^=${id}]`);
