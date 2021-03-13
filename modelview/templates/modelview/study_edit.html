@@ -12,6 +12,7 @@
 <h1>{% if study.label %}{{ obj.title }}{% else %}{{ obj.iri }}{% endif %}</h1>
 
 <form id="study-form" onsubmit="">
+    {% include 'modelview/form_element_factory.html' %}
 </form>
 
 <script>
@@ -43,38 +44,44 @@
         return group_by_first(elements);
     }
 
-    structure = {{ obj.structure_spec | safe }};
-    var clickCache = []; // stores button clicks
+    function path_to_structure(path, d){
+        idx = path.shift();
+        for (el of d){
+            if(el["id"] === idx){
+                return el
+            }
+        }
 
-    var createLeaf = function (each, addButton, flag, outer_id) {
-        let value = 0;
-        clickCache.forEach((button) => {
-            if(button.key == addButton) value = button.value;
-        })
-        let tempHTML = document.createElement('input');
-        tempHTML.innerHTML = each.template;
-        tempHTML.id = flag? outer_id + '.' + value + '.' + each.id : each.id + '.' + value; 
-        tempHTML.className = 'form-control';
+    }
 
-        let smallElement = document.createElement('small');
-        smallElement.className = 'form-text text-muted';
-        smallElement.innerHTML = each.help_text;  //flag? outer_id + '.' + value + '.' + each.id : each.id + '.' + value; 
+    let templates = {{ obj.build_template_structure | safe }};
 
-        let tempHeading = flag? document.createElement('h3'): document.createElement('h2');
-        tempHeading.innerHTML = each.verbose_name;
+    let structure = {{ obj.structure_spec | safe }};
 
-        let element = document.createElement('div');
-        element.className = flag? 'form-group rounded border bg-light p-2 m-1': 'form-group rounded border bg-light p-2'; 
-        if(tempHTML.id.includes('0')) { element.appendChild(tempHeading); }
-        element.appendChild(tempHTML);
-        element.appendChild(smallElement);
-        
+    var createLeaf = function (path) {
+        // Extract largest id
+        let parent = document.getElementById("container_"+path);
+        let value = 1 + [... document.querySelectorAll(`input[id^=${path.replaceAll(".", "\\.")}]`)].reduce(function(s_max, s){return Math.max(s.id.split(".")[1], s_max);},0);
+        // Remove all numbers from path
+        let reduced_path = path.split(".").reduce(function(carry, x){
+            if(carry[1]){
+                carry[0].push(x)
+            }
+            carry[1] = !carry[1];
+            return carry
+        }, [[],true])[0].join(".");
+        let element = document.createElement('li');
+        // Does JS not have a .format() method!?
+        let tempHTML = templates[reduced_path].replaceAll("{prefix}", path+"."+value);
+        element.className = "list-group-item";
+        element.innerHTML = tempHTML;
+        parent.appendChild(element);
         return element; 
     };
 
     // check if structure is truthy
     if(structure) {
-        let studyForm = document.getElementById('study-form');
+        /*
         structure.forEach((each) => {
             if(each.substructure) {
                 let masterDiv = document.createElement('div');
@@ -87,7 +94,7 @@
 
                 each.substructure.forEach((innereach) => {
                     if(!innereach.id.includes('classes')) {
-                        let element = createLeaf(innereach, null, true, each.id);
+                        let element = document.createElement('div');// createLeaf(innereach, null, true, each.id);
                         let addButton = document.createElement('div');
                         addButton.className = 'form-group btn btn-secondary p-2 m-1';
                         addButton.innerHTML = 'Add new';
@@ -134,7 +141,7 @@
                     studyForm.appendChild(masterDiv);
                 }  
             } 
-        });
+        });*/
 
         let submitButton = document.createElement('div');
         submitButton.className = 'btn btn-primary';
@@ -163,7 +170,7 @@
             form.submit();
             //return_dictionary = value_dict;
         };
-        
+        let studyForm = document.getElementById('study-form');
         studyForm.appendChild(submitButton);
     }
     else {

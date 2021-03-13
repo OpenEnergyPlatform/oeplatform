@@ -6,13 +6,11 @@ from modelview.rdf import handler, widget, factory
 
 from modelview.rdf.widget import DynamicFactoryArrayWidget
 
-
-class Field(handler.Rederable):
+class Field:
     """
     :ivar rdf_name: IRI of this property
     :ivar verbose_name: A readable label (not `rdfs:label`)
     :ivar handler: A handler used to parse this field. Defaults to `handler.DefaultHandler`
-    :ivar values: A list of values that the related subject is in relation with
     :ivar help_text: Some helpful text
     """
 
@@ -29,64 +27,11 @@ class Field(handler.Rederable):
         self.rdf_name = rdf_name  # Some IRI
         self.verbose_name = verbose_name
         self.handler = handler if handler else self._handler()
-        self.values = None
         self.help_text = help_text
         self._widget = DynamicFactoryArrayWidget(subwidget_form=widget_cls)
 
-    def to_triples(self, subject):
-        if self.values is not None:
-            for v in self.values:
-                if isinstance(v, (rl.Literal, rl.URIRef)):
-                    yield subject, self.rdf_name, v
-                elif isinstance(v, factory.RDFFactory):
-                    yield subject, self.rdf_name, v.iri
-                    for t in v.to_triples():
-                        yield t
-                else:
-                    raise Exception(v)
-
-
-    def render(self, mode="display", **kwargs):
-        it = list(self.values if self.values else ["-"])
-
-        if mode == "display":
-            f = self._render_atomic_field
-
-            vals = [(f(v),) for v in it]
-
-            s = format_html(
-                mark_safe(
-                    '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
-                ),
-                rdfname=self.rdf_name,
-                vname=self.verbose_name,
-                vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
-            )
-            return s
-        else:
-            return self._widget.render("Name", self, {"id": "field", "level": 0})
-
-    def render_fields(self):
-        return self.render(mode="form")
-
-    def structure(self):
-        return self._widget()
-
-    def _render_atomic_field(self, obj, **kwargs):
-        if isinstance(obj, handler.Rederable):
-            return obj.render()
-        elif isinstance(obj, list):
-            return [self._render_atomic_field(o, **kwargs) for o in obj]
-        elif isinstance(obj, str):
-            return obj
-        elif obj is None:
-            return None
-        else:
-            raise ValueError(obj)
-
-    def merge(self, values, iri, path):
-        assert not path, "Path should be empty"
-        self.values += values
+    def widget(self):
+        return self._widget
 
 
 class PredefinedInstanceField(Field):
@@ -104,14 +49,55 @@ class FactoryField(Field):
     def structure(self):
         return self._widget.get_structure()
 
-    def merge(self, values, iri, path):
-        if not path:
-            self.values += values
-        else:
-            done = False
+
+class Container(handler.Rederable):
+    def __init__(self, field):
+        self.field = field
+        self.values = []
+
+    def to_triples(self, subject):
+        if self.values is not None:
             for v in self.values:
-                if v.iri == iri:
-                    done = True
-                    v.merge(values, path)
-            if not done:
-                raise Exception(f"IRI {iri} found in {self}")
+                if isinstance(v, (rl.Literal, rl.URIRef)):
+                    yield subject, self.field.rdf_name, v
+                elif isinstance(v, factory.RDFFactory):
+                    yield subject, self.field.rdf_name, v.iri
+                    for t in v.to_triples():
+                        yield t
+                else:
+                    raise Exception(v)
+
+    def render(self, mode="display", **kwargs):
+        it = list(self.values if self.values else ["-"])
+
+        if mode == "display":
+            f = self._render_atomic_field
+
+            vals = [(f(v),) for v in it]
+
+            s = format_html(
+                mark_safe(
+                    '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
+                ),
+                rdfname=self.field.rdf_name,
+                vname=self.field.verbose_name,
+                vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
+            )
+            return s
+        else:
+            return self.field._widget.render("Name", self, {"id": "field", "level": 0})
+
+    def to_form_element(self):
+        return self.field._widget.render(self.field_name, self, attrs={"id": self.field_name})
+
+    def _render_atomic_field(self, obj, **kwargs):
+        if isinstance(obj, handler.Rederable):
+            return obj.render()
+        elif isinstance(obj, list):
+            return [self._render_atomic_field(o, **kwargs) for o in obj]
+        elif isinstance(obj, str):
+            return obj
+        elif obj is None:
+            return None
+        else:
+            raise ValueError(obj)

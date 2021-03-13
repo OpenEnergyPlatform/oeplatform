@@ -1,0 +1,11 @@
+<div class="form-group border p-3 bg-light rounded">
+     <h2 class="form-group">
+        {{ obj.verbose_name }}
+     </h2>
+    {% for f in obj.iter_fields %}
+        <div>
+            <h3>{{ f.field.verbose_name }}</h3>
+            {{ f.to_form_element }}
+        </div>
+    {% endfor %}
+</div>

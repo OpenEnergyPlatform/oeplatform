@@ -1,0 +1,5 @@
+{% spaceless %}<table class="table">
+    {% for widget in widget.subwidgets %}
+    <tr><th>{{ widget.attrs.verbose_name }}</th><td>{% include widget.template_name %}</td></tr>
+    {% endfor %}
+</table>{% endspaceless %}
