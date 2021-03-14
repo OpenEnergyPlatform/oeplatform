@@ -167,12 +167,7 @@ class RDFFactory(handler.Rederable, ABC):
     def to_triples(self, iri=None):
         iri = iri or self.iri.values[0]
         return list(chain(
-            *(k.to_triples(iri) for k in self.iter_fields()),
-            (
-                (iri, k, v)
-                for k, vs in self.additional_fields.items()
-                for v in vs
-            ),
+            *(k.to_triples(iri) for k in self.iter_fields())
         ))
 
     def to_graph(self):

@@ -24,12 +24,16 @@ class Field:
         help_text: str = None,
         widget_cls=TextInput,
         widget_kwargs_gen=None,
+        filter = None,
+        subclass = False,
         inverse=False
     ):
         self.rdf_name = rdf_name  # Some IRI
         self.verbose_name = verbose_name
         self.handler = handler if handler else self._handler()
         self.help_text = help_text
+        self.filter = filter
+        self.subclass = subclass
         self._widget = DynamicFactoryArrayWidget(subwidget_form=widget_cls, subwidget_form_kwargs_gen=widget_kwargs_gen)
         self.inverse = inverse
 
@@ -39,14 +43,19 @@ class Field:
     def fetch_query(self, subject, object, filter=None, options=None):
         if filter is None:
             filter = []
+        where = []
         filter = filter.copy()
         filter.append(f"?p = <{self.rdf_name}>")
+        if self.filter:
+            p = "a" if not self.subclass else "rdfs:subClassOf"
+            where.append(f"?o {p} <{self.filter}> . ")
         if options is None:
             options = []
         if self.inverse:
-            query = f"{object} ?p {subject}."
+            where.append(f"{object} ?p {subject}.")
         else:
-            query = f"{subject} ?p {object}."
+            where.append(f"{subject} ?p {object}.")
+        query = " ".join(where)
         for o in options:
             query += f"OPTIONAL {{ {o} }} . "
         if filter:
@@ -63,9 +72,7 @@ class IRIField(Field):
 class PredefinedInstanceField(Field):
     _handler = handler.IRIHandler
 
-    def __init__(self, rdf_name, filter, subclass=False, **kwargs):
-        self.filter = filter
-        self.subclass = subclass
+    def __init__(self, rdf_name, **kwargs):
         super().__init__(rdf_name, widget_cls=Select, handler=handler.IRIHandler(), widget_kwargs_gen=self._get_kwargs, **kwargs)
 
     def _get_kwargs(self):
@@ -74,7 +81,7 @@ class PredefinedInstanceField(Field):
     def _load_choices(self):
         c = connection.ConnectionContext()
         results = c.load_all(self.filter, self.subclass, inverse=self.inverse)
-        choices = [(row.get("label", row['iri'])['value'], row['iri']['value']) for row in results["results"]["bindings"]]
+        choices = [(row['iri']['value'], row.get("l", row['iri'])['value']) for row in results["results"]["bindings"]]
         return choices
 
 
@@ -98,7 +105,7 @@ class Container(handler.Rederable):
     def to_triples(self, subject):
         if self.field.rdf_name and self.values is not None:
             for v in self.values:
-                if isinstance(v, (rl.Literal, rl.URIRef)):
+                if isinstance(v, (rl.Literal, rl.URIRef, rl.BNode)):
                     yield subject, self.field.rdf_name, v
                 elif isinstance(v, factory.RDFFactory):
                     yield subject, self.field.rdf_name, v.iri.values[0]

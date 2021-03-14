@@ -19,7 +19,7 @@ class ConnectionContext:
         options = ["?p rdfs:label ?lp .", "?o rdfs:label ?lo"]
         for s in subjects:
             filter = [f"?s = <{s}>"]
-            query += " UNION ".join(f"{{ { p.fetch_query('?s', '?o', options=options, filter=filter) } }}" for p in predicates)
+            query += " UNION ".join(f"{{ { p.fetch_query('?s', '?o', options=options, filter=filter) } }}" for p in predicates if p.rdf_name)
 
         query += "}"
         self.connection.setQuery(query)
@@ -48,14 +48,10 @@ class ConnectionContext:
         s = f"DELETE {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
         s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in inserts) } }} "
         s += "WHERE {}"
-        print(s)
 
     def load_all(self, filter, subclass=False, inverse=False):
         p = "a" if not subclass else "rdfs:subClassOf"
-        if inverse:
-            q = f"<{filter}> {p} ?iri "
-        else:
-            q = f"?iri {p} <{filter}>"
+        q = f"?iri {p} <{filter}>"
         s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
         s += f"SELECT ?iri ?l WHERE {{ {q} .  OPTIONAL {{ ?iri rdfs:label ?l . }} }}"
         self.connection.setQuery(s)
