@@ -11,17 +11,20 @@ class ConnectionContext:
         self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
         self.connection.setReturnFormat(JSON)
 
-    def execute(self, entities):
-        s = (
+    def query_all_objects(self, subjects, predicates):
+        query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-            "SELECT ?s ?p ?o ?lo ?lp WHERE "
+            "SELECT ?s ?p ?o ?lo ?lp WHERE { "
         )
-        s += " UNION ".join(
-            f"{{ ?s ?p ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}"
-            for e in entities
-        )
-        self.connection.setQuery(s)
+        options = ["?p rdfs:label ?lp .", "?o rdfs:label ?lo"]
+        for s in subjects:
+            filter = [f"?s = <{s}>"]
+            query += " UNION ".join(f"{{ { p.fetch_query('?s', '?o', options=options, filter=filter) } }}" for p in predicates)
+
+        query += "}"
+        self.connection.setQuery(query)
         return self.connection.query().convert()
+
 
     def describe(self, entities):
         s = (
@@ -33,7 +36,7 @@ class ConnectionContext:
         return res
 
     def labels(self, entities):
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" "SELECT ?o WHERE "
+        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n SELECT ?o WHERE "
         s += " UNION ".join(
             f"{{ ?s rdfs:label ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}"
             for e in entities
@@ -46,3 +49,14 @@ class ConnectionContext:
         s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in inserts) } }} "
         s += "WHERE {}"
         print(s)
+
+    def load_all(self, filter, subclass=False, inverse=False):
+        p = "a" if not subclass else "rdfs:subClassOf"
+        if inverse:
+            q = f"<{filter}> {p} ?iri "
+        else:
+            q = f"?iri {p} <{filter}>"
+        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+        s += f"SELECT ?iri ?l WHERE {{ {q} .  OPTIONAL {{ ?iri rdfs:label ?l . }} }}"
+        self.connection.setQuery(s)
+        return self.connection.query().convert()

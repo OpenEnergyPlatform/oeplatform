@@ -1,9 +1,9 @@
 from abc import ABC
 from django.utils.html import format_html, format_html_join, mark_safe
 from itertools import chain
-from rdflib import Graph, BNode
+from rdflib import Graph, BNode, URIRef, Literal
 import json
-from modelview.rdf import handler, field
+from modelview.rdf import handler, field, connection
 from modelview.rdf.namespace import *
 
 
@@ -28,10 +28,12 @@ class RDFFactory(handler.Rederable, ABC):
         return s
 
     def __init_subclass__(cls, **kwargs):
+        cls.fallback_field = "additional_fields"
+        cls._fields[cls.fallback_field] = field.Field(rdf_name=rdf.type, verbose_name="additional")
         cls._fields["classes"] = field.IRIField(rdf_name=rdf.type, verbose_name="Classes")
-        cls._field_handler = {f.rdf_name: f.handler for k, f in cls._fields.items()}
         cls._field_map = {f.rdf_name: k for k, f in cls._fields.items()}
         cls._fields["iri"] = field.IRIField(None)
+        cls._field_handler = {f: f.handler for k, f in cls._fields.items()}
 
 
     def __init__(self, iri=None, **kwargs):
@@ -43,13 +45,11 @@ class RDFFactory(handler.Rederable, ABC):
                 iri = iri[0]
         self.iri.values = [iri] if iri else []
         self.classes.values = kwargs.get("classes", [])
-        self.additional_fields = {}
         default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
         for f in _internal_fields:
             getattr(self, f).field_name = f
-        for k0, v in kwargs.items():
-            k = self._field_map.get(k0, k0)
+        for k, v in kwargs.items():
             if k in _internal_fields:
                 getattr(self, k).values = v
             else:
@@ -65,28 +65,73 @@ class RDFFactory(handler.Rederable, ABC):
 
     @classmethod
     def _load_many(cls, identifiers, context, graph: Graph):
-        graph += context.describe(identifiers)
+        for inverse in (True, False):
+            result = context.query_all_objects(identifiers, cls._fields.values())
+            head = result["head"]
+            for t in result["results"]["bindings"]:
+                if "s" in t:
+                    s = cls._read_value(t["s"])
+                    o = cls._read_value(t.get("o"))
+                    lo = cls._read_value(t.get("lo"))
+                    p = cls._read_value(t.get("p"))
+                    lp = cls._read_value(t.get("lp"))
+                    if inverse:
+                        graph.add((o, p, s))
+                    else:
+                        graph.add((s, p, o))
+                    if lp:
+                        graph.add((p, rdfs.label, lp))
+                    if lo:
+                        graph.add((o, rdfs.label, lo))
         d = {i: cls._parse(i, context, graph) for i in identifiers}
         return d
 
+    @staticmethod
+    def _read_value(v):
+        if isinstance(v, dict):
+            t = v["type"]
+            if t == "uri":
+                return URIRef(v["value"])
+            if t == "literal":
+                return Literal(v["value"])
+            if t == "bnode":
+                return BNode(v["value"])
+        if v is None:
+            return None
+        raise Exception(v)
+
+
+
     @classmethod
-    def _load_one(cls, identifier, context, graph: Graph):
-        graph += context.describe([identifier])
-        return cls._parse(identifier, context, graph)
+    def _load_one(cls, identifier, context: connection.ConnectionContext, graph: Graph):
+        return cls._load_many([identifier], context, graph)[identifier]
+
+    @classmethod
+    def _find_field(cls, predicate_iri, obj):
+        #TODO: There should be a fallback here for additional fields
+        return cls._field_map.get(predicate_iri, None)
 
     @classmethod
     def _parse(cls, identifier, context, graph: Graph, cache=None):
         if cache is None:
             cache = dict()
         obj = cache.get(identifier, dict())
+        skipped = set()
         for p, o in graph.predicate_objects(identifier):
-            try:
-                obj[p].append(o)
-            except KeyError:
-                obj[p] = [o]
+            proper_p = cls._find_field(p, o)
+            if proper_p:
+                try:
+                    obj[proper_p].append(o)
+                except KeyError:
+                    obj[proper_p] = [o]
+            else:
+                skipped.add(p)
+
+        if skipped:
+            print("Warning! Some predicates were not processed:", skipped)
         res = cache[identifier] = cls(iri=identifier,
             **{
-                p: cls._field_handler.get(p, handler.DefaultHandler())(
+                p: cls._fields[p].handler(
                     os, context, graph
                 )
                 for p, os in obj.items()
@@ -251,38 +296,13 @@ class Institution(RDFFactory):
     address = field.Field(rdf_name=foaf.address, verbose_name="Address"))
 
 
-class Study(RDFFactory):
-    _direct_parent = OEO.OEO_00020011
-    _fields = dict(
-        funding_source = field.FactoryField(
-            Institution,
-            rdf_name=OEO.OEO_00000509,
-            verbose_name="Funding source",
-            handler=handler.FactoryHandler(Institution),
-        ),
-        has_part = field.PredefinedInstanceField(rdf_name=obo.BFO_0000051, verbose_name="Has part"),
-        covers_energy_carrier = field.PredefinedInstanceField(
-            rdf_name=OEO.OEO_00000523, verbose_name="Covers energy carriers"
-        ),
-        model_calculations = field.Field(
-            rdf_name=schema.affiliation, verbose_name="Model Calculations"
-        ))
-    # is_referenced_by = field.Field()
-
-
-class Person(RDFFactory):
-    _direct_parent = OEO.OEO_00000323
-    _fields = dict(
-    first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
-    last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
-    affiliation = field.Field(rdf_name=schema.affiliation, verbose_name="Affiliation"))
-
-
 class Model(RDFFactory):
     _direct_parent = OEO.OEO_00020011
     _fields = dict(
     url = field.Field(rdf_name=schema.url, verbose_name="URL"),
     name = field.Field(rdf_name=dc.title, verbose_name="Name"))
+
+
 
 class ModelCalculation(RDFFactory):
     _fields = dict(
@@ -293,3 +313,43 @@ class ModelCalculation(RDFFactory):
             verbose_name="Involved Models",
             handler=handler.FactoryHandler(Model),
         ))
+
+
+class Study(RDFFactory):
+    _direct_parent = OEO.OEO_00020011
+    _fields = dict(
+        funding_source=field.FactoryField(
+            Institution,
+            rdf_name=OEO.OEO_00000509,
+            verbose_name="Funding source",
+            handler=handler.FactoryHandler(Institution),
+        ),
+        has_part=field.PredefinedInstanceField(rdf_name=obo.BFO_0000051, filter=OEO.OEO_00000364, verbose_name="Has part"),
+        covers_energy_carrier=field.PredefinedInstanceField(
+            rdf_name=OEO.OEO_00000523, filter=OEO.OEO_00020039, verbose_name="Covers energy carriers", subclass=True,
+        ),
+        covers_energy=field.PredefinedInstanceField(
+            rdf_name=OEO.OEO_00000523, filter=OEO.OEO_00000150, verbose_name="Related to energy", subclass=True,
+        ),
+        model_calculations=field.Field(
+            rdf_name=schema.affiliation, verbose_name="Model Calculations"
+        ),
+        published_in=field.FactoryField(
+            Publication,
+            rdf_name=obo.IAO_0000136,
+            inverse=True,
+            verbose_name="Publications",
+            handler=handler.FactoryHandler(Publication),
+        ),
+    )
+
+
+class Person(RDFFactory):
+    _direct_parent = OEO.OEO_00000323
+    _fields = dict(
+    first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
+    last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
+    affiliation = field.Field(rdf_name=schema.affiliation, verbose_name="Affiliation"))
+
+
+

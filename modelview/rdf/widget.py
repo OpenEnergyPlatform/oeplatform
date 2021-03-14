@@ -69,23 +69,25 @@ def _factory_field(factory):
     return inner
 
 
-
 class DynamicFactoryArrayWidget(forms.TextInput):
     template_name = "modelview/widgets/dynamic_array.html"
 
     def __init__(self, *args, **kwargs):
         self.subwidget_form = kwargs.pop("subwidget_form", forms.TextInput)
+        self.subwidget_kwargs_gen = kwargs.pop("subwidget_form_kwargs_gen", None)
+        if self.subwidget_kwargs_gen is None:
+            self.subwidget_kwargs_gen = lambda: dict()
         super().__init__(*args, **kwargs)
 
     @property
     def is_hidden(self):
-        return self.subwidget_form().is_hidden
+        return self.subwidget_form(**self.subwidget_kwargs_gen()).is_hidden
 
     def get_context(self, name, value, attrs):
         if value and value.values:
             context_value = value.values
         else:
-            context_value = [""]
+            context_value = []
         attrs["class"] = attrs.get("class", "" ) + " form-control"
         context = super().get_context(name, context_value, attrs)
         final_attrs = context["widget"]["attrs"]
@@ -97,7 +99,7 @@ class DynamicFactoryArrayWidget(forms.TextInput):
             widget_attrs = final_attrs.copy()
             if id_ is not None:
                 widget_attrs["id"] = "{id_}.{index}".format(id_=id_, index=index)
-            widget = self.subwidget_form()
+            widget = self.subwidget_form(**self.subwidget_kwargs_gen())
             widget.is_required = self.is_required
             subwidgets.append(widget.get_context(name, item, widget_attrs)["widget"])
 
@@ -108,18 +110,18 @@ class DynamicFactoryArrayWidget(forms.TextInput):
         if isinstance(self.subwidget_form, type) and issubclass(
             self.subwidget_form, Widget
         ):
-            return self.subwidget_form().render("", None)
+            return self.subwidget_form(**self.subwidget_kwargs_gen()).render("", None)
         else:
-            return self.subwidget_form().get_structure()
+            return self.subwidget_form(**self.subwidget_kwargs_gen()).get_structure()
 
     def build_template_structure(self, prefix):
 
         if isinstance(self.subwidget_form, type) and issubclass(
             self.subwidget_form, Widget
         ):
-            d = {prefix: self.subwidget_form().render("", None, attrs={"id": "{prefix}", "class":  "form-control"})}
+            d = {prefix: self.subwidget_form(**self.subwidget_kwargs_gen()).render("", None, attrs={"id": "{prefix}", "class": "form-control"})}
         else:
-            d = self.subwidget_form().build_template_structure(prefix)
+            d = self.subwidget_form(**self.subwidget_kwargs_gen()).build_template_structure(prefix)
         return d
 
 
