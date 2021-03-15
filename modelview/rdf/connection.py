@@ -14,12 +14,11 @@ class ConnectionContext:
     def query_all_objects(self, subjects, predicates):
         query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-            "SELECT ?s ?p ?o ?lo ?lp WHERE { "
+            "SELECT ?s ?p ?o ?lo ?lp ?fname WHERE { "
         )
         options = ["?p rdfs:label ?lp .", "?o rdfs:label ?lo"]
-        for s in subjects:
-            filter = [f"?s = <{s}>"]
-            query += " UNION ".join(f"{{ { p.fetch_query('?s', '?o', options=options, filter=filter) } }}" for p in predicates if p.rdf_name)
+
+        query += " UNION ".join(f"""{{ { p.fetch_queries('?s', '?o', options=options, filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}""" for s in subjects for fname, p in predicates if p.rdf_name)
 
         query += "}"
         self.connection.setQuery(query)
@@ -50,8 +49,7 @@ class ConnectionContext:
         s += "WHERE {}"
 
     def load_all(self, filter, subclass=False, inverse=False):
-        p = "a" if not subclass else "rdfs:subClassOf"
-        q = f"?iri {p} <{filter}>"
+        q = ". ".join(f"?iri {f}" for f in filter)
         s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
         s += f"SELECT ?iri ?l WHERE {{ {q} .  OPTIONAL {{ ?iri rdfs:label ?l . }} }}"
         self.connection.setQuery(s)

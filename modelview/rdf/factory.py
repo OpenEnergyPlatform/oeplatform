@@ -10,8 +10,8 @@ from modelview.rdf.namespace import *
 class RDFFactory(handler.Rederable, ABC):
     _field_handler = {}
     _direct_parent = None
-    _label_iri = rdfs.label
     _fields = {}
+    _label_field = None
 
     @classmethod
     def doc(self):
@@ -28,12 +28,14 @@ class RDFFactory(handler.Rederable, ABC):
         return s
 
     def __init_subclass__(cls, **kwargs):
-        cls.fallback_field = "additional_fields"
-        cls._fields[cls.fallback_field] = field.Field(rdf_name=rdf.type, verbose_name="additional")
-        cls._fields["classes"] = field.IRIField(rdf_name=rdf.type, verbose_name="Classes")
+        #cls.fallback_field = "additional_fields"
+        #cls._fields[cls.fallback_field] = field.Field(rdf_name=rdf.type, verbose_name="additional")
+        cls._fields["classes"] = field.IRIField(rdf_name=rdf.type, verbose_name="Classes", hidden=True)
         cls._field_map = {f.rdf_name: k for k, f in cls._fields.items()}
-        cls._fields["iri"] = field.IRIField(None)
+        cls._fields["iri"] = field.IRIField(None, hidden=True)
         cls._field_handler = {f: f.handler for k, f in cls._fields.items()}
+        if cls._label_field is None:
+            cls._label_field = "iri"
 
 
     def __init__(self, iri=None, **kwargs):
@@ -64,27 +66,25 @@ class RDFFactory(handler.Rederable, ABC):
         return self._fields.keys()
 
     @classmethod
-    def _load_many(cls, identifiers, context, graph: Graph):
-        for inverse in (True, False):
-            result = context.query_all_objects(identifiers, cls._fields.values())
-            head = result["head"]
-            for t in result["results"]["bindings"]:
-                if "s" in t:
-                    s = cls._read_value(t["s"])
-                    o = cls._read_value(t.get("o"))
-                    lo = cls._read_value(t.get("lo"))
-                    p = cls._read_value(t.get("p"))
-                    lp = cls._read_value(t.get("lp"))
-                    if inverse:
-                        graph.add((o, p, s))
-                    else:
-                        graph.add((s, p, o))
-                    if lp:
-                        graph.add((p, rdfs.label, lp))
-                    if lo:
-                        graph.add((o, rdfs.label, lo))
-        d = {i: cls._parse(i, context, graph) for i in identifiers}
-        return d
+    def _load_many(cls, identifiers, context, cache=None):
+        if cache is None:
+            cache = dict()
+        cached_objects = {i:cache[i] for i in identifiers if i in cache}
+        new_items = [i for i in identifiers if i not in cache]
+        result = context.query_all_objects(new_items, cls._fields.items())
+        head = result["head"]
+        d = dict()
+        for t in result["results"]["bindings"]:
+            if "s" in t:
+                s = cls._read_value(t["s"])
+                o = cls._read_value(t.get("o"))
+                lo = cls._read_value(t.get("lo"))
+                lp = cls._read_value(t.get("lp"))
+                fname = t["fname"]["value"]
+                d[s] = d.get(s, dict())
+                d[s][fname] = d[s].get(fname, []) + [(o, lo)]
+        cached_objects.update({i: cls._parse(i, context, d[i], cache=cache) for i in identifiers})
+        return cached_objects
 
     @staticmethod
     def _read_value(v):
@@ -103,8 +103,8 @@ class RDFFactory(handler.Rederable, ABC):
 
 
     @classmethod
-    def _load_one(cls, identifier, context: connection.ConnectionContext, graph: Graph):
-        return cls._load_many([identifier], context, graph)[identifier]
+    def _load_one(cls, identifier, context: connection.ConnectionContext):
+        return cls._load_many([identifier], context,)[identifier]
 
     @classmethod
     def _find_field(cls, predicate_iri, obj):
@@ -112,27 +112,17 @@ class RDFFactory(handler.Rederable, ABC):
         return cls._field_map.get(predicate_iri, None)
 
     @classmethod
-    def _parse(cls, identifier, context, graph: Graph, cache=None):
+    def _parse(cls, identifier, context, obj, cache=None):
         if cache is None:
             cache = dict()
-        obj = cache.get(identifier, dict())
+        #obj = cache.get(identifier, dict())
         skipped = set()
-        for p, o in graph.predicate_objects(identifier):
-            proper_p = cls._find_field(p, o)
-            if proper_p:
-                try:
-                    obj[proper_p].append(o)
-                except KeyError:
-                    obj[proper_p] = [o]
-            else:
-                skipped.add(p)
-
         if skipped:
             print("Warning! Some predicates were not processed:", skipped)
         res = cache[identifier] = cls(iri=identifier,
             **{
                 p: cls._fields[p].handler(
-                    os, context, graph
+                    os, context
                 )
                 for p, os in obj.items()
             }
@@ -186,7 +176,7 @@ class RDFFactory(handler.Rederable, ABC):
         )
 
     def render_table(self):
-        s = format_html_join("\n", "{}", ((f.render(),) for f in self.iter_fields()))
+        s = format_html_join("\n", "{}", ((f.render(),) for f in self.iter_fields() if not f.field.hidden))
         return s
 
     @classmethod
@@ -221,7 +211,7 @@ class RDFFactory(handler.Rederable, ABC):
     @property
     def label(self):
         try:
-            return getattr(self, self._label_iri)
+            return getattr(self, self._label_field).values[0]
         except:
             return None
 
@@ -231,7 +221,48 @@ class IRIFactory(RDFFactory):
     iri = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation"))
 
 
+class Institution(RDFFactory, handler.Rederable):
+    _direct_parent = OEO.OEO_00000238
+    _label_field = "name"
+    _fields = dict(
+    name = field.Field(rdf_name=foaf.name, verbose_name="Name"),
+    address = field.Field(rdf_name=foaf.address, verbose_name="Address"))
+
+    @property
+    def label(self):
+        return self.name.values[0]
+
+    def render(self, **kwargs):
+        return self.label
+
+
+class Person(RDFFactory, handler.Rederable):
+    _direct_parent = OEO.OEO_00000323
+    _fields = dict(
+    first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
+    last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
+    affiliation = field.FactoryField(factory=Institution, rdf_name=schema.affiliation, verbose_name="Affiliation",handler=handler.FactoryHandler(Institution),))
+
+    @property
+    def label(self):
+        return self.first_name.values[0] + " " + self.last_name.values[0]
+
+    def render(self, **kwargs):
+        return self.label
+
+
+
+
+
+class AnalysisScope(RDFFactory):
+    _fields = dict(
+    is_defined_by = field.Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by"),
+    covers_sector = field.Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors"),
+    covers = field.Field(rdf_name=OEO.OEO_00000522, verbose_name="Covers"))
+
+
 class Scenario(RDFFactory):
+    _label_field = "name"
     _fields = dict(
     abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation"),
     abstract = field.Field(
@@ -244,14 +275,13 @@ class Scenario(RDFFactory):
         verbose_name="Abstract",
         help_text="A short description of this scenario",
     ))
-
-
-class AnalysisScope(RDFFactory):
-    _fields = dict(
-    is_defined_by = field.Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by"),
-    covers_sector = field.Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors"),
-    covers = field.Field(rdf_name=OEO.OEO_00000522, verbose_name="Covers"))
-
+    analysis_scope = field.FactoryField(
+        AnalysisScope,
+        rdf_name=OEO.OEO_00000504,
+        inverse=True,
+        verbose_name="Analysis Scope",
+        handler=handler.FactoryHandler(AnalysisScope),
+    ),
 
 class Publication(RDFFactory):
     _fields = dict(
@@ -272,10 +302,12 @@ class Publication(RDFFactory):
     url = field.Field(
         rdf_name=schema.url, verbose_name="URL", help_text="Link to this publication"
     ),
-    authors = field.Field(
+    authors = field.FactoryField(
         rdf_name=OEO.OEO_00000506,
         verbose_name="Authors",
         help_text="Authors of this publication",
+        factory=Person,
+        handler=handler.FactoryHandler(Person),
     ),
     about = field.Field(
         rdf_name=obo.IAO_0000136,
@@ -283,12 +315,7 @@ class Publication(RDFFactory):
         help_text="Elements of this publication",
     ))
 
-
-class Institution(RDFFactory):
-    _direct_parent = OEO.OEO_00000238
-    _fields = dict(
-    name = field.Field(rdf_name=foaf.name, verbose_name="Name"),
-    address = field.Field(rdf_name=foaf.address, verbose_name="Address"))
+    _label_field = "title"
 
 
 class Model(RDFFactory):
@@ -298,11 +325,23 @@ class Model(RDFFactory):
     name = field.Field(rdf_name=dc.title, verbose_name="Name"))
 
 
+class Dataset(RDFFactory):
+    _fields = dict(
+        url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
+    )
+
+    @property
+    def label(self):
+        return self.url.values[0]
+
+    def render(self, **kwargs):
+        return format_html("<a href={0}>{0}</a>", self.label)
+
 
 class ModelCalculation(RDFFactory):
     _fields = dict(
-        has_input= field.Field(rdf_name=obo.RO_0002233, verbose_name="Inputs"),
-        has_output = field.Field(rdf_name=obo.RO_0002234, verbose_name="Outputs"),
+        has_input= field.FactoryField(rdf_name=obo.RO_0002233, factory=Dataset, verbose_name="Inputs"),
+        has_output = field.FactoryField(rdf_name=obo.RO_0002234, factory=Dataset, verbose_name="Outputs"),
         uses = field.Field(
             rdf_name=OEO.OEO_00000501,
             verbose_name="Involved Models",
@@ -319,15 +358,15 @@ class Study(RDFFactory):
             verbose_name="Funding source",
             handler=handler.FactoryHandler(Institution),
         ),
-        has_part=field.PredefinedInstanceField(rdf_name=obo.BFO_0000051, filter=OEO.OEO_00000364, verbose_name="Has part"),
         covers_energy_carrier=field.PredefinedInstanceField(
-            rdf_name=OEO.OEO_00000523, filter=OEO.OEO_00020039, verbose_name="Covers energy carriers", subclass=True,
+            rdf_name=OEO.OEO_00000523, filter=[f"<{rdfs.subClassOf}> <{OEO.OEO_00000331}>"], verbose_name="Covers energy carriers", subclass=True,
         ),
         covers_energy=field.PredefinedInstanceField(
-            rdf_name=OEO.OEO_00000523, filter=OEO.OEO_00000150, verbose_name="Related to energy", subclass=True,
+            rdf_name=OEO.OEO_00000523, filter=[f"<{rdfs.subClassOf}> <{OEO.OEO_00000150}>"], verbose_name="Related to energy", subclass=True,
         ),
-        model_calculations=field.Field(
-            rdf_name=schema.affiliation, verbose_name="Model Calculations"
+
+        model_calculations=field.FactoryField(
+            rdf_name=obo.BFO_0000051, factory=ModelCalculation, filter=[f"a <{OEO.OEO_00000275}>"], verbose_name="Model Calculations", handler=handler.FactoryHandler(ModelCalculation),
         ),
         published_in=field.FactoryField(
             Publication,
@@ -336,15 +375,5 @@ class Study(RDFFactory):
             verbose_name="Publications",
             handler=handler.FactoryHandler(Publication),
         ),
+
     )
-
-
-class Person(RDFFactory):
-    _direct_parent = OEO.OEO_00000323
-    _fields = dict(
-    first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
-    last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
-    affiliation = field.Field(rdf_name=schema.affiliation, verbose_name="Affiliation"))
-
-
-

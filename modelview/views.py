@@ -451,13 +451,11 @@ class RDFFactoryView(View):
         context = connection.ConnectionContext()
         # Build URI, assuming that this is part of this knowledge graph
         uri = getattr(namespace.OEO_KG, identifier)
-        g = Graph()
-        # Load instance from graph
         # TODO: Error handling:
         #  * What if it is not part of the graph?
         #  * What if it is not of this class?
         #  * Probably: 404 in both cases!?
-        obj = self._cls._load_one(uri, context, g)
+        obj = self._cls._load_one(uri, context)
         return render(
             request,
             self._template,
@@ -480,7 +478,7 @@ class RDFFactoryFormView(View):
         #  * What if it is not part of the graph?
         #  * What if it is not of this class?
         #  * Probably: 404 in both cases!?
-        obj = self._cls._load_one(uri, context, g)
+        obj = self._cls._load_one(uri, context)
         return render(
             request,
             self._template,
@@ -498,9 +496,8 @@ class RDFFactoryFormView(View):
                 obj = self._cls(data)
                 obj.save(context)
             else:
-                graph = Graph()
                 uri = getattr(namespace.OEO_KG, identifier)
-                obj = self._cls._load_one(uri, context, graph)
+                obj = self._cls._load_one(uri, context)
                 new_obj = self._cls._parse_from_structure(data)
                 _, deletes, inserts = graph_diff(obj.to_graph(), new_obj.to_graph())
                 context.apply_diff(inserts, deletes)

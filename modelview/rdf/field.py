@@ -26,6 +26,8 @@ class Field:
         widget_kwargs_gen=None,
         filter = None,
         subclass = False,
+        follow=True,
+        hidden=False,
         inverse=False
     ):
         self.rdf_name = rdf_name  # Some IRI
@@ -34,33 +36,45 @@ class Field:
         self.help_text = help_text
         self.filter = filter
         self.subclass = subclass
+        self.follow = follow
+        self.hidden = hidden
         self._widget = DynamicFactoryArrayWidget(subwidget_form=widget_cls, subwidget_form_kwargs_gen=widget_kwargs_gen)
         self.inverse = inverse
 
     def widget(self):
         return self._widget
 
-    def fetch_query(self, subject, object, filter=None, options=None):
+    def _build_query_parts(self, subject, object, where=None, filter=None, options=None):
         if filter is None:
             filter = []
-        where = []
+        if where is None:
+            where = []
         filter = filter.copy()
         filter.append(f"?p = <{self.rdf_name}>")
         if self.filter:
-            p = "a" if not self.subclass else "rdfs:subClassOf"
-            where.append(f"?o {p} <{self.filter}> . ")
+            where += [f"{object} {f} ." for f in self.filter]
         if options is None:
             options = []
         if self.inverse:
             where.append(f"{object} ?p {subject}.")
         else:
             where.append(f"{subject} ?p {object}.")
+        return where, options, filter
+
+    def fetch_queries(self, subject, object, where=None, filter=None, options=None):
+        where, options, filter = self._build_query_parts(subject, object, where=where, filter=filter, options=options)
         query = " ".join(where)
         for o in options:
             query += f"OPTIONAL {{ {o} }} . "
         if filter:
             query += f"FILTER ({' && ' .join(filter)}) . "
         return query
+
+    def render_display(self, value, **kwargs):
+        if isinstance(value, handler.Rederable):
+            return value.render(**kwargs)
+        else:
+            return value
 
 
 class IRIField(Field):
@@ -81,12 +95,14 @@ class PredefinedInstanceField(Field):
     def _load_choices(self):
         c = connection.ConnectionContext()
         results = c.load_all(self.filter, self.subclass, inverse=self.inverse)
-        choices = [(row['iri']['value'], row.get("l", row['iri'])['value']) for row in results["results"]["bindings"]]
+        choices = [(row['iri']['value'], handler.NamedIRI(row.get('l', dict()).get("value"), row['iri']['value']) if row.get('l', dict()).get("value")  else row['iri']['value']) for row in results["results"]["bindings"]]
         return choices
 
 
 class FactoryField(Field):
     def __init__(self, factory, **kwargs):
+        if kwargs.get("handler", None) is None:
+            kwargs["handler"] = handler.FactoryHandler(factory)
         super(FactoryField, self).__init__(**kwargs)
         self.factory = factory
         self._widget = DynamicFactoryArrayWidget(
@@ -95,6 +111,12 @@ class FactoryField(Field):
 
     def structure(self):
         return self._widget.get_structure()
+
+    def render_display(self, value, **kwargs):
+        if not self.follow and value.label is not None:
+            return value.label
+        else:
+            return value.render()
 
 
 class Container(handler.Rederable):
@@ -115,16 +137,13 @@ class Container(handler.Rederable):
                     raise Exception(v)
 
     def render(self, mode="display", **kwargs):
-        it = list(self.values if self.values else ["-"])
-
+        it = list(self.values if self.values else [])
         if mode == "display":
-            f = self._render_atomic_field
-
-            vals = [(f(v),) for v in it]
+            vals = [(self.field.render_display(v),) for v in it]
 
             s = format_html(
                 mark_safe(
-                    '<tr><th><a href="{rdfname}">{vname}</a></th><td>{vals}</td></tr>'
+                    '<tr><th><a href="{rdfname}">{vname}</a></th><td><ul class="list-group list-group-flush">{vals}</ul></td></tr>'
                 ),
                 rdfname=self.field.rdf_name,
                 vname=self.field.verbose_name,
@@ -137,14 +156,3 @@ class Container(handler.Rederable):
     def to_form_element(self):
         return self.field._widget.render(self.field_name, self, attrs={"id": self.field_name})
 
-    def _render_atomic_field(self, obj, **kwargs):
-        if isinstance(obj, handler.Rederable):
-            return obj.render()
-        elif isinstance(obj, list):
-            return [self._render_atomic_field(o, **kwargs) for o in obj]
-        elif isinstance(obj, str):
-            return obj
-        elif obj is None:
-            return None
-        else:
-            raise ValueError(obj)
