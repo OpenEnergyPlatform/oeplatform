@@ -32,6 +32,9 @@ from .forms import (
     EnergystudyForm,
 )
 from .models import Energyframework, Energymodel, Energyscenario, Energystudy
+from .rdf import factory, connection, namespace
+
+_factory_mappings = {"study": factory.Study, "scenario": factory.Scenario}
 
 def getClasses(sheettype):
     """
@@ -440,14 +443,13 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     return url
 
 
-from .rdf import factory, connection, namespace
-
-
 class RDFFactoryView(View):
-    _cls = None
-    _template = None
-
-    def get(self, request, identifier):
+    _template = "modelview/display_rdf.html"
+    def get(self, request, factory_id, identifier):
+        try:
+            factory = _factory_mappings[factory_id]
+        except KeyError:
+            raise Http404
         context = connection.ConnectionContext()
         # Build URI, assuming that this is part of this knowledge graph
         uri = getattr(namespace.OEO_KG, identifier)
@@ -455,7 +457,7 @@ class RDFFactoryView(View):
         #  * What if it is not part of the graph?
         #  * What if it is not of this class?
         #  * Probably: 404 in both cases!?
-        obj = self._cls._load_one(uri, context)
+        obj = factory._load_one(uri, context)
         return render(
             request,
             self._template,
@@ -464,41 +466,47 @@ class RDFFactoryView(View):
 
 
 class RDFFactoryFormView(View):
-    _cls = None
-    _template = None
+    _template = "modelview/rdf_edit.html"
     _success_url = None
 
-    def get(self, request, identifier):
+    def get(self, request, factory_id, identifier):
+        try:
+            factory = _factory_mappings[factory_id]
+        except KeyError:
+            raise Http404
         context = connection.ConnectionContext()
         # Build URI, assuming that this is part of this knowledge graph
         uri = getattr(namespace.OEO_KG, identifier)
-        g = Graph()
         # Load instance from graph
         # TODO: Error handling:
         #  * What if it is not part of the graph?
         #  * What if it is not of this class?
         #  * Probably: 404 in both cases!?
-        obj = self._cls._load_one(uri, context)
+        obj = factory._load_one(uri, context)
         return render(
             request,
             self._template,
             {"obj": obj},
         )
 
-    def post(self, request, identifier=None):
+    def post(self, request, factory_id, identifier=None):
         try:
             data = json.loads(request.POST["data"])
         except:
             raise PermissionError
         try:
+            factory = _factory_mappings[factory_id]
+        except KeyError:
+            raise Http404
+        try:
             context = connection.ConnectionContext()
             if identifier is None:
-                obj = self._cls(data)
+                obj = factory(data)
                 obj.save(context)
             else:
                 uri = getattr(namespace.OEO_KG, identifier)
-                obj = self._cls._load_one(uri, context)
-                new_obj = self._cls._parse_from_structure(data)
+                obj = factory._load_one(uri, context)
+                new_obj = factory._parse_from_structure(data)
                 _, deletes, inserts = graph_diff(obj.to_graph(), new_obj.to_graph())
                 context.apply_diff(inserts, deletes)
         except Exception as e:
@@ -513,25 +521,20 @@ class RDFFactoryFormView(View):
             return redirect(f"/factsheets/study/{obj.iri.values[0].split('/')[-1]}")
 
 
-class StudyRDFView(RDFFactoryView):
-    _cls = factory.Study
-    _template = "modelview/display_rdf.html"
+class RDFView(View):
 
-
-class StudyRDFFormView(RDFFactoryFormView):
-    _cls = factory.Study
-    _template = "modelview/study_edit.html"
-
-
-class ScenarioRDFView(RDFFactoryView):
-    _cls = factory.Scenario
-    _template = "modelview/display_rdf.html"
-
-
-class ScenarioRDFFormView(RDFFactoryFormView):
-    _cls = factory.Scenario
-    _template = "modelview/study_edit.html"
-
+    def get(self, request, factory_id=None):
+        try:
+            factory = _factory_mappings[factory_id]
+        except KeyError:
+            raise Http404
+        context = connection.ConnectionContext()
+        instances = factory.load_all_instances(context)
+        return render(
+            request,
+            "modelview/list_rdf_instances.html",
+            {"instances": instances}
+        )
 
 BASE_VIEW_PROPS = OrderedDict(
     [

@@ -215,6 +215,11 @@ class RDFFactory(handler.Rederable, ABC):
         except:
             return None
 
+    @classmethod
+    def load_all_instances(cls, context: connection.ConnectionContext):
+        results = context.load_all(filter=[f"a <{cls._direct_parent}>"])
+        return [handler.NamedElement(row['iri']['value'].split("/")[-1], handler.NamedIRI(row.get('l', dict()).get("value"), row['iri']['value']) if row.get('l', dict()).get("value")  else row['iri']['value']) for row in results["results"]["bindings"]]
+
 
 class IRIFactory(RDFFactory):
     _fields = dict(
@@ -251,9 +256,6 @@ class Person(RDFFactory, handler.Rederable):
         return self.label
 
 
-
-
-
 class AnalysisScope(RDFFactory):
     _fields = dict(
     is_defined_by = field.Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by"),
@@ -262,6 +264,7 @@ class AnalysisScope(RDFFactory):
 
 
 class Scenario(RDFFactory):
+    _direct_parent = OEO.OEO_00000364
     _label_field = "name"
     _fields = dict(
     abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation"),
@@ -282,6 +285,7 @@ class Scenario(RDFFactory):
         verbose_name="Analysis Scope",
         handler=handler.FactoryHandler(AnalysisScope),
     ))
+
 
 class Publication(RDFFactory):
     _fields = dict(

@@ -5,10 +5,9 @@ from modelview import views
 from oeplatform import settings
 
 urlpatterns = [
-    url(r"study/(?P<identifier>[\w\d_]*)/$", views.StudyRDFView.as_view()),
-    url(r"study/(?P<identifier>[\w\d_]*)/edit", views.StudyRDFFormView.as_view()),
-    url(r"scenario/(?P<identifier>[\w\d_]*)/$", views.ScenarioRDFView.as_view()),
-    url(r"scenario/(?P<identifier>[\w\d_]*)/edit", views.ScenarioRDFFormView.as_view()),
+    url(r"rdf/(?P<factory_id>[\w\d_]*)/$", views.RDFView.as_view()),
+    url(r"rdf/(?P<factory_id>[\w\d_]*)/(?P<identifier>[\w\d_]*)/$", views.RDFFactoryView.as_view()),
+    url(r"rdf/(?P<factory_id>[\w\d_]*)/(?P<identifier>[\w\d_]*)/edit", views.RDFFactoryFormView.as_view()),
     url(r"^(?P<sheettype>[\w\d_]+)s/$", views.listsheets, {}, name="modellist"),
     url(r"^overview/$", views.overview, {}),
     url(
