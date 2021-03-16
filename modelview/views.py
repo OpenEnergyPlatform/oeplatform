@@ -525,7 +525,12 @@ class StudyRDFFormView(RDFFactoryFormView):
 
 class ScenarioRDFView(RDFFactoryView):
     _cls = factory.Scenario
-    _template = "modelview/scenario.html"
+    _template = "modelview/display_rdf.html"
+
+
+class ScenarioRDFFormView(RDFFactoryFormView):
+    _cls = factory.Scenario
+    _template = "modelview/study_edit.html"
 
 
 BASE_VIEW_PROPS = OrderedDict(

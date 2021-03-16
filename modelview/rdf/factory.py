@@ -274,14 +274,14 @@ class Scenario(RDFFactory):
         rdf_name=foaf.name,
         verbose_name="Abstract",
         help_text="A short description of this scenario",
-    ))
+    ),
     analysis_scope = field.FactoryField(
         AnalysisScope,
         rdf_name=OEO.OEO_00000504,
         inverse=True,
         verbose_name="Analysis Scope",
         handler=handler.FactoryHandler(AnalysisScope),
-    ),
+    ))
 
 class Publication(RDFFactory):
     _fields = dict(
