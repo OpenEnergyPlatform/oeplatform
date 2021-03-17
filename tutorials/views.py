@@ -83,7 +83,7 @@ def _resolveStaticTutorials():
                 'license': handleKeyNotInJson(jsonContent, 'license'),
                 'creator': handleKeyNotInJson(jsonContent, 'creator'),
                 'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
-                'github': handleKeyNotInJson(jsonContent, 'github'),
+                'github_contact': handleKeyNotInJson(jsonContent, 'github_contact'),
                 'html': rTut['html'],
                 'isStatic': True,
             })
@@ -120,7 +120,7 @@ def _resolveDynamicTutorial(evaluatedQs):
                             'license': '',
                             'creator': '',
                             'email_contact': '',
-                            'github': ''
+                            'github_contact': ''
                         }
 
     # populate dict
@@ -136,7 +136,7 @@ def _resolveDynamicTutorial(evaluatedQs):
                            license=evaluatedQs.license,
                            creator=evaluatedQs.creator,
                            email_contact=evaluatedQs.email_contact,
-                           github=evaluatedQs.github
+                           github_contact=evaluatedQs.github_contact
                            )
 
     return currentTutorial
