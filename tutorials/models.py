@@ -2,11 +2,12 @@ from django.db import models
 from django.urls import reverse
 
 # add options if needed
-CATEGORY_OPTIONS = [('publication', 'Publication'), 
-                    ('io', 'I/O'), 
-                    ('intro', 'OEP Introduction'), 
+CATEGORY_OPTIONS = [('general', 'General'),
+                    ('publication', 'Publication/Licensing'), 
+                    ('io', 'Upload/Download'), 
+                    ('data_structure', 'Data Structure'), 
                     ('ontology', 'Ontology'), 
-                    ('other', 'Other')]
+                    ('other', 'Other Topics')]
 
 LEVEL_OPTIONS = [(1, 'Beginner'), (2, 'Intermediate'), (3, 'Expert')]
 LANGUAGE = [('de', 'german'), ('en', 'english'), ('fr', 'french')]
@@ -21,7 +22,6 @@ class Tutorial(models.Model):
     category = models.CharField(max_length=15, choices=CATEGORY_OPTIONS, blank=True)
     title = models.CharField(max_length=255)
     html = models.TextField()
-    # make sure to use official embed links
     media_src = models.URLField(verbose_name='youtube video url', null=True, blank=True)
     markdown = models.TextField()
     level = models.IntegerField(choices=LEVEL_OPTIONS, null=True)
@@ -30,7 +30,7 @@ class Tutorial(models.Model):
     license = models.CharField(choices=LICENSE, null=True, max_length=30)
     creator = models.CharField(verbose_name='creator/copyright', null=True, max_length=254)
     email_contact = models.EmailField(verbose_name='email contact', max_length=255, null=True)
-    github = models.CharField(verbose_name='github name', max_length=50, blank=True)
+    github_contact = models.CharField(verbose_name='github contact', max_length=50, blank=True)
 
     def get_absolute_url (self):
         return reverse('detail_tutorial', args=[self.id])
