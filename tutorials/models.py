@@ -30,7 +30,7 @@ class Tutorial(models.Model):
     license = models.CharField(choices=LICENSE, null=True, max_length=30)
     creator = models.CharField(verbose_name='creator/copyright', null=True, max_length=254)
     email_contact = models.EmailField(verbose_name='email contact', max_length=255, null=True)
-    github_contact = models.CharField(verbose_name='github contact', max_length=50, blank=True)
+    github_contact = models.CharField(verbose_name='github username/handle', max_length=50, blank=True)
 
     def get_absolute_url (self):
         return reverse('detail_tutorial', args=[self.id])
