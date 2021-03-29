@@ -11,6 +11,12 @@ class ConnectionContext:
         self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
         self.connection.setReturnFormat(JSON)
 
+    def update_property(self,subject, property, old_value, new_value):
+        s = f"DELETE {{ {subject} {property} {old_value} }} "
+        s += f"INSERT {{ {subject} {property} {new_value} }} "
+        s += "WHERE {}"
+        print(s)
+
     def query_all_objects(self, subjects, predicates):
         query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"

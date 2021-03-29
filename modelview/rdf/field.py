@@ -5,6 +5,11 @@ import rdflib as rl
 from modelview.rdf import handler, widget, factory, connection
 
 from modelview.rdf.widget import DynamicFactoryArrayWidget
+from os import path
+from django import template
+from django.template import loader
+
+
 
 class Field:
     """
@@ -28,7 +33,8 @@ class Field:
         subclass = False,
         follow=True,
         hidden=False,
-        inverse=False
+        inverse=False,
+        template=None
     ):
         self.rdf_name = rdf_name  # Some IRI
         self.verbose_name = verbose_name
@@ -40,6 +46,11 @@ class Field:
         self.hidden = hidden
         self._widget = DynamicFactoryArrayWidget(subwidget_form=widget_cls, subwidget_form_kwargs_gen=widget_kwargs_gen)
         self.inverse = inverse
+        self._template = template or {"type": "text"}
+
+    @property
+    def template(self):
+        return self._template
 
     def widget(self):
         return self._widget
@@ -70,11 +81,16 @@ class Field:
             query += f"FILTER ({' && ' .join(filter)}) . "
         return query
 
-    def render_display(self, value, **kwargs):
+    def render_display(self, value, index=0, **kwargs):
         if isinstance(value, handler.Rederable):
             return value.render(**kwargs)
         else:
-            return value
+            return self.combine_with_form(value, index=index)
+
+    def combine_with_form(self, value, index=None):
+        FORM_TEMPLATE = loader.get_template(path.join("modelview", "widgets", "dynamic_edit.html"))
+        field = self._widget.subwidget_form(**self._widget.subwidget_kwargs_gen()).render("", value, {"class":"form-control", "id":"input__"+index, "onfocusout":f"hide_field('{index}')"})
+        return FORM_TEMPLATE.render(dict(value=value, id=index, field=field))
 
 
 class IRIField(Field):
@@ -113,11 +129,11 @@ class FactoryField(Field):
         return self._widget.get_structure()
 
     def render_display(self, value, **kwargs):
-        if not self.follow and value.label is not None:
-            return value.label
-        else:
-            return value.render()
+        return value.render(**kwargs)
 
+    @property
+    def template(self):
+        return None
 
 class Container(handler.Rederable):
     def __init__(self, field):
@@ -140,8 +156,13 @@ class Container(handler.Rederable):
 
     def render(self, mode="display", **kwargs):
         it = list(self.values if self.values else [])
+        path = kwargs.pop("index", None)
+        if path:
+            path += "." + self.field_name
+        else:
+            path = self.field_name
         if mode == "display":
-            vals = [(self.field.render_display(v),) for v in it]
+            vals = [(self.field.render_display(v, index=".".join((path, str(i)))),) for i, v in enumerate(it)]
 
             s = format_html(
                 mark_safe(
@@ -155,6 +176,16 @@ class Container(handler.Rederable):
         else:
             return self.field._widget.render("Name", self, {"id": "field", "level": 0})
 
+    def to_json(self):
+        for v in self.values:
+            if isinstance(v, (rl.Literal, rl.URIRef, rl.BNode)):
+                yield v
+            elif isinstance(v, factory.RDFFactory):
+                yield v.iri.values[0]
+            elif isinstance(v, handler.NamedIRI):
+                return v.iri
+            else:
+                raise Exception(v)
+
     def to_form_element(self):
         return self.field._widget.render(self.field_name, self, attrs={"id": self.field_name})
-

@@ -20,29 +20,20 @@ class Handler:
         raise NotImplementedError
 
 
-class NamedIRI(Rederable):
+class NamedIRI:
     def __init__(self, iri, label):
         self.iri = iri
         self.label = label
 
-    def render(self, **kwargs):
-        return format_html(
-            '<a href="{iri}">{label}</a>', iri=self.iri, label=self.label
-        )
 
     def __str__(self):
         return str(self.iri)
 
-class NamedElement(Rederable):
+
+class NamedElement:
     def __init__(self, element, label):
         self.element = element
         self.label = label
-
-    def render(self, follow=True, **kwargs):
-        if follow:
-            return self.element.render(follow=follow, **kwargs)
-        else:
-            return self.label
 
     def __str__(self):
         return self.label

@@ -27,7 +27,7 @@ class FactoryWidget(MultiWidget):
         return d
 
     def get_context(self, name, value, attrs):
-        context = super(MultiWidget, self) .get_context(name, value, attrs)
+        context = super(MultiWidget, self).get_context(name, value, attrs)
         if self.is_localized:
             for widget in self.widgets:
                 widget.is_localized = self.is_localized
@@ -117,7 +117,7 @@ class DynamicFactoryArrayWidget(forms.TextInput):
         ):
             return self.subwidget_form(**self.subwidget_kwargs_gen()).render("", None)
         else:
-            return self.subwidget_form(**self.subwidget_kwargs_gen()).get_structure()
+            return None
 
     def build_template_structure(self, prefix):
 

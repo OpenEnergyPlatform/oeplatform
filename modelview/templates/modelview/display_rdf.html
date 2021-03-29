@@ -4,13 +4,208 @@
 {% load modelview_extras %}
 
 {% block main-right-sidebar-content-actions %}
- <a class="btn btn-primary"href="edit">Edit</a>
+<a class="btn btn-primary"href="edit">Edit</a>
 {% endblock main-right-sidebar-content-actions %}
 
 {% block factsheets_content %}
 
-<table class="table">
-{{ obj.render_table }}
-</table>
+<div id="root"></div>
 
 {% endblock factsheets_content %}
+
+{% block factsheets-after-body-bottom-js %}
+
+<script>
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    load_instance("root", '{{ iri }}', '{{ factory }}');
+    function hide_field(path){
+        document.getElementById("display__" + path).hidden = false;
+        document.getElementById("edit__" + path).hidden = true;
+        let input = document.getElementById("edit__" + path);
+        input.onfocusout = "";
+    }
+    function show_field(path){
+        document.getElementById("display__" + path).hidden = true;
+        let edit = document.getElementById("edit__" + path);
+        edit.hidden = false;
+        let input = document.getElementById("input__" + path);
+        setCaretPosition(input, input.value.length);
+    }
+
+    function setCaretPosition(ctrl, pos) {
+      // Modern browsers
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(pos, pos);
+
+        // IE8 and below
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', pos);
+            range.moveStart('character', pos);
+            range.select();
+        }
+    }
+
+    let templates = {{ rdf_templates | safe}};
+
+    function load_instance(parentId, identifier, factory, path) {
+        let parent = document.getElementById(parentId);
+        $.ajax({
+            url: "/factsheets/rdf/" + factory + "/" + identifier,
+            contentType: "application/json",
+            success: function (data) {
+                let table = document.createElement("table");
+                table.id = "container__" + path;
+                for(const [key, values] of Object.entries(data)){
+                    let tr = document.createElement("tr");
+                    // Create field header
+                    let th = document.createElement("th");
+                    let t = templates[factory][key];
+                    th.innerText = t.verbose_name;
+                    tr.appendChild(th);
+
+                    // Create value list
+                    let td = document.createElement("td");
+                    let ul = document.createElement("ul");
+                    let nextPath;
+                    if(path){
+                        nextPath = path + "." + key;
+                    } else {
+                        nextPath = key;
+                    }
+                    let idx = 0;
+                    for(let v of values) {
+                        let element = fill_template(factory + "/" + identifier, key, t, v, nextPath + "." + idx);
+                        if (element) {
+                            let li = document.createElement("li");
+                            li.appendChild(element);
+                            ul.appendChild(li)
+                        }
+                        idx++;
+                    }
+                    td.appendChild(ul);
+                    tr.appendChild(td);
+                    table.appendChild(tr);
+                    parent.appendChild(table);
+                }
+            }
+        });
+    }
+
+    function fill_template(subject, property, t, data, id){
+        if(!(t.template===undefined)) {
+            let i = document.createElement("input");
+            if (t.template.type === "text") {
+                i.type = "text";
+                i.value = data
+            } else {
+                debugger;
+                console.log(t)
+            }
+            return createEditable(subject, property, id, data, i);
+        } else {
+            return createExpandable(data, id, t["factory"])
+        }
+    }
+
+    function createEditable(subject, property, id, value, field){
+        let container = document.createElement("div");
+        let labelDiv = document.createElement("div");
+        labelDiv.id = "display__" + id;
+        labelDiv.innerText = value;
+        let editButton = document.createElement("a");
+        editButton.href="javascript:show_field('"+ id +"')";
+        let i = document.createElement("i");
+        i.className = "fas fa-pen";
+        editButton.appendChild(i);
+        labelDiv.appendChild(editButton);
+        container.appendChild(labelDiv);
+
+        let formDiv = document.createElement("div");
+        formDiv.id = "edit__" + id;
+        let form = document.createElement("form");
+        field.id = "input__" + id;
+        $(field).focusout(()=>hide_field(id));
+        // Submit on Enter
+        $(field).keydown(function (event) {
+            let keyPressed = event.keyCode || event.which;
+            if (keyPressed === 13) {
+                $(form).submit();
+            }
+        });
+        form.appendChild(field);
+        // Submit to API
+        $(form).submit(() => $.post( "/factsheets/rdf/" + subject + "/",
+            {property: property, oldValue:value, newValue:field.value , csrfmiddlewaretoken:csrftoken},
+            function( data ) {
+              alert( "Load was performed." );
+            }));
+        formDiv.appendChild(form);
+        formDiv.hidden = true;
+        container.appendChild(formDiv);
+        return container;
+    }
+
+    function createExpandable(iri, id, factory){
+        let container = document.createElement("div");
+        container.id = id;
+        let label = document.createElement("div");
+        label.innerText = iri;
+        container.appendChild(label);
+
+        let expand = document.createElement("a");
+        expand.innerText = "Show more";
+        let name = iri.split("/").pop();
+        expand.id = "expand__" + id;
+        expand.href="javascript:expand('" + factory + "','" + name + "','" + id + "')";
+        container.appendChild(expand);
+
+        let collapse = document.createElement("a");
+        collapse.innerText = "Show less";
+        collapse.id = "collapse__" + id;
+        collapse.hidden = true;
+        collapse.href="javascript:collapse('"+ id + "')";
+        container.appendChild(collapse);
+
+
+        return container
+    }
+
+    function expand(factory, name, id){
+        document.getElementById("expand__" + id).hidden = true;
+        document.getElementById("collapse__" + id).hidden = false;
+
+        load_instance(id, name, factory, id)
+    }
+    function collapse(id){
+        document.getElementById("expand__" + id).hidden = false;
+        document.getElementById("collapse__" + id).hidden = true;
+        document.getElementById("container__" + id).remove();
+    }
+
+
+
+
+</script>
+
+{% endblock %}

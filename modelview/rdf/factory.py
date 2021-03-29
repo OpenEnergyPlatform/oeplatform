@@ -9,6 +9,10 @@ from modelview.rdf.namespace import *
 FACTORIES = {}
 
 
+def get_factory_templates():
+    return {n: f.build_structure_spec() for n, f in FACTORIES.items()}
+
+
 def get_factory(identifier):
     return FACTORIES[identifier]
 
@@ -175,17 +179,20 @@ class RDFFactory(handler.Rederable, ABC):
             g.add(t)
         return g
 
+    def to_json(self):
+        return {f: list(getattr(self, f).to_json()) for f in self.iter_field_names() }
+
     def save(self, context):
 
         print("\n".join(self.to_triples()))
 
     def render(self, **kwargs):
         return format_html(
-            mark_safe('<table class="table">{}</table>'), self.render_table()
+            mark_safe('<table class="table">{}</table>'), self.render_table(**kwargs)
         )
 
-    def render_table(self):
-        s = format_html_join("\n", "{}", ((f.render(),) for f in self.iter_fields() if not f.field.hidden))
+    def render_table(self, **kwargs):
+        s = format_html_join("\n", "{}", ((f.render(**kwargs),) for f in self.iter_fields() if not f.field.hidden))
         return s
 
     @classmethod
@@ -194,19 +201,18 @@ class RDFFactory(handler.Rederable, ABC):
 
     @classmethod
     def build_structure_spec(cls):
-        l = []
-        for f, field in cls._fields.items():
+        l = {}
+        for f, fld in cls._fields.items():
             d = dict(
                 id=f,
-                verbose_name=field.verbose_name,
-                help_text=field.help_text,
+                verbose_name=fld.verbose_name,
+                help_text=fld.help_text,
             )
-            t = field._widget.get_structure()
-            if isinstance(t, str):
-                d["template"] = t
-            else:
-                d["substructure"] = t
-            l.append(d)
+            if fld.template:
+                d["template"] = fld.template
+            if isinstance(fld, field.FactoryField):
+                d["factory"] = fld.factory._factory_id
+            l[f] = d
         return l
 
     @classmethod
@@ -261,8 +267,6 @@ class Institution(RDFFactory, handler.Rederable):
     def label(self):
         return self.name.values[0]
 
-    def render(self, **kwargs):
-        return self.label
 
 
 class Person(RDFFactory, handler.Rederable):
@@ -276,10 +280,6 @@ class Person(RDFFactory, handler.Rederable):
     @property
     def label(self):
         return self.first_name.values[0] + " " + self.last_name.values[0]
-
-    def render(self, **kwargs):
-        return self.label
-
 
 class AnalysisScope(RDFFactory):
     _factory_id = "scope"
@@ -367,10 +367,6 @@ class Dataset(RDFFactory):
     @property
     def label(self):
         return self.url.values[0]
-
-    def render(self, **kwargs):
-        return format_html("<a href={0}>{0}</a>", self.label)
-
 
 class ModelCalculation(RDFFactory):
     _fields = dict(

@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from scipy import stats
@@ -442,28 +442,42 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     url = finders.find(path)
     return url
 
+import json
 
 class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
-    def get(self, request, factory_id, identifier):
-        try:
-            fac = factory.get_factory(factory_id)
-        except KeyError:
-            raise Http404
-        context = connection.ConnectionContext()
-        # Build URI, assuming that this is part of this knowledge graph
-        uri = getattr(namespace.OEO_KG, identifier)
-        # TODO: Error handling:
-        #  * What if it is not part of the graph?
-        #  * What if it is not of this class?
-        #  * Probably: 404 in both cases!?
-        obj = fac._load_one(uri, context)
-        return render(
-            request,
-            self._template,
-            {"obj": obj},
-        )
 
+    def get(self, request, factory_id, identifier):
+        if request.content_type == "application/json":
+            try:
+                fac = factory.get_factory(factory_id)
+            except KeyError:
+                raise Http404
+
+            context = connection.ConnectionContext()
+            # Build URI, assuming that this is part of this knowledge graph
+            uri = getattr(namespace.OEO_KG, identifier)
+            # TODO: Error handling:
+            #  * What if it is not part of the graph?
+            #  * What if it is not of this class?
+            #  * Probably: 404 in both cases!?
+            obj = fac._load_one(uri, context)
+            jsn = obj.to_json()
+            return JsonResponse(jsn)
+        else:
+            return render(
+                request,
+                self._template,
+                {"iri":identifier, "factory": factory_id, "rdf_templates": json.dumps(factory.get_factory_templates())},
+            )
+
+    def post(self, request, factory_id, identifier):
+        context = connection.ConnectionContext()
+        subject = getattr(namespace.OEO_KG, identifier)
+        property = request.POST["property"]
+        old_value = request.POST.get("oldValue")
+        new_value = request.POST["newValue"]
+        context.update_property(subject, property, old_value, new_value)
 
 class RDFFactoryFormView(View):
     _template = "modelview/rdf_edit.html"
