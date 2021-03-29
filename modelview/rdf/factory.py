@@ -6,9 +6,16 @@ import json
 from modelview.rdf import handler, field, connection
 from modelview.rdf.namespace import *
 
+FACTORIES = {}
+
+
+def get_factory(identifier):
+    return FACTORIES[identifier]
+
 
 class RDFFactory(handler.Rederable, ABC):
     _field_handler = {}
+    _factory_id = None
     _direct_parent = None
     _fields = {}
     _label_field = None
@@ -28,15 +35,14 @@ class RDFFactory(handler.Rederable, ABC):
         return s
 
     def __init_subclass__(cls, **kwargs):
-        #cls.fallback_field = "additional_fields"
-        #cls._fields[cls.fallback_field] = field.Field(rdf_name=rdf.type, verbose_name="additional")
+        if cls._factory_id is not None:
+            FACTORIES[cls._factory_id] = cls
         cls._fields["classes"] = field.IRIField(rdf_name=rdf.type, verbose_name="Classes", hidden=True)
         cls._field_map = {f.rdf_name: k for k, f in cls._fields.items()}
         cls._fields["iri"] = field.IRIField(None, hidden=True)
         cls._field_handler = {f: f.handler for k, f in cls._fields.items()}
         if cls._label_field is None:
             cls._label_field = "iri"
-
 
     def __init__(self, iri=None, **kwargs):
         for fld_name, fld in self._fields.items():
@@ -56,6 +62,10 @@ class RDFFactory(handler.Rederable, ABC):
                 getattr(self, k).values = v
             else:
                 self.additional_fields[k] = v
+
+    @classmethod
+    def from_iri(cls, iri):
+        return cls
 
     def iter_fields(self):
         """Returns an iterator of all fields in this factory"""
@@ -100,8 +110,6 @@ class RDFFactory(handler.Rederable, ABC):
             return None
         raise Exception(v)
 
-
-
     @classmethod
     def _load_one(cls, identifier, context: connection.ConnectionContext):
         return cls._load_many([identifier], context,)[identifier]
@@ -131,6 +139,7 @@ class RDFFactory(handler.Rederable, ABC):
 
     @classmethod
     def _parse_from_structure(cls, structure:dict, identifier=None, cache=None):
+
         res = cls(
             **{
                 p: cls._fields[p].handler.from_structure(
@@ -208,6 +217,20 @@ class RDFFactory(handler.Rederable, ABC):
             d.update(**field._widget.build_template_structure(new_prefix))
         return d
 
+    def instance_dict(self):
+        context = connection.ConnectionContext()
+        d = {}
+        self._instance_dict(context, d)
+        return d
+
+    @classmethod
+    def _instance_dict(self, context, cache):
+        if self._factory_id not in cache:
+            cache[self._factory_id] = [{"iri":c.iri, "label":c.label} for c in self.load_all_instances(context)]
+        for container in self._fields.values():
+            if isinstance(container, field.FactoryField):
+                container.factory._instance_dict(context, cache)
+
     @property
     def label(self):
         try:
@@ -218,7 +241,7 @@ class RDFFactory(handler.Rederable, ABC):
     @classmethod
     def load_all_instances(cls, context: connection.ConnectionContext):
         results = context.load_all(filter=[f"a <{cls._direct_parent}>"])
-        return [handler.NamedElement(row['iri']['value'].split("/")[-1], handler.NamedIRI(row.get('l', dict()).get("value"), row['iri']['value']) if row.get('l', dict()).get("value")  else row['iri']['value']) for row in results["results"]["bindings"]]
+        return [handler.NamedIRI(iri=row['iri']['value'], label=row.get('l', dict()).get("value") or row['iri']['value'].split("/")[-1]) for row in results["results"]["bindings"]]
 
 
 class IRIFactory(RDFFactory):
@@ -227,6 +250,7 @@ class IRIFactory(RDFFactory):
 
 
 class Institution(RDFFactory, handler.Rederable):
+    _factory_id = "institution"
     _direct_parent = OEO.OEO_00000238
     _label_field = "name"
     _fields = dict(
@@ -243,6 +267,7 @@ class Institution(RDFFactory, handler.Rederable):
 
 class Person(RDFFactory, handler.Rederable):
     _direct_parent = OEO.OEO_00000323
+    _factory_id = "person"
     _fields = dict(
     first_name = field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
     last_name = field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
@@ -257,6 +282,8 @@ class Person(RDFFactory, handler.Rederable):
 
 
 class AnalysisScope(RDFFactory):
+    _factory_id = "scope"
+    _direct_parent = OEO_KG.AnalysisScope
     _fields = dict(
     is_defined_by = field.Field(rdf_name=OEO.OEO_00000504, verbose_name="is defined by"),
     covers_sector = field.Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors"),
@@ -266,6 +293,7 @@ class AnalysisScope(RDFFactory):
 class Scenario(RDFFactory):
     _direct_parent = OEO.OEO_00000364
     _label_field = "name"
+    _factory_id = "scenario"
     _fields = dict(
     abbreviation = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation"),
     abstract = field.Field(
@@ -288,6 +316,8 @@ class Scenario(RDFFactory):
 
 
 class Publication(RDFFactory):
+    _factory_id = "publication"
+    _direct_parent = OEO.OEO_00020012
     _fields = dict(
     title = field.Field(
         rdf_name=dc.title, verbose_name="Title", help_text="Title of the publication"
@@ -354,6 +384,7 @@ class ModelCalculation(RDFFactory):
 
 
 class Study(RDFFactory):
+    _factory_id = "study"
     _direct_parent = OEO.OEO_00020011
     _fields = dict(
         funding_source=field.FactoryField(

@@ -133,6 +133,8 @@ class Container(handler.Rederable):
                     yield subject, self.field.rdf_name, v.iri.values[0]
                     for t in v.to_triples():
                         yield t
+                elif isinstance(v, handler.NamedIRI):
+                    return v.iri
                 else:
                     raise Exception(v)
 

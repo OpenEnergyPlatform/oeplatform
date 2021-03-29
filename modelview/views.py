@@ -447,7 +447,7 @@ class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
     def get(self, request, factory_id, identifier):
         try:
-            factory = _factory_mappings[factory_id]
+            fac = factory.get_factory(factory_id)
         except KeyError:
             raise Http404
         context = connection.ConnectionContext()
@@ -457,7 +457,7 @@ class RDFFactoryView(View):
         #  * What if it is not part of the graph?
         #  * What if it is not of this class?
         #  * Probably: 404 in both cases!?
-        obj = factory._load_one(uri, context)
+        obj = fac._load_one(uri, context)
         return render(
             request,
             self._template,
@@ -525,11 +525,11 @@ class RDFView(View):
 
     def get(self, request, factory_id=None):
         try:
-            factory = _factory_mappings[factory_id]
+            fac = factory.get_factory(factory_id)
         except KeyError:
             raise Http404
         context = connection.ConnectionContext()
-        instances = factory.load_all_instances(context)
+        instances = fac.load_all_instances(context)
         return render(
             request,
             "modelview/list_rdf_instances.html",

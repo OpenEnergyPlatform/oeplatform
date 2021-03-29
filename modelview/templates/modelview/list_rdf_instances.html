@@ -8,7 +8,7 @@
 
 {% block factsheets_content %}
 
-<div  lass="list-group">
+<div  class="list-group">
   {% for inst in instances %}
     <a class="list-group-item list-group-item-action" href="{{ inst.element }}" >{{ inst.label }}</a>
   {% endfor %}

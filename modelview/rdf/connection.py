@@ -47,6 +47,7 @@ class ConnectionContext:
         s = f"DELETE {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
         s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in inserts) } }} "
         s += "WHERE {}"
+        print(s)
 
     def load_all(self, filter, subclass=False, inverse=False):
         q = ". ".join(f"?iri {f}" for f in filter)

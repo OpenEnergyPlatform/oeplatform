@@ -39,6 +39,7 @@ class FactoryWidget(MultiWidget):
         final_attrs = context['widget']['attrs']
         input_type = final_attrs.pop('type', None)
         id_ = final_attrs.get('id')
+
         subwidgets = []
         for i, (widget_name, widget) in enumerate(zip(self.widgets_names, self.widgets)):
             vname = self.verbose_names.get(widget_name)
@@ -59,6 +60,7 @@ class FactoryWidget(MultiWidget):
             subcontext = widget.get_context(widget_name, widget_value, widget_attrs)['widget']
             subwidgets.append(subcontext)
         context['widget']['subwidgets'] = subwidgets
+
         return context
 
 
@@ -104,6 +106,9 @@ class DynamicFactoryArrayWidget(forms.TextInput):
             subwidgets.append(widget.get_context(name, item, widget_attrs)["widget"])
 
         context["widget"]["subwidgets"] = subwidgets
+        empty_widget = self.subwidget_form(**self.subwidget_kwargs_gen())
+        if isinstance(empty_widget, FactoryWidget):
+            context["widget"]["attrs"]["identifier"] = empty_widget.factory._factory_id
         return context
 
     def get_structure(self):
