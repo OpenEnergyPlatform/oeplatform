@@ -75,6 +75,7 @@
             contentType: "application/json",
             success: function (data) {
                 let table = document.createElement("table");
+                table.className = "table";
                 table.id = "container__" + path;
                 for(const [key, values] of Object.entries(data)){
                     let tr = document.createElement("tr");
@@ -87,6 +88,7 @@
                     // Create value list
                     let td = document.createElement("td");
                     let ul = document.createElement("ul");
+                    ul.className = "list-group";
                     let nextPath;
                     if(path){
                         nextPath = path + "." + key;
@@ -98,6 +100,7 @@
                         let element = fill_template(factory + "/" + identifier, key, t, v, nextPath + "." + idx);
                         if (element) {
                             let li = document.createElement("li");
+                            li.className = "list-group-item";
                             li.appendChild(element);
                             ul.appendChild(li)
                         }
@@ -117,7 +120,8 @@
             let i = document.createElement("input");
             if (t.template.type === "text") {
                 i.type = "text";
-                i.value = data
+                i.value = data;
+                i.className = "form-control"
             } else {
                 debugger;
                 console.log(t)
