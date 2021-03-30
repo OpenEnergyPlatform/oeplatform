@@ -127,8 +127,6 @@ class PredefinedInstanceField(Field):
 
 class FactoryField(Field):
     def __init__(self, factory, **kwargs):
-        if kwargs.get("handler", None) is None:
-            kwargs["handler"] = handler.FactoryHandler(factory)
         super(FactoryField, self).__init__(**kwargs)
         self.factory = factory
         self._widget = DynamicFactoryArrayWidget(

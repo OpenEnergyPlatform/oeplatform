@@ -198,7 +198,6 @@ class Person(RDFFactory):
             factory=Institution,
             rdf_name=schema.affiliation,
             verbose_name="Affiliation",
-            handler=handler.FactoryHandler(Institution),
         ),
     )
 
@@ -242,7 +241,6 @@ class Scenario(RDFFactory):
             rdf_name=OEO.OEO_00000504,
             inverse=True,
             verbose_name="Analysis Scope",
-            handler=handler.FactoryHandler(AnalysisScope),
         ),
     )
 
@@ -277,7 +275,6 @@ class Publication(RDFFactory):
             verbose_name="Authors",
             help_text="Authors of this publication",
             factory=Person,
-            handler=handler.FactoryHandler(Person),
         ),
         about=field.Field(
             rdf_name=obo.IAO_0000136,
@@ -318,7 +315,6 @@ class ModelCalculation(RDFFactory):
         uses=field.Field(
             rdf_name=OEO.OEO_00000501,
             verbose_name="Involved Models",
-            handler=handler.FactoryHandler(Model),
         ),
     )
 
@@ -331,7 +327,6 @@ class Study(RDFFactory):
             Institution,
             rdf_name=OEO.OEO_00000509,
             verbose_name="Funding source",
-            handler=handler.FactoryHandler(Institution),
         ),
         covers_energy_carrier=field.PredefinedInstanceField(
             rdf_name=OEO.OEO_00000523,
@@ -350,13 +345,11 @@ class Study(RDFFactory):
             factory=ModelCalculation,
             filter=[f"a <{OEO.OEO_00000275}>"],
             verbose_name="Model Calculations",
-            handler=handler.FactoryHandler(ModelCalculation),
         ),
         published_in=field.FactoryField(
             Publication,
             rdf_name=obo.IAO_0000136,
             inverse=True,
             verbose_name="Publications",
-            handler=handler.FactoryHandler(Publication),
         ),
     )

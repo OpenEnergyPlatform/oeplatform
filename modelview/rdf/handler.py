@@ -89,27 +89,3 @@ class IRIHandler(DefaultHandler):
 
     def from_structure(self, value, **kwargs):
         return [URIRef(v) for v in value if v]
-
-
-class FactoryHandler(Handler):
-    def __init__(self, factory, filter_class=False):
-        self.factory = factory
-        self.filter_class = filter_class
-
-    def __call__(self, value, context, **kwargs):
-        values, labels = zip(*value)
-        d = self.factory._load_many(values, context)
-        return [d[v] for v, l in value if v]
-
-    def from_just_iri(self, iri):
-        return self.factory(iri=iri)
-
-    def from_structure(self, value, **kwargs):
-        if isinstance(value, list):
-            return [self.from_structure(v, **kwargs) for v in value]
-        elif isinstance(value, dict):
-            return self.factory._parse_from_structure(value, **kwargs)
-        elif isinstance(value, str) and is_iri(value):
-            return self.factory(iri=value)
-        else:
-            raise ValueError(f"Cannot process data: {value}")
