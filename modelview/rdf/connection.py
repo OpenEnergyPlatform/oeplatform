@@ -1,5 +1,6 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from rdflib import Graph
+import uuid
 
 from oeplatform.settings import RDF_DATABASES
 
@@ -12,10 +13,22 @@ class ConnectionContext:
         self.connection.setReturnFormat(JSON)
 
     def update_property(self,subject, property, old_value, new_value):
-        s = f"DELETE {{ {subject} {property} {old_value} }} "
-        s += f"INSERT {{ {subject} {property} {new_value} }} "
+        result = None
+        s = "DELETE {{ "
+        if old_value:
+            s += f"{subject} {property} {old_value} "
+        s += "}} "
+        s += f"INSERT {{ "
+        if new_value:
+            s += f"{subject} {property} {new_value} "
+        elif not old_value:
+            hash = uuid.uuid4()
+            s += f"{subject} {property} {hash} "
+            result = hash
+        s += "}} "
         s += "WHERE {}"
         print(s)
+        return result
 
     def query_all_objects(self, subjects, predicates):
         query = (

@@ -17,7 +17,7 @@ def get_factory(identifier):
     return FACTORIES[identifier]
 
 
-class RDFFactory(handler.Rederable, ABC):
+class RDFFactory(ABC):
     _field_handler = {}
     _factory_id = None
     _direct_parent = None
@@ -158,46 +158,8 @@ class RDFFactory(handler.Rederable, ABC):
             cache[identifier] = res
         return res
 
-    def _insert(self, d):
-        s0 = self.__class__(**d)
-
-    def merge(self, second, path):
-        head, iri = path.pop()
-        first_field = getattr(self, head)
-        second_field = getattr(second, head)
-        first_field.merge(second_field, iri, path)
-
-    def to_triples(self, iri=None):
-        iri = iri or self.iri.values[0]
-        return list(chain(
-            *(k.to_triples(iri) for k in self.iter_fields())
-        ))
-
-    def to_graph(self):
-        g = Graph()
-        for t in self.to_triples():
-            g.add(t)
-        return g
-
     def to_json(self):
         return {f: list(getattr(self, f).to_json()) for f in self.iter_field_names() }
-
-    def save(self, context):
-
-        print("\n".join(self.to_triples()))
-
-    def render(self, **kwargs):
-        return format_html(
-            mark_safe('<table class="table">{}</table>'), self.render_table(**kwargs)
-        )
-
-    def render_table(self, **kwargs):
-        s = format_html_join("\n", "{}", ((f.render(**kwargs),) for f in self.iter_fields() if not f.field.hidden))
-        return s
-
-    @classmethod
-    def structure_spec(cls):
-        return json.dumps(cls.build_structure_spec())
 
     @classmethod
     def build_structure_spec(cls):
@@ -215,47 +177,13 @@ class RDFFactory(handler.Rederable, ABC):
             l[f] = d
         return l
 
-    @classmethod
-    def build_template_structure(cls, prefix=""):
-        d = dict()
-        for f, field in cls._fields.items():
-            new_prefix = prefix + "." + f if prefix else f
-            d.update(**field._widget.build_template_structure(new_prefix))
-        return d
-
-    def instance_dict(self):
-        context = connection.ConnectionContext()
-        d = {}
-        self._instance_dict(context, d)
-        return d
-
-    @classmethod
-    def _instance_dict(self, context, cache):
-        if self._factory_id not in cache:
-            cache[self._factory_id] = [{"iri":c.iri, "label":c.label} for c in self.load_all_instances(context)]
-        for container in self._fields.values():
-            if isinstance(container, field.FactoryField):
-                container.factory._instance_dict(context, cache)
-
-    @property
-    def label(self):
-        try:
-            return getattr(self, self._label_field).values[0]
-        except:
-            return None
-
-    @classmethod
-    def load_all_instances(cls, context: connection.ConnectionContext):
-        results = context.load_all(filter=[f"a <{cls._direct_parent}>"])
-        return [handler.NamedIRI(iri=row['iri']['value'], label=row.get('l', dict()).get("value") or row['iri']['value'].split("/")[-1]) for row in results["results"]["bindings"]]
-
 
 class IRIFactory(RDFFactory):
     _fields = dict(
     iri = field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation"))
 
 
-class Institution(RDFFactory, handler.Rederable):
+class Institution(RDFFactory):
     _factory_id = "institution"
     _direct_parent = OEO.OEO_00000238
     _label_field = "name"
@@ -268,8 +196,7 @@ class Institution(RDFFactory, handler.Rederable):
         return self.name.values[0]
 
 
-
-class Person(RDFFactory, handler.Rederable):
+class Person(RDFFactory):
     _direct_parent = OEO.OEO_00000323
     _factory_id = "person"
     _fields = dict(
@@ -280,6 +207,7 @@ class Person(RDFFactory, handler.Rederable):
     @property
     def label(self):
         return self.first_name.values[0] + " " + self.last_name.values[0]
+
 
 class AnalysisScope(RDFFactory):
     _factory_id = "scope"

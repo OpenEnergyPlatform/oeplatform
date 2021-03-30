@@ -476,8 +476,9 @@ class RDFFactoryView(View):
         subject = getattr(namespace.OEO_KG, identifier)
         property = request.POST["property"]
         old_value = request.POST.get("oldValue")
-        new_value = request.POST["newValue"]
-        context.update_property(subject, property, old_value, new_value)
+        new_value = request.POST.get("newValue")
+        result = context.update_property(subject, property, old_value, new_value)
+        return JsonResponse(dict(result=getattr(namespace.OEO_KG, str(result))))
 
 class RDFFactoryFormView(View):
     _template = "modelview/rdf_edit.html"

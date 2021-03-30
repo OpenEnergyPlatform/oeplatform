@@ -81,12 +81,6 @@ class Field:
             query += f"FILTER ({' && ' .join(filter)}) . "
         return query
 
-    def render_display(self, value, index=0, **kwargs):
-        if isinstance(value, handler.Rederable):
-            return value.render(**kwargs)
-        else:
-            return self.combine_with_form(value, index=index)
-
     def combine_with_form(self, value, index=None):
         FORM_TEMPLATE = loader.get_template(path.join("modelview", "widgets", "dynamic_edit.html"))
         field = self._widget.subwidget_form(**self._widget.subwidget_kwargs_gen()).render("", value, {"class":"form-control", "id":"input__"+index, "onfocusout":f"hide_field('{index}')"})
@@ -103,16 +97,7 @@ class PredefinedInstanceField(Field):
     _handler = handler.IRIHandler
 
     def __init__(self, rdf_name, **kwargs):
-        super().__init__(rdf_name, widget_cls=Select, handler=handler.IRIHandler(), widget_kwargs_gen=self._get_kwargs, **kwargs)
-
-    def _get_kwargs(self):
-        return dict(choices=self._load_choices(), attrs=dict(autocomplete="off"))
-
-    def _load_choices(self):
-        c = connection.ConnectionContext()
-        results = c.load_all(self.filter, self.subclass, inverse=self.inverse)
-        choices = [(row['iri']['value'], handler.NamedIRI(row.get('l', dict()).get("value"), row['iri']['value']) if row.get('l', dict()).get("value")  else row['iri']['value']) for row in results["results"]["bindings"]]
-        return choices
+        super().__init__(rdf_name, handler=handler.IRIHandler(), **kwargs)
 
 
 class FactoryField(Field):
@@ -125,56 +110,15 @@ class FactoryField(Field):
             subwidget_form=widget._factory_field(factory)
         )
 
-    def structure(self):
-        return self._widget.get_structure()
-
-    def render_display(self, value, **kwargs):
-        return value.render(**kwargs)
-
     @property
     def template(self):
         return None
+
 
 class Container(handler.Rederable):
     def __init__(self, field):
         self.field = field
         self.values = []
-
-    def to_triples(self, subject):
-        if self.field.rdf_name and self.values is not None:
-            for v in self.values:
-                if isinstance(v, (rl.Literal, rl.URIRef, rl.BNode)):
-                    yield subject, self.field.rdf_name, v
-                elif isinstance(v, factory.RDFFactory):
-                    yield subject, self.field.rdf_name, v.iri.values[0]
-                    for t in v.to_triples():
-                        yield t
-                elif isinstance(v, handler.NamedIRI):
-                    return v.iri
-                else:
-                    raise Exception(v)
-
-    def render(self, mode="display", **kwargs):
-        it = list(self.values if self.values else [])
-        path = kwargs.pop("index", None)
-        if path:
-            path += "." + self.field_name
-        else:
-            path = self.field_name
-        if mode == "display":
-            vals = [(self.field.render_display(v, index=".".join((path, str(i)))),) for i, v in enumerate(it)]
-
-            s = format_html(
-                mark_safe(
-                    '<tr><th><a href="{rdfname}">{vname}</a></th><td><ul class="list-group list-group-flush">{vals}</ul></td></tr>'
-                ),
-                rdfname=self.field.rdf_name,
-                vname=self.field.verbose_name,
-                vals=format_html_join(" ", '<li class="list-group-item">{}</li>', vals),
-            )
-            return s
-        else:
-            return self.field._widget.render("Name", self, {"id": "field", "level": 0})
 
     def to_json(self):
         for v in self.values:
@@ -186,6 +130,3 @@ class Container(handler.Rederable):
                 return v.iri
             else:
                 raise Exception(v)
-
-    def to_form_element(self):
-        return self.field._widget.render(self.field_name, self, attrs={"id": self.field_name})

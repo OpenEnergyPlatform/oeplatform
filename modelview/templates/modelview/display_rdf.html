@@ -83,6 +83,7 @@
                     let th = document.createElement("th");
                     let t = templates[factory][key];
                     th.innerText = t.verbose_name;
+
                     tr.appendChild(th);
 
                     // Create value list
@@ -106,6 +107,24 @@
                         }
                         idx++;
                     }
+
+                    let add = document.createElement("a");
+                    add.href="javascript:void(0)";
+                    add.innerHTML = "+";
+                    $(add).click(function(){
+                        $.post( "/factsheets/rdf/" + factory + "/" + identifier + "/",
+                            {property: key, csrfmiddlewaretoken:csrftoken},
+                            function( data ) {
+                                let li = document.createElement("li");
+                                li.className = "list-group-item";
+                                let element = fill_template(factory + "/" + identifier, key, t, data.result, nextPath + "." + idx)
+                                li.appendChild(element);
+                                ul.appendChild(li);
+                                idx++;
+                            });
+                    });
+                    th.appendChild(add);
+
                     td.appendChild(ul);
                     tr.appendChild(td);
                     table.appendChild(tr);

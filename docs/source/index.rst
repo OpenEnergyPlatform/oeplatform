@@ -94,6 +94,14 @@ via console commands (base/management/commands/notebooks.py)
 
    tutorials
 
+RDF Factsheets
+**************
+
+.. toctree::
+   :maxdepth: 2
+
+   api/scenario
+
 Indices and tables
 ==================
 
