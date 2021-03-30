@@ -477,7 +477,12 @@ class RDFFactoryView(View):
         property = request.POST["property"]
         old_value = request.POST.get("oldValue")
         new_value = request.POST.get("newValue")
-        result = context.update_property(subject, property, old_value, new_value)
+        if not old_value and not new_value:
+            factory_id = request.POST.get("type")
+            fac = factory.get_factory(factory_id)
+            result = context.insert_new_instance(subject, property, fac._direct_parent)
+        else:
+            result = context.update_property(subject, property, old_value, new_value)
         return JsonResponse(dict(result=getattr(namespace.OEO_KG, str(result))))
 
 class RDFFactoryFormView(View):

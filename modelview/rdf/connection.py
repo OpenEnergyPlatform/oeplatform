@@ -13,22 +13,25 @@ class ConnectionContext:
         self.connection.setReturnFormat(JSON)
 
     def update_property(self, subject, property, old_value, new_value):
-        result = None
-        s = "DELETE {{ "
+        s = "DELETE { "
         if old_value:
-            s += f"{subject} {property} {old_value} "
-        s += "}} "
-        s += f"INSERT {{ "
-        if new_value:
-            s += f"{subject} {property} {new_value} "
-        elif not old_value:
-            hash = uuid.uuid4()
-            s += f"{subject} {property} {hash} "
-            result = hash
-        s += "}} "
-        s += "WHERE {}"
-        print(s)
-        return result
+            s += f"{subject} {property} {old_value}. "
+        s += "} INSERT { "
+        if old_value:
+            s += f"{subject} {property} {new_value}. "
+        s += "} WHERE {}"
+        return self.execute(s)
+
+    def insert_new_instance(self, subject, property, factory):
+        hash = uuid.uuid4()
+        s = "DELETE { } INSERT {"
+        s += f"{subject} {property} {hash}. "
+        s += f"{hash} a {factory}. "
+        s += "} WHERE {}"
+        return self.execute(s)
+
+    def execute(self, query):
+        print(query)
 
     def query_all_objects(self, subjects, predicates):
         query = (
@@ -46,35 +49,4 @@ class ConnectionContext:
 
         query += "}"
         self.connection.setQuery(query)
-        return self.connection.query().convert()
-
-    def describe(self, entities):
-        s = (
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-            f"DESCRIBE <{' '.join(entities)}>"
-        )
-        self.connection.setQuery(s)
-        res = self.connection.query().convert()
-        return res
-
-    def labels(self, entities):
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n SELECT ?o WHERE "
-        s += " UNION ".join(
-            f"{{ ?s rdfs:label ?o. OPTIONAL {{ ?p rdfs:label ?lp . }} . OPTIONAL {{ ?o rdfs:label ?lo . }} . FILTER ( ?s = <{e}> )}}"
-            for e in entities
-        )
-        self.connection.setQuery(s)
-        return self.connection.query().convert()
-
-    def apply_diff(self, inserts: Graph, deletes: Graph):
-        s = f"DELETE {{ {'. '.join(f'{s} {p} {o}' for s, p, o in deletes) } }} "
-        s += f"INSERT {{ {'. '.join(f'{s} {p} {o}' for s, p, o in inserts) } }} "
-        s += "WHERE {}"
-        print(s)
-
-    def load_all(self, filter, subclass=False, inverse=False):
-        q = ". ".join(f"?iri {f}" for f in filter)
-        s = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-        s += f"SELECT ?iri ?l WHERE {{ {q} .  OPTIONAL {{ ?iri rdfs:label ?l . }} }}"
-        self.connection.setQuery(s)
         return self.connection.query().convert()

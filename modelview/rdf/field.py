@@ -149,11 +149,16 @@ class Container(handler.Rederable):
 
     def to_json(self):
         for v in self.values:
-            if isinstance(v, (rl.Literal, rl.URIRef, rl.BNode)):
+            if isinstance(v, rl.Literal):
                 yield v
+            elif isinstance(v, (rl.URIRef, rl.BNode)):
+                yield dict(iri=v)
             elif isinstance(v, factory.RDFFactory):
-                yield v.iri.values[0]
+                d = dict(iri=v.iri.values[0])
+                if v.label:
+                    d["label"] = v.label
+                yield d
             elif isinstance(v, handler.NamedIRI):
-                return v.iri
+                return dict(iri=v.iri, label=v.label)
             else:
                 raise Exception(v)

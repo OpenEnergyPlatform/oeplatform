@@ -41,9 +41,6 @@ class RDFFactory(ABC):
     def __init_subclass__(cls, **kwargs):
         if cls._factory_id is not None:
             FACTORIES[cls._factory_id] = cls
-        cls._fields["classes"] = field.IRIField(
-            rdf_name=rdf.type, verbose_name="Classes", hidden=True
-        )
         cls._field_map = {f.rdf_name: k for k, f in cls._fields.items()}
         cls._fields["iri"] = field.IRIField(None, hidden=True)
         cls._field_handler = {f: f.handler for k, f in cls._fields.items()}
@@ -58,7 +55,6 @@ class RDFFactory(ABC):
                 assert len(iri) <= 1, "Too many IRIs"
                 iri = iri[0]
         self.iri.values = [iri] if iri else []
-        self.classes.values = kwargs.get("classes", [])
         default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
         for f in _internal_fields:
@@ -168,6 +164,9 @@ class RDFFactory(ABC):
     def build_structure_spec(cls):
         return {f: fld.spec for f, fld in cls._fields.items()}
 
+    @property
+    def label(self):
+        return None
 
 class IRIFactory(RDFFactory):
     _fields = dict(
