@@ -70,8 +70,9 @@
 
     function load_instance(parentId, identifier, factory, path) {
         let parent = document.getElementById(parentId);
+        let subject = factory + "/" + identifier;
         $.ajax({
-            url: "/factsheets/rdf/" + factory + "/" + identifier,
+            url: "/factsheets/rdf/" + subject,
             contentType: "application/json",
             success: function (data) {
                 let table = document.createElement("table");
@@ -98,14 +99,7 @@
                     }
                     let idx = 0;
                     for(let v of values) {
-                        let element = fill_template(factory + "/" + identifier, key, t, v, nextPath + "." + idx);
-                        if (element) {
-                            let li = document.createElement("li");
-                            li.className = "list-group-item";
-                            li.appendChild(element);
-                            ul.appendChild(li)
-                        }
-                        idx++;
+                        idx = createDisplay(ul, subject, key, t, v, nextPath, idx);
                     }
 
                     let add = document.createElement("a");
@@ -115,12 +109,7 @@
                         $.post( "/factsheets/rdf/" + factory + "/" + identifier + "/",
                             {property: key, csrfmiddlewaretoken:csrftoken},
                             function( data ) {
-                                let li = document.createElement("li");
-                                li.className = "list-group-item";
-                                let element = fill_template(factory + "/" + identifier, key, t, data.result, nextPath + "." + idx)
-                                li.appendChild(element);
-                                ul.appendChild(li);
-                                idx++;
+                                idx = createDisplay(ul, subject, key, t, data.result, nextPath, idx);
                             });
                     });
                     th.appendChild(add);
@@ -132,6 +121,16 @@
                 }
             }
         });
+    }
+
+    function createDisplay(ul, subject, predicate, template, data, path, idx){
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+        let element = fill_template(subject, predicate, template, data, path + "." + idx);
+        li.appendChild(element);
+        ul.appendChild(li);
+        idx++;
+        return idx
     }
 
     function fill_template(subject, property, t, data, id){
