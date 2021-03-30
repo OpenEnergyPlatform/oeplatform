@@ -12,7 +12,7 @@ class ConnectionContext:
         self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
         self.connection.setReturnFormat(JSON)
 
-    def update_property(self,subject, property, old_value, new_value):
+    def update_property(self, subject, property, old_value, new_value):
         result = None
         s = "DELETE {{ "
         if old_value:
@@ -37,12 +37,16 @@ class ConnectionContext:
         )
         options = ["?p rdfs:label ?lp .", "?o rdfs:label ?lo"]
 
-        query += " UNION ".join(f"""{{ { p.fetch_queries('?s', '?o', options=options, filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}""" for s in subjects for fname, p in predicates if p.rdf_name)
+        query += " UNION ".join(
+            f"""{{ { p.fetch_queries('?s', '?o', options=options, filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}"""
+            for s in subjects
+            for fname, p in predicates
+            if p.rdf_name
+        )
 
         query += "}"
         self.connection.setQuery(query)
         return self.connection.query().convert()
-
 
     def describe(self, entities):
         s = (

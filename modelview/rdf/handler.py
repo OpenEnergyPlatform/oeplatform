@@ -2,10 +2,14 @@ from django.utils.html import format_html
 from rdflib import Graph, URIRef, Literal
 import re
 
-url_regex = re.compile(r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$")
+url_regex = re.compile(
+    r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$"
+)
+
 
 def is_iri(value):
     return url_regex.match(value)
+
 
 class Rederable:
     def render(self, **kwargs):
@@ -24,7 +28,6 @@ class NamedIRI:
     def __init__(self, iri, label):
         self.iri = iri
         self.label = label
-
 
     def __str__(self):
         return str(self.iri)
@@ -96,7 +99,7 @@ class FactoryHandler(Handler):
     def __call__(self, value, context, **kwargs):
         values, labels = zip(*value)
         d = self.factory._load_many(values, context)
-        return [d[v] for v,l in value if v]
+        return [d[v] for v, l in value if v]
 
     def from_just_iri(self, iri):
         return self.factory(iri=iri)

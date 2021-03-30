@@ -8,10 +8,12 @@ class FactoryWidget(MultiWidget):
 
     def __init__(self, factory):
         self.factory = factory
-        self.widget_dict = {
-            fn: f._widget for fn, f in factory._fields.items()
+        self.widget_dict = {fn: f._widget for fn, f in factory._fields.items()}
+        self.verbose_names = {
+            ("_%s" % fn): f.verbose_name
+            for fn, f in factory._fields.items()
+            if f.verbose_name
         }
-        self.verbose_names = {('_%s' % fn): f.verbose_name for fn, f in factory._fields.items() if f.verbose_name}
         super().__init__(widgets=self.widget_dict)
 
     def decompress(self, value):
@@ -36,12 +38,14 @@ class FactoryWidget(MultiWidget):
         if not isinstance(value, list):
             value = self.decompress(value)
 
-        final_attrs = context['widget']['attrs']
-        input_type = final_attrs.pop('type', None)
-        id_ = final_attrs.get('id')
+        final_attrs = context["widget"]["attrs"]
+        input_type = final_attrs.pop("type", None)
+        id_ = final_attrs.get("id")
 
         subwidgets = []
-        for i, (widget_name, widget) in enumerate(zip(self.widgets_names, self.widgets)):
+        for i, (widget_name, widget) in enumerate(
+            zip(self.widgets_names, self.widgets)
+        ):
             vname = self.verbose_names.get(widget_name)
             if input_type is not None:
                 widget.input_type = input_type
@@ -52,14 +56,16 @@ class FactoryWidget(MultiWidget):
                 widget_value = None
             if id_:
                 widget_attrs = final_attrs.copy()
-                widget_attrs['id'] = '%s.%s' % (id_, widget_value.field_name)
+                widget_attrs["id"] = "%s.%s" % (id_, widget_value.field_name)
             else:
                 widget_attrs = final_attrs
             if vname:
-                widget_attrs['verbose_name'] = vname
-            subcontext = widget.get_context(widget_name, widget_value, widget_attrs)['widget']
+                widget_attrs["verbose_name"] = vname
+            subcontext = widget.get_context(widget_name, widget_value, widget_attrs)[
+                "widget"
+            ]
             subwidgets.append(subcontext)
-        context['widget']['subwidgets'] = subwidgets
+        context["widget"]["subwidgets"] = subwidgets
 
         return context
 
@@ -90,7 +96,7 @@ class DynamicFactoryArrayWidget(forms.TextInput):
             context_value = value.values
         else:
             context_value = []
-        attrs["class"] = attrs.get("class", "" ) + " form-control"
+        attrs["class"] = attrs.get("class", "") + " form-control"
         context = super().get_context(name, context_value, attrs)
         final_attrs = context["widget"]["attrs"]
         id_ = context["widget"]["attrs"].get("id")
@@ -124,11 +130,16 @@ class DynamicFactoryArrayWidget(forms.TextInput):
         if isinstance(self.subwidget_form, type) and issubclass(
             self.subwidget_form, Widget
         ):
-            d = {prefix: self.subwidget_form(**self.subwidget_kwargs_gen()).render("", None, attrs={"id": "{prefix}", "class": "form-control"})}
+            d = {
+                prefix: self.subwidget_form(**self.subwidget_kwargs_gen()).render(
+                    "", None, attrs={"id": "{prefix}", "class": "form-control"}
+                )
+            }
         else:
-            d = self.subwidget_form(**self.subwidget_kwargs_gen()).build_template_structure(prefix)
+            d = self.subwidget_form(
+                **self.subwidget_kwargs_gen()
+            ).build_template_structure(prefix)
         return d
-
 
     def value_from_datadict(self, data, files, name):
         try:
