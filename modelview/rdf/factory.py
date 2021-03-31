@@ -386,6 +386,11 @@ class Study(RDFFactory):
             inverse=True,
             verbose_name="Publications",
         ),
+        scenarios=field.FactoryField(
+                Scenario,
+                rdf_name=obo.RO_0000057,
+                verbose_name="Scenarios",
+            ),
     )
 
     @classmethod
