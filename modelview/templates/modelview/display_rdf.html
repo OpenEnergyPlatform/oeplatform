@@ -313,30 +313,6 @@
         return container;
     }
 
-    function createExpandable(instance, id, factory){
-        let container = document.createElement("div");
-        container.id = id;
-        let label = document.createElement("div");
-        label.innerText = instance.label || instance.iri;
-        container.appendChild(label);
-        let expand = document.createElement("a");
-        expand.innerText = "Show more";
-        let name = instance.iri.split("/").pop();
-        expand.id = "expand__" + id;
-        expand.href="javascript:expand('" + factory + "','" + name + "','" + id + "')";
-        container.appendChild(expand);
-
-        let collapse = document.createElement("a");
-        collapse.innerText = "Show less";
-        collapse.id = "collapse__" + id;
-        collapse.hidden = true;
-        collapse.href="javascript:collapse('"+ id + "')";
-        container.appendChild(collapse);
-
-
-        return container
-    }
-
     function expand(factory, name, id){
         document.getElementById("expand__" + id).hidden = true;
         document.getElementById("collapse__" + id).hidden = false;
@@ -348,6 +324,38 @@
         document.getElementById("collapse__" + id).hidden = true;
         document.getElementById("container__" + id).remove();
     }
+
+    function createExpandable(instance, id, factory){
+        let container = document.createElement("div");
+        container.id = id;
+
+        let label = document.createElement("div");
+        label.innerText = instance.label || instance.iri;
+        container.appendChild(label);
+
+        // A link to expand a new instance
+        let expander = document.createElement("a");
+        expander.innerText = "Show more";
+        let name = instance.iri.split("/").pop();
+        expander.id = "expand__" + id;
+        expander.href="javascript:void(0)";
+        $(expander).click(() => expand(factory, name, id));
+        container.appendChild(expander);
+
+        // A link to collapse an instance
+        let collapse = document.createElement("a");
+        collapse.innerText = "Show less";
+        collapse.id = "collapse__" + id;
+        collapse.hidden = true;
+        collapse.href="javascript:void(0)";
+        $(collapse).click(() => collapse(id));
+        container.appendChild(collapse);
+
+
+        return container
+    }
+
+
 
 
 
