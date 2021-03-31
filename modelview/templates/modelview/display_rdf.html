@@ -4,7 +4,7 @@
 {% load modelview_extras %}
 
 {% block main-right-sidebar-content-actions %}
-<a class="btn btn-primary"href="edit">Edit</a>
+<a class="btn btn-primary" href="edit">Edit</a>
 {% endblock main-right-sidebar-content-actions %}
 
 {% block factsheets_content %}
@@ -36,13 +36,15 @@
     const csrftoken = getCookie('csrftoken');
 
     load_instance("root", '{{ iri }}', '{{ factory }}');
-    function hide_field(path){
+
+    function hide_field(path) {
         document.getElementById("display__" + path).hidden = false;
         document.getElementById("edit__" + path).hidden = true;
         let input = document.getElementById("edit__" + path);
         input.onfocusout = "";
     }
-    function show_field(path){
+
+    function show_field(path) {
         document.getElementById("display__" + path).hidden = true;
         let edit = document.getElementById("edit__" + path);
         edit.hidden = false;
@@ -51,12 +53,12 @@
     }
 
     function setCaretPosition(ctrl, pos) {
-      // Modern browsers
+        // Modern browsers
         if (ctrl.setSelectionRange) {
             ctrl.focus();
             ctrl.setSelectionRange(pos, pos);
 
-        // IE8 and below
+            // IE8 and below
         } else if (ctrl.createTextRange) {
             var range = ctrl.createTextRange();
             range.collapse(true);
@@ -66,31 +68,38 @@
         }
     }
 
-    let templates = {{ rdf_templates | safe}};
+    let templates = {
+    {
+        rdf_templates | safe
+    }
+    }
+    ;
 
     function load_instance(parentId, identifier, factory, path) {
         let parent = document.getElementById(parentId);
         let subject = factory + "/" + identifier;
         $.ajax({
-            url: "/factsheets/rdf/" + subject  + "/",
+            url: "/factsheets/rdf/" + subject + "/",
             contentType: "application/json",
-            success: (tuples) => {parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))}
+            success: (tuples) => {
+                parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
+            }
         });
     }
 
-    function createPropertyTable(subject, identifier, factory, path, tuples){
-            let table = document.createElement("table");
-            table.className = "table";
-            table.id = "container__" + path;
-            for(const [property, values] of Object.entries(tuples)){
-                if(property!=="iri") {
-                    table.appendChild(createPropertyRow(subject, property, identifier, factory, path, values));
-                }
+    function createPropertyTable(subject, identifier, factory, path, tuples) {
+        let table = document.createElement("table");
+        table.className = "table";
+        table.id = "container__" + path;
+        for (const [property, values] of Object.entries(tuples)) {
+            if (property !== "iri") {
+                table.appendChild(createPropertyRow(subject, property, identifier, factory, path, values));
             }
-            return table;
         }
+        return table;
+    }
 
-    function createPropertyRow(subject, property, identifier, factory, path, values){
+    function createPropertyRow(subject, property, identifier, factory, path, values) {
         const tr = document.createElement("tr");
         // Create field header
         const th = document.createElement("th");
@@ -104,23 +113,23 @@
         const ul = document.createElement("ul");
         ul.className = "list-group";
         let nextPath;
-        if(path){
+        if (path) {
             nextPath = path + "." + property;
         } else {
             nextPath = property;
         }
         let idx = 0;
-        for(let v of values) {
+        for (let v of values) {
             idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
         }
 
         const add = document.createElement("a");
-        add.href="javascript:void(0)";
+        add.href = "javascript:void(0)";
         add.innerHTML = "+";
-        $(add).click(function(){
+        $(add).click(function () {
             // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
-            if(!t.literal) {
-                if(!t.template || t.template.type!=="select") {
+            if (!t.literal) {
+                if (!t.template || t.template.type !== "select") {
                     $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
                         {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
                         function (data) {
@@ -140,7 +149,7 @@
         return tr;
     }
 
-    function createDisplay(ul, subject, property, t, data, path, idx, unfold=false){
+    function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
 
         let id = path + "." + idx;
         let li = document.createElement("li");
@@ -160,10 +169,10 @@
         deleteButton.appendChild(bin);
         let element;
 
-        if(t.template) {
+        if (t.template) {
             if (t.template.type === "text" || t.template.type === "textarea") {
                 let i;
-                if(t.template.type === "text"){
+                if (t.template.type === "text") {
                     i = document.createElement("input");
                     i.type = "text";
                 }
@@ -171,7 +180,7 @@
                     i = document.createElement("textarea");
                     debugger;
                 }
-                if(t.template.field === "literal"){
+                if (t.template.field === "literal") {
                     let temp = data;
                     data = {};
                     data[t.template.field] = temp
@@ -187,12 +196,19 @@
                         debugger;
                         let newValue = {};
                         newValue[t.template.field] = i.value;
-                        $.post( "/factsheets/rdf/" + subject + "/",
-                            {query: JSON.stringify({property: property, oldValue:current_value, newValue: newValue}) , csrfmiddlewaretoken:csrftoken},
-                        function() {
-                           current_value = newValue;
-                           labelText.innerText = current_value[t.template.field];
-                        })
+                        $.post("/factsheets/rdf/" + subject + "/",
+                            {
+                                query: JSON.stringify({
+                                    property: property,
+                                    oldValue: current_value,
+                                    newValue: newValue
+                                }),
+                                csrfmiddlewaretoken: csrftoken
+                            },
+                            function () {
+                                current_value = newValue;
+                                labelText.innerText = current_value[t.template.field];
+                            })
                     }
                 });
 
@@ -202,9 +218,9 @@
                 i.className = "form-control";
 
                 let o = document.createElement("option");
-                if(data){
+                if (data) {
                     o.value = data.iri;
-                    o.selected=true;
+                    o.selected = true;
                     o.innerText = data.label || data.iri;
                     current_value = data;
                     labelText.innerText = data.label || data.iri;
@@ -215,40 +231,47 @@
 
 
                 // Load options on demand
-                $(i).click(function(event){
+                $(i).click(function (event) {
                     $(i).find('option').remove();
                     $.get("/factsheets/rdf/instances/",
-                    {iri: t.template.class, subclass:t.template.subclass, csrfmiddlewaretoken: csrftoken},
-                    function (result) {
-                        let current_o;
-                        for(const instance of result.instances){
-                            let o = document.createElement("option");
-                            o.value = instance.iri;
-                            if(instance.iri===current_value[t.template.field]){
-                                o.selected=true;
-                                current_o = o;
-                            }
-                            $(o).click(function (event) {
-                                let newValue = {};
-                                newValue = instance;
-                                $.post( "/factsheets/rdf/" + subject + "/",
-                                    {query:JSON.stringify({property: property, oldValue:current_value, newValue: newValue}), csrfmiddlewaretoken: csrftoken},
-                                function() {
-                                    current_value = newValue;
-                                    i.value = o.value;
-                                    labelText.innerText = instance.label || instance.iri ;
-                                    if(current_o){
-                                        current_o.selected = false;
-                                    }
+                        {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                        function (result) {
+                            let current_o;
+                            for (const instance of result.instances) {
+                                let o = document.createElement("option");
+                                o.value = instance.iri;
+                                if (instance.iri === current_value[t.template.field]) {
                                     o.selected = true;
                                     current_o = o;
-                                })
-                            });
-                            o.innerText = instance.label || instance.iri;
-                            i.appendChild(o);
+                                }
+                                $(o).click(function (event) {
+                                    let newValue = {};
+                                    newValue = instance;
+                                    $.post("/factsheets/rdf/" + subject + "/",
+                                        {
+                                            query: JSON.stringify({
+                                                property: property,
+                                                oldValue: current_value,
+                                                newValue: newValue
+                                            }), csrfmiddlewaretoken: csrftoken
+                                        },
+                                        function () {
+                                            current_value = newValue;
+                                            i.value = o.value;
+                                            labelText.innerText = instance.label || instance.iri;
+                                            if (current_o) {
+                                                current_o.selected = false;
+                                            }
+                                            o.selected = true;
+                                            current_o = o;
+                                        })
+                                });
+                                o.innerText = instance.label || instance.iri;
+                                i.appendChild(o);
+                            }
                         }
-                    }
-                )});
+                    )
+                });
 
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else {
@@ -268,9 +291,14 @@
         }
 
         $(deleteButton).click(() => {
-            if(current_value && (current_value.literal || current_value.iri)){
-                $.post( "/factsheets/rdf/" + subject + "/",
-                                        {query:JSON.stringify({property: property, oldValue:current_value}), csrfmiddlewaretoken: csrftoken},() =>{li.remove()})
+            if (current_value && (current_value.literal || current_value.iri)) {
+                $.post("/factsheets/rdf/" + subject + "/",
+                    {
+                        query: JSON.stringify({property: property, oldValue: current_value}),
+                        csrfmiddlewaretoken: csrftoken
+                    }, () => {
+                        li.remove()
+                    })
             } else {
                 li.remove()
             }
@@ -279,7 +307,7 @@
         let buttonGroup = document.createElement("div");
         buttonGroup.className = "btn-group float-right";
 
-        if(editButton) {
+        if (editButton) {
             buttonGroup.append(editButton);
         }
         buttonGroup.append(deleteButton);
@@ -290,12 +318,12 @@
         return idx
     }
 
-    function createEditable(subject, property, id, labelText, field, unfold=false){
+    function createEditable(subject, property, id, labelText, field, unfold = false) {
         let container = document.createElement("div");
         let labelDiv = document.createElement("div");
         labelDiv.id = "display__" + id;
         labelDiv.appendChild(labelText);
-        labelDiv.hidden=unfold;
+        labelDiv.hidden = unfold;
 
         container.appendChild(labelDiv);
 
@@ -303,7 +331,7 @@
         formDiv.id = "edit__" + id;
         let form = document.createElement("div");
         field.id = "input__" + id;
-        $(field).focusout(()=>hide_field(id));
+        $(field).focusout(() => hide_field(id));
 
         form.appendChild(field);
         // Submit to API
@@ -313,19 +341,20 @@
         return container;
     }
 
-    function expand(factory, name, id){
+    function expand(factory, name, id) {
         document.getElementById("expand__" + id).hidden = true;
         document.getElementById("collapse__" + id).hidden = false;
 
         load_instance(id, name, factory, id)
     }
-    function collapse(id){
+
+    function collapse(id) {
         document.getElementById("expand__" + id).hidden = false;
         document.getElementById("collapse__" + id).hidden = true;
         document.getElementById("container__" + id).remove();
     }
 
-    function createExpandable(instance, id, factory){
+    function createExpandable(instance, id, factory) {
         let container = document.createElement("div");
         container.id = id;
 
@@ -338,7 +367,7 @@
         expander.innerText = "Show more";
         let name = instance.iri.split("/").pop();
         expander.id = "expand__" + id;
-        expander.href="javascript:void(0)";
+        expander.href = "javascript:void(0)";
         $(expander).click(() => expand(factory, name, id));
         container.appendChild(expander);
 
@@ -347,17 +376,13 @@
         collapse.innerText = "Show less";
         collapse.id = "collapse__" + id;
         collapse.hidden = true;
-        collapse.href="javascript:void(0)";
+        collapse.href = "javascript:void(0)";
         $(collapse).click(() => collapse(id));
         container.appendChild(collapse);
 
 
         return container
     }
-
-
-
-
 
 
 </script>
