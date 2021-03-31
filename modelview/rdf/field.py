@@ -75,6 +75,10 @@ class Field(ABC):
             where.append(f"{subject} ?p {object}.")
         return where, options, filter
 
+    @property
+    def _label_option(self):
+        return "?o rdfs:label ?lo"
+
     def fetch_queries(self, subject, object, where=None, filter=None, options=None):
         where, options, filter = self._build_query_parts(
             subject, object, where=where, filter=filter, options=options
@@ -208,6 +212,13 @@ class FactoryField(IRIField):
     @property
     def template(self):
         return None
+
+    @property
+    def _label_option(self):
+        custom = self.factory._label_option("?o", "?lo")
+        if custom:
+            return custom
+        return super(FactoryField, self)._label_option
 
 
 class Container(handler.Rederable):

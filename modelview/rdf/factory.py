@@ -164,9 +164,10 @@ class RDFFactory(ABC):
     def build_structure_spec(cls):
         return {f: fld.spec for f, fld in cls._fields.items()}
 
-    @property
-    def label(self):
+    @classmethod
+    def _label_option(cls, o, lo):
         return None
+
 
 class IRIFactory(RDFFactory):
     _fields = dict(
@@ -183,9 +184,9 @@ class Institution(RDFFactory):
         address=field.TextField(rdf_name=foaf.address, verbose_name="Address"),
     )
 
-    @property
-    def label(self):
-        return self.name.values[0]
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"{o} <{cls._fields['name'].rdf_name}> {lo}."
 
 
 class Person(RDFFactory):
@@ -201,9 +202,9 @@ class Person(RDFFactory):
         ),
     )
 
-    @property
-    def label(self):
-        return self.first_name.values[0] + " " + self.last_name.values[0]
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"{o} <{cls._fields['last_name'].rdf_name}> {lo}."
 
 
 class AnalysisScope(RDFFactory):
@@ -237,15 +238,15 @@ class Scenario(RDFFactory):
         abbreviation=field.TextField(
             rdf_name=dbo.abbreviation, verbose_name="Abbreviation"
         ),
-        abstract=field.TextField(
+        abstract=field.TextAreaField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="A short description of this scenario",
         ),
-        name=field.TextAreaField(
+        name=field.TextField(
             rdf_name=foaf.name,
-            verbose_name="Abstract",
-            help_text="A short description of this scenario",
+            verbose_name="Name",
+            help_text="Name of this scenario",
         ),
         analysis_scope=field.FactoryField(
             AnalysisScope,
@@ -255,6 +256,9 @@ class Scenario(RDFFactory):
         ),
     )
 
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"{o} <{cls._fields['name'].rdf_name}> {lo}"
 
 class Publication(RDFFactory):
     _factory_id = "publication"
@@ -294,7 +298,9 @@ class Publication(RDFFactory):
         ),
     )
 
-    _label_field = "title"
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"{o} <{cls._fields['title'].rdf_name}> {lo}."
 
 
 class Model(RDFFactory):
@@ -304,6 +310,10 @@ class Model(RDFFactory):
         url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
         name=field.TextField(rdf_name=dc.title, verbose_name="Name"),
     )
+
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"{o} <{cls._fields['name'].rdf_name}> {lo}"
 
 
 class Dataset(RDFFactory):
@@ -367,3 +377,7 @@ class Study(RDFFactory):
             verbose_name="Publications",
         ),
     )
+
+    @classmethod
+    def _label_option(cls, o, lo):
+        return f"_:b <{cls._fields['published_in'].rdf_name}> {o}; {dc.title} {lo}"

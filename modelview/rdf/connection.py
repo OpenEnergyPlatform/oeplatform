@@ -52,16 +52,17 @@ class ConnectionContext:
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             "SELECT ?s ?p ?o ?lo ?lp ?fname WHERE { "
         )
-        options = ["?p rdfs:label ?lp .", "?o rdfs:label ?lo"]
+        options = ["?p rdfs:label ?lp ."]
 
         query += " UNION ".join(
-            f"""{{ { p.fetch_queries('?s', '?o', options=options, filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}"""
+            f"""{{ { p.fetch_queries('?s', '?o', options=options+[p._label_option], filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}"""
             for s in subjects
             for fname, p in predicates
             if p.rdf_name
         )
 
         query += "}"
+        print(query)
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
