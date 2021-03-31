@@ -146,10 +146,15 @@
         let li = document.createElement("li");
         li.className = "list-group-item";
 
+        let container = document.createElement("div");
+        // container.className ="container";
+
+        li.appendChild(container);
         const labelText = document.createElement("p");
         let current_value = {};
-        let deleteButton = document.createElement("a");
-        deleteButton.href="javascript:void(0)";
+        let editButton;
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-secondary";
         let bin = document.createElement("i");
         bin.className = "fas fa-trash";
         deleteButton.appendChild(bin);
@@ -166,9 +171,14 @@
                     i = document.createElement("textarea");
                     debugger;
                 }
-
-                i.value = data;
-                current_value[t.template.field] = data;
+                if(t.template.field === "literal"){
+                    let temp = data;
+                    data = {};
+                    data[t.template.field] = temp
+                }
+                current_value = data;
+                i.value = current_value[t.template.field];
+                labelText.innerText = current_value[t.template.field];
                 i.className = "form-control";
                 // Save on enter
                 $(i).keydown(function (event) {
@@ -181,12 +191,12 @@
                             {query: JSON.stringify({property: property, oldValue:current_value, newValue: newValue}) , csrfmiddlewaretoken:csrftoken},
                         function() {
                            current_value = newValue;
-                           labelText.innerText = i.value;
+                           labelText.innerText = current_value[t.template.field];
                         })
                     }
                 });
 
-                element = createEditable(subject, property, id, labelText, data, i, unfold);
+                element = createEditable(subject, property, id, labelText, i, unfold);
             } else if (t.template.type === "select") {
                 let i = document.createElement("select");
                 i.className = "form-control";
@@ -197,6 +207,7 @@
                     o.selected=true;
                     o.innerText = data.label || data.iri;
                     current_value = data;
+                    labelText.innerText = data.label || data.iri;
                 } else {
                     o.innerText = "Choose one"
                 }
@@ -239,10 +250,18 @@
                     }
                 )});
 
-                element = createEditable(subject, property, id, labelText, data.label || data.iri, i, unfold);
+                element = createEditable(subject, property, id, labelText, i, unfold);
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
+
+            editButton = document.createElement("button");
+            $(editButton).click(() => show_field(id));
+            editButton.className = "btn btn-secondary";
+            let i = document.createElement("i");
+            i.className = "fas fa-pen";
+            editButton.appendChild(i);
+
         } else {
             current_value = data;
             element = createExpandable(data, id, t["factory"])
@@ -257,25 +276,25 @@
             }
         });
 
-        li.appendChild(element);
-        li.append(deleteButton);
+        let buttonGroup = document.createElement("div");
+        buttonGroup.className = "btn-group float-right";
+
+        if(editButton) {
+            buttonGroup.append(editButton);
+        }
+        buttonGroup.append(deleteButton);
+        container.append(buttonGroup);
+        container.appendChild(element);
         ul.appendChild(li);
         idx++;
         return idx
     }
 
-    function createEditable(subject, property, id, labelText, value, field, unfold=false){
+    function createEditable(subject, property, id, labelText, field, unfold=false){
         let container = document.createElement("div");
         let labelDiv = document.createElement("div");
         labelDiv.id = "display__" + id;
-        labelText.innerText = value;
         labelDiv.appendChild(labelText);
-        let editButton = document.createElement("a");
-        editButton.href="javascript:show_field('"+ id +"')";
-        let i = document.createElement("i");
-        i.className = "fas fa-pen";
-        editButton.appendChild(i);
-        labelDiv.appendChild(editButton);
         labelDiv.hidden=unfold;
 
         container.appendChild(labelDiv);
