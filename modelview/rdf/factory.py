@@ -390,4 +390,4 @@ class Study(RDFFactory):
 
     @classmethod
     def _label_option(cls, o, lo):
-        return f"_:b <{cls._fields['published_in'].rdf_name}> {o}; {dc.title} {lo}"
+        return f"_:b <{cls._fields['published_in'].rdf_name}> {o}; <{dc.title}> {lo}"

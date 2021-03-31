@@ -77,7 +77,7 @@ class ConnectionContext:
             query += "OPTIONAL {" + option + "}"
 
 
-        query += "}"
+        query += "} ORDER By ASC(?ls)"
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
