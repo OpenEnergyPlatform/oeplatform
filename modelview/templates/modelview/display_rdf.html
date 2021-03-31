@@ -68,12 +68,7 @@
         }
     }
 
-    let templates = {
-    {
-        rdf_templates | safe
-    }
-    }
-    ;
+    let templates = {{rdf_templates | safe}};
 
     function load_instance(parentId, identifier, factory, path) {
         let parent = document.getElementById(parentId);
@@ -372,13 +367,13 @@
         container.appendChild(expander);
 
         // A link to collapse an instance
-        let collapse = document.createElement("a");
-        collapse.innerText = "Show less";
-        collapse.id = "collapse__" + id;
-        collapse.hidden = true;
-        collapse.href = "javascript:void(0)";
-        $(collapse).click(() => collapse(id));
-        container.appendChild(collapse);
+        let collapser = document.createElement("a");
+        collapser.innerText = "Show less";
+        collapser.id = "collapse__" + id;
+        collapser.hidden = true;
+        collapser.href = "javascript:void(0)";
+        $(collapser).click(() => collapse(id));
+        container.appendChild(collapser);
 
 
         return container
