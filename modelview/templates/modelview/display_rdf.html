@@ -72,132 +72,237 @@
         let parent = document.getElementById(parentId);
         let subject = factory + "/" + identifier;
         $.ajax({
-            url: "/factsheets/rdf/" + subject,
+            url: "/factsheets/rdf/" + subject  + "/",
             contentType: "application/json",
-            success: function (data) {
-                let table = document.createElement("table");
-                table.className = "table";
-                table.id = "container__" + path;
-                for(const [key, values] of Object.entries(data)){
-                    let tr = document.createElement("tr");
-                    // Create field header
-                    let th = document.createElement("th");
-                    let t = templates[factory][key];
-                    th.innerText = t.verbose_name;
-
-                    tr.appendChild(th);
-
-                    // Create value list
-                    let td = document.createElement("td");
-                    let ul = document.createElement("ul");
-                    ul.className = "list-group";
-                    let nextPath;
-                    if(path){
-                        nextPath = path + "." + key;
-                    } else {
-                        nextPath = key;
-                    }
-                    let idx = 0;
-                    for(let v of values) {
-                        idx = createDisplay(ul, subject, key, t, v, nextPath, idx);
-                    }
-
-                    let add = document.createElement("a");
-                    add.href="javascript:void(0)";
-                    add.innerHTML = "+";
-                    $(add).click(function(){
-                        $.post( "/factsheets/rdf/" + factory + "/" + identifier + "/",
-                            {property: key, csrfmiddlewaretoken:csrftoken},
-                            function( data ) {
-                                idx = createDisplay(ul, subject, key, t, data.result, nextPath, idx);
-                            });
-                    });
-                    th.appendChild(add);
-
-                    td.appendChild(ul);
-                    tr.appendChild(td);
-                    table.appendChild(tr);
-                    parent.appendChild(table);
-                }
-            }
+            success: (tuples) => {parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))}
         });
     }
 
-    function createDisplay(ul, subject, predicate, template, data, path, idx){
+    function createPropertyTable(subject, identifier, factory, path, tuples){
+            let table = document.createElement("table");
+            table.className = "table";
+            table.id = "container__" + path;
+            for(const [property, values] of Object.entries(tuples)){
+                if(property!=="iri") {
+                    table.appendChild(createPropertyRow(subject, property, identifier, factory, path, values));
+                }
+            }
+            return table;
+        }
+
+    function createPropertyRow(subject, property, identifier, factory, path, values){
+        const tr = document.createElement("tr");
+        // Create field header
+        const th = document.createElement("th");
+        const t = templates[factory][property];
+        th.innerText = t.verbose_name;
+
+        tr.appendChild(th);
+
+        // Create value list
+        const td = document.createElement("td");
+        const ul = document.createElement("ul");
+        ul.className = "list-group";
+        let nextPath;
+        if(path){
+            nextPath = path + "." + property;
+        } else {
+            nextPath = property;
+        }
+        let idx = 0;
+        for(let v of values) {
+            idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
+        }
+
+        const add = document.createElement("a");
+        add.href="javascript:void(0)";
+        add.innerHTML = "+";
+        $(add).click(function(){
+            // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
+            if(!t.literal) {
+                if(!t.template || t.template.type!=="select") {
+                    $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
+                        {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
+                        function (data) {
+                            idx = createDisplay(ul, data.iri, property, t, data, nextPath, idx);
+                        });
+                } else {
+                    idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
+                }
+            } else {
+                idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
+            }
+        });
+        th.appendChild(add);
+
+        td.appendChild(ul);
+        tr.appendChild(td);
+        return tr;
+    }
+
+    function createDisplay(ul, subject, property, t, data, path, idx, unfold=false){
+
+        let id = path + "." + idx;
         let li = document.createElement("li");
         li.className = "list-group-item";
-        let element = fill_template(subject, predicate, template, data, path + "." + idx);
+
+        const labelText = document.createElement("p");
+        let current_value = {};
+        let deleteButton = document.createElement("a");
+        deleteButton.href="javascript:void(0)";
+        let bin = document.createElement("i");
+        bin.className = "fas fa-trash";
+        deleteButton.appendChild(bin);
+        let element;
+
+        if(t.template) {
+            if (t.template.type === "text" || t.template.type === "textarea") {
+                let i;
+                if(t.template.type === "text"){
+                    i = document.createElement("input");
+                    i.type = "text";
+                }
+                if (t.template.type === "textarea") {
+                    i = document.createElement("textarea");
+                    debugger;
+                }
+
+                i.value = data;
+                current_value[t.template.field] = data;
+                i.className = "form-control";
+                // Save on enter
+                $(i).keydown(function (event) {
+                    let keyPressed = event.keyCode || event.which;
+                    if (keyPressed === 13) {
+                        debugger;
+                        let newValue = {};
+                        newValue[t.template.field] = i.value;
+                        $.post( "/factsheets/rdf/" + subject + "/",
+                            {query: JSON.stringify({property: property, oldValue:current_value, newValue: newValue}) , csrfmiddlewaretoken:csrftoken},
+                        function() {
+                           current_value = newValue;
+                           labelText.innerText = i.value;
+                        })
+                    }
+                });
+
+                element = createEditable(subject, property, id, labelText, data, i, unfold);
+            } else if (t.template.type === "select") {
+                let i = document.createElement("select");
+                i.className = "form-control";
+
+                let o = document.createElement("option");
+                if(data){
+                    o.value = data.iri;
+                    o.selected=true;
+                    o.innerText = data.label || data.iri;
+                    current_value = data;
+                } else {
+                    o.innerText = "Choose one"
+                }
+                i.appendChild(o);
+
+
+                // Load options on demand
+                $(i).click(function(event){
+                    $(i).find('option').remove();
+                    $.get("/factsheets/rdf/instances/",
+                    {iri: t.template.class, subclass:t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                    function (result) {
+                        let current_o;
+                        for(const instance of result.instances){
+                            let o = document.createElement("option");
+                            o.value = instance.iri;
+                            if(instance.iri===current_value[t.template.field]){
+                                o.selected=true;
+                                current_o = o;
+                            }
+                            $(o).click(function (event) {
+                                let newValue = {};
+                                newValue = instance;
+                                $.post( "/factsheets/rdf/" + subject + "/",
+                                    {query:JSON.stringify({property: property, oldValue:current_value, newValue: newValue}), csrfmiddlewaretoken: csrftoken},
+                                function() {
+                                    current_value = newValue;
+                                    i.value = o.value;
+                                    labelText.innerText = instance.label || instance.iri ;
+                                    if(current_o){
+                                        current_o.selected = false;
+                                    }
+                                    o.selected = true;
+                                    current_o = o;
+                                })
+                            });
+                            o.innerText = instance.label || instance.iri;
+                            i.appendChild(o);
+                        }
+                    }
+                )});
+
+                element = createEditable(subject, property, id, labelText, data.label || data.iri, i, unfold);
+            } else {
+                console.log("Unknown template: " + t.template.type)
+            }
+        } else {
+            current_value = data;
+            element = createExpandable(data, id, t["factory"])
+        }
+
+        $(deleteButton).click(() => {
+            if(current_value && (current_value.literal || current_value.iri)){
+                $.post( "/factsheets/rdf/" + subject + "/",
+                                        {query:JSON.stringify({property: property, oldValue:current_value}), csrfmiddlewaretoken: csrftoken},() =>{li.remove()})
+            } else {
+                li.remove()
+            }
+        });
+
         li.appendChild(element);
+        li.append(deleteButton);
         ul.appendChild(li);
         idx++;
         return idx
     }
 
-    function fill_template(subject, property, t, data, id){
-        if(!(t.template===undefined)) {
-            let i = document.createElement("input");
-            if (t.template.type === "text") {
-                i.type = "text";
-                i.value = data;
-                i.className = "form-control"
-            } else {
-                debugger;
-                console.log(t)
-            }
-            return createEditable(subject, property, id, data, i);
-        } else {
-            return createExpandable(data, id, t["factory"])
-        }
-    }
-
-    function createEditable(subject, property, id, value, field){
+    function createEditable(subject, property, id, labelText, value, field, unfold=false){
         let container = document.createElement("div");
         let labelDiv = document.createElement("div");
         labelDiv.id = "display__" + id;
-        labelDiv.innerText = value;
+        labelText.innerText = value;
+        labelDiv.appendChild(labelText);
         let editButton = document.createElement("a");
         editButton.href="javascript:show_field('"+ id +"')";
         let i = document.createElement("i");
         i.className = "fas fa-pen";
         editButton.appendChild(i);
         labelDiv.appendChild(editButton);
+        labelDiv.hidden=unfold;
+
         container.appendChild(labelDiv);
 
         let formDiv = document.createElement("div");
         formDiv.id = "edit__" + id;
-        let form = document.createElement("form");
+        let form = document.createElement("div");
         field.id = "input__" + id;
         $(field).focusout(()=>hide_field(id));
-        // Submit on Enter
-        $(field).keydown(function (event) {
-            let keyPressed = event.keyCode || event.which;
-            if (keyPressed === 13) {
-                $(form).submit();
-            }
-        });
+
         form.appendChild(field);
         // Submit to API
-        $(form).submit(() => $.post( "/factsheets/rdf/" + subject + "/",
-            {property: property, oldValue:value, newValue:field.value , csrfmiddlewaretoken:csrftoken},
-            function( data ) {
-              alert( "Load was performed." );
-            }));
         formDiv.appendChild(form);
-        formDiv.hidden = true;
+        formDiv.hidden = !unfold;
         container.appendChild(formDiv);
         return container;
     }
 
-    function createExpandable(iri, id, factory){
+    function createExpandable(instance, id, factory){
         let container = document.createElement("div");
         container.id = id;
         let label = document.createElement("div");
-        label.innerText = iri;
+        label.innerText = instance.label || instance.iri;
         container.appendChild(label);
-
         let expand = document.createElement("a");
         expand.innerText = "Show more";
-        let name = iri.split("/").pop();
+        let name = instance.iri.split("/").pop();
         expand.id = "expand__" + id;
         expand.href="javascript:expand('" + factory + "','" + name + "','" + id + "')";
         container.appendChild(expand);

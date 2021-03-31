@@ -3,14 +3,14 @@ from django.utils.html import format_html, format_html_join, mark_safe
 import rdflib as rl
 
 from modelview.rdf import handler, widget, factory, connection
-
+from api.error import APIError
 from modelview.rdf.widget import DynamicFactoryArrayWidget
 from os import path
 from django import template
 from django.template import loader
+from abc import ABC
 
-
-class Field:
+class Field(ABC):
     """
     :ivar rdf_name: IRI of this property
     :ivar verbose_name: A readable label (not `rdfs:label`)
@@ -47,8 +47,11 @@ class Field:
             subwidget_form=widget_cls, subwidget_form_kwargs_gen=widget_kwargs_gen
         )
         self.inverse = inverse
-        self._template = template or {"type": "text"}
         self.is_literal = True
+
+    @property
+    def template(self):
+        raise NotImplementedError
 
     def widget(self):
         return self._widget
@@ -105,39 +108,106 @@ class Field:
         return dict(
             verbose_name=self.verbose_name,
             help_text=self.help_text,
-            template=self._template,
+            template=self.template,
             literal=self.is_literal,
         )
 
+    def process_data(self, data):
+        raise NotImplementedError
 
-class IRIField(Field):
+
+class TextField(Field):
+
+    @property
+    def template(self):
+        return {"type": "text", "field": "literal"}
+
+    def process_data(self, data):
+        x = data.get("literal")
+        if not x:
+            return None
+        return f"\"{x}\""
+
+
+class IRIField(TextField):
+
     def __init__(self, rdf_name, **kwargs):
         super().__init__(
-            rdf_name, widget_cls=HiddenInput, handler=handler.IRIHandler(), **kwargs
+            rdf_name, **kwargs
         )
 
+    @property
+    def template(self):
+        return {"type": "text", "field": "iri"}
 
-class PredefinedInstanceField(Field):
-    _handler = handler.IRIHandler
+    def process_data(self, data):
+        x = data.get("iri")
+        if not x:
+            return None
+        elif not handler.url_regex.match(x):
+            raise APIError("Invalid IRI")
+        else:
+            return f"<{x}>"
 
+
+class TextAreaField(TextField):
+
+    @property
+    def template(self):
+        return {"type": "textarea"}
+
+
+class YearField(Field):
     def __init__(self, rdf_name, **kwargs):
-        super().__init__(rdf_name, handler=handler.IRIHandler(), **kwargs)
+        super().__init__(
+            rdf_name, **kwargs
+        )
+
+    @property
+    def template(self):
+        return {"type": "text"}
+
+    def process_data(self, data):
+        x = data.get("literal")
+        if not x:
+            return None
+        try:
+            return int(x)
+        except ValueError:
+            raise APIError("Invalid year")
+
+
+class PredefinedInstanceField(IRIField):
+    def __init__(self, rdf_name, cls_iri, subclass=False, **kwargs):
+        super().__init__(rdf_name, **kwargs)
         self.is_literal = False
+        self.filter = [f"{'rdfs:subClassOf' if subclass else 'a'} <{cls_iri}>"]
+        self.cls_iri = cls_iri
+        self.subclass = subclass
+        self.handler = handler.IRIHandler()
+
+    @property
+    def template(self):
+        return {"type": "select", "class": self.cls_iri, "subclass": self.subclass}
 
 
-class FactoryField(Field):
+class FactoryField(IRIField):
     def __init__(self, factory, **kwargs):
         super(FactoryField, self).__init__(**kwargs)
         self.factory = factory
         self._widget = DynamicFactoryArrayWidget(
             subwidget_form=widget._factory_field(factory)
         )
-        self._template = None
         self.is_literal = False
+        self.handler = handler.IRIHandler()
 
     @property
     def spec(self):
         return dict(factory=self.factory._factory_id, **super(FactoryField, self).spec)
+
+    @property
+    def template(self):
+        return None
 
 
 class Container(handler.Rederable):
@@ -157,6 +227,6 @@ class Container(handler.Rederable):
                     d["label"] = v.label
                 yield d
             elif isinstance(v, handler.NamedIRI):
-                return dict(iri=v.iri, label=v.label)
+                yield dict(iri=v.iri, label=v.label)
             else:
                 raise Exception(v)

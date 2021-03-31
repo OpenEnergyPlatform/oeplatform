@@ -89,3 +89,4 @@ class IRIHandler(DefaultHandler):
 
     def from_structure(self, value, **kwargs):
         return [URIRef(v) for v in value if v]
+

@@ -55,7 +55,6 @@ class RDFFactory(ABC):
                 assert len(iri) <= 1, "Too many IRIs"
                 iri = iri[0]
         self.iri.values = [iri] if iri else []
-        default_handler = handler.DefaultHandler()
         _internal_fields = set(self.iter_field_names())
         for f in _internal_fields:
             getattr(self, f).field_name = f
@@ -95,8 +94,9 @@ class RDFFactory(ABC):
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
                 d[s][fname] = d[s].get(fname, []) + [(o, lo)]
+
         cached_objects.update(
-            {i: cls._parse(i, context, d[i], cache=cache) for i in identifiers}
+            {i: cls._parse(i, context, d[i], cache=cache) if i in d else cls(iri=i) for i in identifiers}
         )
         return cached_objects
 
@@ -170,7 +170,7 @@ class RDFFactory(ABC):
 
 class IRIFactory(RDFFactory):
     _fields = dict(
-        iri=field.Field(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
+        iri=field.IRIField(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
     )
 
 
@@ -179,8 +179,8 @@ class Institution(RDFFactory):
     _direct_parent = OEO.OEO_00000238
     _label_field = "name"
     _fields = dict(
-        name=field.Field(rdf_name=foaf.name, verbose_name="Name"),
-        address=field.Field(rdf_name=foaf.address, verbose_name="Address"),
+        name=field.TextField(rdf_name=foaf.name, verbose_name="Name"),
+        address=field.TextField(rdf_name=foaf.address, verbose_name="Address"),
     )
 
     @property
@@ -192,8 +192,8 @@ class Person(RDFFactory):
     _direct_parent = OEO.OEO_00000323
     _factory_id = "person"
     _fields = dict(
-        first_name=field.Field(rdf_name=foaf.givenName, verbose_name="First name"),
-        last_name=field.Field(rdf_name=foaf.familyName, verbose_name="Last name"),
+        first_name=field.TextField(rdf_name=foaf.givenName, verbose_name="First name"),
+        last_name=field.TextField(rdf_name=foaf.familyName, verbose_name="Last name"),
         affiliation=field.FactoryField(
             factory=Institution,
             rdf_name=schema.affiliation,
@@ -210,11 +210,22 @@ class AnalysisScope(RDFFactory):
     _factory_id = "scope"
     _direct_parent = OEO_KG.AnalysisScope
     _fields = dict(
-        is_defined_by=field.Field(
+        is_defined_by=field.IRIField(
             rdf_name=OEO.OEO_00000504, verbose_name="is defined by"
         ),
-        covers_sector=field.Field(rdf_name=OEO.OEO_00000505, verbose_name="Sectors"),
-        covers=field.Field(rdf_name=OEO.OEO_00000522, verbose_name="Covers"),
+        covers_sector=field.PredefinedInstanceField(rdf_name=OEO.OEO_00000505, verbose_name="Sectors", cls_iri=OEO.OEO_00000367),
+        covers_energy_carrier=field.PredefinedInstanceField(
+            rdf_name=OEO.OEO_00000523,
+            cls_iri=OEO.OEO_00000331,
+            verbose_name="Covers energy carriers",
+            subclass=True,
+        ),
+        covers_energy=field.PredefinedInstanceField(
+            rdf_name=OEO.OEO_00000523,
+            cls_iri=OEO.OEO_00000150,
+            verbose_name="Related to energy",
+            subclass=True,
+        ),
     )
 
 
@@ -223,15 +234,15 @@ class Scenario(RDFFactory):
     _label_field = "name"
     _factory_id = "scenario"
     _fields = dict(
-        abbreviation=field.Field(
+        abbreviation=field.TextField(
             rdf_name=dbo.abbreviation, verbose_name="Abbreviation"
         ),
-        abstract=field.Field(
+        abstract=field.TextField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="A short description of this scenario",
         ),
-        name=field.Field(
+        name=field.TextAreaField(
             rdf_name=foaf.name,
             verbose_name="Abstract",
             help_text="A short description of this scenario",
@@ -249,23 +260,23 @@ class Publication(RDFFactory):
     _factory_id = "publication"
     _direct_parent = OEO.OEO_00020012
     _fields = dict(
-        title=field.Field(
+        title=field.TextField(
             rdf_name=dc.title,
             verbose_name="Title",
             help_text="Title of the publication",
         ),
-        subtitle=field.Field(rdf_name=dbo.subtitle, verbose_name="Subtitle"),
-        publication_year=field.Field(
+        subtitle=field.TextField(rdf_name=dbo.subtitle, verbose_name="Subtitle"),
+        publication_year=field.YearField(
             rdf_name=npg.publicationYear,
             verbose_name="Publication year",
             help_text="Year this publication was published in",
         ),
-        abstract=field.Field(
+        abstract=field.TextAreaField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="Abstract of the publication",
         ),
-        url=field.Field(
+        url=field.IRIField(
             rdf_name=schema.url,
             verbose_name="URL",
             help_text="Link to this publication",
@@ -276,7 +287,7 @@ class Publication(RDFFactory):
             help_text="Authors of this publication",
             factory=Person,
         ),
-        about=field.Field(
+        about=field.IRIField(
             rdf_name=obo.IAO_0000136,
             verbose_name="About",
             help_text="Elements of this publication",
@@ -287,14 +298,16 @@ class Publication(RDFFactory):
 
 
 class Model(RDFFactory):
+    _factory_id = "model"
     _direct_parent = OEO.OEO_00020011
     _fields = dict(
-        url=field.Field(rdf_name=schema.url, verbose_name="URL"),
-        name=field.Field(rdf_name=dc.title, verbose_name="Name"),
+        url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
+        name=field.TextField(rdf_name=dc.title, verbose_name="Name"),
     )
 
 
 class Dataset(RDFFactory):
+    _factory_id = "dataset"
     _fields = dict(
         url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
     )
@@ -305,6 +318,7 @@ class Dataset(RDFFactory):
 
 
 class ModelCalculation(RDFFactory):
+    _factory_id = "model_calculation"
     _fields = dict(
         has_input=field.FactoryField(
             rdf_name=obo.RO_0002233, factory=Dataset, verbose_name="Inputs"
@@ -312,7 +326,7 @@ class ModelCalculation(RDFFactory):
         has_output=field.FactoryField(
             rdf_name=obo.RO_0002234, factory=Dataset, verbose_name="Outputs"
         ),
-        uses=field.Field(
+        uses=field.IRIField(
             rdf_name=OEO.OEO_00000501,
             verbose_name="Involved Models",
         ),
@@ -330,13 +344,13 @@ class Study(RDFFactory):
         ),
         covers_energy_carrier=field.PredefinedInstanceField(
             rdf_name=OEO.OEO_00000523,
-            filter=[f"<{rdfs.subClassOf}> <{OEO.OEO_00000331}>"],
+            cls_iri=OEO.OEO_00000331,
             verbose_name="Covers energy carriers",
             subclass=True,
         ),
         covers_energy=field.PredefinedInstanceField(
             rdf_name=OEO.OEO_00000523,
-            filter=[f"<{rdfs.subClassOf}> <{OEO.OEO_00000150}>"],
+            cls_iri=OEO.OEO_00000150,
             verbose_name="Related to energy",
             subclass=True,
         ),

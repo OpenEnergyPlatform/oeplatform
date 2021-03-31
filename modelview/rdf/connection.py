@@ -1,5 +1,6 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from rdflib import Graph
+from modelview.rdf.namespace import OEO_KG
 import uuid
 
 from oeplatform.settings import RDF_DATABASES
@@ -10,28 +11,41 @@ class ConnectionContext:
         c = RDF_DATABASES["knowledge"]
 
         self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
+        self.update_connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}/update")
         self.connection.setReturnFormat(JSON)
 
-    def update_property(self, subject, property, old_value, new_value):
+    def update_property(self, subject, property, old_value, new_value, inverse=False):
         s = "DELETE { "
         if old_value:
-            s += f"{subject} {property} {old_value}. "
+            if inverse:
+                s += f"{old_value} <{property}> {subject}. "
+            else:
+                s += f"{subject} <{property}> {old_value}. "
         s += "} INSERT { "
-        if old_value:
-            s += f"{subject} {property} {new_value}. "
+        if new_value:
+            if inverse:
+                s += f"{new_value} <{property}> {subject}. "
+            else:
+                s += f"{subject} <{property}> {new_value}. "
         s += "} WHERE {}"
-        return self.execute(s)
+        self.execute(s)
 
-    def insert_new_instance(self, subject, property, factory):
-        hash = uuid.uuid4()
+    def insert_new_instance(self, subject, property, inverse=False):
+        hash = getattr(OEO_KG, str(uuid.uuid4()))
         s = "DELETE { } INSERT {"
-        s += f"{subject} {property} {hash}. "
-        s += f"{hash} a {factory}. "
+        if inverse:
+            s += f" <{hash}> <{property}> {subject}. "
+        else:
+            s += f"{subject} <{property}> <{hash}>. "
         s += "} WHERE {}"
-        return self.execute(s)
+        self.execute(s)
+        return hash
 
     def execute(self, query):
         print(query)
+        self.update_connection.setQuery(query)
+        response = self.update_connection.query()
+        return response
 
     def query_all_objects(self, subjects, predicates):
         query = (
@@ -48,5 +62,15 @@ class ConnectionContext:
         )
 
         query += "}"
+        self.connection.setQuery(query)
+        return self.connection.query().convert()
+
+    def get_all_instances(self, cls, subclass=False):
+        query = (
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT ?s ?l WHERE { " +
+            f"?s {'rdfs:subClassOf' if subclass else 'a'} <{cls}>. " +
+            "OPTIONAL {?s rdfs:label ?l} }"
+        )
         self.connection.setQuery(query)
         return self.connection.query().convert()

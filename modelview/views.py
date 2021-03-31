@@ -473,73 +473,44 @@ class RDFFactoryView(View):
 
     def post(self, request, factory_id, identifier):
         context = connection.ConnectionContext()
-        subject = getattr(namespace.OEO_KG, identifier)
-        property = request.POST["property"]
-        old_value = request.POST.get("oldValue")
-        new_value = request.POST.get("newValue")
-        if not old_value and not new_value:
-            factory_id = request.POST.get("type")
+        subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
+        query = json.loads(request.POST["query"])
+        property = query["property"]
+
+        try:
             fac = factory.get_factory(factory_id)
-            result = context.insert_new_instance(subject, property, fac._direct_parent)
-        else:
-            result = context.update_property(subject, property, old_value, new_value)
-        return JsonResponse(dict(result=getattr(namespace.OEO_KG, str(result))))
-
-class RDFFactoryFormView(View):
-    _template = "modelview/rdf_edit.html"
-    _success_url = None
-
-    def get(self, request, factory_id, identifier):
-        try:
-            factory = _factory_mappings[factory_id]
+            pf = fac._fields[property]
         except KeyError:
             raise Http404
+
+        old_value = None
+        new_value = None
+
+        raw_old_value = query.get("oldValue")
+        if raw_old_value:
+            old_value = pf.process_data(raw_old_value)
+
+        raw_new_value = query.get("newValue")
+        if raw_new_value:
+            new_value = pf.process_data(raw_new_value)
+
+        if not old_value and not new_value:
+            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse)
+            result = dict(iri=str(result))
+        else:
+            context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
+            result = {}
+        return JsonResponse(result)
+
+
+class RDFInstanceView(View):
+    def get(self, request):
         context = connection.ConnectionContext()
-        # Build URI, assuming that this is part of this knowledge graph
-        uri = getattr(namespace.OEO_KG, identifier)
-        # Load instance from graph
-        # TODO: Error handling:
-        #  * What if it is not part of the graph?
-        #  * What if it is not of this class?
-        #  * Probably: 404 in both cases!?
-        obj = factory._load_one(uri, context)
-        return render(
-            request,
-            self._template,
-            {"obj": obj},
-        )
-
-    def post(self, request, factory_id, identifier=None):
-        try:
-            data = json.loads(request.POST["data"])
-        except:
-            raise PermissionError
-        try:
-            factory = _factory_mappings[factory_id]
-        except KeyError:
-            raise Http404
-        try:
-            context = connection.ConnectionContext()
-            if identifier is None:
-                obj = factory(data)
-                obj.save(context)
-            else:
-                uri = getattr(namespace.OEO_KG, identifier)
-                obj = factory._load_one(uri, context)
-                new_obj = factory._parse_from_structure(data)
-                _, deletes, inserts = graph_diff(obj.to_graph(), new_obj.to_graph())
-                context.apply_diff(inserts, deletes)
-        except Exception as e:
-            raise e
-            # TODO: This has to be refined!
-            return render(
-                request,
-                self._template,
-                {"obj": obj, "error": str(e)},
-            )
-        else:
-            return redirect(f"/factsheets/study/{obj.iri.values[0].split('/')[-1]}")
-
+        cls = request.GET["iri"]
+        subclass = request.GET.get("subclass", False)
+        result = context.get_all_instances(cls, subclass=subclass)
+        instances = [dict(iri=row["s"]["value"], label=row["l"]["value"]) if row.get("l") else dict(iri=row["s"]["value"]) for row in result["results"]["bindings"] if not row["s"]["type"] == "bnode"]
+        return JsonResponse(dict(instances=instances))
 
 class RDFView(View):
 
