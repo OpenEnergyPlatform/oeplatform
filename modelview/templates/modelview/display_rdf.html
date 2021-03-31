@@ -173,7 +173,6 @@
                 }
                 if (t.template.type === "textarea") {
                     i = document.createElement("textarea");
-                    debugger;
                 }
                 if (t.template.field === "literal") {
                     let temp = data;
@@ -188,7 +187,6 @@
                 $(i).keydown(function (event) {
                     let keyPressed = event.keyCode || event.which;
                     if (keyPressed === 13) {
-                        debugger;
                         let newValue = {};
                         newValue[t.template.field] = i.value;
                         $.post("/factsheets/rdf/" + subject + "/",

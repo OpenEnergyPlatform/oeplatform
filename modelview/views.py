@@ -512,6 +512,7 @@ class RDFInstanceView(View):
         instances = [dict(iri=row["s"]["value"], label=row["l"]["value"]) if row.get("l") else dict(iri=row["s"]["value"]) for row in result["results"]["bindings"] if not row["s"]["type"] == "bnode"]
         return JsonResponse(dict(instances=instances))
 
+
 class RDFView(View):
 
     def get(self, request, factory_id=None):

@@ -66,6 +66,21 @@ class ConnectionContext:
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
+    def query_all_factory_instances(self, factory):
+        query = (
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+            "SELECT ?s ?ls WHERE { "
+            f"?s a <{factory._direct_parent}>."
+        )
+
+        for option in [factory._label_option("?s", "?ls")]:
+            query += "OPTIONAL {" + option + "}"
+
+
+        query += "}"
+        self.connection.setQuery(query)
+        return self.connection.query().convert()
+
     def get_all_instances(self, cls, subclass=False):
         query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +

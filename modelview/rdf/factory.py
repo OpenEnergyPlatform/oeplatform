@@ -168,6 +168,16 @@ class RDFFactory(ABC):
     def _label_option(cls, o, lo):
         return None
 
+    @classmethod
+    def load_all_instances(cls, context):
+        result = context.query_all_factory_instances(cls)
+        l = []
+        for t in result["results"]["bindings"]:
+            if "s" in t:
+                s = cls._read_value(t["s"])
+                label = cls._read_value(t.get("ls"))
+                l.append(dict(element=s.split("/")[-1], label=label or s))
+        return l
 
 class IRIFactory(RDFFactory):
     _fields = dict(
