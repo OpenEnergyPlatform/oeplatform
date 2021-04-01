@@ -42,7 +42,6 @@ class ConnectionContext:
         return hash
 
     def execute(self, query):
-        print(query)
         self.update_connection.setQuery(query)
         response = self.update_connection.query()
         return response
@@ -62,7 +61,6 @@ class ConnectionContext:
         )
 
         query += "}"
-        print(query)
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
