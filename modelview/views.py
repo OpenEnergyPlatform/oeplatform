@@ -511,7 +511,9 @@ class RDFFactoryView(View):
 class RDFInstanceView(View):
     def get(self, request):
         context = connection.ConnectionContext()
-        cls = request.GET["iri"]
+        cls = request.GET.get("iri")
+        if not cls:
+            raise HttpResponse(status=400)
         subclass = request.GET.get("subclass", False)
         result = context.get_all_instances(cls, subclass=subclass)
         instances = [dict(iri=row["s"]["value"], label=row["l"]["value"]) if row.get("l") else dict(iri=row["s"]["value"]) for row in result["results"]["bindings"] if not row["s"]["type"] == "bnode"]
