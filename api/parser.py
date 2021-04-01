@@ -415,7 +415,7 @@ def parse_type(dt_string, **kwargs):
         elif dt_string in ("bigint", "biginteger"):
             dt = sa.types.BigInteger
         elif dt_string in ("bit",):
-            dt = sa.types.Binary
+            dt = sa.types.LargeBinary
         elif dt_string in ("boolean", "bool"):
             dt = sa.types.Boolean
         elif dt_string in ("char",):
