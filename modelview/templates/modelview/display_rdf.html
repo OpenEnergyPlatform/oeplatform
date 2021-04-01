@@ -119,7 +119,7 @@ Login to edit
         for (let v of values) {
             idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
         }
-
+        {% if user.is_authenticated %}
         const add = document.createElement("a");
         add.href = "javascript:void(0)";
         add.innerHTML = "+";
@@ -140,7 +140,7 @@ Login to edit
             }
         });
         th.appendChild(add);
-
+        {% endif %}
         td.appendChild(ul);
         tr.appendChild(td);
         return tr;

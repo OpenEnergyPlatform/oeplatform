@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse, Http404, JsonResponse
+from django.http import HttpResponse, Http404, JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from scipy import stats
@@ -471,8 +471,9 @@ class RDFFactoryView(View):
                 {"iri":identifier, "factory": factory_id, "rdf_templates": json.dumps(factory.get_factory_templates())},
             )
 
-    @login_required
     def post(self, request, factory_id, identifier):
+        if not request.user.is_authenticated:
+            return HttpResponseForbidden()
         context = connection.ConnectionContext()
         subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
         query = json.loads(request.POST["query"])
