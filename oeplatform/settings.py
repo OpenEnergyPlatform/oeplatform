@@ -23,6 +23,7 @@ except:
 # Application definition
 
 INSTALLED_APPS = (
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -48,7 +49,8 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "jquery"
+    "jquery",
+    "django_better_admin_arrayfield",
 
 )
 

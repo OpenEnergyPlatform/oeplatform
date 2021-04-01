@@ -48,14 +48,14 @@ confirmOnLeave();
 <div style="width:100%">
 
 <ul class="nav nav-tabs" style="width:100%">
-  <li class="active"><a data-toggle="tab" href="#Basic">General Information</a></li>
-  <li><a data-toggle="tab" href="#Openness">Openness</a></li>
-  <li><a data-toggle="tab" href="#Software">Software</a></li>
-  <li><a data-toggle="tab" href="#Coverage">Coverage</a></li>
-  <li><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>  
-  <li><a data-toggle="tab" href="#Integration">Model Integration</a></li>
-  <li><a data-toggle="tab" href="#References">References</a></li>
-  <li><a data-toggle="tab" href="#Tags">Tags</a></li>
+  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Basic">General Information</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Openness">Openness</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Software">Software</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Coverage">Coverage</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Integration">Model Integration</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#References">References</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Tags">Tags</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -182,7 +182,7 @@ confirmOnLeave();
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.modelling_software %}
             {% include 'modelview/editmodel_snippet.html' with field=form.interal_data_processing_software %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer add=form.external_optimizer_yes_text %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer_yes_text %}
             {% include 'modelview/editmodel_snippet.html' with field=form.additional_software %}
             {% include 'modelview/editmodel_snippet.html' with field=form.gui %}
         </table>

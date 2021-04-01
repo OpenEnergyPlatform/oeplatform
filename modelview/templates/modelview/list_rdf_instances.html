@@ -1,0 +1,17 @@
+{% extends "modelview/detail_view.html" %}
+{% load bootstrap4 %}
+{% load static %}
+{% load modelview_extras %}
+
+{% block main-right-sidebar-content-actions %}
+{% endblock main-right-sidebar-content-actions %}
+
+{% block factsheets_content %}
+
+<div  class="list-group">
+  {% for inst in instances %}
+    <a class="list-group-item list-group-item-action" href="{{ inst.element }}" >{{ inst.label }}</a>
+  {% endfor %}
+</div>
+
+{% endblock factsheets_content %}

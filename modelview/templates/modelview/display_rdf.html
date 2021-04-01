@@ -1,0 +1,389 @@
+{% extends "modelview/detail_view.html" %}
+{% load bootstrap4 %}
+{% load static %}
+{% load modelview_extras %}
+
+{% block main-right-sidebar-content-actions %}
+{% if not user.is_authenticated %}
+Login to edit
+{% endif %}
+{% endblock main-right-sidebar-content-actions %}
+
+{% block factsheets_content %}
+
+<div id="root"></div>
+
+{% endblock factsheets_content %}
+
+{% block factsheets-after-body-bottom-js %}
+
+<script>
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    load_instance("root", '{{ iri }}', '{{ factory }}');
+
+    function hide_field(path) {
+        document.getElementById("display__" + path).hidden = false;
+        document.getElementById("edit__" + path).hidden = true;
+        let input = document.getElementById("edit__" + path);
+        input.onfocusout = "";
+    }
+
+    function show_field(path) {
+        document.getElementById("display__" + path).hidden = true;
+        let edit = document.getElementById("edit__" + path);
+        edit.hidden = false;
+        let input = document.getElementById("input__" + path);
+        setCaretPosition(input, input.value.length);
+    }
+
+    function setCaretPosition(ctrl, pos) {
+        // Modern browsers
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(pos, pos);
+
+            // IE8 and below
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', pos);
+            range.moveStart('character', pos);
+            range.select();
+        }
+    }
+
+    let templates = {{rdf_templates | safe}};
+
+    function load_instance(parentId, identifier, factory, path) {
+        let parent = document.getElementById(parentId);
+        let subject = factory + "/" + identifier;
+        $.ajax({
+            url: "/factsheets/rdf/" + subject + "/",
+            contentType: "application/json",
+            success: (tuples) => {
+                parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
+            }
+        });
+    }
+
+    function createPropertyTable(subject, identifier, factory, path, tuples) {
+        let table = document.createElement("table");
+        table.className = "table";
+        table.id = "container__" + path;
+        for (const [property, values] of Object.entries(tuples)) {
+            if (property !== "iri") {
+                table.appendChild(createPropertyRow(subject, property, identifier, factory, path, values));
+            }
+        }
+        return table;
+    }
+
+    function createPropertyRow(subject, property, identifier, factory, path, values) {
+        const tr = document.createElement("tr");
+        // Create field header
+        const th = document.createElement("th");
+        const t = templates[factory][property];
+        th.innerText = t.verbose_name;
+
+        tr.appendChild(th);
+
+        // Create value list
+        const td = document.createElement("td");
+        const ul = document.createElement("ul");
+        ul.className = "list-group";
+        let nextPath;
+        if (path) {
+            nextPath = path + "." + property;
+        } else {
+            nextPath = property;
+        }
+        let idx = 0;
+        for (let v of values) {
+            idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
+        }
+        {% if user.is_authenticated %}
+        const add = document.createElement("a");
+        add.href = "javascript:void(0)";
+        add.innerHTML = "+";
+        $(add).click(function () {
+            // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
+            if (!t.literal) {
+                if (!t.template || t.template.type !== "select") {
+                    $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
+                        {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
+                        function (data) {
+                            idx = createDisplay(ul, data.iri, property, t, data, nextPath, idx);
+                        });
+                } else {
+                    idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
+                }
+            } else {
+                idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
+            }
+        });
+        th.appendChild(add);
+        {% endif %}
+        td.appendChild(ul);
+        tr.appendChild(td);
+        return tr;
+    }
+
+    function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
+
+        let id = path + "." + idx;
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+
+        let container = document.createElement("div");
+        // container.className ="container";
+
+        li.appendChild(container);
+        const labelText = document.createElement("p");
+        let current_value = {};
+        let editButton;
+        {% if user.is_authenticated %}
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-secondary";
+        let bin = document.createElement("i");
+        bin.className = "fas fa-trash";
+        deleteButton.appendChild(bin);
+        {% endif %}
+        let element;
+
+        if (t.template) {
+            if (t.template.type === "text" || t.template.type === "textarea") {
+                let i;
+                if (t.template.type === "text") {
+                    i = document.createElement("input");
+                    i.type = "text";
+                }
+                if (t.template.type === "textarea") {
+                    i = document.createElement("textarea");
+                }
+                if (t.template.field === "literal") {
+                    let temp = data;
+                    data = {};
+                    data[t.template.field] = temp
+                }
+                current_value = data;
+                i.value = current_value[t.template.field];
+                labelText.innerText = current_value[t.template.field];
+                i.className = "form-control";
+                // Save on enter
+                $(i).keydown(function (event) {
+                    let keyPressed = event.keyCode || event.which;
+                    if (keyPressed === 13) {
+                        let newValue = {};
+                        newValue[t.template.field] = i.value;
+                        $.post("/factsheets/rdf/" + subject + "/",
+                            {
+                                query: JSON.stringify({
+                                    property: property,
+                                    oldValue: current_value,
+                                    newValue: newValue
+                                }),
+                                csrfmiddlewaretoken: csrftoken
+                            },
+                            function () {
+                                current_value = newValue;
+                                labelText.innerText = current_value[t.template.field];
+                            })
+                    }
+                });
+
+                element = createEditable(subject, property, id, labelText, i, unfold);
+            } else if (t.template.type === "select") {
+                let i = document.createElement("select");
+                i.className = "form-control";
+
+                let o = document.createElement("option");
+                if (data) {
+                    o.value = data.iri;
+                    o.selected = true;
+                    o.innerText = data.label || data.iri;
+                    current_value = data;
+                    labelText.innerText = data.label || data.iri;
+                } else {
+                    o.innerText = "Choose one"
+                }
+                i.appendChild(o);
+
+
+                // Load options on demand
+                $(i).click(function (event) {
+                    $(i).find('option').remove();
+                    $.get("/factsheets/rdf/instances/",
+                        {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                        function (result) {
+                            let current_o;
+                            for (const instance of result.instances) {
+                                let o = document.createElement("option");
+                                o.value = instance.iri;
+                                if (instance.iri === current_value[t.template.field]) {
+                                    o.selected = true;
+                                    current_o = o;
+                                }
+                                $(o).click(function (event) {
+                                    let newValue = {};
+                                    newValue = instance;
+                                    $.post("/factsheets/rdf/" + subject + "/",
+                                        {
+                                            query: JSON.stringify({
+                                                property: property,
+                                                oldValue: current_value,
+                                                newValue: newValue
+                                            }), csrfmiddlewaretoken: csrftoken
+                                        },
+                                        function () {
+                                            current_value = newValue;
+                                            i.value = o.value;
+                                            labelText.innerText = instance.label || instance.iri;
+                                            if (current_o) {
+                                                current_o.selected = false;
+                                            }
+                                            o.selected = true;
+                                            current_o = o;
+                                        })
+                                });
+                                o.innerText = instance.label || instance.iri;
+                                i.appendChild(o);
+                            }
+                        }
+                    )
+                });
+
+                element = createEditable(subject, property, id, labelText, i, unfold);
+            } else {
+                console.log("Unknown template: " + t.template.type)
+            }
+            {% if user.is_authenticated %}
+            editButton = document.createElement("button");
+            $(editButton).click(() => show_field(id));
+            editButton.className = "btn btn-secondary";
+            let i = document.createElement("i");
+            i.className = "fas fa-pen";
+            editButton.appendChild(i);
+            {% endif %}
+
+        } else {
+            current_value = data;
+            element = createExpandable(data, id, t["factory"])
+        }
+        {% if user.is_authenticated %}
+        $(deleteButton).click(() => {
+            if (current_value && (current_value.literal || current_value.iri)) {
+                $.post("/factsheets/rdf/" + subject + "/",
+                    {
+                        query: JSON.stringify({property: property, oldValue: current_value}),
+                        csrfmiddlewaretoken: csrftoken
+                    }, () => {
+                        li.remove()
+                    })
+            } else {
+                li.remove()
+            }
+        });
+
+        let buttonGroup = document.createElement("div");
+        buttonGroup.className = "btn-group float-right";
+
+        if (editButton) {
+            buttonGroup.append(editButton);
+        }
+        buttonGroup.append(deleteButton);
+        container.append(buttonGroup);
+        {% endif %}
+        container.appendChild(element);
+        ul.appendChild(li);
+        idx++;
+        return idx
+    }
+
+    function createEditable(subject, property, id, labelText, field, unfold = false) {
+        let container = document.createElement("div");
+        let labelDiv = document.createElement("div");
+        labelDiv.id = "display__" + id;
+        labelDiv.appendChild(labelText);
+        labelDiv.hidden = unfold;
+
+        container.appendChild(labelDiv);
+
+        let formDiv = document.createElement("div");
+        formDiv.id = "edit__" + id;
+        let form = document.createElement("div");
+        field.id = "input__" + id;
+        $(field).focusout(() => hide_field(id));
+
+        form.appendChild(field);
+        // Submit to API
+        formDiv.appendChild(form);
+        formDiv.hidden = !unfold;
+        container.appendChild(formDiv);
+        return container;
+    }
+
+    function expand(factory, name, id) {
+        document.getElementById("expand__" + id).hidden = true;
+        document.getElementById("collapse__" + id).hidden = false;
+
+        load_instance(id, name, factory, id)
+    }
+
+    function collapse(id) {
+        document.getElementById("expand__" + id).hidden = false;
+        document.getElementById("collapse__" + id).hidden = true;
+        document.getElementById("container__" + id).remove();
+    }
+
+    function createExpandable(instance, id, factory) {
+        let container = document.createElement("div");
+        container.id = id;
+
+        let label = document.createElement("div");
+        label.innerText = instance.label || instance.iri;
+        container.appendChild(label);
+
+        // A link to expand a new instance
+        let expander = document.createElement("a");
+        expander.innerText = "Show more";
+        let name = instance.iri.split("/").pop();
+        expander.id = "expand__" + id;
+        expander.href = "javascript:void(0)";
+        $(expander).click(() => expand(factory, name, id));
+        container.appendChild(expander);
+
+        // A link to collapse an instance
+        let collapser = document.createElement("a");
+        collapser.innerText = "Show less";
+        collapser.id = "collapse__" + id;
+        collapser.hidden = true;
+        collapser.href = "javascript:void(0)";
+        $(collapser).click(() => collapse(id));
+        container.appendChild(collapser);
+
+
+        return container
+    }
+
+
+</script>
+
+{% endblock %}
