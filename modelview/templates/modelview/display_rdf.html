@@ -4,7 +4,9 @@
 {% load modelview_extras %}
 
 {% block main-right-sidebar-content-actions %}
-<a class="btn btn-primary" href="edit">Edit</a>
+{% if not user.is_authenticated %}
+Login to edit
+{% endif %}
 {% endblock main-right-sidebar-content-actions %}
 
 {% block factsheets_content %}
@@ -157,11 +159,13 @@
         const labelText = document.createElement("p");
         let current_value = {};
         let editButton;
+        {% if user.is_authenticated %}
         let deleteButton = document.createElement("button");
         deleteButton.className = "btn btn-secondary";
         let bin = document.createElement("i");
         bin.className = "fas fa-trash";
         deleteButton.appendChild(bin);
+        {% endif %}
         let element;
 
         if (t.template) {
@@ -270,19 +274,20 @@
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
-
+            {% if user.is_authenticated %}
             editButton = document.createElement("button");
             $(editButton).click(() => show_field(id));
             editButton.className = "btn btn-secondary";
             let i = document.createElement("i");
             i.className = "fas fa-pen";
             editButton.appendChild(i);
+            {% endif %}
 
         } else {
             current_value = data;
             element = createExpandable(data, id, t["factory"])
         }
-
+        {% if user.is_authenticated %}
         $(deleteButton).click(() => {
             if (current_value && (current_value.literal || current_value.iri)) {
                 $.post("/factsheets/rdf/" + subject + "/",
@@ -305,6 +310,7 @@
         }
         buttonGroup.append(deleteButton);
         container.append(buttonGroup);
+        {% endif %}
         container.appendChild(element);
         ul.appendChild(li);
         idx++;
