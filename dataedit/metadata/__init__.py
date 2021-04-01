@@ -119,6 +119,10 @@ def load_metadata_from_db(schema, table):
     :return:
     """
     metadata = actions.get_comment_table(schema, table)
+    metadata = parse_meta_data(metadata, schema, table)
+    return metadata
+
+def parse_meta_data(metadata, schema, table):
     if "error" in metadata:
         return metadata
     if not metadata:

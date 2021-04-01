@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'(?P<tutorial_id>[\w\-]+)/delete/', views.DeleteTutorial.as_view(), name='delete_tutorial'),
 
     # This must be last, otherwise it will match anything
+    url(r'jupyter/(?P<tutorial_id>[\w\-]+)/$', views.TutorialDetail.as_view(), name='detail_tutorial'),
     url(r'^(?P<tutorial_id>[\w\-]+)/$', views.TutorialDetail.as_view(), name='detail_tutorial'),
 ]

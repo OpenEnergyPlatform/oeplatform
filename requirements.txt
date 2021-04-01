@@ -18,7 +18,7 @@ markdown2
 alembic
 django-simple-captcha
 django-bootstrap4
-git+http://github.com/frague59/django-fontawesome-5.git@master
+django-fontawesome
 omi
 rdflib
 django-jquery
@@ -26,4 +26,6 @@ zipstream-new
 rdflib
 rdflib-jsonld
 django_better_admin_arrayfield
-git+https://github.com/rdflib/sparqlwrapper#egg=sparqlwrapper
+sparqlwrapper
+Pygments
+nbconvert==5.6.1

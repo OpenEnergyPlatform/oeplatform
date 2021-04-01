@@ -465,7 +465,8 @@ class Table(APIView):
         actions._get_engine().execute(
             "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(schema=schema, table=table)
         )
-
+        table_object, _ = DBTable.objects.get_or_create(name=table, schema__name=schema)
+        table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 

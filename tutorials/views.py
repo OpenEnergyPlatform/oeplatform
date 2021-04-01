@@ -3,9 +3,13 @@ from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import exceptions, reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.shortcuts import Http404
+from pathlib import Path
 import os
 import json
+import nbformat
+import nbconvert
+from jinja2 import DictLoader
 
 from copy import deepcopy
 
@@ -21,44 +25,64 @@ import re
 
 youtubeUrlRegex = re.compile('^.*youtube\.com\/watch\?v=(?P<id>[A-z0-9]+)$')
 
-def _resolveStaticTutorial(tutorial):
+def _resolveStaticTutorial(path):
     try:
-        with open(os.path.join(settings.BASE_DIR, "examples", "build", tutorial["fileName"]), 'r') as buildFile:
+        with open(path, 'r') as buildFile:
+            with open(os.path.join(settings.BASE_DIR, 'examples', 'template', 'openenergyplatform.tpl'), 'r') as templateFile:
                 buildFileContent = buildFile.read()
+                templateFileContent = templateFile.read()
 
-        return {
-            "html": buildFileContent
-        }
+                jake_notebook = nbformat.reads(buildFileContent, as_version=4)
+                dl = DictLoader({'openenergyplatform': templateFileContent})
+
+                html_exporter = nbconvert.HTMLExporter(extra_loaders=[dl], template_file='openenergyplatform')
+                (body, resources) = html_exporter.from_notebook_node(jake_notebook)
+
+                return {
+                    "html": body
+                }
 
     except:
-        return {"html": "Tutorial is missing"}
-
+        return {
+            "html": "Tutorial is missing"
+        }
 
 def _resolveStaticTutorials():
     resolvedTutorials = []
 
     # Load list of static tutorials
 
+    jsonPaths = Path().rglob('*.json')
+
     try:
-        with open(os.path.join(settings.BASE_DIR, "examples", "build", 'meta.json'), 'r') as metaFile:
-            metaContent = json.load(metaFile)
+        for jsonPath in jsonPaths:
+            neededNotebookPath = os.path.splitext(jsonPath)[0]+'.ipynb'
+            notebookPathExists = os.path.exists(neededNotebookPath)
 
-            for tutorial in metaContent:
-                rTut = _resolveStaticTutorial(tutorial)
-                resolvedTutorials.append({
-                    'id': tutorial['id'],
-                    'fileName': tutorial['fileName'],
-                    'title': tutorial['title'] or tutorial['fileName'],
-                    'html': rTut['html'],
-                })
+            if not notebookPathExists:
+                continue
 
-            return sorted(resolvedTutorials, key=lambda x: x["title"])
+            with open(jsonPath, 'r') as jsonFile:
+                jsonContent = json.load(jsonFile)
+
+            rTut = _resolveStaticTutorial(neededNotebookPath)
+
+            resolvedTutorials.append({
+                'id': jsonContent['name'],
+                'title': jsonContent['displayName'],
+                'html': rTut['html'],
+                'isStatic': True,
+            })
+
+        return sorted(resolvedTutorials, key=lambda x: x["title"])
     except Exception as e:
         print('Static tutorials could not be loaded, error=%s' % e)
         # If we do not have a generated meta.json or we cannot read them, we just do not return any static
         # tutorials. This is completly fine and dynamic tutorials can be used like normal.
         return []
 
+
+staticTutorials = _resolveStaticTutorials()
 
 def _resolveDynamicTutorial(evaluatedQs):
     """
@@ -114,12 +138,15 @@ def _gatherTutorials(id=None):
     # Retrieve allTutorials objects from db and cache
     dynamicTutorialsQs = Tutorial.objects.all()
 
-    tutorials = _resolveStaticTutorials()
+    tutorials = staticTutorials.copy()
     tutorials.extend(_resolveDynamicTutorials(dynamicTutorialsQs))
 
     if id:
-        filteredElement = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))[0]
-        return filteredElement
+        filtered_elements = list(filter(lambda tutorial: tutorial["id"] == id, tutorials))
+        if filtered_elements:
+            return filtered_elements[0]
+        else:
+            raise Http404
 
     return tutorials
 
@@ -147,7 +174,8 @@ def formattedMarkdown(markdown):
     # escapes html but also escapes html code blocks lke "exampel code:
     #                                                    (1 tab)  code"
     # checkbox also not rendered as expected "- [ ]"
-    markdowner = Markdown(safe_mode=True)
+    # TODO: Add syntax highliting, add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks 
+    markdowner = Markdown( extras=["break-on-newline", "fenced-code-blocks"], safe_mode=True)
     markdowner.html_removed_text = ""
 
     return markdowner.convert(markdown)
