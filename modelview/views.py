@@ -471,6 +471,7 @@ class RDFFactoryView(View):
                 {"iri":identifier, "factory": factory_id, "rdf_templates": json.dumps(factory.get_factory_templates())},
             )
 
+    @login_required
     def post(self, request, factory_id, identifier):
         context = connection.ConnectionContext()
         subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
