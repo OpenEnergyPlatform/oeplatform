@@ -76,7 +76,7 @@ Login to edit
         let parent = document.getElementById(parentId);
         let subject = factory + "/" + identifier;
         $.ajax({
-            url: "/factsheets/rdf/" + subject + "/",
+            url: "/factsheets/rdf/" + subject + "/?format=json",
             headers: {
                 Accept: "application/json",
                 "Content-Type": "text/plain; charset=utf-8"

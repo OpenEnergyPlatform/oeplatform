@@ -448,14 +448,8 @@ class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
 
     def get(self, request, factory_id, identifier):
-        if "text/html" in request.headers.get("accept","").split(","):
-            return render(
-                request,
-                self._template,
-                {"iri": identifier, "factory": factory_id,
-                 "rdf_templates": json.dumps(factory.get_factory_templates())},
-            )
-        else:
+        format = request.GET.get("format", "html")
+        if format == "json":
             try:
                 fac = factory.get_factory(factory_id)
             except KeyError:
@@ -471,6 +465,13 @@ class RDFFactoryView(View):
             obj = fac._load_one(uri, context)
             jsn = obj.to_json()
             return JsonResponse(jsn)
+        else:
+            return render(
+                request,
+                self._template,
+                {"iri": identifier, "factory": factory_id,
+                 "rdf_templates": json.dumps(factory.get_factory_templates())},
+            )
 
 
     def post(self, request, factory_id, identifier):
