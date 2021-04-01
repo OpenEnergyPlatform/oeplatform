@@ -448,7 +448,7 @@ class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
 
     def get(self, request, factory_id, identifier):
-        if request.content_type == "application/json":
+        if "application/json" in request.headers.get("accept","").split(","):
             try:
                 fac = factory.get_factory(factory_id)
             except KeyError:
