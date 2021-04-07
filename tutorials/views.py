@@ -18,7 +18,7 @@ from django.conf import settings
 from markdown2 import Markdown
 
 from .forms import TutorialForm
-from .models import Tutorial
+from .models import Tutorial, CATEGORY_OPTIONS, LEVEL_OPTIONS
 
 import re
 # Create your views here.
@@ -84,6 +84,8 @@ def _resolveStaticTutorials():
                 'creator': handleKeyNotInJson(jsonContent, 'creator'),
                 'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
                 'github_contact': handleKeyNotInJson(jsonContent, 'github_contact'),
+                "readable_category": handleKeyNotInJson(jsonContent, 'category'),
+                "readable_level": handleKeyNotInJson(jsonContent, 'level'),
                 'html': rTut['html'],
                 'isStatic': True,
             })
@@ -120,8 +122,13 @@ def _resolveDynamicTutorial(evaluatedQs):
                             'license': '',
                             'creator': '',
                             'email_contact': '',
-                            'github_contact': ''
+                            'github_contact': '',
+                            'readable_category': "",
+                            'readable_level': "",
                         }
+
+    readable_category = next((x for x in CATEGORY_OPTIONS if x[0] == evaluatedQs.category), ("default", "Default"))
+    readable_level = next((x for x in LEVEL_OPTIONS if x[0] == evaluatedQs.level), (0, "Default"))
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
@@ -136,7 +143,9 @@ def _resolveDynamicTutorial(evaluatedQs):
                            license=evaluatedQs.license,
                            creator=evaluatedQs.creator,
                            email_contact=evaluatedQs.email_contact,
-                           github_contact=evaluatedQs.github_contact
+                           github_contact=evaluatedQs.github_contact,
+                           readable_category=readable_category[1],
+                           readable_level=readable_level[1],
                            )
 
     return currentTutorial

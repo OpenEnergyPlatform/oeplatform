@@ -1,5 +1,10 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'css/list.css' %}">
+{% endblock %}
 
 {% block site-header %}
   <h2 class="site-header">Tutorials</h2>
@@ -15,23 +20,55 @@
 {% endblock main-right-sidebar-content  %}
 
 {% block main-content-body %}
-{% load static %}
 
-<table class="table">
-    <thead>
+
+<table class="table table-bordered">
+    <thead class="thead-dark">
       <tr>
-        <th scope="col">Name</td>
+        <th style="background-color: var(--primaryColor1); border-color: var(--primaryColor1)" scope="col">Category</td>
+        <th style="background-color: var(--primaryColor1); border-color: var(--primaryColor1)" scope="col">Name</td>
+        <th style="background-color: var(--primaryColor1); border-color: var(--primaryColor1)" scope="col">Medium</td>
+        <th style="background-color: var(--primaryColor1); border-color: var(--primaryColor1)" scope="col">Level</td>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="">
       {% for tutorial in tutorials %}
         <tr>
+          <td>
+              {{ tutorial.readable_category }}
+          </td>
           <td>
             {% if tutorial.isStatic %}
             <a href="jupyter/{{tutorial.id}}">{{ tutorial.title }}</a>
             {% else %}
             <a href="{{tutorial.id}}">{{ tutorial.title }}</a>
             {% endif %}
+          </td>
+          <td>
+            <div class="icon-container">
+            {% if tutorial.isStatic %}
+                <img style="margin: auto" src="{% static '/icons/notebook.png' %}" alt="notebook">
+            {% else %}
+                <img src="{% static '/icons/text.png' %}" alt="notebook">
+                {% if tutorial.media_src %}
+                    <img src="{% static '/icons/video.png' %}" alt="notebook">
+                {% endif %}
+            {% endif %}
+            </div>
+          </td>
+          <td>
+            <div class="icon-container">
+
+              {% if tutorial.readable_level == "Beginner" %}
+                <img src="{% static '/icons/level1.png' %}" alt="notebook">
+              {% endif %}
+              {% if tutorial.readable_level == "Intermediate"%}
+                <img src="{% static '/icons/level2.png' %}" alt="notebook">
+              {% endif %}
+              {% if tutorial.readable_level == "Expert" %}
+                <img src="{% static '/icons/level3.png' %}" alt="notebook">
+              {% endif %}
+            </div>
           </td>
         </tr>
       {% endfor %}

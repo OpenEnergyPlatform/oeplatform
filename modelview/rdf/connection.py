@@ -3,16 +3,16 @@ from rdflib import Graph
 from modelview.rdf.namespace import OEO_KG
 import uuid
 
-from oeplatform.settings import RDF_DATABASES
 
 
 class ConnectionContext:
     def __init__(self):
-        c = RDF_DATABASES["knowledge"]
+        print("Dummy Constructor")
+        # c = RDF_DATABASES["knowledge"]
 
-        self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
-        self.update_connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}/update")
-        self.connection.setReturnFormat(JSON)
+        # self.connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}")
+        # self.update_connection = SPARQLWrapper(f"http://{c['host']}:{c['port']}/{c['name']}/update")
+        # self.connection.setReturnFormat(JSON)
 
     def update_property(self, subject, property, old_value, new_value, inverse=False):
         s = "DELETE { "
