@@ -102,7 +102,7 @@ staticTutorials = _resolveStaticTutorials()
 
 def _resolveDynamicTutorial(evaluatedQs):
     """
-
+    Get single tutorial as object (dict).
 
     :param evaluatedQs: Evaluated queryset object
     :return:
@@ -153,6 +153,8 @@ def _resolveDynamicTutorial(evaluatedQs):
 
 def _resolveDynamicTutorials(tutorials_qs):
     """
+    Get all tutorials(created via oep website) form django db.  
+
     Evaluates a QuerySet and passes each evaluated object to the next function which returns a python
     dictionary that contains all parameters from the object as dict. The dict is added to a list to
     later merge the static and dynamic tutorials together.
@@ -172,8 +174,8 @@ def _resolveDynamicTutorials(tutorials_qs):
 
 def _gatherTutorials(id=None):
     """
-    Collects all existing tutorials (static/dynamic) and returns them as a list. If an id is
-    specified as parameter a specific tutorial is returned filtered by id.
+    Collects all existing tutorials (static/dynamic) and returns them as a  single list. 
+    If id is set a single tutorial is returned (filter by id).
 
     :param id:
     :return:
@@ -192,7 +194,7 @@ def _gatherTutorials(id=None):
         else:
             raise Http404
 
-    return tutorials
+    return sorted(tutorials, key=lambda x: x["title"])
 
 
 def _processFormInput(form):
@@ -210,8 +212,8 @@ def _processFormInput(form):
 
 def formattedMarkdown(markdown):
     """
-    A parameter is used to enter a text formatted as markdown that is formatted
-    to html and returned. This functionality is implemented using Markdown2.
+    Markdown style text to html and return.
+    This functionality is implemented using Markdown2 package.
 
     :param markdown:
     :return:
