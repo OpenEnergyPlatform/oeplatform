@@ -31,7 +31,6 @@ urlpatterns = [
     url(r"^dataedit/", include("dataedit.urls")),
     url(r"^literature/", include("literature.urls")),
     url(r"^ontology/", include("ontology.urls")),
-    url(r"^captcha/", include("captcha.urls")),
     url(r"^tutorials/", include("tutorials.urls")),
     url(r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$", ImagesView.as_view())
 
