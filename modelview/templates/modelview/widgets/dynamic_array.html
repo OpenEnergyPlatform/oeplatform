@@ -1,0 +1,31 @@
+{% load static %}
+{% load i18n %}
+
+{% spaceless %}
+<div class="related-widget-wrapper" {% if widget.is_hidden %} hidden {% endif %}>
+    <div class="dynamic-array-widget">
+        <table class="table" id="container_{{ widget.attrs.id }}">
+            {% for subwidget in widget.subwidgets %}
+            <tr>
+                <td>
+                <div  class="form-group"{% if widget.is_none %}data-isNone="true" style="display: none"{% endif %}>
+
+                    {% with widget=subwidget %}
+                        {% include widget.template_name %}
+                    {% endwith %}
+                    <div class="remove">
+                        <div class="inline-deletelink"></div>
+                    </div>
+                </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {{ widget.template }}
+        <div><input type="button" class="add-array-item" value="{% trans 'Add another' %}" onclick="createLeaf('{{ widget.attrs.id }}', '{{ widget.template }}')"></div>
+        {% if widget.attrs.identifier %}
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#instanceModal" data-classid="{{ widget.attrs.identifier }}" data-path="{{ widget.attrs.id }}">Choose an existing instance</button>
+        {% endif %}
+    </div>
+</div>
+{% endspaceless %}
