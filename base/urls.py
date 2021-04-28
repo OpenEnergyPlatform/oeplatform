@@ -11,4 +11,4 @@ urlpatterns = [
     url(r"^contact/$", views.ContactView.as_view(), name="index"),
     url(r"^legal/privacy_policy/$", views.redir, {"target": "privacy_policy"}, name="index"),
     url(r"^legal/tou/$", views.redir, {"target": "terms_of_use"}, name="index"),
-] + path('captcha/', include('captcha.urls'))
+] + [path('captcha/', include('captcha.urls'))]
