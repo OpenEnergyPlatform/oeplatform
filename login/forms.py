@@ -9,13 +9,13 @@ from django.contrib.auth.forms import (
 
 )
 from django.core.exceptions import ValidationError
-from captcha.fields import ReCaptchaField
+from captcha.fields import CaptchaField
 from .models import ActivationToken
 from .models import myuser as OepUser, UserGroup
 
 
 class CreateUserForm(UserCreationForm):
-    captcha = ReCaptchaField()
+    captcha = CaptchaField()
 
     class Meta:
         model = OepUser
