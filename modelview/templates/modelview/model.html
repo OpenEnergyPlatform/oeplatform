@@ -14,9 +14,9 @@
   <div class="card-container">
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
+            <a class="fill-div" data-toggle="collapse" href="#GeneralInformation">General Information</a>
       </div>
-      <div id="BasicInformation" class="card-body collapse in  in">
+      <div id="GeneralInformation" class="card-body expand in  in">
 
 
         <table class="profiletable">
@@ -118,42 +118,10 @@
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
           {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
-          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' add=model.external_optimizer_yes_text %}
+          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer_yes_text' %}
           {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
           {% include 'modelview/model_snippet.html' with model=model field='gui' %}
         </table>
-      </div>
-    </div>
-    <div class="card ">
-      <div class="card-header">
-        <a data-toggle="collapse" href="#References">References</a>
-      </div>
-      <div id="References" class="card-body collapse  ">
-        <div>
-          <table class="profiletable">
-            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
-            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
-            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
-
-            <tr>
-              <td class="sheetlabel">
-                Model validation
-              </td>
-              <td>
-                <table>
-                  {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
-
-                </table>
-              </td>
-            </tr>
-
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
-            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
-          </table>
-        </div>
       </div>
     </div>
     <div class="card ">
@@ -385,6 +353,38 @@
           {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
           {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
         </table>
+      </div>
+    </div>
+    <div class="card ">
+      <div class="card-header">
+        <a data-toggle="collapse" href="#References">References</a>
+      </div>
+      <div id="References" class="card-body collapse  ">
+        <div>
+          <table class="profiletable">
+            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
+            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
+            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
+
+            <tr>
+              <td class="sheetlabel">
+                Model validation
+              </td>
+              <td>
+                <table>
+                  {% checklist model "validation_models,validation_measurements,validation_others=validation_others_text" %}
+
+                </table>
+              </td>
+            </tr>
+
+            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
+            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
+            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
+          </table>
+        </div>
       </div>
     </div>
   </div>
