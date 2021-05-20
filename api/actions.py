@@ -1380,11 +1380,11 @@ def move(from_schema, table, to_schema):
         try:
             t = DBTable.objects.get(name=table, schema__name=from_schema)
         except DBTable.DoesNotExist:
-            raise APIError("Table register not found")
+            raise APIError("Table for schema movement not found")
         try:
             to_schema_reg = DBSchema.objects.get(name=to_schema)
         except DBSchema.DoesNotExist:
-            raise APIError("No schema register found")
+            raise APIError("Target schema not found")
         t.schema = to_schema_reg
 
         meta_to_schema = get_meta_schema_name(to_schema)

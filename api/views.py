@@ -551,7 +551,7 @@ class Move(APIView):
     @api_exception
     def post(self, request, schema, table, to_schema):
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
-            raise APIError("Invalid schema")
+            raise APIError("Invalid origin or target schema")
         actions.move(schema, table, to_schema)
         return HttpResponse(status=status.HTTP_200_OK)
 
