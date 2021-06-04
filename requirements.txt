@@ -18,7 +18,7 @@ markdown2
 alembic
 django-simple-captcha
 django-bootstrap4
-git+http://github.com/frague59/django-fontawesome-5.git@master
+django-fontawesome-5
 omi
 rdflib
 django-jquery
