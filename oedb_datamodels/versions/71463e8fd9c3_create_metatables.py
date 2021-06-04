@@ -1,7 +1,7 @@
 """create metatables
 
 Revision ID: 71463e8fd9c3
-Revises: 
+Revises:
 Create Date: 2017-09-18 17:48:59.971501
 
 """
@@ -25,7 +25,7 @@ def upgrade():
     Session = sessionmaker(bind=engine)
     sess = Session()
     try:
-        if not engine.dialect.has_table(sess, table_name="_edit_base"):
+        if not engine.dialect.has_table(sess.connection(), table_name="_edit_base"):
             op.create_table(
                 "_edit_base",
                 sa.Column("_id", sa.BigInteger, primary_key=True, autoincrement=True),
