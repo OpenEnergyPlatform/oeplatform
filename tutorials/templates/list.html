@@ -27,7 +27,11 @@
       {% for tutorial in tutorials %}
         <tr>
           <td>
+            {% if tutorial.isStatic %}
+            <a href="jupyter/{{tutorial.id}}">{{ tutorial.title }}</a>
+            {% else %}
             <a href="{{tutorial.id}}">{{ tutorial.title }}</a>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

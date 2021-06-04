@@ -39,6 +39,7 @@
                     Reset Filters
                 </a>
                 </div>
+                <hr>
                 <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
                     {% for t in all_tags %}
                         <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">

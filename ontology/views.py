@@ -17,14 +17,14 @@ def collect_modules(path):
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")
             if extension == "owl":
-                g = Graph()
-                g.parse(os.path.join(path, file))
-                root = dict(g.namespaces())['']
-                comments = g.objects(root, RDFS.comment)
-                try:
-                    modules[filename]["comment"] = next(comments)
-                except StopIteration:
-                    modules[filename]["comment"] = "No description found"
+                #g = Graph()
+                #g.parse(os.path.join(path, file))
+                #root = dict(g.namespaces())['']
+                #comments = g.objects(root, RDFS.comment)
+                #try:
+                #    modules[filename]["comment"] = next(comments)
+                #except StopIteration:
+                modules[filename]["comment"] = "No description found"
             modules[filename]["extensions"].append(extension)
     return modules
 

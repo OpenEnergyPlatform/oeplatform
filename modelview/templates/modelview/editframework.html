@@ -51,13 +51,13 @@ confirmOnLeave();
 {% csrf_token %}
 
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#Overview">Overview</a></li>
-  <li><a data-toggle="tab" href="#Basic">General Information</a></li>
-  <li><a data-toggle="tab" href="#MathematicalDescription">Mathematical Description</a></li>
-  <li><a data-toggle="tab" href="#Openness">Openness</a></li>
-  <li><a data-toggle="tab" href="#ModelBuilding">Model Building</a></li>
-  <li><a data-toggle="tab" href="#References">References</a></li>
-  <li><a data-toggle="tab" href="#Tags">Tags</a></li>
+  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Overview">Overview</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#General">General Information</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#MathematicalDescription">Mathematical Description</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Openness">Openness</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#ModelBuilding">Model Building</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#References">References</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Tags">Tags</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -81,7 +81,7 @@ confirmOnLeave();
         {% include 'modelview/editmodel_snippet.html' with field=form.logo %}  
         </table>
     </div>
-    <div id="Basic" class="tab-pane fade in">
+    <div id="General" class="tab-pane fade in">
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
             {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}

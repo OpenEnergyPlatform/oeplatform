@@ -15,6 +15,7 @@ from sqlalchemy import (
     not_,
     column,
     func,
+    literal,
     literal_column,
     or_,
     select,
@@ -152,7 +153,12 @@ def parse_insert(d, context, message=None, mapper=None):
 
         query = query.values(values)
     elif d["method"] == "select":
-        values = parse_select(d["values"])
+        subquery = d["values"]
+        for field, value in set_meta_info("insert", context["user"].name, message).items():
+            subquery["fields"].append({"type": "literal", "value": value, "as": field})
+            field_strings.append(field)
+
+        values = parse_select(subquery)
         query = query.from_select(field_strings, values)
     else:
         raise APIError("Unknown insert method: " + str(d["method"]))
@@ -409,7 +415,7 @@ def parse_type(dt_string, **kwargs):
         elif dt_string in ("bigint", "biginteger"):
             dt = sa.types.BigInteger
         elif dt_string in ("bit",):
-            dt = sa.types.Binary
+            dt = sa.types.LargeBinary
         elif dt_string in ("boolean", "bool"):
             dt = sa.types.Boolean
         elif dt_string in ("char",):
@@ -484,6 +490,12 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             return parse_slice(d)
         if dtype == "star":
             return "*"
+        if dtype == "literal":
+            v = get_or_403(d, "value")
+            if v is not None:
+                return literal(read_pgvalue(v))
+            else:
+                return read_pgvalue(v)
         if dtype == "value":
             if "value" in d:
                 if "datatype" in d:
