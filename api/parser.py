@@ -273,11 +273,11 @@ def parse_select(d):
 
 def parse_from_item(d):
     """
-        Defintion of a from_item according to 
+        Defintion of a from_item according to
         http://www.postgresql.org/docs/9.3/static/sql-select.html
-        
+
         return: A from_item string with checked psql qualifiers.
-        
+
         Not implemented:
             with_query_name [ [ AS ] alias [ ( column_alias [, ...] ) ] ]
             [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ] alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
@@ -446,7 +446,9 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.REAL
         elif dt_string in ("smallint",):
             dt = sqltypes.SMALLINT
-        elif hasattr(geoalchemy2, dt_string):
+        # there was a problem here with later versions of sqlalchemy:
+        # attribute "text" returns a function, not a valid type
+        elif 'geo' in dt_string and hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
         elif dt_string in _POSTGIS_MAP:
             dt = _POSTGIS_MAP[dt_string]
