@@ -33,7 +33,7 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.models import UploadedImages
 from dataedit.models import Table as DBTable, Schema as DBSchema
-from dataedit.views import load_metadata_from_db
+from dataedit.views import schema_whitelist
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 import json
@@ -543,6 +543,17 @@ def build_csv(header, result_iterator):
     for row in result_iterator:
         yield b",".join(b'"' + bytes(cell) + b'"' for cell in row).replace(b'"', b'""')
         yield b"\n"
+
+
+class Move(APIView):
+
+    @require_admin_permission
+    @api_exception
+    def post(self, request, schema, table, to_schema):
+        if schema not in schema_whitelist or to_schema not in schema_whitelist:
+            raise APIError("Invalid origin or target schema")
+        actions.move(schema, table, to_schema)
+        return HttpResponse(status=status.HTTP_200_OK)
 
 
 class Rows(APIView):
