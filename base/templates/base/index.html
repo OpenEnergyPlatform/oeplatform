@@ -22,35 +22,71 @@
 
                 <div class="index-tile-container">
                     <div class="index-tile index-tile-colored index-tile-color-1">
-                        <img src="/static/img/welcome/database.png" alt="">
-                        <a role="button" class="btn btn-secondary" href="/dataedit/schemas">Database</a>
+                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg" alt="OEDB">
+                        {% comment %} <a role="button" class="btn btn-secondary" href="/dataedit/schemas">Database</a> {% endcomment %}
+                         <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Database </h2>
+                                <p class = "alternative">
+                                    Are you interested in data? Visualize the database to explore it. All contributors publish datasets under an open license, so you can securely download and work with it. Are you interested in sharing your own data? This is the place to upload it.
+                                </p>
+                            </div>
+                            <a role="button" class="btn btn-secondary pull-right" href="/dataedit/schemas">Database</a>
+                        </div>
+                        {% comment %} <div class ="hovertext"> This text will be trimmed down to what is visible in the div </div> {% endcomment %}
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-2">
-                        <img src="/static/img/welcome/factsheets.png" alt="">
+                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg" alt="Factsheets">
+                         <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Factsheets </h2>
+                                <p class = "alternative">
+                                    Do you want to learn more about scenarios and models related to the data? Then, this is the right place to look. Also if you contributed data and want to provide more context, Create your own factsheet here.
+                                </p>
+                            </div>
+                        </div>
                         <a role="button" class="btn btn-secondary" href="/factsheets/overview/">Factsheets</a>
                     </div>
                     {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
                     {#    <img src="/static/img/welcome/bundles.png" alt="">#}
                     {#    <a role="button" class="btn btn-secondary" href="https://github.com/OpenEnergyPlatform/oeplatform/issues/568">Bundles</a>#}
                     {#    </div>#}
-                    <div class="index-tile index-tile-colored index-tile-color-4">
-                        <img src="/static/img/welcome/ontology.svg" alt="">
-                        <a role="button" class="btn btn-secondary" href="/ontology">Ontology</a>
+                    <div class="index-tile index-tile-colored index-tile-color-3">
+                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg" alt="OEO">
+                        {% comment %} <a role="button" class="btn btn-secondary" href="/ontology">Ontology</a> {% endcomment %}
+                         <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Ontology </h2>
+                                <p class = "alternative">
+                                    Ontology referes to a collection of domain specific terminology and their relationships. Come here to learn more about the Open Energy Ontology (OEO), which helps with data annotation and management.
+                                </p>
+                            </div>
+                        </div>
+                        <a role="button" class="btn btn-secondary " href="/ontology"> Ontology </a>
                     </div>
-                    <div class="index-tile index-tile-colored index-tile-color-5">
-                        <img src="/static/img/welcome/documentation.png" alt="">
-                        <a role="button" class="btn btn-secondary" href="https://oep-data-interface.readthedocs.io/en/latest/">Documentation</a>
+                    <div class="index-tile index-tile-colored index-tile-color-4">
+                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg" alt="Tutorials">
+                        {% comment %} <a role="button" class="btn btn-secondary" href="https://oep-data-interface.readthedocs.io/en/latest/">Tutorials</a> {% endcomment %}
+                        <div class="inner-index-tile">
+                            <div class= "panel-description">
+                                <h2> Tutorials </h2>
+                                <p class="alternative">
+                                    There is something you'd like to do on the platform, but you don't know how? Check out the tutorials! They are available for all levels, and in the form of texts, videos and markdowns.
+                                </p>
+                            </div>
+                        </div>
+                        <a role="button" class="btn btn-secondary " href="{% url 'list_tutorials'%}">Tutorials</a>
                     </div>
                 </div>
             </div>
-            <div class="index-tutorial">
+            {% comment %} <div class="index-tutorial">
                 <h4>Tutorials</h4>
                 <span class="alternative">
                     There is something you'd like to do on the platform, but you don't know how?<br/>
                     Check out the tutorials! They are available for all levels, and in the form of texts, videos and markdowns.<br/>
                 </span>
                 <a role="button" class="btn btn-default btn-sm" href="{% url 'list_tutorials'%}">See tutorials</a>
-            </div>
+            </div> {% endcomment %}
         </div>
 
         <div class="index-about-container-background">

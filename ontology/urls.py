@@ -18,6 +18,9 @@ urlpatterns = [
   url(r"^(?P<ontology>[\w_-]+)\/releases(\/v?(?P<version>[\d\.]+))?\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
       views.OntologyStatics.as_view()),
 
+  url(r"^(?P<ontology>[\w_-]+)\/dev\/(?P<file>[\w_-]+)(.(?P<extension>[\w_-]+))?$",
+      views.OntologyStatics.as_view()),
+
   url(r"^(?P<ontology>[\w_-]+)\/imports\/(?P<module_or_id>[\w\d_-]+)",
       views.OntologyOverview.as_view(), {"imports": True}),
 

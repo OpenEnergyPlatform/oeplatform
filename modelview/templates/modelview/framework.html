@@ -14,7 +14,7 @@
       <div class="card-header">
         <a class="fill-div" data-toggle="collapse" href="#Overview">Overview</a>
       </div>
-      <div id="Overview" class="title= collapse in  in">
+      <div id="Overview" class="title= expand in  in">
 
         <div class="container" style="padding:0">
 
@@ -42,9 +42,9 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-toggle="collapse" href="#BasicInformation">Basic Information</a>
+        <a class="fill-div" data-toggle="collapse" href="#GeneralInformation">General Information</a>
       </div>
-      <div id="BasicInformation" class="title= collapse in  in">
+      <div id="GeneralInformation" class="title= collapse in  in">
 
         <div class="container" style="padding:0">
 
@@ -236,6 +236,11 @@
                 </table>
               </td>
             </tr>
+            {% include  'modelview/model_snippet.html' with model=model field='user_documentation' %}
+            {% include  'modelview/model_snippet.html' with model=model field='installation_guide' %}
+            {% include  'modelview/model_snippet.html' with model=model field='link_to_code_documentation' %}
+            {% include  'modelview/model_snippet.html' with model=model field='skills_basic' %}
+            {% include  'modelview/model_snippet.html' with model=model field='skills_advanced' %}
             <!-- Seems like the following does not belong in the openness section moree liek mathematical description? 
             {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
