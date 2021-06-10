@@ -68,10 +68,9 @@ class ContactView(View):
             )
             send_mail(
                 request.POST.get("contact_topic"),
-                request.POST.get("contact_name")
-                + " wrote: \n"
+                f"{request.POST.get('contact_name')} ({request.POST.get('contact_email')}) wrote: \n"
                 + request.POST.get("content"),
-                request.POST.get("contact_email"),
+                sec.DEFAULT_FROM_EMAIL,
                 receps,
                 fail_silently=False,
             )

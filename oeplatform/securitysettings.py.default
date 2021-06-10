@@ -65,5 +65,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ONTOLOGY_FOLDER = '/ontologies'
 
+RDF_DATABASES = {
+    'knowledge': {
+        'host': 'host',
+        'port': 'port',
+        'name': 'your_rdf_dataset'
+    }
+}
+
 if not DEBUG:
     AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

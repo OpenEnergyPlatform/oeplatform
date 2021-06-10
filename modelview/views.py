@@ -448,7 +448,8 @@ class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
 
     def get(self, request, factory_id, identifier):
-        if request.content_type == "application/json":
+        format = request.GET.get("format", "html")
+        if format == "json":
             try:
                 fac = factory.get_factory(factory_id)
             except KeyError:
@@ -468,8 +469,10 @@ class RDFFactoryView(View):
             return render(
                 request,
                 self._template,
-                {"iri":identifier, "factory": factory_id, "rdf_templates": json.dumps(factory.get_factory_templates())},
+                {"iri": identifier, "factory": factory_id,
+                 "rdf_templates": json.dumps(factory.get_factory_templates())},
             )
+
 
     def post(self, request, factory_id, identifier):
         if not request.user.is_authenticated:
@@ -508,7 +511,9 @@ class RDFFactoryView(View):
 class RDFInstanceView(View):
     def get(self, request):
         context = connection.ConnectionContext()
-        cls = request.GET["iri"]
+        cls = request.GET.get("iri")
+        if not cls:
+            raise HttpResponse(status=400)
         subclass = request.GET.get("subclass", False)
         result = context.get_all_instances(cls, subclass=subclass)
         instances = [dict(iri=row["s"]["value"], label=row["l"]["value"]) if row.get("l") else dict(iri=row["s"]["value"]) for row in result["results"]["bindings"] if not row["s"]["type"] == "bnode"]

@@ -76,8 +76,11 @@ Login to edit
         let parent = document.getElementById(parentId);
         let subject = factory + "/" + identifier;
         $.ajax({
-            url: "/factsheets/rdf/" + subject + "/",
-            contentType: "application/json",
+            url: "/factsheets/rdf/" + subject + "/?format=json",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "text/plain; charset=utf-8"
+            },
             success: (tuples) => {
                 parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
