@@ -54,8 +54,17 @@ def _resolveStaticTutorials():
 
     jsonPaths = Path().rglob('*.json')
 
-    def handleKeyNotInJson(json_dict, key_val):
+    def handleKeyNotInJson(json_dict, key_val, sub_key_val = None, merge_readable = False):
         if key_val in json_dict:
+
+            if sub_key_val and sub_key_val in json_dict[key_val]:
+                sub_val = json_dict[key_val][sub_key_val]
+
+                if isinstance(sub_val, list) and merge_readable:
+                    return ", ".join(sub_val)
+
+                return sub_val
+
             return json_dict[key_val]
         else:
             return ''
@@ -76,16 +85,19 @@ def _resolveStaticTutorials():
             resolvedTutorials.append({
                 'id': handleKeyNotInJson(jsonContent, 'name'),
                 'title': handleKeyNotInJson(jsonContent, 'displayName'),
-                'category': handleKeyNotInJson(jsonContent, 'category'),
-                'level': handleKeyNotInJson(jsonContent, 'level'),
-                'language': handleKeyNotInJson(jsonContent,  'language'),
+                'category': handleKeyNotInJson(jsonContent, 'category', 'identifier'),
+                'level': handleKeyNotInJson(jsonContent, 'level', "identifier"),
+                'language': handleKeyNotInJson(jsonContent,  'language', "identifier"),
                 'medium': handleKeyNotInJson(jsonContent, 'medium'),
-                'license': handleKeyNotInJson(jsonContent, 'license'),
+                'license': handleKeyNotInJson(jsonContent, 'license', "identifier"),
                 'creator': handleKeyNotInJson(jsonContent, 'creator'),
                 'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
                 'github_contact': handleKeyNotInJson(jsonContent, 'github_contact'),
-                "readable_category": handleKeyNotInJson(jsonContent, 'category'),
-                "readable_level": handleKeyNotInJson(jsonContent, 'level'),
+                'readable_github_contact': ", ".join(handleKeyNotInJson(jsonContent, 'github_contact')),
+                "readable_category": handleKeyNotInJson(jsonContent, 'category', "names", True),
+                "readable_level": handleKeyNotInJson(jsonContent, 'level', 'names', True),
+                "readable_language": handleKeyNotInJson(jsonContent, 'language', 'names', True),
+                "readable_license": handleKeyNotInJson(jsonContent, 'license', 'names', True),
                 'html': rTut['html'],
                 'isStatic': True,
             })

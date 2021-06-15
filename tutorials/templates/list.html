@@ -59,13 +59,13 @@
           <td>
             <div class="icon-container">
 
-              {% if tutorial.readable_level == "Beginner" %}
+              {% if tutorial.level == 1 %}
                 <img src="{% static '/icons/level1.png' %}" alt="notebook">
               {% endif %}
-              {% if tutorial.readable_level == "Intermediate"%}
+              {% if tutorial.level == 2 %}
                 <img src="{% static '/icons/level2.png' %}" alt="notebook">
               {% endif %}
-              {% if tutorial.readable_level == "Expert" %}
+              {% if tutorial.level == 3 %}
                 <img src="{% static '/icons/level3.png' %}" alt="notebook">
               {% endif %}
             </div>
