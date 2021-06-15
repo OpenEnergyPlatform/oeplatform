@@ -1,3 +1,5 @@
+import html
+
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -231,14 +233,15 @@ def formattedMarkdown(markdown):
     :return:
     """
 
+    escaped_markdown = html.escape(markdown, quote=False)
+
     # escapes html but also escapes html code blocks lke "exampel code:
     #                                                    (1 tab)  code"
     # checkbox also not rendered as expected "- [ ]"
     # TODO: Add syntax highliting, add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks 
-    markdowner = Markdown( extras=["break-on-newline", "fenced-code-blocks"], safe_mode=True)
-    markdowner.html_removed_text = ""
+    markdowner = Markdown(extras=["break-on-newline", "fenced-code-blocks"])
 
-    return markdowner.convert(markdown)
+    return markdowner.convert(escaped_markdown)
 
 
 class ListTutorials(View):
