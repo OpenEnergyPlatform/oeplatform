@@ -1385,6 +1385,8 @@ def move(from_schema, table, to_schema):
             to_schema_reg = DBSchema.objects.get(name=to_schema)
         except DBSchema.DoesNotExist:
             raise APIError("Target schema not found")
+        if from_schema == to_schema:
+            raise APIError("Target schema same as current schema")
         t.schema = to_schema_reg
 
         meta_to_schema = get_meta_schema_name(to_schema)
