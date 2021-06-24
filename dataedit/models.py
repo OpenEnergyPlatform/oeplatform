@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from colorfield.fields import ColorField
-from django.contrib.postgres.fields import JSONField
+# django.contrib.postgres.fields.JSONField is deprecated.
+from django.db.models import JSONField
 from django.db import models
 from django.db.models import (
     BooleanField,

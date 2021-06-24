@@ -1370,6 +1370,48 @@ def clear_dict(d):
     }
 
 
+def move(from_schema, table, to_schema):
+
+    table = read_pgid(table)
+    engine = _get_engine()
+    Session = sessionmaker(engine)
+    session = Session()
+    try:
+        try:
+            t = DBTable.objects.get(name=table, schema__name=from_schema)
+        except DBTable.DoesNotExist:
+            raise APIError("Table for schema movement not found")
+        try:
+            to_schema_reg = DBSchema.objects.get(name=to_schema)
+        except DBSchema.DoesNotExist:
+            raise APIError("Target schema not found")
+        if from_schema == to_schema:
+            raise APIError("Target schema same as current schema")
+        t.schema = to_schema_reg
+
+        meta_to_schema = get_meta_schema_name(to_schema)
+        meta_from_schema = get_meta_schema_name(from_schema)
+
+        movements = [(from_schema, table, to_schema),
+                     (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
+                     (meta_from_schema, get_insert_table_name(from_schema, table), meta_to_schema),
+                     (meta_from_schema, get_delete_table_name(from_schema, table), meta_to_schema)]
+
+        for fr, tab, to in movements:
+            session.execute("ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                from_schema=fr, table=tab, to_schema=to))
+        session.query(OEDBTableTags).filter(OEDBTableTags.schema_name == from_schema,
+                                            OEDBTableTags.table_name == table).update(
+            {OEDBTableTags.schema_name:to_schema})
+        session.commit()
+        t.save()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
 def create_meta(schema, table):
     meta_schema = get_meta_schema_name(schema)
 

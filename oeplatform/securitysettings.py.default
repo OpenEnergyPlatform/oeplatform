@@ -68,7 +68,7 @@ ONTOLOGY_FOLDER = '/ontologies'
 RDF_DATABASES = {
     'knowledge': {
         'host': 'host',
-        'port': port,
+        'port': 'port',
         'name': 'your_rdf_dataset'
     }
 }
