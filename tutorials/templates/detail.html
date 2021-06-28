@@ -1,5 +1,10 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
 
 {% block site-header %}
   <h2 class="site-header">Tutorial: {{tutorial.title}}</h2>
@@ -30,7 +35,7 @@
 
 
     <span></span>
-    <div>
+    <div class="tutorial-container">
         {{ tutorial.html | safe }}
     </div>
     <div>
