@@ -316,7 +316,7 @@ class FSAdd(LoginRequiredMixin, View):
                 for field in form.errors:
                     e = form.errors[field]
                     error = e[0]
-                    field = e.data[0].params['field_label']
+                    field = form.fields[field].label
                     errors.append((field, str(error)))
 
                 errors = errors + errorsStudy
@@ -359,7 +359,7 @@ class FSAdd(LoginRequiredMixin, View):
                 for field in form.errors:
                     e = form.errors[field]
                     error = e[0]
-                    field = e.data[0].params['field_label']
+                    field = form.fields[field].label
                     errors.append((field, str(error)))
 
                 return render(
