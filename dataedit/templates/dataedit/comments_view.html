@@ -1,0 +1,142 @@
+{% extends "dataedit/base.html" %}
+
+{% block data_content %}
+{% for value in comments.all %}
+		<div class="position-static" style="margin-bottom: 30px"> 
+			<ul>
+				<i class="fas fa-user" style="font-size: 20px; color:black" > </i> 
+
+				<b class="text-sm-left" style="margin-left: 10px; font-size: 20px; color:rgb(80,90,150)"> {{ value.user }} </b>
+				
+				<span class="badge rounded-pill bg-light text-dark" style="margin-left: 40px; font-size: 12px"> <em>@{{ value.comment_time }} </em> </span>
+			
+				<div style="margin-left: 40px; display: block; clear:both; margin-top: 10px; margin-bottom:20px;"> {{ value.content }} </div>
+			
+			
+			{% if anonymous_user == 0 %}
+				<form style="width:80%"  method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+					{% csrf_token %}
+					
+					<input type="hidden"  name="CommentID" value = {{ value.id }}  >
+						
+						<button type="submit" class="btn btn-primary" name="Likes" style="font-size: 8px; margin-top:2px; margin-bottom:20px; margin-left: 45px" >
+							<i class="far fa-thumbs-up" > <em>{{ value.liked_users.all | length }}</em></i>
+						</button>
+
+						<button type="submit" class="btn btn-dark" name="DisLikes" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+							<i class="far fa-thumbs-down" > <em>{{ value.disked_users.all | length }}</em></i>
+						</button>
+												
+						{% if value.user.id == user.id %}
+						<button type="submit" class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+						</button>
+						{% else %}
+						<button type="submit" disabled class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+						</button>
+						{% endif %}
+						
+						<button type="button" class="btn btn-secondary " style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" onclick="myFunction({{ value.id }})"><i class="fas fa-comment" ></i></button>
+						
+				</form>
+				
+				<div>
+					<style>
+						#txtid::placeholder {
+							font-size: 12px;
+							}
+					</style>
+					
+					<div id={{ value.id }} style="display:none">
+						<form method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+							{% csrf_token %}
+							<input type="hidden"  name="CommentID" value = {{ value.id }}  >
+						    <textarea id="txtid" placeholder='Replying to {{ value.user }}' name='content' style="width=100%; height=90px; padding: 2%; margin-left: 150px; position=absolute" required></textarea>
+							<button type="submit" class="btn btn-sm btn-success" style="font-size: 7px"> Reply </button>
+						</form>
+					</div>
+				</div>
+				
+			{% endif %}
+				
+				{% for child_comment in value.children %}
+				<div style="margin-top:20px">
+					<ul>
+					
+						<i class="fas fa-user" style="color:black" > </i> 
+
+						<b class="text-sm-left" style="color:rgb(80,90,150); margin-left:10px "> {{ child_comment.user }} </b>
+						
+						<span class="badge rounded-pill bg-light text-dark" style="margin-left:15px; font-size: 12px"> <em>@{{ child_comment.comment_time }} </em> </span>
+			
+						<div style="display: block; clear:both; margin-top: 10px; margin-left:25px "> {{ child_comment.content }} </div>
+						
+						<form style="width:80%"  method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+						
+						{% csrf_token %}
+				
+						{% if anonymous_user == 0 %}
+							<input type="hidden"  name="CommentID" value = {{ child_comment.id }}  >
+						
+							<button type="submit" class="btn btn-primary" name="Likes" style="font-size: 8px; margin-top:20px; margin-bottom:20px; margin-left: 45px" >
+								<i class="far fa-thumbs-up" > <em>{{ child_comment.liked_users.all | length }}</em></i>
+							</button>
+
+							<button type="submit" class="btn btn-dark" name="DisLikes" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px"  >
+								<i class="far fa-thumbs-down" > <em>{{ child_comment.disked_users.all | length }}</em></i>
+							</button>
+												
+							{% if child_comment.user.id == user.id %}
+							<button type="submit" class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+							</button>
+							{% else %}
+							<button type="submit" disabled class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+							</button>
+							{% endif %}
+							
+							<button type="button" class="btn btn-secondary " style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" onclick="myFunction({{ child_comment.id }})"><i class="fas fa-comment" ></i></button>
+
+							{% endif %}
+								<a class="btn btn-sm btn-success"  href = "{% url 'comments_view' schema=schema table=table comment_id=child_comment.id %}" style="font-size: 10px;  margin-top:20px; margin-bottom:20px; margin-left: 10px"> <em> View More Replies </a>
+							{% if anonymous_user == 0 %}
+
+						
+						</form>
+						
+					<div>					
+						<div id={{ child_comment.id }} style="display:none">
+							<form method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+								{% csrf_token %}
+								<input type="hidden"  name="CommentID" value = {{ child_comment.id }}  >
+								<textarea id="txtid" required placeholder='Replying to {{ child_comment.user }}' name='content' style="width=100%; height=90px; padding: 2%; margin-left: 150px; position=absolute"></textarea>
+								<button type="submit" class="btn btn-sm btn-success" style="font-size: 7px"> Reply </button>
+							</form>
+						</div>
+					</div>
+					{% endif %}
+					<ul>
+					</br>
+				</div>
+				{% endfor %}
+			</ul>
+		</div>		
+{% endfor %}
+</div>
+
+{% endblock %}
+
+
+{% block after-body-bottom-js %}
+<script>
+ function myFunction(id) {
+			var res = document.getElementById(id);
+			if ( res.style.display == "block" )
+				res.style.display = "none";
+			else
+				res.style.display = "block";
+		}
+</script>
+{% endblock after-body-bottom-js %}
