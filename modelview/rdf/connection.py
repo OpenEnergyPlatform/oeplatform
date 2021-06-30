@@ -3,6 +3,7 @@ from rdflib import Graph
 from modelview.rdf.namespace import OEO_KG
 import uuid
 
+from oeplatform.securitysettings import RDF_DATABASES
 
 
 class ConnectionContext:
