@@ -20,10 +20,10 @@
 
         {% if tutorial.id %}
             <button class="btn btn-success" type="submit">Save Tutorial</button>
-            <a type="button" class="btn btn-sm btn-danger" href="/tutorials/{{tutorial.id}}">Abort</a>
+            <a type="button" class="btn btn-danger" href="/tutorials/{{tutorial.id}}">Cancel</a>
         {% else %}
             <button class="btn btn-success" type="submit">Create Tutorial</button>
-            <a type="button" class="btn btn-sm btn-danger" href="/tutorials/">Abort</a>
+            <a type="button" class="btn btn-danger" href="/tutorials/">Cancel</a>
         {% endif %} 
     </form>
 
