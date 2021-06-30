@@ -1,0 +1,87 @@
+name: Automated Test
+
+# We run this automated testing job on every commit on master and develop and for every pull request.
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    env:
+      LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
+      SEGFAULT_SIGNALS: all
+
+      OEP_DJANGO_USER: "postgres"
+      OEP_DB_PW: "postgres"
+      LOCAL_DB_USER: "postgres"
+      LOCAL_DB_PASSWORD: "postgres"
+      TOXENV: py3
+
+    permissions:
+      contents: read
+
+    # We create a service container with a provisioned postgres. oeplatform will use this database for its tests.
+    services:
+      postgres:
+        # We use our own prepared postgres image for this.
+        image: ghcr.io/openenergyplatform/oeplatform-postgres:0.3.0
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        # We open up port 5432 to be able to use `localhost:5432` to connect to the database.
+        # We also could omit this and use `postgres:5432` to connect to the database after modifying security settings.
+        ports:
+           - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # We run this for python version 3.7.
+    strategy:
+      matrix:
+        python-version:
+          - 3.7
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install linux dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install tox
+      - name: Add schemas for testing
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS sandbox" oedb
+          psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS _sandbox" oedb
+      - name: Migrations & User creation
+        run: |
+          cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
+          python manage.py makemigrations
+          python manage.py migrate
+          python manage.py alembic upgrade head
+          python manage.py shell -c "from login.models import myuser; u=myuser.objects.create_user(name='test',email='test@test.com',affiliation='');u.is_mail_verified=True;u.save()"
+      - name: Create API token
+        run: |
+          echo LOCAL_OEP_TOKEN=`python manage.py shell -c "from login.models import Token; print(Token.objects.filter(user__name='test').first().key)"` >> $GITHUB_ENV
+      - name: Start OEP
+        run: python manage.py runserver 8000 &
+
+      - name: Run tox
+        run: tox -v
