@@ -146,22 +146,40 @@ class MapViewForm(ModelForm):
         else:
             return None
 
+
 class LatLonViewForm(MapViewForm):
+    expected_lat_colum_names = ['lat', 'latitude']
+    expected_lon_colum_names = ['lon', 'longitude']
+
     def __init__(self, *args, **kwargs):
         super(LatLonViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            self.fields['lat'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
-            self.fields['lon'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+            self.fields['lat'] = forms.ChoiceField(choices=[(c, c) for c in self.columns])
+            for lat in self.expected_lat_colum_names:
+                if lat in self.columns:
+                    self.fields['lat'].initial = lat
+
+            self.fields['lon'] = forms.ChoiceField(choices=[(c, c) for c in self.columns])
+            for lon in self.expected_lon_colum_names:
+                if lon in self.columns:
+                    self.fields['lon'].initial = lon
 
     def is_valid(self):
         return super(LatLonViewForm, self).is_valid() and (self.options['lat'] in self.columns) and (self.options['lon'] in self.columns)
 
 
 class GeomViewForm(MapViewForm):
+    expected_geom_colum_names = ['geom', 'geometry', 'point', 'polygon', 'line', 'multipolygon']
+
     def __init__(self, *args, **kwargs):
         super(GeomViewForm, self).__init__(*args, **kwargs)
         if self.columns is not None:
-            self.fields['geom'] = forms.ChoiceField(choices=[(c,c) for c in self.columns])
+            print(self.columns)
+            self.fields['geom'] = forms.ChoiceField(choices=[(c, c) for c in self.columns])
+
+            for g in self.expected_geom_colum_names:
+                if g in self.columns:
+                    self.fields['geom'].initial = g
 
     def is_valid(self):
         return super(GeomViewForm, self).is_valid() and self.options['geom'] in self.columns
