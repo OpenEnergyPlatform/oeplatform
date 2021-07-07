@@ -37,8 +37,11 @@ def _resolveStaticTutorial(path):
                 jake_notebook = nbformat.reads(buildFileContent, as_version=4)
                 dl = DictLoader({'openenergyplatform': templateFileContent})
 
-                html_exporter = nbconvert.HTMLExporter(extra_loaders=[dl], template_file='openenergyplatform')
+                html_exporter = nbconvert.HTMLExporter(extra_loaders=[dl], template_file='openenergyplatform', anchor_link_text="Permalink" )
                 (body, resources) = html_exporter.from_notebook_node(jake_notebook)
+
+                # Adding needed bootstrap styling to table.
+                body = body.replace("<table", "<table class=\"table\" ")
 
                 return {
                     "html": body
