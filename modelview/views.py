@@ -312,11 +312,14 @@ class FSAdd(LoginRequiredMixin, View):
                     )
                 )
             else:
-                errors = [
-                    (field.label, str(field.errors.data[0].message))
-                    for field in form
-                    if field.errors
-                ] + errorsStudy
+                errors = []
+                for field in form.errors:
+                    e = form.errors[field]
+                    error = e[0]
+                    field = form.fields[field].label
+                    errors.append((field, str(error)))
+
+                errors = errors + errorsStudy
                 return render(
                     request,
                     "modelview/new{}.html".format(sheettype),
@@ -352,11 +355,13 @@ class FSAdd(LoginRequiredMixin, View):
                     )
                 )
             else:
-                errors = [
-                    (field.label, str(field.errors.data[0].message))
-                    for field in form
-                    if field.errors
-                ]
+                errors = []
+                for field in form.errors:
+                    e = form.errors[field]
+                    error = e[0]
+                    field = form.fields[field].label
+                    errors.append((field, str(error)))
+
                 return render(
                     request,
                     "modelview/edit{}.html".format(sheettype),

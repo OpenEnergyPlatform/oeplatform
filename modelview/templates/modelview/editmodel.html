@@ -45,6 +45,9 @@ confirmOnLeave();
     <form action="/factsheets/models/add/" method="post" role="form" novalidate="novalidate" enctype="multipart/form-data">
 {% endif %}
 {% csrf_token %}
+
+{% include 'modelview/error_snipet.html' with errors=errors %}
+
 <div style="width:100%">
 
 <ul class="nav nav-tabs" style="width:100%">
@@ -62,15 +65,9 @@ confirmOnLeave();
 </ul>
 
 </div>
-    {% if errors %}
-        <ul class="list-group">
-            {% for label, message in errors %}
-                <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+
 <div class="tab-content">
-    <div id="Basic" class="tab-pane fade in active">
+    <div id="Basic" class="tab-pane fade show active">
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.model_name %}
             {% include 'modelview/editmodel_snippet.html' with field=form.acronym %}

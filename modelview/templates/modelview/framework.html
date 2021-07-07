@@ -19,12 +19,10 @@
         <div class="container" style="padding:0">
 
           <table class="profiletable">
-            {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
             {% include 'modelview/model_snippet.html' with model=model field='last_updated' %}
 {#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
             {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
             {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-            {% include 'modelview/model_snippet.html' with model=model field='logo' %}
             <tr>
               <th>
 
@@ -49,7 +47,7 @@
         <div class="container" style="padding:0">
 
           <table class="profiletable">
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='model_name' %} </tr>
+            <tr>{% include 'modelview/model_snippet.html' with model=model field='model_name' fieldNameOverride='Framework Name' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='acronym' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='contact_email' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %} </tr>
