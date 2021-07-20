@@ -1,0 +1,48 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+{% load ontology.rdf %}
+{% block main-content-body %}
+{% load static %}
+
+<br><br>
+<h3>Class: {{ class_id }}</h3>
+
+{% if sub_classes|length == 0 %}
+  <h5>This class has no subclass</h5><br>
+{% else %}
+  <br><br>
+  <h3>Sub classes:</h3><br>
+
+  <div id="accordion">
+      {% for sub_class in sub_classes %}
+          <div class="card">
+              <div class="card-header">
+                  <a class="card-link" href="{{sub_class}}">
+                      {{sub_class}}
+                  </a>
+              </div>
+          </div>
+      {% endfor %}
+  </div>
+{% endif %}
+<br>
+{% if super_classes|length == 0 %}
+  <h5>This class has no superclass</h5><br>
+{% else %}
+  <br><br>
+  <h3>Super classes:</h3><br>
+
+  <div id="accordion">
+      {% for super_class in super_classes %}
+          <div class="card">
+              <div class="card-header">
+                  <a class="card-link" href="{{ super_class }}">
+                      {{super_class}}
+                  </a>
+              </div>
+          </div>
+      {% endfor %}
+  </div>
+{% endif %}
+
+{% endblock %}

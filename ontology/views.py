@@ -28,6 +28,18 @@ def collect_modules(path):
             modules[filename]["extensions"].append(extension)
     return modules
 
+def get_classRelations(aGraph, aClass):
+    sub_classes = []
+    super_classes = []
+
+    for s, p, o in aGraph.triples((None, RDFS.subClassOf, None)):
+        if (aClass in o):
+            sub_classes.append(s)
+        if (aClass in s):
+            super_classes.append(o)
+
+    return sub_classes, super_classes
+
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
         if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
@@ -37,21 +49,38 @@ class OntologyOverview(View):
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
 
         if "text/html" in request.headers.get("accept","").split(","):
-            main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
-            main_module_name = list(main_module.keys())[0]
-            main_module = main_module[main_module_name]
-            main_module["name"] = main_module_name
-            submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
-            # Collect all file names
+            if module_or_id:
+                path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
 
-            imports = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
+                #This should be placed in securitysettings.py
+                file = "oeo-full.owl"
 
-            return render(request, "ontology/oeo.html", dict(
-                ontology=ontology,
-                version=version,
-                main_module=main_module,
-                submodules=submodules.items(),
-                imports=imports.items()
+                Ontology_URI = os.path.join(path, file)
+                g = Graph()
+                g.parse(Ontology_URI)
+
+                sub_classes, super_classes = get_classRelations(g, module_or_id)
+
+                return render(request, "ontology/class.html", dict(
+                    class_id = module_or_id,
+                    sub_classes = sub_classes,
+                    super_classes = super_classes,
+                ))
+            else:
+                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
+                main_module_name = list(main_module.keys())[0]
+                main_module = main_module[main_module_name]
+                main_module["name"] = main_module_name
+                submodules = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules")
+                # Collect all file names
+                imports = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports")
+
+                return render(request, "ontology/oeo.html", dict(
+                    ontology=ontology,
+                    version=version,
+                    main_module=main_module,
+                    submodules=submodules.items(),
+                    imports=imports.items()
             ))
         else:
             module_name = None
