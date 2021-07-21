@@ -4,6 +4,8 @@
 {% block main-content-body %}
 {% load static %}
 
+
+
 <h2>{{ main_module.name }}<div class="btn-group float-right" role="group" aria-label="Basic example">
                     {% for ex in main_module.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
@@ -11,9 +13,21 @@
                         </a>
                     {% endfor %}
                 </div> </h2> <br>
-<span>
-    {{ main_module.comment }}
-</span>
+
+<div class="card">
+    <div class="card-header">
+        <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+            {{ main_module.comment }}
+        </a>
+        <div class="btn-group float-right" role="group" aria-label="Basic example">
+          <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
+              Main
+          </a>
+        </div>
+    </div>
+</div>
+
+
 <br><br>
 <h3>Modules</h3><br>
 

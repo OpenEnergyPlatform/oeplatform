@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponse, redirect, Http404
 from django.views import View
-from rdflib import Graph, RDFS
+from rdflib import Graph, RDFS, URIRef
 from oeplatform.settings import ONTOLOGY_FOLDER
 from collections import OrderedDict
 
@@ -40,6 +40,30 @@ def get_classRelations(aGraph, aClass):
 
     return sub_classes, super_classes
 
+def get_RelationDetails(sub_classes, super_classes, dictOfNames):
+    sub_classes_detail = []
+    super_classes_detail = []
+
+    for sub_class in sub_classes:
+        sub_class_ID = sub_class.split('/')[-1]
+        sub_classes_detail.append({
+                            'sub_class_ID': sub_class_ID,
+                            'sub_class_URI': sub_class,
+                            'sub_class_name': dictOfNames[sub_class_ID]
+                        })
+
+    for super_class in super_classes:
+        super_class_URI = super_class.split('/')
+        if len(super_class_URI) > 1:
+            super_class_ID = super_class_URI[-1]
+            super_classes_detail.append({
+                                'super_class_ID': super_class_ID,
+                                'super_class_URI': super_class,
+                                'super_class_name': dictOfNames[super_class_ID]
+                            })
+
+    return sub_classes_detail, super_classes_detail
+
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
         if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
@@ -59,12 +83,23 @@ class OntologyOverview(View):
                 g = Graph()
                 g.parse(Ontology_URI)
 
+                class_name = ''
+                qString = g.query(""" SELECT * {?x ?y ?z} """)
+
+                class_names_dict = {}
+                for row in qString:
+                    if ('#label' in row.y):
+                        class_name = row.x.split('/')[-1]
+                        class_names_dict[class_name] = row.z
+
                 sub_classes, super_classes = get_classRelations(g, module_or_id)
+                sub_classes_info, super_classes_info = get_RelationDetails(sub_classes, super_classes, class_names_dict)
 
                 return render(request, "ontology/class.html", dict(
                     class_id = module_or_id,
-                    sub_classes = sub_classes,
-                    super_classes = super_classes,
+                    class_name = class_names_dict[module_or_id],
+                    sub_classes = sub_classes_info,
+                    super_classes = super_classes_info,
                 ))
             else:
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
