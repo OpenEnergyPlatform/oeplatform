@@ -28,39 +28,9 @@ def collect_modules(path):
             modules[filename]["extensions"].append(extension)
     return modules
 
-def get_classRelations(aGraph, aClass):
-    sub_classes = []
-    super_classes = []
 
-    for s, p, o in aGraph.triples((None, RDFS.subClassOf, None)):
-        if (aClass in o):
-            sub_classes.append(s)
-        if (aClass in s):
-            super_classes.append(o)
 
-    return sub_classes, super_classes
-
-def get_RelationDetails(sub_classes, super_classes, dictOfNames):
-    sub_classes_detail = []
-    super_classes_detail = []
-
-    for sub_class in sub_classes:
-        sub_class_ID = sub_class.split('/')[-1]
-        sub_classes_detail.append({
-                            'sub_class_ID': sub_class_ID,
-                            'sub_class_URI': sub_class,
-                            'sub_class_name': dictOfNames[sub_class_ID]
-                        })
-
-    for super_class in super_classes:
-        super_class_URI = super_class.split('/')
-        if len(super_class_URI) > 1:
-            super_class_ID = super_class_URI[-1]
-            super_classes_detail.append({
-                                'super_class_ID': super_class_ID,
-                                'super_class_URI': super_class,
-                                'super_class_name': dictOfNames[super_class_ID]
-                            })
+def get_RelationDetails(sub_classes, super_classes, classes_names):
 
     return sub_classes_detail, super_classes_detail
 
@@ -83,23 +53,77 @@ class OntologyOverview(View):
                 g = Graph()
                 g.parse(Ontology_URI)
 
+                q_global = g.query("""
+                    SELECT DISTINCT ?s ?o
+                    WHERE { ?s rdfs:subClassOf ?o }
+                    """)
+
+                q_label =  g.query("""
+                    SELECT DISTINCT ?s ?o
+                    WHERE { ?s rdfs:label ?o }
+                    """)
+
+                classes_name = {}
+                for row in q_label:
+                    class_name = row.s.split('/')[-1]
+                    classes_name[class_name] = row.o
+
+                q_definition =  g.query("""
+                    SELECT DISTINCT ?s ?o
+                    WHERE { ?s obo:IAO_0000115 ?o }
+                    """)
+
+                classes_definitions = {}
+                for row in q_definition:
+                    class_name = row.s.split('/')[-1]
+                    classes_definitions[class_name] = row.o
+
+                sub_classes = []
+                super_classes = []
+
+                for row in q_global:
+                    if (module_or_id in row.o):
+                        sub_class_ID = row.s.split('/')[-1]
+                        sub_class_name = ''
+                        if sub_class_ID in classes_name.keys():
+                            sub_class_name = classes_name[sub_class_ID]
+                            sub_class_definition = 'No description found'
+                            if sub_class_ID in classes_definitions.keys():
+                                sub_class_definition = classes_definitions[sub_class_ID]
+                            sub_classes.append({ 'URI':row.s, 'ID':sub_class_ID, 'name': sub_class_name, 'definition': sub_class_definition})
+                    if (module_or_id in row.s):
+                        super_class_ID = row.o.split('/')[-1]
+                        super_class_name = ''
+                        if super_class_ID in classes_name.keys():
+                            super_class_name = classes_name[super_class_ID]
+                            super_class_definition = 'No description found'
+                            if super_class_ID in classes_definitions.keys():
+                                super_class_definition = classes_definitions[super_class_ID]
+                            super_classes.append({ 'URI':row.o, 'ID':super_class_ID, 'name': super_class_name , 'definition': super_class_definition})
+
+
+
+
+                q_note =  g.query("""
+                    SELECT DISTINCT ?s ?o
+                    WHERE { ?s obo:IAO_0000116 ?o }
+                    """)
+
+
                 class_name = ''
-                qString = g.query(""" SELECT * {?x ?y ?z} """)
+                if module_or_id in classes_name.keys():
+                    class_name = classes_name[module_or_id]
 
-                class_names_dict = {}
-                for row in qString:
-                    if ('#label' in row.y):
-                        class_name = row.x.split('/')[-1]
-                        class_names_dict[class_name] = row.z
-
-                sub_classes, super_classes = get_classRelations(g, module_or_id)
-                sub_classes_info, super_classes_info = get_RelationDetails(sub_classes, super_classes, class_names_dict)
+                class_definition = ''
+                if module_or_id in classes_definitions.keys():
+                    class_definition = classes_definitions[module_or_id]
 
                 return render(request, "ontology/class.html", dict(
                     class_id = module_or_id,
-                    class_name = class_names_dict[module_or_id],
-                    sub_classes = sub_classes_info,
-                    super_classes = super_classes_info,
+                    class_name = class_name,
+                    sub_classes = sub_classes,
+                    super_classes = super_classes,
+                    class_definition = class_definition,
                 ))
             else:
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")

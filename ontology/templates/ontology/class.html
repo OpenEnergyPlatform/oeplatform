@@ -5,63 +5,62 @@
 {% load static %}
 
 <br><br>
-<h4>Class Name: {{ class_name }}</h4> <h6>Class ID: {{ class_id }}</h6>
+<h4>Class: {{ class_name }}</h4>
+<p>{{ class_definition }}</p>
 
-{% if sub_classes|length == 0 %}
-  <br>
-  <h3>Sub classes:</h3>
-  <div id="accordion">
-    <div class="card">
-        <div class="card-header">
-            <a class="card-link">
-              <h6>This class has no subclass.</h6>
-            </a>
-        </div>
-    </div>
-  </div>
-{% else %}
-  <br>
-  <h3>Sub classes:</h3>
-  <div id="accordion">
-      {% for sub_class in sub_classes %}
+{% if sub_classes|length != 0 %}
+<h6>Sub classes:</h6>
+  <div id="sub_classes_accordion">
+        {% for sub_class in sub_classes %}
           <div class="card">
               <div class="card-header">
-                  <a class="card-link" href="{{sub_class.sub_class_ID}}">
-                      <h5>{{sub_class.sub_class_name}}</h5>
-                      {{sub_class.sub_class_ID}}<br>
-                      {{sub_class.sub_class_URI}}
+                  <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                      {{sub_class.name}}
                   </a>
+                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    <a class="btn btn-secondary" href="{{ sub_class.ID }}">
+                        view
+                    </a>
+                  </div>
               </div>
+                  <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#sub_classes_accordion">
+                      <div class="card-body">
+                        {{sub_class.definition}}
+                      </div>
+                  </div>
           </div>
       {% endfor %}
-  </div>
+</div>
 {% endif %}
+
 <br>
-<h3>Super classes:</h3>
-{% if super_classes|length == 0 %}
-  <div id="accordion">
-    <div class="card">
-        <div class="card-header">
-            <a class="card-link">
-                <h6>This class has no superclass</h6><br>
-            </a>
-        </div>
-    </div>
-  </div>
-{% else %}
-  <div id="accordion">
-      {% for super_class in super_classes %}
+
+
+{% if super_classes|length != 0 %}
+  <h6>Super classes:</h6>
+  <div id="super_classes_accordion">
+        {% for super_class in super_classes %}
           <div class="card">
               <div class="card-header">
-                  <a class="card-link" href="{{ super_class.super_class_ID }}">
-                      <h5>{{super_class.super_class_name}}</h5>
-                      {{super_class.super_class_ID}}<br>
-                      {{super_class.super_class_URI}}
+                  <a class="card-link" data-toggle="collapse" href="#super_classes_accordion{{ forloop.counter }}">
+                      {{super_class.name}}
                   </a>
+                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    <a class="btn btn-secondary" href="{{ super_class.ID }}">
+                        view
+                    </a>
+                  </div>
+              </div>
+              <div id="super_classes_accordion{{ forloop.counter }}" class="collapse" data-parent="#super_classes_accordion">
+                  <div class="card-body">
+                    <a class="card-link" href="{{ super_class.ID }}">
+                        <p>{{super_class.definition}}</p>
+                    </a>
+                  </div>
               </div>
           </div>
       {% endfor %}
-  </div>
+</div>
 {% endif %}
 
 {% endblock %}
