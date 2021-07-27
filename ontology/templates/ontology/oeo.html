@@ -12,18 +12,16 @@
                             {{ex}}
                         </a>
                     {% endfor %}
+                    <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
+                        view
+                    </a>
                 </div> </h2> <br>
 
 <div class="card">
     <div class="card-header">
         <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
-            {{ main_module.comment }}
+            {{ ontology_description }}
         </a>
-        <div class="btn-group float-right" role="group" aria-label="Basic example">
-          <a class="btn btn-secondary" href="/ontology/{{ontology}}/BFO_0000001">
-              view
-          </a>
-        </div>
     </div>
 </div>
 

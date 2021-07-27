@@ -5,8 +5,37 @@
 {% load static %}
 
 <br><br>
-<h4>Class: {{ class_name }}</h4>
-<p>{{ class_definition }}</p>
+<h5>Class label: {{ class_name }}</h5>
+
+<hr>
+
+{% if class_definitions != '' %}
+  {% for class_definition in class_definitions %}
+    <h6>Definition:</h6>
+    {{ class_definition }}
+  {% endfor %}
+  <br><br>
+
+  {% comment %}
+  {% else %}
+    <h6>Definition:</h6>
+    No description found.
+  {% endcomment %}
+
+{% endif %}
+
+{% if class_notes != '' %}
+  {% for class_note in class_notes %}
+    <h6>Editor note:</h6>
+    <p>{{ class_note }}</p>
+  {% endfor %}
+
+  {% comment %}
+  {% else %}
+      <h6>Editor note:</h6>
+      No editor note found.
+  {% endcomment %}
+{% endif %}
 
 {% if sub_classes|length != 0 %}
 <h6>Sub classes:</h6>
@@ -25,7 +54,25 @@
               </div>
                   <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#sub_classes_accordion">
                       <div class="card-body">
-                        {{sub_class.definition}}
+                        {% if sub_class.definitions != '' %}
+                          {% for definition in sub_class.definitions %}
+                            <h6>Definition:</h6>
+                            {{definition}}
+                            <br><br>
+                          {% endfor %}
+                        {% endif %}
+
+                        {% if sub_class.notes != '' %}
+                          {% for note in sub_class.notes %}
+                            <h6>Editor note:</h6>
+                            {{note}}
+                            <br><br>
+                          {% endfor %}
+                        {% endif %}
+
+                        {% if sub_class.definitions == '' and sub_class.notes == '' %}
+                          No description found.
+                        {% endif %}
                       </div>
                   </div>
           </div>
@@ -33,8 +80,7 @@
 </div>
 {% endif %}
 
-<br>
-
+<hr>
 
 {% if super_classes|length != 0 %}
   <h6>Super classes:</h6>
@@ -53,9 +99,25 @@
               </div>
               <div id="super_classes_accordion{{ forloop.counter }}" class="collapse" data-parent="#super_classes_accordion">
                   <div class="card-body">
-                    <a class="card-link" href="{{ super_class.ID }}">
-                        <p>{{super_class.definition}}</p>
-                    </a>
+                      {% if super_class.definitions != '' %}
+                        {% for definition in super_class.definitions %}
+                          <h6>Definition:</h6>
+                          {{definition}}
+                          <br><br>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if super_class.notes != '' %}
+                        {% for note in super_class.notes %}
+                          <h6>Editor note:</h6>
+                          {{ note }}
+                          <br><br>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if super_class.definitions == '' and super_class.notes == '' %}
+                        No description found.
+                      {% endif %}
                   </div>
               </div>
           </div>
