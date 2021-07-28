@@ -11,11 +11,13 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
 COPY ./docker/apache2.conf /etc/apache2/conf-enabled/oeplatform.conf
-
 COPY . /app
+COPY ./docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
-RUN python manage.py collectstatic
+
+RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py && python manage.py collectstatic && rm /app/oeplatform/securitysettings.py
 
 EXPOSE 80
 
-CMD ["/usr/sbin/apache2ctl", "-DFOREGROUND"]
+CMD ["/bin/bash", "/app/docker-entrypoint.sh"]
+
