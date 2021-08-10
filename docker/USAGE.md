@@ -1,6 +1,7 @@
 # Docker Usage
 
 > Works for Linux & MacOS (probably). It is tested with Linux.
+> You also need a working Docker installation and some basic knowledge about command lines. 
 
 This is a short introduction into the usage of Docker with Open Energy Platform (OEP). We provide **two** seperate images for the OEP, a database image and a application image. The database image prepares a ready-to-use database for the OEP and is an extension to a common PostgreSQL docker image. The application image contains the OEP and connects to a container running the database image. There are some additional resources at *Further Information* for an more in-depth understanding.
 
