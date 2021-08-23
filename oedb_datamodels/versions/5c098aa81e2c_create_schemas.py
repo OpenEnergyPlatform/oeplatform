@@ -30,12 +30,15 @@ schemas = [
     "reference",
 ]
 
-
 def upgrade():
     for s in schemas:
         op.execute("CREATE SCHEMA " + s)
+    for s in schemas:
+        op.execute("CREATE SCHEMA _" + s)
 
 
 def downgrade():
     for s in schemas:
-        op.execute("DROP SCHEMA " + s)
+        op.execute("DROP SCHEMA _" + s + " CASCADE")
+    for s in schemas:
+        op.execute("DROP SCHEMA " + s + " CASCADE")
