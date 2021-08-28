@@ -1,0 +1,7 @@
+{% if errors %}
+    <ul class="list-group" style="margin-bottom: 1em; margin-top: 1em">
+        {% for label, message in errors %}
+            <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
+        {% endfor %}
+    </ul>
+{% endif %}
