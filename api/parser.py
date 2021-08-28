@@ -25,6 +25,7 @@ from sqlalchemy import (
 )
 import dateutil
 from sqlalchemy.dialects.postgresql.base import INTERVAL
+from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
 from sqlalchemy.sql.annotation import Annotated
@@ -733,66 +734,68 @@ def parse_sql_operator(key: str) -> str:
 
 
 def parse_sqla_operator(raw_key, *operands):
-    key = raw_key.lower().strip()
-    if not operands:
-        raise APIError("Missing arguments for '%s'." % (key))
-    if key in ["and"]:
-        query = and_(*operands)
-        return query
-    elif key in ["or"]:
-        query = or_(*operands)
-        return query
-    elif key in ["not"]:
-        x = operands[0]
-        return not_(parse_condition(x))
-    else:
-        if len(operands) != 2:
-            raise APIError(
-                "Wrong number of arguments for '%s'. Expected: 2 Got: %s"
-                % (key, len(operands))
-            )
-        x, y = operands
-        if x is None:
-            x = null()
+    try:
+        key = raw_key.lower().strip()
+        if not operands:
+            raise APIError("Missing arguments for '%s'." % (key))
+        if key in ["and"]:
+            query = and_(*operands)
+            return query
+        elif key in ["or"]:
+            query = or_(*operands)
+            return query
+        elif key in ["not"]:
+            x = operands[0]
+            return not_(parse_condition(x))
+        else:
+            if len(operands) != 2:
+                raise APIError(
+                    "Wrong number of arguments for '%s'. Expected: 2 Got: %s"
+                    % (key, len(operands))
+                )
+            x, y = operands
+            if x is None:
+                x = null()
 
-        if key in ["equals", "="]:
-            return x == y
-        if key in ["greater", ">"]:
-            return x > y
-        if key in ["lower", "<"]:
-            return x < y
-        if key in ["notequal", "<>", "!="]:
-            return x != y
-        if key in ["notgreater", "<="]:
-            return x <= y
-        if key in ["notlower", ">="]:
-            return x >= y
-        if key in ["add", "+"]:
-            return x + y
-        if key in ["substract", "-"]:
-            return x - y
-        if key in ["multiply", "*"]:
-            return x * y
-        if key in ["divide", "/"]:
-            return x / y
-        if key in ["concatenate", "||"]:
-            return fun.concat(x, y)
-        if key in ["is"]:
-            return x is y
-        if key in ["is not"]:
-            return x.isnot(y)
-        if key in ["like"]:
-            return x.like(y)
-        if key in ["<->"]:
-            return x.distance_centroid(y)
-        if key in ["getitem"]:
-            if isinstance(y, Slice):
-                return x[parse_single(y.start, int) : parse_single(y.stop, int)]
-            else:
-                return x[read_pgid(y)]
-        if key in ["in"]:
-            return x.in_(y)
-
+            if key in ["equals", "="]:
+                return x == y
+            if key in ["greater", ">"]:
+                return x > y
+            if key in ["lower", "<"]:
+                return x < y
+            if key in ["notequal", "<>", "!="]:
+                return x != y
+            if key in ["notgreater", "<="]:
+                return x <= y
+            if key in ["notlower", ">="]:
+                return x >= y
+            if key in ["add", "+"]:
+                return x + y
+            if key in ["substract", "-"]:
+                return x - y
+            if key in ["multiply", "*"]:
+                return x * y
+            if key in ["divide", "/"]:
+                return x / y
+            if key in ["concatenate", "||"]:
+                return fun.concat(x, y)
+            if key in ["is"]:
+                return x is y
+            if key in ["is not"]:
+                return x.isnot(y)
+            if key in ["like"]:
+                return x.like(y)
+            if key in ["<->"]:
+                return x.distance_centroid(y)
+            if key in ["getitem"]:
+                if isinstance(y, Slice):
+                    return x[parse_single(y.start, int) : parse_single(y.stop, int)]
+                else:
+                    return x[read_pgid(y)]
+            if key in ["in"]:
+                return x.in_(y)
+    except ArgumentError:
+        raise APIError("Error parsing query")
     raise APIError("Operator '%s' not supported" % key)
 
 
