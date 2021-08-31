@@ -72,3 +72,5 @@ target/
 # Other generated files
 venv*/
 src
+
+.DS_Store

@@ -1,0 +1,128 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+{% load ontology.rdf %}
+{% block main-content-body %}
+{% load static %}
+
+<br><br>
+<h5>Class label: {{ class_name }}</h5>
+
+<hr>
+
+{% if class_definitions != '' %}
+  {% for class_definition in class_definitions %}
+    <h6>Definition:</h6>
+    {{ class_definition }}
+  {% endfor %}
+  <br><br>
+
+  {% comment %}
+  {% else %}
+    <h6>Definition:</h6>
+    No description found.
+  {% endcomment %}
+
+{% endif %}
+
+{% if class_notes != '' %}
+  {% for class_note in class_notes %}
+    <h6>Editor note:</h6>
+    <p>{{ class_note }}</p>
+  {% endfor %}
+
+  {% comment %}
+  {% else %}
+      <h6>Editor note:</h6>
+      No editor note found.
+  {% endcomment %}
+{% endif %}
+
+{% if sub_classes|length != 0 %}
+<h6>Sub classes:</h6>
+  <div id="sub_classes_accordion">
+        {% for sub_class in sub_classes %}
+          <div class="card">
+              <div class="card-header">
+                  <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                      {{sub_class.name}}
+                  </a>
+                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    <a class="btn btn-secondary" href="{{ sub_class.ID }}">
+                        view
+                    </a>
+                  </div>
+              </div>
+                  <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#sub_classes_accordion">
+                      <div class="card-body">
+                        {% if sub_class.definitions != '' %}
+                          {% for definition in sub_class.definitions %}
+                            <h6>Definition:</h6>
+                            {{definition}}
+                            <br><br>
+                          {% endfor %}
+                        {% endif %}
+
+                        {% if sub_class.notes != '' %}
+                          {% for note in sub_class.notes %}
+                            <h6>Editor note:</h6>
+                            {{note}}
+                            <br><br>
+                          {% endfor %}
+                        {% endif %}
+
+                        {% if sub_class.definitions == '' and sub_class.notes == '' %}
+                          No description found.
+                        {% endif %}
+                      </div>
+                  </div>
+          </div>
+      {% endfor %}
+</div>
+{% endif %}
+
+<hr>
+
+{% if super_classes|length != 0 %}
+  <h6>Super classes:</h6>
+  <div id="super_classes_accordion">
+        {% for super_class in super_classes %}
+          <div class="card">
+              <div class="card-header">
+                  <a class="card-link" data-toggle="collapse" href="#super_classes_accordion{{ forloop.counter }}">
+                      {{super_class.name}}
+                  </a>
+                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                    <a class="btn btn-secondary" href="{{ super_class.ID }}">
+                        view
+                    </a>
+                  </div>
+              </div>
+              <div id="super_classes_accordion{{ forloop.counter }}" class="collapse" data-parent="#super_classes_accordion">
+                  <div class="card-body">
+                      {% if super_class.definitions != '' %}
+                        {% for definition in super_class.definitions %}
+                          <h6>Definition:</h6>
+                          {{definition}}
+                          <br><br>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if super_class.notes != '' %}
+                        {% for note in super_class.notes %}
+                          <h6>Editor note:</h6>
+                          {{ note }}
+                          <br><br>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if super_class.definitions == '' and super_class.notes == '' %}
+                        No description found.
+                      {% endif %}
+                  </div>
+              </div>
+          </div>
+      {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
