@@ -379,7 +379,7 @@
                 <!--
         {% include 'modelview/editmodel_snippet.html' with field=form.modelling_software %}
         {% include 'modelview/editmodel_snippet.html' with field=form.interal_data_processing_software %}
-        {% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer add=form.external_optimizer_yes_text %} 
+        {% include 'modelview/editmodel_snippet.html' with field=form.external_optimizer add=form.external_optimizer_yes_text %}
         {% include 'modelview/editmodel_snippet.html' with field=form.additional_software %}
 
 -->
@@ -423,6 +423,7 @@
         <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.user_documentation %}
             {% include 'modelview/editmodel_snippet.html' with field=form.installation_guide %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.link_to_installation_guide %}
             {% include 'modelview/editmodel_snippet.html' with field=form.link_to_code_documentation %}
             {% include 'modelview/editmodel_snippet.html' with field=form.skills_basic %}
             {% include 'modelview/editmodel_snippet.html' with field=form.skills_advanced %}
