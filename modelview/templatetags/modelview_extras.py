@@ -145,7 +145,10 @@ def white_out(value, arg):
 
 
 @register.simple_tag
-def get_field_attr(instance, field_name, attr, cut=None):
+def get_field_attr(instance, field_name, attr, fieldNameOverride=None, cut=None):
+    if fieldNameOverride:
+        return fieldNameOverride
+
     val = instance._meta.get_field(field_name).__dict__[attr]
     if cut:
         val = val.replace(cut, "")

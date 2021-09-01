@@ -76,6 +76,9 @@ confirmOnLeave();
     <form action="/factsheets/scenarios/add/" method="post" role="form">
 {% endif %}
 {% csrf_token %}
+
+{% include 'modelview/error_snipet.html' with errors=errors %}
+
 <ul class="nav nav-tabs" style="width:100%">
   <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Basic">Study</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Empirical">Empirical Data</a></li>
@@ -86,16 +89,9 @@ confirmOnLeave();
   </span>
   
 </ul>
-    {% if errors %}
-        <ul class="list-group">
-            {% for label, message in errors %}
-                <li class="list-group-item list-group-item-danger"><b>{{ label }}</b>: {{ message }} </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
     {% bootstrap_form_errors form %}
 <div class="tab-content">
-    <div id="Basic" class="tab-pane fade in active">
+    <div id="Basic" class="tab-pane fade show active">
         <table class="formtable">
 	  {% include 'modelview/editmodel_snippet.html' with field=form.study %}
         </table>

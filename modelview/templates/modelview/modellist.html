@@ -64,8 +64,10 @@
 {% block factsheets_content %}
 
 {% if label == 'Model' or label == 'Framework' %}
-    <table id="overview" class="display" style="width:100%">
-    </table>
+    <div style="width:100%; overflow-y: auto; padding-bottom: 1em">
+        <table id="overview" class="display" style="width:100%;">
+        </table>
+    </div>
 
 {% elif label == 'Scenario' %}
 

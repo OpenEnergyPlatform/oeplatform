@@ -19,12 +19,10 @@
         <div class="container" style="padding:0">
 
           <table class="profiletable">
-            {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
             {% include 'modelview/model_snippet.html' with model=model field='last_updated' %}
 {#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
             {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
             {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-            {% include 'modelview/model_snippet.html' with model=model field='logo' %}
             <tr>
               <th>
 
@@ -49,7 +47,7 @@
         <div class="container" style="padding:0">
 
           <table class="profiletable">
-            <tr>{% include 'modelview/model_snippet.html' with model=model field='model_name' %} </tr>
+            <tr>{% include 'modelview/model_snippet.html' with model=model field='model_name' fieldNameOverride='Framework Name' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='acronym' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='contact_email' %} </tr>
             <tr>{% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %} </tr>
@@ -238,10 +236,11 @@
             </tr>
             {% include  'modelview/model_snippet.html' with model=model field='user_documentation' %}
             {% include  'modelview/model_snippet.html' with model=model field='installation_guide' %}
+            {% include  'modelview/model_snippet.html' with model=model field='link_to_installation_guide' %}
             {% include  'modelview/model_snippet.html' with model=model field='link_to_code_documentation' %}
             {% include  'modelview/model_snippet.html' with model=model field='skills_basic' %}
             {% include  'modelview/model_snippet.html' with model=model field='skills_advanced' %}
-            <!-- Seems like the following does not belong in the openness section moree liek mathematical description? 
+            <!-- Seems like the following does not belong in the openness section moree liek mathematical description?
             {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
             {% include 'modelview/model_snippet.html' with model=model field='external_optimizer' %}

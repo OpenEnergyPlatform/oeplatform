@@ -100,7 +100,7 @@ class BasicFactsheet(models.Model):
         help_text="Is an user documentation available for the framework? Please insert the link",
         null=True,
     )
-    
+
     code_documentation = CharField(
         max_length=200,
         verbose_name="Link to Developer/Code Documentation",
@@ -190,7 +190,7 @@ class BasicFactsheet(models.Model):
         help_text="Is the model available on GitHub?",
     )
     link_to_source_code = CharField(
-        max_length=200, verbose_name="Access to source code", 
+        max_length=200, verbose_name="Access to source code",
         help_text="Is the necessary data to run a scenario available?",
         null=True
     )
@@ -252,7 +252,7 @@ class BasicFactsheet(models.Model):
         null=False,
     )
     external_optimizer_yes_text = ArrayField(
-        models.CharField(max_length=1000), 
+        models.CharField(max_length=1000),
         verbose_name="External optimizer",
         help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
         default=list,
@@ -417,7 +417,7 @@ class Energymodel(BasicFactsheet):
 
     network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow")
     network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow")
-    network_coverage_TM = BooleanField(default=False, verbose_name="transshipment model")    
+    network_coverage_TM = BooleanField(default=False, verbose_name="transshipment model")
     network_coverage_SN = BooleanField(default=False, verbose_name="single-node / copper plate model")
     network_coverage_other = BooleanField(
         default=False, verbose_name="other"
@@ -769,7 +769,7 @@ class Energyframework(BasicFactsheet):
 
     last_updated = DateField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].", null=True)
     version = CharField(verbose_name="Version", max_length=200, help_text="To which version of the framework does the factsheet refer?", null=True)
-    #PROGRAMMING FRAMEWORK 
+    #PROGRAMMING FRAMEWORK
     pf_GAMS = BooleanField(verbose_name="GAMS", default=False)
     pf_Python = BooleanField(verbose_name="Python", default=False)
     pf_C = BooleanField(verbose_name="C++", default=False)
@@ -867,6 +867,7 @@ class Energyframework(BasicFactsheet):
     skills_basic = CharField(verbose_name="Skills basic", max_length=200, help_text="What basic skills does a person need to become a user of the framework?",null=True)
     skills_advanced = CharField(verbose_name="Skills advanced", max_length=200, help_text="What advanced skills does a person need to become a user of the framework?",null=True)
     installation_guide = BooleanField(verbose_name="Installation guide", help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link", default=False)
+    link_to_installation_guide = CharField(verbose_name="Link to installation guide", max_length=200, help_text="Is an installation guide availaibe for the framework? Please insert the link!", null=True)
     open_to_developers = BooleanField(verbose_name="Open to developers", help_text="Is it possible to join the developer group?", default=False)
 
     source_code_availability = CharField(verbose_name="Code availability", max_length=200, help_text="What is the link to the source code?", null=True)

@@ -1,5 +1,10 @@
 {% extends "base/base.html" %}
 {% load bootstrap4 %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
 
 {% block site-header %}
   <h2 class="site-header">Tutorial: {{tutorial.title}}</h2>
@@ -12,9 +17,16 @@
           <h4>Actions</h4>
             <a type="button" class="btn btn-sm btn-success" href="{% url 'edit_tutorial' tutorial_id=tutorial.id %}">Edit</a>
             <a type="button" class="btn btn-sm btn-danger" href="{% url 'delete_tutorial' tutorial_id=tutorial.id %}">Delete</a>
-            <a type="button" class="btn btn-sm btn-danger" href="/tutorials/">Back</a>
+            <a type="button" class="btn btn-sm btn-secondary" href="/tutorials/" style="float: right;">Back to tutorials</a>
+        {% else %}
+        <a type="button" class="btn btn-sm btn-secondary" href="/tutorials/">Back to tutorials</a>
         {% endif %}
+    {% else %}
+        <hr>
+        <h4>Actions</h4>
+        <a type="button" class="btn btn-sm btn-secondary" href="/tutorials/">Back to tutorials</a>
     {% endif %}
+    
 {% endblock main-right-sidebar-content  %}
 
 
@@ -23,7 +35,7 @@
 
 
     <span></span>
-    <div>
+    <div class="tutorial-container">
         {{ tutorial.html | safe }}
     </div>
     <div>

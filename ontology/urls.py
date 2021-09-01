@@ -6,8 +6,8 @@ from ontology import views
 from oeplatform import settings
 
 urlpatterns = [
-  url(r"^$", TemplateView.as_view(template_name="ontology/about.html")),
-  url(r"^ontology/$", TemplateView.as_view(template_name="ontology/about.html")),
+  url(r"^$", views.OntologyVersion.as_view()),
+  url(r"^ontology/$", views.OntologyVersion.as_view()),
   url(r"^oeo-steering-committee/$",
       TemplateView.as_view(template_name="ontology/oeo-steering-committee.html"),
       name="oeo-s-c"),

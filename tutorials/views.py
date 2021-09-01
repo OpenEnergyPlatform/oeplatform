@@ -1,3 +1,5 @@
+import html
+
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -18,7 +20,7 @@ from django.conf import settings
 from markdown2 import Markdown
 
 from .forms import TutorialForm
-from .models import Tutorial
+from .models import Tutorial, CATEGORY_OPTIONS, LEVEL_OPTIONS
 
 import re
 # Create your views here.
@@ -35,8 +37,11 @@ def _resolveStaticTutorial(path):
                 jake_notebook = nbformat.reads(buildFileContent, as_version=4)
                 dl = DictLoader({'openenergyplatform': templateFileContent})
 
-                html_exporter = nbconvert.HTMLExporter(extra_loaders=[dl], template_file='openenergyplatform')
+                html_exporter = nbconvert.HTMLExporter(extra_loaders=[dl], template_file='openenergyplatform', anchor_link_text="Permalink" )
                 (body, resources) = html_exporter.from_notebook_node(jake_notebook)
+
+                # Adding needed bootstrap styling to table.
+                body = body.replace("<table", "<table class=\"table\" ")
 
                 return {
                     "html": body
@@ -54,6 +59,21 @@ def _resolveStaticTutorials():
 
     jsonPaths = Path().rglob('*.json')
 
+    def handleKeyNotInJson(json_dict, key_val, sub_key_val = None, merge_readable = False):
+        if key_val in json_dict:
+
+            if sub_key_val and sub_key_val in json_dict[key_val]:
+                sub_val = json_dict[key_val][sub_key_val]
+
+                if isinstance(sub_val, list) and merge_readable:
+                    return ", ".join(sub_val)
+
+                return sub_val
+
+            return json_dict[key_val]
+        else:
+            return ''
+
     try:
         for jsonPath in jsonPaths:
             neededNotebookPath = os.path.splitext(jsonPath)[0]+'.ipynb'
@@ -68,8 +88,21 @@ def _resolveStaticTutorials():
             rTut = _resolveStaticTutorial(neededNotebookPath)
 
             resolvedTutorials.append({
-                'id': jsonContent['name'],
-                'title': jsonContent['displayName'],
+                'id': handleKeyNotInJson(jsonContent, 'name'),
+                'title': handleKeyNotInJson(jsonContent, 'displayName'),
+                'category': handleKeyNotInJson(jsonContent, 'category', 'identifier'),
+                'level': handleKeyNotInJson(jsonContent, 'level', "identifier"),
+                'language': handleKeyNotInJson(jsonContent,  'language', "identifier"),
+                'medium': handleKeyNotInJson(jsonContent, 'medium'),
+                'license': handleKeyNotInJson(jsonContent, 'license', "identifier"),
+                'creator': handleKeyNotInJson(jsonContent, 'creator'),
+                'email_contact': handleKeyNotInJson(jsonContent, 'email_contact'),
+                'github_contact': handleKeyNotInJson(jsonContent, 'github_contact'),
+                'readable_github_contact': ", ".join(handleKeyNotInJson(jsonContent, 'github_contact')),
+                "readable_category": handleKeyNotInJson(jsonContent, 'category', "names", True),
+                "readable_level": handleKeyNotInJson(jsonContent, 'level', 'names', True),
+                "readable_language": handleKeyNotInJson(jsonContent, 'language', 'names', True),
+                "readable_license": handleKeyNotInJson(jsonContent, 'license', 'names', True),
                 'html': rTut['html'],
                 'isStatic': True,
             })
@@ -86,14 +119,33 @@ staticTutorials = _resolveStaticTutorials()
 
 def _resolveDynamicTutorial(evaluatedQs):
     """
-
+    Get single tutorial as object (dict).
 
     :param evaluatedQs: Evaluated queryset object
     :return:
     """
 
     # Initialize dict that stores a tutorial
-    currentTutorial = {'id': '', 'title': '', 'html': '', 'markdown': '', 'category': '', 'media_src': '', 'level': ''}
+    currentTutorial =   {
+                            'id': '', 
+                            'title': '', 
+                            'html': '', 
+                            'markdown': '', 
+                            'category': '', 
+                            'media_src': '', 
+                            'level': '',
+                            'language': '',
+                            'medium': '',
+                            'license': '',
+                            'creator': '',
+                            'email_contact': '',
+                            'github_contact': '',
+                            'readable_category': "",
+                            'readable_level': "",
+                        }
+
+    readable_category = next((x for x in CATEGORY_OPTIONS if x[0] == evaluatedQs.category), ("default", "Default"))
+    readable_level = next((x for x in LEVEL_OPTIONS if x[0] == evaluatedQs.level), (0, "Default"))
 
     # populate dict
     currentTutorial.update(id=str(evaluatedQs.id),
@@ -102,13 +154,24 @@ def _resolveDynamicTutorial(evaluatedQs):
                            markdown=evaluatedQs.markdown,
                            category= evaluatedQs.category,
                            media_src= evaluatedQs.media_src,
-                           level=evaluatedQs.level)
+                           level=evaluatedQs.level,
+                           language=evaluatedQs.language,
+                           medium=evaluatedQs.medium,
+                           license=evaluatedQs.license,
+                           creator=evaluatedQs.creator,
+                           email_contact=evaluatedQs.email_contact,
+                           github_contact=evaluatedQs.github_contact,
+                           readable_category=readable_category[1],
+                           readable_level=readable_level[1],
+                           )
 
     return currentTutorial
 
 
 def _resolveDynamicTutorials(tutorials_qs):
     """
+    Get all tutorials(created via oep website) form django db.  
+
     Evaluates a QuerySet and passes each evaluated object to the next function which returns a python
     dictionary that contains all parameters from the object as dict. The dict is added to a list to
     later merge the static and dynamic tutorials together.
@@ -128,8 +191,8 @@ def _resolveDynamicTutorials(tutorials_qs):
 
 def _gatherTutorials(id=None):
     """
-    Collects all existing tutorials (static/dynamic) and returns them as a list. If an id is
-    specified as parameter a specific tutorial is returned filtered by id.
+    Collects all existing tutorials (static/dynamic) and returns them as a  single list. 
+    If id is set a single tutorial is returned (filter by id).
 
     :param id:
     :return:
@@ -148,7 +211,8 @@ def _gatherTutorials(id=None):
         else:
             raise Http404
 
-    return tutorials
+    return sorted(tutorials, key=lambda x: x["title"])
+
 
 def _processFormInput(form):
     tutorial = form.save(commit=False)
@@ -162,23 +226,25 @@ def _processFormInput(form):
 
     return tutorial
 
+
 def formattedMarkdown(markdown):
     """
-    A parameter is used to enter a text formatted as markdown that is formatted
-    to html and returned. This functionality is implemented using Markdown2.
+    Markdown style text to html and return.
+    This functionality is implemented using Markdown2 package.
 
     :param markdown:
     :return:
     """
 
+    escaped_markdown = html.escape(markdown, quote=False)
+
     # escapes html but also escapes html code blocks lke "exampel code:
     #                                                    (1 tab)  code"
     # checkbox also not rendered as expected "- [ ]"
     # TODO: Add syntax highliting, add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks 
-    markdowner = Markdown( extras=["break-on-newline", "fenced-code-blocks"], safe_mode=True)
-    markdowner.html_removed_text = ""
+    markdowner = Markdown(extras=["break-on-newline", "fenced-code-blocks"])
 
-    return markdowner.convert(markdown)
+    return markdowner.convert(escaped_markdown)
 
 
 class ListTutorials(View):

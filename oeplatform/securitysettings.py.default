@@ -17,10 +17,10 @@ token_test_user = None
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'oep_django',
+        'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
 	    'USER': os.environ.get("OEP_DJANGO_USER"),
 	    'PASSWORD': os.environ.get("OEP_DB_PW"),
-	    'HOST': 'localhost'
+	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
 	}
 }
 
