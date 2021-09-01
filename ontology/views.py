@@ -29,6 +29,16 @@ def collect_modules(path):
             modules[filename]["extensions"].append(extension)
     return modules
 
+class OntologyVersion(View):
+    def get(self, request, ontology="oeo", version=None):
+        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+            raise Http404
+        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        if not version:
+            version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
+        return render(request, "ontology/about.html", dict(
+            version=version,
+    ))
 
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
@@ -38,6 +48,7 @@ class OntologyOverview(View):
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
 
+        print(version)
         path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
         #This is temporary (macOS related)
         file = "oeo-full.owl"
@@ -102,24 +113,24 @@ class OntologyOverview(View):
                     if (module_or_id in row.o):
                         sub_class_ID = row.s.split('/')[-1]
                         sub_class_name = ''
+                        sub_class_definition = ''
+                        sub_class_note = ''
                         if sub_class_ID in classes_name.keys():
                             sub_class_name = classes_name[sub_class_ID]
-                            sub_class_definition = ''
                             if sub_class_ID in classes_definitions.keys():
                                 sub_class_definition = classes_definitions[sub_class_ID]
-                            sub_class_note = ''
                             if sub_class_ID in classes_notes.keys():
                                 sub_class_note = classes_notes[sub_class_ID]
                             sub_classes.append({ 'URI':row.s, 'ID':sub_class_ID, 'name': sub_class_name, 'definitions': sub_class_definition, 'notes': sub_class_note})
                     if (module_or_id in row.s):
                         super_class_ID = row.o.split('/')[-1]
                         super_class_name = ''
+                        super_class_definition = ''
+                        super_class_note = ''
                         if super_class_ID in classes_name.keys():
                             super_class_name = classes_name[super_class_ID]
-                            super_class_definition = ''
                             if super_class_ID in classes_definitions.keys():
                                 super_class_definition = classes_definitions[super_class_ID]
-                            super_class_note = ''
                             if super_class_ID in classes_notes.keys():
                                 super_class_note = classes_notes[super_class_ID]
                             super_classes.append({ 'URI':row.o, 'ID':super_class_ID, 'name': super_class_name , 'definitions': super_class_definition, 'notes': super_class_note})
