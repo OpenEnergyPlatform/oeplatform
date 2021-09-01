@@ -3,13 +3,14 @@
 {% load static %}
 {% load bootstrap4 %}
 
-
 {% block site-header %}
-  <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
+  {% if title %}
+  <h2 class="site-header">{{ schema }}: {{ title }}</h2>
+  {% else  %}
+  <h3 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h3>
+  {% endif %}
 {% endblock site-header %}
-
 {% block data_content %}
-
 
   <ul class="nav nav-tabs">
     <li class="nav-item">
@@ -108,7 +109,135 @@
     </span>
 
     {{ meta_widget }}
-  </div>
+ </div>
+ 
+ <div id = "comment_section" >
+ {% if anonymous_user == 0 %}
+	<form style="width:80%"  method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+	    {% csrf_token %}
+	    {{comment_form.as_p}}
+	      <button type="submit" class="btn btn-success" name="save" style="font-size: 10px; margin-right: 20px; margin-bottom: 50px">Comment</button>
+	</form>
+ {% endif %}
+
+	{% for value in comments.all %}
+		<div class="position-static" style="margin-bottom: 30px"> 
+			<ul>
+				<i class="fas fa-user" style="font-size: 20px; color:black" > </i> 
+
+				<b class="text-sm-left" style="margin-left: 10px; font-size: 20px; color:rgb(80,90,150)"> {{ value.user }} </b>
+				
+				<span class="badge rounded-pill bg-light text-dark" style="margin-left: 40px; font-size: 12px"> <em>@{{ value.comment_time }} </em> </span>
+			
+				<div style="margin-left: 40px; display: block; clear:both; margin-top: 10px; margin-bottom:20px;"> {{ value.content }} </div>
+			
+			
+				{% if anonymous_user == 0 %}
+					<form style="width:80%"  method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+						{% csrf_token %}
+					
+						<input type="hidden"  name="CommentID" value = {{ value.id }}  >
+						
+						<button type="submit" class="btn btn-primary" name="Likes" style="font-size: 8px; margin-top:2px; margin-bottom:20px; margin-left: 45px" >
+							<i class="far fa-thumbs-up" > <em>{{ value.liked_users.all | length }}</em></i>
+						</button>
+
+						<button type="submit" class="btn btn-dark" name="DisLikes" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+							<i class="far fa-thumbs-down" > <em>{{ value.disked_users.all | length }}</em></i>
+						</button>
+												
+						{% if value.user.id == user.id %}
+						<button type="submit" class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+						</button>
+						{% else %}
+						<button type="submit" disabled class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+						</button>
+						{% endif %}
+						
+						<button type="button" class="btn btn-secondary " style="font-size: 8px;  margin-top:2px; margin-bottom:20px; margin-left: 10px" onclick="myFunction({{ value.id }})"><i class="fas fa-comment" ></i></button>
+						
+					</form>
+				
+					<div>
+						<div id={{ value.id }} style="display:none">
+							<form method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+								{% csrf_token %}
+								<input type="hidden"  name="CommentID" value = {{ value.id }}  >
+								<textarea id="summernote" placeholder='Replying to {{ value.user }}' name='content' style="width=100%; height=90px; padding: 2%; margin-left: 150px; position=absolute" required></textarea>
+								<button type="submit" class="btn btn-sm btn-success" style="font-size: 7px"> Reply </button>
+							</form>
+						</div>
+					</div>
+				
+				{% endif %}
+				
+				{% for child_comment in value.children %}
+				<div style="margin-top:20px">
+					<ul>
+					
+						<i class="fas fa-user" style="color:black" > </i> 
+
+						<b class="text-sm-left" style="color:rgb(80,90,150); margin-left:10px "> {{ child_comment.user }} </b>
+						
+						<span class="badge rounded-pill bg-light text-dark" style="margin-left:15px; font-size: 12px"> <em>@{{ child_comment.comment_time }} </em> </span>
+			
+						<div style="display: block; clear:both; margin-top: 10px; margin-left:25px "> {{ child_comment.content }} </div>
+						
+						<form style="width:80%"  method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+						
+						{% csrf_token %}
+				
+						{% if anonymous_user == 0 %}
+							<input type="hidden"  name="CommentID" value = {{ child_comment.id }}  >
+						
+							<button type="submit" class="btn btn-primary" name="Likes" style="font-size: 8px; margin-top:20px; margin-bottom:20px; margin-left: 45px" >
+								<i class="far fa-thumbs-up" > <em>{{ child_comment.liked_users.all | length }}</em></i>
+							</button>
+
+							<button type="submit" class="btn btn-dark" name="DisLikes" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px"  >
+								<i class="far fa-thumbs-down" > <em>{{ child_comment.disked_users.all | length }}</em></i>
+							</button>
+												
+							{% if child_comment.user.id == user.id %}
+							<button type="submit" class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+							</button>
+							{% else %}
+							<button type="submit" disabled class="btn btn-danger" name="Delete" style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" >
+								<i class="fa fa-trash" ></i>
+							</button>
+							{% endif %}
+							
+							<button type="button" class="btn btn-secondary " style="font-size: 8px;  margin-top:20px; margin-bottom:20px; margin-left: 10px" onclick="myFunction({{ child_comment.id }})"><i class="fas fa-comment" ></i></button>
+						{% endif %}
+
+							<a class="btn btn-sm btn-success" href = "{% url 'comments_view' schema=schema table=table comment_id=child_comment.id %}" style="font-size: 10px;  margin-top:20px; margin-bottom:20px; margin-left: 10px"> <em>View More Replies</em> </a>
+						
+						{% if anonymous_user == 0 %}
+						</form>
+						
+					<div>
+						<div id={{ child_comment.id }} style="display:none">
+							<form method="POST" action="/dataedit/view/{{ schema }}/{{ table }}">
+								{% csrf_token %}
+								<input type="hidden"  name="CommentID" value = {{ child_comment.id }}  >
+								<textarea id="summernote"  placeholder='Replying to {{ child_comment.user }}' name='content' style="width=100%; height=90px; padding: 2%; margin-left: 150px; position=absolute" required></textarea>
+								<button type="submit" class="btn btn-sm btn-success" style="font-size: 7px"> Reply </button>
+							</form>
+						</div>
+					</div>
+					{% endif %}
+				<ul>
+				</br>
+			</div>
+			{% endfor %}
+		</ul>
+	</div>		
+{% endfor %}
+</div>
+	
 {% endblock %}
 
 {% block main-right-sidebar-content-additional %}
@@ -143,6 +272,7 @@
     class="form-control" rows="6" cols="50"
     style="white-space: nowrap;font-size: 12px;resize: none;overflow-y: hidden;font-family: 'SFMono-Regular',Consolas,'Liberation Mono',Menlo,Courier,monospace;"
   >
+
 from requests import get
 
 result = get('https://{{ host }}/api/v0/schema/{{ schema }}/tables/{{ table }}/rows')
@@ -156,7 +286,6 @@ for row in result.json():
     <a href="{{ table }}/permissions" type="button" class="btn btn-danger">Permissions</a>
   </div>
   <hr>
-
 {% endblock main-right-sidebar-content-additional %}
 
 {% block after-head %}
@@ -196,6 +325,14 @@ for row in result.json():
           options: JSON5.parse("{{ current_view.options | escapejs }}")
       };
       load_view(schema, table, csrftoken, view);
+	  
+	  function myFunction(id) {
+			var res = document.getElementById(id);
+			if ( res.style.display == "block" )
+				res.style.display = "none";
+			else
+				res.style.display = "block";
+		}
 
       var downloadMetadata = function () {
           var metaUrl = "/api/v0/schema/{{ schema }}/tables/{{ table }}/meta";
@@ -223,6 +360,7 @@ for row in result.json():
       $(function () {
         $('[data-toggle="tooltip"]').tooltip()
       })
+
   </script>
 {% endblock after-body-bottom-js %}
 

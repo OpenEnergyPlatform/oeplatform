@@ -99,4 +99,10 @@ urlpatterns = [
         views.WizardView.as_view(),
         name="wizard_create",
     ),
+	
+	url(
+		r"^comments_view/(?P<schema>{qual})/(?P<table>{qual})/(?P<comment_id>\d+)$".format(qual=pgsql_qualifier),
+		views.commentsView,
+		name = "comments_view",
+	),
 ]

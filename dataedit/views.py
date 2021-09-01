@@ -42,6 +42,8 @@ from dataedit.models import View as DBView
 from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
+from dataedit.models import CommentForm 
+from dataedit.models import Comment
 
 from .models import (
     TableRevision,
@@ -348,6 +350,7 @@ def get_readable_table_names(schema):
         return {}
     finally:
         conn.close()
+
     return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
 
 def listtables(request, schema_name):
@@ -917,9 +920,12 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
+        title_name = None
+        if "title" in metadata:
+            title_name = metadata["title"]
 
 
-
+        cf = CommentForm()
         context_dict = {
             "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
@@ -936,10 +942,19 @@ class DataView(View):
             "current_view": current_view,
             "is_admin": is_admin,
             "can_add": can_add,
+            "title": title_name,
             "host": request.get_host(),
+            "anonymous_user": request.user.is_anonymous,
+            "comment_form" : CommentForm(),
+            "comments": [],
         }
 
         context_dict.update(current_view.options)
+
+        comments = Comment.objects.filter(schema_name = schema, table_name =  table, parent_id__isnull = True).all()
+        cf = CommentForm()
+        context_dict["comment_form"] = cf
+        context_dict["comments"] = comments
 
         return render(request, "dataedit/dataview.html", context=context_dict)
 
@@ -969,6 +984,49 @@ class DataView(View):
                 },
                 {"user": request.user},
             )
+
+        if request.method == 'POST':
+            cf = CommentForm(request.POST or None)
+            if cf.is_valid():
+                parent_obj = None
+                parent_qs = None
+                parent_id = None
+                content = request.POST.get('content')
+                
+                try:
+                    parent_id = int(request.POST.get("CommentID"))
+                except:
+                    parent_id = None
+
+                if parent_id:
+                    parent_qs = Comment.objects.filter(id=parent_id)
+                    if parent_qs.exists():
+                        parent_obj = parent_qs.first()
+                        
+                comment = Comment(user = request.user, content = content, schema_name = schema, table_name = table, parent=parent_obj)
+                comment.save()
+
+            if "Likes" in request.POST:
+                comment_id = request.POST['CommentID']
+                comment = Comment.objects.filter(id=comment_id)
+                if request.user not in comment[0].liked_users.all():
+                    comment[0].liked_users.add(request.user)
+                
+            if "DisLikes" in request.POST:
+                comment_id = request.POST['CommentID']
+                comment = Comment.objects.filter(id=comment_id)
+                if request.user not in comment[0].disked_users.all():
+                    comment[0].disked_users.add(request.user)
+           
+
+            if "Delete" in request.POST:
+                comment_id = request.POST['CommentID']
+                comment = Comment.objects.filter(id=comment_id)
+                if request.user == comment[0].user:
+                    comment[0].liked_users.remove(request.user)
+                    comment[0].disked_users.remove(request.user)
+                    Comment.objects.filter(id = comment_id).delete()
+                
         return redirect(
             "/dataedit/view/{schema}/{table}".format(schema=schema, table=table)
         )
@@ -1367,3 +1425,14 @@ class MetaEditView(LoginRequiredMixin, View):
             context=context_dict,
         )
 
+def commentsView(request, schema, table, comment_id):
+    comments = Comment.objects.filter(id=comment_id).all()
+    comment_dict = {"comments" : [],
+                    "anonymous_user": request.user.is_anonymous,
+                    "schema": schema,
+                    "table": table
+                   }
+    
+    comment_dict["comments"] = comments
+    return render(request,"dataedit/comments_view.html", context=comment_dict)
+    

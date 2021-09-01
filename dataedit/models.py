@@ -13,6 +13,9 @@ from django.db.models import (
 )
 from django.utils import timezone
 from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django import forms
+from django.conf import settings
+from django.contrib.contenttypes.fields import GenericRelation
 
 # Create your models here.
 
@@ -82,3 +85,43 @@ class Filter(models.Model):
     type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
     value = JSONField(null=False)
     view = ForeignKey(View, on_delete=models.CASCADE, related_name="filter")
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE)
+    content = models.TextField()
+    comment_time = models.DateTimeField(default = timezone.now)
+    schema_name = models.TextField()
+    table_name = models.TextField()
+
+    liked_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name = "liked_user")
+    disked_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name = "disliked_user")
+    parent = models.ForeignKey('self', blank=True, null=True, on_delete = models.CASCADE, related_name = "+")
+
+    def children(self):
+        return Comment.objects.filter(parent=self)
+
+    @property
+    def is_parent(self):
+        if self.parent is not None:
+            return False
+        else:
+            return True
+	
+    class Meta:
+        db_table = 'comment'
+        ordering = ['-comment_time']
+
+
+class CommentForm(forms.ModelForm):
+    content = forms.CharField(label ="", widget = forms.Textarea(
+    attrs ={
+        'class':'form-control',
+        'placeholder':'write a comment !',
+        'rows':5,
+        'cols':-5,
+	    'id' : 'summernote',
+    }))
+    class Meta:
+        model = Comment
+        fields =['content']
