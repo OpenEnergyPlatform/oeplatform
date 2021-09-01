@@ -51,7 +51,7 @@ INSTALLED_APPS = (
     "tutorials",
     "jquery",
     "django_better_admin_arrayfield",
-
+    "oeo_viewer",
 )
 
 MIDDLEWARE = (
