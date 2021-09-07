@@ -1,7 +1,7 @@
 # Docker Usage
 
 > Works for Linux & MacOS (probably). It is tested with Linux.
-> You also need a working Docker installation and some basic knowledge about command lines. 
+> You also need a working Docker and Docker Compose installation and some basic knowledge about command lines. 
 
 This is a short introduction into the usage of Docker with Open Energy Platform (OEP). We provide **two** seperate images for the OEP, a database image and a application image. The database image prepares a ready-to-use database for the OEP and is an extension to a common PostgreSQL docker image. The application image contains the OEP and connects to a container running the database image. There are some additional resources at *Further Information* for an more in-depth understanding.
 
@@ -9,11 +9,40 @@ This is a short introduction into the usage of Docker with Open Energy Platform 
 
 ### Full Docker Installation
 
-This can be used, if you just want to host your own OEP installation or test API scipts or something similar, that should not be done with the public instance.
+> Use this, if you want to use Open Energy Platform.
 
-TODO: Write this chapter
+This can be used, if you just want to host your own OEP installation or test API scipts or something similar, that should not be done with the public instance. We use `docker-compose` to deploy more than one container.
+
+Docker Compose is a tool for defining and running multi-container Docker applications. Our applications consists of two different containers, a database container and an application container. We need both containers to get a fully working oeplatform deployment. `docker-compose.yaml` contains a definiton for an isolated environment to run both containers.
+
+Starting a oeplatform installation with Docker is easy, since it is zero configuration and zero dependencies. Our deployment will create persistent files in your current work directory which needs to be reused across restart. Make sure, you use the same working directory each time, e.g. repository root. 
+
+`docker-compose up` will start the deployment and you should be able to access a fresh installation via `http://localhost:8000`. Ctrl + C will stop the entire deployment. If it is restarted in the same working directory, it will keep state.
+
+#### Tasks
+
+We assume, that you choose the repository root as your working directory. If you did choose another working directory, make sure to change the path to the `docker-compose.yaml` file accordingly.
+##### Start Deployment
+
++ `docker-compose -f ./docker/docker-compose.yaml up `
+
+##### Start Deployment In Background
+
++ `docker-compose -f ./docker/docker-compose.yaml up -d`
+
+##### Stop Deployment In Background
+
++ `docker-compose -f ./docker/docker-compose.yaml down`
+
+##### Reset Database
+
++ Stop Deployment
++ Remove `oeplatform_data` folder from our working directory
++ Start Deployment
 
 ### Database Container with local installation
+
+> Use this, if you want to contribute to Open Energy Platform.
 
 This can be used, if you want to use a local installation for development and don't want to mess with the database setup (which should be the normal case).
 
@@ -59,14 +88,14 @@ If the PostgreSQL container gets stopped, it can be recreated with the existing 
 
 If you followed this documentation, you can skip the entire `Setup Your Database` chapter. You already did this and your application is ready to be started.
 
-## Tasks
+#### Tasks
 
-### Start Database On Existing Data
+##### Start Database On Existing Data
 
 + Make sure, `oeplatform_data` exists in your working directory.
-+ Run `docker run -p "5432:5432" -v "$(pwd)/oeplatform_data:/var/lib/postgresql/data" ghcr.io/openenergyplatform/oeplatform-postgres:latest`.
++ Start Database
 
-### Reset Database
+##### Reset Database
 
 + Stop Database
 + Remove `oeplatform_data` folder from our working directory
