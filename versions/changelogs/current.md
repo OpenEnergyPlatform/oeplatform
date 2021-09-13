@@ -10,3 +10,4 @@
 
 ### Features
 - api command for users to move tables between schemas
+- add link to oeo viewer
