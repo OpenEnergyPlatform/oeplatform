@@ -48,7 +48,6 @@ class OntologyOverview(View):
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
 
-        print(version)
         path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
         #This is temporary (macOS related)
         file = "oeo-full.owl"
