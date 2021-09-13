@@ -33,7 +33,6 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
 	  - Change filename to release version (x_x_x.md)
   1. Confirm that the PR passes all tests and checks
-  1. Tag the release number
   1. Once successful, delete the tag, and merge the candidate PR into `master` on Github
 1. Switch to the now-updated master branch: `git checkout master` and `git pull upstream master`
 1. Tag the release number: `git tag v<release version>`, e.g., `git tag v1.2.0`
