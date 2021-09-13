@@ -28,7 +28,7 @@ The project can be linked in an issue or pull request via the menu "Projects"
 ## Basic-Steps for deploy and release (publishing a new release)
 Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)
 
-1. Make a release candidate branch (e.g., `release/vx.x.x`)
+1. Starting out in the `develop` branch, make a release candidate branch (e.g., `release/vx.x.x`)
    and pull request it into `master` with the following updates:
    1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
 	  - Change filename to release version (x_x_x.md)
