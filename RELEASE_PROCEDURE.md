@@ -42,7 +42,6 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Make a new release on Github
    - make sure that you choose the tag name defined above
    - copy the release summary from changelog into the description box
-1. Add a new line "# Next Release" at the top of `RELEASE_PROCEDURE.md` and commit to `master`
 1. Announce it on our mailing list: insert@oep-mailinglist.org
    - again, copy the rendered HTML from the Github release directly in the email
 
