@@ -11,4 +11,5 @@
 ### Features
 - api command for users to move tables between schemas
 - add link to oeo viewer
-
+- add link to faq on top navigation bar https://github.com/OpenEnergyPlatform/oeplatform/issues/775
+- add link to oeo viewer
