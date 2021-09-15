@@ -28,12 +28,11 @@ The project can be linked in an issue or pull request via the menu "Projects"
 ## Basic-Steps for deploy and release (publishing a new release)
 Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)
 
-1. Make a release candidate branch (e.g., `release/vx.x.x`)
+1. Starting out in the `develop` branch, make a release candidate branch (e.g., `release/vx.x.x`)
    and pull request it into `master` with the following updates:
    1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
 	  - Change filename to release version (x_x_x.md)
   1. Confirm that the PR passes all tests and checks
-  1. Tag the release number
   1. Once successful, delete the tag, and merge the candidate PR into `master` on Github
 1. Switch to the now-updated master branch: `git checkout master` and `git pull upstream master`
 1. Tag the release number: `git tag v<release version>`, e.g., `git tag v1.2.0`
@@ -43,15 +42,10 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Make a new release on Github
    - make sure that you choose the tag name defined above
    - copy the release summary from changelog into the description box
-1. Add a new line "# Next Release" at the top of `RELEASE_PROCEDURE.md` and commit to `master`
-1. Announce it on our mailing list: insert@oep-mailinglist.org
+1. Announce it on our mailing list: oep_dev-request@lists.riseup.net
    - again, copy the rendered HTML from the Github release directly in the email
-
-1. As stated in the [django deployment documentation](https://docs.djangoproject.com/en/3.0/howto/deployment/), 
-   every django app has to be served by an external web server. Please make sure to follow the security advise 
-   given in the deployment documentation, if you want to host your own version of the Open Energy Platform.
 
 And that's it! Whew... 
 
-Further Notes on how to deploy the OEP are documented [here](https://github.com/OpenEnergyPlatform/oeplatform-deploy) 
-we also try to make this procedure more userfriendly by introducing [docker](https://www.docker.com/). 
+As stated in the [django deployment documentation](https://docs.djangoproject.com/en/3.0/howto/deployment/), every django app has to be served by an external web server. Please make sure to follow the security advise given in the deployment documentation, if you want to host your own version of the Open Energy Platform. Further Notes on how to deploy the OEP are documented [here](https://github.com/OpenEnergyPlatform/oeplatform-deploy). 
+We also try to make this procedure more userfriendly by introducing [docker](https://www.docker.com/). 
