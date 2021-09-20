@@ -74,7 +74,7 @@ jobs:
       - name: Migrations & User creation
         run: |
           cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
-          python manage.py makemigrations
+          python manage.py makemigrations --check
           python manage.py migrate
           python manage.py alembic upgrade head
           python manage.py shell -c "from login.models import myuser; u=myuser.objects.create_user(name='test',email='test@test.com',affiliation='');u.is_mail_verified=True;u.save()"
