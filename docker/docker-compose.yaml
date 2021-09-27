@@ -1,0 +1,29 @@
+
+version: "3.9"
+services:
+  oeplatform:
+    image: "ghcr.io/openenergyplatform/oeplatform:0.9.2"
+    stdin_open: true
+    tty: true
+    ports:
+      - "8080:80"
+    environment:
+        OEP_DJANGO_USER: postgres
+        OEP_DB_PW: postgres
+        OEP_DJANGO_HOST: postgres
+        OEP_DJANGO_NAME: oep_django
+        LOCAL_DB_USER: postgres
+        LOCAL_DB_PASSWORD: postgres
+        LOCAL_DB_NAME: oedb
+        LOCAL_DB_HOST: postgres
+    depends_on:
+        - postgres
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:0.3.0
+    ports:
+        - "5432:5432"
+    environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+    volumes:
+        - "./oeplatform_data:/var/lib/postgresql/data"
