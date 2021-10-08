@@ -8,6 +8,7 @@ __pycache__/
 
 media/
 local/
+static/
 
 # C extensions
 *.so
