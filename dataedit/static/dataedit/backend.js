@@ -27,6 +27,14 @@ function getCookie(name) {
 }
 
 function fail_handler(jqXHR, exception) {
+    
+    var responseJson;
+    try { // to parse response as json
+        responseJson = JSON.parse(jqXHR.responseText);
+    } catch(error) {
+        responseJson = {};
+    }
+
     var msg = '';
     if (jqXHR.status === 0) {
         msg = 'Not connected.\n Verify Network.';
@@ -40,10 +48,15 @@ function fail_handler(jqXHR, exception) {
         msg = 'Time out error.';
     } else if (exception === 'abort') {
         msg = 'Ajax request aborted.';
+    } else if (responseJson && responseJson.reason) {
+        msg = responseJson.reason;
     } else {
         msg = 'Uncaught Error.\n' + jqXHR.responseText;
     }
-    console.log(msg);
+    $("#loading-indicator").hide();
+    /* display message to user */
+    console.error(msg)
+    showWarning(msg)
 }
 
 var table_info = {
@@ -129,7 +142,7 @@ function request_data(data, callback, settings) {
                 query: JSON.stringify(select_query)
             }
         })
-    ).done(function (count_response, select_response) {
+    ).done(function (count_response, select_response) {        
         $("#loading-indicator").hide();
         if (map !== undefined) {
             build_map(select_response[0].data, select_response[0].description)
@@ -485,18 +498,18 @@ function parse_rule(r) {
                 operator: "like",
                 operands: [{ type: "column", column: r.field }, r.value + "%"]
             });
-        case "contains":
-            return {
-                type: "operator",
-                operator: "in",
-                operands: [{ type: "column", column: r.field }, r.value]
-            };
-        case "not_contains":
-            return negate({
-                type: "operator",
-                operator: "in",
-                operands: [{ type: "column", column: r.field }, r.value]
-            });
+            case "contains":
+                return {
+                    type: "operator",
+                    operator: "in",
+                    operands: [{ type: "column", column: r.field }, r.value]
+                };
+            case "not_contains":
+                return negate({
+                    type: "operator",
+                    operator: "in",
+                    operands: [{ type: "column", column: r.field }, r.value]
+                });
         case "ends_with":
             return {
                 type: "operator",
@@ -541,3 +554,13 @@ var type_maps = {
 };
 
 var valid_types = ["string", "integer", "double", "date", "time", "datetime", "boolean"];
+
+
+function showWarning(message) {
+    var elem = document.getElementById("uiWarnings");
+    message = "" + message;
+    elem.innerHTML = message;
+    elem.className = "show";  
+    // After 3 seconds, remove the show class from DIV
+    setTimeout(function(){ elem.className = elem.className.replace("show", ""); }, 3000);
+} 
