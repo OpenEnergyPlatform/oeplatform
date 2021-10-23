@@ -142,8 +142,12 @@ function request_data(data, callback, settings) {
                 query: JSON.stringify(select_query)
             }
         })
-    ).done(function (count_response, select_response) {        
+    ).done(function (count_response, select_response) {                
         $("#loading-indicator").hide();
+
+        /* fix missing data (on successful query)*/
+        select_response[0].data = select_response[0].data || [];
+
         if (map !== undefined) {
             build_map(select_response[0].data, select_response[0].description)
         }
@@ -498,18 +502,18 @@ function parse_rule(r) {
                 operator: "like",
                 operands: [{ type: "column", column: r.field }, r.value + "%"]
             });
-            case "contains":
-                return {
-                    type: "operator",
-                    operator: "in",
-                    operands: [{ type: "column", column: r.field }, r.value]
-                };
-            case "not_contains":
-                return negate({
-                    type: "operator",
-                    operator: "in",
-                    operands: [{ type: "column", column: r.field }, r.value]
-                });
+        case "contains":
+            return {
+                type: "operator",
+                operator: "like",
+                operands: [{ type: "column", column: r.field }, "%" + r.value + "%"]
+            };
+        case "not_contains":
+            return negate({
+                type: "operator",
+                operator: "like",
+                operands: [{ type: "column", column: r.field }, "%" + r.value + "%"]
+            });
         case "ends_with":
             return {
                 type: "operator",
