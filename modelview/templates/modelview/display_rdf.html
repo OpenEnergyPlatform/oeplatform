@@ -292,16 +292,18 @@ Login to edit
         }
         {% if user.is_authenticated %}
         $(deleteButton).click(() => {
-            if (current_value && (current_value.literal || current_value.iri)) {
+            if (confirm("Are you sure about deleting this item?")) {
+              if (current_value && (current_value.literal || current_value.iri)) {
                 $.post("/factsheets/rdf/" + subject + "/",
-                    {
-                        query: JSON.stringify({property: property, oldValue: current_value}),
-                        csrfmiddlewaretoken: csrftoken
-                    }, () => {
-                        li.remove()
-                    })
-            } else {
+                {
+                  query: JSON.stringify({property: property, oldValue: current_value}),
+                  csrfmiddlewaretoken: csrftoken
+                }, () => {
+                  li.remove()
+                })
+              } else {
                 li.remove()
+              }
             }
         });
 
