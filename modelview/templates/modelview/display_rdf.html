@@ -318,7 +318,7 @@ Login to edit
         }
 
         const deleteItem = async () => {
-          const confirm = await ui.confirm('Are you sure you want to do item?');
+          const confirm = await ui.confirm('Do you really want to remove this item?');
 
           if(confirm){
             if (current_value && (current_value.literal || current_value.iri)) {
@@ -428,8 +428,8 @@ Login to edit
   <div>
     <div id="confirmMessage"></div>
     <div>
-      <input id="confirmYes" type="button" value="Yes" />
-      <input id="confirmNo" type="button" value="No" />
+      <input id="confirmYes" type="button" value="Yes" class="delete_button"/>
+      <input id="confirmNo" type="button" value="No" class="cancel_button"/>
     </div>
   </div>
 </div>
