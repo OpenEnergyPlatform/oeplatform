@@ -3,6 +3,12 @@
 {% load static %}
 {% load modelview_extras %}
 
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/custom_alert.css' %}">
+  <script type="text/javascript"
+          src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
+{% endblock after-head %}
+
 {% block main-right-sidebar-content-actions %}
 {% if not user.is_authenticated %}
 Login to edit
@@ -12,6 +18,7 @@ Login to edit
 {% block factsheets_content %}
 
 <div id="root"></div>
+
 
 {% endblock factsheets_content %}
 
@@ -291,20 +298,45 @@ Login to edit
             element = createExpandable(data, id, t["factory"])
         }
         {% if user.is_authenticated %}
-        $(deleteButton).click(() => {
-            if (confirm("Are you sure about deleting this item?")) {
-              if (current_value && (current_value.literal || current_value.iri)) {
-                $.post("/factsheets/rdf/" + subject + "/",
-                {
-                  query: JSON.stringify({property: property, oldValue: current_value}),
-                  csrfmiddlewaretoken: csrftoken
-                }, () => {
-                  li.remove()
-                })
-              } else {
+
+        const ui = {
+          confirm: async (message) => createConfirm(message)
+        }
+
+        const createConfirm = (message) => {
+          return new Promise((complete, failed)=>{
+            $('#confirmMessage').text(message)
+
+            $('#confirmYes').off('click');
+            $('#confirmNo').off('click');
+
+            $('#confirmYes').on('click', ()=> { $('.confirm').hide(); complete(true); });
+            $('#confirmNo').on('click', ()=> { $('.confirm').hide(); complete(false); });
+
+            $('.confirm').show();
+          });
+        }
+
+        const deleteItem = async () => {
+          const confirm = await ui.confirm('Are you sure you want to do item?');
+
+          if(confirm){
+            if (current_value && (current_value.literal || current_value.iri)) {
+              $.post("/factsheets/rdf/" + subject + "/",
+              {
+                query: JSON.stringify({property: property, oldValue: current_value}),
+                csrfmiddlewaretoken: csrftoken
+              }, () => {
                 li.remove()
-              }
+              })
+            } else {
+              li.remove()
             }
+          }
+        }
+
+        $(deleteButton).click(() => {
+            deleteItem();
         });
 
         let buttonGroup = document.createElement("div");
@@ -390,5 +422,16 @@ Login to edit
 
 
 </script>
+
+<div class="confirm">
+  <div></div>
+  <div>
+    <div id="confirmMessage"></div>
+    <div>
+      <input id="confirmYes" type="button" value="Yes" />
+      <input id="confirmNo" type="button" value="No" />
+    </div>
+  </div>
+</div>
 
 {% endblock %}
