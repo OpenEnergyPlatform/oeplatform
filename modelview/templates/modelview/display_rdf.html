@@ -5,8 +5,8 @@
 
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/custom_alert.css' %}">
-  <script type="text/javascript"
-          src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
+  <script type="text/javascript" src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
+
 {% endblock after-head %}
 
 {% block main-right-sidebar-content-actions %}
@@ -48,12 +48,19 @@ Login to edit
 
     function hide_field(path) {
         document.getElementById("display__" + path).hidden = false;
+        document.getElementById("hint_for_edit").remove();
         document.getElementById("edit__" + path).hidden = true;
         let input = document.getElementById("edit__" + path);
         input.onfocusout = "";
     }
 
     function show_field(path) {
+        let parent_of_editable = document.getElementById("display__" + path).parentElement;
+        let edit_hint = document.createElement("div");
+        edit_hint.setAttribute("id", "hint_for_edit");
+        edit_hint.innerHTML = 'After edit, press Enter to save!';
+        parent_of_editable.appendChild(edit_hint);
+
         document.getElementById("display__" + path).hidden = true;
         let edit = document.getElementById("edit__" + path);
         edit.hidden = false;
@@ -157,7 +164,6 @@ Login to edit
     }
 
     function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
-
         let id = path + "." + idx;
         let li = document.createElement("li");
         li.className = "list-group-item";
@@ -216,6 +222,7 @@ Login to edit
                                 current_value = newValue;
                                 labelText.innerText = current_value[t.template.field];
                             })
+                            $('.message_on_edit').show();
                     }
                 });
 
@@ -416,12 +423,21 @@ Login to edit
         $(collapser).click(() => collapse(id));
         container.appendChild(collapser);
 
-
         return container
     }
 
 
 </script>
+
+<div class="message_on_edit">
+  <div></div>
+  <div>
+    <div id="edit_message">This item has updated with a new value!</div>
+    <div>
+      <input id="edit_confirm" type="button" value="Ok" class="ok_button" onClick="$('.message_on_edit').hide();" />
+    </div>
+  </div>
+</div>
 
 <div class="confirm">
   <div></div>
