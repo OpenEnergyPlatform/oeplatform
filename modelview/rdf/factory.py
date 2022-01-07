@@ -83,8 +83,6 @@ class RDFFactory(ABC):
         cached_objects = {i: cache[i] for i in identifiers if i in cache}
         new_items = [i for i in identifiers if i not in cache]
         result = context.query_all_objects(new_items, cls._fields.items())
-        print('#####')
-        print(cls._fields.items())
         head = result["head"]
         d = dict()
         model_inputs = []
