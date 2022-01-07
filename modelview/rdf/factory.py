@@ -26,7 +26,7 @@ class RDFFactory(ABC):
 
     @classmethod
     def doc(self):
-        s = f"""Factory class for {self._direct_parent}. This class has the following fields: 
+        s = f"""Factory class for {self._direct_parent}. This class has the following fields:
 
 """
         for f in self.iter_field_names():
@@ -83,8 +83,11 @@ class RDFFactory(ABC):
         cached_objects = {i: cache[i] for i in identifiers if i in cache}
         new_items = [i for i in identifiers if i not in cache]
         result = context.query_all_objects(new_items, cls._fields.items())
+        print('#####')
+        print(cls._fields.items())
         head = result["head"]
         d = dict()
+        model_inputs = []
         for t in result["results"]["bindings"]:
             if "s" in t:
                 s = cls._read_value(t["s"])
@@ -93,7 +96,10 @@ class RDFFactory(ABC):
                 lp = cls._read_value(t.get("lp"))
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
-                d[s][fname] = d[s].get(fname, []) + [(o, lo)]
+                res = ''
+                if fname == 'has_input':
+                    res = context.query_one_object(o, '<https://schema.org/url>')["results"]["bindings"][0]["object"]["value"]
+                d[s][fname] = d[s].get(fname, []) + [(o, res)]
 
         cached_objects.update(
             {i: cls._parse(i, context, d[i], cache=cache) if i in d else cls(iri=i) for i in identifiers}
@@ -138,6 +144,7 @@ class RDFFactory(ABC):
             iri=identifier,
             **{p: cls._fields[p].handler(os, context) for p, os in obj.items()},
         )
+        print(res)
         return res
 
     @classmethod
@@ -350,6 +357,9 @@ class ModelCalculation(RDFFactory):
             rdf_name=OEO.OEO_00000501,
             verbose_name="Involved Models",
         ),
+    )
+    model_inputs = field.FactoryField(
+        rdf_name=obo.RO_0002233, factory=Dataset, verbose_name="Inputs"
     )
 
 
