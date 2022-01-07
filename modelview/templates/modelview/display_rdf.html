@@ -85,6 +85,10 @@ Login to edit
     }
 
     let templates = {{rdf_templates | safe}};
+    // temporary
+    /*
+
+    */
 
     function load_instance(parentId, identifier, factory, path) {
         let parent = document.getElementById(parentId);
@@ -96,7 +100,32 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
-                parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
+              // temporary
+              /*
+              templates['study']['assumptions'] = { verbose_name: 'Assumptions', factory: 'assumptions'};
+              templates['study']['empirical_data'] = { verbose_name: 'Empirical Data', factory: 'empirical_data'};
+              templates['study']['results'] = { verbose_name: 'Results', factory: 'results'};
+
+              templates['assumptions'] = { name: { verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
+                                           iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
+              templates['empirical_data'] = { name:{ verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
+                                              iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
+              templates['results'] = { name: { verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
+                                       iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
+
+              tuples['assumptions'] = [{ 'iri': 'http://openenergy-platform.org/thing/Assumption101', 'label': 'Assumption 101'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/Assumption102', 'label': 'Assumption 102'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/Assumption103', 'label': 'Assumption 103'}];
+
+              tuples['empirical_data'] = [{ 'iri': 'http://openenergy-platform.org/thing/EmpiricalData101', 'label': 'Empirical Data 101'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/EmpiricalData102', 'label': 'Empirical Data 102'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/EmpiricalData103', 'label': 'Empirical Data 103'}];
+
+              tuples['results'] = [{ 'iri': 'http://openenergy-platform.org/thing/Result101', 'label': 'Result 101'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/Result102', 'label': 'Result 102'},
+                                      { 'iri': 'http://openenergy-platform.org/thing/Result103', 'label': 'Result 103'}];
+              */
+              parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
     }
@@ -387,7 +416,7 @@ Login to edit
     function expand(factory, name, id) {
         document.getElementById("expand__" + id).hidden = true;
         document.getElementById("collapse__" + id).hidden = false;
-
+        //console.log('#', id, name, factory, id)
         load_instance(id, name, factory, id)
     }
 
@@ -401,13 +430,17 @@ Login to edit
         let container = document.createElement("div");
         container.id = id;
 
-        let label = document.createElement("div");
-        label.innerText = instance.label || instance.iri;
+        let label = document.createElement("a");
+        let link = document.createTextNode(instance.iri.split('/').pop());
+        label.appendChild(link);
+        label.href = instance.label || instance.iri;
+
         container.appendChild(label);
 
         // A link to expand a new instance
         let expander = document.createElement("a");
-        expander.innerText = "Show more";
+        expander.style.cssText = "background-color: #9ED8D8; border-radius: 8px; color:white; padding: 2px 6px; text-align: center; font-size: 12px; margin: 1px 4px; cursor: pointer;"
+        expander.innerText = "Show more...";
         let name = instance.iri.split("/").pop();
         expander.id = "expand__" + id;
         expander.href = "javascript:void(0)";
@@ -416,6 +449,7 @@ Login to edit
 
         // A link to collapse an instance
         let collapser = document.createElement("a");
+        collapser.style.cssText = "background-color: #D89EB7; border-radius: 8px; color:white; padding: 2px 6px; text-align: center; font-size: 12px; margin: 1px 4px; cursor: pointer;"
         collapser.innerText = "Show less";
         collapser.id = "collapse__" + id;
         collapser.hidden = true;
@@ -432,7 +466,7 @@ Login to edit
 <div class="message_on_edit">
   <div></div>
   <div>
-    <div id="edit_message">This item has updated with a new value!</div>
+    <div id="edit_message">A new value saved!</div>
     <div>
       <input id="edit_confirm" type="button" value="Ok" class="ok_button" onClick="$('.message_on_edit').hide();" />
     </div>

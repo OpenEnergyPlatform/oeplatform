@@ -64,6 +64,15 @@ class ConnectionContext:
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
+    def query_one_object(self, subject, predicate):
+        query = (
+            "SELECT ?object WHERE { "
+        )
+        query += f""" <{subject}> {predicate} """
+        query += " ?object . } "
+        self.connection.setQuery(query)
+        return self.connection.query().convert()
+
     def query_all_factory_instances(self, factory):
         query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"

@@ -464,7 +464,7 @@ class RDFFactoryView(View):
             # Build URI, assuming that this is part of this knowledge graph
             uri = getattr(namespace.OEO_KG, identifier)
             # TODO: Error handling:
-            #  * What if it is not part of the graph?
+            #  * What if it is not part of the ?
             #  * What if it is not of this class?
             #  * Probably: 404 in both cases!?
             obj = fac._load_one(uri, context)
