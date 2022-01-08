@@ -95,8 +95,8 @@ class RDFFactory(ABC):
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
                 res = ''
-                if fname == 'has_input':
-                    res = context.query_one_object(o, '<https://schema.org/url>')["results"]["bindings"][0]["object"]["value"]
+                if fname == 'has_input' or fname == 'has_output':
+                    res = context.query_one_object(o, '<https://schema.org/url>')["results"]["bindings"] [0]["object"]["value"]
                 d[s][fname] = d[s].get(fname, []) + [(o, res)]
 
         cached_objects.update(
