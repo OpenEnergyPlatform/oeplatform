@@ -544,7 +544,14 @@ def show_revision(request, schema, table, date):
 
 @login_required
 def tag_overview(request):
-    return render(request=request, template_name="dataedit/tag_overview.html")
+        
+    # if rename or adding of tag fails: display error message
+    context = {
+        "errorMsg": "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+    }
+        
+    return render(request=request, template_name="dataedit/tag_overview.html", context=context)
+
 
 
 @login_required
@@ -584,25 +591,42 @@ def tag_editor(request, id=""):
 
 @login_required
 def change_tag(request):
+
+    status = "" # error status if operation fails
+
     if "submit_save" in request.POST:
-        if "tag_id" in request.POST:
-            id = request.POST["tag_id"]
-            name = request.POST["tag_text"]
-            color = request.POST["tag_color"]
-            edit_tag(id, name, color)
-        else:
-            name = request.POST["tag_text"]
-            color = request.POST["tag_color"]
-            add_tag(name, color)
+        try:
+            if "tag_id" in request.POST:
+                id = request.POST["tag_id"]
+                name = request.POST["tag_text"]
+                color = request.POST["tag_color"]
+                edit_tag(id, name, color)
+            else:
+                name = request.POST["tag_text"]
+                color = request.POST["tag_color"]
+                add_tag(name, color)
+        except sqla.exc.IntegrityError:
+            # requested changes are not valid because of name conflicts
+            status = "invalid"
+
 
     elif "submit_delete" in request.POST:
         id = request.POST["tag_id"]
         delete_tag(id)
 
-    return redirect("/dataedit/tags/")
+    return redirect("/dataedit/tags/?status=" + status)
 
 
 def edit_tag(id, name, color):
+    """
+    Args:
+        id(int): tag id
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    Raises:
+        sqlalchemy.exc.IntegrityError if name is not ok
+
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
@@ -610,9 +634,10 @@ def edit_tag(id, name, color):
     result = session.query(Tag).filter(Tag.id == id).one()
 
     result.name = name
+    result.name_normalized = Tag.create_name_normalized(name)
     result.color = str(int(color[1:], 16))
-
     session.commit()
+    
 
 
 def delete_tag(id):
@@ -630,12 +655,20 @@ def delete_tag(id):
 
 
 def add_tag(name, color):
+    """
+    Args:
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    Raises:
+        sqlalchemy.exc.IntegrityError if name is not ok
+
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
 
     session.add(Tag(**{"name": name, "color": str(int(color[1:], 16)), "id": None}))
-    session.commit()
+    session.commit()    
 
 
 def view_edit(request, schema, table):

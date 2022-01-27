@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -27,6 +28,53 @@ class Tag(Base):
     color = Column(Integer)
     usage_count = Column(BigInteger, server_default="0")
     usage_tracked_since = Column(DateTime(), server_default=func.now())
+    name_normalized = Column(String(40), nullable=False, unique=True)
+
+    def __init__(self, **kwargs):
+        # sanitize name, auto fill name_normalized
+        kwargs["name"] = self.create_name_clean(kwargs["name"])
+        kwargs["name_normalized"] = self.create_name_normalized(kwargs["name"])
+        super().__init__(**kwargs)
+
+    @staticmethod
+    def create_name_normalized(name):
+        """
+        Args:
+            name(str): tag name
+        
+        Returns:
+            str: normalized tag name
+
+        Example:
+            >>> create_name_normalized(" not a good  TAG")
+            'not_a_good_tag'
+        """
+        name_norm = name or ""
+        name_norm = name_norm.lower()
+        re.sub("[^a-z0-9]+", "_", name_norm)
+        name_norm = name_norm.strip("_")
+        return name_norm
+    
+    @staticmethod
+    def create_name_clean(name):
+        """
+        Args:
+            name(str): tag name
+        
+        Returns:
+            str: sanitized tag name
+
+        Example:
+            >>> create_name_clean(" not a good  TAG")
+            'not a good TAG'
+        """
+        name_norm = name or ""
+        re.sub("\s+", " ", name_norm)
+        name_norm = name_norm.strip()
+        return name_norm
+
+        
+
 
 
 class TableTags(Base):
