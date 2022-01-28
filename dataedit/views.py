@@ -1133,32 +1133,22 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     # Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
     # remove table tags that are not present on table anymore
-    # for t in table_oemetadata["keywords"]:
-    #     if session.query(TableTags)
     oep_tags = []
     keywords_match_oep_tags = []
     for k in table_oemetadata["keywords"]:
-        print(k)
         # if session.query(Tag).filter(Tag.name==k) is not None:
         tag = session.query(Tag).filter(Tag.name_normalized==k)
         for t in tag:
             oep_tags.append(t.name_normalized)
-            print(oep_tags)
             table_tag = session.query(TableTags).filter(TableTags.tag==t.id)
-            # table_oemetadata["keywords"].remove(t.name)
             for tt in table_tag :
-                print("tt: " + str(tt.tag))
                 if t.id == tt.tag:
-                    keywords_match_oep_tags.append(t.name)
-            
+                    keywords_match_oep_tags.append(t.name)        
     for t in oep_tags:
         if t in  table_oemetadata["keywords"]:
             table_oemetadata["keywords"].remove(t)
 
-    print(table_oemetadata["keywords"])
-
-        # print(table_oemetadata["keywords"])
-    print(keywords_match_oep_tags)
+    # Add tags to keywords that are assinged to table
     oep_table_tags = []
     for id in tag_ids:           
         t = session.query(Tag).get(id)
@@ -1176,8 +1166,6 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     url = OEP_URL + "/api/v0/schema/{schema}/tables/{table}/meta/".format(
         schema=schema, table=table
     )
-    # headers = request.headers
-    print(request.user.id)
     #TODO: obtain token from user that triggers function / django rest framework obtain token
     token = "d3afdaf66d4acc5415893476d75cf07c28a61878"
 
