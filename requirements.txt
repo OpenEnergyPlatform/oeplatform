@@ -23,8 +23,8 @@ omi
 rdflib
 django-jquery
 zipstream-new
-rdflib
-rdflib-jsonld
+rdflib>=6.0.1
+# rdflib-jsonld # DeprecationWarning: The rdflib-jsonld package has been integrated into rdflib as of rdflib==6.0.1.  Please remove rdflib-jsonld from your project's dependencies
 django_better_admin_arrayfield
 sparqlwrapper
 Pygments
