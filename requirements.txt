@@ -20,7 +20,6 @@ django-simple-captcha
 django-bootstrap4
 django-fontawesome-5
 omi
-rdflib
 django-jquery
 zipstream-new
 rdflib>=6.0.1
