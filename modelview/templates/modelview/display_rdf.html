@@ -100,31 +100,7 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
-              // temporary
-              /*
-              templates['study']['assumptions'] = { verbose_name: 'Assumptions', factory: 'assumptions'};
-              templates['study']['empirical_data'] = { verbose_name: 'Empirical Data', factory: 'empirical_data'};
-              templates['study']['results'] = { verbose_name: 'Results', factory: 'results'};
 
-              templates['assumptions'] = { name: { verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
-                                           iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
-              templates['empirical_data'] = { name:{ verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
-                                              iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
-              templates['results'] = { name: { verbose_name: 'Name', template: {type: 'text', field: 'literal'}},
-                                       iri:  { help_text: null, literal: true, template: {type: 'text', field: 'iri', verbose_name: null}}};
-
-              tuples['assumptions'] = [{ 'iri': 'http://openenergy-platform.org/thing/Assumption101', 'label': 'Assumption 101'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/Assumption102', 'label': 'Assumption 102'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/Assumption103', 'label': 'Assumption 103'}];
-
-              tuples['empirical_data'] = [{ 'iri': 'http://openenergy-platform.org/thing/EmpiricalData101', 'label': 'Empirical Data 101'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/EmpiricalData102', 'label': 'Empirical Data 102'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/EmpiricalData103', 'label': 'Empirical Data 103'}];
-
-              tuples['results'] = [{ 'iri': 'http://openenergy-platform.org/thing/Result101', 'label': 'Result 101'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/Result102', 'label': 'Result 102'},
-                                      { 'iri': 'http://openenergy-platform.org/thing/Result103', 'label': 'Result 103'}];
-              */
               parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
@@ -132,6 +108,7 @@ Login to edit
 
     function createPropertyTable(subject, identifier, factory, path, tuples) {
         let table = document.createElement("table");
+        table.style.cssText = "border: 1px solid #dee2e6";
         table.className = "table";
         table.id = "container__" + path;
         for (const [property, values] of Object.entries(tuples)) {
@@ -145,51 +122,72 @@ Login to edit
     function createPropertyRow(subject, property, identifier, factory, path, values) {
         const tr = document.createElement("tr");
         // Create field header
-        const th = document.createElement("th");
+        const tdElem = document.createElement("td");
+        tdElem.style.cssText = "width: 100%;";
+
+        const thExpand = document.createElement("a");
+        thExpand.href = "javascript:void(0)";
+        const folderIcon = document.createElement("span");
+        folderIcon.className = "far fa-folder";
+        const thName = document.createElement("span");
+        thName.style.cssText = "margin-left: 10px;";
+        const caretDownSpan = document.createElement("span");
+        caretDownSpan.className = "fas fa-caret-down";
+        caretDownSpan.style.cssText = "margin-left: 10px;";
+        thExpand.appendChild(caretDownSpan);
         const t = templates[factory][property];
-        th.innerText = t.verbose_name;
+        thName.innerText = t.verbose_name + " " + "(" + values.length + ")";
+        thName.appendChild(thExpand);
+        tdElem.appendChild(folderIcon);
+        tdElem.appendChild(thName);
+        tr.appendChild(tdElem);
 
-        tr.appendChild(th);
-
-        // Create value list
-        const td = document.createElement("td");
-        const ul = document.createElement("ul");
-        ul.className = "list-group";
-        let nextPath;
-        if (path) {
-            nextPath = path + "." + property;
-        } else {
-            nextPath = property;
-        }
-        let idx = 0;
-        for (let v of values) {
-            idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
-        }
-        {% if user.is_authenticated %}
-        const add = document.createElement("a");
-        add.href = "javascript:void(0)";
-        add.innerHTML = "+";
-        $(add).click(function () {
-            // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
-            if (!t.literal) {
-                if (!t.template || t.template.type !== "select") {
-                    $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
-                        {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
-                        function (data) {
-                            idx = createDisplay(ul, data.iri, property, t, data, nextPath, idx);
-                        });
-                } else {
-                    idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
-                }
-            } else {
-                idx = createDisplay(ul, subject, property, t, "", nextPath, idx, true);
+        $(thExpand).click(function () {
+          for (let [index, v] of values.entries()) {
+            document.getElementById(t.verbose_name + "_" + index).hidden = !document.getElementById(t.verbose_name + "_" + index).hidden;
+            document.getElementById(t.verbose_name + "_" + index).hidden == true ? caretDownSpan.className = "fas fa-caret-down" : caretDownSpan.className = "fas fa-caret-up";
             }
-        });
-        th.appendChild(add);
-        {% endif %}
-        td.appendChild(ul);
+          });
+
+        const childTable = document.createElement("table");
+        childTable.hidden = true,
+        childTable.className = "table";
+        childTable.style.cssText = "border: 1px solid #dee2e6";
+        for (let v of values) {
+          const childTr = document.createElement("tr");
+          const childTd = document.createElement("td");
+          childTd.innerText = v.iri
+          childTr.appendChild(childTd);
+          childTable.appendChild(childTr);
+        }
+
+        const td = document.createElement("td");
+        td.style.cssText = "text-align: right;";
+        const trAdd = document.createElement("span");
+        trAdd.className = "fas fa-folder-plus";
+        const trDel = document.createElement("span");
+        trDel.className = "fas fa-trash";
+        trDel.style.cssText = "margin-left: 10px;";
+        //td.appendChild(trAdd);
+        td.appendChild(trDel);
         tr.appendChild(td);
-        return tr;
+
+        const trMain = document.createElement("tr");
+        const trChilds = document.createElement("tr");
+        trMain.appendChild(tr);
+
+        for (let [index, v] of values.entries()) {
+          const childTr = document.createElement("tr");
+          childTr.id = t.verbose_name + "_" + index;
+          childTr.hidden = true;
+          const childTd = document.createElement("td");
+          const childTdActions = document.createElement("td");
+          childTd.innerText = v.iri
+          childTr.appendChild(childTd);
+          childTr.appendChild(childTdActions);
+          trMain.appendChild(childTr);
+        }
+        return trMain;
     }
 
     function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
@@ -201,7 +199,8 @@ Login to edit
         // container.className ="container";
 
         li.appendChild(container);
-        const labelText = document.createElement("p");
+        const labelText = document.createElement("a");
+        labelText.style.cssText = "font-size: 14px;"
         let current_value = {};
         let editButton;
         {% if user.is_authenticated %}
@@ -231,6 +230,8 @@ Login to edit
                 current_value = data;
                 i.value = current_value[t.template.field];
                 labelText.innerText = current_value[t.template.field];
+
+                console.log(labelText)
                 i.className = "form-control";
                 // Save on enter
                 $(i).keydown(function (event) {
@@ -261,6 +262,7 @@ Login to edit
                 i.className = "form-control";
 
                 let o = document.createElement("option");
+                console.log(data)
                 if (data) {
                     o.value = data.iri;
                     o.selected = true;
@@ -302,6 +304,7 @@ Login to edit
                                             current_value = newValue;
                                             i.value = o.value;
                                             labelText.innerText = instance.label || instance.iri;
+                                            console.log(instance)
                                             if (current_o) {
                                                 current_o.selected = false;
                                             }
@@ -396,6 +399,8 @@ Login to edit
         labelDiv.id = "display__" + id;
         labelDiv.appendChild(labelText);
         labelDiv.hidden = unfold;
+        console.log(labelText)
+        labelText.href = labelText.innerText
 
         container.appendChild(labelDiv);
 
@@ -434,6 +439,7 @@ Login to edit
         let link = document.createTextNode(instance.iri.split('/').pop());
         label.appendChild(link);
         label.href = instance.label || instance.iri;
+        label.style.cssText = "font-size: 14px; cursor: pointer;"
 
         container.appendChild(label);
 
