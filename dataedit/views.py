@@ -1143,7 +1143,7 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
             table_tag = session.query(TableTags).filter(TableTags.tag==t.id)
             for tt in table_tag :
                 if t.id == tt.tag:
-                    keywords_match_oep_tags.append(t.name)        
+                    keywords_match_oep_tags.append(t.name_normalized)        
     for t in oep_tags:
         if t in  table_oemetadata["keywords"]:
             table_oemetadata["keywords"].remove(t)
@@ -1153,7 +1153,7 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     for id in tag_ids:           
         t = session.query(Tag).get(id)
         if t.name not in table_oemetadata["keywords"]:
-            oep_table_tags.append(t.name)
+            oep_table_tags.append(t.name_normalized)
 
     if oep_tags not in table_oemetadata["keywords"]:
         table_oemetadata["keywords"].extend(oep_table_tags)
