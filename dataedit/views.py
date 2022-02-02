@@ -1126,9 +1126,10 @@ class PermissionView(View):
 
 def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     """
-    Add all tags that are assinged to the table to the keywords field
+    Add all tags that are assinged to the current table to the keywords field
     in the oemetadata and update the comment on table.
     """
+    from rest_framework.authtoken.models import Token
     
     # Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
@@ -1136,7 +1137,6 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     oep_tags = []
     keywords_match_oep_tags = []
     for k in table_oemetadata["keywords"]:
-        # if session.query(Tag).filter(Tag.name==k) is not None:
         tag = session.query(Tag).filter(Tag.name_normalized==k)
         for t in tag:
             oep_tags.append(t.name_normalized)
@@ -1153,24 +1153,21 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     for id in tag_ids:           
         t = session.query(Tag).get(id)
         if t.name not in table_oemetadata["keywords"]:
-            # table_oemetadata["keywords"].append(t.name)
             oep_table_tags.append(t.name)
-        
-       
 
     if oep_tags not in table_oemetadata["keywords"]:
         table_oemetadata["keywords"].extend(oep_table_tags)
     
-
     OEP_URL = "http://" + sec.URL + ":8000"
     url = OEP_URL + "/api/v0/schema/{schema}/tables/{table}/meta/".format(
         schema=schema, table=table
     )
-    #TODO: obtain token from user that triggers function / django rest framework obtain token
-    token = "d3afdaf66d4acc5415893476d75cf07c28a61878"
 
-    headers = {'Authorization': 'Token %s'%token, 'Accept': 'application/json', 'Content-Type': 'application/json'}
-    if request.method == 'POST':
+    token = None
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        token = Token.objects.get(user=request.user)
+        headers = {'Authorization': 'Token %s'%token, 'Accept': 'application/json', 'Content-Type': 'application/json', }
         return req.post(url, json=table_oemetadata, headers=headers)
 
 
