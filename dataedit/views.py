@@ -1158,6 +1158,7 @@ def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
     if oep_tags not in table_oemetadata["keywords"]:
         table_oemetadata["keywords"].extend(oep_table_tags)
     
+    # TODO: The URL must be imported from the settings, what is the URL value in production?
     OEP_URL = "http://" + sec.URL + ":8000"
     url = OEP_URL + "/api/v0/schema/{schema}/tables/{table}/meta/".format(
         schema=schema, table=table
