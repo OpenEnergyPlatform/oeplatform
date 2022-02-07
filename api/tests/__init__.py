@@ -90,7 +90,7 @@ class APITestCase(TestCase):
         if data:
             resp = self.__class__.client.post(
                 "/api/v0/schema/{schema}/tables/{table}/rows/new".format(
-                    schema=self.test_schema, table=self.test_table
+                    schema=schema, table=table
                 ),
                 data=json.dumps({"query": data}),
                 HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
