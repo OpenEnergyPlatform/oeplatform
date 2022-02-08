@@ -1,6 +1,5 @@
 import csv
 import datetime
-import imp
 import json
 import os
 import re
@@ -11,8 +10,6 @@ from io import TextIOWrapper
 from itertools import chain
 from operator import add
 from subprocess import call
-from tkinter import N
-from tkinter.messagebox import NO
 from wsgiref.util import FileWrapper
 
 import numpy
@@ -52,6 +49,7 @@ from .models import (
 )
 from .metadata.__init__ import load_metadata_from_db
 import requests as req
+
 
 session = None
 
@@ -1429,7 +1427,6 @@ class MetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
     def get(self, request, schema, table):
-
         columns = get_column_description(schema, table)
 
         can_add = False
@@ -1438,11 +1435,14 @@ class MetaEditView(LoginRequiredMixin, View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
+        url_table_id = request.build_absolute_uri(reverse('view', kwargs={"schema": schema, "table": table}))
+
         context_dict = {
             "config": json.dumps({
                 "schema": schema,
                 "table": table,
                 "columns": columns,
+                "url_table_id": url_table_id,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
             }),
@@ -1454,4 +1454,3 @@ class MetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
-
