@@ -1220,35 +1220,102 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
 
     if check_is_tag(session, keyword_tag_id):
     
+        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": keyword_tag_id})
+
+        try:
+            print("adding")
+            session.add(t)
+            session.commit()
+        except Exception as e:
+            session.rollback() #Rollback the changes on error
+            return e
+        finally:
+            session.close() #Close the connection
+
+
+def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids, default_color_new_tag="#2E3638"):
+    """_summary_
+
+    Args:
+        session (_type_): _description_
+        schema (_type_): _description_
+        table (_type_): _description_
+        tag_ids (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    #TODO: use this to preprocess keyword for keys that should not be added to tags
+    FILTER_TAG_NAMES = ['test', 'test1', 'keyword']
+
     # Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
-    # remove table tags that are not present on table anymore
-    oep_tags = []
-    keywords_match_oep_tags = []
+
+    # Keep, this are the tags that where added by the user via OEP website
+    updated_oep_tags = [] 
+    # this are OEM keywords that are new to the OEP tags
+    kw_only = []
+    # Keywords that are present as OEP tag but have to be assinged as table tag
+    kw_is_oep_tag_but_not_oep_table_tag = []
+    # sync. table tags and keywords
+    updated_keywords = []
+
+    for id in tag_ids:
+        kw = get_tag_name_normalized_by_id(session, id)
+        if get_tag_name_normalized_by_id(session, id) is not None:
+           updated_oep_tags.append(kw)
+
+
     for k in table_oemetadata["keywords"]:
-        tag = session.query(Tag).filter(Tag.name_normalized==k)
-        for t in tag:
-            oep_tags.append(t.name_normalized)
-            table_tag = session.query(TableTags).filter(TableTags.tag==t.id)
-            for tt in table_tag :
-                if t.id == tt.tag:
-                    keywords_match_oep_tags.append(t.name_normalized)        
-    for t in oep_tags:
-        if t in  table_oemetadata["keywords"]:
-            table_oemetadata["keywords"].remove(t)
+        keyword_tag_id = get_tag_id_by_tag_name_normalized(session, k.lower())
+        if keyword_tag_id is None and k not in kw_only:
+            kw_only.append(k)
+        elif keyword_tag_id is not None and check_is_table_tag(session, schema, table, keyword_tag_id) is False \
+            and k not in kw_is_oep_tag_but_not_oep_table_tag:
+            
+            kw_is_oep_tag_but_not_oep_table_tag.append(k)
 
-    # Add tags to keywords that are assinged to table
-    oep_table_tags = []
-    for id in tag_ids:           
-        t = session.query(Tag).get(id)
-        if t.name not in table_oemetadata["keywords"]:
-            oep_table_tags.append(t.name_normalized)
 
-    if oep_tags not in table_oemetadata["keywords"]:
-        table_oemetadata["keywords"].extend(oep_table_tags)
+    updated_keywords = updated_oep_tags + kw_only
+    for k in kw_is_oep_tag_but_not_oep_table_tag:
+        print(k)
+        tag_id = get_tag_id_by_tag_name_normalized(session, k)
+        if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
+            and tag_id not in removed_table_tag_ids:
+            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+            updated_keywords.append(k)
+        
+
+    for k in kw_only:
+        default_color = default_color_new_tag
+        add_tag(k, default_color)
+        tag_id = get_tag_id_by_tag_name_normalized(session, k)
+        if tag_id is not None:
+            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
     
+    table_oemetadata["keywords"] = updated_keywords
+    return table_oemetadata
+
+
+def update_oem_on_table(request, schema, table, oemetadata_json):
+    """
+    
+
+    Args:
+        request (_type_): _description_
+        schema (_type_): _description_
+        table (_type_): _description_
+        oemetadata_json (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    from rest_framework.authtoken.models import Token
     # TODO: The URL must be imported from the settings, what is the URL value in production?
     OEP_URL = "http://" + sec.URL + ":8000"
+    # OEP_URL = request.get_host()
     url = OEP_URL + "/api/v0/schema/{schema}/tables/{table}/meta/".format(
         schema=schema, table=table
     )
@@ -1258,7 +1325,7 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
     if request.method == 'POST' and request.user.is_authenticated:
         token = Token.objects.get(user=request.user)
         headers = {'Authorization': 'Token %s'%token, 'Accept': 'application/json', 'Content-Type': 'application/json', }
-        return req.post(url, json=table_oemetadata, headers=headers)
+        return req.post(url, json=oemetadata_json, headers=headers)
 
 
 @login_required
