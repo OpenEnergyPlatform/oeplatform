@@ -1223,7 +1223,6 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
         t = TableTags(**{"schema_name": schema, "table_name": table, "tag": keyword_tag_id})
 
         try:
-            print("adding")
             session.add(t)
             session.commit()
         except Exception as e:
@@ -1279,7 +1278,6 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
 
     updated_keywords = updated_oep_tags + kw_only
     for k in kw_is_oep_tag_but_not_oep_table_tag:
-        print(k)
         tag_id = get_tag_id_by_tag_name_normalized(session, k)
         if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
             and tag_id not in removed_table_tag_ids:
