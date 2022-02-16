@@ -1122,10 +1122,18 @@ class PermissionView(View):
         p.delete()
         return self.get(request, schema, table)
 
-def add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids):
+
+def check_is_table_tag(session, schema, table, tag_id):
     """
-    Add all tags that are assinged to the current table to the keywords field
-    in the oemetadata and update the comment on table.
+    Check if a tag is existing in the table_tag table in schema public.
+    Tags are queried by tag id.
+
+    Args:
+        session (sqlachemy): sqlachemy session
+        tag_id (int): Tag ID
+
+    Returns:
+        bool: True if exists, False if not
     """
     from rest_framework.authtoken.models import Token
     
