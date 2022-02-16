@@ -1363,7 +1363,9 @@ def add_table_tags(request):
         session.add(t)
     session.commit()
     
-    add_table_tags_to_oem_keywords(request, session, schema, table, tag_ids=ids)
+    # Add keywords from oemetadata to table tags and table tags to keywords
+    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)
+    update_oem_on_table(request, schema, table, updated_oem_json)
     actions.update_meta_search(table, schema)
 
     return redirect(request.META["HTTP_REFERER"])
