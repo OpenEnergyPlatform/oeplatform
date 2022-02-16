@@ -1135,7 +1135,90 @@ def check_is_table_tag(session, schema, table, tag_id):
     Returns:
         bool: True if exists, False if not
     """
-    from rest_framework.authtoken.models import Token
+
+    t = session.query(TableTags.tag).filter_by(tag = tag_id, table_name = table, schema_name = schema)
+    session.commit()
+    return session.query(t.exists()).scalar() 
+
+
+def check_is_tag(session, tag_id):
+    """
+    Check if a tag is existing in the tag table in schema public.
+    Tags are queried by tag_id.
+
+    Args:
+        session (sqlalchemy): Sqlalchemy session
+        tag_id (int): [description]
+
+    Returns:
+        bool: True if exists, False if not
+    """
+
+    t = session.query(Tag).filter(Tag.id==tag_id)
+    session.commit()
+    return session.query(t.exists()).scalar() 
+
+
+def get_tag_id_by_tag_name_normalized(session, tag_name):
+    """
+    Query the Tag tabley in schmea public to get the Tag ID.
+    Tags are queried by unique field tag_name_normalized.
+
+    Args:
+        session ([type]): [description]
+        tag_name ([type]): [description]
+
+    Returns:
+        int: Tag ID
+        None: If Tag ID does not exists.
+
+    """
+
+    tag = session.query(Tag).filter(Tag.name_normalized==tag_name).first()
+    session.commit()
+    if tag is not None:
+        return tag.id
+    else:
+        return None
+
+
+def get_tag_name_normalized_by_id(session, tag_id):
+    """
+    Query the Tag table in schmea public to get the tag_name_normalized.
+    Tags are queried by tag id.
+
+    Args:
+        session (sqilachemy): sqlalachemy session
+        tag_id (int): The Tag ID
+
+    Returns:
+        None: If tag id does not exists.
+        Str: Tag name normalized
+    """
+
+    tag = session.query(Tag).filter(Tag.id==tag_id).first()
+    session.commit()
+    if tag is not None:
+        return tag.name_normalized
+    else:
+        return None
+
+
+def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_id):
+    """
+    Add a tag from the oem-keywords to the table_tags for the current table. 
+
+    Args:
+        session (sqilachemy): sqlalachemy session
+        schema (str): Name of the schema
+        table (str): Name of the table
+        keyword_tag_id (int): The tag id that machtes to keyword tag name (by tag_name_normalized)
+
+    Returns:
+        any: Exception
+    """
+
+    if check_is_tag(session, keyword_tag_id):
     
     # Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
