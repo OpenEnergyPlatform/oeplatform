@@ -1350,6 +1350,11 @@ def add_table_tags(request):
     Session = sessionmaker()
     session = Session(bind=engine)
 
+    # Identify the table tag ids that the user removed from the table.
+    # Usefull to distinguish between keywords that are tags and have to be assinged as table tags
+    # and keywords that exist as tags but where removed by the use, and therefore should not be reassinged to the table
+    removed_table_tag_ids = [tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table and TableTags.schema_name == schema) if tt.tag not in ids]
+
     session.query(TableTags).filter(
         TableTags.table_name == table and TableTags.schema_name == schema
     ).delete()
