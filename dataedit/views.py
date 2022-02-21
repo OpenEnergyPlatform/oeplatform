@@ -1262,7 +1262,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
 
     for id in tag_ids:
         kw = get_tag_name_normalized_by_id(session, id)
-        if get_tag_name_normalized_by_id(session, id) is not None:
+        if kw is not None:
            updated_oep_tags.append(kw)
 
 
