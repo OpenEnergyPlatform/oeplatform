@@ -371,59 +371,70 @@ Login to edit
 
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else if (t.template.type === "select") {
-                let i = document.createElement("select");
-                i.className = "form-control";
-
-                let o = document.createElement("option");
-                if (data) {
-                    o.value = data.iri;
-                    o.selected = true;
-                    o.innerText = data.label || data.iri;
-                    current_value = data;
-                    labelText.innerText = data.label || data.iri;
-                } else {
-                    o.innerText = "Choose one"
-                }
-                i.appendChild(o);
-
                 var options_label = {}
-                // Load options on demand
-                $(i).click(function (event) {
-                  //  $(i).find('option').remove();
-                    $.get("/factsheets/rdf/instances/",
-                        {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
-                        function (result) {
-                            let current_o;
-                            for (const instance of result.instances) {
-                                options_label[instance.iri] = instance.label;
-                                var o = document.createElement("option");
-                                o.value = instance.iri;
-                                o.innerText = instance.label;
-                                i.appendChild(o);
-                            }
+                $.get("/factsheets/rdf/instances/",
+                    {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                    function (result) {
+                        let current_o;
+                        for (const instance of result.instances) {
+                            options_label[instance.iri] = instance.label;
                         }
-                    );
-                });
 
-                i.onchange = function () {
-                  const new_selected = {
-                    iri: i.value,
-                    label: options_label[i.value]
-                  }
-                  $.post("/factsheets/rdf/" + subject + "/",
-                    {
-                        query: JSON.stringify({
-                            property: property,
-                            oldValue: current_value,
-                            newValue: new_selected
-                        }), csrfmiddlewaretoken: csrftoken
-                    },
-                    function () {
-                      console.log(new_selected);
-                    });
-                }
+                        let i = document.createElement("select");
+                        i.className = "form-control";
 
-                element = createEditable(subject, property, id, labelText, i, unfold);
+                        let o = document.createElement("option");
+                        if (data) {
+                            console.log(data);
+                            o.value = data.iri;
+                            o.selected = true;
+                            o.innerText = data.label || data.iri;
+                            current_value = data;
+                            labelText.innerText = options_label[data.iri];
+
+                        } else {
+                            o.innerText = "Choose one"
+                        }
+                        i.appendChild(o);
+
+                        // Load options on demand
+                        $(i).click(function (event) {
+                          //  $(i).find('option').remove();
+                          for (const [key, value] of Object.entries(options_label)) {
+                            var o = document.createElement("option");
+                            o.value = key;
+                            o.innerText = value;
+                            i.appendChild(o);
+                          }
+                        });
+
+                        i.onchange = function () {
+                          const new_selected = {
+                            iri: i.value,
+                            label: options_label[i.value]
+                          }
+                          $.post("/factsheets/rdf/" + subject + "/",
+                            {
+                                query: JSON.stringify({
+                                    property: property,
+                                    oldValue: current_value,
+                                    newValue: new_selected
+                                }), csrfmiddlewaretoken: csrftoken
+                            },
+                            function () {
+                              labelText.innerText = options_label[i.value];
+                              $('.message_on_edit').show();
+                            });
+                        }
+
+                        element = createEditable(subject, property, id, labelText, i, unfold);
+                        container.appendChild(element);
+
+                    }
+                );
+
+
+
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
@@ -439,7 +450,8 @@ Login to edit
 
         } else {
             current_value = data;
-            element = createExpandable(data, id, t["factory"])
+            element = createExpandable(data, id, t["factory"]);
+            container.appendChild(element);
         }
         {% if user.is_authenticated %}
 
@@ -492,7 +504,6 @@ Login to edit
         buttonGroup.append(deleteButton);
         container.append(buttonGroup);
         {% endif %}
-        container.appendChild(element);
         ul.appendChild(li);
         idx++;
         return idx
