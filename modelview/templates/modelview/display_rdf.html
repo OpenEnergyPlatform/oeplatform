@@ -48,8 +48,8 @@ Login to edit
 
     function hide_field(path) {
         document.getElementById("display__" + path).hidden = false;
-        document.getElementById("hint_for_edit").remove();
-        document.getElementById("edit__" + path).hidden = true;
+        // document.getElementById("hint_for_edit").remove();
+        // document.getElementById("edit__" + path).hidden = true;
         let input = document.getElementById("edit__" + path);
         input.onfocusout = "";
     }
@@ -59,12 +59,13 @@ Login to edit
         let edit_hint = document.createElement("div");
         edit_hint.setAttribute("id", "hint_for_edit");
         edit_hint.innerHTML = 'After edit, press Enter to save!';
-        parent_of_editable.appendChild(edit_hint);
+        //parent_of_editable.appendChild(edit_hint);
 
         document.getElementById("display__" + path).hidden = true;
         let edit = document.getElementById("edit__" + path);
         edit.hidden = false;
         let input = document.getElementById("input__" + path);
+
         setCaretPosition(input, input.value.length);
     }
 
@@ -100,7 +101,6 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
-
               parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
@@ -108,22 +108,93 @@ Login to edit
 
     function createPropertyTable(subject, identifier, factory, path, tuples) {
         let table = document.createElement("table");
+        table.className = "table";
         table.style.cssText = "border: 1px solid #dee2e6";
         table.className = "table";
         table.id = "container__" + path;
+        const tr = document.createElement("tr");
+        const tdSearch = document.createElement("td");
+        tdSearch.style.cssText = "width: 50%; background-color: rgb(161 214 251 / 22%); height: 50px";
+        const searchInput = document.createElement("input");
+        searchInput.id = "search_input";
+        searchInput.setAttribute("type", "text");
+        searchInput.setAttribute("placeholder", "Search...");
+
+        searchInput.onkeyup = function() {
+
+          var entered_text = document.getElementById('search_input').value;
+          const tuples_keys = Object.keys(tuples);
+
+          if (entered_text != '') {
+            for (k of tuples_keys) {
+              if (k != 'iri') {
+                document.getElementById( 'property_row_' + k).hidden = true;
+                }
+            }
+          }
+
+
+          tuples_keys.find(element => {
+            if (element != 'iri') {
+              if (
+                element.split("_").some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,1}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,2}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,3}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,4}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,5}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,6}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,7}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,8}/g).some(r => entered_text.split(" ").includes(r)) ||
+                element.match(/.{1,9}/g).some(r => entered_text.split(" ").includes(r))
+              )
+              {
+                document.getElementById( 'property_row_' + element).hidden = false
+              }
+            }
+          });
+
+
+        };
+        // bellow should be enabled later
+        //const filterInput = document.createElement("select");
+        //filterInput.style.cssText = "float: right; height: 30px;";
+        //var option0 = new Option('Filter by...', 'value', false, false);
+        //option0.setAttribute("disabled", "disabled");
+        //option0.setAttribute("selected", "selected");
+        //var option1 = new Option('Name', 'value', false, false);
+        //var option2 = new Option('Number of elements', 'value', false, false);
+        //filterInput.appendChild(option0);
+        //filterInput.appendChild(option1);
+        //filterInput.appendChild(option2);
+        //tdSearch.appendChild(filterInput);
+
+        tdSearch.appendChild(searchInput);
+        if (path == undefined) {
+          tr.appendChild(tdSearch);
+        }
+        table.appendChild(tr);
+
+        let index = 0;
         for (const [property, values] of Object.entries(tuples)) {
             if (property !== "iri") {
                 table.appendChild(createPropertyRow(subject, property, identifier, factory, path, values));
             }
+            index++
         }
         return table;
     }
 
     function createPropertyRow(subject, property, identifier, factory, path, values) {
+        const trMain = document.createElement("tr");
+        trMain.id = "property_row_" + property
+        trMain.style.cssText = "display: flex; flex-direction: column;";
+
         const tr = document.createElement("tr");
+        tr.style.cssText = "display: flex;";
         // Create field header
         const tdElem = document.createElement("td");
-        tdElem.style.cssText = "width: 100%;";
+        tdElem.style.cssText = "width: 95%;";
 
         const thExpand = document.createElement("a");
         thExpand.href = "javascript:void(0)";
@@ -142,70 +213,112 @@ Login to edit
         tdElem.appendChild(thName);
         tr.appendChild(tdElem);
 
+        const actionTd = document.createElement("td");
+        actionTd.style.cssText = "width: 5%; text-align: right;";
+        const addNew = document.createElement("span");
+        addNew.className = "fas fa-folder-plus";
+        addNew.style.cssText = "cursor: pointer;"
+        {% if user.is_authenticated %}
+          actionTd.appendChild(addNew);
+        {% endif %}
+        tr.appendChild(actionTd);
+
         $(thExpand).click(function () {
           for (let [index, v] of values.entries()) {
-            document.getElementById(t.verbose_name + "_" + index).hidden = !document.getElementById(t.verbose_name + "_" + index).hidden;
-            document.getElementById(t.verbose_name + "_" + index).hidden == true ? caretDownSpan.className = "fas fa-caret-down" : caretDownSpan.className = "fas fa-caret-up";
+            document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden = !document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden;
+            document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden == true ? caretDownSpan.className = "fas fa-caret-down" : caretDownSpan.className = "fas fa-caret-up";
             }
           });
 
-        const childTable = document.createElement("table");
-        childTable.hidden = true,
-        childTable.className = "table";
-        childTable.style.cssText = "border: 1px solid #dee2e6";
-        for (let v of values) {
-          const childTr = document.createElement("tr");
-          const childTd = document.createElement("td");
-          childTd.innerText = v.iri
-          childTr.appendChild(childTd);
-          childTable.appendChild(childTr);
+
+        let nextPath;
+        if (path) {
+            nextPath = path + "." + property;
+        } else {
+            nextPath = property;
         }
+        let idx = 0;
 
-        const td = document.createElement("td");
-        td.style.cssText = "text-align: right;";
-        const trAdd = document.createElement("span");
-        trAdd.className = "fas fa-folder-plus";
-        const trDel = document.createElement("span");
-        trDel.className = "fas fa-trash";
-        trDel.style.cssText = "margin-left: 10px;";
-        //td.appendChild(trAdd);
-        td.appendChild(trDel);
-        tr.appendChild(td);
 
-        const trMain = document.createElement("tr");
         const trChilds = document.createElement("tr");
+        trChilds.style.cssText = "display: flex; flex-direction: column;";
+        trChilds.id = t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems';
+        trChilds.hidden = true;
+        const addTd = document.createElement("td");
+        addTd.style.cssText = "width: 100%; background-color: #dae0e5";
+
+
+        $(addNew).click(function () {
+            document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems').hidden = false;
+            // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
+            if (!t.literal) {
+                if (!t.template || t.template.type !== "select") {
+                    $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
+                        {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
+                        function (data) {
+                            //idx = createDisplay(addTd, data.iri, property, t, data, nextPath, idx);
+                            idx = createDisplay(addTd, data.iri, property, t, data, nextPath, idx);
+                        });
+                } else {
+                    idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
+                }
+            } else {
+                idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
+            }
+            for (let [index, v] of values.entries()) {
+              if (document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden == true) {
+                document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden = false;
+              }
+            }
+        });
+
         trMain.appendChild(tr);
 
         for (let [index, v] of values.entries()) {
           const childTr = document.createElement("tr");
-          childTr.id = t.verbose_name + "_" + index;
+          childTr.style.cssText = "display: flex;";
+          childTr.id = t.verbose_name.replaceAll(' ', '_') + "_" + index;
           childTr.hidden = true;
           const childTd = document.createElement("td");
-          const childTdActions = document.createElement("td");
-          childTd.innerText = v.iri
+          childTd.style.cssText = "width: 100%;";
+
+          const ul = document.createElement("ul");
+          ul.className = "list-group";
+          idx = createDisplay(ul, subject, property, t, v, nextPath, idx);
+          childTd.appendChild(ul);
           childTr.appendChild(childTd);
-          childTr.appendChild(childTdActions);
           trMain.appendChild(childTr);
         }
+
+        trChilds.appendChild(addTd);
+        trMain.appendChild(trChilds);
+
         return trMain;
     }
 
     function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
         let id = path + "." + idx;
-        let li = document.createElement("li");
+        let li = document.createElement("div");
         li.className = "list-group-item";
 
         let container = document.createElement("div");
         // container.className ="container";
+        addHint = document.createElement("div");
+        addHint.innerHTML = 'Press Enter to save!';
+        addHint.setAttribute("id", "hint_for_add");
+        addHint.hidden = true;
 
         li.appendChild(container);
+        container.appendChild(addHint);
+
         const labelText = document.createElement("a");
         labelText.style.cssText = "font-size: 14px;"
         let current_value = {};
         let editButton;
         {% if user.is_authenticated %}
-        let deleteButton = document.createElement("button");
-        deleteButton.className = "btn btn-secondary";
+        let deleteButton = document.createElement("span");
+        deleteButton.style.cssText = "cursor: pointer;"
+        //deleteButton.className = "btn btn-secondary";
         let bin = document.createElement("i");
         bin.className = "fas fa-trash";
         deleteButton.appendChild(bin);
@@ -230,11 +343,11 @@ Login to edit
                 current_value = data;
                 i.value = current_value[t.template.field];
                 labelText.innerText = current_value[t.template.field];
-
-                console.log(labelText)
                 i.className = "form-control";
+
                 // Save on enter
                 $(i).keydown(function (event) {
+                    addHint.hidden = false;
                     let keyPressed = event.keyCode || event.which;
                     if (keyPressed === 13) {
                         let newValue = {};
@@ -262,7 +375,6 @@ Login to edit
                 i.className = "form-control";
 
                 let o = document.createElement("option");
-                console.log(data)
                 if (data) {
                     o.value = data.iri;
                     o.selected = true;
@@ -274,59 +386,52 @@ Login to edit
                 }
                 i.appendChild(o);
 
-
+                var options_label = {}
                 // Load options on demand
                 $(i).click(function (event) {
-                    $(i).find('option').remove();
+                  //  $(i).find('option').remove();
                     $.get("/factsheets/rdf/instances/",
                         {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
                         function (result) {
                             let current_o;
                             for (const instance of result.instances) {
-                                let o = document.createElement("option");
+                                options_label[instance.iri] = instance.label;
+                                var o = document.createElement("option");
                                 o.value = instance.iri;
-                                if (instance.iri === current_value[t.template.field]) {
-                                    o.selected = true;
-                                    current_o = o;
-                                }
-                                $(o).click(function (event) {
-                                    let newValue = {};
-                                    newValue = instance;
-                                    $.post("/factsheets/rdf/" + subject + "/",
-                                        {
-                                            query: JSON.stringify({
-                                                property: property,
-                                                oldValue: current_value,
-                                                newValue: newValue
-                                            }), csrfmiddlewaretoken: csrftoken
-                                        },
-                                        function () {
-                                            current_value = newValue;
-                                            i.value = o.value;
-                                            labelText.innerText = instance.label || instance.iri;
-                                            console.log(instance)
-                                            if (current_o) {
-                                                current_o.selected = false;
-                                            }
-                                            o.selected = true;
-                                            current_o = o;
-                                        })
-                                });
-                                o.innerText = instance.label || instance.iri;
+                                o.innerText = instance.label;
                                 i.appendChild(o);
                             }
                         }
-                    )
+                    );
                 });
+
+                i.onchange = function () {
+                  const new_selected = {
+                    iri: i.value,
+                    label: options_label[i.value]
+                  }
+                  $.post("/factsheets/rdf/" + subject + "/",
+                    {
+                        query: JSON.stringify({
+                            property: property,
+                            oldValue: current_value,
+                            newValue: new_selected
+                        }), csrfmiddlewaretoken: csrftoken
+                    },
+                    function () {
+                      console.log(new_selected);
+                    });
+                }
 
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
             {% if user.is_authenticated %}
-            editButton = document.createElement("button");
+            editButton = document.createElement("span");
+            editButton.style.cssText = "margin-right: 8px; cursor: pointer;"
             $(editButton).click(() => show_field(id));
-            editButton.className = "btn btn-secondary";
+            //editButton.className = "btn btn-secondary";
             let i = document.createElement("i");
             i.className = "fas fa-pen";
             editButton.appendChild(i);
@@ -399,7 +504,6 @@ Login to edit
         labelDiv.id = "display__" + id;
         labelDiv.appendChild(labelText);
         labelDiv.hidden = unfold;
-        console.log(labelText)
         labelText.href = labelText.innerText
 
         container.appendChild(labelDiv);
@@ -434,8 +538,8 @@ Login to edit
     function createExpandable(instance, id, factory) {
         let container = document.createElement("div");
         container.id = id;
-
         let label = document.createElement("a");
+        //let link = document.createTextNode(parseInt(id.split('.').pop()) + 1);
         let link = document.createTextNode(instance.iri.split('/').pop());
         label.appendChild(link);
         label.href = instance.label || instance.iri;
@@ -444,9 +548,10 @@ Login to edit
         container.appendChild(label);
 
         // A link to expand a new instance
-        let expander = document.createElement("a");
-        expander.style.cssText = "background-color: #9ED8D8; border-radius: 8px; color:white; padding: 2px 6px; text-align: center; font-size: 12px; margin: 1px 4px; cursor: pointer;"
-        expander.innerText = "Show more...";
+        let expander = document.createElement("span");
+        expander.className = "fas fa-caret-down";
+        expander.style.cssText = "margin: 1px 5px; cursor: pointer;"
+        //expander.innerText = "Show more...";
         let name = instance.iri.split("/").pop();
         expander.id = "expand__" + id;
         expander.href = "javascript:void(0)";
@@ -454,9 +559,11 @@ Login to edit
         container.appendChild(expander);
 
         // A link to collapse an instance
-        let collapser = document.createElement("a");
-        collapser.style.cssText = "background-color: #D89EB7; border-radius: 8px; color:white; padding: 2px 6px; text-align: center; font-size: 12px; margin: 1px 4px; cursor: pointer;"
-        collapser.innerText = "Show less";
+        let collapser = document.createElement("span");
+        collapser.className = "fas fa-caret-up";
+        collapser.style.cssText = "margin: 1px 5px; cursor: pointer;"
+        //collapser.style.cssText = "background-color: #D89EB7; border-radius: 8px; color:white; padding: 2px 6px; text-align: center; font-size: 12px; margin: 1px 4px; cursor: pointer;"
+        //collapser.innerText = "Show less";
         collapser.id = "collapse__" + id;
         collapser.hidden = true;
         collapser.href = "javascript:void(0)";
