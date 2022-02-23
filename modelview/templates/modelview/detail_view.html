@@ -10,7 +10,7 @@
 
 {% block site-header %}
   <h2 class="site-header">
-    {{ displaySheetType }} Factsheet:
+    {{ displaySheetType }}
     {% if model.model_name %} {{ model.model_name }} {% if  model.acronym %} ({{ model.acronym }}) {% endif %}{% endif %}
     {% if model.name_of_scenario %} {{ model.name_of_scenario }} {% endif %}
 
@@ -21,7 +21,9 @@
   <hr>
 
   <h3>Actions</h3>
-
+  <a role="button" class="btn btn-success" href="New_Factsheet">
+    <span class="fas fa-plus"></span> Add
+  </a>
   {% block main-right-sidebar-content-actions %}
   {% endblock main-right-sidebar-content-actions %}
 
