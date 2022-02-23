@@ -31,8 +31,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns, set_table_metadata
-from api.views import require_write_permission
+from api.actions import describe_columns
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -1297,7 +1296,8 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
     return table_oemetadata
 
 
-@require_write_permission
+# FIXME: should use api.views.require_write_permission, but circular imports!
+@login_required
 def add_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.
@@ -1314,6 +1314,7 @@ def add_table_tags(request):
     }
     schema = request.POST["schema"]
     table = request.POST.get("table", None)
+    
 
     engine = actions._get_engine()
     metadata = sqla.MetaData(bind=engine)
@@ -1334,11 +1335,11 @@ def add_table_tags(request):
     session.commit()
     
     # Add keywords from oemetadata to table tags and table tags to keywords
-    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)
+    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)    
     
-    
-    with engine.connect() as con:
-        set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)
+    # TODO: reuse session from above?
+    with engine.begin() as con:
+        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)        
 
     
     return redirect(request.META["HTTP_REFERER"])

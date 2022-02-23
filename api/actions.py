@@ -2139,6 +2139,7 @@ def set_table_metadata(table, schema, metadata, cursor):
     # SQLAlchemy's compiler here but do it manually.
     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
         schema=table_obj.schema,
-        table=table_obj.name)
+        table=table_obj.name
+    )
     cursor.execute(sql, (table_obj.comment, ))
     update_meta_search(table, schema)

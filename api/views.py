@@ -27,7 +27,7 @@ from django.core.files.storage import FileSystemStorage
 
 import api.parser
 import login.models as login_models
-from api import actions, parser, sessions, set_table_metadata
+from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
@@ -260,7 +260,7 @@ class Metadata(APIView):
         
         if metadata is not None:            
             cursor = actions.load_cursor_from_context(request.data)
-            set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)            
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)            
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
