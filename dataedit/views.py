@@ -1,6 +1,5 @@
 import csv
 import datetime
-import imp
 import json
 import os
 import re
@@ -1249,13 +1248,12 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
     # Check for empty or bad tag names
     validate_tag=["", " ", "_", "-", "*"]
 
-    # Add Tages to "keywords" field in oemetadata and update (comment on table)
+    # Get metadata json. Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
     if table_oemetadata is {}:
         from metadata.v140.template import OEMETADATA_V140_TEMPLATE
         table_oemetadata = OEMETADATA_V140_TEMPLATE
     
-    print(table_oemetadata)
 
     # Keep, this are the tags that where added by the user via OEP website
     updated_oep_tags = [] 
