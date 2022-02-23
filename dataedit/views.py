@@ -1,5 +1,6 @@
 import csv
 import datetime
+import imp
 import json
 import os
 import re
@@ -1245,11 +1246,16 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         _type_: _description_
     """
 
-    #TODO: use this to preprocess keyword for keys that should not be added to tags
-    FILTER_TAG_NAMES = ['test', 'test1', 'keyword']
+    # Check for empty or bad tag names
+    validate_tag=["", " ", "_", "-", "*"]
 
     # Add Tages to "keywords" field in oemetadata and update (comment on table)
     table_oemetadata = load_metadata_from_db(schema, table)
+    if table_oemetadata is {}:
+        from metadata.v140.template import OEMETADATA_V140_TEMPLATE
+        table_oemetadata = OEMETADATA_V140_TEMPLATE
+    
+    print(table_oemetadata)
 
     # Keep, this are the tags that where added by the user via OEP website
     updated_oep_tags = [] 
@@ -1268,7 +1274,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
 
     for k in table_oemetadata["keywords"]:
         keyword_tag_id = get_tag_id_by_tag_name_normalized(session, k.lower())
-        if keyword_tag_id is None and k not in kw_only:
+        if keyword_tag_id is None and k not in kw_only and k not in validate_tag:
             kw_only.append(k)
         elif keyword_tag_id is not None and check_is_table_tag(session, schema, table, keyword_tag_id) is False \
             and k not in kw_is_oep_tag_but_not_oep_table_tag:
@@ -1278,7 +1284,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
 
     updated_keywords = updated_oep_tags + kw_only
     for k in kw_is_oep_tag_but_not_oep_table_tag:
-        tag_id = get_tag_id_by_tag_name_normalized(session, k)
+        tag_id = get_tag_id_by_tag_name_normalized(session, k.lower())
         if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
             and tag_id not in removed_table_tag_ids:
             add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
@@ -1292,7 +1298,19 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         if tag_id is not None:
             add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
     
+    print("-----")
+    print(removed_table_tag_ids)
+    print("-----")
+    print(updated_oep_tags)
+    print("-----")
+    print(kw_only)
+    print("-----")
+    print(kw_is_oep_tag_but_not_oep_table_tag)
+    print("-----")
+    print(updated_keywords)
+
     table_oemetadata["keywords"] = updated_keywords
+    print(table_oemetadata)
     return table_oemetadata
 
 
