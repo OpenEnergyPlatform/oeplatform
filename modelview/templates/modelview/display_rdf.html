@@ -101,6 +101,7 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
+              console.log(tuples);
               parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
@@ -113,10 +114,11 @@ Login to edit
         table.className = "table";
         table.id = "container__" + path;
         const tr = document.createElement("tr");
-        const tdSearch = document.createElement("td");
-        tdSearch.style.cssText = "width: 50%; background-color: rgb(161 214 251 / 22%); height: 50px";
+        const tdSearch = document.createElement("div");
+        tdSearch.style.cssText = "display: flex; justify-content: space-between; align-items: center; background-color: rgb(161 214 251 / 22%); height: 50px";
         const searchInput = document.createElement("input");
         searchInput.id = "search_input";
+        searchInput.style.cssText = "margin-right: 10px;";
         searchInput.setAttribute("type", "text");
         searchInput.setAttribute("placeholder", "Search...");
 
@@ -129,6 +131,14 @@ Login to edit
             for (k of tuples_keys) {
               if (k != 'iri') {
                 document.getElementById( 'property_row_' + k).hidden = true;
+                }
+            }
+          }
+
+          if (searchInput.value == '') {
+            for (k of tuples_keys) {
+              if (k != 'iri') {
+                document.getElementById( 'property_row_' + k).hidden = false;
                 }
             }
           }
@@ -169,12 +179,17 @@ Login to edit
         //filterInput.appendChild(option2);
         //tdSearch.appendChild(filterInput);
 
+        const study_title = document.createElement("div");
+        study_title.innerText = "{{ iri }}";
+        study_title.style.cssText = "margin-left: 10px; font-weight: bold; font-size: 22px;";
+
+        tdSearch.appendChild(study_title);
         tdSearch.appendChild(searchInput);
         if (path == undefined) {
           tr.appendChild(tdSearch);
         }
         table.appendChild(tr);
-
+        console.log(tuples);
         let index = 0;
         for (const [property, values] of Object.entries(tuples)) {
             if (property !== "iri") {
@@ -371,70 +386,62 @@ Login to edit
 
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else if (t.template.type === "select") {
+                let i = document.createElement("select");
+                i.className = "form-control";
+
+                let o = document.createElement("option");
+                if (data) {
+                    console.log(data);
+                    o.value = data.iri;
+                    o.selected = true;
+                    o.innerText = data.label || data.iri;
+                    current_value = data;
+                    labelText.innerText = data.label || data.iri;
+
+                } else {
+                    o.innerText = "Choose one"
+                }
+                i.appendChild(o);
+
                 var options_label = {}
-                $.get("/factsheets/rdf/instances/",
-                    {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
-                    function (result) {
-                        let current_o;
-                        for (const instance of result.instances) {
-                            options_label[instance.iri] = instance.label;
+                // Load options on demand
+                $(i).click(function (event) {
+                  //  $(i).find('option').remove();
+                    $.get("/factsheets/rdf/instances/",
+                        {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                        function (result) {
+                            let current_o;
+                            for (const instance of result.instances) {
+                                options_label[instance.iri] = instance.label;
+                                var o = document.createElement("option");
+                                o.value = instance.iri;
+                                o.innerText = instance.label;
+                                i.appendChild(o);
+                            }
                         }
+                    );
+                });
 
-                        let i = document.createElement("select");
-                        i.className = "form-control";
-
-                        let o = document.createElement("option");
-                        if (data) {
-                            console.log(data);
-                            o.value = data.iri;
-                            o.selected = true;
-                            o.innerText = data.label || data.iri;
-                            current_value = data;
-                            labelText.innerText = options_label[data.iri];
-
-                        } else {
-                            o.innerText = "Choose one"
-                        }
-                        i.appendChild(o);
-
-                        // Load options on demand
-                        $(i).click(function (event) {
-                          //  $(i).find('option').remove();
-                          for (const [key, value] of Object.entries(options_label)) {
-                            var o = document.createElement("option");
-                            o.value = key;
-                            o.innerText = value;
-                            i.appendChild(o);
-                          }
-                        });
-
-                        i.onchange = function () {
-                          const new_selected = {
-                            iri: i.value,
-                            label: options_label[i.value]
-                          }
-                          $.post("/factsheets/rdf/" + subject + "/",
-                            {
-                                query: JSON.stringify({
-                                    property: property,
-                                    oldValue: current_value,
-                                    newValue: new_selected
-                                }), csrfmiddlewaretoken: csrftoken
-                            },
-                            function () {
-                              labelText.innerText = options_label[i.value];
-                              $('.message_on_edit').show();
-                            });
-                        }
-
-                        element = createEditable(subject, property, id, labelText, i, unfold);
-                        container.appendChild(element);
-
-                    }
-                );
-
-
-
+                i.onchange = function () {
+                  const new_selected = {
+                    iri: i.value,
+                    label: options_label[i.value]
+                  }
+                  $.post("/factsheets/rdf/" + subject + "/",
+                    {
+                        query: JSON.stringify({
+                            property: property,
+                            oldValue: current_value,
+                            newValue: new_selected
+                        }), csrfmiddlewaretoken: csrftoken
+                    },
+                    function () {
+                      labelText.innerText = options_label[i.value];
+                      $('.message_on_edit').show();
+                    });
+                }
+                console.log(options_label[labelText]);
+                element = createEditable(subject, property, id, labelText, i, unfold);
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
@@ -450,8 +457,7 @@ Login to edit
 
         } else {
             current_value = data;
-            element = createExpandable(data, id, t["factory"]);
-            container.appendChild(element);
+            element = createExpandable(data, id, t["factory"])
         }
         {% if user.is_authenticated %}
 
@@ -504,6 +510,7 @@ Login to edit
         buttonGroup.append(deleteButton);
         container.append(buttonGroup);
         {% endif %}
+        container.appendChild(element);
         ul.appendChild(li);
         idx++;
         return idx
