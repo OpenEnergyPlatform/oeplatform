@@ -31,7 +31,8 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api.actions import describe_columns, set_table_metadata
+from api.views import require_write_permission
 import oeplatform.securitysettings as sec
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
@@ -1296,37 +1297,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
     return table_oemetadata
 
 
-def update_oem_on_table(request, schema, table, oemetadata_json):
-    """
-    
-
-    Args:
-        request (_type_): _description_
-        schema (_type_): _description_
-        table (_type_): _description_
-        oemetadata_json (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    from rest_framework.authtoken.models import Token
-    # TODO: The URL must be imported from the settings, what is the URL value in production?
-    OEP_URL = "http://" + sec.URL + ":8000"
-    # OEP_URL = request.get_host()
-    url = OEP_URL + "/api/v0/schema/{schema}/tables/{table}/meta/".format(
-        schema=schema, table=table
-    )
-
-    token = None
-
-    if request.method == 'POST' and request.user.is_authenticated:
-        token = Token.objects.get(user=request.user)
-        headers = {'Authorization': 'Token %s'%token, 'Accept': 'application/json', 'Content-Type': 'application/json', }
-        return req.post(url, json=oemetadata_json, headers=headers)
-
-
-@login_required
+@require_write_permission
 def add_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.
@@ -1343,6 +1314,7 @@ def add_table_tags(request):
     }
     schema = request.POST["schema"]
     table = request.POST.get("table", None)
+
     engine = actions._get_engine()
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
@@ -1363,9 +1335,12 @@ def add_table_tags(request):
     
     # Add keywords from oemetadata to table tags and table tags to keywords
     updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)
-    update_oem_on_table(request, schema, table, updated_oem_json)
-    actions.update_meta_search(table, schema)
+    
+    
+    with engine.connect() as con:
+        set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)
 
+    
     return redirect(request.META["HTTP_REFERER"])
 
 

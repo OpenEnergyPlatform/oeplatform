@@ -27,7 +27,7 @@ from django.core.files.storage import FileSystemStorage
 
 import api.parser
 import login.models as login_models
-from api import actions, parser, sessions
+from api import actions, parser, sessions, set_table_metadata
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
@@ -255,22 +255,12 @@ class Metadata(APIView):
     @require_write_permission
     @load_cursor()
     def post(self, request, schema, table):
-        table_obj = actions._get_table(schema=schema, table=table)
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
-        if metadata is not None:
-            compiler = JSONCompiler()
-            table_obj.comment = json.dumps(compiler.visit(metadata))
+        
+        if metadata is not None:            
             cursor = actions.load_cursor_from_context(request.data)
-            # Surprisingly, SQLAlchemy does not seem to escape comment strings
-            # properly. Certain strings cause errors database errors.
-            # This MAY be a security issue. Therefore, we do not use
-            # SQLAlchemy's compiler here but do it manually.
-            sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-                schema=table_obj.schema,
-                table=table_obj.name)
-            cursor.execute(sql, (table_obj.comment, ))
-            actions.update_meta_search(table,schema)
+            set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)            
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
