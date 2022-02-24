@@ -58,21 +58,23 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/ontology/">Overview</a>
                         <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
-                        <a class="dropdown-item" href="viewer/oeo/">OEO Viewer</a>
+                        <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
                         <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
                     </div>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/tutorials/">Tutorials</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://oep-data-interface.readthedocs.io/en/latest/">Documentation</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">About OEP</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/tutorials/17/">FAQ</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        About
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/about/">Overview</a>
+                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/">Developer Documentation</a>
+                        <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
+                    </div>
                 </li>
             </ul>
         </div>
