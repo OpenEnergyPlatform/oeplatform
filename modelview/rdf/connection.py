@@ -30,8 +30,9 @@ class ConnectionContext:
         s += "} WHERE {}"
         self.execute(s)
 
-    def insert_new_instance(self, subject, property, inverse=False):
-        hash = getattr(OEO_KG, str(uuid.uuid4()))
+    def insert_new_instance(self, subject, property, inverse=False, new_name=""):
+        hash = getattr(OEO_KG, str(uuid.uuid4())) + "/" + new_name.replace(" ", "-")
+        print(hash)
         s = "DELETE { } INSERT {"
         if inverse:
             s += f" <{hash}> <{property}> {subject}. "

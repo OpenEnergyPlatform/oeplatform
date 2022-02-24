@@ -4,7 +4,7 @@
 {% load modelview_extras %}
 
 {% block after-head %}
-  <link rel="stylesheet" href="{% static 'css/custom_alert.css' %}">
+  <link rel="stylesheet" href="{% static 'custom_alert.css' %}">
   <script type="text/javascript" src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
 
 {% endblock after-head %}
@@ -101,7 +101,6 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
-              console.log(tuples);
               parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
@@ -189,7 +188,6 @@ Login to edit
           tr.appendChild(tdSearch);
         }
         table.appendChild(tr);
-        console.log(tuples);
         let index = 0;
         for (const [property, values] of Object.entries(tuples)) {
             if (property !== "iri") {
@@ -262,29 +260,56 @@ Login to edit
         const addTd = document.createElement("td");
         addTd.style.cssText = "width: 100%; background-color: #dae0e5";
 
+        const addNewItem = {
+          add: async () => createAddNewItem()
+        }
 
-        $(addNew).click(function () {
+        const createAddNewItem = () => {
+          return new Promise((complete, failed)=>{
+            $('#add_name').off('click');
+            $('#add_name').on('click', ()=> { $('.add_new_entry').hide(); complete(true); });
+            $('.add_new_entry').show();
+          });
+        }
+
+        const addItem = async () => {
+          const confirm = await addNewItem.add();
+
+          if(confirm){
+            const new_name = document.getElementById("new_entry_text").value;
+            let newValue = { 'literal': new_name};
+            let oldValue = { 'literal': ""};
             document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems').hidden = false;
             // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
             if (!t.literal) {
                 if (!t.template || t.template.type !== "select") {
+                    $(".add_new_entry").show();
                     $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
-                        {query: JSON.stringify({property: property, type: t.factory}), csrfmiddlewaretoken: csrftoken},
+                        {query: JSON.stringify({ property: property, newValue: newValue, oldValue: oldValue }), csrfmiddlewaretoken: csrftoken},
                         function (data) {
                             //idx = createDisplay(addTd, data.iri, property, t, data, nextPath, idx);
-                            idx = createDisplay(addTd, data.iri, property, t, data, nextPath, idx);
+                            idx = createDisplay(addTd, data.iri.split("/").pop(), property, t, data, nextPath, idx);
                         });
+                    $('.add_new_entry').hide();
                 } else {
                     idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
                 }
-            } else {
-                idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
             }
-            for (let [index, v] of values.entries()) {
-              if (document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden == true) {
-                document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden = false;
-              }
+          }
+        }
+
+        $(addNew).click(function () {
+          if (!t.literal) {
+            addItem();
+          } else {
+              document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems').hidden = false;
+              idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
+          }
+          for (let [index, v] of values.entries()) {
+            if (document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden == true) {
+              document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + index).hidden = false;
             }
+          }
         });
 
         trMain.appendChild(tr);
@@ -379,8 +404,9 @@ Login to edit
                             function () {
                                 current_value = newValue;
                                 labelText.innerText = current_value[t.template.field];
+                                document.getElementById("edited_value").innerText = current_value[t.template.field];
                             })
-                            $('.message_on_edit').show();
+                            $(".message_on_edit").show();
                     }
                 });
 
@@ -391,7 +417,6 @@ Login to edit
 
                 let o = document.createElement("option");
                 if (data) {
-                    console.log(data);
                     o.value = data.iri;
                     o.selected = true;
                     o.innerText = data.label || data.iri;
@@ -437,10 +462,10 @@ Login to edit
                     },
                     function () {
                       labelText.innerText = options_label[i.value];
+                      document.getElementById("edited_value").innerText = options_label[i.value];
                       $('.message_on_edit').show();
                     });
                 }
-                console.log(options_label[labelText]);
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else {
                 console.log("Unknown template: " + t.template.type)
@@ -558,7 +583,7 @@ Login to edit
         container.id = id;
         let label = document.createElement("a");
         //let link = document.createTextNode(parseInt(id.split('.').pop()) + 1);
-        let link = document.createTextNode(instance.iri.split('/').pop());
+        let link = document.createTextNode(instance.iri.split('/').pop().replaceAll("-", " ").replaceAll("_", " "));
         label.appendChild(link);
         label.href = instance.label || instance.iri;
         label.style.cssText = "font-size: 14px; cursor: pointer;"
@@ -595,9 +620,9 @@ Login to edit
 </script>
 
 <div class="message_on_edit">
-  <div></div>
-  <div>
-    <div id="edit_message">A new value saved!</div>
+  <div style="background-color: #eaf6fe;">
+    <div><i class="fa fa-info-circle fa-2x" aria-hidden="true"></i></div>
+    <div style="margin: 15px;"><span id="edit_message">The new value is set as: </span><span id="edited_value"></span></div>
     <div>
       <input id="edit_confirm" type="button" value="Ok" class="ok_button" onClick="$('.message_on_edit').hide();" />
     </div>
@@ -605,12 +630,23 @@ Login to edit
 </div>
 
 <div class="confirm">
-  <div></div>
-  <div>
-    <div id="confirmMessage"></div>
+  <div  style="background-color: #eaf6fe;">
+    <div><i class="fa fa-minus-circle fa-2x" aria-hidden="true"></i></div>
+    <div id="confirmMessage" style="margin: 15px;"></div>
     <div>
       <input id="confirmYes" type="button" value="Yes" class="delete_button"/>
       <input id="confirmNo" type="button" value="No" class="cancel_button"/>
+    </div>
+  </div>
+</div>
+
+<div class="add_new_entry">
+  <div  style="background-color: #eaf6fe;">
+    <div><i class="fa fa-plus-circle fa-2x" aria-hidden="true"></i></div>
+    <div style="margin: 15px;">Please enter a name for this new entry:</div>
+    <div>
+      <input id="new_entry_text" class="form-control" type="text" placeholder="">
+      <input id="add_name" type="button" value="Submit" class="ok_button"  />
     </div>
   </div>
 </div>
