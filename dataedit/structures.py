@@ -51,7 +51,7 @@ class Tag(Base):
         """
         name_norm = name or ""
         name_norm = name_norm.lower()
-        re.sub("[^a-z0-9]+", "_", name_norm)
+        name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
         name_norm = name_norm.strip("_")
         return name_norm
     
