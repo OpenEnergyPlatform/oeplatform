@@ -4,7 +4,7 @@
 {% load modelview_extras %}
 
 {% block after-head %}
-  <link rel="stylesheet" href="{% static 'custom_alert.css' %}">
+  <link rel="stylesheet" href="{% static 'css/custom_alert.css' %}">
   <script type="text/javascript" src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
 
 {% endblock after-head %}
@@ -86,11 +86,11 @@ Login to edit
     }
 
     let templates = {{rdf_templates | safe}};
+
     // temporary
     /*
 
     */
-
     function load_instance(parentId, identifier, factory, path) {
         let parent = document.getElementById(parentId);
         let subject = factory + "/" + identifier;
@@ -101,7 +101,7 @@ Login to edit
                 "Content-Type": "text/plain; charset=utf-8"
             },
             success: (tuples) => {
-              parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
+                parent.appendChild(createPropertyTable(subject, identifier, factory, path, tuples))
             }
         });
     }
@@ -219,6 +219,7 @@ Login to edit
         caretDownSpan.className = "fas fa-caret-down";
         caretDownSpan.style.cssText = "margin-left: 10px;";
         thExpand.appendChild(caretDownSpan);
+
         const t = templates[factory][property];
         thName.innerText = t.verbose_name + " " + "(" + values.length + ")";
         thName.appendChild(thExpand);
@@ -276,30 +277,21 @@ Login to edit
           const confirm = await addNewItem.add();
 
           if(confirm){
-            const new_name = document.getElementById("new_entry_text").value;
+            const new_name = document.getElementById("new_entry_text").value.replace(" ", "_");
             let newValue = { 'literal': new_name};
             let oldValue = { 'literal': ""};
             document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems').hidden = false;
             // In case of a literal, create just an input field. Otherwise, instantiate a new rdf node
-            if (!t.literal) {
-                if (!t.template || t.template.type !== "select") {
-                    $(".add_new_entry").show();
-                    $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
-                        {query: JSON.stringify({ property: property, newValue: newValue, oldValue: oldValue }), csrfmiddlewaretoken: csrftoken},
-                        function (data) {
-                            //idx = createDisplay(addTd, data.iri, property, t, data, nextPath, idx);
-                            idx = createDisplay(addTd, data.iri.split("/").pop(), property, t, data, nextPath, idx);
-                        });
-                    $('.add_new_entry').hide();
-                } else {
-                    idx = createDisplay(addTd, subject, property, t, "", nextPath, idx, true);
-                }
-            }
+            $.post("/factsheets/rdf/" + factory + "/" + identifier + "/",
+                {query: JSON.stringify({ property: property, newValue: newValue, oldValue: oldValue }), csrfmiddlewaretoken: csrftoken},
+                function (data) {
+                    idx = createDisplay(addTd, data.iri.split("/").pop(), property, t, data, nextPath, idx);
+                });
           }
         }
 
         $(addNew).click(function () {
-          if (!t.literal) {
+          if (!t.literal && t.template == undefined) {
             addItem();
           } else {
               document.getElementById(t.verbose_name.replaceAll(' ', '_') + "_" + 'newItems').hidden = false;
@@ -401,7 +393,7 @@ Login to edit
                                 }),
                                 csrfmiddlewaretoken: csrftoken
                             },
-                            function () {
+                            function (result) {
                                 current_value = newValue;
                                 labelText.innerText = current_value[t.template.field];
                                 document.getElementById("edited_value").innerText = current_value[t.template.field];
@@ -409,7 +401,6 @@ Login to edit
                             $(".message_on_edit").show();
                     }
                 });
-
                 element = createEditable(subject, property, id, labelText, i, unfold);
             } else if (t.template.type === "select") {
                 let i = document.createElement("select");
@@ -419,9 +410,41 @@ Login to edit
                 if (data) {
                     o.value = data.iri;
                     o.selected = true;
-                    o.innerText = data.label || data.iri;
-                    current_value = data;
-                    labelText.innerText = data.label || data.iri;
+                    let iri2label = {}
+
+                    const collecting = {
+                      collect: async () => collectLabelsPromise()
+                    }
+                    const collectLabelsPromise = () => {
+                      return new Promise((complete, failed)=>{
+                              $.get("/factsheets/rdf/instances/",
+                                  {iri: t.template.class, subclass: t.template.subclass, csrfmiddlewaretoken: csrftoken},
+                                  function (result) {
+                                      for (const [k, v] of Object.entries(result.instances)) {
+                                        iri2label[v.iri] = v.label
+                                      }
+                                      complete(true);
+                                  }
+                              );
+                      });
+                    }
+                    const assignLabels = async () => {
+                      const confirm = await collecting.collect();
+                      if(confirm){
+                         if (data.iri in iri2label) {
+                           o.innerText = iri2label[data.iri];
+                           labelText.innerText = iri2label[data.iri];
+                         } else {
+                           o.innerText = data.label || data.iri;
+                           labelText.innerText = data.label || data.iri;
+                         }
+                         current_value = data;
+                      } else {
+                        console.log("Error in collecting labels!");
+                      }
+                    }
+
+                    assignLabels();
 
                 } else {
                     o.innerText = "Choose one"
@@ -466,7 +489,7 @@ Login to edit
                       $('.message_on_edit').show();
                     });
                 }
-                element = createEditable(subject, property, id, labelText, i, unfold);
+                element = createEditable(subject, property, id, labelText, i, unfold, data.iri);
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
@@ -541,13 +564,18 @@ Login to edit
         return idx
     }
 
-    function createEditable(subject, property, id, labelText, field, unfold = false) {
+    function createEditable(subject, property, id, labelText, field, unfold = false, link_to_oeo = false) {
         let container = document.createElement("div");
         let labelDiv = document.createElement("div");
         labelDiv.id = "display__" + id;
         labelDiv.appendChild(labelText);
         labelDiv.hidden = unfold;
-        labelText.href = labelText.innerText
+        //labelText.href = labelText.innerText
+        if (link_to_oeo == false) {
+          labelText.href = "https://openenergy-platform.org/oekg/" + labelText.innerText.replace(" ", "_")
+        } else {
+          labelText.href = link_to_oeo
+        }
 
         container.appendChild(labelDiv);
 
