@@ -1,15 +1,15 @@
-.. OpenEnergyPlatform documentation master file, created by
+.. Open Energy Platform developer documentation master file, created by
    sphinx-quickstart on Fri Aug 12 20:13:24 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to OpenEnergyPlatform's documentation!
-==============================================
+Developer documentation of the Open Energy Platform (OEP)
+=========================================================
 
-The OpenEnergyPlatform is a website that has three main targets:
+The Open Energy Platform is a website that has three main targets:
 
-   1. Provide a language-independent interface that is a thin layer on top of the OpenEnergyDatabase
-   2. Implement an intuitive and easy-to use web interface on top of the OpenEnergyDatabase
+   1. Provide a language-independent interface that is a thin layer on top of the Open Energy Database (oedb)
+   2. Implement an intuitive and easy-to use web interface on top of the database
    3. Improve the visibility, communication and transparency of results from energy system modelling
 
 Mission statement
@@ -28,10 +28,17 @@ a transparent way. Hence, results from research of energy system studies should
 be publicly available and reproducible. This raises the need for publicly available
 data sources.
 
+Landing page: index
+*******************
+
+The landing page is programmed in **index.html**.
+It contains a heading, the main modules in boxes, and further information.
+
+
 App: dataedit
 *************
 
-One aim of the OpenEnergyPlatform is the visual and understandable presentation
+One aim of the Open Energy Platform is the visual and understandable presentation
 of such datasets. The underlying OpenEnergyDatabase (OEDB) stores datasets of different
 open-data projects. The visual presentation is implemented in the **dataedit** app.
 
