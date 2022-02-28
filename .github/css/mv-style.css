@@ -1,0 +1,81 @@
+.panel-group {
+    margin-bottom: 20px;
+}
+
+.mv-column-left{ float: left; width: 49.5%;overflow:auto;}
+
+.mv-column-right{ float: right; width: 49.5%; overflow:auto;}
+
+.mv-container{position: relative; display: inline;}
+
+.rowlabel{font-weight:bold;width:40%;vertical-align:top;}
+
+.profiletable{
+    border-collapse: separate;
+    border:1px;
+    width:100%;
+    }
+
+.profiletable td { 
+        padding-bottom: 5px;
+    }
+
+
+/* Icon when the collapsible content is shown */
+.panel-heading a:before {
+    font-family: "Glyphicons Halflings";
+    content: "\e114";
+}
+
+.panel-heading a{
+    display: block;
+    text-decoration: none;
+}
+
+.panel-heading in a{
+     width: 0%;
+     content: "\e080";
+}
+
+/* Icon when the collapsible content is hidden */
+.panel-heading a.collapsed:before {
+    content: "\e080";
+}
+
+.sheetlabel{
+    font-weight: bold;
+    padding-right: 2em;
+    vertical-align:top;
+    width:30%;
+}
+
+.checkbox-container{
+    display: -webkit-flex; /* Safari */
+    -webkit-flex-wrap: wrap; /* Safari 6.1+ */
+    display: flex;
+    flex-flow: column;
+}
+
+.checkbox-item{
+    width:200px;
+    margin: 10 px;
+    padding: 10 px;
+}
+
+.checkbox-item div{
+    margin: 10 px;
+}
+
+.card-container > *:not(:first-child) {
+    margin-top: 0.5em;
+}
+
+.card-container .card-header {
+    background: unset;
+    border: unset;
+}
+
+.card-container .card-body {
+    padding-top: 0.5em;
+}
+
