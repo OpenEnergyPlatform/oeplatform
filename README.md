@@ -201,4 +201,9 @@ Then execute this python code (either directly in a terminal or from a file)
 
 ## Code contribution
 
+
+## Setup oeo-viewer
+
+The oeo-viewer is a visualization tool for our OEO ontology. It is under development in a separate repository. Please refer to https://github.com/OpenEnergyPlatform/oeo-viewer and follow the steps to integrate the oeo-viewer to the OEP.
+
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
