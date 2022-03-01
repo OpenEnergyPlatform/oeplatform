@@ -39,9 +39,6 @@ from django.conf import settings
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 os.environ["DJANGO_SETTINGS_MODULE"] = "oeplatform.settings"
-os.environ.get("SECRET_KEY", "0")
-os.environ.get("DEFAULT_FROM_EMAIL")
-os.environ.get("URL")
 
 django.setup()
 
