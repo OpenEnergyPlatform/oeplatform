@@ -4,6 +4,7 @@
 
 ### Bugs
 - Prohibit duplicate / similar tags (PR #885)
+- Fix ReadTheDocs Build (PR #917)
 
 ### Features
 - Synchronize metadata keywords with tags (PR #885)
