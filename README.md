@@ -206,5 +206,12 @@ Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergy
 
 ## Setup the OEO-viewer
 
-The oeo-viewer is a visualization tool for our OEO ontology. It is under development in a separate repository. Please refer to https://github.com/OpenEnergyPlatform/oeo-viewer and follow the steps to integrate the oeo-viewer into the OEP.
+The oeo-viewer is a visualization tool for our OEO ontology and it is under development. You should be able to see the viewer at http://localhost:8000/viewer/oeo/ in your local machine. If you are interested in contributing to the development process of the oeo-viewer, you can find the code in `/oeo_viewer/client/src`. After making your contributions, follow the steps below to update the oeo-viewer:
+
+    cd oep-website/oeo_viewer/client
+    npm install
+    npm run build
+    
+
+
 
