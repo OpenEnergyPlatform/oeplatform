@@ -20,7 +20,7 @@ from django.contrib.postgres.search import SearchVector, SearchVectorField
 class TableRevision(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    date = DateTimeField(max_length=1000, null=False, default=datetime.now)
+    date = DateTimeField(max_length=1000, null=False, default=timezone.now)
     created = DateTimeField(null=False, default=timezone.now)
     path = CharField(max_length=1000, null=False)
     size = IntegerField(null=False)

@@ -4,6 +4,11 @@
 {% block data_content %}
 
 {% load dataedit.taghandler %}
+
+{% if errorMsg %}
+<div class="alert alert-danger">{{ errorMsg }}</div>
+{% endif %}
+
 {% get_tags as all_tags %}
 <h3>Current Tags:</h3>
 <div style="overflow: hidden;">

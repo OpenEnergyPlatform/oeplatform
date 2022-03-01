@@ -47,6 +47,9 @@ from .models import (
     TableRevision,
     View as DataViewModel
 )
+from .metadata.__init__ import load_metadata_from_db
+import requests as req
+
 
 session = None
 
@@ -544,7 +547,14 @@ def show_revision(request, schema, table, date):
 
 @login_required
 def tag_overview(request):
-    return render(request=request, template_name="dataedit/tag_overview.html")
+        
+    # if rename or adding of tag fails: display error message
+    context = {
+        "errorMsg": "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+    }
+        
+    return render(request=request, template_name="dataedit/tag_overview.html", context=context)
+
 
 
 @login_required
@@ -584,25 +594,42 @@ def tag_editor(request, id=""):
 
 @login_required
 def change_tag(request):
+
+    status = "" # error status if operation fails
+
     if "submit_save" in request.POST:
-        if "tag_id" in request.POST:
-            id = request.POST["tag_id"]
-            name = request.POST["tag_text"]
-            color = request.POST["tag_color"]
-            edit_tag(id, name, color)
-        else:
-            name = request.POST["tag_text"]
-            color = request.POST["tag_color"]
-            add_tag(name, color)
+        try:
+            if "tag_id" in request.POST:
+                id = request.POST["tag_id"]
+                name = request.POST["tag_text"]
+                color = request.POST["tag_color"]
+                edit_tag(id, name, color)
+            else:
+                name = request.POST["tag_text"]
+                color = request.POST["tag_color"]
+                add_tag(name, color)
+        except sqla.exc.IntegrityError:
+            # requested changes are not valid because of name conflicts
+            status = "invalid"
+
 
     elif "submit_delete" in request.POST:
         id = request.POST["tag_id"]
         delete_tag(id)
 
-    return redirect("/dataedit/tags/")
+    return redirect("/dataedit/tags/?status=" + status)
 
 
 def edit_tag(id, name, color):
+    """
+    Args:
+        id(int): tag id
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    Raises:
+        sqlalchemy.exc.IntegrityError if name is not ok
+
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
@@ -610,9 +637,10 @@ def edit_tag(id, name, color):
     result = session.query(Tag).filter(Tag.id == id).one()
 
     result.name = name
+    result.name_normalized = Tag.create_name_normalized(name)
     result.color = str(int(color[1:], 16))
-
     session.commit()
+    
 
 
 def delete_tag(id):
@@ -630,12 +658,20 @@ def delete_tag(id):
 
 
 def add_tag(name, color):
+    """
+    Args:
+        name(str): max 40 character tag text
+        color(str): hexadecimal color code, eg #aaf0f0
+    Raises:
+        sqlalchemy.exc.IntegrityError if name is not ok
+
+    """
     engine = actions._get_engine()
     Session = sessionmaker()
     session = Session(bind=engine)
 
     session.add(Tag(**{"name": name, "color": str(int(color[1:], 16)), "id": None}))
-    session.commit()
+    session.commit()    
 
 
 def view_edit(request, schema, table):
@@ -1087,6 +1123,192 @@ class PermissionView(View):
         return self.get(request, schema, table)
 
 
+def check_is_table_tag(session, schema, table, tag_id):
+    """
+    Check if a tag is existing in the table_tag table in schema public.
+    Tags are queried by tag id.
+
+    Args:
+        session (sqlachemy): sqlachemy session
+        tag_id (int): Tag ID
+
+    Returns:
+        bool: True if exists, False if not
+    """
+
+    t = session.query(TableTags.tag).filter_by(tag = tag_id, table_name = table, schema_name = schema)
+    session.commit()
+    return session.query(t.exists()).scalar() 
+
+
+def check_is_tag(session, tag_id):
+    """
+    Check if a tag is existing in the tag table in schema public.
+    Tags are queried by tag_id.
+
+    Args:
+        session (sqlalchemy): Sqlalchemy session
+        tag_id (int): [description]
+
+    Returns:
+        bool: True if exists, False if not
+    """
+
+    t = session.query(Tag).filter(Tag.id==tag_id)
+    session.commit()
+    return session.query(t.exists()).scalar() 
+
+
+def get_tag_id_by_tag_name_normalized(session, tag_name):
+    """
+    Query the Tag tabley in schmea public to get the Tag ID.
+    Tags are queried by unique field tag_name_normalized.
+
+    Args:
+        session ([type]): [description]
+        tag_name ([type]): [description]
+
+    Returns:
+        int: Tag ID
+        None: If Tag ID does not exists.
+
+    """
+
+    tag = session.query(Tag).filter(Tag.name_normalized==tag_name).first()
+    session.commit()
+    if tag is not None:
+        return tag.id
+    else:
+        return None
+
+
+def get_tag_name_normalized_by_id(session, tag_id):
+    """
+    Query the Tag table in schmea public to get the tag_name_normalized.
+    Tags are queried by tag id.
+
+    Args:
+        session (sqilachemy): sqlalachemy session
+        tag_id (int): The Tag ID
+
+    Returns:
+        None: If tag id does not exists.
+        Str: Tag name normalized
+    """
+
+    tag = session.query(Tag).filter(Tag.id==tag_id).first()
+    session.commit()
+    if tag is not None:
+        return tag.name_normalized
+    else:
+        return None
+
+
+def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_id):
+    """
+    Add a tag from the oem-keywords to the table_tags for the current table. 
+
+    Args:
+        session (sqilachemy): sqlalachemy session
+        schema (str): Name of the schema
+        table (str): Name of the table
+        keyword_tag_id (int): The tag id that machtes to keyword tag name (by tag_name_normalized)
+
+    Returns:
+        any: Exception
+    """
+
+    if check_is_tag(session, keyword_tag_id):
+    
+        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": keyword_tag_id})
+
+        try:
+            session.add(t)
+            session.commit()
+        except Exception as e:
+            session.rollback() #Rollback the changes on error
+            return e
+        finally:
+            session.close() #Close the connection
+
+
+def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids, default_color_new_tag="#2E3638"):
+    """_summary_
+
+    Args:
+        session (_type_): _description_
+        schema (_type_): _description_
+        table (_type_): _description_
+        tag_ids (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    # Empty or bad tag names
+    invalid_tags=["", " ", "_", "-", "*"]
+
+    # Get metadata json. Add Tages to "keywords" field in oemetadata and update (comment on table)
+    # Returns oem v1.4.0 if metadata is empty from ./metadata/__init__.py/__LATEST
+    table_oemetadata = load_metadata_from_db(schema, table)
+
+    # if table_oemetadata is {}:
+    #     from metadata.v151.template import OEMETADATA_V151_TEMPLATE
+    #     table_oemetadata = OEMETADATA_V151_TEMPLATE
+        # md, error = actions.try_parse_metadata(table_oemetadata)
+        # print(md, error)
+
+    
+
+    # Keep, this are the tags that where added by the user via OEP website
+    updated_oep_tags = [] 
+    # this are OEM keywords that are new to the OEP tags
+    kw_only = []
+    # Keywords that are present as OEP tag but have to be assinged as table tag
+    kw_is_oep_tag_but_not_oep_table_tag = []
+    # sync. table tags and keywords
+    updated_keywords = []
+
+    for id in tag_ids:
+        kw = get_tag_name_normalized_by_id(session, id)
+        if kw is not None:
+           updated_oep_tags.append(kw)
+
+
+    for k in table_oemetadata["keywords"]:
+        normalized_kw = Tag.create_name_normalized(k)
+        keyword_tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
+        if keyword_tag_id is None and k not in kw_only and k not in invalid_tags:
+            kw_only.append(k)
+        elif keyword_tag_id is not None and check_is_table_tag(session, schema, table, keyword_tag_id) is False \
+            and k not in kw_is_oep_tag_but_not_oep_table_tag:
+            
+            kw_is_oep_tag_but_not_oep_table_tag.append(k)
+
+
+    updated_keywords = updated_oep_tags + kw_only
+    for k in kw_is_oep_tag_but_not_oep_table_tag:
+        normalized_kw = Tag.create_name_normalized(k)
+        tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
+        if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
+            and tag_id not in removed_table_tag_ids:
+            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+            updated_keywords.append(k)
+        
+
+    for k in kw_only:
+        default_color = default_color_new_tag
+        add_tag(k, default_color)
+        tag_id = get_tag_id_by_tag_name_normalized(session, k)
+        if tag_id is not None:
+            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+    
+
+    table_oemetadata["keywords"] = updated_keywords
+    return table_oemetadata
+
+
+# FIXME: should use api.views.require_write_permission, but circular imports!
 @login_required
 def add_table_tags(request):
     """
@@ -1104,10 +1326,17 @@ def add_table_tags(request):
     }
     schema = request.POST["schema"]
     table = request.POST.get("table", None)
+    
+
     engine = actions._get_engine()
     metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
+
+    # Identify the table tag ids that the user removed from the table.
+    # Usefull to distinguish between keywords that are tags and have to be assinged as table tags
+    # and keywords that exist as tags but where removed by the use, and therefore should not be reassinged to the table
+    removed_table_tag_ids = [tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table and TableTags.schema_name == schema) if tt.tag not in ids]
 
     session.query(TableTags).filter(
         TableTags.table_name == table and TableTags.schema_name == schema
@@ -1116,7 +1345,15 @@ def add_table_tags(request):
         t = TableTags(**{"schema_name": schema, "table_name": table, "tag": id})
         session.add(t)
     session.commit()
-    actions.update_meta_search(table, schema)
+    
+    # Add keywords from oemetadata to table tags and table tags to keywords
+    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)    
+    
+    # TODO: reuse session from above?
+    with engine.begin() as con:
+        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)        
+
+    
     return redirect(request.META["HTTP_REFERER"])
 
 
@@ -1341,7 +1578,6 @@ class MetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
 
     def get(self, request, schema, table):
-
         columns = get_column_description(schema, table)
 
         can_add = False
@@ -1350,11 +1586,14 @@ class MetaEditView(LoginRequiredMixin, View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
+        url_table_id = request.build_absolute_uri(reverse('view', kwargs={"schema": schema, "table": table}))
+
         context_dict = {
             "config": json.dumps({
                 "schema": schema,
                 "table": table,
                 "columns": columns,
+                "url_table_id": url_table_id,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
             }),
@@ -1366,4 +1605,3 @@ class MetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
-
