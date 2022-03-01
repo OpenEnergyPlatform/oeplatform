@@ -15,7 +15,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 try:
     from .securitysettings import *
 except:
-    raise Exception("No securitysettings found")
+    import logging
+    logging.error("No securitysettings found")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
