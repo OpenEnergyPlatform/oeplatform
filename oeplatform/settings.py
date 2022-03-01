@@ -16,6 +16,7 @@ try:
     from .securitysettings import *
 except:
     import logging
+    import os
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
     os.environ.get("SECRET_KEY", "0")   
 
