@@ -159,6 +159,16 @@ In order to run the OEP website, the primary database needs some extra managemen
 We use `alembic` to keep track of changes in those tables. To create all tables that are needed, simply type
 
     python manage.py alembic upgrade head
+    
+##### Setup the OEO-viewer
+
+The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
+
+    cd oep-website/oeo_viewer/client
+    npm install
+    npm run build
+    
+After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
 #### 3. Tutorials
 
@@ -203,14 +213,6 @@ Then execute this python code (either directly in a terminal or from a file)
 
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
 
-
-## Setup the OEO-viewer
-
-The oeo-viewer is a visualization tool for our OEO ontology and it is under development. You should be able to see the viewer at http://localhost:8000/viewer/oeo/ in your local machine. If you are interested in contributing to the development process of the oeo-viewer, you can find the code in `/oeo_viewer/client/src`. After making your contributions, follow the steps below to update the oeo-viewer:
-
-    cd oep-website/oeo_viewer/client
-    npm install
-    npm run build
     
 
 
