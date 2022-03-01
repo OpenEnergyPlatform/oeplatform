@@ -20,13 +20,13 @@ from unittest.mock import MagicMock
 import django
 from django.conf import settings
 
-try:
-    from oeplatform.oeplatform.securitysettings import SECRET_KEY
-except:
-    import logging
-    logging.error("No securitysettings found. Setting defaults")
-    DEBUG = True
-    SECRET_KEY = '0'
+# try:
+#     from oeplatform.oeplatform.securitysettings import SECRET_KEY
+# except:
+#     import logging
+#     logging.error("No securitysettings found. Setting defaults")
+#     DEBUG = True
+#     SECRET_KEY = '0'
     
 
 
