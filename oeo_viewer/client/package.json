@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "parcel build src/index.html --out-dir ../static && npm run build:clean",
+    "build": "parcel build source-code/index.html --out-dir ../static && npm run build:clean",
     "build:clean": "cd ../static && mv *.js main.js && mv *.css main.css"
   },
   "keywords": [
