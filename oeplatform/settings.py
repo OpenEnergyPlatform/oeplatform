@@ -19,9 +19,8 @@ except:
     import os
 
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    # SECRET_KEY = '0'
-    os.rename( '../oeplatform/securitysettings.py.default', '../oeplatform/securitysettings.py')
-    from .securitysettings import *
+    SECRET_KEY = '0'
+    
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
