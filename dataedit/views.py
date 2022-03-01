@@ -32,7 +32,12 @@ from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api.actions import describe_columns
-import oeplatform.securitysettings as sec
+
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in dataedit/views.py")
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
 from dataedit.metadata.widget import MetaDataWidget
