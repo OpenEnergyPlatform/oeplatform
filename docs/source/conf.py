@@ -25,8 +25,8 @@ try:
 except:
     import logging
     logging.error("No securitysettings found. Setting defaults")
-    DEBUG = os.environ["DEBUG"]
-    SECRET_KEY = os.environ["SECRET_KEY"]
+    DEBUG = True
+    SECRET_KEY = '0'
     
 
 
