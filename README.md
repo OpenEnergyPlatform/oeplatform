@@ -164,6 +164,17 @@ We use `alembic` to keep track of changes in those tables. To create all tables 
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
 
+install npm:
+
+
+- On linux:    
+    sudo apt install npm
+    
+- On MacOS:
+    brew install node
+    
+- On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+
     cd oep-website/oeo_viewer/client
     npm install
     npm run build
