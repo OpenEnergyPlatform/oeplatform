@@ -1,0 +1,50 @@
+{
+  "name": "oeo-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Advanced Graph Visualization.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node dev-server.js",
+    "build": "parcel build src/index.html --out-dir ../static && npm run build:clean",
+    "build:clean": "cd ../static && mv *.js main.js && mv *.css main.css"
+  },
+  "keywords": [
+    "Graph"
+  ],
+  "author": "memariani.adel@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.14.8",
+    "@babel/plugin-proposal-class-properties": "^7.14.5",
+    "@babel/preset-react": "^7.14.5",
+    "parcel-bundler": "^1.12.5",
+    "sass": "^1.37.0"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "@material-ui/styles": "^4.11.4",
+    "@react-spring/web": "^9.2.4",
+    "@types/react": "^17.0.15",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "d3": "^7.0.0",
+    "http-proxy": "^1.18.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-force-graph": "^1.41.7",
+    "react-force-graph-2d": "^1.23.8",
+    "react-force-graph-3d": "^1.21.10",
+    "react-router-dom": "^5.2.0",
+    "react-spring": "^9.2.4",
+    "react-swipeable-views": "^0.13.9",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.3",
+    "styled-components": "^4.4.1",
+    "three": "^0.131.1",
+    "three-spritetext": "^1.6.2"
+  }
+}

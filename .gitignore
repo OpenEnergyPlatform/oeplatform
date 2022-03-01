@@ -78,3 +78,6 @@ src
 
 # Deployment files
 docker/oeplatform_data
+
+**/node_modules
+oep-website/oeo_viewer/client/node_modules
