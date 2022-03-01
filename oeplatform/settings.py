@@ -17,6 +17,7 @@ try:
 except:
     import logging
     logging.error("No securitysettings found")
+    SECRET_KEY = '0'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
