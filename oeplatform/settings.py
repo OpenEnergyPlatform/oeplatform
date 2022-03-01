@@ -20,8 +20,7 @@ except:
 
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
     # SECRET_KEY = '0'
-    print(os.getcwd())
-    os.rename( os.getcwd() + 'securitysettings.py.default', os.getcwd() + 'securitysettings.py')
+    os.rename( '../oeplatform/securitysettings.py.default', '../oeplatform/securitysettings.py')
     from .securitysettings import *
 
 # Quick-start development settings - unsuitable for production
