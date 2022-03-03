@@ -328,6 +328,16 @@ Login to edit
         return trMain;
     }
 
+    function isValidHttpUrl(string) {
+      let url;
+      try {
+        url = new URL(string);
+      } catch (_) {
+        return false;
+      }
+      return url.protocol === "http:" || url.protocol === "https:";
+    }
+
     function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
         let id = path + "." + idx;
         let li = document.createElement("div");
@@ -343,8 +353,6 @@ Login to edit
         li.appendChild(container);
         container.appendChild(addHint);
 
-        const labelText = document.createElement("a");
-        labelText.style.cssText = "font-size: 14px;"
         let current_value = {};
         let editButton;
         {% if user.is_authenticated %}
@@ -356,25 +364,37 @@ Login to edit
         deleteButton.appendChild(bin);
         {% endif %}
         let element;
-
         if (t.template) {
             if (t.template.type === "text" || t.template.type === "textarea") {
-                let i;
-                if (t.template.type === "text") {
-                    i = document.createElement("input");
-                    i.type = "text";
-                }
-                if (t.template.type === "textarea") {
-                    i = document.createElement("textarea");
-                }
-                if (t.template.field === "literal") {
-                    let temp = data;
-                    data = {};
-                    data[t.template.field] = temp
-                }
+                let label;
+                let i = document.createElement("input");
+                let temp = data;
+                data = {};
+                data[t.template.field] = temp
                 current_value = data;
-                i.value = current_value[t.template.field];
-                labelText.innerText = current_value[t.template.field];
+
+                if (current_value[t.template.field] != undefined) {
+                  if (isValidHttpUrl(temp)) {
+                    label = document.createElement("a");
+                    label.innerText = current_value[t.template.field];
+                    label.href = current_value[t.template.field];
+                  } else {
+                    label = document.createElement("span");
+                    label.innerText = current_value[t.template.field];
+                  }
+                  i.value = temp;
+                } else {
+                  if (isValidHttpUrl(temp)) {
+                    label = document.createElement("a");
+                    label.innerText = temp;
+                    label.href = temp;
+                  } else {
+                    label = document.createElement("span");
+                    label.innerText = temp;
+                  }
+                  i.value = temp;
+                }
+                label.style.cssText = "font-size: 14px;"
                 i.className = "form-control";
 
                 // Save on enter
@@ -395,14 +415,17 @@ Login to edit
                             },
                             function (result) {
                                 current_value = newValue;
-                                labelText.innerText = current_value[t.template.field];
+                                label.innerText = current_value[t.template.field];
                                 document.getElementById("edited_value").innerText = current_value[t.template.field];
                             })
                             $(".message_on_edit").show();
                     }
                 });
-                element = createEditable(subject, property, id, labelText, i, unfold);
+                element = createEditable(subject, property, id, label, i, unfold);
             } else if (t.template.type === "select") {
+                let label = document.createElement("a");
+                label.style.cssText = "font-size: 14px;"
+
                 let i = document.createElement("select");
                 i.className = "form-control";
 
@@ -433,11 +456,12 @@ Login to edit
                       if(confirm){
                          if (data.iri in iri2label) {
                            o.innerText = iri2label[data.iri];
-                           labelText.innerText = iri2label[data.iri];
+                           label.innerText = iri2label[data.iri];
                          } else {
                            o.innerText = data.label || data.iri;
-                           labelText.innerText = data.label || data.iri;
+                           label.innerText = data.label || data.iri;
                          }
+                         label.href = data.iri;
                          current_value = data;
                       } else {
                         console.log("Error in collecting labels!");
@@ -484,12 +508,12 @@ Login to edit
                         }), csrfmiddlewaretoken: csrftoken
                     },
                     function () {
-                      labelText.innerText = options_label[i.value];
+                      label.innerText = options_label[i.value];
                       document.getElementById("edited_value").innerText = options_label[i.value];
                       $('.message_on_edit').show();
                     });
                 }
-                element = createEditable(subject, property, id, labelText, i, unfold, data.iri);
+                element = createEditable(subject, property, id, label, i, unfold);
             } else {
                 console.log("Unknown template: " + t.template.type)
             }
@@ -564,18 +588,12 @@ Login to edit
         return idx
     }
 
-    function createEditable(subject, property, id, labelText, field, unfold = false, link_to_oeo = false) {
+    function createEditable(subject, property, id, labelText, field, unfold = false) {
         let container = document.createElement("div");
         let labelDiv = document.createElement("div");
         labelDiv.id = "display__" + id;
         labelDiv.appendChild(labelText);
         labelDiv.hidden = unfold;
-        //labelText.href = labelText.innerText
-        if (link_to_oeo == false) {
-          labelText.href = "https://openenergy-platform.org/oekg/" + labelText.innerText.replace(" ", "_")
-        } else {
-          labelText.href = link_to_oeo
-        }
 
         container.appendChild(labelDiv);
 
@@ -609,12 +627,11 @@ Login to edit
     function createExpandable(instance, id, factory) {
         let container = document.createElement("div");
         container.id = id;
-        let label = document.createElement("a");
+        let label = document.createElement("span");
         //let link = document.createTextNode(parseInt(id.split('.').pop()) + 1);
         let link = document.createTextNode(instance.iri.split('/').pop().replaceAll("-", " ").replaceAll("_", " "));
         label.appendChild(link);
-        label.href = instance.label || instance.iri;
-        label.style.cssText = "font-size: 14px; cursor: pointer;"
+        label.style.cssText = "font-size: 14px;"
 
         container.appendChild(label);
 

@@ -253,7 +253,7 @@ class Scenario(RDFFactory):
         abbreviation=field.TextField(
             rdf_name=dbo.abbreviation, verbose_name="Abbreviation"
         ),
-        abstract=field.TextAreaField(
+        abstract=field.TextField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="A short description of this scenario",
@@ -285,17 +285,17 @@ class Publication(RDFFactory):
             help_text="Title of the publication",
         ),
         subtitle=field.TextField(rdf_name=dbo.subtitle, verbose_name="Subtitle"),
-        publication_year=field.YearField(
+        publication_year=field.TextField(
             rdf_name=npg.publicationYear,
             verbose_name="Publication year",
             help_text="Year this publication was published in",
         ),
-        abstract=field.TextAreaField(
+        abstract=field.TextField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="Abstract of the publication",
         ),
-        url=field.IRIField(
+        url=field.TextField(
             rdf_name=schema.url,
             verbose_name="URL",
             help_text="Link to this publication",
@@ -306,7 +306,7 @@ class Publication(RDFFactory):
             help_text="Authors of this publication",
             factory=Person,
         ),
-        about=field.IRIField(
+        about=field.TextField(
             rdf_name=obo.IAO_0000136,
             verbose_name="About",
             help_text="Elements of this publication",
@@ -334,7 +334,7 @@ class Model(RDFFactory):
 class Dataset(RDFFactory):
     _factory_id = "dataset"
     _fields = dict(
-        url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
+        url=field.TextField(rdf_name=schema.url, verbose_name="URL"),
     )
 
     @property
