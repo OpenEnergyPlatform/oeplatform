@@ -479,12 +479,16 @@ class RDFFactoryView(View):
 
 
     def post(self, request, factory_id, identifier):
+
         if not request.user.is_authenticated:
             return HttpResponseForbidden()
         context = connection.ConnectionContext()
         subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
         query = json.loads(request.POST["query"])
         property = query["property"]
+
+        if (factory_id == "study" and identifier == "new"):
+            context.insert_new_study(property)
 
         try:
             fac = factory.get_factory(factory_id)
@@ -495,8 +499,6 @@ class RDFFactoryView(View):
         old_value = None
         new_value = None
 
-        print("=====query====")
-        print(query)
         raw_old_value = query.get("oldValue")
         if raw_old_value:
             old_value = pf.process_data(raw_old_value)
@@ -511,6 +513,10 @@ class RDFFactoryView(View):
         else:
             context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
             result = {}
+        return JsonResponse(result)
+
+    def add_study(self, name):
+        result = context.insert_new_study(name)
         return JsonResponse(result)
 
 
