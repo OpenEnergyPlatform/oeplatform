@@ -30,8 +30,9 @@ class ConnectionContext:
         s += "} WHERE {}"
         self.execute(s)
 
-    def insert_new_instance(self, subject, property, inverse=False):
-        hash = getattr(OEO_KG, str(uuid.uuid4()))
+    def insert_new_instance(self, subject, property, inverse=False, new_name=""):
+        #hash = getattr(OEO_KG, str(uuid.uuid4())) + "/" + new_name.replace(" ", "-")
+        hash = getattr(OEO_KG, new_name.replace(" ", "-"))
         s = "DELETE { } INSERT {"
         if inverse:
             s += f" <{hash}> <{property}> {subject}. "
@@ -40,6 +41,13 @@ class ConnectionContext:
         s += "} WHERE {}"
         self.execute(s)
         return hash
+
+    def insert_new_study(self, study_name):
+        s = "INSERT {"
+        s += f"<http://openenergy-platform.org/oekg/{study_name}> a <http://openenergy-platform.org/ontology/oeo/OEO_00020011>"
+        s += "} WHERE {}"
+        self.execute(s)
+        return {}
 
     def execute(self, query):
         self.update_connection.setQuery(query)
@@ -64,13 +72,21 @@ class ConnectionContext:
         self.connection.setQuery(query)
         return self.connection.query().convert()
 
+    def query_one_object(self, subject, predicate):
+        query = (
+            "SELECT ?object WHERE { "
+        )
+        query += f""" <{subject}> {predicate} """
+        query += " ?object . } "
+        self.connection.setQuery(query)
+        return self.connection.query().convert()
+
     def query_all_factory_instances(self, factory):
         query = (
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             "SELECT ?s ?ls WHERE { "
             f"?s a <{factory._direct_parent}>."
         )
-
         for option in [factory._label_option("?s", "?ls")]:
             query += "OPTIONAL {" + option + "}"
 

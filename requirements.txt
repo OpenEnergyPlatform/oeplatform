@@ -1,4 +1,4 @@
-django>=3.2.4
+django>=3.2.4,<4.0
 matplotlib>=2.0
 urllib3>=1.20
 scipy>=0.18.1
@@ -20,11 +20,10 @@ django-simple-captcha
 django-bootstrap4
 django-fontawesome-5
 omi
-rdflib
 django-jquery
 zipstream-new
-rdflib
-rdflib-jsonld
+rdflib<6.0
+rdflib-jsonld # DeprecationWarning when rdflib>=6.0
 django_better_admin_arrayfield
 sparqlwrapper
 Pygments

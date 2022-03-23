@@ -446,12 +446,10 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
-
 import json
 
 class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
-
     def get(self, request, factory_id, identifier):
         format = request.GET.get("format", "html")
         if format == "json":
@@ -464,10 +462,11 @@ class RDFFactoryView(View):
             # Build URI, assuming that this is part of this knowledge graph
             uri = getattr(namespace.OEO_KG, identifier)
             # TODO: Error handling:
-            #  * What if it is not part of the graph?
+            #  * What if it is not part of the ?
             #  * What if it is not of this class?
             #  * Probably: 404 in both cases!?
             obj = fac._load_one(uri, context)
+
             jsn = obj.to_json()
             return JsonResponse(jsn)
         else:
@@ -480,12 +479,16 @@ class RDFFactoryView(View):
 
 
     def post(self, request, factory_id, identifier):
+
         if not request.user.is_authenticated:
             return HttpResponseForbidden()
         context = connection.ConnectionContext()
         subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
         query = json.loads(request.POST["query"])
         property = query["property"]
+
+        if (factory_id == "study" and identifier == "new"):
+            context.insert_new_study(property)
 
         try:
             fac = factory.get_factory(factory_id)
@@ -505,11 +508,15 @@ class RDFFactoryView(View):
             new_value = pf.process_data(raw_new_value)
 
         if not old_value and not new_value:
-            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse)
-            result = dict(iri=str(result))
+            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse, new_name=raw_new_value["literal"])
+            result = dict(iri=str(result.rpartition('/')[0] + "/" + raw_new_value["literal"]))
         else:
             context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
             result = {}
+        return JsonResponse(result)
+
+    def add_study(self, name):
+        result = context.insert_new_study(name)
         return JsonResponse(result)
 
 
@@ -528,6 +535,7 @@ class RDFInstanceView(View):
 class RDFView(View):
 
     def get(self, request, factory_id=None):
+
         try:
             fac = factory.get_factory(factory_id)
         except KeyError:

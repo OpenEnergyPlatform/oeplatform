@@ -26,7 +26,7 @@ class RDFFactory(ABC):
 
     @classmethod
     def doc(self):
-        s = f"""Factory class for {self._direct_parent}. This class has the following fields: 
+        s = f"""Factory class for {self._direct_parent}. This class has the following fields:
 
 """
         for f in self.iter_field_names():
@@ -85,6 +85,7 @@ class RDFFactory(ABC):
         result = context.query_all_objects(new_items, cls._fields.items())
         head = result["head"]
         d = dict()
+        model_inputs = []
         for t in result["results"]["bindings"]:
             if "s" in t:
                 s = cls._read_value(t["s"])
@@ -93,7 +94,10 @@ class RDFFactory(ABC):
                 lp = cls._read_value(t.get("lp"))
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
-                d[s][fname] = d[s].get(fname, []) + [(o, lo)]
+                res = ''
+                if fname == 'has_input' or fname == 'has_output':
+                    res = context.query_one_object(o, '<https://schema.org/url>')["results"]["bindings"] [0]["object"]["value"]
+                d[s][fname] = d[s].get(fname, []) + [(o, res)]
 
         cached_objects.update(
             {i: cls._parse(i, context, d[i], cache=cache) if i in d else cls(iri=i) for i in identifiers}
@@ -138,6 +142,7 @@ class RDFFactory(ABC):
             iri=identifier,
             **{p: cls._fields[p].handler(os, context) for p, os in obj.items()},
         )
+        print(res)
         return res
 
     @classmethod
@@ -248,7 +253,7 @@ class Scenario(RDFFactory):
         abbreviation=field.TextField(
             rdf_name=dbo.abbreviation, verbose_name="Abbreviation"
         ),
-        abstract=field.TextAreaField(
+        abstract=field.TextField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="A short description of this scenario",
@@ -280,17 +285,17 @@ class Publication(RDFFactory):
             help_text="Title of the publication",
         ),
         subtitle=field.TextField(rdf_name=dbo.subtitle, verbose_name="Subtitle"),
-        publication_year=field.YearField(
+        publication_year=field.TextField(
             rdf_name=npg.publicationYear,
             verbose_name="Publication year",
             help_text="Year this publication was published in",
         ),
-        abstract=field.TextAreaField(
+        abstract=field.TextField(
             rdf_name=dbo.abstract,
             verbose_name="Abstract",
             help_text="Abstract of the publication",
         ),
-        url=field.IRIField(
+        url=field.TextField(
             rdf_name=schema.url,
             verbose_name="URL",
             help_text="Link to this publication",
@@ -301,7 +306,7 @@ class Publication(RDFFactory):
             help_text="Authors of this publication",
             factory=Person,
         ),
-        about=field.IRIField(
+        about=field.TextField(
             rdf_name=obo.IAO_0000136,
             verbose_name="About",
             help_text="Elements of this publication",
@@ -329,7 +334,7 @@ class Model(RDFFactory):
 class Dataset(RDFFactory):
     _factory_id = "dataset"
     _fields = dict(
-        url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
+        url=field.TextField(rdf_name=schema.url, verbose_name="URL"),
     )
 
     @property
@@ -350,6 +355,9 @@ class ModelCalculation(RDFFactory):
             rdf_name=OEO.OEO_00000501,
             verbose_name="Involved Models",
         ),
+    )
+    model_inputs = field.FactoryField(
+        rdf_name=obo.RO_0002233, factory=Dataset, verbose_name="Inputs"
     )
 
 
