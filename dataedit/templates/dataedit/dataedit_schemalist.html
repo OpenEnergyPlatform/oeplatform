@@ -2,28 +2,42 @@
 {% block title %} - Schemas{% endblock %}
 
 {% block site-header %}
-    <h2 class="site-header">Schemas</h2>
+<h2 class="site-header">Data categories</h2>
 {% endblock site-header %}
 
 {% block data_content %}
 <h3>Topics</h3>
-<table id="schemas" class="table table-hover table-bordered">
-    <thead>
-        <tr class="table-primary">
-            <th>Name</th>
-            <th>Description</th>
-            <th>Tables</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for schema, description, tables, tag_ids in schemas %}
-            <tr onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
-                <td>{{schema}}</td>
-                <td>{{description}}</td>
-                <td>{{tables}}</td>
-            </tr>
-        {% endfor %}
+<div id="schemas" class="card-deck">
+    {% for schema, description, tables, tag_ids in schemas %}
 
-    </tbody>
-</table>
+
+    <div class="card"
+        onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
+
+        <div class="card-header">
+            Table collection
+        </div>
+        <div class="card-body">
+            {% if schema == "model_draft" %}
+            <span class="badge badge-pill badge-primary">Various data</span>
+            {% else %}
+            <span class="badge badge-pill badge-success">{{schema}} data</span>
+            {% endif %}
+            <h5 class="card-title">{{schema}}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{tables}} data tables</h6>
+            <p class="card-text">{{description}}</p>
+
+        </div>
+        <div class="card-footer">
+            <a href="#" class="card-link">Discover the data</a>
+        </div>
+    </div>
+
+
+
+    {% endfor %}
+</div>
+
+
+
 {% endblock %}
