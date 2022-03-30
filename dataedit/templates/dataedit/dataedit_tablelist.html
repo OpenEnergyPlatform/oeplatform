@@ -2,38 +2,58 @@
 {% block title %} - {{schema}}{% endblock %}
 
 {% block site-header %}
-    <h2 class="site-header"><a href="/dataedit/schemas">Schema</a>: {{ schema }}</h2>
+<h2 class="site-header"><a href="/dataedit/schemas">Schema</a>: {{ schema }}</h2>
 {% endblock site-header %}
 
 {% block data_content %}
 {% load dataedit.taghandler %}
 
-<table id="tables" class="table table-hover table-bordered">
-    <thead>
-        <tr class="table-primary">
-            <th>Name</th>
-            <th>Tags</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for table, label, tags in tables %}
+<div class="m-4">
+    <div id="tables" class="row row-cols-1 g-4">
 
-            <tr onclick="window.location='/dataedit/view/{{ schema }}/{{ table }}'">
-                {% if label %}
-                    <td>{{ label }}</td>
-                {% else %}
-                    <td>{{ table }}</td>
-                {% endif %}
-                <td>
+        {% for table, label, tags in tables %}
+        <div class="col">
+
+            <div class="card" style="margin-bottom:20px;">
+                <div class="card-header">
+                    Data Table
+                </div>
+                <div class="card-body">
+                    <span class="badge badge-pill badge-primary">Various data</span>
+
+
+                    {% if label %}
+                    <h5 class="card-title">{{ label }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
+                    <p class="card-text">Description</p>
+                    {% else %}
+                    <h5 class="card-title">{{ table }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
+                    <p class="card-text">Description</p>
+                    {% endif %}
+                    <p class="card-text">
+                    <h6 class="card-subtitle"> Tags: </h6>
                     {% for tag in tags %}
-                        <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}" style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
+                    <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}"
+                        style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
                     {% endfor %}
-                </td>
-            </tr>
+                    </p>
+
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"></li>
+                    <li class="list-group-item">License:</li>
+                    <li class="list-group-item">Contibutor:</li>
+                    <li class="list-group-item">Last Updated:</li>
+                </ul>
+                <div class="card-footer bg-dark" onclick="window.location='/dataedit/view/{{ schema }}/{{ table }}'">
+                    <a href="#" class="card-link text-white">Discover the data</a>
+                </div>
+            </div>
+        </div>
         {% endfor %}
 
-    </tbody>
-</table>
+    </div>
+</div>
 
 {% endblock %}
-
