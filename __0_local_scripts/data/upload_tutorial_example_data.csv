@@ -1,0 +1,25 @@
+id;variable;unit;year;value
+0;Antimatter price;Euro (2010) / GJ;2020;3
+1;Antimatter price;Euro (2010) / GJ;2030;3.3
+2;Antimatter price;Euro (2010) / GJ;2040;3.33
+3;Antimatter price;Euro (2010) / GJ;2050;4.44
+4;Fusion price;Euro (2010) / GJ;2020;1.7
+5;Fusion price;Euro (2010) / GJ;2030;1.7
+6;Fusion price;Euro (2010) / GJ;2040;1.7
+7;Fusion price;Euro (2010) / GJ;2050;1.7
+8;Naquadria price;Euro (2010) / GJ;2020;10.0
+9;Naquadria price;Euro (2010) / GJ;2030;18.1
+10;Naquadria price;Euro (2010) / GJ;2040;26.2
+11;Naquadria price;Euro (2010) / GJ;2050;32.3
+12;Power Cristals price;Euro (2010) / GJ;2020;5.5
+13;Power Cristals price;Euro (2010) / GJ;2030;9.9
+14;Power Cristals price;Euro (2010) / GJ;2040;11.11
+15;Power Cristals price;Euro (2010) / GJ;2050;14.4
+16;CO2 certificate price ;Euro (2010) / ton;2020;40
+17;CO2 certificate price ;Euro (2010) / ton;2030;80
+18;CO2 certificate price ;Euro (2010) / ton;2040;160
+19;CO2 certificate price ;Euro (2010) / ton;2050;320
+20;Gross domestic product;Billion Euro (2000);2020;1000
+21;Gross domestic product;Billion Euro (2010);2030;2000
+22;Gross domestic product;Billion Euro (2010);2040;3000
+23;Gross domestic product;Billion Euro (2010);2050;4000

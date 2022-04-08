@@ -1,0 +1,146 @@
+{
+    "name": "upload_tutorial_example_data",
+    "title": "Example Data for Upload Tutorial",
+    "id": "http://openenergyplatform.org/dataedit/view/model_draft/upload_tutorial_example_data",
+    "description": "Example data for upload tutorial to the OEP",
+    "language": [
+        "en-GB"
+    ],
+    "keywords": [
+        "example",
+        "template",
+        "test"
+    ],
+    "publicationDate": "2020-06-16",
+    "context": {
+        "homepage": "https://reiner-lemoine-institut.de/szenariendb/",
+        "documentation": "https://github.com/OpenEnergyPlatform/organisation/wiki/metadata",
+        "sourceCode": "https://github.com/OpenEnergyPlatform/tutorial/tree/master/upload/data/upload_tutorial_example_data.csv",
+        "contact": "https://github.com/christian-rli",
+        "grantNo": "03ET4057",
+        "fundingAgency": "Bundesministerium für Wirtschaft und Energie",
+        "fundingAgencyLogo": "https://www.innovation-beratung-foerderung.de/INNO/Redaktion/DE/Bilder/Titelbilder/titel_foerderlogo_bmwi.jpg?__blob=poster&v=2",
+        "publisherLogo": "https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png"
+    },
+    "spatial": {
+        "location": null,
+        "extent": null,
+        "resolution": null
+    },
+    "temporal": {
+        "referenceDate": "2020-06-16",
+        "timeseries": {
+            "start": null,
+            "end": null,
+            "resolution": null,
+            "alignment": null,
+            "aggregationType": null
+        }
+    },
+    "sources": [
+        {
+            "title": "OpenEnergyPlatform Metadata Example",
+            "description": "Metadata description",
+            "path": "https://github.com/OpenEnergyPlatform",
+            "licenses": [
+                {
+                    "name": "CC0-1.0",
+                    "title": "Creative Commons Zero v1.0 Universal",
+                    "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
+                    "instruction": "You are free: To Share, To Create, To Adapt",
+                    "attribution": "© Reiner Lemoine Institut"
+                }
+            ]
+        }
+    ],
+    "licenses": [
+        {
+            "name": "ODbL-1.0",
+            "title": "Open Data Commons Open Database License 1.0",
+            "path": "https://opendatacommons.org/licenses/odbl/1.0/",
+            "instruction": "You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!",
+            "attribution": "© Reiner Lemoine Institut © OpenStreetMap contributors"
+        }
+    ],
+    "contributors": [
+        {
+            "title": "christian-rli",
+            "email": null,
+            "date": "2020-06-16",
+            "object": "metadata",
+            "comment": "Create metadata"
+        }
+    ],
+    "resources": [
+        {
+            "profile": "tabular-data-resource",
+            "name": "model_draft.upload_tutorial_example_data",
+            "path": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v140",
+            "format": "PostgreSQL",
+            "encoding": "UTF-8",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "id",
+                        "description": "Unique identifier",
+                        "type": "integer",
+                        "unit": null
+                    },
+                    {
+                        "name": "variable",
+                        "description": "Variable of interest",
+                        "type": "text",
+                        "unit": null
+                    },
+                    {
+                        "name": "unit",
+                        "description": "Unit the variable is measured in",
+                        "type": "text",
+                        "unit": null
+                    },
+                    {
+                        "name": "year",
+                        "description": "Year for which the value is valid",
+                        "type": "integer",
+                        "unit": null
+                    },
+                    {
+                        "name": "value",
+                        "description": "Measured or assigned value of the variable",
+                        "type": "float",
+                        "unit": null
+                    }
+                ],
+                "primaryKey": [
+                    "id"
+                ],
+                "foreignKeys": []
+            },
+            "dialect": {
+                "delimiter": null,
+                "decimalSeparator": "."
+            }
+        }
+    ],
+    "review": {
+        "path": "https://github.com/OpenEnergyPlatform/data-preprocessing/wiki",
+        "badge": "platin"
+    },
+    "metaMetadata": {
+        "metadataVersion": "OEP-1.4.0",
+        "metadataLicense": {
+            "name": "CC0-1.0",
+            "title": "Creative Commons Zero v1.0 Universal",
+            "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+        }
+    },
+    "_comment": {
+        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
+        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+        "units": "Use a space between numbers and units (100 m)",
+        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
+        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
+        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
+        "null": "If not applicable use (null)"
+    }
+}
