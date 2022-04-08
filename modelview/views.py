@@ -495,6 +495,8 @@ class RDFFactoryView(View):
         old_value = None
         new_value = None
 
+        print("=====query====")
+        print(query)
         raw_old_value = query.get("oldValue")
         if raw_old_value:
             old_value = pf.process_data(raw_old_value)
@@ -506,7 +508,6 @@ class RDFFactoryView(View):
         if not old_value and not new_value:
             result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse, new_name=raw_new_value["literal"])
             result = dict(iri=str(result.rpartition('/')[0] + "/" + raw_new_value["literal"]))
-            print(result)
         else:
             context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
             result = {}
