@@ -27,4 +27,4 @@ rdflib-jsonld # DeprecationWarning when rdflib>=6.0
 django_better_admin_arrayfield
 sparqlwrapper
 Pygments
-nbconvert==5.6.1
+nbconvert>=6.4.5

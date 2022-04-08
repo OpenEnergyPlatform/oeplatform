@@ -12,7 +12,7 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-The installation steps have been proofed on linux and windows for python 3.6 and 3.7. Be aware that some of the required packages present installation's difficulties on windows
+The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows
 
 
 ### Setup the repository
