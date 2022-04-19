@@ -537,14 +537,6 @@ class Fields(APIView):
         pass
 
 
-def build_csv(header, result_iterator):
-    yield b",".join(header)
-    yield b"\n"
-    for row in result_iterator:
-        yield b",".join(b'"' + bytes(cell) + b'"' for cell in row).replace(b'"', b'""')
-        yield b"\n"
-
-
 class Move(APIView):
 
     @require_admin_permission
@@ -638,7 +630,13 @@ class Rows(APIView):
             return_obj["rowcount"] = 0
         if format == "csv":
             pseudo_buffer = Echo()
-            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
+            
+            # NOTE: the csv downloader for views (client side)
+            # in dataedit/static/dataedit/backend.js: parse_download()
+            # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC 
+            # to get somewhat consistent results
+
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_NONNUMERIC)
             response = OEPStream(
                 (
                     writer.writerow(x)
