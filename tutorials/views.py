@@ -1,5 +1,4 @@
-import html
-
+import re
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -228,23 +227,26 @@ def _processFormInput(form):
 
 
 def formattedMarkdown(markdown):
-    """
-    Markdown style text to html and return.
+    """Markdown style text to html and return.
     This functionality is implemented using Markdown2 package.
 
-    :param markdown:
-    :return:
+    Args:
+        markdown(str): markdown formatted text
+    
+    Returns:
+        str: html
     """
-
-    escaped_markdown = html.escape(markdown, quote=False)
-
-    # escapes html but also escapes html code blocks lke "exampel code:
-    #                                                    (1 tab)  code"
-    # checkbox also not rendered as expected "- [ ]"
-    # TODO: Add syntax highliting, add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks 
+    # TODO: Add syntax highliting, 
+    # add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks
+    
     markdowner = Markdown(extras=["break-on-newline", "fenced-code-blocks"])
+    html = markdowner.convert(markdown)
 
-    return markdowner.convert(escaped_markdown)
+    # remove <script> and <iframe>
+    html = re.sub('<script[^>]*>.*</script>', '', html, re.IGNORECASE)
+    html = re.sub('<iframe[^>]*>.*</iframe>', '', html, re.IGNORECASE)
+
+    return html
 
 
 class ListTutorials(View):
