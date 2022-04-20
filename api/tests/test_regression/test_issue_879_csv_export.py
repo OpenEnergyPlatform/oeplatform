@@ -10,8 +10,8 @@ class Test_879(APITestCase):
     test_table = "test_issue_879_csv_export"
 
     test_data = [
-        {"id": 1, "textfield": "text1", "numfield": 1},
-        {"id": 2, "textfield": "text2", "numfield": -0.5},
+        {"id": 1, "textfield": "text", "numfield": 1},
+        {"id": 2, "textfield": "text", "numfield": -0.5},
     ]
 
     def test_879(self):
@@ -39,8 +39,8 @@ class Test_879(APITestCase):
         stream = self.client.get(url).streaming_content
         byte_data = b"".join(stream)
         str_data = byte_data.decode()
-        # remove all whitespace
-        str_data = re.sub("\s+", "", str_data)
+        # remove newlines for regexp comparison
+        str_data = re.sub("\s+", " ", str_data)
 
         # check for quotes around numbers
         self.assertFalse(re.match('.*"[0-9-]', str_data), "Quoted numbers")
