@@ -239,7 +239,18 @@ def formattedMarkdown(markdown):
     # TODO: Add syntax highliting, 
     # add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks
     
-    markdowner = Markdown(extras=["break-on-newline", "fenced-code-blocks"])
+    # list of extras: https://github.com/trentm/python-markdown2/wiki/Extras
+    extras = {
+        "break-on-newline": {}, 
+        "fenced-code-blocks": {},
+        "header-ids": {}, # Adds "id" attributes to headers. value is slug of the header text.
+        "target-blank-links": {}, # Add target="_blank" to all <a> tags with an href. 
+        "task_list": {}, # Allows github-style task lists (i.e. check boxes),
+        "html-classes": {
+            "img": "img-fluid" # add bootstrap class img-fluid to all images (so they dont overflow)
+        }
+    }
+    markdowner = Markdown(extras=extras)
     html = markdowner.convert(markdown)
 
     # remove <script> and <iframe>
