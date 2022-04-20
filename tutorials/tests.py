@@ -9,10 +9,15 @@ def md_to_html(md):
     html = formattedMarkdown(md)
     # make lowercase for comparison
     html = html.lower()
+    # remove tag attributes for testing
+    html = re.sub('<([^> ]+)(|[^>]*)>', r'<\1>', html)
+    # remove additional <p> and <br> tags for testing
+    html = re.sub('</?p>', '', html)
+    # <br/> to <br>
+    html = re.sub('<br/>', '<br>', html)
     # remove linebreaks spaces for test comparison
     html = re.sub('\s+', '', html).strip()
-    # remove additional <p> tags for testing
-    html = re.sub('</?p>', '', html)
+
     return html
 
 class TestMarkdown(TestCase):
@@ -38,7 +43,7 @@ class TestMarkdown(TestCase):
     def test_blockquote(self):
         # https://spec.commonmark.org/0.30/#raw-html
         html = md_to_html(["> block line 1", "> block line 2"])
-        self.assertEqual("<blockquote>blockline1<br/>blockline2</blockquote>", html)
+        self.assertEqual("<blockquote>blockline1<br>blockline2</blockquote>", html)
     
     def test_codeblock(self):
         html = md_to_html(["```python", "code", "```"])
