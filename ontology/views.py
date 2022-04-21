@@ -7,7 +7,7 @@ from collections import OrderedDict
 from collections import defaultdict
 import os
 import re
-
+import json
 
 def collect_modules(path):
     modules = dict()
@@ -34,6 +34,7 @@ class OntologyVersion(View):
         if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
             raise Http404
         versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        print(versions)
         if not version:
             version = max((d for d in versions), key=lambda d:[int(x) for x in d.split(".")])
         return render(request, "ontology/about.html", dict(
@@ -57,8 +58,9 @@ class OntologyOverview(View):
 
         q_global = g.query("""
             SELECT DISTINCT ?s ?o
-            WHERE { ?s rdfs:subClassOf ?o }
-            ORDER BY ASC(UCASE(str(?s)))
+            WHERE { ?s rdfs:subClassOf ?o
+            filter(!isBlank(?o))
+            }
             """)
 
         q_label =  g.query("""
@@ -69,13 +71,11 @@ class OntologyOverview(View):
         q_definition =  g.query("""
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000115 ?o }
-            ORDER BY ASC(UCASE(str(?o)))
             """)
 
         q_note =  g.query("""
             SELECT DISTINCT ?s ?o
             WHERE { ?s obo:IAO_0000116 ?o }
-            ORDER BY ASC(UCASE(str(?o)))
             """)
 
         q_main_description =  g.query("""
@@ -102,6 +102,53 @@ class OntologyOverview(View):
         for row in q_main_description:
             if (row.s.split('/')[-1] == ''):
                 ontology_description = row.o
+
+        #Begin prepare data for oeo-viewer. Only need to be executed once per release
+        # graphLinks = []
+        # graphNodes = []
+        #
+        # for row in q_global:
+        #     source = row.o.split('/')[-1]
+        #     target = row.s.split('/')[-1]
+        #
+        #     #if source in classes_name.keys() and target in classes_name.keys():
+        #     graphLinks.append({
+        #         "source": source,
+        #         "target": target
+        #         })
+        #
+        #     target_found = False
+        #     source_found = False
+        #
+        #     for item in graphNodes:
+        #         if item["id"] == target:
+        #             target_found = True
+        #         if item["id"] == source:
+        #             source_found = True
+        #
+        #     try:
+        #         if not target_found:
+        #             graphNodes.append({
+        #                 "id": target,
+        #                 "name": classes_name[target],
+        #                 "description": classes_definitions[target],
+        #                 "editor_note": classes_notes[target]
+        #                 })
+        #
+        #         if not source_found:
+        #             graphNodes.append({
+        #                 "id": source,
+        #                 "name": classes_name[source],
+        #                 "description": classes_definitions[source],
+        #                 "editor_note": classes_notes[source]
+        #                 })
+        #     except:
+        #         pass
+        #
+        # with open('GraphData.json', 'w') as f:
+        #     json.dump({"nodes": graphNodes,
+        #                 "links": graphLinks}, f)
+        #End prepare data for oeo-viewer
 
         if "text/html" in request.headers.get("accept","").split(","):
             if module_or_id:
@@ -146,6 +193,8 @@ class OntologyOverview(View):
                 if module_or_id in classes_notes.keys():
                     class_notes = classes_notes[module_or_id]
 
+                print("ontology classes!")
+                print(module_or_id)
                 return render(request, "ontology/class.html", dict(
                     class_id=module_or_id,
                     class_name=class_name,
