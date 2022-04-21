@@ -8,18 +8,10 @@ TEMPLATE_V1_4 = {
     "title": "",
     "id": "",
     "description": "",
-    "language": [""],
-    "keywords": [""],
+    "language": [],
+    "keywords": [],
     "publicationDate": "",
-    "context": {
-        "homepage": "",
-        "documentation": "",
-        "sourceCode": "",
-        "contact": "",
-        "grantNo": "",
-        "fundingAgency": "",
-        "fundingAgencyLogo": "",
-        "publisherLogo": ""
+    "context": {        
     },
     "spatial": {
         "location": "",
@@ -41,28 +33,14 @@ TEMPLATE_V1_4 = {
             "title": "",
             "description": "",
             "path": "",
-            "licenses": [
-                {
-                    "name": "",
-                    "title": "",
-                    "path": "",
-                    "instruction": "",
-                    "attribution": ""
-                }
+            "licenses": [                
             ]
         },
         {
             "title": "",
             "description": "",
             "path": "",
-            "licenses": [
-                {
-                    "name": "",
-                    "title": "",
-                    "path": "",
-                    "instruction": "",
-                    "attribution": ""
-                }
+            "licenses": [                
             ]
         }
     ],
@@ -75,9 +53,7 @@ TEMPLATE_V1_4 = {
             "attribution": ""
         }
     ],
-    "contributors": [
-        {"title": "", "email": "", "date": "", "object": "", "comment": ""},
-        {"title": "", "email": "", "date": "", "object": "", "comment": ""}
+    "contributors": [        
     ],
     "resources": [
         {
@@ -87,16 +63,9 @@ TEMPLATE_V1_4 = {
             "format": "",
             "encoding" : "",
             "schema": {
-                "fields": [
-                    {"name": "", "description": "", "type": "", "unit": ""},
-                    {"name": "", "description": "", "type": "", "unit": ""}
+                "fields": [                    
                 ],
-                "primaryKey": [""],
-                "foreignKeys": [{
-                    "fields": [""],
-                    "reference": {
-                        "resource": "",
-                        "fields": [""] } } ] },
+            },
             "dialect":
                 {
                     "delimiter": "",

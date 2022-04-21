@@ -2,7 +2,7 @@
 // e.preventDefault(), e.stopPropagation(), t.saveJSON()
 
 
-var MetaEdit = function(config) {
+var MetaEdit = function (config) {
 
     /*
     TODO: consolidate functions (same as in wizard and other places)
@@ -47,14 +47,14 @@ var MetaEdit = function(config) {
 
     function fixSchema(json) {
         /* recursively remove null types */
-        function fixRecursive(elem){
-            Object.keys(elem).map(function(key){
+        function fixRecursive(elem) {
+            Object.keys(elem).map(function (key) {
                 var prop = elem[key];
                 prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1)
                 if (prop.type == 'array') {
                     //prop.items = prop.items || {};
                     prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
-                    fixRecursive({"": prop.items});
+                    fixRecursive({ "": prop.items });
                 } else if (prop.type == 'object') {
                     //prop.properties = prop.properties || {};
                     fixRecursive(prop.properties);
@@ -74,16 +74,16 @@ var MetaEdit = function(config) {
         fixRecursive(json.properties);
 
         // make some readonly
-        json.properties.id.readonly =  true;
+        json.properties.id.readonly = true;
         json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
         json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
 
         // hide some
-        json.properties.resources.items.properties.profile.options = {hidden: true};
-        json.properties.resources.items.properties.encoding.options = {hidden: true};
-        json.properties.resources.items.properties.dialect.options = {hidden: true};
-        json.properties.review.options = {hidden: true};
-        json.properties.metaMetadata.options = {hidden: true};
+        json.properties.resources.items.properties.profile.options = { hidden: true };
+        json.properties.resources.items.properties.encoding.options = { hidden: true };
+        json.properties.resources.items.properties.dialect.options = { hidden: true };
+        json.properties.review.options = { hidden: true };
+        json.properties.metaMetadata.options = { hidden: true };
 
         // add formats
         json.properties.publicationDate.format = 'date';
@@ -101,7 +101,7 @@ var MetaEdit = function(config) {
 
     function fixData(json) {
         // MUST have ID
-        json["id"] = json["id"] || config.table;
+        json["id"] = json["id"] || config["url_table_id"];
 
         // MUST have one resource with name == id == tablename
         json["resources"] = json["resources"] || [{}];
@@ -111,43 +111,43 @@ var MetaEdit = function(config) {
         json["resources"][0]["schema"] = json["resources"][0]["schema"] || {};
         json["resources"][0]["schema"]["fields"] = json["resources"][0]["schema"]["fields"] || [];
         var fieldsByName = {};
-        json["resources"][0]["schema"]["fields"].map(function(field){
+        json["resources"][0]["schema"]["fields"].map(function (field) {
             fieldsByName[field.name] = field
         })
 
         json["resources"][0]["schema"]["fields"] = [];
-        config.columns.map(function(column){
-            var field = fieldsByName[column.name] || {name: column.name};
+        config.columns.map(function (column) {
+            var field = fieldsByName[column.name] || { name: column.name };
             field.type = field.type || column.data_type;
             json["resources"][0]["schema"]["fields"].push(field);
         })
 
         // add empty value for all missing so they show up in editor
         // these will be removed at the end
-        function fixRecursive(schemaProps, elemObject, path){
+        function fixRecursive(schemaProps, elemObject, path) {
             // is object ?
-            if (typeof elemObject != 'object' || $.isArray(elemObject)){
+            if (typeof elemObject != 'object' || $.isArray(elemObject)) {
                 return;
             }
             // for each key: fill missing (recursively)
-            Object.keys(schemaProps).map(function(key){
+            Object.keys(schemaProps).map(function (key) {
                 var prop = schemaProps[key];
                 //console.log(path + '.' + key, prop.type)
-                if (prop.type == 'object'){
+                if (prop.type == 'object') {
                     elemObject[key] = elemObject[key] || {};
                     fixRecursive(prop.properties, elemObject[key], path + '.' + key);
                 }
-                else if (prop.type == 'array'){
+                else if (prop.type == 'array') {
                     elemObject[key] = elemObject[key] || [];
                     // if non empty array
                     if ($.isArray(elemObject[key]) && elemObject[key].length > 0) {
-                        elemObject[key].map(function(elem, i) {
+                        elemObject[key].map(function (elem, i) {
                             fixRecursive(prop.items.properties, elem, path + '.' + key + '.' + i);
                         })
                     }
                 }
                 else { // value
-                    if (elemObject[key] === undefined){
+                    if (elemObject[key] === undefined) {
                         //console.log('adding empty value: ' + path + '.' + key)
                         elemObject[key] = null;
                     }
@@ -171,29 +171,29 @@ var MetaEdit = function(config) {
     }
 
     function convertDescriptionIntoPopover() {
-        function convert(descr, label){
+        function convert(descr, label) {
             var description = $(descr).text(); // get description text
             if (description && label) {
                 label
-                .attr('data-content', description)
-                .attr('title', label.text())
-                .attr('data-toggle', "popover")
-                .popover({
-                    placement: 'top',
-                    trigger: 'hover',
-                    template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
-                });
+                    .attr('data-content', description)
+                    .attr('title', label.text())
+                    .attr('data-toggle', "popover")
+                    .popover({
+                        placement: 'top',
+                        trigger: 'hover',
+                        template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
+                    });
                 descr.addClass('d-none')
             }
         }
 
         // headings
-        config.form.find('.card-title').parent().find('>p').not('.d-none').each(function(i, e) {
+        config.form.find('.card-title').parent().find('>p').not('.d-none').each(function (i, e) {
             convert($(e), $(e).parent().find('>.card-title>label'))
         });
 
         // inputs
-        config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
+        config.form.find('.form-group>.form-text').not('.d-none').each(function (_i, e) {
             convert($(e), $(e).parent().find('>label'))
         });
 
@@ -230,9 +230,9 @@ var MetaEdit = function(config) {
             var json = config.editor.getValue();
             json = fixData(json);
             json = JSON.stringify(json);
-            sendJson("POST", config.url_api_meta, json).then(function() {
+            sendJson("POST", config.url_api_meta, json).then(function () {
                 window.location = config.url_view_table;
-            }).catch(function(err) {
+            }).catch(function (err) {
                 // TODO evaluate error, show user message
                 $('#metaedit-submitting').addClass('d-none');
                 alert(getErrorMsg(err))
@@ -256,7 +256,7 @@ var MetaEdit = function(config) {
             $.getJSON('/static/metaedit/schema.json'),
             //$.getJSON('https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/develop/metadata/v140/schema.json')
 
-        ).done(function(data, schema) {
+        ).done(function (data, schema) {
             config.schema = fixSchema(schema[0]);
             config.initialData = fixData(data[0]);
 
@@ -299,7 +299,7 @@ var MetaEdit = function(config) {
 
             convertDescriptionIntoPopover();
             // check for new items in dom
-            (new MutationObserver(function(_mutationsList, _observer) {
+            (new MutationObserver(function (_mutationsList, _observer) {
                 convertDescriptionIntoPopover()
             })).observe(config.form[0], { attributes: false, childList: true, subtree: true });
 

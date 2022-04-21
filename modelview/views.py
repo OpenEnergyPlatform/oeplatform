@@ -446,12 +446,10 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
-
 import json
 
 class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
-
     def get(self, request, factory_id, identifier):
         format = request.GET.get("format", "html")
         if format == "json":
@@ -468,6 +466,7 @@ class RDFFactoryView(View):
             #  * What if it is not of this class?
             #  * Probably: 404 in both cases!?
             obj = fac._load_one(uri, context)
+
             jsn = obj.to_json()
             return JsonResponse(jsn)
         else:
@@ -496,6 +495,8 @@ class RDFFactoryView(View):
         old_value = None
         new_value = None
 
+        print("=====query====")
+        print(query)
         raw_old_value = query.get("oldValue")
         if raw_old_value:
             old_value = pf.process_data(raw_old_value)
@@ -505,8 +506,8 @@ class RDFFactoryView(View):
             new_value = pf.process_data(raw_new_value)
 
         if not old_value and not new_value:
-            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse)
-            result = dict(iri=str(result))
+            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse, new_name=raw_new_value["literal"])
+            result = dict(iri=str(result.rpartition('/')[0] + "/" + raw_new_value["literal"]))
         else:
             context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
             result = {}
@@ -528,6 +529,7 @@ class RDFInstanceView(View):
 class RDFView(View):
 
     def get(self, request, factory_id=None):
+
         try:
             fac = factory.get_factory(factory_id)
         except KeyError:

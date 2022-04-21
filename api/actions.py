@@ -23,6 +23,7 @@ from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
 from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
+from omi.dialects.oep.compiler import JSONCompiler
 import api
 import login.models as login_models
 from api import DEFAULT_SCHEMA, references
@@ -2118,3 +2119,27 @@ def update_meta_search(table, schema):
 
     t.search = Func(Value(s), function="to_tsvector")
     t.save()
+
+def set_table_metadata(table, schema, metadata, cursor):
+    """saves metadata as json string on table comment.
+
+    Args:
+        table(str): name of table
+        schema(str): schema of table
+        metadata(object): json serializable meta data object
+        cursor: sql alchemy connection cursor
+    """
+
+    table_obj = _get_table(schema=schema, table=table)
+    compiler = JSONCompiler()
+    table_obj.comment = json.dumps(compiler.visit(metadata))    
+    # Surprisingly, SQLAlchemy does not seem to escape comment strings
+    # properly. Certain strings cause errors database errors.
+    # This MAY be a security issue. Therefore, we do not use
+    # SQLAlchemy's compiler here but do it manually.
+    sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+        schema=table_obj.schema,
+        table=table_obj.name
+    )
+    cursor.execute(sql, (table_obj.comment, ))
+    update_meta_search(table, schema)
