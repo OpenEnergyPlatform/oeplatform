@@ -26,5 +26,5 @@ rdflib<6.0
 rdflib-jsonld # DeprecationWarning when rdflib>=6.0
 django_better_admin_arrayfield
 sparqlwrapper
-Pygments
+Pygments<=2.11.2 # latest version fails to convert fenced code blocks
 nbconvert>=6.4.5
