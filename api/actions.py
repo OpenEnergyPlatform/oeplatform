@@ -50,6 +50,7 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
+MAX_TABLE_NAME_LENGTH = 50 # postgres limit minus pre/suffix for meta tables
 
 def get_column_obj(table, column):
     """
@@ -727,8 +728,8 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 def assert_valid_table_name(table):
-    if len(table) > 63:
-        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
+    if len(table) > MAX_TABLE_NAME_LENGTH:
+        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})")
     if len(table) == 0:
         raise APIError("Empty table name")
     if not re.match(r"[a-z][a-z0-9_]*", table):

@@ -159,7 +159,7 @@ class APITestCase(TestCase):
 
         resp = self.__class__.client.delete(
             "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
+                schema=schema, table=table
             ),
             HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
             content_type="application/json",
