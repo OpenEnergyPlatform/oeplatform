@@ -69,9 +69,6 @@ def _resolveStaticTutorial(path):
             return {"html": body}
 
     except Exception:
-        import traceback
-
-        print(traceback.format_exc())
         return {"html": "Tutorial is missing"}
 
 
