@@ -9,3 +9,4 @@
 
 ### Features
 - Synchronize metadata keywords with tags (PR #885)
+- The user is informed about automatic changes to the metadata after he submits table tags (PR #947)
