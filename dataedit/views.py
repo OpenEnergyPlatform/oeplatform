@@ -1357,7 +1357,7 @@ def add_table_tags(request):
         actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)     
 
 
-    messasge = messages.success(request, 'Be aware that OEMetadata keywords and table tags are syncronized now. You might notice automatic changes to the table tags and/or metadata "keywords" field!')   
+    messasge = messages.success(request, 'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.')   
 
     
     return render(request, 'dataedit/dataview.html', {"messages": messasge})
