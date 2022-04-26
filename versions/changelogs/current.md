@@ -8,4 +8,5 @@
 - Fix CI error by raising nbconvert package version, this required to drop support for Python 3.6 (PR#941)
 
 ### Features
-- Synchronize metadata keywords with tags (PR #885)
+
+### Bugs
