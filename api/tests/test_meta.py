@@ -131,7 +131,7 @@ class TestPut(APITestCase):
         null = None
         meta = {"name": "oep_metadata_table_example_v14",
 "title": "Good example title",
-"id": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v14",
+"id": "https://openenergy-platform.org/dataedit/view/model_draft/oep_metadata_table_example_v14",
 "description": "example metadata for example data",
 "language": [ "en-GB", "en-US", "de-DE", "fr-FR" ],
 "keywords": [ "example", "template", "test" ],
@@ -201,7 +201,7 @@ class TestPut(APITestCase):
 "resources": [
     {"profile": "tabular-data-resource",
     "name": "model_draft.oep_metadata_table_example_v14",
-    "path": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v14",
+    "path": "https://openenergy-platform.org/dataedit/view/model_draft/oep_metadata_table_example_v14",
     "format": "PostgreSQL",
     "encoding" : "UTF-8",
     "schema": {
