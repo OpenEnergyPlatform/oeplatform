@@ -22,7 +22,7 @@ urlpatterns = [
         views.DataView.as_view(),
         name="view",
     ),
-    url(r"^tags/add/$".format(qual=pgsql_qualifier), views.add_table_tags),
+    url(r"^tags/add/$".format(qual=pgsql_qualifier), views.redirect_after_table_tags_updated),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/download$".format(
             qual=pgsql_qualifier

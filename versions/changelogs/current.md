@@ -5,8 +5,11 @@
 ### Bugs
 
 - removed quoted numbers on csv export
-- Fix CI error by raising nbconvert package version, this required to drop support for Python 3.6 (PR#941)
+- Prohibit duplicate / similar tags (PR #885)
 
 ### Features
 
+- The user is informed about automatic changes to the metadata after he submits table tags (PR #947)
+
 ### Bugs
+

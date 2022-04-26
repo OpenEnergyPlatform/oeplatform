@@ -1,0 +1,15 @@
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-dismissible alert-success">
+      <h4>
+        Sucessuflly updated table tags!
+      </h4>
+      <button type="button" class="close" data-dismiss="alert">
+      ×
+      </button>
+      <p class="mb-0" style="font-size: 30px;">
+      {{message}}
+      </p>
+    </div>
+ {% endfor %}
+{% endif %}
