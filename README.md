@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/oep-data-interface/badge/?version=latest)](http://oep-data-interface.readthedocs.io/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/oeplatform/badge/?version=latest)](https://oeplatform.readthedocs.io/en/latest/?badge=latest)
 
 <a href="https://openenergy-platform.org/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
