@@ -1,5 +1,7 @@
 ### Changes
 
+- slightly improved tutorial markdown capabilities <#951>
+
 ### Bugs
 
 - Fix ReadTheDocs Build (PR #917)
