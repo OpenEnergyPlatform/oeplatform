@@ -28,3 +28,4 @@ django_better_admin_arrayfield
 sparqlwrapper
 Pygments
 nbconvert>=6.4.5
+ipython # needed for IPython3Lexer for nbconvert

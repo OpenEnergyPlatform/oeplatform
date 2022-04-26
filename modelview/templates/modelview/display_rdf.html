@@ -328,6 +328,16 @@ Login to edit
         return trMain;
     }
 
+    function isValidHttpUrl(string) {
+      let url;
+      try {
+        url = new URL(string);
+      } catch (_) {
+        return false;
+      }
+      return url.protocol === "http:" || url.protocol === "https:";
+    }
+
     function createDisplay(ul, subject, property, t, data, path, idx, unfold = false) {
         let id = path + "." + idx;
         let li = document.createElement("div");
@@ -343,9 +353,6 @@ Login to edit
         li.appendChild(container);
         container.appendChild(addHint);
 
-
-
-
         let current_value = {};
         let editButton;
         {% if user.is_authenticated %}
@@ -360,30 +367,35 @@ Login to edit
         if (t.template) {
 
             if (t.template.type === "text" || t.template.type === "textarea") {
-                let label = current_value[t.template.field] != undefined ? document.createElement("span") : document.createElement("a");
-                label.style.cssText = "font-size: 14px;"
-
-                let i;
-                if (t.template.type === "text") {
-                    i = document.createElement("input");
-                    i.type = "text";
-                }
-                if (t.template.type === "textarea") {
-                    i = document.createElement("textarea");
-                }
-                if (t.template.field === "literal") {
-                    let temp = data;
-                    data = {};
-                    data[t.template.field] = temp
-                }
+                let label;
+                let i = document.createElement("input");
+                let temp = data;
+                data = {};
+                data[t.template.field] = temp
                 current_value = data;
-                i.value = current_value[t.template.field];
+
                 if (current_value[t.template.field] != undefined) {
-                  label.innerText = current_value[t.template.field]
+                  if (isValidHttpUrl(temp)) {
+                    label = document.createElement("a");
+                    label.innerText = current_value[t.template.field];
+                    label.href = current_value[t.template.field];
+                  } else {
+                    label = document.createElement("span");
+                    label.innerText = current_value[t.template.field];
+                  }
+                  i.value = temp;
                 } else {
-                  label.innerText = current_value;
-                  label.href = current_value;
+                  if (isValidHttpUrl(temp)) {
+                    label = document.createElement("a");
+                    label.innerText = temp;
+                    label.href = temp;
+                  } else {
+                    label = document.createElement("span");
+                    label.innerText = temp;
+                  }
+                  i.value = temp;
                 }
+                label.style.cssText = "font-size: 14px;"
                 i.className = "form-control";
 
                 // Save on enter

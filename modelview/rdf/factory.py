@@ -334,7 +334,7 @@ class Model(RDFFactory):
 class Dataset(RDFFactory):
     _factory_id = "dataset"
     _fields = dict(
-        url=field.IRIField(rdf_name=schema.url, verbose_name="URL"),
+        url=field.TextField(rdf_name=schema.url, verbose_name="URL"),
     )
 
     @property
