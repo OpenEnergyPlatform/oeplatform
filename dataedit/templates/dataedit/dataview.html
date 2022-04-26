@@ -5,11 +5,14 @@
 
 
 {% block site-header %}
+
 <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
 {% endblock site-header %}
 
 {% block data_content %}
-
+<div>
+{% include 'messages.html' %}
+</div>
 
 <ul class="nav nav-tabs">
   <li class="nav-item">
