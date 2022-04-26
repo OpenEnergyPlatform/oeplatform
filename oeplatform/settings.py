@@ -15,7 +15,12 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 try:
     from .securitysettings import *
 except:
-    raise Exception("No securitysettings found")
+    import logging
+    import os
+    logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
+    SECRET_KEY = os.environ.get("SECRET_KEY", "0")   
+    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+    URL = os.environ.get("URL")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/

@@ -1,7 +1,10 @@
 import sqlalchemy as sqla
 
-import oeplatform.securitysettings as sec
-
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in api/connection.py")
 
 def get_connection_string():
     return "postgresql://{0}:{1}@{2}:{3}/{4}".format(
