@@ -55,6 +55,7 @@ from .models import (
 from .metadata.__init__ import load_metadata_from_db
 import requests as req
 
+from django.contrib import messages
 
 session = None
 
@@ -356,7 +357,7 @@ def get_readable_table_names(schema):
         conn.close()
     return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
 
-
+  
 def get_readable_table_name(schema_name, table_name):
     """get readable table name from metadata
 
@@ -448,7 +449,6 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     tables = Table.objects.filter(*filters)
 
     return tables
-
 
 def listtables(request, schema_name):
     """
@@ -1381,8 +1381,6 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         # md, error = actions.try_parse_metadata(table_oemetadata)
         # print(md, error)
 
-    
-
     # Keep, this are the tags that where added by the user via OEP website
     updated_oep_tags = [] 
     # this are OEM keywords that are new to the OEP tags
@@ -1425,6 +1423,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         tag_id = get_tag_id_by_tag_name_normalized(session, k)
         if tag_id is not None:
             add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+    
     
 
     table_oemetadata["keywords"] = updated_keywords
@@ -1474,9 +1473,18 @@ def add_table_tags(request):
     
     # TODO: reuse session from above?
     with engine.begin() as con:
-        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)        
+        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)     
+
+
+    messasge = messages.success(request, 'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.')   
 
     
+    return render(request, 'dataedit/dataview.html', {"messages": messasge})
+
+
+def redirect_after_table_tags_updated(request):
+    add_table_tags(request)
+
     return redirect(request.META["HTTP_REFERER"])
 
 

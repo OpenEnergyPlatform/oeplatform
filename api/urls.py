@@ -40,6 +40,7 @@ urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",
         views.Rows.as_view(),
+        name='api_rows'
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
