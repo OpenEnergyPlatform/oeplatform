@@ -20,7 +20,12 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 import dataedit.models as datamodels
-import oeplatform.securitysettings as sec
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in login/models.py")
+
 from login.mail import send_verification_mail
 
 NO_PERM = 0

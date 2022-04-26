@@ -6,7 +6,12 @@ from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views.generic import View
 
-import oeplatform.securitysettings as sec
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in base/views.py")
+
 from base.forms import ContactForm
 
 # Create your views here.

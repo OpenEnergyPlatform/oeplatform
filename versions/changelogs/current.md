@@ -4,8 +4,8 @@
 
 ### Bugs
 
+- Fix ReadTheDocs Build (PR #917)
 - removed quoted numbers on csv export
-- Prohibit duplicate / similar tags (PR #885)
 
 ### Features
 
