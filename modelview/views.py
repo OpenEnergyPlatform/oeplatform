@@ -499,6 +499,8 @@ class RDFFactoryView(View):
         old_value = None
         new_value = None
 
+        print("=====query====")
+        print(query)
         raw_old_value = query.get("oldValue")
         if raw_old_value:
             old_value = pf.process_data(raw_old_value)
