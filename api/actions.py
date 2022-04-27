@@ -36,7 +36,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.metadata import load_metadata_from_db
+import dataedit.metadata
 from dataedit.models import Table as DBTable, Schema as DBSchema
 from dataedit.structures import TableTags as OEDBTableTags, Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -50,6 +50,7 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
+MAX_TABLE_NAME_LENGTH = 50 # postgres limit minus pre/suffix for meta tables
 
 def get_column_obj(table, column):
     """
@@ -727,8 +728,8 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 def assert_valid_table_name(table):
-    if len(table) > 63:
-        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
+    if len(table) > MAX_TABLE_NAME_LENGTH:
+        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})")
     if len(table) == 0:
         raise APIError("Empty table name")
     if not re.match(r"[a-z][a-z0-9_]*", table):
@@ -2112,7 +2113,7 @@ def apply_deletion(session, table, rows, rids):
 def update_meta_search(table, schema):
     schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
     t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
-    comment = str(load_metadata_from_db(schema, table))
+    comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)
     s = (" ".join((*re.findall("\w+", schema), *re.findall("\w+", table), *re.findall(u"\w+", comment), *(tag[0] for tag in tags))))

@@ -1,10 +1,10 @@
-[![Documentation Status](https://readthedocs.org/projects/oep-data-interface/badge/?version=latest)](http://oep-data-interface.readthedocs.io/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/oeplatform/badge/?version=latest)](https://oeplatform.readthedocs.io/en/latest/?badge=latest)
 
-<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
+<a href="https://openenergy-platform.org/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
 # Open Energy Family - Open Energy Platform (OEP)
 
-Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
+Repository for the code of the Open Energy Platform (OEP) website [https://openenergy-platform.org/](https://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
 
 ## License / Copyright
 

@@ -19,7 +19,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from django.db.models import Count, Aggregate
+from django.db.models import Count, Aggregate, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -32,7 +32,12 @@ from sqlalchemy.orm import sessionmaker
 
 import api.parser
 from api.actions import describe_columns
-import oeplatform.securitysettings as sec
+
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in dataedit/views.py")
 from api import actions as actions
 from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
 from dataedit.metadata.widget import MetaDataWidget
@@ -50,6 +55,7 @@ from .models import (
 from .metadata.__init__ import load_metadata_from_db
 import requests as req
 
+from django.contrib import messages
 
 session = None
 
@@ -235,24 +241,20 @@ def listschemas(request):
     :return: Renders the schema list
     """
 
-    searchedQueryString = request.GET.get("query")
-    searchedTagIds = list(map(
+    searched_query_string = request.GET.get("query")
+    
+    searched_tag_ids = list(map(
         lambda t: int(t),
         request.GET.getlist("tags"),
     ))
-
-    for tag_id in searchedTagIds:
+    for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
 
-    filter_kwargs = dict(search=SearchQuery(" & ".join(p + ":*" for p in re.findall("[\w]+", searchedQueryString)),
-                                            search_type="raw")) if searchedQueryString else {}
-    response = Table.objects.filter(**filter_kwargs).values("schema__name").annotate(tables_count=Count("name"))
-
-    engine = actions._get_engine()
-    conn = engine.connect()
-    Session = sessionmaker()
-    session = Session(bind=conn)
-    tags = {r[0]: set(r[1]) for r in session.query(TableTags.schema_name, array_agg(TableTags.tag)).group_by(TableTags.schema_name)}
+    # find all tables (layzy query set)
+    tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
+    
+    # get table count per schema
+    response = tables.values("schema__name").annotate(tables_count=Count("name"))    
 
     description = {
         "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
@@ -271,23 +273,25 @@ def listschemas(request):
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."
     }
 
-    schemas = sorted(
-        [
-            (row["schema__name"], description.get(row["schema__name"], "No description"), row["tables_count"], tags.get(row["schema__name"], []))
-            for row in response
-            if row["schema__name"] in schema_whitelist
-            and tags.get(row["schema__name"], set()).issuperset(searchedTagIds or set())
-        ],
-        key=lambda x: x[0],
-    )
+    schemas = [
+        (
+            row["schema__name"],
+            description.get(row["schema__name"], "No description"), 
+            row["tables_count"], # number of tables in schema                
+        )
+        for row in response            
+    ]
+
+    # sort by name
+    schemas = sorted(schemas, key=lambda x: x[0])
 
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
         {
             "schemas": schemas,
-            "query": searchedQueryString,
-            "tags": searchedTagIds
+            "query": searched_query_string,
+            "tags": searched_tag_ids
         }
     )
 
@@ -353,6 +357,99 @@ def get_readable_table_names(schema):
         conn.close()
     return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
 
+  
+def get_readable_table_name(schema_name, table_name):
+    """get readable table name from metadata
+
+    Args:
+        schema_name (str): schema name
+        table_name (str): table name
+
+    Returns:
+        str
+    """
+    try:
+        label = read_label(table_name, load_metadata_from_db(schema_name, table_name))
+    except:
+        label = ""
+    return label
+
+def get_session_query():
+    engine = actions._get_engine()
+    conn = engine.connect()
+    Session = sessionmaker()
+    session = Session(bind=conn)    
+    return session.query
+
+
+def find_tables(schema_name=None, query_string=None, tag_ids=None):
+    """find tables given search criteria
+
+    Args:
+        schema_name (str, optional): only tables in this schema
+        query_string (str, optional): user search term
+        tag_ids (list, optional): list of tag ids
+
+    Returns:
+        QuerySet of Table objetcs
+    """
+    
+    # define search filter (will be combined with AND):
+    filters = []
+
+    # only whitelisted schemata:
+    filters.append(Q(schema__name__in=schema_whitelist))
+
+    if schema_name: # only tables in schema 
+        filters.append(Q(schema__name=schema_name))
+
+    if query_string: # filter by search terms
+        filters.append(Q(search=SearchQuery(
+            " & ".join(p+":*" for p in re.findall("[\w]+", query_string)), 
+            search_type="raw"
+        )))
+
+    if tag_ids: # filter by tags:
+        # unfortunately, tags are no longer in django tables, 
+        # so we cannot filter directly
+        # instead, we load all table names that match the given tags
+
+        # find tables (in schema), that use all of the tags
+        filter_tags = [
+            TableTags.tag.in_(tag_ids)
+        ]
+        if schema_name:
+            filter_tags.append(
+                TableTags.schema_name==schema_name
+            )
+
+        tag_query = get_session_query()(
+            TableTags.schema_name, 
+            TableTags.table_name,            
+        ).filter(
+            *filter_tags
+        ).group_by(
+            TableTags.schema_name, 
+            TableTags.table_name
+        ).having(
+            # only if number of matches == number of tags
+            sqla.func.count() == len(tag_ids)
+        )                
+
+        filter_tables = Q(pk__in=[])
+        # start with a "always false" condition, because we add OR statements
+        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851
+
+        for schema_name, table_name in tag_query:
+            filter_tables = filter_tables | (Q(schema__name=schema_name) & Q(name=table_name))
+        
+        filters.append(filter_tables)
+
+    
+    tables = Table.objects.filter(*filters)
+
+    return tables
+
 def listtables(request, schema_name):
     """
     :param request: A HTTP-request object sent by the Django framework
@@ -360,48 +457,74 @@ def listtables(request, schema_name):
     :return: Renders the list of all tables in the specified schema
     """
 
-    searchedQueryString = request.GET.get("query")
-    searchedTagIds = list(map(int,
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = list(map(int,
         request.GET.getlist("tags"),
     ))
-
-    for tag_id in searchedTagIds:
+    for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
+    
+    # find all tables (layzy query set) in this schema
+    tables = find_tables(
+        schema_name=schema_name,
+        query_string=searched_query_string, 
+        tag_ids=searched_tag_ids
+    )
 
-    labels = get_readable_table_names(schema_name)
-    filter_kwargs = dict(search=SearchQuery(" & ".join(p+":*" for p in re.findall("[\w]+", searchedQueryString)), search_type="raw")) if searchedQueryString else {}
+    # get all tags for table in schema
+    tag_query = get_session_query()(
+        TableTags.table_name, 
+        array_agg(TableTags.tag), 
+        array_agg(Tag.name), 
+        array_agg(Tag.color), 
+        array_agg(Tag.usage_count)
+    ).filter(
+        TableTags.schema_name==schema_name,
+        TableTags.tag==Tag.id # join
+    ).group_by(
+        TableTags.table_name
+    )
 
-    engine = actions._get_engine()
-    conn = engine.connect()
-    Session = sessionmaker()
-    session = Session(bind=conn)
-    tag_query = session.query(TableTags.table_name, array_agg(TableTags.tag), array_agg(Tag.name), array_agg(Tag.color), array_agg(Tag.usage_count)).filter(
-        TableTags.schema_name==schema_name, TableTags.tag==Tag.id).group_by(TableTags.table_name)
 
-    tags = {r[0]: sorted([dict(id=ident, name=label, color="#" + format(color, "06X"), popularity=pop)
-                   for ident, label, color, pop in zip(r[1], r[2], r[3], r[4])], key=lambda x: x["popularity"])
-            for r in tag_query}
+    def create_taglist(row):
+        return [
+            dict(
+                id=ident, 
+                name=label, 
+                color="#" + format(color, "06X"), 
+                popularity=pop
+            )
+            for ident, label, color, pop 
+            in zip(row[1], row[2], row[3], row[4])
+        ]
 
+    # group tags by table_name, order by popularity
+    tags = {
+        r[0]: sorted(create_taglist(r), key=lambda x: x["popularity"]) 
+        for r in tag_query
+    }
+    
     tables = [
         (
             table.name,
-            labels.get(table.name),
+            # TODO: slow, because must read metadata for each table!
+            get_readable_table_name(schema_name=schema_name, table_name=table.name),
             tags.get(table.name, [])
         )
-        for table in Table.objects.filter(schema__name=schema_name, **filter_kwargs)
+        for table in tables
     ]
-
-    # Apply tag filter later on, because I am not smart enough to do it inline.
-    tables = [tableEntry for tableEntry in tables
-              if {tag["id"] for tag in tableEntry[2]}.issuperset(searchedTagIds or set())]
-
+    
+    # sort by name    
     tables = sorted(tables, key=lambda x: x[0])
+
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema_name, "tables": tables,
-            "query": searchedQueryString, "tags": searchedTagIds
+            "schema": schema_name, 
+            "tables": tables,
+            "query": searched_query_string, 
+            "tags": searched_tag_ids
         },
     )
 
@@ -1258,8 +1381,6 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         # md, error = actions.try_parse_metadata(table_oemetadata)
         # print(md, error)
 
-    
-
     # Keep, this are the tags that where added by the user via OEP website
     updated_oep_tags = [] 
     # this are OEM keywords that are new to the OEP tags
@@ -1302,6 +1423,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
         tag_id = get_tag_id_by_tag_name_normalized(session, k)
         if tag_id is not None:
             add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+    
     
 
     table_oemetadata["keywords"] = updated_keywords
@@ -1351,9 +1473,18 @@ def add_table_tags(request):
     
     # TODO: reuse session from above?
     with engine.begin() as con:
-        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)        
+        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)     
+
+
+    messasge = messages.success(request, 'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.')   
 
     
+    return render(request, 'dataedit/dataview.html', {"messages": messasge})
+
+
+def redirect_after_table_tags_updated(request):
+    add_table_tags(request)
+
     return redirect(request.META["HTTP_REFERER"])
 
 

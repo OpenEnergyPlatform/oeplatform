@@ -20,6 +20,16 @@ from unittest.mock import MagicMock
 import django
 from django.conf import settings
 
+# try:
+#     from oeplatform.oeplatform.securitysettings import SECRET_KEY
+# except:
+#     import logging
+#     logging.error("No securitysettings found. Setting defaults")
+#     DEBUG = True
+#     SECRET_KEY = '0'
+    
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -29,6 +39,7 @@ from django.conf import settings
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 os.environ["DJANGO_SETTINGS_MODULE"] = "oeplatform.settings"
+
 django.setup()
 
 # If your documentation needs a minimal Sphinx version, state it here.

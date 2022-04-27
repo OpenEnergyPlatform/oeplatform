@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import datetime
 
 from django.db import migrations, models
-
+import django.utils
 
 class Migration(migrations.Migration):
 
@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="tablerevision",
             name="date",
-            field=models.DateTimeField(default=datetime.datetime.now, max_length=1000),
+            field=models.DateTimeField(default=django.utils.timezone.now, max_length=1000),
         ),
     ]

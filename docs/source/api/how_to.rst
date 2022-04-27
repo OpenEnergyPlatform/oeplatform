@@ -47,7 +47,7 @@ We want to create the following table with primary key `id`:
 
 In order to do so, we send the following PUT request::
 
-    PUT oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
+    PUT https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/
     {
         "query": {
             "columns": [
@@ -111,7 +111,7 @@ tool **curl**::
                     "metadata": {"id": "sandbox.example_table"}
                 }
             }'
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
+        https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/
 
 
 or **python**:
@@ -177,7 +177,7 @@ In the following example, we want to add a row containing just the name
         -H "Content-Type: application/json"
         -H 'Authorization: Token <your-token>'
         -d '{"query": {"name": "John Doe"}}'
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
+        https://openenergy-platform.org//api/v0/schema/sandbox/tables/example_table/rows/
 
 **python**:
 
@@ -232,7 +232,7 @@ No authorization is required to do so.
 
     curl
         -X GET
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
+        https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/rows/
 
 The data will be returned as list of JSON-dictionaries similar to the ones used
 when adding new rows::
