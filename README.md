@@ -12,7 +12,13 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows
+In the meantime, we also offer the possibility to use [docker](https://www.docker.com/) in addition to the manual installation. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+
+[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+
+
+
+The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows.
 
 
 ### Setup the repository
