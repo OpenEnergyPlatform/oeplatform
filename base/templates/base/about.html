@@ -7,8 +7,9 @@
 <h2>Open Energy Family and Open Energy Platform</h2> <br>
 
 <a href="{% static 'img/about/OpenEnergyFamily_GroupPhoto.png' %}">
-        <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_GroupPhoto.png' %}" alt="Open Energy Family"/>
-    </a>
+    <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_GroupPhoto.png' %}"
+        alt="Open Energy Family" />
+</a>
 
 <h3 id="general-introduction">General Introduction</h3>
 <p>The Open Energy Family aims to ensure quality, transparency and reproducibility in energy
@@ -23,9 +24,10 @@
 
 <h3 id="what-energy-system-modelling">What? Energy System Modelling</h3>
 
-    <a href="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}">
-        <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}" alt="OEP circle simple"/>
-    </a>
+<a href="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}">
+    <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}"
+        alt="OEP circle simple" />
+</a>
 
 <p>Energy system models are used to explore the current and future energy
     systems and are often applied to questions involving the expansion of
@@ -37,13 +39,15 @@
     of the OEP is the underlying
     <a href="https://openenergy-platform.org/dataedit/schemas/">open energy database</a>,
     which can be used by everyone and is maintained by a team of developers from different
-    institutes.</p>
+    institutes.
+</p>
 
 <h3 id="how-open-science">How? Open Science</h3>
 
-    <a href="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}">
-        <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}" alt="OEP circle simple"/>
-    </a>
+<a href="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}">
+    <img style="width:50%" class="mx-auto d-block"
+        src="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}" alt="OEP circle simple" />
+</a>
 <p>We follow and promote the principles of
     <a href="https://en.wikipedia.org/wiki/Open_science/">Open Science</a>
     and offer an open infrastructure for energy system research.
@@ -55,7 +59,8 @@
     specifications and the
     <a href="https://www.go-fair.org/fair-principles/">FAIR principles</a>
     to improve the findability, accessibility, interoperability, and reuse of
-    digital assets.</p>
+    digital assets.
+</p>
 
 <h3 id="who-oep-community">Who? OEP-Community</h3>
 <p>The OEP is a cross-project research project that is continuously being developed by
@@ -66,13 +71,12 @@
 
 <h4 id="who-projects">Research Projects</h4>
 <div class="d-flex justify-content-between flex-md-wrap">
-        <a class="logo" href="https://github.com/openego" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/open_eGo_Header.png' %}"
-                 alt="open_eGo" width="275"
-                 border="0"/>
-        </a>
-        <a class="logo" href="https://github.com/open-fred" target="_blank">
+    {% for project in projects %}
+    <a class="logo" href="https://github.com/openego" target="_blank">
+        <img class="flex-item" src="{% static 'logos/' %}{{project.logo}}" alt="open_eGo" width="275" border="0" />
+    </a>
+    {% endfor %}
+    <!-- <a class="logo" href="https://github.com/open-fred" target="_blank">
             <img class="flex-item"
                  src="{% static 'logos/open_FRED_Header.png' %}"
                  alt="open_FRED" width="275"
@@ -101,76 +105,54 @@
                  src="{% static 'logos/SIROP_logo.png' %}"
                  alt="SIROP" width="275"
                  border="0"/>
-        </a>
+        </a> -->
 </div>
 
 <h4 id="who-partners">Partners</h4>
 <div class="d-flex justify-content-between flex-md-wrap">
-        <a class="logo" href="http://iks.cs.ovgu.de/IKS.html" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/OvGU.png' %}"
-                 alt="Otto von Guericke Universität Magdeburg - IKS" width="245" height="85"
-                 border="0"/>
-        </a>
-        <a class="logo" href="http://reiner-lemoine-institut.de/en/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/RLI.png' %}"
-                 alt="Reiner Lemoine Institut" width="140" height="102" border="0"/>
-        </a>
-        <a class="logo" href="https://www.uni-flensburg.de/en/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/EUF.png' %}"
-                 alt="Europa-Universität Flensburg" width="250px"/>
-        </a>
-        <a class="logo" href="http://www.znes-flensburg.de/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/ZNES.png' %}"
-                 alt="Zentrum für nachhaltige Energiesysteme" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.dlr.de/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/DLR-VE.png' %}"
-                 alt="DLR-VE (NEXT Energy)" width="268" height="109" border="0"/>
-        </a>
-        <a class="logo" href="https://www.hereon.de/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/partner_logo_hereon.png' %}"
-                 alt="HZG-Hereon" width="268" height="109" border="0"/>
-        </a>
-        <a class="logo" href="https://www.iee.fraunhofer.de/en.html" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/IEE.png' %}"
-                 alt="Fraunhofer IEE" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.oeko.de/en/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/OEI.png' %}"
-                 alt="Öko Institut" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.fz-juelich.de" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/FZJuelich-1.jpg' %}"
-                 alt="FZJ" width="250px"/>
-        </a>
-        <a class="logo" href="https://infai.org/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/InfAI-Logo.png' %}"
-                 alt="InfAI" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.pik-potsdam.de/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/pik_logo.png' %}"
-                 alt="PIK" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.ier.uni-stuttgart.de/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/Logo_IER_UniStuttgart-1200x386.png' %}"
-                 alt="IER" width="250px"/>
-        </a>
-        <a class="logo" href="https://www.fortiss.org/" target="_blank">
-            <img class="flex-item"
-                 src="{% static 'logos/partner_logo_fortiss.png' %}"
-                 alt="fortiss" width="250px"/>
-        </a>
+    <a class="logo" href="http://iks.cs.ovgu.de/IKS.html" target="_blank">
+        <img class="flex-item" src="{% static 'logos/OvGU.png' %}" alt="Otto von Guericke Universität Magdeburg - IKS"
+            width="245" height="85" border="0" />
+    </a>
+    <a class="logo" href="http://reiner-lemoine-institut.de/en/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/RLI.png' %}" alt="Reiner Lemoine Institut" width="140" height="102"
+            border="0" />
+    </a>
+    <a class="logo" href="https://www.uni-flensburg.de/en/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/EUF.png' %}" alt="Europa-Universität Flensburg" width="250px" />
+    </a>
+    <a class="logo" href="http://www.znes-flensburg.de/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/ZNES.png' %}" alt="Zentrum für nachhaltige Energiesysteme"
+            width="250px" />
+    </a>
+    <a class="logo" href="https://www.dlr.de/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/DLR-VE.png' %}" alt="DLR-VE (NEXT Energy)" width="268" height="109"
+            border="0" />
+    </a>
+    <a class="logo" href="https://www.hereon.de/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/partner_logo_hereon.png' %}" alt="HZG-Hereon" width="268"
+            height="109" border="0" />
+    </a>
+    <a class="logo" href="https://www.iee.fraunhofer.de/en.html" target="_blank">
+        <img class="flex-item" src="{% static 'logos/IEE.png' %}" alt="Fraunhofer IEE" width="250px" />
+    </a>
+    <a class="logo" href="https://www.oeko.de/en/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/OEI.png' %}" alt="Öko Institut" width="250px" />
+    </a>
+    <a class="logo" href="https://www.fz-juelich.de" target="_blank">
+        <img class="flex-item" src="{% static 'logos/FZJuelich-1.jpg' %}" alt="FZJ" width="250px" />
+    </a>
+    <a class="logo" href="https://infai.org/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/InfAI-Logo.png' %}" alt="InfAI" width="250px" />
+    </a>
+    <a class="logo" href="https://www.pik-potsdam.de/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/pik_logo.png' %}" alt="PIK" width="250px" />
+    </a>
+    <a class="logo" href="https://www.ier.uni-stuttgart.de/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/Logo_IER_UniStuttgart-1200x386.png' %}" alt="IER" width="250px" />
+    </a>
+    <a class="logo" href="https://www.fortiss.org/" target="_blank">
+        <img class="flex-item" src="{% static 'logos/partner_logo_fortiss.png' %}" alt="fortiss" width="250px" />
+    </a>
 </div>
 {% endblock %}
