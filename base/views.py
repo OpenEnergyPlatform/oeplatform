@@ -1,5 +1,8 @@
+import json
 import os
 import re
+import pathlib
+from django.apps import apps
 
 import markdown2
 from django.core.mail import send_mail
@@ -107,3 +110,56 @@ def handler404(request, exception):
     response = render(request, "base/404.html", {})
     response.status_code = 404
     return response
+
+
+def get_json_content(path, json_id=None):
+    """ Parse all jsons from given path and return as 
+        list or return a single parsed json by id ->  
+        The json must have a field called id. 
+
+    Args:
+        path (string): path to directory like 'static/project_pages_content/'
+        json_id (string, optional): ID value that must match the value of json[id]. Defaults to None.
+
+    Returns:
+        list[object]: List of all deserialized json files in path 
+        or
+        object: single json python object
+    """
+    if path is not None:
+        all_jsons=[]
+        for _json in os.listdir(path=path):
+            with open(os.path.join(path, _json), "r", encoding='utf-8') as json_content:
+                content = json.load(json_content)
+                all_jsons.append(content)
+
+        if json_id is None:
+            return all_jsons
+        else:
+            content_by_id = [i for i in all_jsons if i[id] is json_id]
+            return content_by_id
+    else:
+        return {"error": "The path cant be None. Please create a new Project"}
+
+class AboutPage(View):
+# docstring
+    projects_content_static = "project_detail_pages_content"
+
+    def get(self, request):
+        # projects_content_path = pathlib.Path(sec.BASE_DIR + sec.STATIC_URL + self.projects_content_static).resolve() 
+        # projects_content_path = os.path.join(sec.BASE_DIR + apps.get_app_config('base').name, sec.STATIC_URL)
+        projects_content_path = os.path.join(sec.STATIC_ROOT, self.projects_content_static)
+        projects = get_json_content(path=projects_content_path)
+        print(projects)
+
+        return render(request, "base/about.html", {"projects": projects})
+
+class AboutProjectDetail(AboutPage):
+# docstring
+
+    def get(self, request, project_id):
+        project = get_json_content(path=None, json_id=project_id)
+
+        return render(request, "project-detail.html", {"project_details": project})
+    
+          
