@@ -1337,7 +1337,7 @@ def get_tag_name_by_id(session, tag_id):
 
     Returns:
         None: If tag id does not exists.
-        Str: Tag name normalized
+        Str: Tag name
     """
 
     tag = session.query(Tag).filter(Tag.id==tag_id).first()
