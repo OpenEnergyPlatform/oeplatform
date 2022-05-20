@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+{% load bootstrap4 %}
+
+
+{% block main-content-body %}
+{% load static %}
+<div>
+    <!-- logo -->
+    <img class="flex-item" src="{% static 'logos/' %}{{project.logo}}" alt="{{ project.fullTitle }}" width="275"
+        border="0" />
+
+    <!-- full title and acronym -->
+    {{ project.fullTitle }}
+    {{ project.acronym }}
+
+    <!-- general -->
+    {{ project.general }}
+    <!-- tasks -->
+    {% for task in project.tasks %}
+    <li>{{ task }}</li>
+    {% endfor %}
+    <!-- Partners -->
+    {{ project.partners }}
+    <!-- Funding -->
+    {{ project.funding }}
+    <!-- Meta -->
+    {{ project.meta.lastUpdated }}
+</div>
+{% endblock main-content-body %}
