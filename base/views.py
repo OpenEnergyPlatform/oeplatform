@@ -126,6 +126,7 @@ def get_json_content(path, json_id=None):
         or
         object: single json python object
     """
+    
     if path is not None:
         all_jsons=[]
         for _json in os.listdir(path=path):
@@ -136,21 +137,19 @@ def get_json_content(path, json_id=None):
         if json_id is None:
             return all_jsons
         else:
-            content_by_id = [i for i in all_jsons if i[id] is json_id]
-            return content_by_id
+            content_by_id = [i for i in all_jsons if json_id == i["id"] and "template" != i["id"]]
+            return content_by_id[0]
+    # TODO: catch the exception if path is none 
     else:
-        return {"error": "The path cant be None. Please create a new Project"}
+        return {"error": "Path cant be None. Please provide the path to '/static/project_detail_pages_content/' . You can create a new Project by adding an JSON file like the '/static/project_detail_pages_content/PROJECT_TEMPLATE.json'."}
 
 class AboutPage(View):
 # docstring
     projects_content_static = "project_detail_pages_content"
+    projects_content_path = os.path.join(sec.STATIC_ROOT, projects_content_static)
 
-    def get(self, request):
-        # projects_content_path = pathlib.Path(sec.BASE_DIR + sec.STATIC_URL + self.projects_content_static).resolve() 
-        # projects_content_path = os.path.join(sec.BASE_DIR + apps.get_app_config('base').name, sec.STATIC_URL)
-        projects_content_path = os.path.join(sec.STATIC_ROOT, self.projects_content_static)
+    def get(self, request, projects_content_path=projects_content_path):
         projects = get_json_content(path=projects_content_path)
-        print(projects)
 
         return render(request, "base/about.html", {"projects": projects})
 
@@ -158,8 +157,8 @@ class AboutProjectDetail(AboutPage):
 # docstring
 
     def get(self, request, project_id):
-        project = get_json_content(path=None, json_id=project_id)
+        project = get_json_content(path=self.projects_content_path, json_id=project_id)
 
-        return render(request, "project-detail.html", {"project_details": project})
+        return render(request, "base/project-detail.html", {"project": project})
     
           
