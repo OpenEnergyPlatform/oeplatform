@@ -1,0 +1,16 @@
+{
+    "id": "test_project_2",
+    "fullTitle": "Testitute",
+    "acronym": "Ttte",
+    "general": "We have done all the tests.",
+    "tasks": [
+        "all the tests",
+        "another test"
+    ],
+    "partners": "Partner insititute",
+    "funding": "Test Money",
+    "logo": "FZJuelich-1.jpg",
+    "meta": {
+        "lastUpdated": "2022-05-17"
+    }
+}

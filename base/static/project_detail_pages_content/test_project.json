@@ -1,0 +1,16 @@
+{
+    "id": "test_project",
+    "fullTitle": "Reiner Lemoine Institut",
+    "acronym": "RLI",
+    "general": "We have done all the work.",
+    "tasks": [
+        "all the work",
+        "another work"
+    ],
+    "partners": "Partner insititute",
+    "funding": "Money",
+    "logo": "DLR-VE.png",
+    "meta": {
+        "lastUpdated": "2022-05-10"
+    }
+}
