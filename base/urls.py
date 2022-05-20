@@ -6,7 +6,7 @@ urlpatterns = [
     url(r"^robots.txt$", views.robot),
     url(r"^$", views.Welcome.as_view(), name="index"),
     url(r"^about/$", views.AboutPage.as_view(), name="index"),
-    url(r"^project-detail/(?P<id>[\w\-]+)/$", views.AboutProjectDetail.as_view(), name="p"),
+    url(r"^about/project-detail/(?P<project_id>[\w\-]+)/$", views.AboutProjectDetail.as_view(), name="project_detail"),
     url(r"^faq/$", views.redir, {"target": "faq"}, name="index"),
     url(r"^discussion/$", views.redir, {"target": "discussion"}, name="index"),
     url(r"^contact/$", views.ContactView.as_view(), name="index"),
