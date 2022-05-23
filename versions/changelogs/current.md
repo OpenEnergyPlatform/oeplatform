@@ -10,6 +10,7 @@
 
 - Fix ReadTheDocs Build (PR #917)
 - removed quoted numbers on csv export
+- Fix bug that removed umlauts from tags that are added to OEM keywords (PR #975)
 
 
 ### Features
