@@ -73,7 +73,7 @@
 <div class="d-flex justify-content-between flex-md-wrap">
     {% for project in projects %}
     <a class="logo" href="{% url 'project_detail'  project_id=project.id %}">
-        <img class="flex-item" src="{% static 'logos/' %}{{project.logo}}" alt="{{project.id}}" width="275"
+        <img class="flex-item" src="{% static 'logos/project/' %}{{project.logo}}" alt="{{project.id}}" width="275"
             border="0" />
     </a>
     {% endfor %}
