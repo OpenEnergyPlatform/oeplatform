@@ -30,18 +30,9 @@
                 title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto"
                 style="background-color: gray;">
                 {% for t in all_tags %}
-                <!-- <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}"
-                                style="background:{{ t.color }};color:{% readable_text_color t.color %}">
-                                <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox"
-                                    class="tag-checkbox" name="tags" value="{{ t.id }}">
-                                <span>{{ t.name }}</span>
-                                <span class="tag-checkbox-icon fas fa-check"></span>
-                            </label> -->
-
-                <option value="{{ t.id }}" style="color: {{ t.color }};">
+                <option value="{{ t.id }}" style="color: {{ t.color }}; background-color: gray;">
                     {{ t.name }}
                 </option>
-
                 {% endfor %}
             </select>
         </div>
@@ -53,17 +44,17 @@
                 Reset Filters
             </a>
         </div>
-        <hr>
-        <div id="howto" class="collapse show foldable-entry-body">
-            <ul class="list-group">
-                <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p>
-                <li class="list-group-item">Tags can be added when viewing a table.</li>
-                <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p>
-                <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
-            </ul>
-        </div>
     </div>
 </form>
+<hr>
+<div id="howto" class="collapse show foldable-entry-body">
+    <ul class="list-group">
+        <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p>
+        <li class="list-group-item">Tags can be added when viewing a table.</li>
+        <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p>
+        <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
+    </ul>
+</div>
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
