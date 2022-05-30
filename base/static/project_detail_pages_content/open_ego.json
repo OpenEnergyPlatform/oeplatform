@@ -1,24 +1,29 @@
 {
     "id": "open_ego",
-    "fullTitle": "open_eGo",
-    "acronym": "",
-    "projectStatus": "",
-    "general": "",
-    "tasks": [
-        "",
-        ""
-    ],
+    "fullTitle": "open_eGo: open electricity grid optimization",
+    "acronym": "open_eGo",
+    "projectStatus": "isFinished",
+    "general": "The aim of the open_eGo project is to use models to generate cost-optimised solutions for the expansion and conversion of the electricity grid for the energy transition. The open-source tool landscape created around the eGo grid planning tool can model all voltage levels in Germany, simulate the basic functioning of the electricity market taking into account the physical AC load flow behaviour and simultaneously optimise grid and storage expansion in an integrated way.",
+    "tasks": "The Open Energy Platform was created as a product of the open_eGo research project, with the aim of enabling the systematised, cross-model use of open energy data."
     "partners": [
         {
-            "name": "",
+            "name": "Reiner Lemoine Institut",
             "logo": ""
         },
         {
-            "name": "",
+            "name": "Next Energy",
+            "logo": ""
+        },
+	{
+            "name": "Zentrum für nachhaltige Energiesysteme",
+            "logo": ""
+        },
+	{
+            "name": "Otto von Guericke Universität Magdeburg",
             "logo": ""
         }
     ],
-    "funding": "",
+    "funding": "0325881",
     "logo": "open_eGo_Header.png",
     "meta": {
         "lastUpdated": "2022-05-24"
