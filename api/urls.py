@@ -1,4 +1,6 @@
 from django.conf.urls import url
+from django.views.generic import TemplateView
+from django.urls import path
 
 from api import actions, views
 
@@ -173,4 +175,7 @@ urlpatterns = [
     ),
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
-]
+] + [path('swagger-ui/', TemplateView.as_view(
+        template_name='swagger-ui.html',
+        extra_context={'schema_url':'/static/openapi-schema.yml'}
+    ), name='swagger-ui'),]
