@@ -1,26 +1,31 @@
 {
     "id": "sirop",
-    "fullTitle": "SIROP",
-    "acronym": "",
-    "projectStatus": "",
-    "general": "",
-    "tasks": [
-        "",
-        ""
-    ],
+    "fullTitle": "SIROP: Automated comparison of energy scenarios",
+    "acronym": "SIROP",
+    "projectStatus": "isActive",
+    "general": "The SIROP project aims to enable and (partially) automate scenario interoperability and scenario comparisons. This is an important step towards more comprehensible and reproducible energy system research. SIROP builds on the predecessor project SzenarienDB: Here, the basic concept of "scenario bundles" (bundles) was developed and tested.",
+    "tasks": "SIROP is part of the Open Energy Family and thus pursues the goal of enabling transparency, traceability and reusability of results in energy system research. All data and results created with the tools of the Open Energy Family are freely and openly licensed to science, business and society.",
     "partners": [
         {
-            "name": "",
+            "name": "Reiner Lemoine Institut",
             "logo": ""
         },
         {
-            "name": "",
+            "name": "Frauenhofer IEE",
+            "logo": ""
+        },
+	{
+            "name": "Öko-Institut e.V.",
+            "logo": ""
+        },
+	{
+            "name": "Otto von Guericke Universität Magdeburg",
             "logo": ""
         }
     ],
-    "funding": "",
+    "funding": "03EI1035",
     "logo": "SIROP_logo.png",
     "meta": {
-        "lastUpdated": "2022-05-24"
+        "lastUpdated": "2022-05-31"
     }
 }
