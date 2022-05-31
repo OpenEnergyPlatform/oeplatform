@@ -10,6 +10,7 @@
 
 - Fix ReadTheDocs Build (PR #917)
 - removed quoted numbers on csv export
+- Fix bug to make renaming of permission groups possible (PR #980)
 
 
 ### Features
