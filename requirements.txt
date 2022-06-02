@@ -19,7 +19,7 @@ alembic
 django-simple-captcha
 django-bootstrap4
 django-fontawesome-5
-omi>0.0.6
+omi==0.0.7b1 # Raise omi version to beta release (omi is release as beta because release was not reviewd)
 django-jquery
 zipstream-new
 rdflib<6.0
