@@ -4,7 +4,7 @@
 - Update navigation bar (PR #898)
 - Python 3.6 is no longer supported due to dependency requirements (PR#941)
 - slightly improved tutorial markdown capabilities <#951>
-
+- Remove link to Study Factsheets (alpha) in navigation bar (PR #987)
 
 ### Bugs
 
