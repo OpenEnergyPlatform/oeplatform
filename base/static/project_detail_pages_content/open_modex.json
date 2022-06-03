@@ -1,26 +1,43 @@
 {
     "id": "open_modex",
     "fullTitle": "open_MODEX",
-    "acronym": "",
-    "projectStatus": "",
-    "general": "",
-    "tasks": [
-        "",
-        ""
-    ],
+    "acronym": "open_MODEX",
+    "projectStatus": "isFinished",
+    "general": "In the open_MODEX project, five open source frameworks for energy system analysis are being examined and compared with each other. The aim is to highlight the strengths and weaknesses of the individual frameworks and to analyse commonalities, differences and possible synergies between the frameworks.",
+    "tasks": "The aim is to develop modelling frameworks as open-source licensed software that can be viewed and edited by all interested parties. This will simplify the selection of suitable models for concrete questions in the future. All input data and results from open_MODEX shall be available on the OEP under open licences.",
     "partners": [
         {
-            "name": "",
+            "name": "Reiner Lemoine Institut",
             "logo": ""
         },
         {
-            "name": "",
+            "name": "Forschungsnetzwerk Energie",
+            "logo": ""
+        },
+{
+            "name": "RWTH Aachen",
+            "logo": ""
+        },
+	{
+            "name": "Technical University of Denmark",
+            "logo": ""
+        },
+	{
+            "name": "TU Berlin",
+            "logo": ""
+        },
+	{
+            "name": "Europa-Universität Flensburg",
+            "logo": ""
+        },
+	{
+            "name": "TU München",
             "logo": ""
         }
     ],
     "funding": "",
     "logo": "open_MODEX_Header.jpg",
     "meta": {
-        "lastUpdated": "2022-05-24"
+        "lastUpdated": "2022-05-31"
     }
 }

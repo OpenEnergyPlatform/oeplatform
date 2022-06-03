@@ -1,24 +1,25 @@
 {
     "id": "open_fred",
-    "fullTitle": "open_FRED",
-    "acronym": "",
-    "projectStatus": "",
-    "general": "",
-    "tasks": [
-        "",
-        ""
-    ],
+    "fullTitle": "open_FRED: open feed-in time series based on a Renewable Energy Database",
+    "acronym": "open_FRED",
+    "projectStatus": "isFinished",
+    "general": "In open_FRED, the requirements, assumptions and possibilities of energy system analysis and climate models are examined in order to create high-quality, transparent and citable data sets. These are then linked to open source simulation models that generate feed-in time series of fluctuating renewable energies.",
+    "tasks": "The aim of open_FRED is to create a data basis for energy system analyses with a uniform standard. For this purpose, the project participated in the development of the Open Energy platform with relevant data sets for power plant, climate and basic data.",
     "partners": [
         {
-            "name": "",
+            "name": "Reiner Lemoine Institut",
             "logo": ""
         },
         {
-            "name": "",
+            "name": "Helmholtz-Zentrum Geesthacht",
+            "logo": ""
+        },
+	{
+            "name": "Otto von Guericke Universität Magdeburg",
             "logo": ""
         }
     ],
-    "funding": "",
+    "funding": "0324006",
     "logo": "open_FRED_Header.png",
     "meta": {
         "lastUpdated": "2022-05-24"
