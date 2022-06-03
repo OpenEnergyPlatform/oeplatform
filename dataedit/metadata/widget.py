@@ -106,6 +106,9 @@ class MetaDataWidget:
 
             else:
                 for item in data:
+                    print(type(item))
+                    print(item)
+                    print(parent)
                     if isinstance(item, dict):
                         item = item.copy()
                         name = item.get('title', None)
@@ -121,11 +124,19 @@ class MetaDataWidget:
                             html += mark_safe('<p class="metaproperty">')
                             html += conditional_escape(name) + self.__convert_to_html(item, level + 1, parent=parent)
                             html += mark_safe('</p>')
+                        if item.get("start", None) is not None:
+                            no_valid_item = False
+                            html += mark_safe('<br>')
+                            html += mark_safe('{} element'.format(parent))
+                            html += self.__convert_to_html(item, level + 1, parent=parent)
+                    
                     else:
                         html += mark_safe('<p>Not implemented yet</p>')
+        
 
             if no_valid_item:
                 html += mark_safe('<p class="metaproperty">There is no valid entry for this field</p>')
+        
 
         elif isinstance(data, str) and re.match(self.url_regex, data):
             html += format_html('<a href="{}">{}</a>', data, data)
@@ -165,6 +176,7 @@ class MetaDataWidget:
         return html
 
     def render(self):
+        print(self.json)
         answer = self.__convert_to_html(data=self.json)
         return answer
 
