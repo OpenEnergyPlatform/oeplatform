@@ -6,7 +6,7 @@ from api import actions
 
 from . import APITestCase
 from .util import content2json, load_content, load_content_as_json
-from omi.dialects.oep.dialect import OEP_V_1_4_Dialect
+from omi.dialects.oep.dialect import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
 
 class TestPut(APITestCase):
     def setUp(self):
@@ -76,6 +76,7 @@ class TestPut(APITestCase):
             )
 
     def metadata_roundtrip(self, meta):
+        print(meta)
         response = self.__class__.client.post(
             "/api/v0/schema/{schema}/tables/{table}/meta/".format(
                 schema=self.test_schema, table=self.test_table
@@ -98,8 +99,9 @@ class TestPut(APITestCase):
 
         self.assertEqual(response.status_code, 200, response.json())
 
-        d = OEP_V_1_4_Dialect()
-        omi_meta = json.loads(json.dumps((d.compile(d.parse(json.dumps(meta))))))
+        d_14 = OEP_V_1_4_Dialect() # not tested anymore as OEM version is currently v1.5.1
+        d_15 = OEP_V_1_5_Dialect()
+        omi_meta = json.loads(json.dumps((d_15.compile(d_15.parse(json.dumps(meta))))))
 
         self.assertDictEqualKeywise(response.json(), omi_meta)
 
