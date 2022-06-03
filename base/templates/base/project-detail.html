@@ -5,25 +5,55 @@
 {% block main-content-body %}
 {% load static %}
 <div>
-    <!-- logo -->
-    <img class="flex-item" src="{% static 'logos/' %}{{project.logo}}" alt="{{ project.fullTitle }}" width="275"
-        border="0" />
+    <div class="d-flex justify-content-between flex-md-wrap">
+        <!-- full title and acronym -->
+        <h1>
+            <!-- logo -->
 
-    <!-- full title and acronym -->
-    {{ project.fullTitle }}
-    {{ project.acronym }}
+            {{ project.fullTitle }}
+            <br>
+            ({{ project.acronym }})
+        </h1>
+
+        <img class="flex-item" src="{% static 'logos/project/' %}{{project.logo}}" alt="{{ project.fullTitle }}"
+            width="200" border="0" />
+
+        <p>
+            last updated on:
+            {{ project.meta.lastUpdated }}
+        </p>
+    </div>
+
+
+
+
+
 
     <!-- general -->
+    <h2>General</h2>
     {{ project.general }}
     <!-- tasks -->
+    <h2>Tasks</h2>
+    {% if entry in project.tasks %}
     {% for task in project.tasks %}
     <li>{{ task }}</li>
     {% endfor %}
+    {% else %}
+    {{project.tasks}}
+    {% endif %}
     <!-- Partners -->
-    {{ project.partners }}
+    <h2>Partners</h2>
+    {% for partner in project.partners %}
+    <ul>
+        <img src="{% static 'logos/partner/' %}{{partner.logo}}" alt="{{ project.fullTitle }}" width="200" border="0" />
+        <li>{{ partner.name }}</li>
+
+    </ul>
+    {% endfor %}
     <!-- Funding -->
+    <h3>Funding</h3>
+    Grant number:
     {{ project.funding }}
     <!-- Meta -->
-    {{ project.meta.lastUpdated }}
 </div>
 {% endblock main-content-body %}
