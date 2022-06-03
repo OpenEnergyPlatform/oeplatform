@@ -8,11 +8,11 @@
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
-            "logo": ""
+            "logo": "RLI.png"
         },
         {
             "name": "Forschungsnetzwerk Energie",
-            "logo": ""
+            "logo": "partner_logo_fortiss.png"
         },
         {
             "name": "RWTH Aachen",
@@ -28,7 +28,7 @@
         },
         {
             "name": "Europa-Universität Flensburg",
-            "logo": ""
+            "logo": "EUF.png"
         },
         {
             "name": "TU München",

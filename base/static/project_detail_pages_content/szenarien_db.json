@@ -8,19 +8,19 @@
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
-            "logo": ""
+            "logo": "RLI.png"
         },
         {
             "name": "Frauenhofer IEE",
-            "logo": ""
+            "logo": "IEE.png"
         },
         {
             "name": "Öko-Institut e.V.",
-            "logo": ""
+            "logo": "OEI.png"
         },
         {
             "name": "Otto von Guericke Universität Magdeburg",
-            "logo": ""
+            "logo": "OvGU.png"
         }
     ],
     "funding": "",

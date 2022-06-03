@@ -8,31 +8,31 @@
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
-            "logo": ""
+            "logo": "RLI.png"
         },
         {
             "name": "Deutsches Zentrum für Luft- und Raumfahrt",
-            "logo": ""
+            "logo": "DLR-VE.png"
         },
         {
             "name": "Deutsches Zentrum für Luft- und Raumfahrt – Institut für Vernetzte Energiesysteme",
-            "logo": ""
+            "logo": "DLR-VE.png"
         },
         {
             "name": "Jülich Fosrschungszentrum",
-            "logo": ""
+            "logo": "FZJuelich-1.jpg"
         },
         {
             "name": "Potsdam Institute for Climate Impact Research",
-            "logo": ""
+            "logo": "pik_logo.png"
         },
         {
             "name": "Institut für Angewandte Informatik",
-            "logo": ""
+            "logo": "InfAI-Logo.png"
         },
         {
             "name": "Universität Stuttgart – IER",
-            "logo": ""
+            "logo": "Logo_IER_UniStuttgart-1200x386.png"
         }
     ],
     "funding": "03EI1005",

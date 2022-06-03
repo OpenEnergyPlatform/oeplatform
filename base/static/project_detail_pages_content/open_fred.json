@@ -8,15 +8,15 @@
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
-            "logo": ""
+            "logo": "RLI.png"
         },
         {
             "name": "Helmholtz-Zentrum Geesthacht",
-            "logo": ""
+            "logo": "HZG.png"
         },
         {
             "name": "Otto von Guericke Universität Magdeburg",
-            "logo": ""
+            "logo": "OvGU.png"
         }
     ],
     "funding": "0324006",

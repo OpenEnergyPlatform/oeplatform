@@ -8,19 +8,19 @@
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
-            "logo": ""
+            "logo": "RLI.png"
         },
         {
             "name": "Next Energy",
-            "logo": ""
+            "logo": "NE.png"
         },
         {
             "name": "Zentrum für nachhaltige Energiesysteme",
-            "logo": ""
+            "logo": "ZNES.png"
         },
         {
             "name": "Otto von Guericke Universität Magdeburg",
-            "logo": ""
+            "logo": "OvGU.png"
         }
     ],
     "funding": "0325881",
