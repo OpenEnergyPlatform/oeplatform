@@ -76,7 +76,6 @@ class TestPut(APITestCase):
             )
 
     def metadata_roundtrip(self, meta):
-        print(meta)
         response = self.__class__.client.post(
             "/api/v0/schema/{schema}/tables/{table}/meta/".format(
                 schema=self.test_schema, table=self.test_table
