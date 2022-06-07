@@ -26,19 +26,9 @@ class TableRevision(models.Model):
     size = IntegerField(null=False)
     last_accessed = DateTimeField(null=False, default=timezone.now)
 
-
-class Tag(models.Model):
-    label = CharField(max_length=50, null=False, unique=True)
-    color = ColorField(default="#FF0000")
-
-    #def get_absolute_url(self):
-    #    return reverse("tag", kwargs={"pk": self.pk})
-
-
 class Tagable(models.Model):
     name = CharField(max_length=1000, null=False)
-    tags = models.ManyToManyField(Tag)
-
+    
     class Meta:
         abstract = True
 

@@ -2,7 +2,7 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 from django.forms import Form
-from dataedit.models import Tag, View
+from dataedit.models import View
 
 
 # This structure maps postgresql data types to django forms
@@ -185,7 +185,3 @@ class GeomViewForm(MapViewForm):
         return super(GeomViewForm, self).is_valid() and self.options['geom'] in self.columns
 
 
-class TagForm(ModelForm):
-    class Meta:
-        model = Tag
-        fields = ["label"]
