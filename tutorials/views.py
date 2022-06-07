@@ -13,6 +13,7 @@ from django.views import View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from jinja2 import DictLoader
 from markdown2 import Markdown
+from bs4 import BeautifulSoup
 
 from .forms import TutorialForm
 from .models import CATEGORY_OPTIONS, LEVEL_OPTIONS, Tutorial
@@ -271,6 +272,22 @@ def _processFormInput(form):
 
     return tutorial
 
+def cleanup_html(html):
+    """
+    
+    Args:
+        html (str): html code parsed from markdown
+    Returns:
+        str: cleaned html
+    """
+    html = BeautifulSoup(html, 'html.parser')
+    html = str(html)
+    
+    # remove iframes and script
+    html = re.sub('<script[^>]*>.*</script>', '', html, re.IGNORECASE)
+    html = re.sub('<iframe[^>]*>.*</iframe>', '', html, re.IGNORECASE)    
+
+    return html
 
 def formattedMarkdown(markdown):
     """Markdown style text to html and return.
@@ -298,10 +315,8 @@ def formattedMarkdown(markdown):
     }
     markdowner = Markdown(extras=extras)
     html = markdowner.convert(markdown)
-
-    html = re.sub('<script[^>]*>.*</script>', '', html, re.IGNORECASE)
-    html = re.sub('<iframe[^>]*>.*</iframe>', '', html, re.IGNORECASE)    
-
+    html = cleanup_html(html)
+    
     return html
 
 
