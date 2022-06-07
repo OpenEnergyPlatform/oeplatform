@@ -4,6 +4,7 @@
 - Update navigation bar (PR #898)
 - Python 3.6 is no longer supported due to dependency requirements (PR#941)
 - slightly improved tutorial markdown capabilities <#951>
+- Update OEMetadata integration (using new omi version) and metadater widget to be bale to use OEM v1.5.1 (PR#986)
 
 
 ### Bugs
