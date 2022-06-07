@@ -5,6 +5,7 @@
 - Python 3.6 is no longer supported due to dependency requirements (PR#941)
 - slightly improved tutorial markdown capabilities <#951>
 - Update text and links in About OEP (PR #982) 
+- Update Factsheets Overview (PR #983)
 
 ### Bugs
 
