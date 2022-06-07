@@ -26,10 +26,9 @@
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
             <select name="tags" class="selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto"
-                style="">
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" style="">
                 {% for t in all_tags %}
-                <option value="{{ t.id }}" style="color: {{ t.color }};">
+                <option value="{{ t.id }}">
                     {{ t.name }}
                 </option>
                 {% endfor %}
