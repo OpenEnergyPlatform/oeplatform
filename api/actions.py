@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Func, Value
 from django.http import Http404, JsonResponse
-from omi.dialects.oep.parser import JSONParser_1_4, ParserException
+from omi.dialects.oep.parser import ParserException
 from shapely import wkb, wkt
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql, cast
 from sqlalchemy import types as sqltypes
@@ -22,7 +22,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
-from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect_14
+from omi.dialects.oep import OEP_V_1_5_Dialect as OmiDialect_15
 from omi.dialects.oep.compiler import JSONCompiler
 import api
 import login.models as login_models
@@ -142,8 +143,11 @@ def try_parse_metadata(inp):
         True
 
     """
-
-    parser = JSONParser_1_4()
+    dialect14 = OmiDialect_14()
+    dialect15 = OmiDialect_15()
+    parser_14 = dialect14._parser()
+    parser_15 = dialect15._parser()
+    # Add here
     if isinstance(inp, dict):
         jsn = inp
     else:
@@ -152,11 +156,19 @@ def try_parse_metadata(inp):
         except:
             return None, "Could not parse json"
     try:
-        metadata = parser.parse(jsn)
+        metadata = parser_15.parse(jsn)
     except ParserException as e:
         return None, str(e)
-    except:
-        raise APIError("Metadata could not be parsed")
+    except Exception as e:
+        APIError("Metadata could not be parsed{}".format(e))
+        try:
+            metadata = parser_14.parse(jsn)
+        except ParserException as e:
+            return None, str(e)
+        except Exception as e:
+            raise APIError("Metadata could not be parsed{}".format(e))
+        else:
+            return metadata, None
     else:
         return metadata, None
 
@@ -757,13 +769,28 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
     # if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
 
+    # NOTE: THIS SECTION HANDEL OEMETADATA when table is created
     if table_metadata is not None:
-        omi_dialect = OmiDialect()
+        omi_dialect_14 = OmiDialect_14()
+        omi_dialect_15 = OmiDialect_15()
         try:
-            comment_on_table = omi_dialect._parser().parse(table_metadata)
+            comment_on_table = omi_dialect_15._parser().parse(table_metadata)
         except ParserException as e:
-            raise APIError(str(e))
-        comment_on_table = json.dumps(omi_dialect.compile(comment_on_table))
+            APIError(str(e))
+            try:
+                comment_on_table = omi_dialect_14._parser().parse(table_metadata) 
+            except ParserException as e:
+                raise APIError(str(e))
+        try:
+            comment_on_table = json.dumps(omi_dialect_15.compile(comment_on_table))
+        except Exception as e:
+            APIError(str(e))
+            try:
+                comment_on_table = json.dumps(omi_dialect_14.compile(comment_on_table))
+            except Exception as e:
+                raise APIError(str(e))
+        
+        
     else:
         comment_on_table = None
 
@@ -2132,8 +2159,24 @@ def set_table_metadata(table, schema, metadata, cursor):
     """
 
     table_obj = _get_table(schema=schema, table=table)
-    compiler = JSONCompiler()
-    table_obj.comment = json.dumps(compiler.visit(metadata))    
+    compiler_14 = JSONCompiler()
+
+    dialect_15 = OmiDialect_15()
+    compiler_15 = dialect_15._compiler()
+    
+    try:
+        table_obj.comment = json.dumps(compiler_15.visit(metadata))
+    except Exception as e:
+        APIError("Metadata is not compilable using metadat aversion 1.5 compiler {}".format(e))
+        try:
+            table_obj.comment = json.dumps(compiler_14.visit(metadata))
+        except Exception as e:
+            raise APIError("Metadata is not compilable using metadat aversion 1.4 compiler{}".format(e))
+        
+
+    
+    
+    # table_obj.comment = json.dumps(compiler_15.visit(metadata))
     # Surprisingly, SQLAlchemy does not seem to escape comment strings
     # properly. Certain strings cause errors database errors.
     # This MAY be a security issue. Therefore, we do not use
