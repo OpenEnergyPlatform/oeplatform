@@ -1,0 +1,33 @@
+{
+    "id": "sirop",
+    "fullTitle": "SIROP: Automated comparison of energy scenarios",
+    "acronym": "SIROP",
+    "start": "2021-04-01",
+    "end": "2014-03-31",
+    "projectStatus": "isActive",
+    "general": "The SIROP project aims to enable and (partially) automate scenario interoperability and scenario comparisons. This is an important step towards more comprehensible and reproducible energy system research. SIROP builds on the predecessor project SzenarienDB.",
+    "tasks": "In order to use the OEO, the Open Energy Knowledge Graph (OEKG) is beeing developed. As part of the Open Energy Family it is enabling transparency, traceability and reusability of results in energy system research. It is the basis for new Factsheets and a scenario comparision tool. In addition, the OEP is extended by workshop concepts and tutorials to make everything understandable and accessible.",
+    "partners": [
+        {
+            "name": "Reiner Lemoine Institut",
+            "logo": "RLI.png"
+        },
+        {
+            "name": "Frauenhofer IEE",
+            "logo": "IEE.png"
+        },
+        {
+            "name": "Öko-Institut e.V.",
+            "logo": "OEI.png"
+        },
+        {
+            "name": "Otto von Guericke Universität Magdeburg",
+            "logo": "OvGU.png"
+        }
+    ],
+    "funding": "03EI1035",
+    "logo": "SIROP_logo.png",
+    "meta": {
+        "lastUpdated": "2022-05-31"
+    }
+}
