@@ -9,26 +9,39 @@
 <a href="{% static 'img/about/OpenEnergyFamily_GroupPhoto.png' %}">
     <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_GroupPhoto.png' %}"
         alt="Open Energy Family" />
-</a>
+
 
 <h3 id="general-introduction">General Introduction</h3>
-<p>The Open Energy Family aims to ensure quality, transparency and reproducibility in energy
-    system research. It is a collection of various tools and information and that help working
-    with energy related data. It is a collaborative community effort, everything is
+<p>The Open Energy Family aims to ensure quality, transparency and
+    reproducibility in energy
+    system research. It is a collection of <a
+            href="https://github.com/OpenEnergyPlatform/organisation">various
+        tools and information</a> and that help working
+    with energy related data. It is a collaborative community effort, everything
+    is
     openly developed and therefore constantly evolving.</p>
-
 <p>The main module is the Open Energy Platform (OEP),
-    a web interface to access most of the modules, especially the community database.
-    It provides a way to publish data with proper documentation (metadata), and link it to source
+    a web interface to access most of the modules, especially the community
+    database.
+    It provides a way to publish data with proper documentation (metadata), and
+    link it to source
     code and underlying assumptions.</p>
+<p>The address the problem of different name and data(base) formats, the
+    <a href="https://openenergy-platform.org/ontology">Open Energy Ontology
+        (OEO)</a>
+    was developed. The ontology provides a controlled vocabulary with clear
+    definitions of terms and relationships between those terms.
+    Data annotation adds the possibility of enhanced searching functions and
+    logical querying across data sets.
+</p>
 
-<h3 id="what-energy-system-modelling">What? Energy System Modelling</h3>
 
-<a href="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}">
-    <img style="width:50%" class="mx-auto d-block" src="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}"
-        alt="OEP circle simple" />
-</a>
-
+<h3 id="what-energy-system-modelling">What? Energy System Modelling and
+    Data</h3>
+<p>Openly licensed data relevant in the field of climate and energy research can
+    be published and accessed here. Especially energy system modelling data and
+    scenarios can be found, along with further information on the underlying
+    models, frameworks and studies.</p>
 <p>Energy system models are used to explore the current and future energy
     systems and are often applied to questions involving the expansion of
     renewables and energy storages as well as energy and climate policy. The
@@ -37,36 +50,49 @@
 <p>The OEP considers the entire modelling process from the preprocessing of the
     raw data, the simulations, the postprocessing of the result data. The heart
     of the OEP is the underlying
-    <a href="https://openenergy-platform.org/dataedit/schemas/">open energy database</a>,
-    which can be used by everyone and is maintained by a team of developers from different
-    institutes.
-</p>
+    <a href="https://openenergy-platform.org/dataedit/schemas">Open Energy
+        Database (OEDB)</a>,
+    which can be used by everyone and is maintained by a team of developers from
+    different
+    institutes.</p>
+
+
+<a href="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}">
+    <img style="width:50%" class="mx-auto d-block"
+         src="{% static 'img/about/OpenEnergyFamily_modeling-cycle.png' %}"
+         alt="OEP circle simple"/>
+</a>
 
 <h3 id="how-open-science">How? Open Science</h3>
+<p>We follow and promote the principles of
+    <a href="https://en.wikipedia.org/wiki/Open_science">Open Science</a>
+    and offer an open infrastructure for energy system research.
+    The focus is on Open Data and the provision of modelling results under open
+    licenses.
+    The OEP uses an extensive metadata set, the
+    <a href="https://github.com/OpenEnergyPlatform/oemetadata">OEMetadata</a>.
+    It is based on the
+    <a href="https://frictionlessdata.io/specs/tabular-data-package/">Tabular
+        Data Package</a>
+    specifications and the
+    <a href="https://www.go-fair.org/fair-principles/">FAIR principles</a>
+    to improve the Findability, Accessibility, Interoperability, and Reuse of
+    digital assets.</p>
+
 
 <a href="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}">
     <img style="width:50%" class="mx-auto d-block"
-        src="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}" alt="OEP circle simple" />
+         src="{% static 'img/about/OpenEnergyFamily_modeling-open-science.png' %}"
+         alt="OEP circle simple"/>
 </a>
-<p>We follow and promote the principles of
-    <a href="https://en.wikipedia.org/wiki/Open_science/">Open Science</a>
-    and offer an open infrastructure for energy system research.
-    The focus is on Open Data and the provision of modelling results under open licenses.
-    The OEP uses an
-    <a href="https://github.com/OpenEnergyPlatform/metadata/">extensive metadata set</a>
-    based on the
-    <a href="https://frictionlessdata.io/specs/tabular-data-package/">tabular data package</a>
-    specifications and the
-    <a href="https://www.go-fair.org/fair-principles/">FAIR principles</a>
-    to improve the findability, accessibility, interoperability, and reuse of
-    digital assets.
-</p>
 
 <h3 id="who-oep-community">Who? OEP-Community</h3>
-<p>The OEP is a cross-project research project that is continuously being developed by
-    various universities and institutes. The entire source code of the OEP and
-    all other members of the Open Energy Family is
-    open source and accessible on <a href="https://github.com/OpenEnergyPlatform/">GitHub</a>.
+<p>The Open Energy Family is a cross-project research project that is
+    continuously being developed by
+    various universities and institutes. The source code of all members of the
+    family is
+    open source and accessible on <a
+            href="https://github.com/OpenEnergyPlatform/">GitHub</a>.
     Get involved and contribute!</p>
 
 <h4 id="who-projects">Research Projects</h4>
@@ -82,51 +108,73 @@
 <h4 id="who-partners">Partners</h4>
 <div class="d-flex justify-content-between flex-md-wrap">
     <a class="logo" href="http://iks.cs.ovgu.de/IKS.html" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/OvGU.png' %}"
-            alt="Otto von Guericke Universität Magdeburg - IKS" width="245" height="85" border="0" />
+        <img class="flex-item"
+             src="{% static 'logos/OvGU.png' %}"
+             alt="Otto von Guericke Universität Magdeburg - IKS" width="245"
+             height="85"
+             border="0"/>
     </a>
-    <a class="logo" href="http://reiner-lemoine-institut.de/en/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/RLI.png' %}" alt="Reiner Lemoine Institut" width="140"
-            height="102" border="0" />
+    <a class="logo" href="http://reiner-lemoine-institut.de/en/"
+       target="_blank">
+        <img class="flex-item"
+             src="{% static 'logos/RLI.png' %}"
+             alt="Reiner Lemoine Institut" width="140" height="102" border="0"/>
     </a>
     <a class="logo" href="https://www.uni-flensburg.de/en/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/EUF.png' %}" alt="Europa-Universität Flensburg"
-            width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/EUF.png' %}"
+             alt="Europa-Universität Flensburg" width="250px"/>
     </a>
     <a class="logo" href="http://www.znes-flensburg.de/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/ZNES.png' %}" alt="Zentrum für nachhaltige Energiesysteme"
-            width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/ZNES.png' %}"
+             alt="Zentrum für nachhaltige Energiesysteme" width="250px"/>
     </a>
     <a class="logo" href="https://www.dlr.de/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/DLR-VE.png' %}" alt="DLR-VE (NEXT Energy)" width="268"
-            height="109" border="0" />
+        <img class="flex-item"
+             src="{% static 'logos/DLR-VE.png' %}"
+             alt="DLR-VE (NEXT Energy)" width="268" height="109" border="0"/>
     </a>
     <a class="logo" href="https://www.hereon.de/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/partner_logo_hereon.png' %}" alt="HZG-Hereon" width="268"
-            height="109" border="0" />
+        <img class="flex-item"
+             src="{% static 'logos/partner_logo_hereon.png' %}"
+             alt="HZG-Hereon" width="268" height="109" border="0"/>
     </a>
-    <a class="logo" href="https://www.iee.fraunhofer.de/en.html" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/IEE.png' %}" alt="Fraunhofer IEE" width="250px" />
+    <a class="logo" href="https://www.iee.fraunhofer.de/en.html"
+       target="_blank">
+        <img class="flex-item"
+             src="{% static 'logos/IEE.png' %}"
+             alt="Fraunhofer IEE" width="250px"/>
     </a>
     <a class="logo" href="https://www.oeko.de/en/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/OEI.png' %}" alt="Öko Institut" width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/OEI.png' %}"
+             alt="Öko Institut" width="250px"/>
     </a>
     <a class="logo" href="https://www.fz-juelich.de" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/FZJuelich-1.jpg' %}" alt="FZJ" width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/FZJuelich-1.jpg' %}"
+             alt="FZJ" width="250px"/>
     </a>
     <a class="logo" href="https://infai.org/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/InfAI-Logo.png' %}" alt="InfAI" width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/InfAI-Logo.png' %}"
+             alt="InfAI" width="250px"/>
     </a>
     <a class="logo" href="https://www.pik-potsdam.de/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/pik_logo.png' %}" alt="PIK" width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/pik_logo.png' %}"
+             alt="PIK" width="250px"/>
     </a>
     <a class="logo" href="https://www.ier.uni-stuttgart.de/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/Logo_IER_UniStuttgart-1200x386.png' %}" alt="IER"
-            width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/Logo_IER_UniStuttgart-1200x386.png' %}"
+             alt="IER" width="250px"/>
     </a>
     <a class="logo" href="https://www.fortiss.org/" target="_blank">
-        <img class="flex-item" src="{% static 'logos/partner/partner_logo_fortiss.png' %}" alt="fortiss"
-            width="250px" />
+        <img class="flex-item"
+             src="{% static 'logos/partner_logo_fortiss.png' %}"
+             alt="fortiss" width="250px"/>
     </a>
 </div>
 {% endblock %}
