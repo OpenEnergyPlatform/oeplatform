@@ -2,6 +2,8 @@
     "id": "open_fred",
     "fullTitle": "open_FRED: open feed-in time series based on a Renewable Energy Database",
     "acronym": "open_FRED",
+    "start": "2016-08-01",
+    "end": "2019-07-31",
     "projectStatus": "isFinished",
     "general": "In open_FRED, the requirements, assumptions and possibilities of energy system analysis and climate models are examined in order to create high-quality, transparent and citable data sets. These are then linked to open source simulation models that generate feed-in time series of fluctuating renewable energies.",
     "tasks": "The aim of open_FRED is to create a data basis for energy system analyses with a uniform standard. For this purpose, the project made availlable relevant data sets for power plant, geospatial and basic data. The result is a special weather data set with high spatial and temporal resolution that meets the requirements of the feed-in models pvlib, windpowerlib and hydropowerlib.",
