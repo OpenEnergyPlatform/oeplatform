@@ -106,9 +106,6 @@ class MetaDataWidget:
 
             else:
                 for item in data:
-                    print(type(item))
-                    print(item)
-                    print(parent)
                     if isinstance(item, dict):
                         item = item.copy()
                         name = item.get('title', None)
@@ -176,7 +173,6 @@ class MetaDataWidget:
         return html
 
     def render(self):
-        print(self.json)
         answer = self.__convert_to_html(data=self.json)
         return answer
 
