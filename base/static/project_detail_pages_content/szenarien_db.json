@@ -4,7 +4,7 @@
     "acronym": "SzenarienDB",
     "projectStatus": "isFinished",
     "general": "The aim of SzenarienDB is to create a publicly accessible database on which scenario data, i.e. all data related to a scenario calculation, are summarised and published. This includes both input and output data of the calculation. In addition, the data is linked to the model descriptions. ",
-    "tasks": "The OpenEnergyDatabase (OEDB), a part of the associated OpenEnergy Platform (OEP), forms the basis for the creation of the database for SzearienDB. This will significantly improve transparency and the exchange of scenario data and promote the efficient use of public funds.",
+    "tasks": "The Open Energy Platform (OEP) has been reworked and redesigned. As a major output, the Open Energy Ontology (OEO) has been created and developed collaboratively. This is significantly improving transparency and the exchange of scenario data.",
     "partners": [
         {
             "name": "Reiner Lemoine Institut",
