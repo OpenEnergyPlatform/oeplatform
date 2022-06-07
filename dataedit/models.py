@@ -1,18 +1,16 @@
-from datetime import datetime
-
-from colorfield.fields import ColorField
-# django.contrib.postgres.fields.JSONField is deprecated.
-from django.db.models import JSONField
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
+
+# django.contrib.postgres.fields.JSONField is deprecated.
 from django.db.models import (
     BooleanField,
     CharField,
     DateTimeField,
     ForeignKey,
     IntegerField,
+    JSONField,
 )
 from django.utils import timezone
-from django.contrib.postgres.search import SearchVector, SearchVectorField
 
 # Create your models here.
 
@@ -26,9 +24,10 @@ class TableRevision(models.Model):
     size = IntegerField(null=False)
     last_accessed = DateTimeField(null=False, default=timezone.now)
 
+
 class Tagable(models.Model):
     name = CharField(max_length=1000, null=False)
-    
+
     class Meta:
         abstract = True
 
@@ -41,6 +40,7 @@ class Schema(Tagable):
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
+
     @classmethod
     def load(cls, schema, table):
         table_obj, _ = Table.objects.get_or_create(
@@ -63,7 +63,9 @@ class View(models.Model):
     is_default = BooleanField(default=False)
 
     def __str__(self):
-        return '{}/{}--"{}"({})'.format(self.schema, self.table, self.name, self.type.upper())
+        return '{}/{}--"{}"({})'.format(
+            self.schema, self.table, self.name, self.type.upper()
+        )
 
 
 class Filter(models.Model):
