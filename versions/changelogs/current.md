@@ -4,6 +4,7 @@
 - Update navigation bar (PR #898)
 - Python 3.6 is no longer supported due to dependency requirements (PR#941)
 - slightly improved tutorial markdown capabilities <#951>
+- improve UX for filter using tags and restructure parts of the dataedit sidebar (PR#978)
 
 
 ### Bugs
