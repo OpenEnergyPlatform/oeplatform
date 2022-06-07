@@ -1326,6 +1326,27 @@ def get_tag_name_normalized_by_id(session, tag_id):
     else:
         return None
 
+def get_tag_name_by_id(session, tag_id):
+    """
+    Query the Tag table in schmea public to get the tags.name.
+    Tags are queried by tag id.
+
+    Args:
+        session (sqilachemy): sqlalachemy session
+        tag_id (int): The Tag ID
+
+    Returns:
+        None: If tag id does not exists.
+        Str: Tag name
+    """
+
+    tag = session.query(Tag).filter(Tag.id==tag_id).first()
+    session.commit()
+    if tag is not None:
+        return tag.name
+    else:
+        return None
+
 
 def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_id):
     """
@@ -1391,7 +1412,7 @@ def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids,
     updated_keywords = []
 
     for id in tag_ids:
-        kw = get_tag_name_normalized_by_id(session, id)
+        kw = get_tag_name_by_id(session, id)
         if kw is not None:
            updated_oep_tags.append(kw)
 

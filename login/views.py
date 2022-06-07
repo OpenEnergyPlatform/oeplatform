@@ -89,6 +89,7 @@ class GroupCreate(View, LoginRequiredMixin):
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
             if group_id:
+                group = form.save()
                 membership = get_object_or_404(
                     GroupMembership, group=group, user=request.user
                 )
