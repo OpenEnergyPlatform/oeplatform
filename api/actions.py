@@ -1184,7 +1184,7 @@ def data_insert_check(schema, table, values, context):
                             {
                                 "operands": [
                                     {"type": "column", "column": c},
-                                    {"type": "value", "value": _load_value(row[c])}
+                                    {"type": "value", "value": row[c]}
                                     if c in row
                                     else {"type": "value"},
                                 ],
@@ -1231,13 +1231,6 @@ def data_insert_check(schema, table, values, context):
                             )
                             + ")"
                         )
-
-
-def _load_value(v):
-    if isinstance(v, str):
-        if v.isdigit():
-            return int(v)
-    return v
 
 
 def data_insert(request, context=None):

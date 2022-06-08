@@ -766,7 +766,7 @@ class Rows(APIView):
             clause = {
                 "operator": "=",
                 "operands": [
-                    actions._load_value(row_id),
+                    row_id,
                     {"type": "column", "column": "id"},
                 ],
                 "type": "operator",
@@ -847,7 +847,7 @@ class Rows(APIView):
             clause = {
                 "operator": "=",
                 "operands": [
-                    actions._load_value(row_id),
+                    row_id,
                     {"type": "column", "column": "id"},
                 ],
                 "type": "operator",
