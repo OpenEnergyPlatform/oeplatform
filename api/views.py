@@ -421,7 +421,7 @@ class Table(APIView):
             schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        table_object, _ = DBTable.objects.get_or_create(name=table, schema=schema_object)
+        table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
 
     @api_exception
@@ -455,7 +455,7 @@ class Table(APIView):
         actions._get_engine().execute(
             "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(schema=schema, table=table)
         )
-        table_object, _ = DBTable.objects.get_or_create(name=table, schema__name=schema)
+        table_object = DBTable.objects.get(name=table, schema__name=schema)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
