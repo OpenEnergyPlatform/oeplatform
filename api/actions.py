@@ -2139,7 +2139,7 @@ def apply_deletion(session, table, rows, rids):
 
 def update_meta_search(table, schema):
     schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
-    t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
+    t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)
