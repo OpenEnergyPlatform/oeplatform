@@ -7,6 +7,13 @@ This caused the creation of an artefact entry in django tables.
 from api.tests import APITestCase
 from api.connection import table_exists_in_oedb
 from api.actions import assert_permission
+from dataedit.models import Table, Schema
+
+def table_exists_in_django(table, schema):
+    schema_obj = Schema.objects.get_or_create(name=schema)[0]
+    table_objs = Table.objects.get(name=table, schema=schema_obj)
+    return bool(table_objs)
+    
 
 class Test_issue_807_table_artefacts(APITestCase):
     schema = "test" # created in APITestCase
@@ -22,4 +29,8 @@ class Test_issue_807_table_artefacts(APITestCase):
             )
         except Exception:
             pass
-        self.assertTrue(table_exists_in_oedb(self.table, self.schema))
+        
+        self.assertFalse(table_exists_in_oedb(self.table, self.schema))
+        # this failed before the bugfix
+        self.assertFalse(table_exists_in_django(self.table, self.schema))
+        
