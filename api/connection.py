@@ -1,4 +1,7 @@
+"""Contains functions to interact with the postgres oedb"""
+
 import sqlalchemy as sqla
+from api import DEFAULT_SCHEMA
 
 try:
     import oeplatform.securitysettings as sec
@@ -19,3 +22,23 @@ __ENGINE = sqla.create_engine(
 
 def _get_engine():
     return __ENGINE
+
+
+def table_exists_in_oedb(table, schema=None):
+    """check if table exists in oedb
+
+    Args:
+        table (str): table name
+        schema (str, optional): table schema name
+
+    Returns:
+        bool
+    """
+    engine = _get_engine()
+    schema = schema or DEFAULT_SCHEMA
+    conn = engine.connect()
+    try:
+        result = engine.dialect.has_table(conn, table, schema=schema)
+    finally:
+        conn.close()
+    return result
