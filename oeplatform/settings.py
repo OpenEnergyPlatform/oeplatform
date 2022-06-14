@@ -130,7 +130,7 @@ AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesBackend',
 
     # custom class extenging Django ModelBackend for login with username OR email
-    'login.models.ModelBackendWithEmail',
+    'login.backends.ModelBackendWithEmail',
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
