@@ -26,7 +26,7 @@
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
             <select name="tags" class="selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" iconBase="fa">
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="count" data-actions-box="true" iconBase="fa">
                 {% for t in all_tags %}
                 <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}">
                     {{ t.name }}
