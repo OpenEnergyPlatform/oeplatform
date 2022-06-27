@@ -10,8 +10,18 @@
 </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
 <hr>
 <div style="display: flex;">
-    <h3>Search and filter</h3>
-    <button type="button" class="btn btn-outline-light" data-toggle="popover" data-trigger="focus" title="Popover title" data-content="And here's some amazing content. It's very engaging. Right?" style="margin-left: 10px;">
+    <h3>Search & filter</h3>
+    <button type="button" 
+    class="btn btn-outline-light" 
+    data-toggle="popover" 
+    data-trigger="focus" 
+    title="How to use search and filter" 
+    {% if not tables%}
+    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed." 
+    {% else %}
+    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
+    {% endif %}
+    style="margin-left: 10px;">
         <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
     </button>
 </div>
