@@ -12,7 +12,7 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-In the meantime, we also offer the possibility to use [docker](https://www.docker.com/) in addition to the manual installation. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+Below we describe the complete manual installation of the OEP website and database. We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
 [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
@@ -43,6 +43,10 @@ If you are a windows user, we recommand you use conda because of the dependency 
 3)      conda config –add channels conda-forge
 4)      conda install shapely
 5)      pip install –r requirements.txt
+
+You can also use Python to create the environment
+
+    python -m venv env
 
 
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
