@@ -11,24 +11,24 @@
 <hr>
 <div style="display: flex;">
     <h3>Filters</h3>
-    <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#exampleModalCenter">
+    <button type="button" class="btn btn-outline-light" data-toggle="modal" data-target="#ModalCenter">
         <i class="fas fa-info-circle" style="color: #3B77A0; margin-left: 10px;"></i>
     </button>
 </div>
 <form action="{{ request.path }}" method="get">
     <h5>Text</h5>
     <div class="searchbox_container small">
-        <input type="text" name="query" placeholder="Search" value="{% firstof query "" %}" class="form-control" />
+        <input type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
     </div>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <h5>Tags</h5>
+    <h5>Tags</h5>    
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-            <select name="tags" class="selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" style="">
+            <select name="tags" class="form-control selectpicker" multiple data-live-search="true"
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
                 {% for t in all_tags %}
-                <option value="{{ t.id }}">
+                <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
                     {{ t.name }}
                 </option>
                 {% endfor %}
@@ -54,12 +54,12 @@
     </ul>
 </div>
 <!-- Modal content used in "tooltip" next to Filter section -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+<div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">How to work with Tags and Filter</h6>
+                <h5 class="modal-title" id="ModalLongTitle">How to work with Tags and Filter</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

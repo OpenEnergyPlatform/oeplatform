@@ -334,3 +334,7 @@ This is a fix, because we use modals within a position:fixed context, which is n
   to {bottom: 0; opacity: 0;}
 } 
 
+/* hide "select all" in tag selector */
+#tags .bootstrap-select .bs-select-all{
+  display: none !important
+}
