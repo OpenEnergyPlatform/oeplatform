@@ -123,12 +123,14 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     )
 }
+
+
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     'axes.backends.AxesBackend',
 
-    # Django ModelBackend is the default authentication backend.
-    'django.contrib.auth.backends.ModelBackend',
+    # custom class extenging Django ModelBackend for login with username OR email
+    'login.backends.ModelBackendWithEmail',
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
