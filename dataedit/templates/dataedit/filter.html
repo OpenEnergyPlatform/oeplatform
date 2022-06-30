@@ -28,17 +28,17 @@
 <form action="{{ request.path }}" method="get">
     <h5>Text</h5>
     <div class="searchbox_container small">
-        <input type="text" name="query" placeholder="Search" value="{% firstof query "" %}" class="form-control" />
+        <input type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
     </div>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <h5>Tags</h5>
+    <h5>Tags</h5>    
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-            <select name="tags" class="selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" style="">
+            <select name="tags" class="form-control selectpicker" multiple data-live-search="true"
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
                 {% for t in all_tags %}
-                <option value="{{ t.id }}">
+                <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
                     {{ t.name }}
                 </option>
                 {% endfor %}
