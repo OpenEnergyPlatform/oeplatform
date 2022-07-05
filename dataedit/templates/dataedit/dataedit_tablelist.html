@@ -2,7 +2,8 @@
 {% block title %} - {{schema}}{% endblock %}
 
 {% block site-header %}
-<h2 class="site-header"><a href="/dataedit/schemas">Schema</a>: {{ schema }}</h2>
+<i class="far fa-ruler"></i>
+<h2 class="site-header"><a href="/dataedit/schemas"><i class="fas fa-arrow-alt-circle-left "></i>Data categorie</a>: {{ schema }}</h2>
 {% endblock site-header %}
 
 {% block data_content %}
@@ -19,6 +20,9 @@
                         <li class="nav-item" onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">
                             <a class="nav-link bg-success rounded active">View Data</a>
                         </li>
+                        <!-- <li class="nav-item">
+                            <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
+                        </li> -->
                       </ul>
                 </div>
                 <div class="card-body">
@@ -27,19 +31,15 @@
 
                     {% if label %}
                     <h5 class="card-title">{{ label }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
-                    <p class="card-text">Description</p>
                     {% else %}
                     <h5 class="card-title">{{ table }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
-                    <p class="card-text">Description</p>
                     {% endif %}
                     <p class="card-text">
-                    <h6 class="card-subtitle"> Tags: </h6>
-                    {% for tag in tags %}
-                    <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}"
-                        style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
-                    {% endfor %}
+                        <h6 class="card-subtitle"> <i class="fas fa-bookmark"></i> Tags </h6>
+                        {% for tag in tags %}
+                        <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}"
+                            style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
+                        {% endfor %}
                     </p>
                 </div>
                
@@ -59,11 +59,13 @@
                 </ul>
                
                 <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade active show" id="general-{{ table }}" role="tabpanel" aria-labelledby="general-tab">...</div>
+                    <div class="tab-pane fade active show" id="general-{{ table }}" role="tabpanel" aria-labelledby="general-tab"> 
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Description</li>
+                        </ul>
+                    </div>
                     <div class="tab-pane fade " id="license-{{ table }}" role="tabpanel" aria-labelledby="license-tab">
                         <ul class="list-group list-group-flush">
-                                            <li class="list-group-item"></li>
-                                            <li class="list-group-item"></li>
                             <li class="list-group-item">License:</li>
                             <li class="list-group-item">Contibutor:</li>
                             <li class="list-group-item">More:</li>
