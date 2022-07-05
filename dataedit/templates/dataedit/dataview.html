@@ -5,11 +5,14 @@
 
 
 {% block site-header %}
+
 <h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
 {% endblock site-header %}
 
 {% block data_content %}
-
+<div>
+{% include 'messages.html' %}
+</div>
 
 <ul class="nav nav-tabs">
   <li class="nav-item">
@@ -169,7 +172,6 @@ for row in result.json():
 {% block after-head %}
 
 <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
-<link href="https://raw.githubusercontent.com/tobiasahlin/SpinKit/master/css/spinkit.css" rel="stylesheet">
 <link href="{% static 'dataedit/metadata.css' %}" rel="stylesheet">
 <link href="{% static 'dataedit/query-builder.default.min.css' %}" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"

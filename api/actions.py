@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Func, Value
 from django.http import Http404, JsonResponse
-from omi.dialects.oep.parser import JSONParser_1_4, ParserException
+from omi.dialects.oep.parser import ParserException
 from shapely import wkb, wkt
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql, cast
 from sqlalchemy import types as sqltypes
@@ -22,7 +22,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
-from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect_14
+from omi.dialects.oep import OEP_V_1_5_Dialect as OmiDialect_15
 from omi.dialects.oep.compiler import JSONCompiler
 import api
 import login.models as login_models
@@ -36,7 +37,7 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.metadata import load_metadata_from_db
+import dataedit.metadata
 from dataedit.models import Table as DBTable, Schema as DBSchema
 from dataedit.structures import TableTags as OEDBTableTags, Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -50,6 +51,7 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
+MAX_TABLE_NAME_LENGTH = 50 # postgres limit minus pre/suffix for meta tables
 
 def get_column_obj(table, column):
     """
@@ -141,8 +143,11 @@ def try_parse_metadata(inp):
         True
 
     """
-
-    parser = JSONParser_1_4()
+    dialect14 = OmiDialect_14()
+    dialect15 = OmiDialect_15()
+    parser_14 = dialect14._parser()
+    parser_15 = dialect15._parser()
+    # Add here
     if isinstance(inp, dict):
         jsn = inp
     else:
@@ -151,11 +156,19 @@ def try_parse_metadata(inp):
         except:
             return None, "Could not parse json"
     try:
-        metadata = parser.parse(jsn)
+        metadata = parser_15.parse(jsn)
     except ParserException as e:
         return None, str(e)
-    except:
-        raise APIError("Metadata could not be parsed")
+    except Exception as e:
+        APIError("Metadata could not be parsed{}".format(e))
+        try:
+            metadata = parser_14.parse(jsn)
+        except ParserException as e:
+            return None, str(e)
+        except Exception as e:
+            raise APIError("Metadata could not be parsed{}".format(e))
+        else:
+            return metadata, None
     else:
         return metadata, None
 
@@ -727,8 +740,8 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 def assert_valid_table_name(table):
-    if len(table) > 63:
-        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > 63)")
+    if len(table) > MAX_TABLE_NAME_LENGTH:
+        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})")
     if len(table) == 0:
         raise APIError("Empty table name")
     if not re.match(r"[a-z][a-z0-9_]*", table):
@@ -756,13 +769,28 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
     # if not get_or_403(cid, 'data_type').lower() == 'bigserial':
     #    raise APIError('Your column "id" must have type "bigserial"')
 
+    # NOTE: THIS SECTION HANDEL OEMETADATA when table is created
     if table_metadata is not None:
-        omi_dialect = OmiDialect()
+        omi_dialect_14 = OmiDialect_14()
+        omi_dialect_15 = OmiDialect_15()
         try:
-            comment_on_table = omi_dialect._parser().parse(table_metadata)
+            comment_on_table = omi_dialect_15._parser().parse(table_metadata)
         except ParserException as e:
-            raise APIError(str(e))
-        comment_on_table = json.dumps(omi_dialect.compile(comment_on_table))
+            APIError(str(e))
+            try:
+                comment_on_table = omi_dialect_14._parser().parse(table_metadata) 
+            except ParserException as e:
+                raise APIError(str(e))
+        try:
+            comment_on_table = json.dumps(omi_dialect_15.compile(comment_on_table))
+        except Exception as e:
+            APIError(str(e))
+            try:
+                comment_on_table = json.dumps(omi_dialect_14.compile(comment_on_table))
+            except Exception as e:
+                raise APIError(str(e))
+        
+        
     else:
         comment_on_table = None
 
@@ -2111,8 +2139,8 @@ def apply_deletion(session, table, rows, rids):
 
 def update_meta_search(table, schema):
     schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
-    t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
-    comment = str(load_metadata_from_db(schema, table))
+    t = DBTable.objects.get(name=table, schema=schema_obj)
+    comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)
     s = (" ".join((*re.findall("\w+", schema), *re.findall("\w+", table), *re.findall(u"\w+", comment), *(tag[0] for tag in tags))))
@@ -2131,8 +2159,24 @@ def set_table_metadata(table, schema, metadata, cursor):
     """
 
     table_obj = _get_table(schema=schema, table=table)
-    compiler = JSONCompiler()
-    table_obj.comment = json.dumps(compiler.visit(metadata))    
+    compiler_14 = JSONCompiler()
+
+    dialect_15 = OmiDialect_15()
+    compiler_15 = dialect_15._compiler()
+    
+    try:
+        table_obj.comment = json.dumps(compiler_15.visit(metadata))
+    except Exception as e:
+        APIError("Metadata is not compilable using metadat aversion 1.5 compiler {}".format(e))
+        try:
+            table_obj.comment = json.dumps(compiler_14.visit(metadata))
+        except Exception as e:
+            raise APIError("Metadata is not compilable using metadat aversion 1.4 compiler{}".format(e))
+        
+
+    
+    
+    # table_obj.comment = json.dumps(compiler_15.visit(metadata))
     # Surprisingly, SQLAlchemy does not seem to escape comment strings
     # properly. Certain strings cause errors database errors.
     # This MAY be a security issue. Therefore, we do not use

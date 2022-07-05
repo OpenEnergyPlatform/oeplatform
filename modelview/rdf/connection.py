@@ -33,7 +33,6 @@ class ConnectionContext:
     def insert_new_instance(self, subject, property, inverse=False, new_name=""):
         #hash = getattr(OEO_KG, str(uuid.uuid4())) + "/" + new_name.replace(" ", "-")
         hash = getattr(OEO_KG, new_name.replace(" ", "-"))
-        print(hash)
         s = "DELETE { } INSERT {"
         if inverse:
             s += f" <{hash}> <{property}> {subject}. "
@@ -42,6 +41,13 @@ class ConnectionContext:
         s += "} WHERE {}"
         self.execute(s)
         return hash
+
+    def insert_new_study(self, study_name):
+        s = "INSERT {"
+        s += f"<http://openenergy-platform.org/oekg/{study_name}> a <http://openenergy-platform.org/ontology/oeo/OEO_00020011>"
+        s += "} WHERE {}"
+        self.execute(s)
+        return {}
 
     def execute(self, query):
         self.update_connection.setQuery(query)
@@ -81,7 +87,6 @@ class ConnectionContext:
             "SELECT ?s ?ls WHERE { "
             f"?s a <{factory._direct_parent}>."
         )
-
         for option in [factory._label_option("?s", "?ls")]:
             query += "OPTIONAL {" + option + "}"
 

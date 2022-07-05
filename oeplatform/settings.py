@@ -15,7 +15,12 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 try:
     from .securitysettings import *
 except:
-    raise Exception("No securitysettings found")
+    import logging
+    import os
+    logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
+    SECRET_KEY = os.environ.get("SECRET_KEY", "0")   
+    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+    URL = os.environ.get("URL")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -118,12 +123,14 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     )
 }
+
+
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     'axes.backends.AxesBackend',
 
-    # Django ModelBackend is the default authentication backend.
-    'django.contrib.auth.backends.ModelBackend',
+    # custom class extenging Django ModelBackend for login with username OR email
+    'login.backends.ModelBackendWithEmail',
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

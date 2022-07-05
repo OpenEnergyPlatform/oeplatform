@@ -1,11 +1,9 @@
 ### Changes
-- Update links on landing page (PR #896)
-- Update navigation bar (PR #898)
-- Python 3.6 is no longer supported due to dependency requirements (PR#941)
+- Add a tag color indicator to the tag filter dropdown (PR#1004)
+- Add the OEPlatypus to 404 page (PR #999)
 
-### Bugs
-- Prohibit duplicate / similar tags (PR #885)
-- Fix CI error by raising nbconvert package version, this required to drop support for Python 3.6 (PR#941)
+-  Update UI and description text for dataedit search and filter funtionality (PR#1007)
 
 ### Features
-- Synchronize metadata keywords with tags (PR #885)
+
+### Bugs

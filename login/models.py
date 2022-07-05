@@ -20,7 +20,12 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 import dataedit.models as datamodels
-import oeplatform.securitysettings as sec
+try:
+    import oeplatform.securitysettings as sec
+except:
+    import logging
+    logging.error("No securitysettings found. Triggerd in login/models.py")
+
 from login.mail import send_verification_mail
 
 NO_PERM = 0
@@ -267,7 +272,7 @@ class UserBackend(object):
             login_req = requests.post(url, data, cookies=token_req.cookies)
 
             if login_req.json()["login"]["result"] == "Success":
-                return myuser.objects.get_or_create(name=username)[0]
+                return myuser.objects.get(name=username)
             else:
                 return None
 

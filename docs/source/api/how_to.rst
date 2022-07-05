@@ -47,7 +47,7 @@ We want to create the following table with primary key `id`:
 
 In order to do so, we send the following PUT request::
 
-    PUT oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
+    PUT https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/
     {
         "query": {
             "columns": [
@@ -111,7 +111,7 @@ tool **curl**::
                     "metadata": {"id": "sandbox.example_table"}
                 }
             }'
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/
+        https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/
 
 
 or **python**:
@@ -177,7 +177,7 @@ In the following example, we want to add a row containing just the name
         -H "Content-Type: application/json"
         -H 'Authorization: Token <your-token>'
         -d '{"query": {"name": "John Doe"}}'
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
+        https://openenergy-platform.org//api/v0/schema/sandbox/tables/example_table/rows/
 
 **python**:
 
@@ -232,7 +232,7 @@ No authorization is required to do so.
 
     curl
         -X GET
-        oep.iks.cs.ovgu.de/api/v0/schema/sandbox/tables/example_table/rows/
+        https://openenergy-platform.org/api/v0/schema/sandbox/tables/example_table/rows/
 
 The data will be returned as list of JSON-dictionaries similar to the ones used
 when adding new rows::
@@ -438,7 +438,7 @@ information. You can query this metadata
     >>> result = requests.get(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/')
     >>> result.status_code
     200
-    >>> result.json() == {'id': 'sandbox.example_table', 'metaMetadata': {'metadataVersion': 'OEP-1.4.0', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}}
+    >>> result.json() == {'id': 'sandbox.example_table', 'metaMetadata': {'metadataVersion': 'OEP-1.5.1', 'metadataLicense': {'name': 'CC0-1.0', 'title': 'Creative Commons Zero v1.0 Universal', 'path': 'https://creativecommons.org/publicdomain/zero/1.0/'}}}
     True
 
 Note that the returned metadata differs from the metadata passed when creating
@@ -480,7 +480,7 @@ on existing tables via `POST`-requests (granted that you have write-permissions)
     ...        }
     ...    ],
     ...    "metaMetadata": {
-    ...        "metadataVersion": "OEP-1.4.0",
+    ...        "metadataVersion": "OEP-1.5.1",
     ...        "metadataLicense": {
     ...            "name": "CC0-1.0",
     ...            "title": "Creative Commons Zero v1.0 Universal",
@@ -488,13 +488,14 @@ on existing tables via `POST`-requests (granted that you have write-permissions)
     ...        }
     ...    },
     ...    "_comment": {
-    ...        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
+    ...        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/oemetadata)",
     ...        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
     ...        "units": "Use a space between numbers and units (100 m)",
     ...        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
     ...        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
-    ...        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
-    ...        "null": "If not applicable use (null)"
+    ...        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",
+    ...        "null": "If not applicable use: null",
+    ...        "todo": "If a value is not yet available, use: todo"
     ...    }
     ... }
     >>> result = requests.post(oep_url+'/api/v0/schema/sandbox/tables/example_table/meta/', json=data, headers={'Authorization': 'Token %s'%your_token})

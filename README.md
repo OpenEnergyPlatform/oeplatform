@@ -1,10 +1,10 @@
-[![Documentation Status](https://readthedocs.org/projects/oep-data-interface/badge/?version=latest)](http://oep-data-interface.readthedocs.io/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/oeplatform/badge/?version=latest)](https://oeplatform.readthedocs.io/en/latest/?badge=latest)
 
-<a href="http://oep.iks.cs.ovgu.de/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
+<a href="https://openenergy-platform.org/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
 # Open Energy Family - Open Energy Platform (OEP)
 
-Repository for the code of the Open Energy Platform (OEP) website [http://openenergy-platform.org/](http://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
+Repository for the code of the Open Energy Platform (OEP) website [https://openenergy-platform.org/](https://openenergy-platform.org/). This repository does not contain data, for data access please consult [this page](https://github.com/OpenEnergyPlatform/organisation/blob/master/README.md)
 
 ## License / Copyright
 
@@ -12,7 +12,13 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 ## Installation
 
-The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows
+Below we describe the complete manual installation of the OEP website and database. We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+
+[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+
+
+
+The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows.
 
 
 ### Setup the repository
@@ -37,6 +43,10 @@ If you are a windows user, we recommand you use conda because of the dependency 
 3)      conda config –add channels conda-forge
 4)      conda install shapely
 5)      pip install –r requirements.txt
+
+You can also use Python to create the environment
+
+    python -m venv env
 
 
 If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
@@ -159,10 +169,30 @@ In order to run the OEP website, the primary database needs some extra managemen
 We use `alembic` to keep track of changes in those tables. To create all tables that are needed, simply type
 
     python manage.py alembic upgrade head
+    
+#### 3. Setup the OEO-viewer
 
-#### 3. Tutorials
+The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
 
-##### 3.1 Rendering Jupyter Notebooks
+1- Install npm:
+
+- On linux: `sudo apt install npm`
+    
+- On MacOS: `brew install node`
+    
+- On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+
+2- Build the oeo-viewer: 
+
+    cd oep-website/oeo_viewer/client
+    npm install
+    npm run build
+    
+After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
+
+#### 4. Tutorials
+
+##### 4.1 Rendering Jupyter Notebooks
 
 Tutorials needs an additional step to display the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
 This basically recursivly clones the submodule, which is linked within `/examples`.
@@ -202,3 +232,8 @@ Then execute this python code (either directly in a terminal or from a file)
 ## Code contribution
 
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
+
+    
+
+
+

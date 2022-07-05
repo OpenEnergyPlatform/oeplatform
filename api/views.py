@@ -421,7 +421,7 @@ class Table(APIView):
             schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
         )
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        table_object, _ = DBTable.objects.get_or_create(name=table, schema=schema_object)
+        table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
 
     @api_exception
@@ -455,7 +455,7 @@ class Table(APIView):
         actions._get_engine().execute(
             "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(schema=schema, table=table)
         )
-        table_object, _ = DBTable.objects.get_or_create(name=table, schema__name=schema)
+        table_object = DBTable.objects.get(name=table, schema__name=schema)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 
@@ -525,14 +525,6 @@ class Fields(APIView):
 
     def put(self, request):
         pass
-
-
-def build_csv(header, result_iterator):
-    yield b",".join(header)
-    yield b"\n"
-    for row in result_iterator:
-        yield b",".join(b'"' + bytes(cell) + b'"' for cell in row).replace(b'"', b'""')
-        yield b"\n"
 
 
 class Move(APIView):
@@ -628,7 +620,13 @@ class Rows(APIView):
             return_obj["rowcount"] = 0
         if format == "csv":
             pseudo_buffer = Echo()
-            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
+            
+            # NOTE: the csv downloader for views (client side)
+            # in dataedit/static/dataedit/backend.js: parse_download()
+            # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC 
+            # to get somewhat consistent results
+
+            writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_NONNUMERIC)
             response = OEPStream(
                 (
                     writer.writerow(x)
