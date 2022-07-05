@@ -26,7 +26,8 @@
                       </ul>
                 </div>
                 <div class="card-body">
-                    <span class="badge badge-pill badge-primary">Various data</span>
+                    <!-- Is there a use case for this extra badge? -->
+                    <!-- <span class="badge badge-pill badge-primary">Various data</span> -->
 
 
                     {% if label %}
@@ -35,7 +36,21 @@
                     <h5 class="card-title">{{ table }}</h5>
                     {% endif %}
                     <p class="card-text">
-                        <h6 class="card-subtitle"> <i class="fas fa-bookmark"></i> Tags </h6>
+                        <h6 class="card-subtitle"> 
+                            <i class="fas fa-bookmark"></i> 
+                            <a 
+                            tabindex="0" 
+                            class="" 
+                            role="button" 
+                            data-toggle="popover" 
+                            data-trigger="manual" 
+                            title="Add Tags to a data table:" 
+                            data-content="Tags can be added when viewing a data table. If you can't find a Tag thats fits the data you can create <a href='/dataedit/tags' target='_blank'>new Tags</a>.">
+                                <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+                            </a>
+                            Tags 
+                        </h6>
+                       
                         {% for tag in tags %}
                         <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}"
                             style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
