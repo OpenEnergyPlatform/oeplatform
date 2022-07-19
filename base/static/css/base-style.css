@@ -61,7 +61,7 @@ h1, h2, h3, h4, h5, h6 {
     display: grid;
     grid-template-columns: 100%;
     /* container-fluid creates pseudo-elements, which are handled like normal children in grids, WTF. */
-    grid-template-rows: auto 1fr auto auto;
+    /* grid-template-rows: auto 1fr auto auto; */
 }
 
 .base > div:first-child {
