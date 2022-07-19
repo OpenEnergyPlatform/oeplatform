@@ -1,7 +1,9 @@
 {% extends "dataedit/filter.html" %}
+{% load static %}
 {% block title %} - {{schema}}{% endblock %}
 
 {% block site-header %}
+<link rel="stylesheet" href="{% static 'dataedit/data-list.css' %}">
 <i class="far fa-ruler"></i>
 <h2 class="site-header"><a href="/dataedit/schemas"><i class="fas fa-arrow-alt-circle-left "></i>Data categorie</a>: {{ schema }}</h2>
 {% endblock site-header %}
@@ -9,7 +11,7 @@
 {% block data_content %}
 {% load dataedit.taghandler %}
 
-<div class="m-4">
+<div id="tables-box">
     <div id="tables" class="row row-cols-1 g-4">
 
         {% for table, label, tags in tables %}
