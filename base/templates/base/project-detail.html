@@ -7,18 +7,21 @@
 <div>
     <div class="d-flex justify-content-between flex-md-wrap">
         <!-- full title and acronym -->
-        <h1>
-            {{ project.fullTitle }}
-        </h1>
+        <div>
+            <p>
+                last updated on:
+                {{ project.meta.lastUpdated }}
+            </p>
+            <h1>
+                {{ project.fullTitle }}
+            </h1>
+        </div>
         <!-- logo -->
         <a href="{% static 'logos/project/' %}{{project.logo}}">
             <img style="width:75%" class="mx-auto d-block" src="{% static 'logos/project/' %}{{project.logo}}"
                  alt="{{ project.fullTitle }}"/>
         </a>
-        <a>
-            last updated on:
-            {{ project.meta.lastUpdated }}
-        </a>
+        
     </div>
     <!-- general -->
     <h2>General</h2>
@@ -38,10 +41,10 @@
     <h2>Partners</h2>
     <div class="d-flex justify-content-between flex-md-wrap">
         {% for partner in project.partners %}
-            <a>
+            <div>
                 <!-- <li>{{ partner.name }}</li> -->
-                <img src="{% static 'logos/partner/' %}{{partner.logo}}" alt="{{ partner.name }}" width="275" border="0" />
-            </a>
+                <img src="{% static 'logos/partner/' %}{{partner.logo}}" alt="{{ partner.name }}" width="150vh" border="0" />
+            </div>
         {% endfor %}
     </div>
     <!-- Funding -->
