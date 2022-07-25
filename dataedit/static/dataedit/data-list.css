@@ -1,0 +1,12 @@
+#tables-box {
+    height:100vh;
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: scroll;
+    padding: 15px;
+
+}
+
+#tables-box::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
