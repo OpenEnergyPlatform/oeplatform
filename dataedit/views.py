@@ -1757,3 +1757,20 @@ class MetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
+
+
+class StandaloneMetaEditView(LoginRequiredMixin, View):
+    def get(self, request):
+        context_dict = {
+            "config": json.dumps({
+                "schema": "schema",
+                "table": "table",
+                "columns": "columns"
+            }),
+            "can_add": "can_add"
+        }
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )
