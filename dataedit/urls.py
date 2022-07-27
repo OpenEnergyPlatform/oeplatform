@@ -99,4 +99,9 @@ urlpatterns = [
         views.WizardView.as_view(),
         name="wizard_create",
     ),
+    url(
+        r"^standalone_meta_edit/$",
+        views.StandaloneMetaEditView.as_view(),
+        name="standalone_meta_edit",
+    )
 ]
