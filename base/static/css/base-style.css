@@ -52,9 +52,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .base {
-    height: calc(100% - 1em);
+    height: 30rem;
     box-sizing: border-box;
     padding-top: 1em;
+    -moz-border-radius: 0 0 1rem 1rem;
+    -webkit-border-radius: 0 0 1rem 1rem;
+            border-radius: 0 0 1rem 1rem;
 
 
 
@@ -66,6 +69,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .base > div:first-child {
     margin: 0 -15px;
+}
+
+.round-top-corner {
+    -moz-border-radius: 1rem 1rem 0 0;
+    -webkit-border-radius: 1rem 1rem 0 0;
+            border-radius: 1rem 1rem 0 0;
 }
 
 
@@ -184,4 +193,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .table-hover tr {
     cursor: pointer;
+}
+
+#round-corner {
+
+    border-radius: 15px 50px 30px 5px;
+    padding: 20px;
+    width: 200px;
+    height: 150px;
 }
