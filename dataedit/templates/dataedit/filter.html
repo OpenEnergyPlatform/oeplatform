@@ -3,13 +3,8 @@
 
 {% block main-right-sidebar-filter %}
 <!-- extending the filter block to add wizard button -->
-
-<h3>Create Table</h3>
-<a class="btn btn-success" href="{% url 'wizard_create' %}">
-    Create new table
-</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
-<hr>
-<div style="display: flex;">
+<div class="">
+<div class="d-flex flex-row justify-content-center">
     <h3>Search & Filter</h3>
     <button type="button" 
     class="btn btn-outline-light" 
@@ -54,6 +49,22 @@
         </div>
     </div>
 </form>
+{% if schema == "model_draft" %}
+<div class="">
+    <h3>Create Table</h3>
+    <a class="btn btn-success" href="{% url 'wizard_create' %}">
+        Create new table
+    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+</div>
+{% elif not schema %}
+<div class="">
+    <h3>Create Table</h3>
+    <a class="btn btn-success" href="{% url 'wizard_create' %}">
+        Create new table
+    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+</div>
+{% endif %}
+</div>
 {% endblock main-right-sidebar-filter %}
 
 {% block after-body-bottom-js %}
