@@ -3,16 +3,21 @@
 {% block title %} - {{schema}}{% endblock %}
 
 {% block site-header %}
-<link rel="stylesheet" href="{% static 'dataedit/data-list.css' %}">
-<i class="far fa-ruler"></i>
-<h2 class="site-header"><a href="/dataedit/schemas"><i class="fas fa-arrow-alt-circle-left "></i>Data categorie</a>: {{ schema }}</h2>
+<div class="d-flex flex-row justify-content-center">
+    <div class="">
+        <link rel="stylesheet" href="{% static 'dataedit/data-list.css' %}">
+        <i class="far fa-ruler"></i>
+        <h2 class="site-header"><a href="/dataedit/schemas"><i class="fas fa-arrow-alt-circle-left "></i>Data categorie</a>: {{ schema }}</h2>
+    </div>
+</div>
 {% endblock site-header %}
 
 {% block data_content %}
 {% load dataedit.taghandler %}
+<div class="" style="margin-top: 1rem;"><h1>Data tables</h1></div>
 
 <div id="tables-box">
-    <div id="tables" class="row row-cols-1 g-4">
+    <div id="tables" class="row row-cols-1">
 
         {% for table, meta_data, tags in tables %}
         <div class="col">
@@ -82,6 +87,7 @@
                     <div class="tab-pane fade active show" id="general-{{ table }}" role="tabpanel"
                         aria-labelledby="general-tab">
                         <ul class="list-group list-group-flush">
+                            {% if meta_data.1 is not None %}
                             {% for k, v in meta_data.1.context.items %}
                                 {% if v and k is not None %}
                                 <div class="list-group-item flex-column align-items-start">
@@ -90,20 +96,38 @@
                                     </div>
                                     <p class="mb-1">{{ v }}</p>
                                 </div>
-                                
-                                {% else %}
-                                <li class="list-group-item"> No metadata present </li>
                                 {% endif %}
                                 {% empty %}
                                 <li class="list-group-item"> No entries found</li>
                             {% endfor %}
+                            {% else %}
+                                <li class="list-group-item"> No metadata present </li>
+                            {% endif %}
                         </ul>
                     </div>
                     <div class="tab-pane fade " id="license-{{ table }}" role="tabpanel" aria-labelledby="license-tab">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">License:</li>
-                            <li class="list-group-item">Contibutor:</li>
-                            <li class="list-group-item">More:</li>
+                            <ul class="list-group list-group-flush">
+                                {% if meta_data.1 is not None %}
+                                    {% for i in meta_data.1.licenses %}
+                                        {% for k, v in i.items %}
+                                            {% if v and k is not None %}
+                                                <div class="list-group-item flex-column align-items-start">
+                                                    <div class="d-flex justify-content-between">
+                                                    <h5 class="mb-1">{{ k |capfirst }}</h5>
+                                                    </div>
+                                                    <p class="mb-1">{{ v }}</p>
+                                                </div>
+                                                
+                                            {% endif %}
+                                            {% empty %}
+                                            <li class="list-group-item"> No entries found</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    <li class="list-group-item"> No metadata present </li>
+                                {% endif %}
+                            </ul>
                         </ul>
                     </div>
                     <div class="tab-pane fade" id="contibutor-{{ table }}" role="tabpanel" aria-labelledby="contibutor-tab">...</div>
