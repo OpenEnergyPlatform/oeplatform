@@ -5,7 +5,7 @@
 {% block main-content-body %}
 {% load static %}
 <div>
-    <div class="d-flex justify-content-between flex-md-wrap">
+    <div class="d-flex flex-wrap">
         <!-- full title and acronym -->
         <div>
             <p>
@@ -39,7 +39,7 @@
     {% endif %}
     <!-- Partners -->
     <h2>Partners</h2>
-    <div class="d-flex justify-content-between flex-md-wrap">
+    <div class="d-flex flex-wrap">
         {% for partner in project.partners %}
             <div>
                 <!-- <li>{{ partner.name }}</li> -->
