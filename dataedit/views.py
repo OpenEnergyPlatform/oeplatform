@@ -320,6 +320,7 @@ def read_label(table, comment):
         return None
 
 
+# NOTE: Not in use, keep it for now!
 def get_readable_table_names(schema):
     """
     Loads all tables from a schema with their corresponding comments, extracts
@@ -358,7 +359,7 @@ def get_readable_table_name(schema_name, table_name):
     """
     try:
         metadata = load_metadata_from_db(schema_name, table_name)
-        label = read_label(table_name, load_metadata_from_db(schema_name, table_name))
+        label = read_label(table_name, metadata)
     except:
         label = ""
         metadata = None
