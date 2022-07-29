@@ -4,7 +4,6 @@
     scrollbar-width: none; /* for Firefox */
     overflow-y: scroll;
     padding: 15px;
-
 }
 
 #tables-box::-webkit-scrollbar {
