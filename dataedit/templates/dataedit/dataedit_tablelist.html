@@ -61,6 +61,248 @@
 
 {% block data_content %}
 {% load dataedit.taghandler %}
+<div class="" style="margin-top: 1rem;">
+    <h1>Datasets</h1>
+</div>
+{% if schema == "model_draft" %}
+<div class="">
+    <h3>Create tabular dataset</h3>
+    <a class="btn btn-success" href="{% url 'wizard_create' %}">
+        Create new table
+    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+</div>
+{% elif not schema %}
+<div class="">
+    <h3>Create Table</h3>
+    <a class="btn btn-success" href="{% url 'wizard_create' %}">
+        Create new table
+    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+</div>
+{% endif %}
+<div id="tables-box">
+    <div id="tables" class="row row-cols-1">
 
+        {% for table, meta_data, tags in tables %}
+        <div class="col">
+            <div class="card shadow" style="margin-bottom:20px;">
+                <div class="card-header bg-primary">
+                    <ul class="nav nav-pills card-header-pills">
+                        <li class="nav-item"
+                            onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">
+                            <a class="nav-link bg-success rounded active">
+                                <i class="fas fa-external-link-alt"></i>
+                                View Data
+                            </a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <h6 class="card-subtitle mb-2 text-muted">Table ID: {{ table }}</h6>
+                        </li> -->
+                    </ul>
+                </div>
+                <div class="card-body d-flex flex-row justify-content-between">
+                    <div style="margin-right: 5px;">
+                        {% if meta_data.0 %}
+                        <h5 class="card-title">{{ meta_data.0 }}</h5>
+                        {% else %}
+                        <h5 class="card-title">{{ table }}</h5>
+                        {% endif %}
+                        <p class="card-text">
+                        <h6 class="card-subtitle">
+                            <a tabindex="0" class="" role="button" data-toggle="popover" data-trigger="manual"
+                                title="Add Tags to a data table:"
+                                data-content="Tags can be added when viewing a data table. If you can't find a Tag thats fits the data you can create <a href='/dataedit/tags' target='_blank'>new Tags</a>.">
+                                <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+                            </a>
+                            Tags
+                        </h6>
+                        {% for tag in tags %}
+                        <!-- <i class="fas fa-bookmark" style="color: {{tag.color}};"></i> -->
+                        
+                        <i class="fas fa-hashtag" style="color: {{tag.color}};"></i>
+                        <a class="btn tag" href="/dataedit/view/{{ schema }}?query=&tags={{ tag.id }}"
+                            style="background:{{tag.color}};color:{% readable_text_color tag.color %}">{{tag.name}}</a>
+                        
+                        {% endfor %}
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-column">
+                        {% if meta_data.1 is not None %}
+                            {% for i in meta_data.1.licenses %}
+                            
+                            {% if i is None or not "" %}
+                
+                            <h5 class="card-title">License</h5>
+                            {% endif %}
+                            {% endfor %}
+                    <div>
+                        
+                            {% for i in meta_data.1.licenses %}
+                                {% for k, v in i.items %}
+                                    {% if v and k is not None %}
+
+                                        {% if k == 'name' %}
+                                        <dif><i class="fas fa-copyright" style="color: #3B77A0;"></i></dif>
+                                            {{ v }}
+                                        {% endif %}
+                                        
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item"> No metadata present </li>
+                        {% endif %}
+                                               
+                    </div>
+                    <div>
+                        {% if meta_data.1 is not None %}
+                            {% for i in meta_data.1.licenses %}
+                                {% for k, v in i.items %}
+                                    {% if v and k is not None %}
+                                        {% if k == 'instruction' %}
+                                        <div> <i class="fas fa-book-open" style="color: #3B77A0;"></i> {{ v }}</div>
+                                        
+                                        {% endif %}
+                                        {% if k == 'attribution' %}
+                                        <div> <i class="fab fa-creative-commons-by" style="color: #3B77A0;"></i> {{ v }}</div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item"> No metadata present </li>
+                        {% endif %}
+
+                    </div>
+                    <div>
+                       
+
+                        {% if meta_data.1 is not None %}
+                            {% for k, v in meta_data.1.context.items %}
+                                {% if v and k is not None %}
+                                    {% if k == 'publisherLogo' %}
+                                    <div class="list-group-item flex-column align-items-start">
+                                        <div class="d-flex justify-content-between">
+                                        <h5 class="mb-1">{{ k |capfirst }}</h5>
+                                        </div>
+                                        <img class="flex-item" src="{{ v }}" alt="Reiner Lemoine Institut" width="140" height="102" border="0" />
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                                {% empty %}
+                                <li class="list-group-item"> No entries found</li>
+                            {% endfor %}
+                            {% else %}
+                                <li class="list-group-item"> No metadata present </li>
+                        {% endif %}
+
+                    </div>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs" id="metaTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general-{{ table }}"
+                            role="tab" aria-controls="general-{{ table }}" aria-selected="true">General</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="context-tab" data-toggle="tab" href="#context-{{ table }}" role="tab"
+                            aria-controls="context-{{ table }}" aria-selected="false">Context</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="contibutor-tab" data-toggle="tab" href="#contibutor-{{ table }}"
+                            role="tab" aria-controls="contibutor-{{ table }}" aria-selected="false">Contibutor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="more-tab" data-toggle="tab" href="#more-{{ table }}" role="tab"
+                            aria-controls="more-{{ table }}" aria-selected="false">More</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="metaTabContent">
+                    <div class="tab-pane fade active show" id="general-{{ table }}" role="tabpanel"
+                        aria-labelledby="general-tab">
+                        <ul class="list-group list-group-flush">
+                            {% if meta_data.1 is not None %}
+                            <div class="list-group-item flex-column align-items-start">
+                                <div class="d-flex justify-content-between">
+                                  <h5 class="mb-1">Description</h5>
+                                </div>
+                                <p class="mb-1">{{ meta_data.1.description }}</p>
+                            </div>
+                            
+                           
+                            
+                            
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade " id="context-{{ table }}" role="tabpanel" aria-labelledby="context-tab">
+                        <ul class="list-group list-group-flush">
+                            <ul class="list-group list-group-flush">
+                            {% if meta_data.1 is not None %}
+                                {% for k, v in meta_data.1.context.items %}
+                                {% if v and k is not None %}
+                                <div class="list-group-item flex-column align-items-start">
+                                    <div class="d-flex justify-content-between">
+                                      <h5 class="mb-1">{{ k |capfirst }}</h5>
+                                    </div>
+                                    <p class="mb-1">{{ v }}</p>
+                                </div>
+                                {% endif %}
+                                {% empty %}
+                                <li class="list-group-item"> No entries found</li>
+                                {% endfor %}
+                                {% else %}
+                                    <li class="list-group-item"> No metadata present </li>
+                                {% for i in meta_data.1.description.items %}
+                                    {{i}}
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="contibutor-{{ table }}" role="tabpanel" aria-labelledby="contibutor-tab">
+                        <div class="container mt-5 mb-5">
+                            <div class="row">
+                                <div class="col-md-6 offset-md-3">
+                                    <h4>Latest Contributions</h4>
+                                    <ul class="timeline">
+                                        {% if meta_data.1 is not None %}
+                                            {% for i in meta_data.1.contributors %}
+                                                <li>
+                                                {% for k, v in i.items %}
+                                                    {% if v and k is not None %}
+                                                        {% if k == 'title' %}
+                                                            {{ v}}
+                                                        {% endif %}
+                                                        
+                                                        <a href="#" class="float-right">{% if k == 'date' %}{{ v }}{% endif %}</a>
+                                                        <p>{% if k == 'comment' %}{{ v }}{% endif %}</p>
+                                                    {% endif %}
+                                                
+                                                {% endfor %}
+                                                </li>
+                                            {% endfor %}
+                                        {% else %}
+                                            <li class=""> No metadata present </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>   
+                    </div>
+                    <div class="tab-pane fade" id="more-{{ table }}" role="tabpanel" aria-labelledby="more-tab">...
+                    </div>
+                </div>
+                <div class="card-footer bg-info">
+                    <a class="card-link text-white">Last Updated: datetimehere</a>
+                    <a class="card-link text-white">Change subject: Metadata latest crontribution subject</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}
