@@ -52,7 +52,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .base {
-    height: 30rem;
+    height: 95vh;
     box-sizing: border-box;
     padding-top: 1em;
     -moz-border-radius: 0 0 1rem 1rem;
