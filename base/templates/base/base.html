@@ -105,7 +105,12 @@
 
             {% block main-left-sidebar %}{% endblock main-left-sidebar %}
             {% block main-content %}
-                <div class="col-lg-7 col-md-9 round-top-corner" style="background-color: white;">
+                <!-- Workaround to add extra style to main content body when viewing the table list -->
+                {% if schema %}
+                <div class="col-lg-7 col-md-9 round-top-corner" style="margin-top: 10px; background-color: #73b2df3d;">
+                {% else %}
+                <div class="col-lg-7 col-md-9 round-top-corner">
+                {% endif %}
                     {% block main-content-body %}{% endblock %}
                 </div>
             {% endblock main-content %}
