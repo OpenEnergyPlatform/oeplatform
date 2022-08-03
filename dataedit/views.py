@@ -1748,6 +1748,7 @@ class MetaEditView(LoginRequiredMixin, View):
                 "url_table_id": url_table_id,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
+                "standalone": False
             }),
             "can_add": can_add
         }
@@ -1763,11 +1764,8 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
     def get(self, request):
         context_dict = {
             "config": json.dumps({
-                "schema": "schema",
-                "table": "table",
-                "columns": "columns"
-            }),
-            "can_add": "can_add"
+                "standalone": True
+            })
         }
         return render(
             request,
