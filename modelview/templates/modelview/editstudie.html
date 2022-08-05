@@ -4,54 +4,7 @@
 {% load bootstrap4 %}
 {% load static %}
 
-<script type="text/javascript">
-    <!--
-    $(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
-    });
-    function Hide_Display(name)
-    {
-	x = document.getElementById('id_'+name).value;
-	divInfo1 = document.getElementById('hide1'+name);
-	divInfo2 = document.getElementById('hide2'+name);
-	divInfo3 = document.getElementById('hide3'+name);
 
-
-	if ( x == 'not estimated')
-	{
-	    divInfo1.style.display = 'none';
-	    divInfo2.style.display = 'none';
-	    divInfo3.style.display = 'inline';
-	}
-	else
-	{
-	    divInfo1.style.display = 'inline';
-	    divInfo2.style.display = 'inline';
-	    divInfo3.style.display = 'none';
-	} 
-    }
-
-      var confirmOnLeave = function(msg) {
- 
-      window.onbeforeunload = function (e) {
-        e = e || window.event;
-        msg = msg || '';
- 
-        // For IE and Firefox
-        if (e) {e.returnValue = msg;}
- 
-        // For Chrome and Safari
-        return msg;
-    };
- 
-};
- 
-confirmOnLeave();
-
-
-
-//-->
-</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Study </h1>
 {% if method == "update"%}
@@ -211,4 +164,54 @@ confirmOnLeave();
            
         </table>
   
+{% endblock %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript">
+    
+    $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+    });
+    function Hide_Display(name)
+    {
+	x = document.getElementById('id_'+name).value;
+	divInfo1 = document.getElementById('hide1'+name);
+	divInfo2 = document.getElementById('hide2'+name);
+	divInfo3 = document.getElementById('hide3'+name);
+
+
+	if ( x == 'not estimated')
+	{
+	    divInfo1.style.display = 'none';
+	    divInfo2.style.display = 'none';
+	    divInfo3.style.display = 'inline';
+	}
+	else
+	{
+	    divInfo1.style.display = 'inline';
+	    divInfo2.style.display = 'inline';
+	    divInfo3.style.display = 'none';
+	} 
+    }
+
+      var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+ 
+confirmOnLeave();
+
+
+
+</script>
 {% endblock %}

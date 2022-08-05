@@ -15,25 +15,7 @@
 }
 </style>
 
-<script type="text/javascript">
-    var confirmOnLeave = function(msg) {
- 
-      window.onbeforeunload = function (e) {
-        e = e || window.event;
-        msg = msg || '';
- 
-        // For IE and Firefox
-        if (e) {e.returnValue = msg;}
- 
-        // For Chrome and Safari
-        return msg;
-    };
- 
-};
- 
-confirmOnLeave();
 
-</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Model </h1>
 <sup color="light grey">* required field</sup>
@@ -474,4 +456,26 @@ confirmOnLeave();
     {%include 'modelview/tag_selector.html'%}
 </div>
 </form>
+{% endblock %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript">
+    var confirmOnLeave = function(msg) {
+ 
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+ 
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+ 
+        // For Chrome and Safari
+        return msg;
+    };
+ 
+};
+ 
+confirmOnLeave();
+
+</script>
 {% endblock %}

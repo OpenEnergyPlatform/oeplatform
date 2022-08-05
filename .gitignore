@@ -6,9 +6,9 @@ __pycache__/
 *$py.class
 *~
 
-media/
-local/
-static/
+media
+local
+/static  # only on root dir
 
 # C extensions
 *.so
