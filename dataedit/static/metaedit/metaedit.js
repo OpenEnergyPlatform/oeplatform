@@ -241,7 +241,7 @@ var MetaEdit = function (config) {
 
         // Cancel
         $('#metaedit-cancel').bind('click', function cancel() {
-            window.location = config.url_view_table;
+            window.location = config.cancle_url;
         })
 
     }
