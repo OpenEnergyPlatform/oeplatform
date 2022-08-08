@@ -1748,6 +1748,7 @@ class MetaEditView(LoginRequiredMixin, View):
                 "url_table_id": url_table_id,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
+                "cancle_url": redirect('input', schema), 
                 "standalone": False
             }),
             "can_add": can_add
@@ -1762,8 +1763,12 @@ class MetaEditView(LoginRequiredMixin, View):
 
 class StandaloneMetaEditView(LoginRequiredMixin, View):
     def get(self, request):
+        def get_cancle_state(request):
+            return request.META.get('HTTP_REFERER')
+
         context_dict = {
             "config": json.dumps({
+                "cancle_url": get_cancle_state(self.request),
                 "standalone": True
             })
         }
