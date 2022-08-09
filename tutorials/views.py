@@ -333,9 +333,12 @@ class ListTutorials(View):
 
         # Gathering all tutorials
 
-        tutorials = _gatherTutorials()
+        tutorials = _gatherTutorials()        
 
-        return render(request, "list.html", {"tutorials": tutorials})
+        # 
+        tutorials_overview = [t for t in tutorials if t["category"] == 'overview']
+        
+        return render(request, "list.html", {"tutorials": tutorials, "tutorials_overview": tutorials_overview})
 
 
 class TutorialDetail(View):

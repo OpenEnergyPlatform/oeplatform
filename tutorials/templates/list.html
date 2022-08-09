@@ -21,6 +21,19 @@
 
 {% block main-content-body %}
 
+<!-- sticky overview tutorials (capacity building) -->
+
+<h2 class="mb-5">Overview</h2>
+
+<div id="tutorials-overview">
+{% for tutorial in tutorials_overview %}
+  <div class="tutorial-container">
+    {{ tutorial.html | safe }}
+  </div>
+{% endfor %}
+</div><!-- end of overview tutorials -->
+
+<h2 class="my-5">Tutorials by category</h2>
 
 <table class="table table-bordered">
     <thead class="thead-dark">
