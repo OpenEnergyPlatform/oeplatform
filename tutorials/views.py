@@ -335,7 +335,7 @@ class ListTutorials(View):
 
         tutorials = _gatherTutorials()
 
-        #
+        # special overview tutorials that are sticky
         tutorials_overview = [t for t in tutorials if t["category"] == "overview"]
 
         return render(
