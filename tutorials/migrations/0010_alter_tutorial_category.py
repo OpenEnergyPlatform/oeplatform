@@ -6,13 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tutorials', '0009_alter_tutorial_github_contact'),
+        ("tutorials", "0009_alter_tutorial_github_contact"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tutorial',
-            name='category',
-            field=models.CharField(blank=True, choices=[('general', 'General'), ('publication', 'Publication/Licensing'), ('io', 'Upload/Download'), ('data_structure', 'Data Structure'), ('ontology', 'Ontology'), ('other', 'Other Topics'), ('overview', 'Overview')], max_length=15),
+            model_name="tutorial",
+            name="category",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("general", "General"),
+                    ("publication", "Publication/Licensing"),
+                    ("io", "Upload/Download"),
+                    ("data_structure", "Data Structure"),
+                    ("ontology", "Ontology"),
+                    ("other", "Other Topics"),
+                    ("overview", "Overview"),
+                ],
+                max_length=15,
+            ),
         ),
     ]
