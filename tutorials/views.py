@@ -337,6 +337,8 @@ class ListTutorials(View):
 
         # special overview tutorials that are sticky
         tutorials_overview = [t for t in tutorials if t["category"] == "overview"]
+        # sort them by title
+        tutorials_overview = sorted(tutorials_overview, key=lambda t: t["title"])
 
         return render(
             request,
