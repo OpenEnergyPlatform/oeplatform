@@ -27,6 +27,7 @@
 
 <div id="tutorials-overview">
 {% for tutorial in tutorials_overview %}
+  <h3 class="my-2">{{ tutorial.title }}</h3>
   <div class="tutorial-container">
     {{ tutorial.html | safe }}
   </div>
