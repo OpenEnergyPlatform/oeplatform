@@ -1,6 +1,7 @@
 """Contains functions to interact with the postgres oedb"""
 
 import sqlalchemy as sqla
+from sqlalchemy.orm import sessionmaker
 
 from api import DEFAULT_SCHEMA
 from dataedit.models import Schema, Table
@@ -65,3 +66,12 @@ def table_exists_in_django(table, schema=None):
         return True
     except Table.DoesNotExist:
         return False
+
+
+
+def create_oedb_session():
+    """Return a sqlalchemy session to the oedb
+    
+    Should only be created once per user request.
+    """
+    return sessionmaker(bind=_get_engine())()

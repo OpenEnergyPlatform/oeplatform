@@ -56,6 +56,8 @@ from .metadata.__init__ import load_metadata_from_db
 import requests as req
 
 from django.contrib import messages
+from dataedit.metadata import load_metadata_from_db
+from api.connection import create_oedb_session, _get_engine
 
 session = None
 
@@ -1282,14 +1284,14 @@ def check_is_tag(session, tag_id):
     return session.query(t.exists()).scalar() 
 
 
-def get_tag_id_by_tag_name_normalized(session, tag_name):
+def get_tag_id_by_tag_name_normalized(session, name_normalized):
     """
-    Query the Tag tabley in schmea public to get the Tag ID.
+    Query the Tag table in schema public to get the Tag ID.
     Tags are queried by unique field tag_name_normalized.
 
     Args:
         session ([type]): [description]
-        tag_name ([type]): [description]
+        name_normalized ([type]): [description]
 
     Returns:
         int: Tag ID
@@ -1297,8 +1299,7 @@ def get_tag_id_by_tag_name_normalized(session, tag_name):
 
     """
 
-    tag = session.query(Tag).filter(Tag.name_normalized==tag_name).first()
-    session.commit()
+    tag = session.query(Tag).filter(Tag.name_normalized==name_normalized).first()    
     if tag is not None:
         return tag.id
     else:
@@ -1307,11 +1308,11 @@ def get_tag_id_by_tag_name_normalized(session, tag_name):
 
 def get_tag_name_normalized_by_id(session, tag_id):
     """
-    Query the Tag table in schmea public to get the tag_name_normalized.
+    Query the Tag table in schema public to get the tag_name_normalized.
     Tags are queried by tag id.
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         tag_id (int): The Tag ID
 
     Returns:
@@ -1328,11 +1329,11 @@ def get_tag_name_normalized_by_id(session, tag_id):
 
 def get_tag_name_by_id(session, tag_id):
     """
-    Query the Tag table in schmea public to get the tags.name.
+    Query the Tag table in schema public to get the tags.name.
     Tags are queried by tag id.
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         tag_id (int): The Tag ID
 
     Returns:
@@ -1353,7 +1354,7 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
     Add a tag from the oem-keywords to the table_tags for the current table. 
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         schema (str): Name of the schema
         table (str): Name of the table
         keyword_tag_id (int): The tag id that machtes to keyword tag name (by tag_name_normalized)
@@ -1376,84 +1377,112 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
             session.close() #Close the connection
 
 
-def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids, default_color_new_tag="#2E3638"):
-    """_summary_
+
+def get_tag_keywords_synchronized_metadata(table, schema, keywords_new=None, tag_ids_new=None):
+    """synchronize tags and keywords, either by new metadata OR by set of tag ids (from UI)
 
     Args:
-        session (_type_): _description_
-        schema (_type_): _description_
         table (_type_): _description_
-        tag_ids (_type_): _description_
-
-    Returns:
-        _type_: _description_
+        schema (_type_): _description_
+        metadata_new (_type_, optional): _description_. Defaults to None.
+        tag_ids_new (_type_, optional): _description_. Defaults to None.
     """
 
-    # Empty or bad tag names
-    invalid_tags=["", " ", "_", "-", "*"]
+    session = create_oedb_session()
+    
+    metadata = load_metadata_from_db(schema=schema, table=table)
+    keywords_old = set(k for k in metadata.get("keywords", []) if Tag.create_name_normalized(k))  # remove empy    
 
-    # Get metadata json. Add Tages to "keywords" field in oemetadata and update (comment on table)
-    # Returns oem v1.4.0 if metadata is empty from ./metadata/__init__.py/__LATEST
-    table_oemetadata = load_metadata_from_db(schema, table)
+    tag_ids_old = set(tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table, TableTags.schema_name == schema))
+    tags_old = session.query(Tag).filter(Tag.id.in_(tag_ids_old)).all()
 
-    # if table_oemetadata is {}:
-    #     from metadata.v151.template import OEMETADATA_V151_TEMPLATE
-    #     table_oemetadata = OEMETADATA_V151_TEMPLATE
-        # md, error = actions.try_parse_metadata(table_oemetadata)
-        # print(md, error)
+    tags_by_name_normalized = {}
+    tags_by_id = dict()
 
-    # Keep, this are the tags that where added by the user via OEP website
-    updated_oep_tags = [] 
-    # this are OEM keywords that are new to the OEP tags
-    kw_only = []
-    # Keywords that are present as OEP tag but have to be assinged as table tag
-    kw_is_oep_tag_but_not_oep_table_tag = []
-    # sync. table tags and keywords
-    updated_keywords = []
+    for tag in tags_old:
+        tags_by_name_normalized[tag.name_normalized] = tag
+        tags_by_id[tag.id] = tag
+    
 
-    for id in tag_ids:
-        kw = get_tag_name_by_id(session, id)
-        if kw is not None:
-           updated_oep_tags.append(kw)
-
-
-    for k in table_oemetadata["keywords"]:
-        normalized_kw = Tag.create_name_normalized(k)
-        keyword_tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
-        if keyword_tag_id is None and k not in kw_only and k not in invalid_tags:
-            kw_only.append(k)
-        elif keyword_tag_id is not None and check_is_table_tag(session, schema, table, keyword_tag_id) is False \
-            and k not in kw_is_oep_tag_but_not_oep_table_tag:
-            
-            kw_is_oep_tag_but_not_oep_table_tag.append(k)
-
-
-    updated_keywords = updated_oep_tags + kw_only
-    for k in kw_is_oep_tag_but_not_oep_table_tag:
-        normalized_kw = Tag.create_name_normalized(k)
-        tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
-        if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
-            and tag_id not in removed_table_tag_ids:
-            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
-            updated_keywords.append(k)
+    def get_or_create_tag_by_name(name):
+        name_normalized = Tag.create_name_normalized(name)
+        if not name_normalized:
+            return None
+        if name_normalized not in tags_by_name_normalized:            
+            tag = session.query(Tag).filter(Tag.name_normalized == name_normalized).first()
+            if tag is None:                
+                tag = Tag(name=name)
+                session.add(tag)
+                session.flush()                
+            assert tag.id
+            tags_by_name_normalized[name_normalized] = tag
+            tags_by_id[tag.id] = tag
+        return tags_by_name_normalized[name_normalized]
+    
+    def get_tag_by_id(tag_id):
+        if tag_id not in tags_by_id:
+            tag = session.query(Tag).filter(Tag.id == tag_id).first()
+            tags_by_name_normalized[tag.name_normalized] = tag
+            tags_by_id[tag.id] = tag
+        return tags_by_id[tag_id]
+    
+    
+    # map old keywords to tag ids (create tags if needed)
+    keyword_tag_ids_old = set(get_or_create_tag_by_name(n).id for n in keywords_old)
+    
+    
+    if keywords_new is not None: # user updated metadata keywords
         
-
-    for k in kw_only:
-        default_color = default_color_new_tag
-        add_tag(k, default_color)
-        tag_id = get_tag_id_by_tag_name_normalized(session, k)
-        if tag_id is not None:
-            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
+        # map new keywords to tag ids (create tags if needed)
+        keywords_new = [k for k in keywords_new if Tag.create_name_normalized(k)] # remove empy
+        keyword_new_tag_ids = set(get_or_create_tag_by_name(n).id for n in keywords_new)            
+        
+        # determine which tag ids the user wants to remove
+        remove_table_tag_ids = (keyword_tag_ids_old - keyword_new_tag_ids) 
+        keyword_add_tag_ids = tag_ids_old - remove_table_tag_ids - keyword_new_tag_ids
+        tag_ids_new = set()
     
+    elif tag_ids_new is not None: # user updated tags in UI
+        
+        # determine which tag ids the user wants to remove
+        remove_table_tag_ids = (tag_ids_old - tag_ids_new)        
+        keywords_new = [k for k in keywords_old if get_or_create_tag_by_name(k).id not in remove_table_tag_ids]        
+        keyword_new_tag_ids = set()
+        keyword_add_tag_ids = tag_ids_new - keyword_tag_ids_old - remove_table_tag_ids
+    
+    else:
+        raise NotImplementedError("must provide either metadata or tag_ids")
+
+    # determine which tag ids have to be removed
+    delete_table_tag_ids = remove_table_tag_ids & tag_ids_old        
+    for tid in delete_table_tag_ids:
+        if tid is None:
+            continue
+        session.query(TableTags).filter(TableTags.table_name == table, TableTags.schema_name == schema, TableTags.tag == tid).delete()
+    
+    # determine which tag ids must be added
+    add_table_tag_ids = (keyword_tag_ids_old | keyword_new_tag_ids| tag_ids_new) - (tag_ids_old | remove_table_tag_ids)    
+    for tid in add_table_tag_ids:
+        if tid is None:
+            continue
+        session.add(TableTags(table_name=table, schema_name=schema, tag=tid))
+    
+    # determine wich keywords need to be added    
+    for tid in keyword_add_tag_ids:
+        if tid is None:
+            continue
+        keywords_new.append(get_tag_by_id(tid).name)
+                
+    session.commit()
+    session.close()
+    
+    metadata["keywords"] = keywords_new
+    
+    return metadata
     
 
-    table_oemetadata["keywords"] = updated_keywords
-    return table_oemetadata
-
-
-# FIXME: should use api.views.require_write_permission, but circular imports!
 @login_required
-def add_table_tags(request):
+def update_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.
     The update will delete all tags that are not present in request and add all tags that are.
@@ -1463,40 +1492,24 @@ def add_table_tags(request):
         * table: The name of a table
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
-    """
+    """        
+    # check if valid table / schema
+    schema, table = actions.get_table_name(schema=request.POST["schema"], table=request.POST["table"])
+
+    # check write permission
+    actions.assert_permission(request.user, table, login_models.WRITE_PERM, schema=schema)
+
     ids = {
         int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
-    }
-    schema = request.POST["schema"]
-    table = request.POST.get("table", None)
+    }    
+
+    # update tags in db and harmonize metadata 
+    metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, tag_ids_new=ids)    
+
+    with _get_engine().connect() as con:
+        with con.begin():
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=con)
     
-
-    engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
-
-    # Identify the table tag ids that the user removed from the table.
-    # Usefull to distinguish between keywords that are tags and have to be assinged as table tags
-    # and keywords that exist as tags but where removed by the use, and therefore should not be reassinged to the table
-    removed_table_tag_ids = [tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table and TableTags.schema_name == schema) if tt.tag not in ids]
-
-    session.query(TableTags).filter(
-        TableTags.table_name == table and TableTags.schema_name == schema
-    ).delete()
-    for id in ids:
-        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": id})
-        session.add(t)
-    session.commit()
-    
-    # Add keywords from oemetadata to table tags and table tags to keywords
-    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)    
-    
-    # TODO: reuse session from above?
-    with engine.begin() as con:
-        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)     
-
-
     messasge = messages.success(request, 'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.')   
 
     
@@ -1504,7 +1517,8 @@ def add_table_tags(request):
 
 
 def redirect_after_table_tags_updated(request):
-    add_table_tags(request)
+    
+    update_table_tags(request)
 
     return redirect(request.META["HTTP_REFERER"])
 
@@ -1529,6 +1543,7 @@ def get_all_tags(schema=None, table=None):
                 {
                     "id": r.id,
                     "name": r.name,
+                    "name_normalized": r.name_normalized,
                     "color": "#" + format(r.color, "06X"),
                     "usage_count": r.usage_count,
                     "usage_tracked_since": r.usage_tracked_since,
@@ -1544,6 +1559,7 @@ def get_all_tags(schema=None, table=None):
         result = session.execute(
             session.query(
                 Tag.name.label("name"),
+                Tag.name_normalized.label("name_normalized"),
                 Tag.id.label("id"),
                 Tag.color.label("color"),
                 Tag.usage_count.label("usage_count"),
@@ -1562,6 +1578,7 @@ def get_all_tags(schema=None, table=None):
         {
             "id": r.id,
             "name": r.name,
+            "name_normalized": r.name_normalized,
             "color": "#" + format(r.color, "06X"),
             "usage_count": r.usage_count,
             "usage_tracked_since": r.usage_tracked_since,
