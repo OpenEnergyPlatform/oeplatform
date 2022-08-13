@@ -1,10 +1,17 @@
 """admin command to check for dead links in test environment
 
+looking for 
+* static content (css, js, images)
+* web pages
+* javascript that opens local pages
+
+
 start with `python management.py check_links http://localhost:8000 --no-external`
 
 or whatever your test enviroment is.
 
 Probably not useful on a productive server as it will iterate over every table page as well.
+This is by no means perfect, but covers a lot of possible broken links
 
 """
 import logging
