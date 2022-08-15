@@ -1757,3 +1757,8 @@ class MetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
+
+
+class PeerReview(LoginRequiredMixin, View):
+    def get(self, request, schema='model_draft', table=None):
+        pass
