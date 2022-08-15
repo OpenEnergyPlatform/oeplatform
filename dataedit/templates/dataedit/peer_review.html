@@ -1,0 +1,23 @@
+{% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
+<link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %}
+
+
+{% block main %}
+
+<nav class="nav nav-pills nav-justified">
+  <a class="nav-link active" href="#">General Keys</a>
+  <a class="nav-link" href="#">Spatial and Temporal Keys</a>
+  <a class="nav-link" href="#">Source Keys</a>
+  <a class="nav-link" href="#">License Keys</a>
+  <a class="nav-link" href="#">Contributor</a>
+  <a class="nav-link disabled" href="#">Resource Keys</a>
+  <a class="nav-link" href="#">Summary</a>
+</nav>
+
+{% endblock main %}
+
+{% block right-sidebar-content %}
+<h4>Progress Bar</h4>
+<h> Reviewer Comment Area </h>
+
+{% endblock right-sidebar-content %}
