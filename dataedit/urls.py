@@ -99,4 +99,9 @@ urlpatterns = [
         views.WizardView.as_view(),
         name="wizard_create",
     ),
+    url( # Hier ändern!!!!
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
+        views.PeerReview.as_view(),
+        name="peer_review"
+    )
 ]
