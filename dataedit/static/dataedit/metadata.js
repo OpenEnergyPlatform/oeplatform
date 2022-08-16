@@ -120,7 +120,7 @@ function add_list_objects(prefix){
 function add_list_field(id){
     var index = window[id+"_counter"];
     var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
-        <table  style="width:100%"><tr><td class="form-group"> <input class="form-control" name="'+id+'_'+index+'" id="'+id+'_'+index+'"/></td> \
+        <table  style="width:100%"><tr><td class="mb-3"> <input class="form-control" name="'+id+'_'+index+'" id="'+id+'_'+index+'"/></td> \
         <td><a style="position:inline" onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="fas fa-minus"/></a></td></tr></table> \
     </div>');
     $div.appendTo($('#'+id+'_container'));
@@ -132,11 +132,11 @@ function add_list_field(id){
 function add_url_list_field(id){
     var index = window[id+"_counter"];
     var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
-        <div class="form-group"> \
+        <div class="mb-3"> \
             <label>Name</label> \
             <input class="form-control" name="'+id+'_name_'+index+'"/> \
         </div> \
-        <div class="form-group"> \
+        <div class="mb-3"> \
             <label>URL</label> \
             <input class="form-control" name="'+id+'_url_'+index+'"/> \
         </div> \

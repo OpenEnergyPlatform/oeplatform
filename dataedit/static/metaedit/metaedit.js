@@ -193,7 +193,7 @@ var MetaEdit = function (config) {
         });
 
         // inputs
-        config.form.find('.form-group>.form-text').not('.d-none').each(function (_i, e) {
+        config.form.find('.mb-3>.form-text').not('.d-none').each(function (_i, e) {
             convert($(e), $(e).parent().find('>label'))
         });
 

@@ -6,11 +6,11 @@
         <div id="{{id}}_container">
             {% for source in list %}
             <div id="{{id}}_wrapper_{{forloop.counter}}">
-                <div class="form-group">
+                <div class="mb-3">
                     <label>Name</label>
                     <input class="form-control" name="{{id}}_name_{{forloop.counter}}" value="{{source.Name}}"/>
                 </div>
-                <div class="form-group">
+                <div class="mb-3">
                     <label>URL</label>
                     <input class="form-control" name="{{id}}_url_{{forloop.counter}}" value="{{source.URL}}"/>
                 </div>
