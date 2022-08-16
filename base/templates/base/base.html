@@ -26,74 +26,75 @@
 <body>
 {% block header %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="/">
-            <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
-        </a>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/dataedit/schemas">Database</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Factsheets
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
-                        <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
-                        <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                        <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a>
-                        <!-- <a class="dropdown-item" href="/factsheets/rdf/study/">Study  Factsheet<sup class="small text-muted">Alpha</sup></a> -->
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Ontology
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/ontology/">Overview</a>
-                        <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
-                        <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
-                        <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/tutorials/">Tutorials</a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        About
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/about/">Overview</a>
-                        <a class="dropdown-item" href="https://oeplatform.readthedocs.io/en/latest/" target="_blank">Developer Documentation</a>
-                        <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-
-            <div class="btn profile-bar">
-                <a class="btn-profile" href="/user/profile/{{ user.pk }}">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
-                <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">
+                <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
+            </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dataedit/schemas">Database</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Factsheets
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
+                            <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
+                            <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
+                            <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
+                            <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a>
+                            <!-- <a class="dropdown-item" href="/factsheets/rdf/study/">Study  Factsheet<sup class="small text-muted">Alpha</sup></a> -->
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOntology" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Ontology
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
+                            <a class="dropdown-item" href="/ontology/">Overview</a>
+                            <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
+                            <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
+                            <a class="dropdown-item" href="{% url 'oeo-s-c'%}">OEO Steering Committee</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tutorials/">Tutorials</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
+                           data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            About
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
+                            <a class="dropdown-item" href="/about/">Overview</a>
+                            <a class="dropdown-item" href="https://oeplatform.readthedocs.io/en/latest/" target="_blank">Developer Documentation</a>
+                            <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
+                        </div>
+                    </li>
+                </ul>
             </div>
-
-        {% else %}
-            <a class="btn btn-info" style="float: right;margin:5px"
-               href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
-        {% endif %}
-
+            {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
+    
+                <div class="btn profile-bar">
+                    <a class="btn-profile" href="/user/profile/{{ user.pk }}">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
+                    <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
+                </div>
+    
+            {% else %}
+                <a class="btn btn-info" style="float: right;margin:5px"
+                   href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
+            {% endif %}
+    
+            </div>
+                </ul>
+            </div>
         </div>
-
     </nav>
 
 {% endblock header %}
@@ -157,9 +158,10 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
-    <script type="text/javascript" src="{% static '/js/bootstrap.bundle.min.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 
