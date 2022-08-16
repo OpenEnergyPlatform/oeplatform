@@ -66,7 +66,7 @@
             <div class="card-body">
                 <div>
                     {% if is_admin %}
-                        <label for="group_level">{{ perm.holder.name }}</label>
+                        <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
 
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
@@ -136,7 +136,7 @@
             <div class="card-body">
                 <div>
                     {% if is_admin %}
-                        <label for="level">{{ perm.holder.name }}</label>
+                        <label class="form-label" for="level">{{ perm.holder.name }}</label>
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="alter_user">

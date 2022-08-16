@@ -34,7 +34,7 @@
 		{% for membership in group.memberships.all %}
 		<div class="card-body">
 			<div>
-                <label for="level">{{ membership.user.name }}</label>
+                <label class="form-label" for="level">{{ membership.user.name }}</label>
 				{% if is_admin %}
                     <form class="form-inline" action="members" method="post" style ="display:inline-block;">
                         {% csrf_token %}

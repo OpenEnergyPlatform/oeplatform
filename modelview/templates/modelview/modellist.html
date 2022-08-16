@@ -31,7 +31,7 @@
   <h3>Tags</h3>
   <div style="display: flex; flex-flow: wrap">
       {% for t in tags %}
-          <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
+          <label class="tag-checkbox-container form-label {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
               <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" id="select_{{ t.id }}" value="{{ t.id }}" onchange="apply_tag_filter(event.target)">
               <span>{{ t.name }}</span>
               <span class="tag-checkbox-icon fas fa-check"></span>
@@ -50,7 +50,7 @@
               {% for key,value in d.items %}
                   <div style="display: flex;flex-flow: nowrap;align-items: center">
                       <input type="checkbox" onchange="apply_filter(event.target)" id="{{key}}" {% if key.split|join:'_' in default %} checked="checked" {%endif %}>
-                      <label style="margin: 0" for="{{key}}">{{key}}</label>
+                      <label class="form-label" style="margin: 0" for="{{key}}">{{key}}</label>
                   </div>
               {% endfor %}
           </div>

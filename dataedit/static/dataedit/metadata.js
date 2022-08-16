@@ -133,11 +133,11 @@ function add_url_list_field(id){
     var index = window[id+"_counter"];
     var $div = $('<div id="'+id+'_wrapper_'+index+'"> \
         <div class="mb-3"> \
-            <label>Name</label> \
+            <label class="form-label">Name</label> \
             <input class="form-control" name="'+id+'_name_'+index+'"/> \
         </div> \
         <div class="mb-3"> \
-            <label>URL</label> \
+            <label class="form-label">URL</label> \
             <input class="form-control" name="'+id+'_url_'+index+'"/> \
         </div> \
         <a onclick="$(\'#'+id+'_wrapper_'+index+'\').remove();"><span class="fas fa-minus"/></a><hr> \

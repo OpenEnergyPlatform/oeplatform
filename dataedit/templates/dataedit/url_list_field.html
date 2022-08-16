@@ -1,5 +1,5 @@
 <table style="width:100%">
-    <tr><td><label for="{{id}}_container">{{name}}</label></td></tr>
+    <tr><td><label class="form-label" for="{{id}}_container">{{name}}</label></td></tr>
     <tr>
         <td style="width:150px"></td>
         <td>
@@ -7,11 +7,11 @@
             {% for source in list %}
             <div id="{{id}}_wrapper_{{forloop.counter}}">
                 <div class="mb-3">
-                    <label>Name</label>
+                    <label class="form-label">Name</label>
                     <input class="form-control" name="{{id}}_name_{{forloop.counter}}" value="{{source.Name}}"/>
                 </div>
                 <div class="mb-3">
-                    <label>URL</label>
+                    <label class="form-label">URL</label>
                     <input class="form-control" name="{{id}}_url_{{forloop.counter}}" value="{{source.URL}}"/>
                 </div>
                 <a onclick="$('#{{id}}_wrapper_{{forloop.counter}}').remove();"><span class="fas fas-minus"></span></a>
