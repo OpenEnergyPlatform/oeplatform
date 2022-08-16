@@ -181,7 +181,7 @@ var MetaEdit = function (config) {
                     .popover({
                         placement: 'top',
                         trigger: 'hover',
-                        template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
+                        template: '<div class="popover"><div class="popover-arrow"></div><div class="popover-body"></div></div>'
                     });
                 descr.addClass('d-none')
             }
