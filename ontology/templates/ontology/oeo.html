@@ -6,7 +6,7 @@
 
 
 
-<h2>{{ main_module.name }}<div class="btn-group float-right" role="group" aria-label="Basic example">
+<h2>{{ main_module.name }}<div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in main_module.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
                             {{ex}}
@@ -39,7 +39,7 @@
                 <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
-                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                <div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in about.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{module}}.{{ex}}">
                             {{ex}}
@@ -66,7 +66,7 @@
                 <a class="card-link" data-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
-                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                <div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in about.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/imports/{{module}}.{{ex}}">
                             {{ex}}
