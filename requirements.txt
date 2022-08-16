@@ -17,7 +17,7 @@ shapely>=1.5.17
 markdown2
 alembic
 django-simple-captcha
-django-bootstrap4
+django-bootstrap5
 django-fontawesome-5
 omi>=0.0.7
 django-jquery

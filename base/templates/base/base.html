@@ -1,5 +1,5 @@
 {% load static %}
-{% load bootstrap4 %}
+{% load bootstrap5 %}
 {% load fontawesome_5 %}
 
 <!DOCTYPE html>
@@ -157,9 +157,9 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    {% bootstrap_javascript jquery=1 %}
     <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/bootstrap.bundle.min.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

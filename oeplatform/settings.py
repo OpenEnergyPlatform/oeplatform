@@ -35,7 +35,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap4",
+    "bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",

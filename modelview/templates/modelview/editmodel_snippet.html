@@ -1,5 +1,5 @@
 {% load modelview_extras %}
-{% load bootstrap4 %}
+{% load bootstrap5 %}
 {% if field|fieldtype == "CheckboxInput" and add %}
     {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name%}
 {% elif field|fieldtype == "Select" and add %}
