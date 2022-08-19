@@ -1,5 +1,13 @@
-{% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
-<link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %}
+{% extends "dataedit/base.html" %}
+{% load dataedit.metadata %}
+{% load static %}
+{% load bootstrap4 %}
+
+
+{% block site-header %}
+<h2>See all parts of the metadatastring below, divided in each section.
+</h2>
+{% endblock site-header %}
 
 
 {% block main %}
@@ -10,14 +18,7 @@
   <a class="nav-link" href="#">Source Keys</a>
   <a class="nav-link" href="#">License Keys</a>
   <a class="nav-link" href="#">Contributor</a>
-  <a class="nav-link disabled" href="#">Resource Keys</a>
+  <a class="nav-link" href="#">Resource Keys</a>
   <a class="nav-link" href="#">Summary</a>
 </nav>
-
 {% endblock main %}
-
-{% block right-sidebar-content %}
-<h4>Progress Bar</h4>
-<h> Reviewer Comment Area </h>
-
-{% endblock right-sidebar-content %}
