@@ -44,7 +44,7 @@
   <div class="checkbox-container">
   {% for heading,d in fields.items %}
       <div class="checkbox-item">
-          <a class="fill-div" data-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
+          <a class="fill-div" data-bs-toggle="collapse" href="#{{heading.split|join:'_'}}">{{heading}}</a>
 
           <div id="{{heading.split|join:'_'}}" class="collapse">
               {% for key,value in d.items %}

@@ -17,10 +17,10 @@
 {% include 'modelview/error_snipet.html' with errors=errors %}
 
 <ul class="nav nav-tabs" style="width:100%">
-  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Basic">Study</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Empirical">Empirical Data</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Assumtions">Assumptions</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Results">Results</a></li>
+  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Basic">Study</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Empirical">Empirical Data</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Assumtions">Assumptions</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Results">Results</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -195,7 +195,7 @@
 <script type="text/javascript">
     
     $(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip();
     });
 
       var confirmOnLeave = function(msg) {

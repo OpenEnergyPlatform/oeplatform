@@ -22,7 +22,7 @@
 
 <div class="card">
     <div class="card-header">
-        <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+        <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
             {{ ontology_description }}
         </a>
     </div>
@@ -36,7 +36,7 @@
     {% for module, about in submodules %}
         <div class="card">
             <div class="card-header">
-                <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
                 <div class="btn-group float-end" role="group" aria-label="Basic example">
@@ -47,7 +47,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#accordion">
+            <div id="collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#accordion">
                 <div class="card-body">
                     {{ about.comment }}
                 </div>
@@ -63,7 +63,7 @@
     {% for module, about in imports %}
         <div class="card">
             <div class="card-header">
-                <a class="card-link" data-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
+                <a class="card-link" data-bs-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
                 <div class="btn-group float-end" role="group" aria-label="Basic example">
@@ -74,7 +74,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-parent="#imports_accordion">
+            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#imports_accordion">
                 <div class="card-body">
                     {{ about.comment }}
                 </div>

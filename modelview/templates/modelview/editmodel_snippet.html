@@ -8,7 +8,7 @@
 <tr {% if class %} class="{{class}}" {% endif %} {% if visible %}style="display:{{visible}}"{% endif %} >
     <th class="formlabel">{% bootstrap_label field.label %}{% if field.field.required  and field|fieldtype != 'CheckboxInput' %}*{% endif %}
         {% if field.help_text and field.help_text != "" %}
-            <i data-toggle="tooltip" title="{{ field.help_text }}">
+            <i data-bs-toggle="tooltip" title="{{ field.help_text }}">
                 <span class='fas fa-question'></span>
             </i>
         {% endif %}</th>

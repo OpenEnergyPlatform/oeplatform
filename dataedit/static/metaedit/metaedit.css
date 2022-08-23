@@ -1,4 +1,4 @@
-label[data-toggle="popover"]:after{
+label[data-bs-toggle="popover"]:after{
     color: var(--primary);
     font-family: "Font Awesome 5 Free";
     font-weight: 900;

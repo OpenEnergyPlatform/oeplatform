@@ -14,10 +14,10 @@
 {% endif %}
 {% csrf_token %}
 <ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#Basic">Study</a></li>
-  <li><a data-toggle="tab" href="#Empirical">Empirical Data</a></li>
-  <li><a data-toggle="tab" href="#Assumtions">Assumptions</a></li>
-  <li><a data-toggle="tab" href="#Results">Results</a></li>
+  <li class="active"><a data-bs-toggle="tab" href="#Basic">Study</a></li>
+  <li><a data-bs-toggle="tab" href="#Empirical">Empirical Data</a></li>
+  <li><a data-bs-toggle="tab" href="#Assumtions">Assumptions</a></li>
+  <li><a data-bs-toggle="tab" href="#Results">Results</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -357,7 +357,7 @@
 <script type="text/javascript">    
 
     $(document).ready(function(){
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-bs-toggle="tooltip"]').tooltip();
     });
     
     function existing_or_new_study(){

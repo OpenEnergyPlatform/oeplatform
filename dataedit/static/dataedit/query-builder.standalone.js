@@ -4296,7 +4296,7 @@ QueryBuilder.define('bt-tooltip-errors', function(options) {
     // add BT Tooltip data
     this.on('getRuleTemplate.filter getGroupTemplate.filter', function(h) {
         var $h = $(h.value);
-        $h.find(QueryBuilder.selectors.error_container).attr('data-toggle', 'tooltip');
+        $h.find(QueryBuilder.selectors.error_container).attr('data-bs-toggle', 'tooltip');
         h.value = $h.prop('outerHTML');
     });
 
@@ -4582,7 +4582,7 @@ QueryBuilder.define('filter-description', function(options) {
             }
             else {
                 if ($b.length === 0) {
-                    $b = $('<button type="button" class="btn btn-xs btn-info filter-description" data-toggle="popover"><i class="' + options.icon + '"></i></button>');
+                    $b = $('<button type="button" class="btn btn-xs btn-info filter-description" data-bs-toggle="popover"><i class="' + options.icon + '"></i></button>');
                     $b.prependTo(rule.$el.find(QueryBuilder.selectors.rule_actions));
 
                     $b.popover({
@@ -4622,7 +4622,7 @@ QueryBuilder.define('filter-description', function(options) {
             }
             else {
                 if ($b.length === 0) {
-                    $b = $('<button type="button" class="btn btn-xs btn-info filter-description" data-toggle="bootbox"><i class="' + options.icon + '"></i></button>');
+                    $b = $('<button type="button" class="btn btn-xs btn-info filter-description" data-bs-toggle="bootbox"><i class="' + options.icon + '"></i></button>');
                     $b.prependTo(rule.$el.find(QueryBuilder.selectors.rule_actions));
 
                     $b.on('click', function() {

@@ -24,7 +24,7 @@
         {{ widget.template }}
         <div><input type="button" class="add-array-item" value="{% trans 'Add another' %}" onclick="createLeaf('{{ widget.attrs.id }}', '{{ widget.template }}')"></div>
         {% if widget.attrs.identifier %}
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#instanceModal" data-classid="{{ widget.attrs.identifier }}" data-path="{{ widget.attrs.id }}">Choose an existing instance</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#instanceModal" data-classid="{{ widget.attrs.identifier }}" data-path="{{ widget.attrs.id }}">Choose an existing instance</button>
         {% endif %}
     </div>
 </div>

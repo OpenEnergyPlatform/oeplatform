@@ -40,7 +40,7 @@
         var config = JSON.parse("{{ config|escapejs }}");
         MetaEdit(config);
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
+            $('[data-bs-toggle="tooltip"]').tooltip()
         })
     </script>
 {% endblock after-body-bottom-js %}
