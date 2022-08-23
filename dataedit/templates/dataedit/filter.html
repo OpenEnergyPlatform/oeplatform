@@ -80,8 +80,14 @@
         })
     })
 
-    /* update filter when closing tag select dropdown */
+    /* update filter when changing selection */
+    /*
     $('#tag-select').on('change', function (e) {
+        $("#form-filter").submit();
+    });
+    */
+    /* update filter when closing tag select dropdown */
+    $('#tag-select').on('hide.bs.select', function (e) {
         $("#form-filter").submit();
     });
     /* also update filter if leave search field */
