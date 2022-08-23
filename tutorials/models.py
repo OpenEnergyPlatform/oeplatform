@@ -3,13 +3,17 @@ from django.urls import reverse
 
 # add options if needed
 CATEGORY_OPTIONS = [
-    ("general", "General"),
-    ("publication", "Publication/Licensing"),
-    ("io", "Upload/Download"),
-    ("data_structure", "Data Structure"),
-    ("ontology", "Ontology"),
-    ("other", "Other Topics"),
-    ("overview", "Overview"),  # TODO: limit access / number
+    ("Training", [
+        ("overview", "Overview"),  # TODO: limit access / number
+    ]),
+    ("Tutorial", [
+        ("general", "General"),
+        ("publication", "Publication/Licensing"),
+        ("io", "Upload/Download"),
+        ("data_structure", "Data Structure"),
+        ("ontology", "Ontology"),
+        ("other", "Other Topics"),
+    ])
 ]
 
 LEVEL_OPTIONS = [(1, "Beginner"), (2, "Intermediate"), (3, "Expert")]
