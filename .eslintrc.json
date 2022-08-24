@@ -12,6 +12,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "no-var": 0,
     "camelcase": 0,
     "prefer-const": 0,
     "valid-jsdoc": [
