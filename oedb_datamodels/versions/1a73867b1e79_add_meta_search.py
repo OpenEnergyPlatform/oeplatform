@@ -39,6 +39,5 @@ def upgrade():
             update_meta_search(table.name, table.schema)
 
 
-
 def downgrade():
     op.drop_table("meta_search", schema="public")

@@ -14,7 +14,15 @@
   "rules": {
     "camelcase": 0,
     "prefer-const": 0,
-    "valid-jsdoc": [2, { "prefer": { "return": "returns" } }],
+    "valid-jsdoc": [
+      2,
+      {
+        "prefer": { "return": "returns" },
+        "requireReturn": false,
+        "requireReturnDescription": false,
+        "requireParamDescription": false
+      }
+    ],
     "quotes": [0, "single", "double"],
     "space-before-function-paren": [
       "error",

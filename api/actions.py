@@ -8,38 +8,41 @@ from datetime import datetime
 import geoalchemy2  # Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
-from django.core.exceptions import PermissionDenied
 from django.contrib.postgres.search import SearchVector
+from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404, JsonResponse
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect_14
+from omi.dialects.oep import OEP_V_1_5_Dialect as OmiDialect_15
+from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import ParserException
 from shapely import wkb, wkt
-from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql, cast
+from sqlalchemy import Column, ForeignKey, MetaData, Table, cast, exc, func, sql
 from sqlalchemy import types as sqltypes
 from sqlalchemy import util
-from sqlalchemy.dialects.postgresql import TSVECTOR, array, ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR, array
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.sql import column
 from sqlalchemy.sql.expression import func
-from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect_14
-from omi.dialects.oep import OEP_V_1_5_Dialect as OmiDialect_15
-from omi.dialects.oep.compiler import JSONCompiler
+
 import api
+import dataedit.metadata
 import login.models as login_models
 from api import DEFAULT_SCHEMA, references
 from api.connection import _get_engine
 from api.error import APIError
-from api.parser import get_or_403, read_bool, read_pgid, parse_type
+from api.parser import get_or_403, parse_type, read_bool, read_pgid
 from api.sessions import (
     SessionContext,
     close_all_for_user,
     load_cursor_from_context,
     load_session_from_context,
 )
-import dataedit.metadata
-from dataedit.models import Table as DBTable, Schema as DBSchema
-from dataedit.structures import TableTags as OEDBTableTags, Tag as OEDBTag
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.structures import TableTags as OEDBTableTags
+from dataedit.structures import Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -51,7 +54,8 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
-MAX_TABLE_NAME_LENGTH = 50 # postgres limit minus pre/suffix for meta tables
+MAX_TABLE_NAME_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
+
 
 def get_column_obj(table, column):
     """
@@ -126,6 +130,7 @@ def _translate_sqla_type(column):
         return column.udt_name
     else:
         return column.data_type
+
 
 def try_parse_metadata(inp):
     """
@@ -364,8 +369,10 @@ def apply_queued_column(id):
     res = table_change_column(column_description)
 
     if res.get("success") is True:
-        sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(
-            id=id
+        sql = (
+            "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(
+                id=id
+            )
         )
     else:
         ex_str = str(res.get("exception"))
@@ -739,17 +746,29 @@ def column_add(schema, table, column, description):
     perform_sql(s.format(schema=meta_schema, table=insert_table))
     return get_response_dict(success=True)
 
+
 def assert_valid_table_name(table):
     if len(table) > MAX_TABLE_NAME_LENGTH:
-        raise APIError(f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})")
+        raise APIError(
+            f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})"
+        )
     if len(table) == 0:
         raise APIError("Empty table name")
     if not re.match(r"[a-z][a-z0-9_]*", table):
-        raise APIError("Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "
-                       "and start with a letter.")
+        raise APIError(
+            "Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "
+            "and start with a letter."
+        )
 
 
-def table_create(schema, table, column_definitions, constraints_definitions, cursor, table_metadata=None):
+def table_create(
+    schema,
+    table,
+    column_definitions,
+    constraints_definitions,
+    cursor,
+    table_metadata=None,
+):
     """
     Creates a new table.
     :param schema: schema
@@ -778,7 +797,7 @@ def table_create(schema, table, column_definitions, constraints_definitions, cur
         except ParserException as e:
             APIError(str(e))
             try:
-                comment_on_table = omi_dialect_14._parser().parse(table_metadata) 
+                comment_on_table = omi_dialect_14._parser().parse(table_metadata)
             except ParserException as e:
                 raise APIError(str(e))
         try:
@@ -789,16 +808,15 @@ def table_create(schema, table, column_definitions, constraints_definitions, cur
                 comment_on_table = json.dumps(omi_dialect_14.compile(comment_on_table))
             except Exception as e:
                 raise APIError(str(e))
-        
-        
+
     else:
         comment_on_table = None
 
     metadata = MetaData()
 
     primary_key_col_names = None
-    columns_by_name = {}    
-    
+    columns_by_name = {}
+
     columns = []
     for cdef in column_definitions:
         col = get_column_definition_query(cdef)
@@ -829,13 +847,13 @@ def table_create(schema, table, column_definitions, constraints_definitions, cur
             if "columns" in constraint:
                 ccolumns = constraint["columns"]
             else:
-                ccolumns = [constraint["constraint_parameter"]]                        
-            
+                ccolumns = [constraint["constraint_parameter"]]
+
             if primary_key_col_names:
                 raise APIError("Multiple definitions of primary key")
             primary_key_col_names = ccolumns
-            
-            const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)            
+
+            const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)
             constraints.append(const)
         elif constraint_type == "unique":
             kwargs = {}
@@ -851,27 +869,31 @@ def table_create(schema, table, column_definitions, constraints_definitions, cur
     assert_valid_table_name(table)
 
     # autogenerate id column if missing
-    if 'id' not in columns_by_name:        
+    if "id" not in columns_by_name:
         columns_by_name["id"] = sa.Column("id", sa.BigInteger, autoincrement=True)
         columns.insert(0, columns_by_name["id"])
-    
+
     # check id column type
     id_col_type = str(columns_by_name["id"].type).upper()
     if not "INT" in id_col_type or "SERIAL" in id_col_type:
         raise APIError("Id column must be of int type")
-    
+
     # autogenerate primary key
     if not primary_key_col_names:
         constraints.append(sa.schema.PrimaryKeyConstraint("id"))
         primary_key_col_names = ["id"]
-    
+
     # check pk == id
     if tuple(primary_key_col_names) != ("id",):
         raise APIError("Primary key must be column id")
 
-    
-
-    t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
+    t = Table(
+        table,
+        metadata,
+        *(columns + constraints),
+        schema=schema,
+        comment=comment_on_table,
+    )
     t.create(_get_engine())
 
     # Create Metatables
@@ -1457,17 +1479,30 @@ def move(from_schema, table, to_schema):
         meta_to_schema = get_meta_schema_name(to_schema)
         meta_from_schema = get_meta_schema_name(from_schema)
 
-        movements = [(from_schema, table, to_schema),
-                     (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
-                     (meta_from_schema, get_insert_table_name(from_schema, table), meta_to_schema),
-                     (meta_from_schema, get_delete_table_name(from_schema, table), meta_to_schema)]
+        movements = [
+            (from_schema, table, to_schema),
+            (meta_from_schema, get_edit_table_name(from_schema, table), meta_to_schema),
+            (
+                meta_from_schema,
+                get_insert_table_name(from_schema, table),
+                meta_to_schema,
+            ),
+            (
+                meta_from_schema,
+                get_delete_table_name(from_schema, table),
+                meta_to_schema,
+            ),
+        ]
 
         for fr, tab, to in movements:
-            session.execute("ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
-                from_schema=fr, table=tab, to_schema=to))
-        session.query(OEDBTableTags).filter(OEDBTableTags.schema_name == from_schema,
-                                            OEDBTableTags.table_name == table).update(
-            {OEDBTableTags.schema_name:to_schema})
+            session.execute(
+                "ALTER TABLE {from_schema}.{table} SET SCHEMA {to_schema}".format(
+                    from_schema=fr, table=tab, to_schema=to
+                )
+            )
+        session.query(OEDBTableTags).filter(
+            OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
+        ).update({OEDBTableTags.schema_name: to_schema})
         session.commit()
         t.save()
     except:
@@ -1578,7 +1613,7 @@ def get_table_oid(request, context=None):
             conn,
             get_or_403(request, "table"),
             schema=request.get("schema", DEFAULT_SCHEMA),
-            **request
+            **request,
         )
     except sa.exc.NoSuchTableError as e:
         raise ConnectionError(str(e))
@@ -1629,7 +1664,7 @@ def get_view_definition(request, context=None):
             conn,
             get_or_403(request, "view_name"),
             schema=request.pop("schema", DEFAULT_SCHEMA),
-            **request
+            **request,
         )
     finally:
         conn.close()
@@ -1709,7 +1744,7 @@ def get_pk_constraint(request, context=None):
             conn,
             get_or_403(request, "table"),
             schema=request.pop("schema", DEFAULT_SCHEMA),
-            **request
+            **request,
         )
     finally:
         conn.close()
@@ -1728,7 +1763,7 @@ def get_foreign_keys(request, context=None):
             postgresql_ignore_search_path=request.pop(
                 "postgresql_ignore_search_path", False
             ),
-            **request
+            **request,
         )
     finally:
         conn.close()
@@ -1906,21 +1941,21 @@ def get_comment_table_name(schema, table, create=True):
 
 
 def get_delete_table_name(schema, table, create=True):
-    table_name = '_' + table + '_delete'
+    table_name = "_" + table + "_delete"
     if create:
         create_delete_table(schema, table)
     return table_name
 
 
 def get_edit_table_name(schema, table, create=True):
-    table_name = '_' + table + '_edit'
+    table_name = "_" + table + "_edit"
     if create:
         create_edit_table(schema, table)
     return table_name
 
 
 def get_insert_table_name(schema, table, create=True):
-    table_name = '_' + table + '_insert'
+    table_name = "_" + table + "_insert"
     if create:
         create_insert_table(schema, table)
     return table_name
@@ -1942,20 +1977,21 @@ def create_meta_schema(schema):
     connection.execute(query)
 
 
-def create_meta_table(schema, table, meta_table, meta_schema=None, include_indexes=True):
+def create_meta_table(
+    schema, table, meta_table, meta_schema=None, include_indexes=True
+):
     if not meta_schema:
         meta_schema = get_meta_schema_name(schema)
     if not has_table(dict(schema=meta_schema, table=meta_table)):
-        query = 'CREATE TABLE "{meta_schema}"."{edit_table}" ' \
-                '(LIKE "{schema}"."{table}"'
+        query = (
+            'CREATE TABLE "{meta_schema}"."{edit_table}" ' '(LIKE "{schema}"."{table}"'
+        )
         if include_indexes:
-            query += 'INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) '
-        query += ') INHERITS (_edit_base);'
+            query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
+        query += ") INHERITS (_edit_base);"
         query = query.format(
-            meta_schema=meta_schema,
-            edit_table=meta_table,
-            schema=schema,
-            table=table)
+            meta_schema=meta_schema, edit_table=meta_table, schema=schema, table=table
+        )
         engine = _get_engine()
         engine.execute(query)
 
@@ -1968,7 +2004,6 @@ def create_delete_table(schema, table, meta_schema=None):
 def create_edit_table(schema, table, meta_schema=None):
     meta_table = get_edit_table_name(schema, table, create=False)
     create_meta_table(schema, table, meta_table, meta_schema)
-
 
 
 def create_insert_table(schema, table, meta_schema=None):
@@ -2157,10 +2192,12 @@ def apply_insert(session, table, rows, rids):
 
 
 def apply_update(session, table, rows, rids):
-    for row, rid in zip(rows,rids):
+    for row, rid in zip(rows, rids):
         logger.info("apply update " + str(row))
         pks = [c.name for c in table.columns if c.primary_key]
-        query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(row)
+        query = table.update(*[getattr(table.c, pk) == row[pk] for pk in pks]).values(
+            row
+        )
         _execute_sqla(query, session)
         set_applied(session, table, [rid], __UPDATE)
 
@@ -2168,21 +2205,37 @@ def apply_update(session, table, rows, rids):
 def apply_deletion(session, table, rows, rids):
     for row, rid in zip(rows, rids):
         logger.info("apply deletion " + str(row))
-        query = table.delete().where(*[getattr(table.c, col) == row[col] for col in row])
+        query = table.delete().where(
+            *[getattr(table.c, col) == row[col] for col in row]
+        )
         _execute_sqla(query, session)
         set_applied(session, table, [rid], __DELETE)
 
 
 def update_meta_search(table, schema):
-    schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
+    schema_obj, _ = DBSchema.objects.get_or_create(
+        name=schema if schema is not None else DEFAULT_SCHEMA
+    )
     t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
-    tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)
-    s = (" ".join((*re.findall("\w+", schema), *re.findall("\w+", table), *re.findall(u"\w+", comment), *(tag[0] for tag in tags))))
+    tags = session.query(OEDBTag.name).filter(
+        OEDBTableTags.schema_name == schema,
+        OEDBTableTags.table_name == table,
+        OEDBTableTags.tag == OEDBTag.id,
+    )
+    s = " ".join(
+        (
+            *re.findall("\w+", schema),
+            *re.findall("\w+", table),
+            *re.findall("\w+", comment),
+            *(tag[0] for tag in tags),
+        )
+    )
 
     t.search = Func(Value(s), function="to_tsvector")
     t.save()
+
 
 def set_table_metadata(table, schema, metadata, cursor):
     """saves metadata as json string on table comment.
@@ -2199,27 +2252,31 @@ def set_table_metadata(table, schema, metadata, cursor):
 
     dialect_15 = OmiDialect_15()
     compiler_15 = dialect_15._compiler()
-    
+
     try:
         table_obj.comment = json.dumps(compiler_15.visit(metadata))
     except Exception as e:
-        APIError("Metadata is not compilable using metadat aversion 1.5 compiler {}".format(e))
+        APIError(
+            "Metadata is not compilable using metadat aversion 1.5 compiler {}".format(
+                e
+            )
+        )
         try:
             table_obj.comment = json.dumps(compiler_14.visit(metadata))
         except Exception as e:
-            raise APIError("Metadata is not compilable using metadat aversion 1.4 compiler{}".format(e))
-        
+            raise APIError(
+                "Metadata is not compilable using metadat aversion 1.4 compiler{}".format(
+                    e
+                )
+            )
 
-    
-    
     # table_obj.comment = json.dumps(compiler_15.visit(metadata))
     # Surprisingly, SQLAlchemy does not seem to escape comment strings
     # properly. Certain strings cause errors database errors.
     # This MAY be a security issue. Therefore, we do not use
     # SQLAlchemy's compiler here but do it manually.
     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-        schema=table_obj.schema,
-        table=table_obj.name
+        schema=table_obj.schema, table=table_obj.name
     )
-    cursor.execute(sql, (table_obj.comment, ))
+    cursor.execute(sql, (table_obj.comment,))
     update_meta_search(table, schema)

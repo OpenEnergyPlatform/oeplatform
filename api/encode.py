@@ -1,7 +1,7 @@
+import itertools as it
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType
-import itertools as it
-    
+
 from django.core.serializers.json import DjangoJSONEncoder
 
 

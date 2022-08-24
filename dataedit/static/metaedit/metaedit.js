@@ -250,7 +250,7 @@ var MetaEdit = function (config) {
         $('#metaedit-loading').removeClass('d-none');
 
         config.form = $('#metaedit-form');
-        
+
         // check if the editor should be initialized with metadata from table or as standalone withou any initial data
         if (config.standalone == false) {
             $.when(
@@ -285,7 +285,7 @@ var MetaEdit = function (config) {
                 }
 
                 config.editor = new JSONEditor(config.form[0], options);
-                            
+
                 /* patch labels */
                 var mainEditBox = config.form.find('.je-object__controls').first();
                 mainEditBox.find('.json-editor-btntype-save').text('Apply');

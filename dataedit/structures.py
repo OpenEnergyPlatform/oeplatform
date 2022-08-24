@@ -1,4 +1,5 @@
 import re
+
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -35,7 +36,7 @@ class Tag(Base):
         # sanitize name, auto fill name_normalized
         kwargs["name"] = self.create_name_clean(kwargs["name"])
         kwargs["name_normalized"] = self.create_name_normalized(kwargs["name"])
-        kwargs["color"] = kwargs.get("color", self.default_color)      
+        kwargs["color"] = kwargs.get("color", self.default_color)
         super().__init__(**kwargs)
 
     @staticmethod
@@ -43,7 +44,7 @@ class Tag(Base):
         """
         Args:
             name(str): tag name
-        
+
         Returns:
             str: normalized tag name
 
@@ -56,13 +57,13 @@ class Tag(Base):
         name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
         name_norm = name_norm.strip("_")
         return name_norm
-    
+
     @staticmethod
     def create_name_clean(name):
         """
         Args:
             name(str): tag name
-        
+
         Returns:
             str: sanitized tag name
 
@@ -74,9 +75,6 @@ class Tag(Base):
         re.sub("\s+", " ", name_norm)
         name_norm = name_norm.strip()
         return name_norm
-
-        
-
 
 
 class TableTags(Base):

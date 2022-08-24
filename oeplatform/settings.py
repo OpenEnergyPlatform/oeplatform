@@ -17,8 +17,9 @@ try:
 except:
     import logging
     import os
+
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    SECRET_KEY = os.environ.get("SECRET_KEY", "0")   
+    SECRET_KEY = os.environ.get("SECRET_KEY", "0")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
     URL = os.environ.get("URL")
 
@@ -45,7 +46,7 @@ INSTALLED_APPS = (
     "base.templatetags.base_tags",
     "widget_tweaks",
     "dataedit",
-    "colorfield",    
+    "colorfield",
     "api",
     "ontology",
     "axes",
@@ -126,10 +127,9 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    'axes.backends.AxesBackend',
-
+    "axes.backends.AxesBackend",
     # custom class extenging Django ModelBackend for login with username OR email
-    'login.backends.ModelBackendWithEmail',
+    "login.backends.ModelBackendWithEmail",
 ]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

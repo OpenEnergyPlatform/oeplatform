@@ -6,38 +6,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modelview', '0053_auto_20200408_1442'),
+        ("modelview", "0053_auto_20200408_1442"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='energyframework',
-            name='th_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="th_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='ts_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="ts_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='citation_reference',
-            field=models.CharField(help_text='Are publications available about the framework? Please list!', max_length=10000, null=True, verbose_name='Citation reference'),
+            model_name="basicfactsheet",
+            name="citation_reference",
+            field=models.CharField(
+                help_text="Are publications available about the framework? Please list!",
+                max_length=10000,
+                null=True,
+                verbose_name="Citation reference",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='references_to_reports_produced_using_the_model',
-            field=models.CharField(help_text='Which studies were calculated/ Which models were developed  with the framework?', max_length=10000, null=True, verbose_name='Reference Studies/Models'),
+            model_name="basicfactsheet",
+            name="references_to_reports_produced_using_the_model",
+            field=models.CharField(
+                help_text="Which studies were calculated/ Which models were developed  with the framework?",
+                max_length=10000,
+                null=True,
+                verbose_name="Reference Studies/Models",
+            ),
         ),
         migrations.AlterField(
-            model_name='energyframework',
-            name='variable_rolling_horizon',
-            field=models.BooleanField(default=False, help_text='Is it possible to model a variable Rolling Horizon with the framework?', verbose_name='Variable rolling'),
+            model_name="energyframework",
+            name="variable_rolling_horizon",
+            field=models.BooleanField(
+                default=False,
+                help_text="Is it possible to model a variable Rolling Horizon with the framework?",
+                verbose_name="Variable rolling",
+            ),
         ),
         migrations.AlterField(
-            model_name='energyframework',
-            name='variable_time_step',
-            field=models.BooleanField(default=False, help_text='Is it possible to model variable time steps with the framework?', verbose_name='Variable time step'),
+            model_name="energyframework",
+            name="variable_time_step",
+            field=models.BooleanField(
+                default=False,
+                help_text="Is it possible to model variable time steps with the framework?",
+                verbose_name="Variable time step",
+            ),
         ),
     ]

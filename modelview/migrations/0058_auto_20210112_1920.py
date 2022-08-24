@@ -7,23 +7,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modelview', '0057_auto_20200916_1502'),
+        ("modelview", "0057_auto_20200916_1502"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='contact_email',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.EmailField(max_length=254), help_text='Please provide the mailadress of the contact person.', size=None, verbose_name='Contact (e-mail)'),
+            model_name="basicfactsheet",
+            name="contact_email",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.EmailField(max_length=254),
+                help_text="Please provide the mailadress of the contact person.",
+                size=None,
+                verbose_name="Contact (e-mail)",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='external_optimizer_yes_text',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=1000), default=list, help_text='Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.', null=True, size=None, verbose_name='External optimizer'),
+            model_name="basicfactsheet",
+            name="external_optimizer_yes_text",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=1000),
+                default=list,
+                help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+                null=True,
+                size=None,
+                verbose_name="External optimizer",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='user_documentation',
-            field=models.CharField(help_text='Is an user documentation available for the framework? Please insert the link', max_length=500, null=True, verbose_name='Link to User Documentation'),
+            model_name="basicfactsheet",
+            name="user_documentation",
+            field=models.CharField(
+                help_text="Is an user documentation available for the framework? Please insert the link",
+                max_length=500,
+                null=True,
+                verbose_name="Link to User Documentation",
+            ),
         ),
     ]

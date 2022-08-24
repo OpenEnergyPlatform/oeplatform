@@ -135,6 +135,7 @@ def _get_new_key(dictionary):
         key = randrange(0, sys.maxsize)
     return key
 
+
 def _add_entry(value, dictionary, key=None):
     if key is None:
         key = _get_new_key(dictionary)

@@ -37,7 +37,7 @@ def checktable(model, label, prefix, suffixes, separator="_"):
     i = 0
     return """<tr>
                 <td valign="top"  class="rowlabel"> {0}</td>
-                <td> 
+                <td>
                     <table class="profiletable-checktable">
                         <tr>
                             {1}
@@ -61,9 +61,14 @@ def checklist(model, labels):
         if "=" in name:
             decider, text = name.split("=")
             is_other = True
-        if  "conventional_generation" in name or "networks_electricity" in name or "storage" in name or "CHP" in name:
-                is_other = False
-                
+        if (
+            "conventional_generation" in name
+            or "networks_electricity" in name
+            or "storage" in name
+            or "CHP" in name
+        ):
+            is_other = False
+
         if model.__dict__[decider]:
             if first:
                 first = False
@@ -199,4 +204,3 @@ def assignClass(field, css):
 @register.filter
 def addClass(value, arg):
     return value.as_widget(attrs={"class": arg})
-

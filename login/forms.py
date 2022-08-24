@@ -1,3 +1,4 @@
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import (
@@ -6,12 +7,11 @@ from django.contrib.auth.forms import (
     SetPasswordForm,
     UserChangeForm,
     UserCreationForm,
-
 )
 from django.core.exceptions import ValidationError
-from captcha.fields import CaptchaField
-from .models import ActivationToken
-from .models import myuser as OepUser, UserGroup
+
+from .models import ActivationToken, UserGroup
+from .models import myuser as OepUser
 
 
 class CreateUserForm(UserCreationForm):
@@ -95,9 +95,10 @@ class GroupForm(forms.ModelForm):
         model = UserGroup
         fields = ("name", "description")
 
+
 class GroupUserForm(forms.ModelForm):
     """
-     A form for setting members of a group.     
+    A form for setting members of a group.
     """
 
     class Meta:

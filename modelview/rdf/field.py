@@ -1,14 +1,16 @@
-from django.forms.widgets import TextInput, HiddenInput, Select
-from django.utils.html import format_html, format_html_join, mark_safe
-import rdflib as rl
-
-from modelview.rdf import handler, widget, factory, connection
-from api.error import APIError
-from modelview.rdf.widget import DynamicFactoryArrayWidget
-from os import path
-from django import template
-from django.template import loader
 from abc import ABC
+from os import path
+
+import rdflib as rl
+from django import template
+from django.forms.widgets import HiddenInput, Select, TextInput
+from django.template import loader
+from django.utils.html import format_html, format_html_join, mark_safe
+
+from api.error import APIError
+from modelview.rdf import connection, factory, handler, widget
+from modelview.rdf.widget import DynamicFactoryArrayWidget
+
 
 class Field(ABC):
     """
@@ -121,7 +123,6 @@ class Field(ABC):
 
 
 class TextField(Field):
-
     @property
     def template(self):
         return {"type": "text", "field": "literal"}
@@ -130,15 +131,12 @@ class TextField(Field):
         x = data.get("literal")
         if not x:
             return None
-        return f"\"{x}\""
+        return f'"{x}"'
 
 
 class IRIField(TextField):
-
     def __init__(self, rdf_name, **kwargs):
-        super().__init__(
-            rdf_name, **kwargs
-        )
+        super().__init__(rdf_name, **kwargs)
 
     @property
     def template(self):
@@ -155,7 +153,6 @@ class IRIField(TextField):
 
 
 class TextAreaField(TextField):
-
     @property
     def template(self):
         return {"type": "textarea"}
@@ -163,9 +160,7 @@ class TextAreaField(TextField):
 
 class YearField(Field):
     def __init__(self, rdf_name, **kwargs):
-        super().__init__(
-            rdf_name, **kwargs
-        )
+        super().__init__(rdf_name, **kwargs)
 
     @property
     def template(self):

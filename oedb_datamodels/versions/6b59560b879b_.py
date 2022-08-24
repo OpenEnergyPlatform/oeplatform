@@ -5,26 +5,27 @@ Revises: 7dd42bf4925b
 Create Date: 2022-01-27 10:12:56.713893
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = '3c2369dfcc55'
-down_revision = '7dd42bf4925b'
+revision = "3c2369dfcc55"
+down_revision = "7dd42bf4925b"
 branch_labels = None
 depends_on = None
 
-def upgrade():    
+
+def upgrade():
     # add new column name_normalized (allow nullable at first)
     op.add_column(
         table_name="tags",
         column=sa.Column("name_normalized", sa.String(length=40), nullable=True),
         schema="public",
-    )               
+    )
 
     # create normalized names
     op.execute(
-        """        
+        """
         -- create normalized names
         UPDATE public.tags
         SET name_normalized = TRIM(BOTH '_' FROM REGEXP_REPLACE(LOWER(name), '[^a-z0-9]+', '_', 'g'))
@@ -68,7 +69,7 @@ def upgrade():
         DELETE FROM public.table_tags tt
         WHERE tag IN
         (
-            SELECT id 
+            SELECT id
             FROM public.tags
             WHERE id != id_normalized
             OR COALESCE(name_normalized, '') = ''
@@ -91,14 +92,14 @@ def upgrade():
     op.alter_column(
         table_name="tags",
         column_name="name_normalized",
-        nullable=False,        
+        nullable=False,
         schema="public",
     )
     op.create_unique_constraint(
         constraint_name="uq_name_normalized",
         table_name="tags",
-        columns=["name_normalized"],        
-        schema="public"
+        columns=["name_normalized"],
+        schema="public",
     )
 
 

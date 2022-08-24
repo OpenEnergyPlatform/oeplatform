@@ -10,7 +10,7 @@ def from_v0(comment_on_table, schema, table):
         if "resources" not in comment_on_table:
             comment_on_table = {
                 "title": comment_on_table.get("Name"),
-                "description": "; ".join(comment_on_table.get("Description",[])),
+                "description": "; ".join(comment_on_table.get("Description", [])),
                 "language": [],
                 "reference_date": refdate[0] if isinstance(refdate, list) else refdate,
                 "spatial": [
@@ -68,18 +68,28 @@ def from_v0(comment_on_table, schema, table):
                 "meta_version": "1.1",
             }
 
-            comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
+            comment_on_table["fields"] = comment_on_table.get("resources", [{}])[0].get(
+                "fields"
+            )
 
-            commented_cols = [col.get("name") for col in comment_on_table.get("fields", [])]
+            commented_cols = [
+                col.get("name") for col in comment_on_table.get("fields", [])
+            ]
         else:
-            comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
+            comment_on_table["fields"] = comment_on_table.get("resources", [{}])[0].get(
+                "fields"
+            )
 
-            if "fields" not in comment_on_table.get("resources",[{}])[0]:
+            if "fields" not in comment_on_table.get("resources", [{}])[0]:
                 comment_on_table["fields"] = []
             else:
-                comment_on_table["fields"] = comment_on_table.get("resources",[{}])[0].get("fields")
+                comment_on_table["fields"] = comment_on_table.get("resources", [{}])[
+                    0
+                ].get("fields")
 
-            commented_cols = [col.get("name") for col in comment_on_table.get("fields", [])]
+            commented_cols = [
+                col.get("name") for col in comment_on_table.get("fields", [])
+            ]
     except Exception as e:
         raise MetadataException(comment_on_table, e)
 

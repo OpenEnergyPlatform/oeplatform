@@ -30,6 +30,7 @@ schemas = [
     "reference",
 ]
 
+
 def upgrade():
     for s in schemas:
         op.execute("CREATE SCHEMA " + s)

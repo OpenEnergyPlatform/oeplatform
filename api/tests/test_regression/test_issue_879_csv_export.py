@@ -1,5 +1,7 @@
 import re
+
 from django.urls import reverse
+
 from api.tests import APITestCase
 
 # test indivisually:

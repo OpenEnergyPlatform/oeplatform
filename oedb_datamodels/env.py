@@ -20,7 +20,7 @@ django.setup()
 
 alembic_cfg = Config()
 db_url = get_connection_string()
-db_url = db_url.replace('%', '%%')
+db_url = db_url.replace("%", "%%")
 alembic_cfg.set_main_option("url", db_url)
 
 # this is the Alembic Config object, which provides

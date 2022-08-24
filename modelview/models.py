@@ -5,14 +5,15 @@ from django.db import models
 from django.db.models import (
     BooleanField,
     CharField,
+    DateField,
     EmailField,
     ForeignKey,
     ImageField,
     IntegerField,
     SmallIntegerField,
     TextField,
-    DateField,
 )
+
 
 class BasicFactsheet(models.Model):
     model_name = CharField(
@@ -95,7 +96,8 @@ class BasicFactsheet(models.Model):
     )
     framework_yes_text = CharField(max_length=1000, null=True)
 
-    user_documentation = CharField(max_length=500,
+    user_documentation = CharField(
+        max_length=500,
         verbose_name="Link to User Documentation",
         help_text="Is an user documentation available for the framework? Please insert the link",
         null=True,
@@ -124,7 +126,7 @@ class BasicFactsheet(models.Model):
     open_source = BooleanField(
         default=False,
         verbose_name="Open Source",
-        help_text="Is the framework published under an open source license?"
+        help_text="Is the framework published under an open source license?",
     )
     open_up = BooleanField(
         default=False,
@@ -143,7 +145,7 @@ class BasicFactsheet(models.Model):
                 "Apache license 2.0",
                 "Artistic license 2.0",
                 "Boost Software License 1.0",
-                "BSD 2-clause \"Simplified\" license",
+                'BSD 2-clause "Simplified" license',
                 "BSD 3-clause Clear license",
                 "Creative Commons license family",
                 "Creative Commons Zero v1.0 Universal",
@@ -190,15 +192,20 @@ class BasicFactsheet(models.Model):
         help_text="Is the model available on GitHub?",
     )
     link_to_source_code = CharField(
-        max_length=200, verbose_name="Access to source code",
+        max_length=200,
+        verbose_name="Access to source code",
         help_text="Is the necessary data to run a scenario available?",
-        null=True
+        null=True,
     )
     data_provided = CharField(
         max_length=1000,
         verbose_name="Data provided",
         help_text="Is the necessary data to run a scenario available?",
-        choices=(("none", "none"), ("example data", "example data"), ("all data", "all data")),
+        choices=(
+            ("none", "none"),
+            ("example data", "example data"),
+            ("all data", "all data"),
+        ),
         default="none",
     )
     cooperative_programming = BooleanField(
@@ -244,7 +251,7 @@ class BasicFactsheet(models.Model):
         default=list,
         null=True,
     )
-    #TODO: external_optimizer is not used anymore since the form adds a array element, a boolean field is not needed anymore
+    # TODO: external_optimizer is not used anymore since the form adds a array element, a boolean field is not needed anymore
     external_optimizer = BooleanField(
         default=False,
         verbose_name="External optimizer",
@@ -256,7 +263,7 @@ class BasicFactsheet(models.Model):
         verbose_name="External optimizer",
         help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
         default=list,
-        null=True
+        null=True,
     )
 
     additional_software = ArrayField(
@@ -370,7 +377,9 @@ class Energymodel(BasicFactsheet):
     generation_renewables_hydro = BooleanField(default=False, verbose_name="Hydro")
     generation_renewables_biomass = BooleanField(default=False, verbose_name="Biomass")
     generation_renewables_biogas = BooleanField(default=False, verbose_name="Biogas")
-    generation_renewables_bio = BooleanField(default=False, verbose_name="Biomass,Biogas,Biofuels")
+    generation_renewables_bio = BooleanField(
+        default=False, verbose_name="Biomass,Biogas,Biofuels"
+    )
     generation_renewables_solar_thermal = BooleanField(
         default=False, verbose_name="Solar thermal"
     )
@@ -382,8 +391,12 @@ class Energymodel(BasicFactsheet):
 
     generation_conventional_gas = BooleanField(default=False, verbose_name="gas")
     generation_conventional_coal = BooleanField(default=False, verbose_name="coal")
-    generation_conventional_lignite = BooleanField(default=False, verbose_name="lignite")
-    generation_conventional_hard_coal = BooleanField(default=False, verbose_name="hard coal")
+    generation_conventional_lignite = BooleanField(
+        default=False, verbose_name="lignite"
+    )
+    generation_conventional_hard_coal = BooleanField(
+        default=False, verbose_name="hard coal"
+    )
     generation_conventional_oil = BooleanField(default=False, verbose_name="oil")
     generation_conventional_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
@@ -394,8 +407,12 @@ class Energymodel(BasicFactsheet):
 
     generation_CHP = BooleanField(default=False, verbose_name="CHP")
 
-    modeled_technology_renewables = BooleanField(default=False, verbose_name="renewables")
-    modeled_technology_conventional = BooleanField(default=False, verbose_name="conventional")
+    modeled_technology_renewables = BooleanField(
+        default=False, verbose_name="renewables"
+    )
+    modeled_technology_conventional = BooleanField(
+        default=False, verbose_name="conventional"
+    )
 
     transfer_electricity = BooleanField(default=False, verbose_name="electricity")
     transfer_electricity_distribution = BooleanField(
@@ -417,13 +434,14 @@ class Energymodel(BasicFactsheet):
 
     network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow")
     network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow")
-    network_coverage_TM = BooleanField(default=False, verbose_name="transshipment model")
-    network_coverage_SN = BooleanField(default=False, verbose_name="single-node / copper plate model")
-    network_coverage_other = BooleanField(
-        default=False, verbose_name="other"
+    network_coverage_TM = BooleanField(
+        default=False, verbose_name="transshipment model"
     )
+    network_coverage_SN = BooleanField(
+        default=False, verbose_name="single-node / copper plate model"
+    )
+    network_coverage_other = BooleanField(default=False, verbose_name="other")
     network_coverage_other_text = CharField(max_length=200, null=True)
-
 
     storage_electricity_battery = BooleanField(default=False, verbose_name="battery")
     storage_electricity_kinetic = BooleanField(default=False, verbose_name="kinetic")
@@ -687,16 +705,18 @@ class Energymodel(BasicFactsheet):
         help_text="Which models are integrated in the model? Where are these models available?",
         null=True,
     )
+
     def formfield(self, **kwargs):
         defaults = {
-            'form_class': forms.MultipleChoiceField,
-            'choices': self.base_field.choices,
+            "form_class": forms.MultipleChoiceField,
+            "choices": self.base_field.choices,
         }
         defaults.update(kwargs)
         # Skip our parent's formfield implementation completely as we don't
         # care for it.
         # pylint:disable=bad-super-call
         return super(ArrayField, self).formfield(**defaults)
+
 
 class Energyframework(BasicFactsheet):
     def __init__(self, *args, **kwargs):
@@ -726,13 +746,36 @@ class Energyframework(BasicFactsheet):
         default=list,
         null=True,
     )
-    inital_purpose = CharField(verbose_name="Inital purpose", null=True, help_text="What was the initial purpose/task/motivation to start the development?", max_length=1000)
-    inital_purpose_change = CharField(verbose_name="Inital purpose change", null=True, help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?", max_length=1000)
-    inital_release_date = DateField(verbose_name="Inital Release Date", null=True, help_text="When [YYYY-MM-DD] was the framework initially released?", max_length=30)
-    research_questions = ArrayField(
-        CharField(max_length=1000), verbose_name="Research questions", null=True, help_text="What are 3 typical research questions that are answered by applying the FW?"
+    inital_purpose = CharField(
+        verbose_name="Inital purpose",
+        null=True,
+        help_text="What was the initial purpose/task/motivation to start the development?",
+        max_length=1000,
     )
-    parent_framework = CharField(verbose_name="Parent Framework", null=True, help_text="Is the framework based on a framework? If yes, which?", max_length=80)
+    inital_purpose_change = CharField(
+        verbose_name="Inital purpose change",
+        null=True,
+        help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?",
+        max_length=1000,
+    )
+    inital_release_date = DateField(
+        verbose_name="Inital Release Date",
+        null=True,
+        help_text="When [YYYY-MM-DD] was the framework initially released?",
+        max_length=30,
+    )
+    research_questions = ArrayField(
+        CharField(max_length=1000),
+        verbose_name="Research questions",
+        null=True,
+        help_text="What are 3 typical research questions that are answered by applying the FW?",
+    )
+    parent_framework = CharField(
+        verbose_name="Parent Framework",
+        null=True,
+        help_text="Is the framework based on a framework? If yes, which?",
+        max_length=80,
+    )
     # GEOGRAPHICAL SCOPE
     gs_global = BooleanField(verbose_name="Global", default=False)
     gs_regional = BooleanField(verbose_name="Regional", default=False)
@@ -746,7 +789,9 @@ class Energyframework(BasicFactsheet):
     ss_transport = BooleanField(verbose_name="Transport", default=False)
     ss_other = BooleanField(verbose_name="Other specific sectors", default=False)
     ss_overall = BooleanField(verbose_name="Overall economy", default=False)
-    ss_other_text = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    ss_other_text = CharField(
+        verbose_name="Other", max_length=400, help_text="", null=True
+    )
     # GENERAL PROBLEM SCOPE
     gps_forecast = BooleanField(verbose_name="Forecasting", default=False)
     gps_explore = BooleanField(verbose_name="Exploring", default=False)
@@ -758,18 +803,34 @@ class Energyframework(BasicFactsheet):
     sps_impacts = BooleanField(verbose_name="Impacts", default=False)
     sps_environmental = BooleanField(verbose_name="Environmental", default=False)
     sps_appraisal = BooleanField(verbose_name="Appraisal", default=False)
-    sps_integrated_approach = BooleanField(verbose_name="Integrated approach", default=False)
+    sps_integrated_approach = BooleanField(
+        verbose_name="Integrated approach", default=False
+    )
     sps_modular_buildup = BooleanField(verbose_name="Modular build-up", default=False)
     sps_energy_dispatch = BooleanField(verbose_name="Energy dispatch", default=False)
-    sps_capacity_expansion = BooleanField(verbose_name="Capacity expansion planning", default=False)
+    sps_capacity_expansion = BooleanField(
+        verbose_name="Capacity expansion planning", default=False
+    )
     sps_unit_commitment = BooleanField(verbose_name="Unit commitment", default=False)
-    sps_rule_based = BooleanField(verbose_name="Rule based operation management", default=False)
+    sps_rule_based = BooleanField(
+        verbose_name="Rule based operation management", default=False
+    )
     sps_sector_coupling = BooleanField(verbose_name="Sector-coupling ", default=False)
     sps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    last_updated = DateField(verbose_name="Last updated", max_length=200, help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].", null=True)
-    version = CharField(verbose_name="Version", max_length=200, help_text="To which version of the framework does the factsheet refer?", null=True)
-    #PROGRAMMING FRAMEWORK
+    last_updated = DateField(
+        verbose_name="Last updated",
+        max_length=200,
+        help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].",
+        null=True,
+    )
+    version = CharField(
+        verbose_name="Version",
+        max_length=200,
+        help_text="To which version of the framework does the factsheet refer?",
+        null=True,
+    )
+    # PROGRAMMING FRAMEWORK
     pf_GAMS = BooleanField(verbose_name="GAMS", default=False)
     pf_Python = BooleanField(verbose_name="Python", default=False)
     pf_C = BooleanField(verbose_name="C++", default=False)
@@ -783,14 +844,14 @@ class Energyframework(BasicFactsheet):
     pf_Matlab = BooleanField(verbose_name="Matlab", default=False)
     pf_Ruby = BooleanField(verbose_name="Ruby", default=False)
     pf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    #EXTERNAL SOLVER
+    # EXTERNAL SOLVER
     es_CPLEX = BooleanField(verbose_name="CPLEX", default=False)
     es_Gurobi = BooleanField(verbose_name="Gurobi", default=False)
     es_Coin = BooleanField(verbose_name="Coin-Or CBC", default=False)
     es_GLPK = BooleanField(verbose_name="GLPK", default=False)
     es_MOSEK = BooleanField(verbose_name="MOSEK", default=False)
     es_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    #INPUT DATA FORMAT
+    # INPUT DATA FORMAT
     idf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False)
     idf_Python_dicts = BooleanField(verbose_name="Python dicts", default=False)
     idf_XLSX = BooleanField(verbose_name="XLSX", default=False)
@@ -799,9 +860,11 @@ class Energyframework(BasicFactsheet):
     idf_XML = BooleanField(verbose_name="XML", default=False)
     idf_txt = BooleanField(verbose_name="txt", default=False)
     idf_db = BooleanField(verbose_name="db", default=False)
-    idf_GAMS = BooleanField(verbose_name="GAMS data exchange format (gdx)", default=False)
+    idf_GAMS = BooleanField(
+        verbose_name="GAMS data exchange format (gdx)", default=False
+    )
     idf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    #OUTPUT DATA FORMAT
+    # OUTPUT DATA FORMAT
     odf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False)
     odf_Python_dicts = BooleanField(verbose_name="Python dicts", default=False)
     odf_XLSX = BooleanField(verbose_name="XLSX", default=False)
@@ -810,33 +873,58 @@ class Energyframework(BasicFactsheet):
     odf_XML = BooleanField(verbose_name="XML", default=False)
     odf_txt = BooleanField(verbose_name="txt", default=False)
     odf_db = BooleanField(verbose_name="db", default=False)
-    odf_GAMS = BooleanField(verbose_name="GAMS data exchange format (gdx)", default=False)
+    odf_GAMS = BooleanField(
+        verbose_name="GAMS data exchange format (gdx)", default=False
+    )
     odf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    auto_model_generator = BooleanField(verbose_name="Auto model generator", help_text="Is an auto-Model generator available that transfers an input file into a Model?", default=False)
-    data_preprocessing = BooleanField(verbose_name="data preprocessing", help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available", default=False)
-    data_preprocessing_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    data_postprocessing = BooleanField(verbose_name="data postprocessing",
-                                       help_text="Which output format(s) can the framework apply? Please list!",
-                                       default=False)
-    data_postprocessing_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    plotting_functionalities = BooleanField(verbose_name="plotting functionalities", help_text="Are specific plotting functionalities available?", default=False)
-    #ANALYTICAL APPROACH
+    auto_model_generator = BooleanField(
+        verbose_name="Auto model generator",
+        help_text="Is an auto-Model generator available that transfers an input file into a Model?",
+        default=False,
+    )
+    data_preprocessing = BooleanField(
+        verbose_name="data preprocessing",
+        help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",
+        default=False,
+    )
+    data_preprocessing_other = CharField(
+        verbose_name="Other", max_length=400, help_text="", null=True
+    )
+    data_postprocessing = BooleanField(
+        verbose_name="data postprocessing",
+        help_text="Which output format(s) can the framework apply? Please list!",
+        default=False,
+    )
+    data_postprocessing_other = CharField(
+        verbose_name="Other", max_length=400, help_text="", null=True
+    )
+    plotting_functionalities = BooleanField(
+        verbose_name="plotting functionalities",
+        help_text="Are specific plotting functionalities available?",
+        default=False,
+    )
+    # ANALYTICAL APPROACH
     ap_TopDown = BooleanField(verbose_name="Top Down", default=False)
     ap_BottomUp = BooleanField(verbose_name="Bottom up", default=False)
     ap_Hybrid = BooleanField(verbose_name="Hybrid", default=False)
     ap_Other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    interfaces = CharField(verbose_name="interfaces", max_length=200, help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ", null=True)
+    interfaces = CharField(
+        verbose_name="interfaces",
+        max_length=200,
+        help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ",
+        null=True,
+    )
 
-    #MATHEMATICAL APPROACH
+    # MATHEMATICAL APPROACH
     ma_lp = BooleanField(verbose_name="Linear Programming", default=False)
     ma_mip = BooleanField(verbose_name="Mixed integer programming", default=False)
     ma_dp = BooleanField(verbose_name="Dynamic Programming", default=False)
     ma_fl = BooleanField(verbose_name="Fuzzy Logic", default=False)
-    ma_abp  = BooleanField(verbose_name="Agent based programming", default=False)
+    ma_abp = BooleanField(verbose_name="Agent based programming", default=False)
     ma_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    #UNDERLYING METHODOLOGY
+    # UNDERLYING METHODOLOGY
     um_econometric = BooleanField(verbose_name="Econometric", default=False)
     um_me = BooleanField(verbose_name="Macro-Economic", default=False)
     um_ee = BooleanField(verbose_name="Economic Equilibrium", default=False)
@@ -849,10 +937,12 @@ class Energyframework(BasicFactsheet):
     um_mc = BooleanField(verbose_name="Multi-Criteria", default=False)
     um_Accounting = BooleanField(verbose_name="Accounting", default=False)
     um_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
-    #OBJECTIVE FUNCTION TYPE
+    # OBJECTIVE FUNCTION TYPE
     oft_mtsc = BooleanField(verbose_name="Minimize Total System Cost", default=False)
     oft_mce = BooleanField(verbose_name="Minimize CO2-emissions", default=False)
-    oft_mlce = BooleanField(verbose_name="Minimizing Levelized Cost of Energy", default=False)
+    oft_mlce = BooleanField(
+        verbose_name="Minimizing Levelized Cost of Energy", default=False
+    )
     oft_msw = BooleanField(verbose_name="Maximize Social Welfare", default=False)
     oft_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
     # SUPPORT
@@ -863,15 +953,53 @@ class Energyframework(BasicFactsheet):
     support_modelExamples = BooleanField(verbose_name="Model Examples", default=False)
     support_other_text = CharField(verbose_name="Other", max_length=1000, null=True)
 
-    link_to_code_documentation = CharField(verbose_name="Link to code documentation", max_length=200, help_text="Is a code/API documentation availaibe for the framework? Please insert the link!", null=True)
-    skills_basic = CharField(verbose_name="Skills basic", max_length=200, help_text="What basic skills does a person need to become a user of the framework?",null=True)
-    skills_advanced = CharField(verbose_name="Skills advanced", max_length=200, help_text="What advanced skills does a person need to become a user of the framework?",null=True)
-    installation_guide = BooleanField(verbose_name="Installation guide", help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link", default=False)
-    link_to_installation_guide = CharField(verbose_name="Link to installation guide", max_length=200, help_text="Is an installation guide availaibe for the framework? Please insert the link!", null=True)
-    open_to_developers = BooleanField(verbose_name="Open to developers", help_text="Is it possible to join the developer group?", default=False)
+    link_to_code_documentation = CharField(
+        verbose_name="Link to code documentation",
+        max_length=200,
+        help_text="Is a code/API documentation availaibe for the framework? Please insert the link!",
+        null=True,
+    )
+    skills_basic = CharField(
+        verbose_name="Skills basic",
+        max_length=200,
+        help_text="What basic skills does a person need to become a user of the framework?",
+        null=True,
+    )
+    skills_advanced = CharField(
+        verbose_name="Skills advanced",
+        max_length=200,
+        help_text="What advanced skills does a person need to become a user of the framework?",
+        null=True,
+    )
+    installation_guide = BooleanField(
+        verbose_name="Installation guide",
+        help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link",
+        default=False,
+    )
+    link_to_installation_guide = CharField(
+        verbose_name="Link to installation guide",
+        max_length=200,
+        help_text="Is an installation guide availaibe for the framework? Please insert the link!",
+        null=True,
+    )
+    open_to_developers = BooleanField(
+        verbose_name="Open to developers",
+        help_text="Is it possible to join the developer group?",
+        default=False,
+    )
 
-    source_code_availability = CharField(verbose_name="Code availability", max_length=200, help_text="What is the link to the source code?", null=True)
-    data_code_availability = CharField(verbose_name="Data availability", max_length=200, help_text="Is at least one (dummy) data set available to run a model built with the framework?", null=True)
+    source_code_availability = CharField(
+        verbose_name="Code availability",
+        max_length=200,
+        help_text="What is the link to the source code?",
+        null=True,
+    )
+    data_code_availability = CharField(
+        verbose_name="Data availability",
+        max_length=200,
+        help_text="Is at least one (dummy) data set available to run a model built with the framework?",
+        null=True,
+    )
 
     # RENEWABLE ENERGY INCLUSION
     Hydro = BooleanField(verbose_name="Hydro", default=False)
@@ -885,11 +1013,17 @@ class Energyframework(BasicFactsheet):
     st_hydro = BooleanField(verbose_name="Pumped-hydro energy storage", default=False)
     st_battery = BooleanField(verbose_name="Battery energy storage", default=False)
     st_air = BooleanField(verbose_name="Compressed-air energy storage", default=False)
-    st_hydrogen = BooleanField(verbose_name="Hydrogen production / storage / consumption", default=False)
+    st_hydrogen = BooleanField(
+        verbose_name="Hydrogen production / storage / consumption", default=False
+    )
     # DEMAND CHARACTERISTICS | TRANSPORT DEMAND
-    dc_combustion = BooleanField(verbose_name="Internal-combustion vehicles", default=False)
+    dc_combustion = BooleanField(
+        verbose_name="Internal-combustion vehicles", default=False
+    )
     dc_battery = BooleanField(verbose_name="Battery-electric vehicles", default=False)
-    dc_v2grid = BooleanField(verbose_name="Vehicle-to-grid electric vehicles", default=False)
+    dc_v2grid = BooleanField(
+        verbose_name="Vehicle-to-grid electric vehicles", default=False
+    )
     dc_hydrogen = BooleanField(verbose_name="Hydrogen vehicles", default=False)
     dc_rail = BooleanField(verbose_name="Rail", default=False)
     dc_aviation = BooleanField(verbose_name="Aviation", default=False)
@@ -898,21 +1032,31 @@ class Energyframework(BasicFactsheet):
     rd_Lighting = BooleanField(verbose_name="Lighting", default=False)
     rd_Cooking = BooleanField(verbose_name="Cooking", default=False)
     rd_ApplianceUsage = BooleanField(verbose_name="Appliance usage", default=False)
-    rd_SmartAppliances = BooleanField(verbose_name="Smart appliances & Smart metres", default=False)
+    rd_SmartAppliances = BooleanField(
+        verbose_name="Smart appliances & Smart metres", default=False
+    )
     # DEMAND CHARACTERISTICS | COMMERCIAL DEMAND
     cd_Offices = BooleanField(verbose_name="Offices", default=False)
     cd_Warehouses = BooleanField(verbose_name="Warehouses", default=False)
     cd_Retail = BooleanField(verbose_name="Retail", default=False)
     # GRID MODEL
     gm_singleNode = BooleanField(verbose_name="Single-node model", default=False)
-    gm_TranshipmentModel = BooleanField(verbose_name="Transhipment model", default=False)
-    gm_LinearOptimal = BooleanField(verbose_name="Linear optimal power flow", default=False)
+    gm_TranshipmentModel = BooleanField(
+        verbose_name="Transhipment model", default=False
+    )
+    gm_LinearOptimal = BooleanField(
+        verbose_name="Linear optimal power flow", default=False
+    )
     # COST INCLUSION
     ci_FuelPrices = BooleanField(verbose_name="Fuel prices", default=False)
     ci_FuelHandling = BooleanField(verbose_name="Fuel handling", default=False)
     ci_Investment = BooleanField(verbose_name="Investment", default=False)
-    ci_FixedOperation = BooleanField(verbose_name="Fixed Operation & Maintenance", default=False)
-    ci_VariableOperation = BooleanField(verbose_name="Variable Operation & Maintenance", default=False)
+    ci_FixedOperation = BooleanField(
+        verbose_name="Fixed Operation & Maintenance", default=False
+    )
+    ci_VariableOperation = BooleanField(
+        verbose_name="Variable Operation & Maintenance", default=False
+    )
     ci_CO2 = BooleanField(verbose_name="CO2 cost", default=False)
     # TIME STEPS
     ts_Minutely = BooleanField(verbose_name="Minutely", default=False)
@@ -927,28 +1071,45 @@ class Energyframework(BasicFactsheet):
     th_lt = BooleanField(verbose_name="long term (>=15)", default=False)
     th_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
 
-    fixed_units = BooleanField(verbose_name="Fixed units", help_text="Is the framework build on fixed base units?", default=False)
-    agricultural_demand = BooleanField(verbose_name="Agricultural demand", help_text="Which agricultural demands are already modelled with the framework?",default=False)
-    new_components = BooleanField(verbose_name="New components",
-                                  help_text="Is the framework build to allow for the implementation of new components?",
-                                  default=False)
-    variable_time_step = BooleanField(verbose_name="Variable time step", help_text="Is it possible to Model variable time steps with the framework?",default=False)
-    variable_rolling_horizon = BooleanField(verbose_name="Variable rolling",
-                                            help_text="Is it possible to Model a variable Rolling Horizon with the framework?",
-                                            default=False)
+    fixed_units = BooleanField(
+        verbose_name="Fixed units",
+        help_text="Is the framework build on fixed base units?",
+        default=False,
+    )
+    agricultural_demand = BooleanField(
+        verbose_name="Agricultural demand",
+        help_text="Which agricultural demands are already modelled with the framework?",
+        default=False,
+    )
+    new_components = BooleanField(
+        verbose_name="New components",
+        help_text="Is the framework build to allow for the implementation of new components?",
+        default=False,
+    )
+    variable_time_step = BooleanField(
+        verbose_name="Variable time step",
+        help_text="Is it possible to Model variable time steps with the framework?",
+        default=False,
+    )
+    variable_rolling_horizon = BooleanField(
+        verbose_name="Variable rolling",
+        help_text="Is it possible to Model a variable Rolling Horizon with the framework?",
+        default=False,
+    )
 
     how_to_cite = CharField(
         verbose_name="Citation",
         help_text="How to cite the framework?",
         max_length=1000,
-        null = True,
+        null=True,
     )
     fw_appliance = CharField(
         verbose_name="Projects using the framework",
         help_text="Which research projects (on-going or past) apply the framework?",
         max_length=1000,
-        null = True,
+        null=True,
     )
+
 
 class Energystudy(models.Model):
     def __str__(self):
@@ -1015,7 +1176,7 @@ class Energystudy(models.Model):
         verbose_name="Tools",
         help_text="Which model(s) and other tools have been used?",
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
     )
     tools_other = CharField(
         verbose_name="Tools",
@@ -1113,7 +1274,11 @@ class Energystudy(models.Model):
 class Energyscenario(models.Model):
 
     study = ForeignKey(
-        "Energystudy", db_column="name_of_the_study_id", null=True, blank=True, on_delete=models.CASCADE
+        "Energystudy",
+        db_column="name_of_the_study_id",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
     )
 
     exogenous_time_series_used_climate = BooleanField(verbose_name="climate")

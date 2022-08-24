@@ -10,12 +10,12 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
 
 import login.models as models
+from oeplatform.settings import URL
 
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
-from oeplatform.settings import URL
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -41,10 +41,10 @@ class ProfileView(View):
 class GroupManagement(View, LoginRequiredMixin):
     def get(self, request):
         """
-        Load and list the available groups by groupadmin. 
+        Load and list the available groups by groupadmin.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
 
         membership = request.user.memberships
@@ -126,11 +126,11 @@ class GroupView(View, LoginRequiredMixin):
 class GroupEdit(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
-        Load the chosen action(create or edit) for a group. 
+        Load the chosen action(create or edit) for a group.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param user_id: An group id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
         group = get_object_or_404(UserGroup, pk=group_id)
         is_admin = False
@@ -147,13 +147,13 @@ class GroupEdit(View, LoginRequiredMixin):
 
     def post(self, request, group_id):
         """
-        Performs selected action(save or delete) for a group. If a groupname already exists, then a error 
-        will be output. 
+        Performs selected action(save or delete) for a group. If a groupname already exists, then a error
+        will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param user_id: An group id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
         mode = request.POST["mode"]
         group = get_object_or_404(UserGroup, id=group_id)

@@ -23,7 +23,7 @@ _TYPES = [
     "time",
     "varchar",
     "character varying",
-    "geometry"
+    "geometry",
 ]
 
 
@@ -155,7 +155,7 @@ class TestPut(APITestCase):
                     "character_maximum_length": 123,
                 },
                 {"name": "col_intarr", "data_type": "integer[]", "is_nullable": True},
-            ]
+            ],
         }
         self.test_table = "Table_all_columns"
 

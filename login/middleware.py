@@ -6,7 +6,6 @@ ACTIVATE_PATH = "/user/activate"
 
 
 class DetachMiddleware:
-
     def __init__(self, get_response):
         self.get_response = get_response
 

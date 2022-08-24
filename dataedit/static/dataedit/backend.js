@@ -27,7 +27,7 @@ function getCookie(name) {
 }
 
 function fail_handler(jqXHR, exception) {
-    
+
     var responseJson;
     try { // to parse response as json
         responseJson = JSON.parse(jqXHR.responseText);
@@ -142,7 +142,7 @@ function request_data(data, callback, settings) {
                 query: JSON.stringify(select_query)
             }
         })
-    ).done(function (count_response, select_response) {                
+    ).done(function (count_response, select_response) {
         $("#loading-indicator").hide();
 
         /* fix missing data (on successful query)*/
@@ -564,7 +564,7 @@ function showWarning(message) {
     var elem = document.getElementById("uiWarnings");
     message = "" + message;
     elem.innerHTML = message;
-    elem.className = "show";  
+    elem.className = "show";
     // After 3 seconds, remove the show class from DIV
     setTimeout(function(){ elem.className = elem.className.replace("show", ""); }, 3000);
-} 
+}

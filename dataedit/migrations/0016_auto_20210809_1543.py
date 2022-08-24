@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dataedit', '0015_merge_20201106_1249'),
+        ("dataedit", "0015_merge_20201106_1249"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='filter',
-            name='value',
+            model_name="filter",
+            name="value",
             field=models.JSONField(),
         ),
         migrations.AlterField(
-            model_name='view',
-            name='options',
+            model_name="view",
+            name="options",
             field=models.JSONField(default=dict),
         ),
     ]

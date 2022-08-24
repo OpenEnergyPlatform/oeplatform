@@ -27,7 +27,6 @@ from django.conf import settings
 #     logging.error("No securitysettings found. Setting defaults")
 #     DEBUG = True
 #     SECRET_KEY = '0'
-    
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -74,9 +73,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"OpenEnergyPlatform"
-copyright = u"2016, open_eGo"
-author = u"open_eGo"
+project = "OpenEnergyPlatform"
+copyright = "2016, open_eGo"
+author = "open_eGo"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -250,8 +249,8 @@ latex_documents = [
     (
         master_doc,
         "OpenEnergyPlatform.tex",
-        u"OpenEnergyPlatform Documentation",
-        u"open\\_eGo",
+        "OpenEnergyPlatform Documentation",
+        "open\\_eGo",
         "manual",
     )
 ]
@@ -282,7 +281,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "openenergyplatform", u"OpenEnergyPlatform Documentation", [author], 1)
+    (master_doc, "openenergyplatform", "OpenEnergyPlatform Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -298,7 +297,7 @@ texinfo_documents = [
     (
         master_doc,
         "OpenEnergyPlatform",
-        u"OpenEnergyPlatform Documentation",
+        "OpenEnergyPlatform Documentation",
         author,
         "OpenEnergyPlatform",
         "One line description of project.",

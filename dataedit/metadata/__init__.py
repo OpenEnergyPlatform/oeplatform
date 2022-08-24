@@ -1,6 +1,5 @@
 from api import actions
 from dataedit.metadata import v1_4 as __LATEST
-
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 
@@ -13,22 +12,22 @@ from .error import MetadataException
 
 # name of the metadata fields which should not be filled by the user
 METADATA_HIDDEN_FIELDS = [
-    '_comment',  # v1.4
-    'metaMetadata',  # v1.4
-    'metadata_version'  # v1.3
+    "_comment",  # v1.4
+    "metaMetadata",  # v1.4
+    "metadata_version",  # v1.3
 ]
 
 
 def format_content_key(parent, k):
-    if parent != '':
-        answer = '{}_{}'.format(parent, k)
+    if parent != "":
+        answer = "{}_{}".format(parent, k)
     else:
         answer = k
 
     return answer
 
 
-def assign_content_values_to_metadata(content, template=None, parent=''):
+def assign_content_values_to_metadata(content, template=None, parent=""):
     """Match a query dict onto a nested structure
 
     example :
@@ -68,7 +67,7 @@ def assign_content_values_to_metadata(content, template=None, parent=''):
                 template[k] = assign_content_values_to_metadata(
                     content=content,
                     template=template[k],
-                    parent=format_content_key(parent, k)
+                    parent=format_content_key(parent, k),
                 )
             elif isinstance(template[k], list):
                 # the value is a list, so we make a recursive call on the unique instances
@@ -84,7 +83,7 @@ def assign_content_values_to_metadata(content, template=None, parent=''):
                 item_list = []
                 is_dict = isinstance((template[k][0]), dict)
                 for i in matches:
-                    idx = i.replace(prefix, '').split('_')[0]
+                    idx = i.replace(prefix, "").split("_")[0]
                     if idx not in count:
                         count.append(idx)
 
@@ -94,19 +93,23 @@ def assign_content_values_to_metadata(content, template=None, parent=''):
                                 assign_content_values_to_metadata(
                                     content=content,
                                     template=template[k][0].copy(),
-                                    parent=format_content_key(parent, '{}{}'.format(k, idx))
+                                    parent=format_content_key(
+                                        parent, "{}{}".format(k, idx)
+                                    ),
                                 )
                             )
                         else:
                             # it is a list of string
                             item_list.append(
-                                content[format_content_key(parent, '{}{}'.format(k, idx))]
+                                content[
+                                    format_content_key(parent, "{}{}".format(k, idx))
+                                ]
                             )
 
                 if len(count) != 0:
                     template[k] = item_list
             elif isinstance(template[k], str):
-                template[k] = content.get(format_content_key(parent, k), '')
+                template[k] = content.get(format_content_key(parent, k), "")
 
     return template
 
@@ -121,6 +124,7 @@ def load_metadata_from_db(schema, table):
     metadata = actions.get_comment_table(schema, table)
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
+
 
 def parse_meta_data(metadata, schema, table):
     if "error" in metadata:
@@ -155,7 +159,9 @@ def parse_meta_data(metadata, schema, table):
                         # templates.
                         res = metadata.get("resources", [])
                         if res:
-                            metadata["fields"] = res[0].get("schema",{}).get("fields", [])
+                            metadata["fields"] = (
+                                res[0].get("schema", {}).get("fields", [])
+                            )
                 elif version[0] == 0:
                     metadata = __LATEST.from_v0(metadata, schema, table)
             else:
@@ -185,8 +191,7 @@ def read_metadata_from_post(content_query, schema, table):
     else:
         template = METADATA_TEMPLATE[4].copy()
     metadata = assign_content_values_to_metadata(
-        content=content_query,
-        template=template
+        content=content_query, template=template
     )
     # TODO fill the "resource" field for v1.4
     # d["resources"] = [
@@ -240,6 +245,6 @@ def get_metadata_version(metadata):
 
 def __parse_version(version_string):
     """Formats the string version to a tuple of int"""
-    if version_string.count('.') == 1:
-        version_string = version_string + '.0'
+    if version_string.count(".") == 1:
+        version_string = version_string + ".0"
     return tuple(map(int, version_string.split(".")))

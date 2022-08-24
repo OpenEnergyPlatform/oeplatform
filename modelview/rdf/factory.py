@@ -1,9 +1,11 @@
-from abc import ABC
-from django.utils.html import format_html, format_html_join, mark_safe
-from itertools import chain
-from rdflib import Graph, BNode, URIRef, Literal
 import json
-from modelview.rdf import handler, field, connection
+from abc import ABC
+from itertools import chain
+
+from django.utils.html import format_html, format_html_join, mark_safe
+from rdflib import BNode, Graph, Literal, URIRef
+
+from modelview.rdf import connection, field, handler
 from modelview.rdf.namespace import *
 
 FACTORIES = {}
@@ -94,13 +96,18 @@ class RDFFactory(ABC):
                 lp = cls._read_value(t.get("lp"))
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
-                res = ''
-                if fname == 'has_input' or fname == 'has_output':
-                    res = context.query_one_object(o, '<https://schema.org/url>')["results"]["bindings"] [0]["object"]["value"]
+                res = ""
+                if fname == "has_input" or fname == "has_output":
+                    res = context.query_one_object(o, "<https://schema.org/url>")[
+                        "results"
+                    ]["bindings"][0]["object"]["value"]
                 d[s][fname] = d[s].get(fname, []) + [(o, res)]
 
         cached_objects.update(
-            {i: cls._parse(i, context, d[i], cache=cache) if i in d else cls(iri=i) for i in identifiers}
+            {
+                i: cls._parse(i, context, d[i], cache=cache) if i in d else cls(iri=i)
+                for i in identifiers
+            }
         )
         return cached_objects
 
@@ -184,6 +191,7 @@ class RDFFactory(ABC):
                 l.append(dict(element=s.split("/")[-1], label=label or s))
         return l
 
+
 class IRIFactory(RDFFactory):
     _fields = dict(
         iri=field.IRIField(rdf_name=dbo.abbreviation, verbose_name="Abbreviation")
@@ -229,7 +237,9 @@ class AnalysisScope(RDFFactory):
         is_defined_by=field.IRIField(
             rdf_name=OEO.OEO_00000504, verbose_name="is defined by"
         ),
-        covers_sector=field.PredefinedInstanceField(rdf_name=OEO.OEO_00000505, verbose_name="Sectors", cls_iri=OEO.OEO_00000367),
+        covers_sector=field.PredefinedInstanceField(
+            rdf_name=OEO.OEO_00000505, verbose_name="Sectors", cls_iri=OEO.OEO_00000367
+        ),
         covers_energy_carrier=field.PredefinedInstanceField(
             rdf_name=OEO.OEO_00000523,
             cls_iri=OEO.OEO_00000331,
@@ -274,6 +284,7 @@ class Scenario(RDFFactory):
     @classmethod
     def _label_option(cls, o, lo):
         return f"{o} <{cls._fields['name'].rdf_name}> {lo}"
+
 
 class Publication(RDFFactory):
     _factory_id = "publication"
@@ -395,10 +406,10 @@ class Study(RDFFactory):
             verbose_name="Publications",
         ),
         scenarios=field.FactoryField(
-                Scenario,
-                rdf_name=obo.RO_0000057,
-                verbose_name="Scenarios",
-            ),
+            Scenario,
+            rdf_name=obo.RO_0000057,
+            verbose_name="Scenarios",
+        ),
     )
 
     @classmethod

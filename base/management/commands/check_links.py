@@ -1,6 +1,6 @@
 """admin command to check for dead links in test environment
 
-looking for 
+looking for
 * static content (css, js, images)
 * web pages
 * javascript that opens local pages

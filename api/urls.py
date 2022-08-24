@@ -9,7 +9,7 @@ urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/$",
         views.Table.as_view(),
-        name='api_table',
+        name="api_table",
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/sequences/(?P<sequence>[\w\d_\s]+)/$",
@@ -18,12 +18,12 @@ urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/meta/$",
         views.Metadata.as_view(),
-        name='api_table_meta',
+        name="api_table_meta",
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",
         views.Move.as_view(),
-        name='move',
+        name="move",
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/columns/(?P<column>[\w\d_\s]+)?$",
@@ -40,13 +40,13 @@ urlpatterns = [
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/(?P<row_id>[\d]+)?$",
         views.Rows.as_view(),
-        name='api_rows'
+        name="api_rows",
     ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/rows/new?$",
         views.Rows.as_view(),
         {"action": "new"},
-        name='api_rows_new'
+        name="api_rows_new",
     ),
     url(
         r"^v0/advanced/search",
@@ -57,7 +57,7 @@ urlpatterns = [
     url(
         r"^v0/advanced/insert",
         views.create_ajax_handler(actions.data_insert, requires_cursor=True),
-        name='api_insert',
+        name="api_insert",
     ),
     url(
         r"^v0/advanced/delete",
@@ -109,17 +109,17 @@ urlpatterns = [
     url(
         r"^v0/advanced/connection/open",
         views.create_ajax_handler(actions.open_raw_connection),
-        name='api_con_open',
+        name="api_con_open",
     ),
     url(
         r"^v0/advanced/connection/close$",
         views.create_ajax_handler(actions.close_raw_connection),
-        name='api_con_close',
+        name="api_con_close",
     ),
     url(
         r"^v0/advanced/connection/commit",
         views.create_ajax_handler(actions.commit_raw_connection),
-        name='api_con_commit',
+        name="api_con_commit",
     ),
     url(
         r"^v0/advanced/connection/rollback",
@@ -171,10 +171,7 @@ urlpatterns = [
         r"^v0/advanced/show_revisions",
         views.create_ajax_handler(actions.get_unique_constraints),
     ),
-    url(
-        r"^v0/image/upload",
-        views.ImageUpload.as_view()
-    ),
+    url(r"^v0/image/upload", views.ImageUpload.as_view()),
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
 ]
