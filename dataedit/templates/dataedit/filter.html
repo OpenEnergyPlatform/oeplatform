@@ -25,17 +25,17 @@
         <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
     </button>
 </div>
-<form action="{{ request.path }}" method="get">
+<form id="form-filter" action="{{ request.path }}" method="get">
     <h5>Text</h5>
     <div class="searchbox_container small">
-        <input type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
+        <input id="search-filter" type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
     </div>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
     <h5>Tags</h5>    
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-            <select name="tags" class="form-control selectpicker" multiple data-live-search="true"
+            <select id="tag-select" name="tags" class="form-control selectpicker" multiple data-live-search="true"
                 title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
                 {% for t in all_tags %}
                 <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
@@ -45,9 +45,11 @@
             </select>
         </div>
         <div style="padding-bottom: 15px;">
+            <!--
             <button type="submit" class="btn btn-success">
                 Apply Filters
             </button>
+            -->
             <a class="btn btn-danger" href="{{ request.path }}">
                 Reset Filters
             </a>
@@ -77,5 +79,21 @@
             trigger: 'focus'
         })
     })
+
+    /* update filter when changing selection */
+    /*
+    $('#tag-select').on('change', function (e) {
+        $("#form-filter").submit();
+    });
+    */
+    /* update filter when closing tag select dropdown */
+    $('#tag-select').on('hide.bs.select', function (e) {
+        $("#form-filter").submit();
+    });
+    /* also update filter if leave search field */
+    $('#search-filter').on('blur', function (e) {
+        $("#form-filter").submit();
+    });
+    
 </script>
 {% endblock after-body-bottom-js %}
