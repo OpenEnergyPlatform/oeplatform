@@ -5,6 +5,7 @@
 - Add exception and test for invalid tags, make tag usage count more robust (PR#1035)
 - Add, remove and update static and deprecated files and cleanup cdn links (PR#1030)
 - Check for existance of ID column and if duplicated column names exist when creating a table (PR#1032)
+- Remove unused code: django apps like literature and the old oep tags system (PR#994)
 
 ### Features
 
