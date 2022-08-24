@@ -1,5 +1,4 @@
 import csv
-import datetime
 import json
 import os
 import re
@@ -48,7 +47,6 @@ from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .metadata.__init__ import load_metadata_from_db
 from .models import TableRevision
 from .models import View as DataViewModel
 
@@ -1546,7 +1544,7 @@ def get_all_tags(schema=None, table=None):
     Session = sessionmaker()
     session = Session(bind=engine)
     try:
-        if table == None:
+        if table is None:
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by("name"))
             session.commit()
@@ -1563,7 +1561,7 @@ def get_all_tags(schema=None, table=None):
             ]
             return sort_tags_by_popularity(r)
 
-        if schema == None:
+        if schema is None:
             # default schema is the public schema
             schema = "public"
 

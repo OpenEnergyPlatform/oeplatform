@@ -266,7 +266,7 @@ class FSAdd(LoginRequiredMixin, View):
         if method == "add":
             form = f()
             if sheettype == "scenario":
-                c_study, f_study = getClasses("studie")
+                _c_study, f_study = getClasses("studie")
                 formstudy = f_study()
                 return render(
                     request,
@@ -280,13 +280,14 @@ class FSAdd(LoginRequiredMixin, View):
                     {"form": form, "method": method},
                 )
         else:
-            model = get_object_or_404(c, pk=model_name)
-            form = f(instance=model)
-            return render(
-                request,
-                "modelview/edit{}.html".format(sheettype),
-                {"form": form, "name": model.pk, "method": method},
-            )
+            raise NotImplementedError()  # FIXME: model_name not defined
+            # model = get_object_or_404(c, pk=model_name)
+            # form = f(instance=model)
+            # return render(
+            #     request,
+            #     "modelview/edit{}.html".format(sheettype),
+            #     {"form": form, "name": model.pk, "method": method},
+            # )
 
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)
@@ -430,7 +431,9 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
         density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
     else:
         # if there are no commits the density is a constant 0
-        density = lambda x: 0
+        def density(x):
+            return 0
+
     # plot this distribution
     x = numpy.arange(0.0, len(commits), 0.01)
     c_real_max = max(density(xv) for xv in x)
@@ -449,9 +452,6 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
-
-
-import json
 
 
 class RDFFactoryView(View):
@@ -536,8 +536,9 @@ class RDFFactoryView(View):
         return JsonResponse(result)
 
     def add_study(self, name):
-        result = context.insert_new_study(name)
-        return JsonResponse(result)
+        # result = context.insert_new_study(name)
+        # return JsonResponse(result)
+        raise NotImplementedError()  # FIXME: context not defined
 
 
 class RDFInstanceView(View):

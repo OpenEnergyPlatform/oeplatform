@@ -18,7 +18,6 @@ from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
-from sqlalchemy.sql.expression import func
 
 import api
 import dataedit.metadata
@@ -869,7 +868,7 @@ def table_create(
 
     # check id column type
     id_col_type = str(columns_by_name["id"].type).upper()
-    if not "INT" in id_col_type or "SERIAL" in id_col_type:
+    if "INT" not in id_col_type or "SERIAL" in id_col_type:
         raise APIError("Id column must be of int type")
 
     # autogenerate primary key

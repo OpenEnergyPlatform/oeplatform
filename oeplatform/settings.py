@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 try:
-    from .securitysettings import *
+    from .securitysettings import *  # noqa
 except ImportError:
     import logging
     import os
@@ -92,7 +92,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
 try:
-    ONTOLOGY_FOLDER
+    ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 

@@ -48,6 +48,7 @@ class Welcome(View):
 
 def get_logs(request):
     version_expr = r"^(?P<major>\d+)_(?P<major>\d+)+_(?P<major>\d+)\.md$"
+    logs = {}
     for file in os.listdir("../versions/changelogs"):
         match = re.match(version_expr, file)
         markdowner = markdown2.Markdown()
@@ -57,6 +58,7 @@ def get_logs(request):
                 logs[(major, minor, patch)] = markdowner.convert(
                     "\n".join(line for line in f.readlines())
                 )
+    return logs
 
 
 def redir(request, target):

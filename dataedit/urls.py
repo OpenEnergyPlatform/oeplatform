@@ -23,7 +23,7 @@ urlpatterns = [
         name="view",
     ),
     url(
-        r"^tags/add/$".format(qual=pgsql_qualifier),
+        r"^tags/add/$",
         views.redirect_after_table_tags_updated,
     ),
     url(

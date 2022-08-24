@@ -32,11 +32,11 @@ Move to the cloned repository
 
 If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
 
-1.                     conda env create –n oep-website
-2.                     activate oep-website
-3.                     conda config –add channels conda-forge
-4.                     conda install shapely
-5.                     pip install –r requirements.txt
+1. conda env create –n oep-website
+2. activate oep-website
+3. conda config –add channels conda-forge
+4. conda install shapely
+5. pip install –r requirements.txt
 
 You can also use Python to create the environment
 

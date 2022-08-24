@@ -3,12 +3,13 @@ from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 
+from .error import MetadataException
+
 METADATA_TEMPLATE = {
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
 }
 
-from .error import MetadataException
 
 # name of the metadata fields which should not be filled by the user
 METADATA_HIDDEN_FIELDS = [

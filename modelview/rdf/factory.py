@@ -2,8 +2,8 @@ from abc import ABC
 
 from rdflib import BNode, Literal, URIRef
 
-from modelview.rdf import connection, field
 import modelview.rdf.namespace as ns
+from modelview.rdf import connection, field
 
 FACTORIES = {}
 
@@ -180,13 +180,13 @@ class RDFFactory(ABC):
     @classmethod
     def load_all_instances(cls, context):
         result = context.query_all_factory_instances(cls)
-        l = []
+        insts = []
         for t in result["results"]["bindings"]:
             if "s" in t:
                 s = cls._read_value(t["s"])
                 label = cls._read_value(t.get("ls"))
-                l.append(dict(element=s.split("/")[-1], label=label or s))
-        return l
+                insts.append(dict(element=s.split("/")[-1], label=label or s))
+        return insts
 
 
 class IRIFactory(RDFFactory):
@@ -213,8 +213,12 @@ class Person(RDFFactory):
     _direct_parent = ns.OEO.OEO_00000323
     _factory_id = "person"
     _fields = dict(
-        first_name=field.TextField(rdf_name=ns.foaf.givenName, verbose_name="First name"),
-        last_name=field.TextField(rdf_name=ns.foaf.familyName, verbose_name="Last name"),
+        first_name=field.TextField(
+            rdf_name=ns.foaf.givenName, verbose_name="First name"
+        ),
+        last_name=field.TextField(
+            rdf_name=ns.foaf.familyName, verbose_name="Last name"
+        ),
         affiliation=field.FactoryField(
             factory=Institution,
             rdf_name=ns.schema.affiliation,
@@ -235,7 +239,9 @@ class AnalysisScope(RDFFactory):
             rdf_name=ns.OEO.OEO_00000504, verbose_name="is defined by"
         ),
         covers_sector=field.PredefinedInstanceField(
-            rdf_name=ns.OEO.OEO_00000505, verbose_name="Sectors", cls_iri=ns.OEO.OEO_00000367
+            rdf_name=ns.OEO.OEO_00000505,
+            verbose_name="Sectors",
+            cls_iri=ns.OEO.OEO_00000367,
         ),
         covers_energy_carrier=field.PredefinedInstanceField(
             rdf_name=ns.OEO.OEO_00000523,

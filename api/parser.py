@@ -118,7 +118,7 @@ def parse_insert(d, context, message=None, mapper=None):
 
     query = table.insert()
 
-    if not "method" in d:
+    if "method" not in d:
         d["method"] = "values"
     if d["method"] == "values":
         if field_strings:
@@ -350,7 +350,10 @@ def parse_column(d, mapper):
         table_name = read_pgid(table_name)
         if mapper is None:
             mapper = dict()
-        do_map = lambda x: mapper.get(x, x)
+
+        def do_map(x):
+            return mapper.get(x, x)
+
         if "schema" in d:
             schema_name = read_pgid(do_map(d["schema"]))
         else:

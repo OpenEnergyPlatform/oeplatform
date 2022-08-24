@@ -1,6 +1,6 @@
 import json
 
-from omi.dialects.oep.dialect import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
+from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
 
 from api import actions
 
@@ -486,5 +486,5 @@ class TestPut(APITestCase):
                 "todo": "If a value is not yet available, use: todo",
             },
         }
-        
+
         self.metadata_roundtrip(meta)
