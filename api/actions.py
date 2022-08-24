@@ -749,12 +749,12 @@ def assert_valid_table_name(table):
                        "and start with a letter.")
 
 
-def table_create(schema, table, columns, constraints_definitions, cursor, table_metadata=None):
+def table_create(schema, table, column_definitions, constraints_definitions, cursor, table_metadata=None):
     """
     Creates a new table.
     :param schema: schema
     :param table: table
-    :param columns: Description of columns
+    :param column_definitions: Description of columns
     :param constraints: Description of constraints
     :return: Dictionary with results
     """
@@ -796,7 +796,22 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
 
     metadata = MetaData()
 
-    columns = [get_column_definition_query(c) for c in columns]
+    primary_key_col_names = None
+    columns_by_name = {}    
+    
+    columns = []
+    for cdef in column_definitions:
+        col = get_column_definition_query(cdef)
+        columns.append(col)
+
+        # check for duplicate column names
+        if col.name in columns_by_name:
+            raise APIError("Duplicate column name: %s" % col.name)
+        columns_by_name[col.name] = col
+        if col.primary_key:
+            if primary_key_col_names:
+                raise APIError("Multiple definitions of primary key")
+            primary_key_col_names = [col.name]
 
     constraints = []
 
@@ -814,8 +829,14 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
             if "columns" in constraint:
                 ccolumns = constraint["columns"]
             else:
-                ccolumns = [constraint["constraint_parameter"]]
-            constraints.append(sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs))
+                ccolumns = [constraint["constraint_parameter"]]                        
+            
+            if primary_key_col_names:
+                raise APIError("Multiple definitions of primary key")
+            primary_key_col_names = ccolumns
+            
+            const = sa.schema.PrimaryKeyConstraint(*ccolumns, **kwargs)            
+            constraints.append(const)
         elif constraint_type == "unique":
             kwargs = {}
             cname = constraint.get("name")
@@ -828,6 +849,28 @@ def table_create(schema, table, columns, constraints_definitions, cursor, table_
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
     assert_valid_table_name(table)
+
+    # autogenerate id column if missing
+    if 'id' not in columns_by_name:        
+        columns_by_name["id"] = sa.Column("id", sa.BigInteger, autoincrement=True)
+        columns.insert(0, columns_by_name["id"])
+    
+    # check id column type
+    id_col_type = str(columns_by_name["id"].type).upper()
+    if not "INT" in id_col_type or "SERIAL" in id_col_type:
+        raise APIError("Id column must be of int type")
+    
+    # autogenerate primary key
+    if not primary_key_col_names:
+        constraints.append(sa.schema.PrimaryKeyConstraint("id"))
+        primary_key_col_names = ["id"]
+    
+    # check pk == id
+    if tuple(primary_key_col_names) != ("id",):
+        raise APIError("Primary key must be column id")
+
+    
+
     t = Table(table, metadata, *(columns + constraints), schema=schema, comment=comment_on_table)
     t.create(_get_engine())
 
@@ -1184,7 +1227,7 @@ def data_insert_check(schema, table, values, context):
                             {
                                 "operands": [
                                     {"type": "column", "column": c},
-                                    {"type": "value", "value": _load_value(row[c])}
+                                    {"type": "value", "value": row[c]}
                                     if c in row
                                     else {"type": "value"},
                                 ],
@@ -1231,13 +1274,6 @@ def data_insert_check(schema, table, values, context):
                             )
                             + ")"
                         )
-
-
-def _load_value(v):
-    if isinstance(v, str):
-        if v.isdigit():
-            return int(v)
-    return v
 
 
 def data_insert(request, context=None):
@@ -2139,7 +2175,7 @@ def apply_deletion(session, table, rows, rids):
 
 def update_meta_search(table, schema):
     schema_obj, _ = DBSchema.objects.get_or_create(name=schema if schema is not None else DEFAULT_SCHEMA)
-    t, _ = DBTable.objects.get_or_create(name=table, schema=schema_obj)
+    t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(OEDBTableTags.schema_name==schema, OEDBTableTags.table_name==table, OEDBTableTags.tag==OEDBTag.id)

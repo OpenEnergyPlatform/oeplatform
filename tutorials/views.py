@@ -5,6 +5,7 @@ from pathlib import Path
 
 import nbconvert
 import nbformat
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import Http404, redirect, render
@@ -16,7 +17,6 @@ from markdown2 import Markdown
 
 from .forms import TutorialForm
 from .models import CATEGORY_OPTIONS, LEVEL_OPTIONS, Tutorial
-
 
 youtubeUrlRegex = re.compile(r"^.*youtube\.com\/watch\?v=(?P<id>[A-z0-9]+)$")
 
@@ -215,8 +215,9 @@ def _resolveDynamicTutorials(tutorials_qs):
     """
     Get all tutorials(created via oep website) form django db.
 
-    Evaluates a QuerySet and passes each evaluated object to the next function which returns a python
-    dictionary that contains all parameters from the object as dict. The dict is added to a list to
+    Evaluates a QuerySet and passes each evaluated object to the next function
+    which returns a python dictionary that contains all parameters from the
+    object as dict. The dict is added to a list to
     later merge the static and dynamic tutorials together.
 
     :param tutorials_qs:
@@ -272,35 +273,51 @@ def _processFormInput(form):
     return tutorial
 
 
+def cleanup_html(html):
+    """
+
+    Args:
+        html (str): html code parsed from markdown
+    Returns:
+        str: cleaned html
+    """
+    html = BeautifulSoup(html, "html.parser")
+    html = str(html)
+
+    # remove iframes and script
+    html = re.sub("<script[^>]*>.*</script>", "", html, re.IGNORECASE)
+    html = re.sub("<iframe[^>]*>.*</iframe>", "", html, re.IGNORECASE)
+
+    return html
+
+
 def formattedMarkdown(markdown):
     """Markdown style text to html and return.
     This functionality is implemented using Markdown2 package.
 
     Args:
         markdown(str): markdown formatted text
-    
+
     Returns:
         str: html
     """
-    # TODO: Add syntax highliting, 
+    # TODO: Add syntax highliting,
     # add css files -> https://github.com/trentm/python-markdown2/wiki/fenced-code-blocks
-    
+
     # list of extras: https://github.com/trentm/python-markdown2/wiki/Extras
     extras = {
-        "break-on-newline": {}, 
+        "break-on-newline": {},
         "fenced-code-blocks": {},
-        "header-ids": {}, # Adds "id" attributes to headers. value is slug of the header text.
-        "target-blank-links": {}, # Add target="_blank" to all <a> tags with an href. 
-        "task_list": {}, # Allows github-style task lists (i.e. check boxes),
+        "header-ids": {},  # Adds "id" attributes to headers. value is slug of the header text.
+        "target-blank-links": {},  # Add target="_blank" to all <a> tags with an href.
+        "task_list": {},  # Allows github-style task lists (i.e. check boxes),
         "html-classes": {
-            "img": "img-fluid" # add bootstrap class img-fluid to all images (so they dont overflow)
-        }
+            "img": "img-fluid"  # add bootstrap class img-fluid to all images (so they dont overflow)
+        },
     }
     markdowner = Markdown(extras=extras)
     html = markdowner.convert(markdown)
-
-    html = re.sub('<script[^>]*>.*</script>', '', html, re.IGNORECASE)
-    html = re.sub('<iframe[^>]*>.*</iframe>', '', html, re.IGNORECASE)    
+    html = cleanup_html(html)
 
     return html
 
@@ -318,7 +335,23 @@ class ListTutorials(View):
 
         tutorials = _gatherTutorials()
 
-        return render(request, "list.html", {"tutorials": tutorials})
+        # special overview tutorials that are sticky
+        tutorials_overview = [t for t in tutorials if t["category"] == "overview"]
+        # sort them by title
+        tutorials_overview = sorted(tutorials_overview, key=lambda t: t["title"])
+        # change ids in collapsables (because we render multiple tutorials at once)
+        # TODO: this is a quick and dirty solution. 
+        # it would be better (but slower) to use the parsed html and use bs4 to properly find tags
+        for i, tut in enumerate(tutorials_overview):
+            tut["html"] = tut["html"].replace('data-target="#collapsable', 'data-target="#t%d-collapsable' % i)
+            tut["html"] = tut["html"].replace('id="collapsable', 'id="t%d-collapsable' % i)        
+        
+
+        return render(
+            request,
+            "list.html",
+            {"tutorials": tutorials, "tutorials_overview": tutorials_overview},
+        )
 
 
 class TutorialDetail(View):

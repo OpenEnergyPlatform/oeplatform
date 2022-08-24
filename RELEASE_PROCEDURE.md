@@ -28,18 +28,27 @@ The project can be linked in an issue or pull request via the menu "Projects"
 ## Basic-Steps for deploy and release (publishing a new release)
 Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)
 
+![git branching model](https://nvie.com/img/git-model@2x.png)
+
+1. Merge all feature and hotfix branches into `develop`
 1. Starting out in the `develop` branch, make a release candidate branch (e.g., `release/vx.x.x`)
-   and pull request it into `master` with the following updates:
-   1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
-	  - Change filename to release version (x_x_x.md)
-  1. Confirm that the PR passes all tests and checks
-  1. Once successful, delete the tag, and merge the candidate PR into `master` on Github
-1. Switch to the now-updated master branch: `git checkout master` and `git pull upstream master`
+1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
+   - Change filename to release version (x_x_x.md)
+   - Copy template to `current.md`
+   - Update `VERSION` with lastest version number
+1. Deploy release branch on TEOP.
+   - Test the changes 
+   - Create a hotfix and merge changes into the release branch
+1. merge release branch into `master` and `develop`
+   - make sure to pull before merge
+1. Deploy the master branch on production OEP
 1. Tag the release number: `git tag v<release version>`, e.g., `git tag v1.2.0`
    - `versioneer` automatically updates the version number based on the tag
    - this is now the official tagged commit
-1. Push the tag upstream: `git push upstream --tags`
+   - Push the tag upstream: `git push upstream --tags`
+   - Alternatievely: tag on github platform while creating release
 1. Make a new release on Github
+   - https://github.com/OpenEnergyPlatform/oeplatform/releases/new
    - make sure that you choose the tag name defined above
    - copy the release summary from changelog into the description box
 1. Announce it on our mailing list: oep_dev-request@lists.riseup.net

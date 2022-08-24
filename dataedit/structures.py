@@ -29,11 +29,13 @@ class Tag(Base):
     usage_count = Column(BigInteger, server_default="0")
     usage_tracked_since = Column(DateTime(), server_default=func.now())
     name_normalized = Column(String(40), nullable=False, unique=True)
+    default_color = int("2E3638", 16)
 
     def __init__(self, **kwargs):
         # sanitize name, auto fill name_normalized
         kwargs["name"] = self.create_name_clean(kwargs["name"])
         kwargs["name_normalized"] = self.create_name_normalized(kwargs["name"])
+        kwargs["color"] = kwargs.get("color", self.default_color)      
         super().__init__(**kwargs)
 
     @staticmethod

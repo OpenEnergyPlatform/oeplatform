@@ -21,6 +21,20 @@
 
 {% block main-content-body %}
 
+<!-- sticky overview tutorials (capacity building) -->
+
+<h2 id="tut-training-start" class="mb-5">Training</h2>
+
+<div id="tutorials-overview">
+{% for tutorial in tutorials_overview %}
+  <h3 class="my-2"><a href="#tut-training-start" title="back to top"><i class="mr-2 fa fa-caret-up"></i></a>{{ tutorial.title }}</h3>
+  <div class="tutorial-container">
+    {{ tutorial.html | safe }}
+  </div>
+{% endfor %}
+</div><!-- end of overview tutorials -->
+
+<h2 class="my-5">Tutorials by category</h2>
 
 <table class="table table-bordered">
     <thead class="thead-dark">
@@ -76,5 +90,3 @@
   </table>
 
 {% endblock main-content-body %}
-
-

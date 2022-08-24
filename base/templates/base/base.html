@@ -74,7 +74,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/about/">Overview</a>
-                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/">Developer Documentation</a>
+                        <a class="dropdown-item" href="https://oeplatform.readthedocs.io/en/latest/" target="_blank">Developer Documentation</a>
                         <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
                     </div>
                 </li>
@@ -116,7 +116,7 @@
                         <p>
                             If you find bugs or if you have ideas to improve the Open Energy Platform, you are
                             welcome to add your comments to the existing issues on <a
-                                href="https://github.com/openego/oeplatform">GitHub</a>. <br>
+                                href="https://github.com/openego/oeplatform" target="_blank">GitHub</a>. <br>
                             You can also fork the project and get involved.
                         </p>
                         <p>
@@ -158,7 +158,7 @@
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
     {% bootstrap_javascript jquery=1 %}
-    <script type="text/javascript" src="{% static '/js/jsi18n' %}"></script>
+    <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
