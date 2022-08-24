@@ -278,10 +278,12 @@ p.datetime {
   color: #ccc;
 }
 
-.datetime input, .d-flex .datetime input.vDateField, .d-flex .datetime input.vTimeField {
-    min-width: 0;
-    margin-left: 5px;
-    margin-bottom: 4px;
+.datetime input,
+.d-flex .datetime input.vDateField,
+.d-flex .datetime input.vTimeField {
+  min-width: 0;
+  margin-left: 5px;
+  margin-bottom: 4px;
 }
 
 table p.datetime {

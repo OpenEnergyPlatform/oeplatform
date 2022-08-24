@@ -1,11 +1,11 @@
-label[data-bs-toggle="popover"]:after{
-    color: var(--primary);
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    content: "\f05a";
-    vertical-align: super;
-    font-size: small;
-    margin-left: 2px
+label[data-bs-toggle="popover"]:after {
+  color: var(--primary);
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f05a";
+  vertical-align: super;
+  font-size: small;
+  margin-left: 2px;
 }
 
 .json-editor-btn-add {
