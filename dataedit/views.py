@@ -30,7 +30,7 @@ from api.actions import describe_columns
 
 try:
     import oeplatform.securitysettings as sec
-except:
+except Exception:
     import logging
 
     logging.error("No securitysettings found. Triggerd in dataedit/views.py")
@@ -141,7 +141,7 @@ def change_requests(schema, table):
     # print(api_columns)
     # print(api_constraints)
 
-    cache = dict()
+    # cache = dict()
     data = dict()
 
     data["api_columns"] = {}
@@ -317,7 +317,7 @@ def read_label(table, comment):
         else:
             return None
 
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -359,7 +359,7 @@ def get_readable_table_name(schema_name, table_name):
     """
     try:
         label = read_label(table_name, load_metadata_from_db(schema_name, table_name))
-    except:
+    except Exception:
         label = ""
     return label
 
@@ -575,7 +575,7 @@ def get_dependencies(schema, table, found=None):
     )
 
     engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
+    # metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
 
@@ -676,7 +676,7 @@ def tag_overview(request):
 def tag_editor(request, id=""):
     tags = get_all_tags()
 
-    create_new = True
+    # create_new = True
 
     for t in tags:
         if id != "" and int(id) == t["id"]:
@@ -1008,7 +1008,7 @@ class DataView(View):
             raise Http404("Schema not accessible")
 
         tags = []  # TODO: Unused - Remove
-        db = sec.dbname
+        # db = sec.dbname
 
         engine = actions._get_engine()
 
@@ -1542,7 +1542,7 @@ def get_all_tags(schema=None, table=None):
     :return:
     """
     engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
+    # metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
     try:
@@ -1601,7 +1601,7 @@ def get_all_tags(schema=None, table=None):
 
 def sort_tags_by_popularity(tags):
     def key_func(tag):
-        track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
+        # track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
         return tag["usage_count"]
 
     tags.sort(reverse=True, key=key_func)
@@ -1724,7 +1724,7 @@ class WizardView(LoginRequiredMixin, View):
 
         can_add = False
         columns = None
-        pk_fields = None
+        # pk_fields = None
         n_rows = None
         if table:
             # get information about the table
@@ -1735,7 +1735,7 @@ class WizardView(LoginRequiredMixin, View):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
             if not request.user.is_anonymous:
-                user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+                # user_perms = login_models.UserPermission.objects.filter(table=table_obj)
                 level = request.user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)

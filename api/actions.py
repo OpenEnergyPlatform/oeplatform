@@ -152,7 +152,7 @@ def try_parse_metadata(inp):
     else:
         try:
             jsn = json.loads(inp)
-        except:
+        except Exception:
             return None, "Could not parse json"
     try:
         metadata = parser_15.parse(jsn)
@@ -1035,7 +1035,7 @@ def table_change_constraint(table, constraint_definition):
             constraint.create(_get_engine())
         elif ctype == "check":
             raise APIError("Not supported")
-            constraint_class = sa.CheckConstraint
+            # constraint_class = sa.CheckConstraint
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             "ALTER TABLE {schema}.{table} DROP CONSTRAINT {constraint_name}".format(
@@ -1076,7 +1076,7 @@ def _get_table(schema, table):
 
 
 def __internal_select(query, context):
-    engine = _get_engine()
+    # engine = _get_engine()
     context2 = dict(user=context.get("user"))
     context2.update(open_raw_connection({}, context2))
     try:
@@ -1307,7 +1307,7 @@ def data_insert(request, context=None):
 
     assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
 
-    mapper = {orig_schema: schema, orig_table: table}
+    # mapper = {orig_schema: schema, orig_table: table}
 
     request["table"] = get_insert_table_name(orig_schema, orig_table)
     if not orig_schema.startswith("_"):
@@ -1377,7 +1377,7 @@ def _execute_sqla(query, cursor):
     except psycopg2.DatabaseError as e:
         # Other DBAPIErrors should not be reflected to the client.
         raise e
-    except:
+    except Exception:
         raise
 
 
@@ -1499,7 +1499,7 @@ def move(from_schema, table, to_schema):
         ).update({OEDBTableTags.schema_name: to_schema})
         session.commit()
         t.save()
-    except:
+    except Exception:
         session.rollback()
         raise
     finally:
@@ -1507,7 +1507,7 @@ def move(from_schema, table, to_schema):
 
 
 def create_meta(schema, table):
-    meta_schema = get_meta_schema_name(schema)
+    # meta_schema = get_meta_schema_name(schema)
 
     if not has_schema({"schema": "_" + schema}):
         create_meta_schema(schema)
@@ -2134,7 +2134,7 @@ def apply_changes(schema, table, cursor=None):
             _apply_stack(cursor, table_obj, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
-    except:
+    except Exception:
         if artificial_connection:
             connection.rollback()
         raise

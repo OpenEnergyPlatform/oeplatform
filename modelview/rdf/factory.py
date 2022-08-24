@@ -82,15 +82,15 @@ class RDFFactory(ABC):
         cached_objects = {i: cache[i] for i in identifiers if i in cache}
         new_items = [i for i in identifiers if i not in cache]
         result = context.query_all_objects(new_items, cls._fields.items())
-        head = result["head"]
+        # head = result["head"]
         d = dict()
-        model_inputs = []
+        # model_inputs = []
         for t in result["results"]["bindings"]:
             if "s" in t:
                 s = cls._read_value(t["s"])
                 o = cls._read_value(t.get("o"))
-                lo = cls._read_value(t.get("lo"))
-                lp = cls._read_value(t.get("lp"))
+                # lo = cls._read_value(t.get("lo"))
+                # lp = cls._read_value(t.get("lp"))
                 fname = t["fname"]["value"]
                 d[s] = d.get(s, dict())
                 res = ""

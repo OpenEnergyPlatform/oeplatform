@@ -66,7 +66,7 @@ def _make_iterencode(
     _sort_keys,
     _skipkeys,
     _one_shot,
-    ## HACK: hand-optimized bytecode; turn globals into locals
+    # HACK: hand-optimized bytecode; turn globals into locals
     ValueError=ValueError,
     dict=dict,
     float=float,

@@ -13,7 +13,7 @@ import dataedit.models as datamodels
 
 try:
     import oeplatform.securitysettings as sec  # noqa
-except:
+except Exception:
     import logging
 
     logging.error("No securitysettings found. Triggerd in login/models.py")

@@ -286,8 +286,8 @@ def parse_from_item(d):
     dtype = get_or_403(d, "type")
     if dtype == "table":
         schema_name = read_pgid(d["schema"]) if "schema" in d else None
-        only = d.get("only", False)
-        ext_name = table_name = read_pgid(get_or_403(d, "table"))
+        # only = d.get("only", False)
+        ext_name = read_pgid(get_or_403(d, "table"))
         tkwargs = dict(autoload=True)
         if schema_name:
             ext_name = schema_name + "." + ext_name
@@ -297,7 +297,7 @@ def parse_from_item(d):
         else:
             try:
                 item = Table(d["table"], __PARSER_META, **tkwargs)
-            except sa.exc.NoSuchTableError as e:
+            except sa.exc.NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
         engine = _get_engine()
@@ -383,7 +383,7 @@ def parse_type(dt_string, **kwargs):
         dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
         arr_match = re.match(dtarr_expression, dt_string)
         if arr_match:
-            is_array = True
+            # is_array = True
             dt_string = arr_match.groups()[0]
             dt, autoincrement = parse_type(dt_string)
             return sa.ARRAY(dt), autoincrement
@@ -517,7 +517,7 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             return parse_label(d)
         if dtype == "sequence":
             schema = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
-            s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
+            # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema)
         if dtype == "select":
             return parse_select(d)

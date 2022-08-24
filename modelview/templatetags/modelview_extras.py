@@ -34,7 +34,6 @@ def checktable(model, label, prefix, suffixes, separator="_"):
         else:
             data = '<span class="fas fas-times"></span>'
         header += "<td>{1} {0} </td>".format(s, data)
-    i = 0
     return """<tr>
                 <td valign="top"  class="rowlabel"> {0}</td>
                 <td>
@@ -177,9 +176,9 @@ def fieldtype(field):
 
 @register.simple_tag
 def year_field(instance, field_name):
-    field_amount = instance.fields[field_name + "_amount"]
-    field_kind = instance.fields[field_name + "_kind"]
-    field_year = instance.fields[field_name + "_year"]
+    # field_amount = instance.fields[field_name + "_amount"]
+    # field_kind = instance.fields[field_name + "_kind"]
+    # field_year = instance.fields[field_name + "_year"]
     return mark_safe(
         "{{{{ {field}.label }}}}: {{{{ {field}_amount }}}} {{{{ {field}_kind }}}} {{{{ {field}_year }}}} <br>".format(
             field=field_name

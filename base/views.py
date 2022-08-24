@@ -9,7 +9,7 @@ from django.views.generic import View
 
 try:
     import oeplatform.securitysettings as sec
-except:
+except Exception:
     import logging
 
     logging.error("No securitysettings found. Triggerd in base/views.py")

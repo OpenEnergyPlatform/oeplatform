@@ -139,7 +139,7 @@ def show(request, sheettype, model_name):
         model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
-    http = urllib3.PoolManager(headers=user_agent)
+    urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
     if sheettype != "scenario" and sheettype != "studie":
@@ -151,8 +151,8 @@ def show(request, sheettype, model_name):
                 )
                 org = match.group("org")
                 repo = match.group("repo")
-                gh_url = _handle_github_contributions(org, repo)
-            except:
+                _handle_github_contributions(org, repo)
+            except Exception:
                 org = None
                 repo = None
     return render(
@@ -397,7 +397,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
                 org, repo
             ),
         ).data.decode("utf8")
-    except:
+    except Exception:
         pass
 
     reply = json.loads(reply)
@@ -434,7 +434,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     # plot this distribution
     x = numpy.arange(0.0, len(commits), 0.01)
     c_real_max = max(density(xv) for xv in x)
-    fig1 = plt.figure(figsize=(4, 2))  # facecolor='white',
+    plt.figure(figsize=(4, 2))  # facecolor='white',
 
     # replace labels by dates and numbers of commits
     ax1 = plt.axes(frameon=False)

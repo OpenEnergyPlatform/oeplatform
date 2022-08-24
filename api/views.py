@@ -403,7 +403,7 @@ class Table(APIView):
             column_definitions.append(column_definition)
         metadata = json_data.get("metadata")
 
-        result = self.__create_table(
+        self.__create_table(
             request,
             schema,
             table,
@@ -905,8 +905,8 @@ class Rows(APIView):
     @load_cursor(named=True)
     def __get_rows(self, request, data):
         table = actions._get_table(data["schema"], table=data["table"])
-        params = {}
-        params_count = 0
+        # params = {}
+        # params_count = 0
         columns = data.get("columns")
 
         if not columns:
@@ -1014,7 +1014,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                     query = query[0]
                 if isinstance(query, str):
                     query = json.loads(query)
-            except:
+            except Exception:
                 raise APIError("Your query is not properly formated.")
             data = func(query, context)
 
@@ -1134,5 +1134,5 @@ class ImageUpload(APIView):
 
                 return JsonResponse({"data": {"filePath": process_url}})
 
-            except:
+            except Exception:
                 raise ParseError("Unsupported image type")

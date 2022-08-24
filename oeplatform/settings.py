@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 try:
     from .securitysettings import *
-except:
+except ImportError:
     import logging
     import os
 

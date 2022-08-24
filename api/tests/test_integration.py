@@ -120,10 +120,10 @@ class IntegrationTestCase(APITestCase):
             "constraint_parameter": "number",
         }
 
-        j_data_column = json.dumps(data_column)
-        j_data_constraint = json.dumps(data_constraint)
+        # j_data_column = json.dumps(data_column)
+        # j_data_constraint = json.dumps(data_constraint)
 
-        headerInfo = {"content-type": "application/json"}
+        # headerInfo = {"content-type": "application/json"}
 
         c_column_resp = self.__class__.client.post(
             "/api/v0/schema/{schema}/tables/{table}/".format(
