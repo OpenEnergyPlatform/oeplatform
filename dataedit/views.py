@@ -1746,6 +1746,8 @@ class WizardView(LoginRequiredMixin, View):
 
         return render(request, "dataedit/wizard.html", context=context)
 
+def get_cancle_state(request):
+            return request.META.get('HTTP_REFERER')
 
 class MetaEditView(LoginRequiredMixin, View):
     """Metadata editor (cliet side json forms)."""
@@ -1769,10 +1771,28 @@ class MetaEditView(LoginRequiredMixin, View):
                 "url_table_id": url_table_id,
                 "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
                 "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
+                "cancle_url": get_cancle_state(self.request),
+                "standalone": False
             }),
             "can_add": can_add
         }
 
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )
+
+
+class StandaloneMetaEditView(LoginRequiredMixin, View):
+    def get(self, request):
+        
+        context_dict = {
+            "config": json.dumps({
+                "cancle_url": get_cancle_state(self.request),
+                "standalone": True
+            })
+        }
         return render(
             request,
             "dataedit/meta_edit.html",
