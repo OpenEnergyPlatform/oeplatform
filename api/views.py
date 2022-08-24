@@ -35,9 +35,9 @@ from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
-    "^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
-    + "|".join(parser.sql_operators)
-    + ")\s*(?P<second>(?![>=]).+)$"
+    r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
+    + r"|".join(parser.sql_operators)
+    + r")\s*(?P<second>(?![>=]).+)$"
 )
 
 

@@ -2220,9 +2220,9 @@ def update_meta_search(table, schema):
     )
     s = " ".join(
         (
-            *re.findall("\w+", schema),
-            *re.findall("\w+", table),
-            *re.findall("\w+", comment),
+            *re.findall(r"\w+", schema),
+            *re.findall(r"\w+", table),
+            *re.findall(r"\w+", comment),
             *(tag[0] for tag in tags),
         )
     )

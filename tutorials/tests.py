@@ -19,7 +19,7 @@ def md_to_html(md):
     # <br/> to <br>
     html = re.sub("<br/>", "<br>", html)
     # remove linebreaks spaces for test comparison
-    html = re.sub("\s+", "", html).strip()
+    html = re.sub(r"\s+", "", html).strip()
 
     return html
 

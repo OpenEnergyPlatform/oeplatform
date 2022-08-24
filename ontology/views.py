@@ -13,7 +13,7 @@ def collect_modules(path):
     modules = dict()
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
-            match = re.match("^(?P<filename>.*)\.(?P<extension>\w+)$", file)
+            match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
             filename, extension = match.groups()
             if filename not in modules:
                 modules[filename] = dict(extensions=[], comment="No description found")

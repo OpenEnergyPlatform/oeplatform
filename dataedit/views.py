@@ -397,7 +397,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
         filters.append(
             Q(
                 search=SearchQuery(
-                    " & ".join(p + ":*" for p in re.findall("[\w]+", query_string)),
+                    " & ".join(p + ":*" for p in re.findall(r"[\w]+", query_string)),
                     search_type="raw",
                 )
             )

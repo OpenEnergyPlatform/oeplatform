@@ -70,7 +70,7 @@ class Tag(Base):
             'not a good TAG'
         """
         name_norm = name or ""
-        re.sub("\s+", " ", name_norm)
+        re.sub(r"\s+", " ", name_norm)
         name_norm = name_norm.strip()
         return name_norm
 

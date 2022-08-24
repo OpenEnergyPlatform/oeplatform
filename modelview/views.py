@@ -188,7 +188,7 @@ def model_to_csv(request, sheettype):
     tag_ids = request.GET.get("tags")
     if tag_ids:
         for label in tag_ids.split(","):
-            match = re.match("^select_(?P<tid>\d+)$", label)
+            match = re.match(r"^select_(?P<tid>\d+)$", label)
             tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
     header = list(
@@ -219,7 +219,7 @@ def processPost(post, c, f, files=None, pk=None, key=None):
         if type(field) == ArrayField:
             parts = []
             for fi in fields.keys():
-                if re.match("^{}_\d$".format(field.name), str(fi)) and fields[fi]:
+                if re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]:
                     parts.append(fi)
             parts.sort()
             fields[field.name] = ",".join(fields[k].replace(",", ";") for k in parts)
