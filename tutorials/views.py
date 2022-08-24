@@ -335,7 +335,23 @@ class ListTutorials(View):
 
         tutorials = _gatherTutorials()
 
-        return render(request, "list.html", {"tutorials": tutorials})
+        # special overview tutorials that are sticky
+        tutorials_overview = [t for t in tutorials if t["category"] == "overview"]
+        # sort them by title
+        tutorials_overview = sorted(tutorials_overview, key=lambda t: t["title"])
+        # change ids in collapsables (because we render multiple tutorials at once)
+        # TODO: this is a quick and dirty solution. 
+        # it would be better (but slower) to use the parsed html and use bs4 to properly find tags
+        for i, tut in enumerate(tutorials_overview):
+            tut["html"] = tut["html"].replace('data-target="#collapsable', 'data-target="#t%d-collapsable' % i)
+            tut["html"] = tut["html"].replace('id="collapsable', 'id="t%d-collapsable' % i)        
+        
+
+        return render(
+            request,
+            "list.html",
+            {"tutorials": tutorials, "tutorials_overview": tutorials_overview},
+        )
 
 
 class TutorialDetail(View):
