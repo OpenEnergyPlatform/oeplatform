@@ -243,10 +243,14 @@ def listschemas(request):
 
     searched_query_string = request.GET.get("query")
     
-    searched_tag_ids = list(map(
-        lambda t: int(t),
-        request.GET.getlist("tags"),
-    ))
+    try:
+        searched_tag_ids = list(map(
+            lambda t: int(t),
+            request.GET.getlist("tags"),
+        ))
+    except ValueError:
+        raise Http404
+        
     for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
 
@@ -1599,8 +1603,8 @@ def increment_usage_count(tag_id):
 
     try:
         result = session.query(Tag).filter_by(id=tag_id).first()
-
-        result.usage_count += 1
+        if result:
+            result.usage_count += 1
 
         session.commit()
     finally:
