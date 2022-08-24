@@ -272,7 +272,7 @@ class UserBackend(object):
             login_req = requests.post(url, data, cookies=token_req.cookies)
 
             if login_req.json()["login"]["result"] == "Success":
-                return myuser.objects.get_or_create(name=username)[0]
+                return myuser.objects.get(name=username)
             else:
                 return None
 

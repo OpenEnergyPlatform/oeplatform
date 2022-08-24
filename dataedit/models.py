@@ -43,7 +43,7 @@ class Table(Tagable):
 
     @classmethod
     def load(cls, schema, table):
-        table_obj, _ = Table.objects.get_or_create(
+        table_obj = Table.objects.get(
             name=table, schema=Schema.objects.get_or_create(name=schema)[0]
         )
 

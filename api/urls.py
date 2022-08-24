@@ -57,6 +57,7 @@ urlpatterns = [
     url(
         r"^v0/advanced/insert",
         views.create_ajax_handler(actions.data_insert, requires_cursor=True),
+        name='api_insert',
     ),
     url(
         r"^v0/advanced/delete",
@@ -108,14 +109,17 @@ urlpatterns = [
     url(
         r"^v0/advanced/connection/open",
         views.create_ajax_handler(actions.open_raw_connection),
+        name='api_con_open',
     ),
     url(
         r"^v0/advanced/connection/close$",
         views.create_ajax_handler(actions.close_raw_connection),
+        name='api_con_close',
     ),
     url(
         r"^v0/advanced/connection/commit",
         views.create_ajax_handler(actions.commit_raw_connection),
+        name='api_con_commit',
     ),
     url(
         r"^v0/advanced/connection/rollback",
