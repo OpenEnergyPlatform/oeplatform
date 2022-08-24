@@ -913,7 +913,7 @@ class Energyframework(BasicFactsheet):
     interfaces = CharField(
         verbose_name="interfaces",
         max_length=200,
-        help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list!",  # noqa
+        help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ",  # noqa
         null=True,
     )
 
