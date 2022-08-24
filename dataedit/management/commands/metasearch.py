@@ -1,6 +1,5 @@
 import sqlalchemy as sqla
-from django.core.management.base import BaseCommand, CommandError
-from sqlalchemy.orm.session import sessionmaker
+from django.core.management.base import BaseCommand
 
 from api.actions import update_meta_search
 from api.connection import _get_engine

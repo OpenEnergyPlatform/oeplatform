@@ -2,13 +2,11 @@ from abc import ABC
 from os import path
 
 import rdflib as rl
-from django import template
-from django.forms.widgets import HiddenInput, Select, TextInput
+from django.forms.widgets import TextInput
 from django.template import loader
-from django.utils.html import format_html, format_html_join, mark_safe
 
 from api.error import APIError
-from modelview.rdf import connection, factory, handler, widget
+from modelview.rdf import factory, handler, widget
 from modelview.rdf.widget import DynamicFactoryArrayWidget
 
 

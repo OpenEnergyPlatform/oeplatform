@@ -13,12 +13,10 @@
 # serve to show the default.
 
 import os
-import shlex
 import sys
 from unittest.mock import MagicMock
 
 import django
-from django.conf import settings
 
 # try:
 #     from oeplatform.oeplatform.securitysettings import SECRET_KEY

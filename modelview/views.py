@@ -17,8 +17,6 @@ from django.contrib.staticfiles import finders
 from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
-from rdflib import Graph
-from rdflib.compare import graph_diff, to_canonical_graph
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 

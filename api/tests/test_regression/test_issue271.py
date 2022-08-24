@@ -1,7 +1,5 @@
 import json
 
-import requests
-
 from api.tests import APITestCase
 
 from ..util import load_content_as_json

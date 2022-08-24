@@ -1,11 +1,6 @@
 import json
 
-from django.contrib.auth import get_user_model
-
-from api import actions
 from api.tests import APITestCase
-
-from .util import load_content_as_json
 
 
 class IntegrationTestCase(APITestCase):

@@ -3,8 +3,6 @@ import datetime
 import json
 import os
 import re
-import threading
-import time
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -12,21 +10,18 @@ from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
 
-import numpy
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Aggregate, Count, Q
-from django.http import Http404, HttpResponse, JsonResponse
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
-from django.views.generic.base import TemplateView
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -39,13 +34,13 @@ except:
     import logging
 
     logging.error("No securitysettings found. Triggerd in dataedit/views.py")
-import requests as req
+
 from django.contrib import messages
 
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
+from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table

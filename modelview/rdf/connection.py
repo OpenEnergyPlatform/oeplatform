@@ -1,6 +1,3 @@
-import uuid
-
-from rdflib import Graph
 from SPARQLWrapper import JSON, SPARQLWrapper
 
 from modelview.rdf.namespace import OEO_KG

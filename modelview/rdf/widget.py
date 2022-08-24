@@ -1,6 +1,5 @@
 from django import forms
-from django.forms.widgets import MultiWidget, TextInput, Widget
-from django_better_admin_arrayfield.forms.widgets import DynamicArrayWidget
+from django.forms.widgets import MultiWidget, Widget
 
 
 class FactoryWidget(MultiWidget):

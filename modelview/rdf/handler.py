@@ -1,7 +1,6 @@
 import re
 
-from django.utils.html import format_html
-from rdflib import Graph, Literal, URIRef
+from rdflib import Literal, URIRef
 
 url_regex = re.compile(
     r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$"

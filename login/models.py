@@ -1,19 +1,9 @@
 import itertools
-import json
 
 import requests
 from django.conf import settings
-from django.contrib import auth
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    Group,
-    PermissionsMixin,
-    User,
-    UserManager,
-)
+from django.contrib.auth.models import AbstractBaseUser, Group, UserManager
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -22,7 +12,7 @@ from rest_framework.authtoken.models import Token
 import dataedit.models as datamodels
 
 try:
-    import oeplatform.securitysettings as sec
+    import oeplatform.securitysettings as sec  # noqa
 except:
     import logging
 

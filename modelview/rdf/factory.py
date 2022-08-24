@@ -1,11 +1,8 @@
-import json
 from abc import ABC
-from itertools import chain
 
-from django.utils.html import format_html, format_html_join, mark_safe
-from rdflib import BNode, Graph, Literal, URIRef
+from rdflib import BNode, Literal, URIRef
 
-from modelview.rdf import connection, field, handler
+from modelview.rdf import connection, field
 from modelview.rdf.namespace import *
 
 FACTORIES = {}

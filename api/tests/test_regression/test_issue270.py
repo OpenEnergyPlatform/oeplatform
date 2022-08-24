@@ -1,5 +1,3 @@
-import json
-
 from api.tests import APITestCase
 
 

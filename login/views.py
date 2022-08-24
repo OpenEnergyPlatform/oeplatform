@@ -1,16 +1,12 @@
 from django import forms
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
-from django.contrib.auth.views import PasswordChangeView, PasswordResetView
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.http import Http404
+from django.contrib.auth.views import PasswordChangeView
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
 
 import login.models as models
-from oeplatform.settings import URL
 
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup

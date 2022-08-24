@@ -3,26 +3,21 @@ import itertools
 import json
 import logging
 import re
-import time
 from decimal import Decimal
 
-import geoalchemy2  # Although this import seems unused is has to be here
+import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sqla
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import FileSystemStorage
-from django.core.validators import validate_image_file_extension
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.exceptions import ParseError
-from rest_framework.parsers import FileUploadParser, MultiPartParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 
 import api.parser

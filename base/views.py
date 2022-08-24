@@ -1,10 +1,8 @@
 import json
 import os
-import pathlib
 import re
 
 import markdown2
-from django.apps import apps
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views.generic import View

@@ -1,12 +1,10 @@
 import json
 
 from omi.dialects.oep.dialect import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
-from shapely import wkb, wkt
 
 from api import actions
 
 from . import APITestCase
-from .util import content2json, load_content, load_content_as_json
 
 
 class TestPut(APITestCase):

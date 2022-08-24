@@ -1,8 +1,6 @@
 from django.conf.urls import url
-from django.conf.urls.static import static
 
 from modelview import views
-from oeplatform import settings
 
 urlpatterns = [
     url(r"rdf/instances/$", views.RDFInstanceView.as_view()),

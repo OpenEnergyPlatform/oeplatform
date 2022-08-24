@@ -3,13 +3,12 @@
 ###########
 import decimal
 import re
-from datetime import date, datetime
+from datetime import datetime
 
 import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
 import sqlalchemy as sa
 from sqlalchemy import (
-    Column,
     MetaData,
     Table,
     and_,
@@ -29,10 +28,9 @@ from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
-from sqlalchemy.sql.annotation import Annotated
 from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.expression import ColumnClause, CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
+from sqlalchemy.sql.expression import CompoundSelect
+from sqlalchemy.sql.sqltypes import Interval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError

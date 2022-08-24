@@ -1,11 +1,10 @@
-import json
 import os
 import re
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
-from rdflib import RDFS, Graph, URIRef
+from rdflib import Graph
 
 from oeplatform.settings import ONTOLOGY_FOLDER
 
