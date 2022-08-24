@@ -3,42 +3,37 @@
 ###########
 import decimal
 import re
-from datetime import datetime, date
+from datetime import datetime
 
+import dateutil
 import geoalchemy2  # Although this import seems unused is has to be here
 import sqlalchemy as sa
 from sqlalchemy import (
-    Column,
     MetaData,
     Table,
     and_,
-    not_,
+    cast,
     column,
     func,
     literal,
     literal_column,
+    not_,
+    null,
     or_,
     select,
-    util,
-    cast,
-    null,
 )
-import dateutil
+from sqlalchemy import types as sqltypes
+from sqlalchemy import util
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import functions as fun
-from sqlalchemy.sql.annotation import Annotated
 from sqlalchemy.sql.elements import Slice
-from sqlalchemy.sql.expression import ColumnClause, CompoundSelect
-from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
+from sqlalchemy.sql.expression import CompoundSelect
+from sqlalchemy.sql.sqltypes import Interval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
-from api.connection import _get_engine
-from sqlalchemy.sql.sqltypes import Interval, _AbstractInterval
-from sqlalchemy.dialects.postgresql.base import INTERVAL
-from sqlalchemy import types as sqltypes
 
 from . import DEFAULT_SCHEMA
 
@@ -123,7 +118,7 @@ def parse_insert(d, context, message=None, mapper=None):
 
     query = table.insert()
 
-    if not "method" in d:
+    if "method" not in d:
         d["method"] = "values"
     if d["method"] == "values":
         if field_strings:
@@ -155,7 +150,9 @@ def parse_insert(d, context, message=None, mapper=None):
         query = query.values(values)
     elif d["method"] == "select":
         subquery = d["values"]
-        for field, value in set_meta_info("insert", context["user"].name, message).items():
+        for field, value in set_meta_info(
+            "insert", context["user"].name, message
+        ).items():
             subquery["fields"].append({"type": "literal", "value": value, "as": field})
             field_strings.append(field)
 
@@ -173,13 +170,14 @@ def parse_insert(d, context, message=None, mapper=None):
 
 def parse_select(d):
     """
-        Defintion of a select query according to
-        http://www.postgresql.org/docs/9.3/static/sql-select.html
+    Defintion of a select query according to
+    http://www.postgresql.org/docs/9.3/static/sql-select.html
 
-        not implemented:
-            [ WITH [ RECURSIVE ] with_query [, ...] ]
-            [ WINDOW window_name AS ( window_definition ) [, ...] ]
-            [ FOR { UPDATE | NO KEY UPDATE | SHARE | KEY SHARE } [ OF table_name [, ...] ] [ NOWAIT ] [...] ]
+    not implemented:
+        [ WITH [ RECURSIVE ] with_query [, ...] ]
+        [ WINDOW window_name AS ( window_definition ) [, ...] ]
+        [ FOR { UPDATE | NO KEY UPDATE | SHARE | KEY SHARE }
+            [ OF table_name [, ...] ] [ NOWAIT ] [...] ]
     """
     distinct = d.get("distinct", False)
 
@@ -212,10 +210,7 @@ def parse_select(d):
             L = []
             for field in d["fields"]:
                 if isinstance(field, str):
-                    field = dict(
-                        type="column",
-                        column=field
-                    )
+                    field = dict(type="column", column=field)
                 col = parse_expression(field)
                 if "as" in field:
                     col.label(read_pgid(field["as"]))
@@ -274,15 +269,17 @@ def parse_select(d):
 
 def parse_from_item(d):
     """
-        Defintion of a from_item according to
-        http://www.postgresql.org/docs/9.3/static/sql-select.html
+    Defintion of a from_item according to
+    http://www.postgresql.org/docs/9.3/static/sql-select.html
 
-        return: A from_item string with checked psql qualifiers.
+    return: A from_item string with checked psql qualifiers.
 
-        Not implemented:
-            with_query_name [ [ AS ] alias [ ( column_alias [, ...] ) ] ]
-            [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ] alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
-            [ LATERAL ] function_name ( [ argument [, ...] ] ) AS ( column_definition [, ...] )
+    Not implemented:
+        with_query_name [ [ AS ] alias [ ( column_alias [, ...] ) ] ]
+        [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ]
+            alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
+        [ LATERAL ] function_name ( [ argument [, ...] ] )
+            AS ( column_definition [, ...] )
     """
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):
@@ -292,8 +289,8 @@ def parse_from_item(d):
     dtype = get_or_403(d, "type")
     if dtype == "table":
         schema_name = read_pgid(d["schema"]) if "schema" in d else None
-        only = d.get("only", False)
-        ext_name = table_name = read_pgid(get_or_403(d, "table"))
+        # only = d.get("only", False)
+        ext_name = read_pgid(get_or_403(d, "table"))
         tkwargs = dict(autoload=True)
         if schema_name:
             ext_name = schema_name + "." + ext_name
@@ -303,7 +300,7 @@ def parse_from_item(d):
         else:
             try:
                 item = Table(d["table"], __PARSER_META, **tkwargs)
-            except sa.exc.NoSuchTableError as e:
+            except sa.exc.NoSuchTableError:
                 raise APIError("Table {table} not found".format(table=ext_name))
 
         engine = _get_engine()
@@ -356,7 +353,10 @@ def parse_column(d, mapper):
         table_name = read_pgid(table_name)
         if mapper is None:
             mapper = dict()
-        do_map = lambda x: mapper.get(x, x)
+
+        def do_map(x):
+            return mapper.get(x, x)
+
         if "schema" in d:
             schema_name = read_pgid(do_map(d["schema"]))
         else:
@@ -389,7 +389,7 @@ def parse_type(dt_string, **kwargs):
         dtarr_expression = r"(?P<dtname>[A-z_]+)\s*\[\]"
         arr_match = re.match(dtarr_expression, dt_string)
         if arr_match:
-            is_array = True
+            # is_array = True
             dt_string = arr_match.groups()[0]
             dt, autoincrement = parse_type(dt_string)
             return sa.ARRAY(dt), autoincrement
@@ -449,7 +449,7 @@ def parse_type(dt_string, **kwargs):
             dt = sqltypes.SMALLINT
         # there was a problem here with later versions of sqlalchemy:
         # attribute "text" returns a function, not a valid type
-        elif 'geo' in dt_string and hasattr(geoalchemy2, dt_string):
+        elif "geo" in dt_string and hasattr(geoalchemy2, dt_string):
             dt = getattr(geoalchemy2, dt_string)
         elif dt_string in _POSTGIS_MAP:
             dt = _POSTGIS_MAP[dt_string]
@@ -464,8 +464,13 @@ def parse_type(dt_string, **kwargs):
 
 
 _POSTGIS_MAP = {
-    "compositeelement": geoalchemy2.types.CompositeElement, 'geography': geoalchemy2.types.Geography , 'geometry': geoalchemy2.types.Geometry, 'raster': geoalchemy2.types.Raster, 'rasterelement':geoalchemy2.types.RasterElement
+    "compositeelement": geoalchemy2.types.CompositeElement,
+    "geography": geoalchemy2.types.Geography,
+    "geometry": geoalchemy2.types.Geometry,
+    "raster": geoalchemy2.types.Raster,
+    "rasterelement": geoalchemy2.types.RasterElement,
 }
+
 
 def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=True):
     # TODO: Implement
@@ -518,7 +523,7 @@ def parse_expression(d, mapper=None, allow_untyped_dicts=False, escape_quotes=Tr
             return parse_label(d)
         if dtype == "sequence":
             schema = read_pgid(d["schema"]) if "schema" in d else DEFAULT_SCHEMA
-            s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
+            # s = '"%s"."%s"' % (schema, get_or_403(d, "sequence"))
             return Sequence(get_or_403(d, "sequence"), schema=schema)
         if dtype == "select":
             return parse_select(d)
@@ -579,18 +584,27 @@ def parse_condition(dl):
     clean_dl = _unpack_clauses(dl)
     return parse_expression(clean_dl)
 
+
 def parse_case(dl):
-    else_clause=parse_expression(dl["else"])
+    else_clause = parse_expression(dl["else"])
     if "expression" in dl:
         return sa.case(
-            {parse_expression(case["when"]): parse_expression(case["then"]) for case in dl.get("cases", [])},
+            {
+                parse_expression(case["when"]): parse_expression(case["then"])
+                for case in dl.get("cases", [])
+            },
             value=parse_expression(dl["expression"]),
-            else_=else_clause
+            else_=else_clause,
         )
     else:
         return sa.case(
-            [(parse_expression(case["when"]), parse_expression(case["then"])) for case in dl.get("cases", [])],
-            else_=else_clause)
+            [
+                (parse_expression(case["when"]), parse_expression(case["then"]))
+                for case in dl.get("cases", [])
+            ],
+            else_=else_clause,
+        )
+
 
 def parse_operator(d):
     query = parse_sqla_operator(

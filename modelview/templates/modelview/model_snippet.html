@@ -1,8 +1,8 @@
 {% load modelview_extras %}
 <tr>
-    <td class="sheetlabel"> 
-        {% assign_field_attr model field 'help_text' as vname %} 
-        {% assign_field model field as val %} 
+    <td class="sheetlabel">
+        {% assign_field_attr model field 'help_text' as vname %}
+        {% assign_field model field as val %}
         {% get_field_attr model field 'verbose_name' fieldNameOverride %}
         {% if vname %}
             <i data-bs-toggle='tooltip' title="{{ vname }}">
@@ -10,8 +10,8 @@
             </i>
         {% endif %}
     </td>
-    <td> 
-        {% if not add %} 
+    <td>
+        {% if not add %}
             {% if val != None %}
                 {% if val == False %}
                     <span class='fas fa-times'></span>
@@ -20,14 +20,14 @@
                 {% elif 'http://' in val or 'www.' in val or 'https://' in val %}
                     <a href="{% get_field model field %} ">{% get_field model field %}</a>
                 {% else %}
-                    {% get_field model field %} 
+                    {% get_field model field %}
                 {% endif %}
             {% else %}
                 -
-            {% endif %} 
-        {% endif %} 
-        {% if val and add%} 
-            {{ add }} 
+            {% endif %}
+        {% endif %}
+        {% if val and add%}
+            {{ add }}
         {% endif %}
     </td>
 </tr>

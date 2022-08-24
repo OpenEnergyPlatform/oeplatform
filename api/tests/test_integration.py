@@ -1,11 +1,6 @@
 import json
 
-from django.contrib.auth import get_user_model
-
-from api import actions
 from api.tests import APITestCase
-
-from .util import load_content_as_json
 
 
 class IntegrationTestCase(APITestCase):
@@ -67,7 +62,8 @@ class IntegrationTestCase(APITestCase):
         for column in self.structure_data["columns"]:
             for key in column:
                 # name is a programmer-introduced key.
-                # We are able to use a list instead of a dictonary to get better iteration possibilities.
+                # We are able to use a list instead of a dictonary to get
+                # better iteration possibilities.
                 if key == "name":
                     continue
                 if key == "data_type" and column[key] == "bigserial":
@@ -125,10 +121,10 @@ class IntegrationTestCase(APITestCase):
             "constraint_parameter": "number",
         }
 
-        j_data_column = json.dumps(data_column)
-        j_data_constraint = json.dumps(data_constraint)
+        # j_data_column = json.dumps(data_column)
+        # j_data_constraint = json.dumps(data_constraint)
 
-        headerInfo = {"content-type": "application/json"}
+        # headerInfo = {"content-type": "application/json"}
 
         c_column_resp = self.__class__.client.post(
             "/api/v0/schema/{schema}/tables/{table}/".format(

@@ -79,10 +79,10 @@ class EnergyscenarioForm(ModelForm):
         ]:
             name_kind = cleaned_data[name + "_kind"]
             name_amount = cleaned_data[name + "_amount"]
-            if name_kind != "not estimated" and name_amount == None:
+            if name_kind != "not estimated" and name_amount is None:
                 self.add_error(name + "_amount", "This field is required")
             name_year = cleaned_data[name + "_year"]
-            if name_kind != "not estimated" and name_year == None:
+            if name_kind != "not estimated" and name_year is None:
                 self.add_error(name + "_year", "This field is required")
 
         return cleaned_data

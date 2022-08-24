@@ -1,13 +1,13 @@
 from django.conf.urls import url
+from django.views.generic import RedirectView
 
 from dataedit import views
-from django.views.generic import RedirectView
 
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
     url(r"^schemas$", views.listschemas, name="index"),
-    url(r"^$", RedirectView.as_view(url='/dataedit/schemas')),
+    url(r"^$", RedirectView.as_view(url="/dataedit/schemas")),
     # url(r'^admin/$', views.admin, name='index'),
     url(r"^admin/columns/", views.admin_columns, name="input"),
     url(r"^admin/constraints/", views.admin_constraints, name="input"),
@@ -22,7 +22,10 @@ urlpatterns = [
         views.DataView.as_view(),
         name="view",
     ),
-    url(r"^tags/add/$".format(qual=pgsql_qualifier), views.redirect_after_table_tags_updated),
+    url(
+        r"^tags/add/$",
+        views.redirect_after_table_tags_updated,
+    ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/download$".format(
             qual=pgsql_qualifier
@@ -79,15 +82,17 @@ urlpatterns = [
     url(r"^tags/set/?$", views.change_tag),
     url(r"^tags/new/?$", views.tag_editor),
     url(r"^tags/(?P<id>[0-9]+)/?$", views.tag_editor),
-    url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
+    url(
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/graph/new".format(
             qual=pgsql_qualifier
         ),
-        views.GraphView.as_view()
+        views.GraphView.as_view(),
     ),
-    url(r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(
+    url(
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(  # noqa
             qual=pgsql_qualifier
         ),
-        views.MapView.as_view()
+        views.MapView.as_view(),
     ),
     url(
         r"^wizard/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
@@ -98,5 +103,10 @@ urlpatterns = [
         r"^wizard/$",
         views.WizardView.as_view(),
         name="wizard_create",
+    ),
+    url(
+        r"^standalone_meta_edit/$",
+        views.StandaloneMetaEditView.as_view(),
+        name="standalone_meta_edit",
     ),
 ]

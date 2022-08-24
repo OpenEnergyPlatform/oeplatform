@@ -1,10 +1,7 @@
 import csv
-import datetime
 import json
 import os
 import re
-import threading
-import time
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -12,21 +9,18 @@ from operator import add
 from subprocess import call
 from wsgiref.util import FileWrapper
 
-import numpy
 import sqlalchemy as sqla
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.search import SearchQuery
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from django.db.models import Count, Aggregate, Q
-from django.http import Http404, HttpResponse, JsonResponse
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
-from django.views.generic.base import TemplateView
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
@@ -35,27 +29,26 @@ from api.actions import describe_columns
 
 try:
     import oeplatform.securitysettings as sec
-except:
+except Exception:
     import logging
+
     logging.error("No securitysettings found. Triggerd in dataedit/views.py")
+
+from django.contrib import messages
+
 from api import actions as actions
-from dataedit.metadata import load_metadata_from_db, read_metadata_from_post
+from api.connection import _get_engine, create_oedb_session
+from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
+from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import Table
 from dataedit.models import View as DBView
-from dataedit.forms import GraphViewForm, LatLonViewForm, GeomViewForm
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
 
-from .models import (
-    TableRevision,
-    View as DataViewModel
-)
-from .metadata.__init__ import load_metadata_from_db
-import requests as req
-
-from django.contrib import messages
+from .models import TableRevision
+from .models import View as DataViewModel
 
 session = None
 
@@ -146,7 +139,7 @@ def change_requests(schema, table):
     # print(api_columns)
     # print(api_constraints)
 
-    cache = dict()
+    # cache = dict()
     data = dict()
 
     data["api_columns"] = {}
@@ -242,44 +235,50 @@ def listschemas(request):
     """
 
     searched_query_string = request.GET.get("query")
-    
-    searched_tag_ids = list(map(
-        lambda t: int(t),
-        request.GET.getlist("tags"),
-    ))
+
+    try:
+        searched_tag_ids = list(
+            map(
+                lambda t: int(t),
+                request.GET.getlist("tags"),
+            )
+        )
+    except ValueError:
+        raise Http404
+
     for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
 
     # find all tables (layzy query set)
     tables = find_tables(query_string=searched_query_string, tag_ids=searched_tag_ids)
-    
+
     # get table count per schema
-    response = tables.values("schema__name").annotate(tables_count=Count("name"))    
+    response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
     description = {
-        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
-        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",
-        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",
-        "demand": "Data on demand. Demand can relate to commodities but also to services.",
-        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",
-        "supply": "Data on supply. Supply can relate to commodities but also to services.",
-        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
-        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
-        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
-        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",
-        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
-        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
-        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country."
+        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
+        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
+        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
+        "demand": "Data on demand. Demand can relate to commodities but also to services.",  # noqa
+        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",  # noqa
+        "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
+        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
+        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
+        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
+        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
+        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
+        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",  # noqa
+        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }
 
     schemas = [
         (
             row["schema__name"],
-            description.get(row["schema__name"], "No description"), 
-            row["tables_count"], # number of tables in schema                
+            description.get(row["schema__name"], "No description"),
+            row["tables_count"],  # number of tables in schema
         )
-        for row in response            
+        for row in response
     ]
 
     # sort by name
@@ -288,11 +287,7 @@ def listschemas(request):
     return render(
         request,
         "dataedit/dataedit_schemalist.html",
-        {
-            "schemas": schemas,
-            "query": searched_query_string,
-            "tags": searched_tag_ids
-        }
+        {"schemas": schemas, "query": searched_query_string, "tags": searched_tag_ids},
     )
 
 
@@ -310,25 +305,17 @@ def read_label(table, comment):
     """
     try:
         if comment.get("Name"):
-            return (
-                comment["Name"].strip() + " (" + table + ")"
-            )
+            return comment["Name"].strip() + " (" + table + ")"
         elif comment.get("Title"):
-            return (
-                    comment["Title"].strip() + " (" + table + ")"
-            )
+            return comment["Title"].strip() + " (" + table + ")"
         elif comment.get("title"):
-            return (
-                    comment["title"].strip() + " (" + table + ")"
-            )
+            return comment["title"].strip() + " (" + table + ")"
         elif comment.get("name"):
-            return (
-                    comment["name"].strip() + " (" + table + ")"
-            )
+            return comment["name"].strip() + " (" + table + ")"
         else:
             return None
 
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -339,14 +326,15 @@ def get_readable_table_names(schema):
 
     :param schema: The schema name as string
 
-    :return: A dictionary with that maps table names to readable names as returned by :py:meth:`dataedit.views.read_label`
+    :return: A dictionary with that maps table names to readable names as
+        returned by :py:meth:`dataedit.views.read_label`
     """
     engine = actions._get_engine()
     conn = engine.connect()
     try:
         res = conn.execute(
             "SELECT table_name as TABLE "
-            "FROM information_schema.tables where table_schema='{table_schema}';".format(
+            "FROM information_schema.tables where table_schema='{table_schema}';".format(  # noqa
                 table_schema=schema
             )
         )
@@ -357,7 +345,7 @@ def get_readable_table_names(schema):
         conn.close()
     return {r[0]: read_label(r[0], load_metadata_from_db(schema, r[0])) for r in res}
 
-  
+
 def get_readable_table_name(schema_name, table_name):
     """get readable table name from metadata
 
@@ -370,15 +358,16 @@ def get_readable_table_name(schema_name, table_name):
     """
     try:
         label = read_label(table_name, load_metadata_from_db(schema_name, table_name))
-    except:
+    except Exception:
         label = ""
     return label
+
 
 def get_session_query():
     engine = actions._get_engine()
     conn = engine.connect()
     Session = sessionmaker()
-    session = Session(bind=conn)    
+    session = Session(bind=conn)
     return session.query
 
 
@@ -393,62 +382,65 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     Returns:
         QuerySet of Table objetcs
     """
-    
+
     # define search filter (will be combined with AND):
     filters = []
 
     # only whitelisted schemata:
     filters.append(Q(schema__name__in=schema_whitelist))
 
-    if schema_name: # only tables in schema 
+    if schema_name:  # only tables in schema
         filters.append(Q(schema__name=schema_name))
 
-    if query_string: # filter by search terms
-        filters.append(Q(search=SearchQuery(
-            " & ".join(p+":*" for p in re.findall("[\w]+", query_string)), 
-            search_type="raw"
-        )))
+    if query_string:  # filter by search terms
+        filters.append(
+            Q(
+                search=SearchQuery(
+                    " & ".join(p + ":*" for p in re.findall(r"[\w]+", query_string)),
+                    search_type="raw",
+                )
+            )
+        )
 
-    if tag_ids: # filter by tags:
-        # unfortunately, tags are no longer in django tables, 
+    if tag_ids:  # filter by tags:
+        # unfortunately, tags are no longer in django tables,
         # so we cannot filter directly
         # instead, we load all table names that match the given tags
 
         # find tables (in schema), that use all of the tags
-        filter_tags = [
-            TableTags.tag.in_(tag_ids)
-        ]
+        filter_tags = [TableTags.tag.in_(tag_ids)]
         if schema_name:
-            filter_tags.append(
-                TableTags.schema_name==schema_name
-            )
+            filter_tags.append(TableTags.schema_name == schema_name)
 
-        tag_query = get_session_query()(
-            TableTags.schema_name, 
-            TableTags.table_name,            
-        ).filter(
-            *filter_tags
-        ).group_by(
-            TableTags.schema_name, 
-            TableTags.table_name
-        ).having(
-            # only if number of matches == number of tags
-            sqla.func.count() == len(tag_ids)
-        )                
+        tag_query = (
+            get_session_query()(
+                TableTags.schema_name,
+                TableTags.table_name,
+            )
+            .filter(*filter_tags)
+            .group_by(TableTags.schema_name, TableTags.table_name)
+            .having(
+                # only if number of matches == number of tags
+                sqla.func.count()
+                == len(tag_ids)
+            )
+        )
 
         filter_tables = Q(pk__in=[])
         # start with a "always false" condition, because we add OR statements
-        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851
+        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
         for schema_name, table_name in tag_query:
-            filter_tables = filter_tables | (Q(schema__name=schema_name) & Q(name=table_name))
-        
+            filter_tables = filter_tables | (
+                Q(schema__name=schema_name) & Q(name=table_name)
+            )
+
         filters.append(filter_tables)
 
-    
     tables = Table.objects.filter(*filters)
 
     return tables
+
 
 def listtables(request, schema_name):
     """
@@ -458,73 +450,68 @@ def listtables(request, schema_name):
     """
 
     searched_query_string = request.GET.get("query")
-    searched_tag_ids = list(map(int,
-        request.GET.getlist("tags"),
-    ))
+    searched_tag_ids = list(
+        map(
+            int,
+            request.GET.getlist("tags"),
+        )
+    )
     for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
-    
+
     # find all tables (layzy query set) in this schema
     tables = find_tables(
         schema_name=schema_name,
-        query_string=searched_query_string, 
-        tag_ids=searched_tag_ids
+        query_string=searched_query_string,
+        tag_ids=searched_tag_ids,
     )
 
     # get all tags for table in schema
-    tag_query = get_session_query()(
-        TableTags.table_name, 
-        array_agg(TableTags.tag), 
-        array_agg(Tag.name), 
-        array_agg(Tag.color), 
-        array_agg(Tag.usage_count)
-    ).filter(
-        TableTags.schema_name==schema_name,
-        TableTags.tag==Tag.id # join
-    ).group_by(
-        TableTags.table_name
+    tag_query = (
+        get_session_query()(
+            TableTags.table_name,
+            array_agg(TableTags.tag),
+            array_agg(Tag.name),
+            array_agg(Tag.color),
+            array_agg(Tag.usage_count),
+        )
+        .filter(TableTags.schema_name == schema_name, TableTags.tag == Tag.id)  # join
+        .group_by(TableTags.table_name)
     )
-
 
     def create_taglist(row):
         return [
-            dict(
-                id=ident, 
-                name=label, 
-                color="#" + format(color, "06X"), 
-                popularity=pop
-            )
-            for ident, label, color, pop 
-            in zip(row[1], row[2], row[3], row[4])
+            dict(id=ident, name=label, color="#" + format(color, "06X"), popularity=pop)
+            for ident, label, color, pop in zip(row[1], row[2], row[3], row[4])
         ]
 
     # group tags by table_name, order by popularity
     tags = {
-        r[0]: sorted(create_taglist(r), key=lambda x: x["popularity"]) 
+        r[0]: sorted(create_taglist(r), key=lambda x: x["popularity"])
         for r in tag_query
     }
-    
+
     tables = [
         (
             table.name,
             # TODO: slow, because must read metadata for each table!
             get_readable_table_name(schema_name=schema_name, table_name=table.name),
-            tags.get(table.name, [])
+            tags.get(table.name, []),
         )
         for table in tables
     ]
-    
-    # sort by name    
+
+    # sort by name
     tables = sorted(tables, key=lambda x: x[0])
 
     return render(
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema_name, 
+            "schema": schema_name,
             "tables": tables,
-            "query": searched_query_string, 
-            "tags": searched_tag_ids
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
         },
     )
 
@@ -547,7 +534,8 @@ def _type_json(json_obj):
     Recursively labels JSON-objects by their types. Singleton lists are handled
     as elementary objects.
 
-    :param json_obj: An JSON-object - possibly a dictionary, a list or an elementary JSON-object (e.g a string)
+    :param json_obj: An JSON-object - possibly a dictionary, a list
+        or an elementary JSON-object (e.g a string)
 
     :return: An annotated JSON-object (type, object)
 
@@ -563,6 +551,7 @@ def _type_json(json_obj):
 
 
 pending_dumps = {}
+
 
 class RevisionView(View):
     def get(self, request, schema, table):
@@ -586,7 +575,7 @@ def get_dependencies(schema, table, found=None):
     )
 
     engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
+    # metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
 
@@ -670,21 +659,24 @@ def show_revision(request, schema, table, date):
 
 @login_required
 def tag_overview(request):
-        
+
     # if rename or adding of tag fails: display error message
     context = {
-        "errorMsg": "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
+        "errorMsg": "Tag name is not valid"
+        if request.GET.get("status") == "invalid"
+        else ""
     }
-        
-    return render(request=request, template_name="dataedit/tag_overview.html", context=context)
 
+    return render(
+        request=request, template_name="dataedit/tag_overview.html", context=context
+    )
 
 
 @login_required
 def tag_editor(request, id=""):
     tags = get_all_tags()
 
-    create_new = True
+    # create_new = True
 
     for t in tags:
         if id != "" and int(id) == t["id"]:
@@ -718,7 +710,7 @@ def tag_editor(request, id=""):
 @login_required
 def change_tag(request):
 
-    status = "" # error status if operation fails
+    status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
         try:
@@ -734,7 +726,6 @@ def change_tag(request):
         except sqla.exc.IntegrityError:
             # requested changes are not valid because of name conflicts
             status = "invalid"
-
 
     elif "submit_delete" in request.POST:
         id = request.POST["tag_id"]
@@ -763,7 +754,6 @@ def edit_tag(id, name, color):
     result.name_normalized = Tag.create_name_normalized(name)
     result.color = str(int(color[1:], 16))
     session.commit()
-    
 
 
 def delete_tag(id):
@@ -794,7 +784,7 @@ def add_tag(name, color):
     session = Session(bind=engine)
 
     session.add(Tag(**{"name": name, "color": str(int(color[1:], 16)), "id": None}))
-    session.commit()    
+    session.commit()
 
 
 def view_edit(request, schema, table):
@@ -931,65 +921,52 @@ def view_delete(request, schema, table):
 class GraphView(View):
     def get(self, request, schema, table):
         # get the columns id from the schema and the table
-        columns = [
-            (c, c)
-            for c in describe_columns(schema, table).keys()
-        ]
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
         formset = GraphViewForm(columns=columns)
 
-        return render(request, 'dataedit/tablegraph_form.html', {'formset': formset})
+        return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
 
     def post(self, request, schema, table):
-        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
-        # options
-        opt = dict(x=request.POST.get('column_x'), y=request.POST.get('column_y'))
+        # save an instance of View, look at GraphViewForm fields in forms.py
+        # for information to the options
+        opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
         gview = DataViewModel.objects.create(
-            name=request.POST.get('name'),
+            name=request.POST.get("name"),
             table=table,
             schema=schema,
-            type='graph',
+            type="graph",
             options=opt,
-            is_default=request.POST.get('is_default', False)
+            is_default=request.POST.get("is_default", False),
         )
         gview.save()
 
         return redirect(
-            "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=gview.id)
+            "/dataedit/view/{schema}/{table}?view={view_id}".format(
+                schema=schema, table=table, view_id=gview.id
+            )
         )
 
 
 class MapView(View):
     def get(self, request, schema, table, maptype):
-        columns = [
-            (c, c)
-            for c in describe_columns(schema, table).keys()
-        ]
-        if maptype=="latlon":
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
+        if maptype == "latlon":
             form = LatLonViewForm(columns=columns)
-        elif maptype=="geom":
+        elif maptype == "geom":
             form = GeomViewForm(columns=columns)
         else:
             raise Http404
 
-        return render(request, 'dataedit/tablemap_form.html',
-                      {'form': form})
+        return render(request, "dataedit/tablemap_form.html", {"form": form})
 
     def post(self, request, schema, table, maptype):
-        columns = [
-            (c, c)
-            for c in describe_columns(schema, table).keys()
-        ]
+        columns = [(c, c) for c in describe_columns(schema, table).keys()]
         if maptype == "latlon":
             form = LatLonViewForm(request.POST, columns=columns)
-            options = dict(
-                lat=request.POST.get('lat'),
-                lon=request.POST.get('lon')
-            )
+            options = dict(lat=request.POST.get("lat"), lon=request.POST.get("lon"))
         elif maptype == "geom":
             form = GeomViewForm(request.POST, columns=columns)
-            options = dict(
-                geom=request.POST.get('geom')
-            )
+            options = dict(geom=request.POST.get("geom"))
         else:
             raise Http404
 
@@ -999,18 +976,21 @@ class MapView(View):
         if form.is_valid():
             view_id = form.save(commit=True)
             return redirect(
-                "/dataedit/view/{schema}/{table}?view={view_id}".format(schema=schema, table=table, view_id=view_id)
+                "/dataedit/view/{schema}/{table}?view={view_id}".format(
+                    schema=schema, table=table, view_id=view_id
+                )
             )
         else:
             return self.get(request, schema, table)
 
 
 class DataView(View):
-    """ This class handles the GET and POST requests for the main page of data edit.
+    """This class handles the GET and POST requests for the main page of data edit.
 
-        This view is displayed when a table is clicked on after choosing a schema on the website
+    This view is displayed when a table is clicked on after choosing a schema
+    on the website
 
-        Initialises the session data (if necessary)
+    Initialises the session data (if necessary)
     """
 
     def get(self, request, schema, table):
@@ -1029,7 +1009,7 @@ class DataView(View):
             raise Http404("Schema not accessible")
 
         tags = []  # TODO: Unused - Remove
-        db = sec.dbname
+        # db = sec.dbname
 
         engine = actions._get_engine()
 
@@ -1053,7 +1033,7 @@ class DataView(View):
         display_items = api_changes.get("display_items")
 
         is_admin = False
-        can_add = False # can upload data
+        can_add = False  # can upload data
         table_obj = Table.load(schema, table)
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(schema, table)
@@ -1076,8 +1056,6 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
-
-
 
         context_dict = {
             "comment_on_table": dict(metadata),
@@ -1134,8 +1112,8 @@ class DataView(View):
 
 
 class PermissionView(View):
-    """ This method handles the GET requests for the main page of data edit.
-        Initialises the session data (if necessary)
+    """This method handles the GET requests for the main page of data edit.
+    Initialises the session data (if necessary)
     """
 
     def get(self, request, schema, table):
@@ -1259,9 +1237,11 @@ def check_is_table_tag(session, schema, table, tag_id):
         bool: True if exists, False if not
     """
 
-    t = session.query(TableTags.tag).filter_by(tag = tag_id, table_name = table, schema_name = schema)
+    t = session.query(TableTags.tag).filter_by(
+        tag=tag_id, table_name=table, schema_name=schema
+    )
     session.commit()
-    return session.query(t.exists()).scalar() 
+    return session.query(t.exists()).scalar()
 
 
 def check_is_tag(session, tag_id):
@@ -1277,19 +1257,19 @@ def check_is_tag(session, tag_id):
         bool: True if exists, False if not
     """
 
-    t = session.query(Tag).filter(Tag.id==tag_id)
+    t = session.query(Tag).filter(Tag.id == tag_id)
     session.commit()
-    return session.query(t.exists()).scalar() 
+    return session.query(t.exists()).scalar()
 
 
-def get_tag_id_by_tag_name_normalized(session, tag_name):
+def get_tag_id_by_tag_name_normalized(session, name_normalized):
     """
-    Query the Tag tabley in schmea public to get the Tag ID.
+    Query the Tag table in schema public to get the Tag ID.
     Tags are queried by unique field tag_name_normalized.
 
     Args:
         session ([type]): [description]
-        tag_name ([type]): [description]
+        name_normalized ([type]): [description]
 
     Returns:
         int: Tag ID
@@ -1297,8 +1277,7 @@ def get_tag_id_by_tag_name_normalized(session, tag_name):
 
     """
 
-    tag = session.query(Tag).filter(Tag.name_normalized==tag_name).first()
-    session.commit()
+    tag = session.query(Tag).filter(Tag.name_normalized == name_normalized).first()
     if tag is not None:
         return tag.id
     else:
@@ -1307,11 +1286,11 @@ def get_tag_id_by_tag_name_normalized(session, tag_name):
 
 def get_tag_name_normalized_by_id(session, tag_id):
     """
-    Query the Tag table in schmea public to get the tag_name_normalized.
+    Query the Tag table in schema public to get the tag_name_normalized.
     Tags are queried by tag id.
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         tag_id (int): The Tag ID
 
     Returns:
@@ -1319,20 +1298,21 @@ def get_tag_name_normalized_by_id(session, tag_id):
         Str: Tag name normalized
     """
 
-    tag = session.query(Tag).filter(Tag.id==tag_id).first()
+    tag = session.query(Tag).filter(Tag.id == tag_id).first()
     session.commit()
     if tag is not None:
         return tag.name_normalized
     else:
         return None
 
+
 def get_tag_name_by_id(session, tag_id):
     """
-    Query the Tag table in schmea public to get the tags.name.
+    Query the Tag table in schema public to get the tags.name.
     Tags are queried by tag id.
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         tag_id (int): The Tag ID
 
     Returns:
@@ -1340,7 +1320,7 @@ def get_tag_name_by_id(session, tag_id):
         Str: Tag name
     """
 
-    tag = session.query(Tag).filter(Tag.id==tag_id).first()
+    tag = session.query(Tag).filter(Tag.id == tag_id).first()
     session.commit()
     if tag is not None:
         return tag.name
@@ -1350,161 +1330,211 @@ def get_tag_name_by_id(session, tag_id):
 
 def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_id):
     """
-    Add a tag from the oem-keywords to the table_tags for the current table. 
+    Add a tag from the oem-keywords to the table_tags for the current table.
 
     Args:
-        session (sqilachemy): sqlalachemy session
+        session (sqlachemy): sqlalachemy session
         schema (str): Name of the schema
         table (str): Name of the table
-        keyword_tag_id (int): The tag id that machtes to keyword tag name (by tag_name_normalized)
+        keyword_tag_id (int): The tag id that machtes to keyword tag name
+            (by tag_name_normalized)
 
     Returns:
         any: Exception
     """
 
     if check_is_tag(session, keyword_tag_id):
-    
-        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": keyword_tag_id})
+
+        t = TableTags(
+            **{"schema_name": schema, "table_name": table, "tag": keyword_tag_id}
+        )
 
         try:
             session.add(t)
             session.commit()
         except Exception as e:
-            session.rollback() #Rollback the changes on error
+            session.rollback()  # Rollback the changes on error
             return e
         finally:
-            session.close() #Close the connection
+            session.close()  # Close the connection
 
 
-def process_oem_keywords(session, schema, table, tag_ids, removed_table_tag_ids, default_color_new_tag="#2E3638"):
-    """_summary_
+def get_tag_keywords_synchronized_metadata(
+    table, schema, keywords_new=None, tag_ids_new=None
+):
+    """synchronize tags and keywords, either by new metadata OR by set of tag ids
+    (from UI)
 
     Args:
-        session (_type_): _description_
-        schema (_type_): _description_
         table (_type_): _description_
-        tag_ids (_type_): _description_
-
-    Returns:
-        _type_: _description_
+        schema (_type_): _description_
+        metadata_new (_type_, optional): _description_. Defaults to None.
+        tag_ids_new (_type_, optional): _description_. Defaults to None.
     """
 
-    # Empty or bad tag names
-    invalid_tags=["", " ", "_", "-", "*"]
+    session = create_oedb_session()
 
-    # Get metadata json. Add Tages to "keywords" field in oemetadata and update (comment on table)
-    # Returns oem v1.4.0 if metadata is empty from ./metadata/__init__.py/__LATEST
-    table_oemetadata = load_metadata_from_db(schema, table)
+    metadata = load_metadata_from_db(schema=schema, table=table)
+    keywords_old = set(
+        k for k in metadata.get("keywords", []) if Tag.create_name_normalized(k)
+    )  # remove empy
 
-    # if table_oemetadata is {}:
-    #     from metadata.v151.template import OEMETADATA_V151_TEMPLATE
-    #     table_oemetadata = OEMETADATA_V151_TEMPLATE
-        # md, error = actions.try_parse_metadata(table_oemetadata)
-        # print(md, error)
+    tag_ids_old = set(
+        tt.tag
+        for tt in session.query(TableTags).filter(
+            TableTags.table_name == table, TableTags.schema_name == schema
+        )
+    )
+    tags_old = session.query(Tag).filter(Tag.id.in_(tag_ids_old)).all()
 
-    # Keep, this are the tags that where added by the user via OEP website
-    updated_oep_tags = [] 
-    # this are OEM keywords that are new to the OEP tags
-    kw_only = []
-    # Keywords that are present as OEP tag but have to be assinged as table tag
-    kw_is_oep_tag_but_not_oep_table_tag = []
-    # sync. table tags and keywords
-    updated_keywords = []
+    tags_by_name_normalized = {}
+    tags_by_id = dict()
 
-    for id in tag_ids:
-        kw = get_tag_name_by_id(session, id)
-        if kw is not None:
-           updated_oep_tags.append(kw)
+    for tag in tags_old:
+        tags_by_name_normalized[tag.name_normalized] = tag
+        tags_by_id[tag.id] = tag
+
+    def get_or_create_tag_by_name(name):
+        name_normalized = Tag.create_name_normalized(name)
+        if not name_normalized:
+            return None
+        if name_normalized not in tags_by_name_normalized:
+            tag = (
+                session.query(Tag)
+                .filter(Tag.name_normalized == name_normalized)
+                .first()
+            )
+            if tag is None:
+                tag = Tag(name=name)
+                session.add(tag)
+                session.flush()
+            assert tag.id
+            tags_by_name_normalized[name_normalized] = tag
+            tags_by_id[tag.id] = tag
+        return tags_by_name_normalized[name_normalized]
+
+    def get_tag_by_id(tag_id):
+        if tag_id not in tags_by_id:
+            tag = session.query(Tag).filter(Tag.id == tag_id).first()
+            tags_by_name_normalized[tag.name_normalized] = tag
+            tags_by_id[tag.id] = tag
+        return tags_by_id[tag_id]
+
+    # map old keywords to tag ids (create tags if needed)
+    keyword_tag_ids_old = set(get_or_create_tag_by_name(n).id for n in keywords_old)
+
+    if keywords_new is not None:  # user updated metadata keywords
+
+        # map new keywords to tag ids (create tags if needed)
+        keywords_new = [
+            k for k in keywords_new if Tag.create_name_normalized(k)
+        ]  # remove empy
+        keyword_new_tag_ids = set(get_or_create_tag_by_name(n).id for n in keywords_new)
+
+        # determine which tag ids the user wants to remove
+        remove_table_tag_ids = keyword_tag_ids_old - keyword_new_tag_ids
+        keyword_add_tag_ids = tag_ids_old - remove_table_tag_ids - keyword_new_tag_ids
+        tag_ids_new = set()
+
+    elif tag_ids_new is not None:  # user updated tags in UI
+
+        # determine which tag ids the user wants to remove
+        remove_table_tag_ids = tag_ids_old - tag_ids_new
+        keywords_new = [
+            k
+            for k in keywords_old
+            if get_or_create_tag_by_name(k).id not in remove_table_tag_ids
+        ]
+        keyword_new_tag_ids = set()
+        keyword_add_tag_ids = tag_ids_new - keyword_tag_ids_old - remove_table_tag_ids
+
+    else:
+        raise NotImplementedError("must provide either metadata or tag_ids")
+
+    # determine which tag ids have to be removed
+    delete_table_tag_ids = remove_table_tag_ids & tag_ids_old
+    for tid in delete_table_tag_ids:
+        if tid is None:
+            continue
+        session.query(TableTags).filter(
+            TableTags.table_name == table,
+            TableTags.schema_name == schema,
+            TableTags.tag == tid,
+        ).delete()
+
+    # determine which tag ids must be added
+    add_table_tag_ids = (keyword_tag_ids_old | keyword_new_tag_ids | tag_ids_new) - (
+        tag_ids_old | remove_table_tag_ids
+    )
+    for tid in add_table_tag_ids:
+        if tid is None:
+            continue
+        session.add(TableTags(table_name=table, schema_name=schema, tag=tid))
+
+    # determine wich keywords need to be added
+    for tid in keyword_add_tag_ids:
+        if tid is None:
+            continue
+        keywords_new.append(get_tag_by_id(tid).name)
+
+    session.commit()
+    session.close()
+
+    metadata["keywords"] = keywords_new
+
+    return metadata
 
 
-    for k in table_oemetadata["keywords"]:
-        normalized_kw = Tag.create_name_normalized(k)
-        keyword_tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
-        if keyword_tag_id is None and k not in kw_only and k not in invalid_tags:
-            kw_only.append(k)
-        elif keyword_tag_id is not None and check_is_table_tag(session, schema, table, keyword_tag_id) is False \
-            and k not in kw_is_oep_tag_but_not_oep_table_tag:
-            
-            kw_is_oep_tag_but_not_oep_table_tag.append(k)
-
-
-    updated_keywords = updated_oep_tags + kw_only
-    for k in kw_is_oep_tag_but_not_oep_table_tag:
-        normalized_kw = Tag.create_name_normalized(k)
-        tag_id = get_tag_id_by_tag_name_normalized(session, normalized_kw)
-        if k is not None and k not in updated_oep_tags and [True for kw in table_oemetadata["keywords"] if k in kw] \
-            and tag_id not in removed_table_tag_ids:
-            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
-            updated_keywords.append(k)
-        
-
-    for k in kw_only:
-        default_color = default_color_new_tag
-        add_tag(k, default_color)
-        tag_id = get_tag_id_by_tag_name_normalized(session, k)
-        if tag_id is not None:
-            add_existing_keyword_tag_to_table_tags(session, schema, table, tag_id)
-    
-    
-
-    table_oemetadata["keywords"] = updated_keywords
-    return table_oemetadata
-
-
-# FIXME: should use api.views.require_write_permission, but circular imports!
 @login_required
-def add_table_tags(request):
+def update_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.
-    The update will delete all tags that are not present in request and add all tags that are.
+    The update will delete all tags that are not present
+    in request and add all tags that are.
 
-    :param request: A HTTP-request object sent by the Django framework. The *POST* field must contain the following values:
+    :param request: A HTTP-request object sent by the Django framework.
+        The *POST* field must contain the following values:
         * schema: The name of a schema
         * table: The name of a table
         * Any number of values that start with 'tag_' followed by the id of a tag.
     :return: Redirects to the previous page
     """
+    # check if valid table / schema
+    schema, table = actions.get_table_name(
+        schema=request.POST["schema"], table=request.POST["table"]
+    )
+
+    # check write permission
+    actions.assert_permission(
+        request.user, table, login_models.WRITE_PERM, schema=schema
+    )
+
     ids = {
         int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
     }
-    schema = request.POST["schema"]
-    table = request.POST.get("table", None)
-    
 
-    engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
-    Session = sessionmaker()
-    session = Session(bind=engine)
+    # update tags in db and harmonize metadata
+    metadata = get_tag_keywords_synchronized_metadata(
+        table=table, schema=schema, tag_ids_new=ids
+    )
 
-    # Identify the table tag ids that the user removed from the table.
-    # Usefull to distinguish between keywords that are tags and have to be assinged as table tags
-    # and keywords that exist as tags but where removed by the use, and therefore should not be reassinged to the table
-    removed_table_tag_ids = [tt.tag for tt in session.query(TableTags).filter(TableTags.table_name == table and TableTags.schema_name == schema) if tt.tag not in ids]
+    with _get_engine().connect() as con:
+        with con.begin():
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=con
+            )
 
-    session.query(TableTags).filter(
-        TableTags.table_name == table and TableTags.schema_name == schema
-    ).delete()
-    for id in ids:
-        t = TableTags(**{"schema_name": schema, "table_name": table, "tag": id})
-        session.add(t)
-    session.commit()
-    
-    # Add keywords from oemetadata to table tags and table tags to keywords
-    updated_oem_json = process_oem_keywords(session, schema, table, ids, removed_table_tag_ids)    
-    
-    # TODO: reuse session from above?
-    with engine.begin() as con:
-        actions.set_table_metadata(table=table, schema=schema, metadata=updated_oem_json, cursor=con)     
+    messasge = messages.success(
+        request,
+        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
+    )
 
-
-    messasge = messages.success(request, 'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.')   
-
-    
-    return render(request, 'dataedit/dataview.html', {"messages": messasge})
+    return render(request, "dataedit/dataview.html", {"messages": messasge})
 
 
 def redirect_after_table_tags_updated(request):
-    add_table_tags(request)
+
+    update_table_tags(request)
 
     return redirect(request.META["HTTP_REFERER"])
 
@@ -1517,11 +1547,11 @@ def get_all_tags(schema=None, table=None):
     :return:
     """
     engine = actions._get_engine()
-    metadata = sqla.MetaData(bind=engine)
+    # metadata = sqla.MetaData(bind=engine)
     Session = sessionmaker()
     session = Session(bind=engine)
     try:
-        if table == None:
+        if table is None:
             # Neither table, not schema are defined
             result = session.execute(sqla.select([Tag]).order_by("name"))
             session.commit()
@@ -1529,6 +1559,7 @@ def get_all_tags(schema=None, table=None):
                 {
                     "id": r.id,
                     "name": r.name,
+                    "name_normalized": r.name_normalized,
                     "color": "#" + format(r.color, "06X"),
                     "usage_count": r.usage_count,
                     "usage_tracked_since": r.usage_tracked_since,
@@ -1537,13 +1568,14 @@ def get_all_tags(schema=None, table=None):
             ]
             return sort_tags_by_popularity(r)
 
-        if schema == None:
+        if schema is None:
             # default schema is the public schema
             schema = "public"
 
         result = session.execute(
             session.query(
                 Tag.name.label("name"),
+                Tag.name_normalized.label("name_normalized"),
                 Tag.id.label("id"),
                 Tag.color.label("color"),
                 Tag.usage_count.label("usage_count"),
@@ -1562,6 +1594,7 @@ def get_all_tags(schema=None, table=None):
         {
             "id": r.id,
             "name": r.name,
+            "name_normalized": r.name_normalized,
             "color": "#" + format(r.color, "06X"),
             "usage_count": r.usage_count,
             "usage_tracked_since": r.usage_tracked_since,
@@ -1573,7 +1606,7 @@ def get_all_tags(schema=None, table=None):
 
 def sort_tags_by_popularity(tags):
     def key_func(tag):
-        track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
+        # track_time = tag["usage_tracked_since"] - datetime.datetime.utcnow()
         return tag["usage_count"]
 
     tags.sort(reverse=True, key=key_func)
@@ -1599,8 +1632,8 @@ def increment_usage_count(tag_id):
 
     try:
         result = session.query(Tag).filter_by(id=tag_id).first()
-
-        result.usage_count += 1
+        if result:
+            result.usage_count += 1
 
         session.commit()
     finally:
@@ -1609,59 +1642,66 @@ def increment_usage_count(tag_id):
 
 def get_column_description(schema, table):
     """Return list of column descriptions:
-     [{
-        "name": str,
-        "data_type": str,
-        "is_nullable': bool,
-        "is_pk": bool
-     }]
+    [{
+       "name": str,
+       "data_type": str,
+       "is_nullable': bool,
+       "is_pk": bool
+    }]
 
     """
 
     def get_datatype_str(column_def):
         """get single string sql type definition.
 
-        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128),
-        so we need to combine the various fields (type, numeric_precision, numeric_scale, ...)
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
         """
         # for reverse validation, see also api.parser.parse_type(dt_string)
-        dt = column_def['data_type'].lower()
+        dt = column_def["data_type"].lower()
         precisions = None
-        if dt.startswith('character'):
-            if dt == 'character varying':
-                dt = 'varchar'
+        if dt.startswith("character"):
+            if dt == "character varying":
+                dt = "varchar"
             else:
-                dt = 'char'
-            precisions = [column_def['character_maximum_length']]
-        elif dt.endswith(' without time zone'): # this is the default
-            dt =  dt.replace(' without time zone', '')
-        elif re.match('(numeric|decimal)', dt):
-            precisions = [column_def['numeric_precision'], column_def['numeric_scale']]
-        elif dt == 'interval':
-            precisions = [column_def['interval_precision']]
-        elif re.match('.*int', dt) and re.match('nextval', column_def.get('column_default') or ''):
-            #dt = dt.replace('int', 'serial')
+                dt = "char"
+            precisions = [column_def["character_maximum_length"]]
+        elif dt.endswith(" without time zone"):  # this is the default
+            dt = dt.replace(" without time zone", "")
+        elif re.match("(numeric|decimal)", dt):
+            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
+        elif dt == "interval":
+            precisions = [column_def["interval_precision"]]
+        elif re.match(".*int", dt) and re.match(
+            "nextval", column_def.get("column_default") or ""
+        ):
+            # dt = dt.replace('int', 'serial')
             pass
-        elif dt.startswith('double'):
-            dt = 'float'
+        elif dt.startswith("double"):
+            dt = "float"
         if precisions:  # remove None
             precisions = [x for x in precisions if x is not None]
         if precisions:
-            dt += '(%s)' % ', '.join(str(x) for x in precisions)
+            dt += "(%s)" % ", ".join(str(x) for x in precisions)
         return dt
 
     def get_pk_fields(constraints):
-        """Get the column names that make up the primary key from the constraints definitions.
+        """Get the column names that make up the primary key
+        from the constraints definitions.
 
-        NOTE: Currently, the wizard to create tables only supports single fields primary keys (which is advisable anyways)
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
         """
         pk_fields = []
         for _name, constraint in constraints.items():
             if constraint.get("constraint_type") == "PRIMARY KEY":
-                m = re.match(r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or "")
+                m = re.match(
+                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
+                )
                 if m:
                     # "f1, f2" -> ["f1", "f2"]
-                    pk_fields = [x.strip() for x in m.groups()[0].split(',')]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
         return pk_fields
 
     _columns = actions.describe_columns(schema, table)
@@ -1669,61 +1709,71 @@ def get_column_description(schema, table):
     pk_fields = get_pk_fields(_constraints)
     # order by ordinal_position
     columns = []
-    for name, col in sorted(_columns.items(), key=lambda kv: int(kv[1]['ordinal_position'])):
-        columns.append({
-            'name': name,
-            'data_type': get_datatype_str(col),
-            'is_nullable': col['is_nullable'],
-            'is_pk': name in pk_fields
-        })
+    for name, col in sorted(
+        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+    ):
+        columns.append(
+            {
+                "name": name,
+                "data_type": get_datatype_str(col),
+                "is_nullable": col["is_nullable"],
+                "is_pk": name in pk_fields,
+            }
+        )
     return columns
 
 
 class WizardView(LoginRequiredMixin, View):
-    """View for the upload wizard (create tables, upload csv).
-    """
+    """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema='model_draft', table=None):
-        """Handle GET request (render the page).
-        """
+    def get(self, request, schema="model_draft", table=None):
+        """Handle GET request (render the page)."""
         engine = actions._get_engine()
 
         can_add = False
         columns = None
-        pk_fields = None
+        # pk_fields = None
         n_rows = None
         if table:
             # get information about the table
             # if upload: table must exist in schema model_draft
-            if schema != 'model_draft':
-                raise Http404('Can only upload to schema model_draft')
+            if schema != "model_draft":
+                raise Http404("Can only upload to schema model_draft")
             if not engine.dialect.has_table(engine, table, schema=schema):
-                raise Http404('Table does not exist')
+                raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
             if not request.user.is_anonymous:
-                user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+                # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
                 level = request.user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)
             # get number of rows
-            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(schema=schema, table=table)
+            sql = "SELECT COUNT(*) FROM {schema}.{table}".format(
+                schema=schema, table=table
+            )
             res = actions.perform_sql(sql)
-            n_rows = res['result'].fetchone()[0]
+            n_rows = res["result"].fetchone()[0]
 
         context = {
-            "config": json.dumps({ # pass as json string
-                "canAdd": can_add,
-                "columns": columns,
-                "schema": schema,
-                "table": table,
-                "nRows": n_rows
-            }),
+            "config": json.dumps(
+                {  # pass as json string
+                    "canAdd": can_add,
+                    "columns": columns,
+                    "schema": schema,
+                    "table": table,
+                    "nRows": n_rows,
+                }
+            ),
             "schema": schema,
             "table": table,
-            "can_add": can_add
+            "can_add": can_add,
         }
 
         return render(request, "dataedit/wizard.html", context=context)
+
+
+def get_cancle_state(request):
+    return request.META.get("HTTP_REFERER")
 
 
 class MetaEditView(LoginRequiredMixin, View):
@@ -1738,20 +1788,45 @@ class MetaEditView(LoginRequiredMixin, View):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
-        url_table_id = request.build_absolute_uri(reverse('view', kwargs={"schema": schema, "table": table}))
+        url_table_id = request.build_absolute_uri(
+            reverse("view", kwargs={"schema": schema, "table": table})
+        )
 
         context_dict = {
-            "config": json.dumps({
-                "schema": schema,
-                "table": table,
-                "columns": columns,
-                "url_table_id": url_table_id,
-                "url_api_meta": reverse('api_table_meta', kwargs={"schema": schema, "table": table}),
-                "url_view_table": reverse('view', kwargs={"schema": schema, "table": table}),
-            }),
-            "can_add": can_add
+            "config": json.dumps(
+                {
+                    "schema": schema,
+                    "table": table,
+                    "columns": columns,
+                    "url_table_id": url_table_id,
+                    "url_api_meta": reverse(
+                        "api_table_meta", kwargs={"schema": schema, "table": table}
+                    ),
+                    "url_view_table": reverse(
+                        "view", kwargs={"schema": schema, "table": table}
+                    ),
+                    "cancle_url": get_cancle_state(self.request),
+                    "standalone": False,
+                }
+            ),
+            "can_add": can_add,
         }
 
+        return render(
+            request,
+            "dataedit/meta_edit.html",
+            context=context_dict,
+        )
+
+
+class StandaloneMetaEditView(LoginRequiredMixin, View):
+    def get(self, request):
+
+        context_dict = {
+            "config": json.dumps(
+                {"cancle_url": get_cancle_state(self.request), "standalone": True}
+            )
+        }
         return render(
             request,
             "dataedit/meta_edit.html",

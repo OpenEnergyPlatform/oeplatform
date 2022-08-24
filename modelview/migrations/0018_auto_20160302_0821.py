@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
             name="geographical_coverage",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
-                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
                     max_length=1000,
                 ),
                 default=list,
