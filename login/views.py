@@ -16,7 +16,8 @@ from .models import myuser as OepUser
 class ProfileView(View):
     def get(self, request, user_id):
         """
-        Load the user identified by user_id and is OAuth-token. If latter does not exist yet, create one.
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
@@ -73,8 +74,8 @@ class GroupCreate(View, LoginRequiredMixin):
 
     def post(self, request, group_id=None):
         """
-        Performs selected action(save or delete) for a group. If a groupname already exists, then a error
-        will be output.
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
@@ -143,8 +144,8 @@ class GroupEdit(View, LoginRequiredMixin):
 
     def post(self, request, group_id):
         """
-        Performs selected action(save or delete) for a group. If a groupname already exists, then a error
-        will be output.
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id

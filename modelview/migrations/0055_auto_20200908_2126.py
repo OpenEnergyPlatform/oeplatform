@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             name="auto_model_generator",
             field=models.BooleanField(
                 default=False,
-                help_text="Is an auto-Model generator available that transfers an input file into a Model?",
+                help_text="Is an auto-Model generator available that transfers an input file into a Model?",  # noqa
                 verbose_name="Auto model generator",
             ),
         ),
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="last_updated",
             field=models.DateField(
-                help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].",
+                help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Last updated",
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
             name="variable_rolling_horizon",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to Model a variable Rolling Horizon with the framework?",
+                help_text="Is it possible to Model a variable Rolling Horizon with the framework?",  # noqa
                 verbose_name="Variable rolling",
             ),
         ),
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
             name="variable_time_step",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to Model variable time steps with the framework?",
+                help_text="Is it possible to Model variable time steps with the framework?",  # noqa
                 verbose_name="Variable time step",
             ),
         ),

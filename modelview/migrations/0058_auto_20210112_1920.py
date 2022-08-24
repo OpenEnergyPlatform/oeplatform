@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
                 default=list,
-                help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+                help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",  # noqa
                 null=True,
                 size=None,
                 verbose_name="External optimizer",
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="user_documentation",
             field=models.CharField(
-                help_text="Is an user documentation available for the framework? Please insert the link",
+                help_text="Is an user documentation available for the framework? Please insert the link",  # noqa
                 max_length=500,
                 null=True,
                 verbose_name="Link to User Documentation",

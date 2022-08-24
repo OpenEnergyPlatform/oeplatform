@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="citation_reference",
             field=models.CharField(
-                help_text="Are publications available about the framework? Please list!",
+                help_text="Are publications available about the framework? Please list!",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Citation reference",
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="references_to_reports_produced_using_the_model",
             field=models.CharField(
-                help_text="Which studies were calculated/ Which models were developed  with the framework?",
+                help_text="Which studies were calculated/ Which models were developed  with the framework?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Reference Studies/Models",
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             name="variable_rolling_horizon",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to model a variable Rolling Horizon with the framework?",
+                help_text="Is it possible to model a variable Rolling Horizon with the framework?",  # noqa
                 verbose_name="Variable rolling",
             ),
         ),
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             name="variable_time_step",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to model variable time steps with the framework?",
+                help_text="Is it possible to model variable time steps with the framework?",  # noqa
                 verbose_name="Variable time step",
             ),
         ),

@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="larger_scale_usage",
             field=models.CharField(
-                help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",
+                help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Model usage",

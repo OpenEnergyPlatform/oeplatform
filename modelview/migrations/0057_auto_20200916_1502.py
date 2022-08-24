@@ -9,6 +9,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            'ALTER TABLE "modelview_basicfactsheet" ALTER COLUMN "contact_email" TYPE varchar(254)[] USING ARRAY["contact_email"];'
+            'ALTER TABLE "modelview_basicfactsheet" ALTER COLUMN "contact_email" TYPE varchar(254)[] USING ARRAY["contact_email"];'  # noqa
         )
     ]

@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="link_to_installation_guide",
             field=models.CharField(
-                help_text="Is an installation guide availaibe for the framework? Please insert the link!",
+                help_text="Is an installation guide availaibe for the framework? Please insert the link!",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Link to installation guide",

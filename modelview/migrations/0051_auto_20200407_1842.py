@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="contact_phone",
             field=models.CharField(
-                help_text="WWhat is the website of the framework? Please provide a link!",
+                help_text="WWhat is the website of the framework? Please provide a link!",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Phone",
@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
             name="data_preprocessing",
             field=models.BooleanField(
                 default=False,
-                help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",
+                help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",  # noqa
                 verbose_name="data preprocessing",
             ),
         ),

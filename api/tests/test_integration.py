@@ -62,7 +62,8 @@ class IntegrationTestCase(APITestCase):
         for column in self.structure_data["columns"]:
             for key in column:
                 # name is a programmer-introduced key.
-                # We are able to use a list instead of a dictonary to get better iteration possibilities.
+                # We are able to use a list instead of a dictonary to get
+                # better iteration possibilities.
                 if key == "name":
                     continue
                 if key == "data_type" and column[key] == "bigserial":

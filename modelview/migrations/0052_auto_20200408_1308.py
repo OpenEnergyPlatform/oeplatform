@@ -163,7 +163,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="user_documentation",
             field=models.CharField(
-                help_text="Is an user documentation available for the framework? Please insert the link",
+                help_text="Is an user documentation available for the framework? Please insert the link",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Link to User Documentation",
@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="data_code_availability",
             field=models.CharField(
-                help_text="Is at least one (dummy) data set available to run a model built with the framework?",
+                help_text="Is at least one (dummy) data set available to run a model built with the framework?",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Data availability",
@@ -184,7 +184,7 @@ class Migration(migrations.Migration):
             name="installation_guide",
             field=models.BooleanField(
                 default=False,
-                help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link",
+                help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link",  # noqa
                 verbose_name="Installation guide",
             ),
         ),
@@ -192,7 +192,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="link_to_code_documentation",
             field=models.CharField(
-                help_text="Is a code/API documentation availaibe for the framework? Please insert the link!",
+                help_text="Is a code/API documentation availaibe for the framework? Please insert the link!",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Link to code documentation",

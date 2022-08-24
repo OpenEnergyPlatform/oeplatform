@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="methodical_focus_1",
             field=models.CharField(
-                help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',
+                help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',  # noqa
                 max_length=50,
                 verbose_name="Methodical Focus",
             ),
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="source_of_funding",
             field=models.CharField(
-                help_text="What is the main source of funding for the development of the model?",
+                help_text="What is the main source of funding for the development of the model?",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Source of funding",

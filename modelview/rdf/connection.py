@@ -44,7 +44,7 @@ class ConnectionContext:
 
     def insert_new_study(self, study_name):
         s = "INSERT {"
-        s += f"<http://openenergy-platform.org/oekg/{study_name}> a <http://openenergy-platform.org/ontology/oeo/OEO_00020011>"
+        s += f"<http://openenergy-platform.org/oekg/{study_name}> a <http://openenergy-platform.org/ontology/oeo/OEO_00020011>"  # noqa
         s += "} WHERE {}"
         self.execute(s)
         return {}
@@ -62,7 +62,7 @@ class ConnectionContext:
         options = ["?p rdfs:label ?lp ."]
 
         query += " UNION ".join(
-            f"""{{ { p.fetch_queries('?s', '?o', options=options+[p._label_option], filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}"""
+            f"""{{ { p.fetch_queries('?s', '?o', options=options+[p._label_option], filter=[f'?s = <{s}>'], where=[f'BIND("{fname}" as ?fname )']) } }}"""  # noqa
             for s in subjects
             for fname, p in predicates
             if p.rdf_name

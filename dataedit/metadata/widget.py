@@ -18,7 +18,7 @@ class MetaDataWidget:
         self.json = json
         self.url_regex = re.compile(
             r"^(?:http|ftp)s?://"
-            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # noqa
             r"localhost|"
             r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
             r"(?::\d+)?"
@@ -211,7 +211,8 @@ class MetaDataWidget:
         elif level > 0:
             label = parent.split("_")[-1]
             label = self.format_index_numbers(label)
-            # between the horizontal lines the item can be a string, a list of objects or a dict
+            # between the horizontal lines the item can be a string,
+            # a list of objects or a dict
             if isinstance(data, str) and "No json format" in data:
                 # simply an input field and a label within a div
                 self.is_error = True
@@ -222,7 +223,7 @@ class MetaDataWidget:
                     label,
                 )
                 html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',
+                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',  # noqa
                     parent,
                     parent,
                     data,
@@ -238,7 +239,7 @@ class MetaDataWidget:
                     label,
                 )
                 html += format_html(
-                    '<textarea class="form-control" id="{}" name="{}" type="text">"{}" </textarea>',
+                    '<textarea class="form-control" id="{}" name="{}" type="text">"{}" </textarea>',  # noqa
                     parent,
                     parent,
                     data,
@@ -253,7 +254,7 @@ class MetaDataWidget:
                     label,
                 )
                 html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',
+                    '<input class="form-control" id="{}" name="{}" type="text" value="{}" />',  # noqa
                     parent,
                     parent,
                     data,
@@ -269,7 +270,7 @@ class MetaDataWidget:
                 )
                 # None has to be written as null in JSON context
                 html += format_html(
-                    '<input class="form-control" id="{}" name="{}" type="text" value="null" />',
+                    '<input class="form-control" id="{}" name="{}" type="text" value="null" />',  # noqa
                     parent,
                     parent,
                 )

@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
             name="agricultural_demand",
             field=models.BooleanField(
                 default=False,
-                help_text="Which agricultural demand were already modelled with the framework?",
+                help_text="Which agricultural demand were already modelled with the framework?",  # noqa
                 verbose_name="Agricultural demand",
             ),
         ),
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
             name="auto_model_generator",
             field=models.BooleanField(
                 default=False,
-                help_text="Is an auto-model generator available that transfers an input file into a model?",
+                help_text="Is an auto-model generator available that transfers an input file into a model?",  # noqa
                 verbose_name="Auto model generator",
             ),
         ),
@@ -161,7 +161,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="data_code_availability",
             field=models.CharField(
-                help_text="Is at least one (dummy) data set available to run a model built with the framework",
+                help_text="Is at least one (dummy) data set available to run a model built with the framework",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Data availability",
@@ -172,7 +172,7 @@ class Migration(migrations.Migration):
             name="data_postprocessing",
             field=models.BooleanField(
                 default=False,
-                help_text="Are there any scripts for data post-processing (e.g. calculating demand, economic functions)",
+                help_text="Are there any scripts for data post-processing (e.g. calculating demand, economic functions)",  # noqa
                 verbose_name="data postprocessing",
             ),
         ),
@@ -181,7 +181,7 @@ class Migration(migrations.Migration):
             name="data_preprocessing",
             field=models.BooleanField(
                 default=False,
-                help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions)",
+                help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions)",  # noqa
                 verbose_name="data preprocessing",
             ),
         ),
@@ -259,7 +259,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="fw_appliance",
             field=models.CharField(
-                help_text="Which research projects (on-going or past) apply the framework?",
+                help_text="Which research projects (on-going or past) apply the framework?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Projects using the framework",
@@ -387,7 +387,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="inital_purpose",
             field=models.CharField(
-                help_text="What was the initial purpose/task/motivation to start the development?",
+                help_text="What was the initial purpose/task/motivation to start the development?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Inital purpose",
@@ -397,7 +397,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="inital_purpose_change",
             field=models.CharField(
-                help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?",
+                help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Inital purpose change",
@@ -418,7 +418,7 @@ class Migration(migrations.Migration):
             name="installation_guide",
             field=models.BooleanField(
                 default=False,
-                help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)?",
+                help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)?",  # noqa
                 verbose_name="Installation guide",
             ),
         ),
@@ -426,7 +426,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="interfaces",
             field=models.CharField(
-                help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ",
+                help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="interfaces",
@@ -485,7 +485,7 @@ class Migration(migrations.Migration):
             name="new_components",
             field=models.BooleanField(
                 default=False,
-                help_text="Is the framework build to allow for the implementation of new components?",
+                help_text="Is the framework build to allow for the implementation of new components?",  # noqa
                 verbose_name="New components",
             ),
         ),
@@ -686,7 +686,7 @@ class Migration(migrations.Migration):
             name="research_questions",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
-                help_text="What are 3 typical research questions that are answered by applying the FW?",
+                help_text="What are 3 typical research questions that are answered by applying the FW?",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Research questions",
@@ -696,7 +696,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="skills_advanced",
             field=models.CharField(
-                help_text="What advanced skills does a person need to become a user of the framework?",
+                help_text="What advanced skills does a person need to become a user of the framework?",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Skills advanced",
@@ -706,7 +706,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="skills_basic",
             field=models.CharField(
-                help_text="What basic skills does a person need to become a user of the framework?",
+                help_text="What basic skills does a person need to become a user of the framework?",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Skills basic",
@@ -716,7 +716,7 @@ class Migration(migrations.Migration):
             model_name="energyframework",
             name="source_code_availability",
             field=models.CharField(
-                help_text="What is the link to the source code? If left empty, field won't appear.",
+                help_text="What is the link to the source code? If left empty, field won't appear.",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Code availability",
@@ -979,7 +979,7 @@ class Migration(migrations.Migration):
             name="variable_rolling_horizon",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to model a variable Rolling Horizon with the framework? ",
+                help_text="Is it possible to model a variable Rolling Horizon with the framework? ",  # noqa
                 verbose_name="Variable rolling",
             ),
         ),
@@ -988,7 +988,7 @@ class Migration(migrations.Migration):
             name="variable_time_step",
             field=models.BooleanField(
                 default=False,
-                help_text="Is it possible to model variable time steps with the framework? ",
+                help_text="Is it possible to model variable time steps with the framework? ",  # noqa
                 verbose_name="Variable time step",
             ),
         ),
@@ -1006,7 +1006,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="methodical_focus_1",
             field=models.CharField(
-                help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',
+                help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',  # noqa
                 max_length=50,
                 null=True,
                 verbose_name="Methodical Focus",
@@ -1078,7 +1078,7 @@ class Migration(migrations.Migration):
             name="external_optimizer",
             field=models.BooleanField(
                 default=False,
-                help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+                help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",  # noqa
                 verbose_name="External optimizer",
             ),
         ),

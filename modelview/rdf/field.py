@@ -14,7 +14,8 @@ class Field(ABC):
     """
     :ivar rdf_name: IRI of this property
     :ivar verbose_name: A readable label (not `rdfs:label`)
-    :ivar handler: A handler used to parse this field. Defaults to `handler.DefaultHandler`
+    :ivar handler: A handler used to parse this field.
+        Defaults to `handler.DefaultHandler`
     :ivar help_text: Some helpful text
     """
 

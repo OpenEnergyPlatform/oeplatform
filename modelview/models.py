@@ -37,7 +37,7 @@ class BasicFactsheet(models.Model):
     )
     authors = ArrayField(
         CharField(max_length=300),
-        help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+        help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
         default=list,
         null=True,
         verbose_name="Author(s) (institution, working field, active time period)",
@@ -98,14 +98,14 @@ class BasicFactsheet(models.Model):
     user_documentation = CharField(
         max_length=500,
         verbose_name="Link to User Documentation",
-        help_text="Is an user documentation available for the framework? Please insert the link",
+        help_text="Is an user documentation available for the framework? Please insert the link",  # noqa
         null=True,
     )
 
     code_documentation = CharField(
         max_length=200,
         verbose_name="Link to Developer/Code Documentation",
-        help_text="If a code documentation and or a developer documentation is publicly available please insert the link",
+        help_text="If a code documentation and or a developer documentation is publicly available please insert the link",  # noqa
         null=True,
     )
     documentation_quality = CharField(
@@ -119,7 +119,7 @@ class BasicFactsheet(models.Model):
     source_of_funding = CharField(
         max_length=200,
         verbose_name="Source of funding",
-        help_text="What is the main source of funding for the development of the model?",
+        help_text="What is the main source of funding for the development of the model?",  # noqa
         null=True,
     )
     open_source = BooleanField(
@@ -245,22 +245,23 @@ class BasicFactsheet(models.Model):
     )
     interal_data_processing_software = ArrayField(
         models.CharField(max_length=1000),
-        help_text="Which data processing software is required? Please list all software (packages) that are used for internal data processing",
+        help_text="Which data processing software is required? Please list all software (packages) that are used for internal data processing",  # noqa
         verbose_name="Internal data processing software",
         default=list,
         null=True,
     )
-    # TODO: external_optimizer is not used anymore since the form adds a array element, a boolean field is not needed anymore
+    # TODO: external_optimizer is not used anymore since the form adds a array element,
+    # a boolean field is not needed anymore
     external_optimizer = BooleanField(
         default=False,
         verbose_name="External optimizer",
-        help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+        help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",  # noqa
         null=False,
     )
     external_optimizer_yes_text = ArrayField(
         models.CharField(max_length=1000),
         verbose_name="External optimizer",
-        help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",
+        help_text="Which external optimizer(s) can the model apply (e.g. Pyomo)? Please list them.",  # noqa
         default=list,
         null=True,
     )
@@ -288,19 +289,19 @@ class BasicFactsheet(models.Model):
     citation_DOI = CharField(
         max_length=10000,
         verbose_name="Citation DOI",
-        help_text="If  there are publications about the model that have a DOI please liste the DOIs",
+        help_text="If  there are publications about the model that have a DOI please liste the DOIs",  # noqa
         null=True,
     )
     references_to_reports_produced_using_the_model = CharField(
         max_length=10000,
         verbose_name="Reference Studies/Models",
-        help_text="Which studies were calculated/ Which models were developed  with the framework?",
+        help_text="Which studies were calculated/ Which models were developed  with the framework?",  # noqa
         null=True,
     )
     larger_scale_usage = CharField(
         max_length=10000,
         verbose_name="Model usage",
-        help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",
+        help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",  # noqa
         null=True,
     )
 
@@ -328,7 +329,7 @@ class Energymodel(BasicFactsheet):
     methodical_focus_1 = CharField(
         max_length=50,
         verbose_name="Methodical Focus",
-        help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',
+        help_text='1-3 Keyords describing the main methodical focus of the model e.g."open source", "sector coupling"',  # noqa
         null=True,
     )
     methodical_focus_2 = CharField(max_length=50, null=True, blank=True)
@@ -456,13 +457,13 @@ class Energymodel(BasicFactsheet):
     user_behaviour = BooleanField(
         default=False,
         verbose_name="User behaviour and demand side management",
-        help_text="Can user behaviour and demand side management be considered in the model? If yes please shortly explain how that is realised.",
+        help_text="Can user behaviour and demand side management be considered in the model? If yes please shortly explain how that is realised.",  # noqa
     )
     user_behaviour_yes_text = TextField(null=True)
     changes_in_efficiency = TextField(
         null=True,
         verbose_name="Changes in efficiency",
-        help_text="Can changes in efficiency be considered in the model? If yes please shortly explain how that is realised.",
+        help_text="Can changes in efficiency be considered in the model? If yes please shortly explain how that is realised.",  # noqa
     )
 
     market_models = CharField(
@@ -470,12 +471,12 @@ class Energymodel(BasicFactsheet):
         verbose_name="Market models",
         choices=((x, x) for x in ["fundamental model", "stochastic model"]),
         null=True,
-        help_text="If the described model is not a market model itself please indicate if a market model is included - if yes,  which one?",
+        help_text="If the described model is not a market model itself please indicate if a market model is included - if yes,  which one?",  # noqa
     )
 
     geographical_coverage = ArrayField(
         models.CharField(max_length=1000),
-        help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+        help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
         verbose_name="Geographical coverage",
         default=list,
         null=True,
@@ -505,7 +506,7 @@ class Energymodel(BasicFactsheet):
 
     comment_on_geo_resolution = TextField(
         verbose_name="Comment on geographic (spatial) resolution",
-        help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",
+        help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",  # noqa
         null=True,
     )
 
@@ -582,7 +583,7 @@ class Energymodel(BasicFactsheet):
 
     short_description_of_mathematical_model_class = TextField(
         verbose_name="Short description of mathematical model class",
-        help_text="Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.",
+        help_text="Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.",  # noqa
         null=True,
     )
 
@@ -623,13 +624,13 @@ class Energymodel(BasicFactsheet):
     typical_computation_hardware = CharField(
         max_length=10000,
         verbose_name="Typical computation hardware",
-        help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",
+        help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",  # noqa
         null=True,
     )
     technical_data_anchored_in_the_model = CharField(
         max_length=10000,
         verbose_name="Technical data anchored in the model",
-        help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",
+        help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",  # noqa
         null=True,
     )
 
@@ -645,18 +646,18 @@ class Energymodel(BasicFactsheet):
     model_specific_properties = CharField(
         max_length=10000,
         verbose_name="Model specific properties",
-        help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",
+        help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",  # noqa
         null=True,
     )
     example_research_questions = CharField(
         max_length=10000,
         verbose_name="Example research questions",
-        help_text="Which would be good research questions that could be answered with the model?",
+        help_text="Which would be good research questions that could be answered with the model?",  # noqa
         null=True,
     )
     properties_missed = TextField(
         verbose_name="further properties",
-        help_text="Which properties of your model have not been mentioned on this factsheet? Please note them.",
+        help_text="Which properties of your model have not been mentioned on this factsheet? Please note them.",  # noqa
         null=True,
     )
 
@@ -695,13 +696,13 @@ class Energymodel(BasicFactsheet):
     integrating_models = ArrayField(
         TextField(),
         verbose_name="Integration with other models",
-        help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?",
+        help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?",  # noqa
         null=True,
     )
     integrated_models = ArrayField(
         TextField(),
         verbose_name="Integration of other models",
-        help_text="Which models are integrated in the model? Where are these models available?",
+        help_text="Which models are integrated in the model? Where are these models available?",  # noqa
         null=True,
     )
 
@@ -748,13 +749,13 @@ class Energyframework(BasicFactsheet):
     inital_purpose = CharField(
         verbose_name="Inital purpose",
         null=True,
-        help_text="What was the initial purpose/task/motivation to start the development?",
+        help_text="What was the initial purpose/task/motivation to start the development?",  # noqa
         max_length=1000,
     )
     inital_purpose_change = CharField(
         verbose_name="Inital purpose change",
         null=True,
-        help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?",
+        help_text="Did that initial purpose change over time? If yes, what was the intentional purpose?",  # noqa
         max_length=1000,
     )
     inital_release_date = DateField(
@@ -767,7 +768,7 @@ class Energyframework(BasicFactsheet):
         CharField(max_length=1000),
         verbose_name="Research questions",
         null=True,
-        help_text="What are 3 typical research questions that are answered by applying the FW?",
+        help_text="What are 3 typical research questions that are answered by applying the FW?",  # noqa
     )
     parent_framework = CharField(
         verbose_name="Parent Framework",
@@ -879,12 +880,12 @@ class Energyframework(BasicFactsheet):
 
     auto_model_generator = BooleanField(
         verbose_name="Auto model generator",
-        help_text="Is an auto-Model generator available that transfers an input file into a Model?",
+        help_text="Is an auto-Model generator available that transfers an input file into a Model?",  # noqa
         default=False,
     )
     data_preprocessing = BooleanField(
         verbose_name="data preprocessing",
-        help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",
+        help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",  # noqa
         default=False,
     )
     data_preprocessing_other = CharField(
@@ -912,7 +913,7 @@ class Energyframework(BasicFactsheet):
     interfaces = CharField(
         verbose_name="interfaces",
         max_length=200,
-        help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list! ",
+        help_text="Which interfaces to recommended, additional,  useful software is provided by the framework? Please list!",  # noqa
         null=True,
     )
 
@@ -955,30 +956,30 @@ class Energyframework(BasicFactsheet):
     link_to_code_documentation = CharField(
         verbose_name="Link to code documentation",
         max_length=200,
-        help_text="Is a code/API documentation availaibe for the framework? Please insert the link!",
+        help_text="Is a code/API documentation availaibe for the framework? Please insert the link!",  # noqa
         null=True,
     )
     skills_basic = CharField(
         verbose_name="Skills basic",
         max_length=200,
-        help_text="What basic skills does a person need to become a user of the framework?",
+        help_text="What basic skills does a person need to become a user of the framework?",  # noqa
         null=True,
     )
     skills_advanced = CharField(
         verbose_name="Skills advanced",
         max_length=200,
-        help_text="What advanced skills does a person need to become a user of the framework?",
+        help_text="What advanced skills does a person need to become a user of the framework?",  # noqa
         null=True,
     )
     installation_guide = BooleanField(
         verbose_name="Installation guide",
-        help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link",
+        help_text="Is an installation guide provided for the framework (e.g. as part of the documentation)? Please provide a link",  # noqa
         default=False,
     )
     link_to_installation_guide = CharField(
         verbose_name="Link to installation guide",
         max_length=200,
-        help_text="Is an installation guide availaibe for the framework? Please insert the link!",
+        help_text="Is an installation guide availaibe for the framework? Please insert the link!",  # noqa
         null=True,
     )
     open_to_developers = BooleanField(
@@ -996,7 +997,7 @@ class Energyframework(BasicFactsheet):
     data_code_availability = CharField(
         verbose_name="Data availability",
         max_length=200,
-        help_text="Is at least one (dummy) data set available to run a model built with the framework?",
+        help_text="Is at least one (dummy) data set available to run a model built with the framework?",  # noqa
         null=True,
     )
 
@@ -1077,22 +1078,22 @@ class Energyframework(BasicFactsheet):
     )
     agricultural_demand = BooleanField(
         verbose_name="Agricultural demand",
-        help_text="Which agricultural demands are already modelled with the framework?",
+        help_text="Which agricultural demands are already modelled with the framework?",  # noqa
         default=False,
     )
     new_components = BooleanField(
         verbose_name="New components",
-        help_text="Is the framework build to allow for the implementation of new components?",
+        help_text="Is the framework build to allow for the implementation of new components?",  # noqa
         default=False,
     )
     variable_time_step = BooleanField(
         verbose_name="Variable time step",
-        help_text="Is it possible to Model variable time steps with the framework?",
+        help_text="Is it possible to Model variable time steps with the framework?",  # noqa
         default=False,
     )
     variable_rolling_horizon = BooleanField(
         verbose_name="Variable rolling",
-        help_text="Is it possible to Model a variable Rolling Horizon with the framework?",
+        help_text="Is it possible to Model a variable Rolling Horizon with the framework?",  # noqa
         default=False,
     )
 
@@ -1104,7 +1105,7 @@ class Energyframework(BasicFactsheet):
     )
     fw_appliance = CharField(
         verbose_name="Projects using the framework",
-        help_text="Which research projects (on-going or past) apply the framework?",
+        help_text="Which research projects (on-going or past) apply the framework?",  # noqa
         max_length=1000,
         null=True,
     )
@@ -1121,7 +1122,7 @@ class Energystudy(models.Model):
     )
     author_Institution = CharField(
         verbose_name="Author, Institution",
-        help_text="Who are the authors of the study and for which institution do they work?",
+        help_text="Who are the authors of the study and for which institution do they work?",  # noqa
         max_length=1000,
     )
     contact_email = EmailField(
@@ -1146,7 +1147,7 @@ class Energystudy(models.Model):
     )
     aim = CharField(
         verbose_name="Aim",
-        help_text="What is the purpose (hypothesis) and research question of the study?",
+        help_text="What is the purpose (hypothesis) and research question of the study?",  # noqa
         max_length=1000,
         null=True,
     )
@@ -1198,17 +1199,17 @@ class Energystudy(models.Model):
     modeled_demand_sectors_transport = BooleanField(verbose_name="transport")
 
     economic_behavioral_perfect = BooleanField(
-        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"
+        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"  # noqa
     )
 
     economic_behavioral_myopic = BooleanField(
-        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"
+        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"  # noqa
     )
     economic_behavioral_qualitative = BooleanField(
-        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"
+        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"  # noqa
     )
     economic_behavioral_agentbased = BooleanField(
-        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"
+        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"  # noqa
     )
     economic_behavioral_other = BooleanField(verbose_name="other")
     economic_behavioral_other_text = CharField(max_length=1000, null=True)
@@ -1288,31 +1289,31 @@ class Energyscenario(models.Model):
 
     technical_data = CharField(
         verbose_name="Technical data + usage",
-        help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",
+        help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
         max_length=1000,
         null=True,
     )
     social_data = CharField(
         verbose_name="Social data",
-        help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+        help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
         max_length=1000,
         null=True,
     )
     economical_data = CharField(
         verbose_name="Economical data",
-        help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",
+        help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
         max_length=1000,
         null=True,
     )
     ecological_data = CharField(
         verbose_name="Ecological data",
-        help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",
+        help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
         max_length=1000,
         null=True,
     )
     preProcessing = CharField(
         verbose_name="Pre-Processing",
-        help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",
+        help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",  # noqa
         max_length=1000,
         null=True,
     )
@@ -1499,7 +1500,7 @@ class Energyscenario(models.Model):
 
     social_developement = CharField(
         verbose_name="Social developement",
-        help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",
+        help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",  # noqa
         max_length=1000,
         null=True,
     )
@@ -1517,7 +1518,7 @@ class Energyscenario(models.Model):
     )
     postprocessing = BooleanField(
         verbose_name="Post-processing",
-        help_text="Are the presented results directly taken from the models’ outcome or are they modified?",
+        help_text="Are the presented results directly taken from the models’ outcome or are they modified?",  # noqa
     )
     further_assumptions_for_postprocessing = BooleanField(
         verbose_name="Further assumptions for post-processing",
@@ -1538,13 +1539,13 @@ class Energyscenario(models.Model):
     )
     comparability_Validation = CharField(
         verbose_name="Comparability / Validation",
-        help_text="How far do the modelling results fit in compared to similar scientific research?",
+        help_text="How far do the modelling results fit in compared to similar scientific research?",  # noqa
         max_length=1000,
         null=True,
     )
     conclusions = CharField(
         verbose_name="Conclusions",
-        help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",
+        help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",  # noqa
         max_length=1000,
         null=True,
     )

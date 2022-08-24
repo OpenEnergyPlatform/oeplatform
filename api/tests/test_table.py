@@ -58,7 +58,8 @@ class TestPut(APITestCase):
         for column in self._structure_data["columns"]:
             for key in column:
                 # name is a programmer-introduced key.
-                # We are able to use a list instead of a dictonary to get better iteration possibilities.
+                # We are able to use a list instead of a dictonary to get better
+                # iteration possibilities.
                 if key != "name":
                     value = column[key]
                     name = column["name"]

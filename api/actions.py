@@ -175,7 +175,8 @@ def describe_columns(schema, table):
     """
     Loads the description of all columns of the specified table and return their
     description as a dictionary. Each column is identified by its name and
-    points to a dictionary containing the information specified in https://www.postgresql.org/docs/9.3/static/infoschema-columns.html:
+    points to a dictionary containing the information specified
+    in https://www.postgresql.org/docs/9.3/static/infoschema-columns.html:
 
     * ordinal_position
     * column_default
@@ -208,11 +209,11 @@ def describe_columns(schema, table):
         "c.character_maximum_length, c.character_octet_length, "
         "c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, "
         "c.datetime_precision, c.interval_type, c.interval_precision, "
-        "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "
+        "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "  # noqa
         "from INFORMATION_SCHEMA.COLUMNS  c "
         "LEFT JOIN information_schema.element_types e "
-        "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "
-        "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "
+        "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
+        "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
         "'{table}' and table_schema='{schema}';".format(table=table, schema=schema)
     )
     response = session.execute(query)
@@ -273,7 +274,8 @@ def describe_constraints(schema, table):
     """
     Loads the description of all constraints of the specified table and return their
     description as a dictionary. Each constraints is identified by its name and
-    points to a dictionary containing the following information specified in https://www.postgresql.org/docs/9.3/static/infoschema-table-constraints.html:
+    points to a dictionary containing the following information specified
+    in https://www.postgresql.org/docs/9.3/static/infoschema-table-constraints.html:
 
     * constraint_typ
     * is_deferrable
@@ -291,7 +293,7 @@ def describe_constraints(schema, table):
 
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
-    query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(
+    query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
         table=table, schema=schema
     )
     response = session.execute(query)
@@ -332,7 +334,8 @@ def perform_sql(sql_statement, parameter=None):
         raise APIError(str(e))
     else:
         # Why is commit() not part of close() ?
-        # I have to commit the changes before closing session. Otherwise the changes are not persistent.
+        # I have to commit the changes before closing session.
+        # Otherwise the changes are not persistent.
         session.commit()
     finally:
         session.close()
@@ -369,7 +372,7 @@ def apply_queued_column(id):
         )
     else:
         ex_str = str(res.get("exception"))
-        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(
+        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
             id=id, ex_str=ex_str
         )
 
@@ -388,12 +391,12 @@ def apply_queued_constraint(id):
     res = table_change_constraint(constraint_description)
 
     if res.get("success") is True:
-        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(
+        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(  # noqa
             id=id
         )
     else:
         ex_str = str(res.get("exception"))
-        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(
+        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
             id=id, ex_str=ex_str
         )
     perform_sql(sql)
@@ -447,8 +450,8 @@ def queue_constraint_change(schema, table, constraint_def):
 
     sql_string = (
         "INSERT INTO public.api_constraints (action, constraint_type"
-        ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) "
-        "VALUES ('{action}', '{c_type}', '{c_name}', '{c_parameter}', '{r_table}', '{r_column}' , '{c_schema}' "
+        ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) "  # noqa
+        "VALUES ('{action}', '{c_type}', '{c_name}', '{c_parameter}', '{r_table}', '{r_column}' , '{c_schema}' "  # noqa
         ", '{c_table}');".format(
             action=get_or_403(cd, "action"),
             c_type=get_or_403(cd, "constraint_type"),
@@ -475,7 +478,7 @@ def queue_column_change(schema, table, column_definition):
 
     column_definition = api.parser.replace_None_with_NULL(column_definition)
 
-    sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(
+    sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(  # noqa
         name=get_or_403(column_definition, "column_name"),
         not_null=get_or_403(column_definition, "not_null"),
         data_type=get_or_403(column_definition, "data_type"),
@@ -743,13 +746,13 @@ def column_add(schema, table, column, description):
 def assert_valid_table_name(table):
     if len(table) > MAX_TABLE_NAME_LENGTH:
         raise APIError(
-            f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})"
+            f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})"  # noqa
         )
     if len(table) == 0:
         raise APIError("Empty table name")
     if not re.match(r"[a-z][a-z0-9_]*", table):
         raise APIError(
-            "Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "
+            "Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "  # noqa
             "and start with a letter."
         )
 
@@ -771,7 +774,8 @@ def table_create(
     :return: Dictionary with results
     """
 
-    # Building and joining a string array seems to be more efficient than native string concats.
+    # Building and joining a string array seems to be more efficient
+    # than native string concats.
     # https://waymoot.org/home/python_string/
 
     # id_columns = [c for c in columns if c['name'] == 'id']
@@ -921,12 +925,13 @@ def table_change_column(column_definition):
     if current_name in existing_column_description:
         # Column exists and want to be changed
 
-        # Figure out, which column should be changed and constraint or datatype or name should be changed
+        # Figure out, which column should be changed and constraint
+        # or datatype or name should be changed
 
         if get_or_403(column_definition, "new_name") is not None:
             # Rename table
             sql.append(
-                "ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {new_name};".format(
+                "ALTER TABLE {schema}.{table} RENAME COLUMN {name} TO {new_name};".format(  # noqa
                     schema=schema,
                     table=table,
                     name=current_name,
@@ -944,7 +949,7 @@ def table_change_column(column_definition):
             != existing_column_description[column_definition["name"]]["data_type"]
         ):
             sql.append(
-                "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(
+                "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} TYPE {c_datatype};".format(  # noqa
                     schema=schema,
                     table=table,
                     c_name=current_name,
@@ -958,14 +963,14 @@ def table_change_column(column_definition):
             if c_null:
                 # Change to nullable
                 sql.append(
-                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;".format(
+                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} DROP NOT NULL;".format(  # noqa
                         schema=schema, table=table, c_name=current_name
                     )
                 )
             else:
                 # Change to not null
                 sql.append(
-                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;".format(
+                    "ALTER TABLE {schema}.{table} ALTER COLUMN {c_name} SET NOT NULL;".format(  # noqa
                         schema=schema, table=table, c_name=current_name
                     )
                 )
@@ -973,7 +978,7 @@ def table_change_column(column_definition):
         # Column does not exist and should be created
         # Request will end in 500, if an argument is missing.
         sql.append(
-            "ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(
+            "ALTER TABLE {schema}.{table} ADD {c_name} {c_datatype} {c_notnull};".format(  # noqa
                 schema=schema,
                 table=table,
                 c_name=current_name,
@@ -1276,7 +1281,7 @@ def data_insert_check(schema, table, values, context):
                 if val is None or (isinstance(val, str) and val.lower() == "null"):
                     if column_name in row or not column.get("column_default", None):
                         raise APIError(
-                            "Action violates not-null constraint on {col}. Failing row was {row}".format(
+                            "Action violates not-null constraint on {col}. Failing row was {row}".format(  # noqa
                                 col=column_name,
                                 row="("
                                 + (
@@ -1436,7 +1441,7 @@ def _get_header(results):
 def analyze_columns(schema, table):
     engine = _get_engine()
     result = engine.execute(
-        "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(
+        "select column_name as id, data_type as type from information_schema.columns where table_name = '{table}' and table_schema='{schema}';".format(  # noqa
             schema=schema, table=table
         )
     )
@@ -1520,7 +1525,7 @@ def get_comment_table(schema, table):
     engine = _get_engine()
 
     # https://www.postgresql.org/docs/9.5/functions-info.html
-    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(
+    sql_string = "select obj_description('\"{schema}\".\"{table}\"'::regclass::oid, 'pg_class');".format(  # noqa
         schema=schema, table=table
     )
     res = engine.execute(sql_string)
@@ -2258,7 +2263,7 @@ def set_table_metadata(table, schema, metadata, cursor):
             table_obj.comment = json.dumps(compiler_14.visit(metadata))
         except Exception as e:
             raise APIError(
-                "Metadata is not compilable using metadat aversion 1.4 compiler{}".format(
+                "Metadata is not compilable using metadat aversion 1.4 compiler{}".format(  # noqa
                     e
                 )
             )

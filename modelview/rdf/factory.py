@@ -25,9 +25,7 @@ class RDFFactory(ABC):
 
     @classmethod
     def doc(self):
-        s = f"""Factory class for {self._direct_parent}. This class has the following fields:
-
-"""
+        s = f"Factory class for {self._direct_parent}. This class has the following fields:"  # noqa
         for f in self.iter_field_names():
             fld = getattr(self, f)
             s += f"* `{f} <{field.rdf_name}>`_ ({fld.rdf_name})"

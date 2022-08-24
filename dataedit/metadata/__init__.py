@@ -58,7 +58,8 @@ def assign_content_values_to_metadata(content, template=None, parent=""):
 
     :param content: query dict
     :param template: dict (can be nested dicts)
-    :param parent: a parameter to link content keys with the nested structure of template
+    :param parent: a parameter to link content keys with the nested structure
+        of template
     :return: the template with assigned values from the content query dict
     """
     for k in template:
@@ -71,8 +72,8 @@ def assign_content_values_to_metadata(content, template=None, parent=""):
                     parent=format_content_key(parent, k),
                 )
             elif isinstance(template[k], list):
-                # the value is a list, so we make a recursive call on the unique instances
-                # in the list
+                # the value is a list, so we make a recursive call on the
+                # unique instances in the list
 
                 # find the instances which start with the prefix in the content keys
                 prefix = format_content_key(parent, k)
@@ -148,16 +149,16 @@ def parse_meta_data(metadata, schema, table):
                     elif version[1] == 2:
                         metadata = __LATEST.from_v1_2(metadata)
                     elif version[1] == 3:
-                        # This is not part of the actual metadata-schema. We move the fields to
-                        # a higher level in order to avoid fetching the first resource in the
-                        # templates.
+                        # This is not part of the actual metadata-schema. We move the
+                        # fields to a higher level in order to avoid fetching the first
+                        # resource in the templates.
                         res = metadata.get("resources", [])
                         if res:
                             metadata["fields"] = res[0].get("fields", [])
                     elif version[1] == 4:
-                        # This is not part of the actual metadata-schema. We move the fields to
-                        # a higher level in order to avoid fetching the first resource in the
-                        # templates.
+                        # This is not part of the actual metadata-schema. We move the
+                        # fields to a higher level in order to avoid fetching the
+                        # first resource in the templates.
                         res = metadata.get("resources", [])
                         if res:
                             metadata["fields"] = (
@@ -178,7 +179,8 @@ def parse_meta_data(metadata, schema, table):
 
 
 def read_metadata_from_post(content_query, schema, table):
-    """Prepare dict to modify the comment prop of a table in OEP database (contains the metadata)
+    """Prepare dict to modify the comment prop of a table in OEP database
+    i.e. contains the metadata
 
     :param content_query: the content of the POST request
 

@@ -256,20 +256,20 @@ def listschemas(request):
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
     description = {
-        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
-        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",
-        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",
-        "demand": "Data on demand. Demand can relate to commodities but also to services.",
-        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",
-        "supply": "Data on supply. Supply can relate to commodities but also to services.",
-        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
-        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
-        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
-        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",
-        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
-        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
-        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",
+        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
+        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
+        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
+        "demand": "Data on demand. Demand can relate to commodities but also to services.",  # noqa
+        "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",  # noqa
+        "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
+        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
+        "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
+        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
+        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
+        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
+        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",  # noqa
+        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }
 
     schemas = [
@@ -326,14 +326,15 @@ def get_readable_table_names(schema):
 
     :param schema: The schema name as string
 
-    :return: A dictionary with that maps table names to readable names as returned by :py:meth:`dataedit.views.read_label`
+    :return: A dictionary with that maps table names to readable names as
+        returned by :py:meth:`dataedit.views.read_label`
     """
     engine = actions._get_engine()
     conn = engine.connect()
     try:
         res = conn.execute(
             "SELECT table_name as TABLE "
-            "FROM information_schema.tables where table_schema='{table_schema}';".format(
+            "FROM information_schema.tables where table_schema='{table_schema}';".format(  # noqa
                 table_schema=schema
             )
         )
@@ -427,7 +428,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
 
         filter_tables = Q(pk__in=[])
         # start with a "always false" condition, because we add OR statements
-        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851
+        # see: https://forum.djangoproject.com/t/improving-q-objects-with-true-false-and-none/851   # noqa
 
         for schema_name, table_name in tag_query:
             filter_tables = filter_tables | (
@@ -533,7 +534,8 @@ def _type_json(json_obj):
     Recursively labels JSON-objects by their types. Singleton lists are handled
     as elementary objects.
 
-    :param json_obj: An JSON-object - possibly a dictionary, a list or an elementary JSON-object (e.g a string)
+    :param json_obj: An JSON-object - possibly a dictionary, a list
+        or an elementary JSON-object (e.g a string)
 
     :return: An annotated JSON-object (type, object)
 
@@ -925,8 +927,8 @@ class GraphView(View):
         return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
 
     def post(self, request, schema, table):
-        # save an instance of View, look at GraphViewForm fields in forms.py for information to the
-        # options
+        # save an instance of View, look at GraphViewForm fields in forms.py
+        # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
         gview = DataViewModel.objects.create(
             name=request.POST.get("name"),
@@ -985,7 +987,8 @@ class MapView(View):
 class DataView(View):
     """This class handles the GET and POST requests for the main page of data edit.
 
-    This view is displayed when a table is clicked on after choosing a schema on the website
+    This view is displayed when a table is clicked on after choosing a schema
+    on the website
 
     Initialises the session data (if necessary)
     """
@@ -1333,7 +1336,8 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
         session (sqlachemy): sqlalachemy session
         schema (str): Name of the schema
         table (str): Name of the table
-        keyword_tag_id (int): The tag id that machtes to keyword tag name (by tag_name_normalized)
+        keyword_tag_id (int): The tag id that machtes to keyword tag name
+            (by tag_name_normalized)
 
     Returns:
         any: Exception
@@ -1358,7 +1362,8 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
 def get_tag_keywords_synchronized_metadata(
     table, schema, keywords_new=None, tag_ids_new=None
 ):
-    """synchronize tags and keywords, either by new metadata OR by set of tag ids (from UI)
+    """synchronize tags and keywords, either by new metadata OR by set of tag ids
+    (from UI)
 
     Args:
         table (_type_): _description_
@@ -1484,9 +1489,11 @@ def get_tag_keywords_synchronized_metadata(
 def update_table_tags(request):
     """
     Updates the tags on a table according to the tag values in request.
-    The update will delete all tags that are not present in request and add all tags that are.
+    The update will delete all tags that are not present
+    in request and add all tags that are.
 
-    :param request: A HTTP-request object sent by the Django framework. The *POST* field must contain the following values:
+    :param request: A HTTP-request object sent by the Django framework.
+        The *POST* field must contain the following values:
         * schema: The name of a schema
         * table: The name of a table
         * Any number of values that start with 'tag_' followed by the id of a tag.
@@ -1519,7 +1526,7 @@ def update_table_tags(request):
 
     messasge = messages.success(
         request,
-        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',
+        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
     )
 
     return render(request, "dataedit/dataview.html", {"messages": messasge})
@@ -1647,8 +1654,9 @@ def get_column_description(schema, table):
     def get_datatype_str(column_def):
         """get single string sql type definition.
 
-        We want the data type definition to be a simple string, e.g. decimal(10, 6) or varchar(128),
-        so we need to combine the various fields (type, numeric_precision, numeric_scale, ...)
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
         """
         # for reverse validation, see also api.parser.parse_type(dt_string)
         dt = column_def["data_type"].lower()
@@ -1679,9 +1687,11 @@ def get_column_description(schema, table):
         return dt
 
     def get_pk_fields(constraints):
-        """Get the column names that make up the primary key from the constraints definitions.
+        """Get the column names that make up the primary key
+        from the constraints definitions.
 
-        NOTE: Currently, the wizard to create tables only supports single fields primary keys (which is advisable anyways)
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
         """
         pk_fields = []
         for _name, constraint in constraints.items():
@@ -1733,7 +1743,7 @@ class WizardView(LoginRequiredMixin, View):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
             if not request.user.is_anonymous:
-                # user_perms = login_models.UserPermission.objects.filter(table=table_obj)
+                # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
                 level = request.user.get_table_permission_level(table_obj)
                 can_add = level >= login_models.WRITE_PERM
             columns = get_column_description(schema, table)

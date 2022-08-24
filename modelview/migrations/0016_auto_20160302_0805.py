@@ -29,9 +29,9 @@ class Migration(migrations.Migration):
             name="authors",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
-                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
                     max_length=300,
-                    verbose_name="Author(s) (institution, working field, active time period) (comma-separated)",
+                    verbose_name="Author(s) (institution, working field, active time period) (comma-separated)",  # noqa
                 ),
                 default=list,
                 null=True,
@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
             name="geographical_coverage",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
-                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
                     max_length=1000,
                     verbose_name="Geographical coverage (comma-separated)",
                 ),

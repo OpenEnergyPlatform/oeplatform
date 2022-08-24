@@ -89,7 +89,7 @@ urlpatterns = [
         views.GraphView.as_view(),
     ),
     url(
-        r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/map/(?P<maptype>(latlon|geom))/new".format(  # noqa
             qual=pgsql_qualifier
         ),
         views.MapView.as_view(),

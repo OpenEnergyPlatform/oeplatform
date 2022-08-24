@@ -77,7 +77,8 @@ class ContactView(View):
             )
             send_mail(
                 request.POST.get("contact_topic"),
-                f"{request.POST.get('contact_name')} ({request.POST.get('contact_email')}) wrote: \n"
+                f"{request.POST.get('contact_name')} "
+                + f"({request.POST.get('contact_email')}) wrote: \n"
                 + request.POST.get("content"),
                 sec.DEFAULT_FROM_EMAIL,
                 receps,
@@ -120,7 +121,8 @@ def get_json_content(path, json_id=None):
 
     Args:
         path (string): path to directory like 'static/project_pages_content/'
-        json_id (string, optional): ID value that must match the value of json[id]. Defaults to None.
+        json_id (string, optional): ID value that must match the value of json[id].
+            Defaults to None.
 
     Returns:
         list[object]: List of all deserialized json files in path
@@ -145,7 +147,7 @@ def get_json_content(path, json_id=None):
     # TODO: catch the exception if path is none
     else:
         return {
-            "error": "Path cant be None. Please provide the path to '/static/project_detail_pages_content/' . You can create a new Project by adding an JSON file like the '/static/project_detail_pages_content/PROJECT_TEMPLATE.json'."
+            "error": "Path cant be None. Please provide the path to '/static/project_detail_pages_content/' . You can create a new Project by adding an JSON file like the '/static/project_detail_pages_content/PROJECT_TEMPLATE.json'."  # noqa
         }
 
 

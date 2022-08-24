@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="data_postprocessing",
             field=models.BooleanField(
                 default=False,
-                help_text="Which output format(s) can the framework apply? Please list!",
+                help_text="Which output format(s) can the framework apply? Please list!",  # noqa
                 verbose_name="data postprocessing",
             ),
         ),
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             name="agricultural_demand",
             field=models.BooleanField(
                 default=False,
-                help_text="Which agricultural demands are already modelled with the framework?",
+                help_text="Which agricultural demands are already modelled with the framework?",  # noqa
                 verbose_name="Agricultural demand",
             ),
         ),

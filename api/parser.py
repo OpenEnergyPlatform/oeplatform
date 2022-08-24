@@ -176,7 +176,8 @@ def parse_select(d):
     not implemented:
         [ WITH [ RECURSIVE ] with_query [, ...] ]
         [ WINDOW window_name AS ( window_definition ) [, ...] ]
-        [ FOR { UPDATE | NO KEY UPDATE | SHARE | KEY SHARE } [ OF table_name [, ...] ] [ NOWAIT ] [...] ]
+        [ FOR { UPDATE | NO KEY UPDATE | SHARE | KEY SHARE }
+            [ OF table_name [, ...] ] [ NOWAIT ] [...] ]
     """
     distinct = d.get("distinct", False)
 
@@ -275,8 +276,10 @@ def parse_from_item(d):
 
     Not implemented:
         with_query_name [ [ AS ] alias [ ( column_alias [, ...] ) ] ]
-        [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ] alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
-        [ LATERAL ] function_name ( [ argument [, ...] ] ) AS ( column_definition [, ...] )
+        [ LATERAL ] function_name ( [ argument [, ...] ] ) [ AS ]
+            alias [ ( column_alias [, ...] | column_definition [, ...] ) ]
+        [ LATERAL ] function_name ( [ argument [, ...] ] )
+            AS ( column_definition [, ...] )
     """
     # TODO: If 'type' is not set assume just a table name is present
     if isinstance(d, str):

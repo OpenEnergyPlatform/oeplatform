@@ -102,8 +102,9 @@ class TestPut(APITestCase):
 
         omi_meta_return = response.json()
 
-        # ignore difference in keywords (by setting resulting keywords == input keywords)
-        # REASON: the test re-uses the same test table, but does not delete the table tags in between
+        # ignore diff in keywords (by setting resulting keywords == input keywords)
+        # REASON: the test re-uses the same test table,
+        # but does not delete the table tags in between
         # if we want to synchronize tagsand keywords, the roundtrip would otherwise fail
         omi_meta["keywords"] = omi_meta.get("keywords", [])
         omi_meta_return["keywords"] = omi_meta["keywords"]
@@ -138,8 +139,8 @@ class TestPut(APITestCase):
         meta = {
             "name": "oep_metadata_table_example_v151",
             "title": "Example title for metadata example - Version 1.5.1",
-            "id": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v151",
-            "description": "This is an metadata example for example data. There is a corresponding table on the OEP for each metadata version.",
+            "id": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v151",  # noqa
+            "description": "This is an metadata example for example data. There is a corresponding table on the OEP for each metadata version.",  # noqa
             "language": ["en-GB", "en-US", "de-DE", "fr-FR"],
             "subject": [
                 {
@@ -155,13 +156,13 @@ class TestPut(APITestCase):
             "publicationDate": "2022-02-15",
             "context": {
                 "homepage": "https://reiner-lemoine-institut.de/lod-geoss/",
-                "documentation": "https://openenergy-platform.org/tutorials/jupyter/OEMetadata/",
-                "sourceCode": "https://github.com/OpenEnergyPlatform/oemetadata/tree/master",
+                "documentation": "https://openenergy-platform.org/tutorials/jupyter/OEMetadata/",  # noqa
+                "sourceCode": "https://github.com/OpenEnergyPlatform/oemetadata/tree/master",  # noqa
                 "contact": "https://github.com/Ludee",
                 "grantNo": "03EI1005",
                 "fundingAgency": "Bundesministerium für Wirtschaft und Klimaschutz",
-                "fundingAgencyLogo": "https://commons.wikimedia.org/wiki/File:BMWi_Logo_2021.svg#/media/File:BMWi_Logo_2021.svg",
-                "publisherLogo": "https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png",
+                "fundingAgencyLogo": "https://commons.wikimedia.org/wiki/File:BMWi_Logo_2021.svg#/media/File:BMWi_Logo_2021.svg",  # noqa
+                "publisherLogo": "https://reiner-lemoine-institut.de//wp-content/uploads/2015/09/rlilogo.png",  # noqa
             },
             "spatial": {"location": null, "extent": "europe", "resolution": "100 m"},
             "temporal": {
@@ -192,22 +193,22 @@ class TestPut(APITestCase):
                         {
                             "name": "CC0-1.0",
                             "title": "Creative Commons Zero v1.0 Universal",
-                            "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
-                            "instruction": "You are free: To Share, To Create, To Adapt",
+                            "path": "https://creativecommons.org/publicdomain/zero/1.0/legalcode",  # noqa
+                            "instruction": "You are free: To Share, To Create, To Adapt",  # noqa
                             "attribution": "© Reiner Lemoine Institut",
                         }
                     ],
                 },
                 {
                     "title": "OpenStreetMap",
-                    "description": "A collaborative project to create a free editable map of the world",
+                    "description": "A collaborative project to create a free editable map of the world",  # noqa
                     "path": "https://www.openstreetmap.org/",
                     "licenses": [
                         {
                             "name": "ODbL-1.0",
                             "title": "Open Data Commons Open Database License 1.0",
-                            "path": "https://opendatacommons.org/licenses/odbl/1.0/index.html",
-                            "instruction": "You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!",
+                            "path": "https://opendatacommons.org/licenses/odbl/1.0/index.html",  # noqa
+                            "instruction": "You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!",  # noqa
                             "attribution": "© OpenStreetMap contributors",
                         }
                     ],
@@ -218,8 +219,8 @@ class TestPut(APITestCase):
                     "name": "ODbL-1.0",
                     "title": "Open Data Commons Open Database License 1.0",
                     "path": "https://opendatacommons.org/licenses/odbl/1.0/",
-                    "instruction": "You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!",
-                    "attribution": "© Reiner Lemoine Institut © OpenStreetMap contributors",
+                    "instruction": "You are free: To Share, To Create, To Adapt; As long as you: Attribute, Share-Alike, Keep open!",  # noqa
+                    "attribution": "© Reiner Lemoine Institut © OpenStreetMap contributors",  # noqa
                 }
             ],
             "contributors": [
@@ -347,7 +348,7 @@ class TestPut(APITestCase):
                 {
                     "profile": "tabular-data-resource",
                     "name": "model_draft.oep_metadata_table_example_v151",
-                    "path": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v151",
+                    "path": "http://openenergyplatform.org/dataedit/view/model_draft/oep_metadata_table_example_v151",  # noqa
                     "format": "PostgreSQL",
                     "encoding": "UTF-8",
                     "schema": {
@@ -370,7 +371,7 @@ class TestPut(APITestCase):
                                 "isAbout": [
                                     {
                                         "name": "written name",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/IAO_0000590",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/IAO_0000590",  # noqa
                                     }
                                 ],
                                 "valueReference": [
@@ -385,19 +386,19 @@ class TestPut(APITestCase):
                                 "isAbout": [
                                     {
                                         "name": "wind farm",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000447",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000447",  # noqa
                                     }
                                 ],
                                 "valueReference": [
                                     {
                                         "value": "onshore ",
                                         "name": "onshore wind farm",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000311",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000311",  # noqa
                                     },
                                     {
                                         "value": "offshore ",
                                         "name": "offshore wind farm",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000308",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000308",  # noqa
                                     },
                                 ],
                             },
@@ -409,7 +410,7 @@ class TestPut(APITestCase):
                                 "isAbout": [
                                     {
                                         "name": "year",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/UO_0000036",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/UO_0000036",  # noqa
                                     }
                                 ],
                                 "valueReference": [
@@ -424,7 +425,7 @@ class TestPut(APITestCase):
                                 "isAbout": [
                                     {
                                         "name": "quantity value",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000350",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/OEO_00000350",  # noqa
                                     }
                                 ],
                                 "valueReference": [
@@ -439,7 +440,7 @@ class TestPut(APITestCase):
                                 "isAbout": [
                                     {
                                         "name": "spatial region",
-                                        "path": "https://openenergy-platform.org/ontology/oeo/BFO_0000006",
+                                        "path": "https://openenergy-platform.org/ontology/oeo/BFO_0000006",  # noqa
                                     }
                                 ],
                                 "valueReference": [
@@ -462,9 +463,9 @@ class TestPut(APITestCase):
                 }
             ],
             "@id": "https://databus.dbpedia.org/kurzum/mastr/bnetza-mastr/01.04.00",
-            "@context": "https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/context.json",
+            "@context": "https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/context.json",  # noqa
             "review": {
-                "path": "https://github.com/OpenEnergyPlatform/data-preprocessing/issues",
+                "path": "https://github.com/OpenEnergyPlatform/data-preprocessing/issues",  # noqa
                 "badge": "Platinum",
             },
             "metaMetadata": {
@@ -476,12 +477,12 @@ class TestPut(APITestCase):
                 },
             },
             "_comment": {
-                "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/oemetadata)",
-                "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
+                "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/oemetadata)",  # noqa
+                "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",  # noqa
                 "units": "Use a space between numbers and units (100 m)",
-                "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-                "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
-                "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",
+                "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",  # noqa
+                "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",  # noqa
+                "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",  # noqa
                 "null": "If not applicable use: null",
                 "todo": "If a value is not yet available, use: todo",
             },

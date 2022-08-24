@@ -180,7 +180,7 @@ def year_field(instance, field_name):
     # field_kind = instance.fields[field_name + "_kind"]
     # field_year = instance.fields[field_name + "_year"]
     return mark_safe(
-        "{{{{ {field}.label }}}}: {{{{ {field}_amount }}}} {{{{ {field}_kind }}}} {{{{ {field}_year }}}} <br>".format(
+        "{{{{ {field}.label }}}}: {{{{ {field}_amount }}}} {{{{ {field}_kind }}}} {{{{ {field}_year }}}} <br>".format(  # noqa
             field=field_name
         )
     )

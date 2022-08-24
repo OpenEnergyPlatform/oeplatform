@@ -28,7 +28,8 @@ def upgrade():
         """
         -- create normalized names
         UPDATE public.tags
-        SET name_normalized = TRIM(BOTH '_' FROM REGEXP_REPLACE(LOWER(name), '[^a-z0-9]+', '_', 'g'))
+        SET name_normalized =
+        TRIM(BOTH '_' FROM REGEXP_REPLACE(LOWER(name), '[^a-z0-9]+', '_', 'g'))
         ;
 
         -- create temporary column id_normalized

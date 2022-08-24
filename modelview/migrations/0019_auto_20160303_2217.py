@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name="integrated_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
-                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",
+                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration of other models",
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             name="integrating_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
-                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration with other models",
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="endogenous_variables",
             field=models.CharField(
-                help_text="Which time series and variables are generated inside the model?",
+                help_text="Which time series and variables are generated inside the model?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Endogenous variables",

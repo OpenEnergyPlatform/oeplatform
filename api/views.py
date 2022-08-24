@@ -94,11 +94,13 @@ def load_cursor(named=False):
                         result = {}
                     # Initial server-side cursors do not contain any description before
                     # the first row is fetched. Therefore, we have to try to fetch the
-                    # first one - if successful, we a description if not, nothing is returned.
+                    # first one - if successful, we a description if not,
+                    # nothing is returned.
                     # But: After the last row the cursor will 'forget' its description.
                     # Therefore we have to fetch the remaining data later.
 
-                    # Set of triggers after all the data was fetched. The cursor must not be closed earlier!
+                    # Set of triggers after all the data was fetched.
+                    # The cursor must not be closed earlier!
                     triggers = [
                         actions.close_cursor,
                         actions.close_raw_connection,
@@ -372,7 +374,8 @@ class Table(APIView):
         """
         Every request to unsave http methods have to contain a "csrftoken".
         This token is used to deny cross site reference forwarding.
-        In every request the header had to contain "X-CSRFToken" with the actual csrftoken.
+        In every request the header had to contain "X-CSRFToken"
+        with the actual csrftoken.
         The token can be requested at / and will be returned as cookie.
 
         :param request:
@@ -616,7 +619,8 @@ class Rows(APIView):
 
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
-        # If you connect two values with an +, it will convert the + to a space. Whatever.
+        # If you connect two values with an +, it will convert the + to a space.
+        # Whatever.
 
         where_clauses = self.__read_where_clause(where)
 
@@ -950,7 +954,8 @@ def date_handler(obj):
     """
     Implements a handler to serialize dates in JSON-strings
     :param obj: An object
-    :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
+    :return: The str method is called (which is the default serializer for JSON)
+        unless the object has an attribute  *isoformat*
     """
     if isinstance(obj, Decimal):
         return str(obj)
@@ -968,7 +973,8 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
-    :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
+    :return: A JSON-Response that contains a dictionary with
+      the corresponding response stored in *content*
     """
 
     class AJAX_View(APIView):
