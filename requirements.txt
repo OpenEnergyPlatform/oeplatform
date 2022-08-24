@@ -20,7 +20,6 @@ django-simple-captcha
 django-bootstrap5
 django-fontawesome-5
 omi>=0.0.7
-django-jquery
 zipstream-new
 rdflib<6.0
 rdflib-jsonld # DeprecationWarning when rdflib>=6.0
