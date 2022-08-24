@@ -35,6 +35,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`
+   - Update `VERSION` with lastest version number
 1. merge release branch into `master` and `develop`
    - make sure to pull before merge
 1. Tag the release number: `git tag v<release version>`, e.g., `git tag v1.2.0`
