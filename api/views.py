@@ -34,6 +34,7 @@ from api.helpers.http import ModHttpResponse
 from api.models import UploadedImages
 from dataedit.models import Table as DBTable, Schema as DBSchema
 from dataedit.views import schema_whitelist
+from dataedit.views import get_tag_keywords_synchronized_metadata
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 import json
@@ -260,6 +261,17 @@ class Metadata(APIView):
         
         if metadata is not None:            
             cursor = actions.load_cursor_from_context(request.data)
+            
+            # update/sync keywords with tags before saving metadata
+            keywords = metadata.keywords or []            
+            
+            # get_tag_keywords_synchronized_metadata returns the OLD metadata
+            # but with the now harmonized keywords (harmonized with tags)
+            # so we only copy the resulting keywords before storing the metadata            
+            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)                        
+            metadata.keywords = _metadata["keywords"]     
+            
+
             actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)            
             return JsonResponse(raw_input)
         else:

@@ -36,18 +36,19 @@ class APITestCase(TestCase):
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
-            name="MrTest", email="mrtest@test.com"
+            name="MrTest", email="mrtest@test.com", did_agree=True, is_mail_verified=True
         )
         cls.user.save()
         cls.token = Token.objects.get(user=cls.user)
 
         cls.other_user, _ = myuser.objects.get_or_create(
-            name="NotMrTest", email="notmrtest@test.com"
+            name="NotMrTest", email="notmrtest@test.com", did_agree=True, is_mail_verified=True
         )
         cls.other_user.save()
         cls.other_token = Token.objects.get(user=cls.other_user)
 
         cls.client = Client()
+        
 
     def assertDictEqualKeywise(self, d1, d2, excluded=None):
         if not excluded:
@@ -168,3 +169,4 @@ class APITestCase(TestCase):
         self.assertEqual(
             resp.status_code, 200, resp.json().get("reason", "No reason returned")
         )
+
