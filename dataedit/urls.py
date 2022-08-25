@@ -48,12 +48,6 @@ urlpatterns = [
         name="meta_edit",
     ),
     url(
-        r"^view/(?P<schema>{qual})/(?P<table>{qual})/view$".format(
-            qual=pgsql_qualifier
-        ),
-        views.view_edit,
-    ),
-    url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/view/save$".format(
             qual=pgsql_qualifier
         ),

@@ -787,31 +787,6 @@ def add_tag(name, color):
     session.commit()
 
 
-def view_edit(request, schema, table):
-    post_id = request.GET.get("id")
-    if post_id:
-        view = DBView.objects.get(id=post_id)
-        context = {
-            "type": view.type,
-            "view": view,
-            "schema": schema,
-            "table": table,
-            "filter": view.filter.all(),
-        }
-        if view.options is not None:
-            context.update(view.options)
-        return render(
-            request, template_name="dataedit/view_editor.html", context=context
-        )
-    else:
-        type = request.GET.get("type")
-        return render(
-            request,
-            template_name="dataedit/view_editor.html",
-            context={"type": type, "new": True, "schema": schema, "table": table},
-        )
-
-
 def view_save(request, schema, table):
     post_name = request.POST.get("name")
     post_type = request.POST.get("type")
