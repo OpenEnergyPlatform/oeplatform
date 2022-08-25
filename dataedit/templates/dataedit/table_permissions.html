@@ -33,25 +33,7 @@
             </div>
         </div>
         {% if is_admin %}
-        <script>
-            $('#group_field').bind('input', function() {
-                var dfd = new $.Deferred();
-                var request = $.ajax({type: 'GET',
-                    url:'/api/grpprop/', dataType:'json',
-                    data: {
-                        name: $(this).val()
-                    }
-                });
-                request.done(function(users)
-                {
-                    console.log(users);
-                    $('#group_field').autocomplete({
-                        source: users
-                    });
-                    dfd.resolve({})
-                });
-            });
-        </script>
+        
         {% endif %}
         {% if not group_perms %}
             No permissions for groups set, yet.
@@ -102,27 +84,6 @@
                 <h4>User Permissions</h4>
             </div>
         </div>
-        {% if is_admin %}
-            <script>
-                $('#user_field').bind('input', function() {
-                    var dfd = new $.Deferred();
-                    var request = $.ajax({type: 'GET',
-                        url:'/api/usrprop/', dataType:'json',
-                        data: {
-                            name: $(this).val()
-                        }
-                    });
-                    request.done(function(users)
-                    {
-                        console.log(users);
-                        $('#user_field').autocomplete({
-                            source: users
-                        });
-                        dfd.resolve({})
-                    });
-                });
-            </script>
-        {% endif %}
         {% if not user_perms %}
             No permissions for users set, yet.
         {% endif %}
@@ -158,3 +119,29 @@
     </div>
 
 {% endblock %}
+
+{% block after-body-bottom-js %}
+
+{% if is_admin %}
+<script>                            
+    $('#group_field').bind('input', function() {
+        var dfd = new $.Deferred();
+        var request = $.ajax({type: 'GET',
+            url:'/api/grpprop/', dataType:'json',
+            data: {
+                name: $(this).val()
+            }
+        });
+        request.done(function(users)
+        {
+            console.log(users);
+            $('#group_field').autocomplete({
+                source: users
+            });
+            dfd.resolve({})
+        });
+    });
+</script>
+{% endif %}
+
+{% endblock after-body-bottom-js %}
