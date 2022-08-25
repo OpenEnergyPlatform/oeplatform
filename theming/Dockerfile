@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     ruby-full \
  && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --branch v4.4.1 https://github.com/twbs/bootstrap.git /bootstrap
+RUN git clone --branch v5.2.0 https://github.com/twbs/bootstrap.git /bootstrap
 RUN gem install sass
 
 WORKDIR /

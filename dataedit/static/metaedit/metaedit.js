@@ -152,7 +152,35 @@ var MetaEdit = function(config) {
       });
     }
 
-    fixRecursive(config.schema.properties, json, 'root');
+    function convertDescriptionIntoPopover() {
+        function convert(descr, label) {
+            var description = $(descr).text(); // get description text
+            if (description && label) {
+                label
+                    .attr('data-content', description)
+                    .attr('title', label.text())
+                    .attr('data-toggle', "popover")
+                    .popover({
+                        placement: 'top',
+                        trigger: 'hover',
+                        template: '<div class="popover"><div class="popover-arrow"></div><div class="popover-body"></div></div>'
+                    });
+                descr.addClass('d-none')
+            }
+        }
+
+        // headings
+        config.form.find('.card-title').parent().find('>p').not('.d-none').each(function (i, e) {
+            convert($(e), $(e).parent().find('>.card-title>label'))
+        });
+
+        // inputs
+        config.form.find('.mb-3>.form-text').not('.d-none').each(function (_i, e) {
+            convert($(e), $(e).parent().find('>label'))
+        });
+
+        // remove button groups
+        config.form.find('.btn-group').removeClass('btn-group');
 
     return json;
   }
@@ -258,7 +286,7 @@ var MetaEdit = function(config) {
         options = {
           startval: config.initialData,
           schema: config.schema,
-          theme: 'bootstrap4',
+          theme: 'bootstrap5',
           iconlib: 'fontawesome5',
           mode: 'form',
           compact: true,
@@ -309,7 +337,7 @@ var MetaEdit = function(config) {
 
         standalone_options = {
           schema: config.schema,
-          theme: 'bootstrap4',
+          theme: 'bootstrap5',
           iconlib: 'fontawesome5',
           mode: 'form',
           compact: true,

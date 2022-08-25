@@ -1,5 +1,5 @@
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 
 <!DOCTYPE html>
@@ -23,26 +23,25 @@
 
 <body>
 {% block header %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <a class="navbar-brand" href="/">
             <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
         </a>
-
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="/dataedit/schemas">Database</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Factsheets
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
                         <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
                         <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                         <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
@@ -51,11 +50,11 @@
                     </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOntology" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ontology
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
                         <a class="dropdown-item" href="/ontology/">Overview</a>
                         <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
                         <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
@@ -66,13 +65,13 @@
                     <a class="nav-link" href="/tutorials/">Tutorials</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         About
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
                         <a class="dropdown-item" href="/about/">Overview</a>
-                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/">Developer Documentation</a>
+                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/" target="_blank">Developer Documentation</a>
                         <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
                     </div>
                 </li>
@@ -91,8 +90,10 @@
         {% endif %}
 
         </div>
-
-    </nav>
+            </ul>
+        </div>
+    </div>
+</nav>
 
 {% endblock header %}
 
@@ -130,7 +131,6 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    {% bootstrap_javascript jquery=1 %}
     <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
