@@ -1,7 +1,7 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
 {% load static %}
 
 
@@ -24,7 +24,7 @@
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
-  
+
 </ul>
     {% bootstrap_form_errors form %}
 <div class="tab-content">
@@ -36,7 +36,7 @@
     <div id="Empirical" class="tab-pane fade">
         <table class="formtable">
             <tr>
-                <th> 
+                <th>
                     Exogenous time series used
                 </th>
                 <td>
@@ -68,7 +68,7 @@
             {% include 'modelview/editscenario_snippet_year.html' with name='share_RE_total' amount=form.share_RE_total_amount kind=form.share_RE_total_kind year=form.share_RE_total_year %}
 
             <tr>
-                <th> 
+                <th>
                     Cost development
                 </th>
                 <td>
@@ -78,14 +78,14 @@
                         {% include 'modelview/editmodel_snippet.html' with field=form.cost_development_learning_curves %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.cost_development_constant %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.cost_development_rediscount %}
-                        
+
                     </table>
                 </td>
             </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.technological_innovations %}
-            
+
             <tr>
-                <th> 
+                <th>
                     Potential wind
                 </th>
                 <td>
@@ -95,12 +95,12 @@
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_wind_economical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_wind_ecological %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_wind_other add=form.potential_wind_other_text%}
-                        
+
                     </table>
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Potential solar electric
                 </th>
                 <td>
@@ -110,13 +110,13 @@
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_electric_economical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_electric_ecological %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_electric_other add=form.potential_solar_electric_other_text %}
-                        
+
                     </table>
                 </td>
             </tr>
-            
+
             <tr>
-                <th> 
+                <th>
                     Potential solar thermal
                 </th>
                 <td>
@@ -125,12 +125,12 @@
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_technical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_economical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_ecological %}
-                        {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_other add=form.potential_solar_thermal_other_text%}  
+                        {% include 'modelview/editmodel_snippet.html' with field=form.potential_solar_thermal_other add=form.potential_solar_thermal_other_text%}
                     </table>
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Potential biomass
                 </th>
                 <td>
@@ -139,12 +139,12 @@
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_technical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_economical %}
                         {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_ecological %}
-                        {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_other add=form.potential_biomass_other_text%}  
+                        {% include 'modelview/editmodel_snippet.html' with field=form.potential_biomass_other add=form.potential_biomass_other_text%}
                     </table>
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Potential geothermal
                 </th>
                 <td>
@@ -158,7 +158,7 @@
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Potential hydro power
                 </th>
                 <td>
@@ -171,7 +171,7 @@
                     </table>
                 </td>
             </tr>
-            
+
             {% include 'modelview/editmodel_snippet.html' with field=form.social_developement %}
             {% include 'modelview/editmodel_snippet.html' with field=form.economic_development %}
             {% include 'modelview/editmodel_snippet.html' with field=form.development_of_environmental_aspects %}
@@ -187,32 +187,32 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.conclusions %}
         </table>
     </div>
-</div>   
+</div>
 </form>
 {% endblock %}
 
 {% block after-body-bottom-js %}
 <script type="text/javascript">
-    
+
     $(document).ready(function(){
     $('[data-bs-toggle="tooltip"]').tooltip();
     });
 
       var confirmOnLeave = function(msg) {
- 
+
       window.onbeforeunload = function (e) {
         e = e || window.event;
         msg = msg || '';
- 
+
         // For IE and Firefox
         if (e) {e.returnValue = msg;}
- 
+
         // For Chrome and Safari
         return msg;
     };
- 
+
 };
-    
+
     function Hide_Display(name)
     {
 	x = document.getElementById('id_'+name).value;
@@ -232,24 +232,24 @@
 	    divInfo1.style.display = 'inline';
 	    divInfo2.style.display = 'inline';
 	    divInfo3.style.display = 'none';
-	} 
+	}
     }
 
       var confirmOnLeave = function(msg) {
- 
+
       window.onbeforeunload = function (e) {
         e = e || window.event;
         msg = msg || '';
- 
+
         // For IE and Firefox
         if (e) {e.returnValue = msg;}
- 
+
         // For Chrome and Safari
         return msg;
     };
- 
+
 };
- 
+
 confirmOnLeave();
 
 

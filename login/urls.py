@@ -1,17 +1,45 @@
 from django.conf.urls import include, url
+from django.contrib.auth.views import (
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
+    PasswordResetView,
+)
 from django.urls import path
+
 from login import views
-from django.contrib.auth.views import PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView
 
 urlpatterns = [
-    path('password_reset/', views.PasswordResetView.as_view(
-        html_email_template_name="registration/password_reset_email.html",
-        email_template_name="registration/password_reset_email.txt",
-        template_name='registration/custom_password_reset_form.html'), name='password_reset'),
-    path('password_reset/done/', PasswordResetDoneView.as_view(template_name = 'registration/custom_password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', PasswordResetConfirmView.as_view(template_name = 'registration/custom_password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', PasswordResetCompleteView.as_view(template_name='registration/custom_password_reset_complete.html'), name='password_reset_complete'),
-
+    path(
+        "password_reset/",
+        PasswordResetView.as_view(
+            html_email_template_name="registration/password_reset_email.html",
+            email_template_name="registration/password_reset_email.txt",
+            template_name="registration/custom_password_reset_form.html",
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password_reset/done/",
+        PasswordResetDoneView.as_view(
+            template_name="registration/custom_password_reset_done.html"
+        ),
+        name="password_reset_done",
+    ),
+    path(
+        "reset/<uidb64>/<token>/",
+        PasswordResetConfirmView.as_view(
+            template_name="registration/custom_password_reset_confirm.html"
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "reset/done/",
+        PasswordResetCompleteView.as_view(
+            template_name="registration/custom_password_reset_complete.html"
+        ),
+        name="password_reset_complete",
+    ),
     url("^", include("django.contrib.auth.urls")),
     url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
     url(

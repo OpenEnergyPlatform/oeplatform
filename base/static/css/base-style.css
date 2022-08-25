@@ -1,88 +1,85 @@
-/*.column-center{
-    background:#FCFCFD;
-    border: 2px solid #C5C5CF;
-}*/
-
 html {
-    --primaryColor1: #3B77A0;
-    --primaryColor2: #1F567D;
-    --primaryColor3: #0B3E62;
-    --primaryColor4: #072437;
-    --primaryColor5: #01090D;
-    --secondaryColor1: #BFD7EA;
-    --grey1: #62869D;
-    --white: #FFFFFF;
+  --primaryColor1: #3b77a0;
+  --primaryColor2: #1f567d;
+  --primaryColor3: #0b3e62;
+  --primaryColor4: #072437;
+  --primaryColor5: #01090d;
+  --secondaryColor1: #bfd7ea;
+  --grey1: #62869d;
+  --white: #ffffff;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 html {
-    height: 100%;
+  height: 100%;
 }
 
 body {
-    overflow: auto;
-    height: calc(100% - 55px);
+  overflow: auto;
+  height: calc(100% - 55px);
 }
 
-
 .alternative {
-    color: var(--grey1)
+  color: var(--grey1);
 }
 
 .base-navbar {
-    margin-bottom: 0;
-    border-radius: 0;
-    background-color: var(--primaryColor2);
-    background-image: unset;
+  margin-bottom: 0;
+  border-radius: 0;
+  background-color: var(--primaryColor2);
+  background-image: unset;
 }
 
 .site-header {
-    text-align: center;
-    width: 100%;
+  text-align: center;
+  width: 100%;
 
-    margin: 1em 0 1.5em;
+  margin: 1em 0 1.5em;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    color: var(--primaryColor2)
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--primaryColor2);
 }
 
 .base {
-    height: calc(100% - 1em);
-    box-sizing: border-box;
-    padding-top: 1em;
+  height: calc(100% - 1em);
+  box-sizing: border-box;
+  padding-top: 1em;
 
-
-
-    display: grid;
-    grid-template-columns: 100%;
-    /* container-fluid creates pseudo-elements, which are handled like normal children in grids, WTF. */
-    grid-template-rows: auto 1fr auto auto;
+  display: grid;
+  grid-template-columns: 100%;
+  /* container-fluid creates pseudo-elements, which are handled like normal children in grids, WTF. */
+  grid-template-rows: auto 1fr auto auto;
 }
 
 .base > div:first-child {
-    margin: 0 -15px;
+  margin: 0 -15px;
 }
 
-
 .tag {
-    padding: 0px;
-    padding-left: 5px;
-    padding-right: 5px;
-    height: 25px;
-    display: inline;
+  padding: 0px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 25px;
+  display: inline;
 }
 
 .footer {
   position: relative;
   margin-top: -150px; /* negative value of footer height */
   height: 150px;
-  clear:both;
-  padding-top:20px;
+  clear: both;
+  padding-top: 20px;
 }
 
 .circular_image {
@@ -95,93 +92,91 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 15px;
   margin-right: 5px;
   margin-top: 2px;
-  display:inline-block;
-  vertical-align:middle;
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.circular_image img{
+.circular_image img {
   width: 45px;
   height: 45px;
 }
 
 .btn-logout {
-    margin:5px;
-    color:#ffffff;
+  margin: 5px;
+  color: #ffffff;
 }
 
 .btn-profile {
-    margin:5px;
-    color:#ffffff;
+  margin: 5px;
+  color: #ffffff;
 }
 
-.profile-bar{
-    float: right;
-    background:none;
-
+.profile-bar {
+  float: right;
+  background: none;
 }
 
 .container-center {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.logo{
-    .flex-fill;
-    max-width: 250px;
-    max-width: 250px;
-    margin: 10px;
+.logo {
+  max-width: 250px;
+  max-width: 250px;
+  margin: 10px;
 }
 
 .flex-item {
-    margin: 10px;
+  margin: 10px;
 }
 
 .navbar-footer {
-    border-top: 1em white solid;
-    width: calc(100% + 30px);
-    margin: auto -15px 0;
+  border-top: 1em white solid;
+  width: calc(100% + 30px);
+  margin: auto -15px 0;
 
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .navbar-footer .navbar {
-    height: 71px;
+  height: 71px;
 }
 
 /** Styling for OEP Tags **/
 
 .tag-checkbox {
-    display: none;
+  display: none;
 }
 
 .tag-checkbox:before {
-    display: none;
+  display: none;
 }
 
 .tag-checkbox-container {
-    padding: 0.25em 0.5em;
-    border-radius: 0.5em;
+  padding: 0.25em 0.5em;
+  border-radius: 0.5em;
 
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .tag-checkbox-container:not(:last-child) {
-    margin-right: 0.5em;
+  margin-right: 0.5em;
 }
 
 .tag-checkbox-icon {
-    display: none;
+  display: none;
 
-    margin-left: 0.5em;
+  margin-left: 0.5em;
 }
 
 .tag-checkbox-checked .tag-checkbox-icon {
-    display: block;
+  display: block;
 }
 
 .table-hover tr {
-    cursor: pointer;
+  cursor: pointer;
 }

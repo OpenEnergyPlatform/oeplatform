@@ -23,7 +23,7 @@ _TYPES = [
     "time",
     "varchar",
     "character varying",
-    "geometry"
+    "geometry",
 ]
 
 
@@ -58,7 +58,8 @@ class TestPut(APITestCase):
         for column in self._structure_data["columns"]:
             for key in column:
                 # name is a programmer-introduced key.
-                # We are able to use a list instead of a dictonary to get better iteration possibilities.
+                # We are able to use a list instead of a dictonary to get better
+                # iteration possibilities.
                 if key != "name":
                     value = column[key]
                     name = column["name"]
@@ -155,7 +156,7 @@ class TestPut(APITestCase):
                     "character_maximum_length": 123,
                 },
                 {"name": "col_intarr", "data_type": "integer[]", "is_nullable": True},
-            ]
+            ],
         }
         self.test_table = "Table_all_columns"
 

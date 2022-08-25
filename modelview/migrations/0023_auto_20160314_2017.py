@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="comment_on_geo_resolution",
             field=models.TextField(
-                help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",
+                help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",  # noqa
                 null=True,
                 verbose_name="Comment on geographic (spatial) resolution",
             ),

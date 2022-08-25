@@ -54,9 +54,9 @@ class Migration(migrations.Migration):
                 (
                     "authors",
                     models.CharField(
-                        help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                        help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
                         max_length=300,
-                        verbose_name="Author(s) (institution, working field, active time period)",
+                        verbose_name="Author(s) (institution, working field, active time period)",  # noqa
                     ),
                 ),
                 (
@@ -225,7 +225,7 @@ class Migration(migrations.Migration):
                             (" more than 50", " more than 50"),
                         ],
                         default="less than 10",
-                        help_text="How many people are involved in the model development?",
+                        help_text="How many people are involved in the model development?",  # noqa
                         max_length=100,
                         verbose_name="Number of devolopers",
                     ),
@@ -249,7 +249,7 @@ class Migration(migrations.Migration):
                     "modelling_software",
                     django.contrib.postgres.fields.ArrayField(
                         base_field=models.CharField(
-                            help_text="What modelling software and which version is used?",
+                            help_text="What modelling software and which version is used?",  # noqa
                             max_length=100,
                         ),
                         default=list,
@@ -287,7 +287,7 @@ class Migration(migrations.Migration):
                     "additional_software",
                     django.contrib.postgres.fields.ArrayField(
                         base_field=models.CharField(
-                            help_text="Which additional software is required to run the model?",
+                            help_text="Which additional software is required to run the model?",  # noqa
                             max_length=100,
                         ),
                         default=list,
@@ -332,7 +332,7 @@ class Migration(migrations.Migration):
                 (
                     "larger_scale_usage",
                     models.CharField(
-                        help_text="Is this model used on a larger scale? If so, who uses it?",
+                        help_text="Is this model used on a larger scale? If so, who uses it?",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Larger scale usage",
@@ -628,7 +628,7 @@ class Migration(migrations.Migration):
                     "user_behaviour",
                     models.BooleanField(
                         default=False,
-                        help_text="How can user behaviour changes and demand side management be considered?",
+                        help_text="How can user behaviour changes and demand side management be considered?",  # noqa
                         verbose_name="User behaviour and demand side management",
                     ),
                 ),
@@ -649,7 +649,7 @@ class Migration(migrations.Migration):
                     django.contrib.postgres.fields.ArrayField(
                         base_field=models.CharField(
                             default="",
-                            help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+                            help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
                             max_length=100,
                         ),
                         default=list,
@@ -711,7 +711,7 @@ class Migration(migrations.Migration):
                 (
                     "comment_on_geo_resolution",
                     models.CharField(
-                        help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",
+                        help_text="Feel free to explain the geographical resolution of the model e.g. with regard to the grid data.",  # noqa
                         max_length=200,
                         null=True,
                         verbose_name="Comment on geographic (spatial) resolution",
@@ -894,7 +894,7 @@ class Migration(migrations.Migration):
                 (
                     "typical_computation_hardware",
                     models.CharField(
-                        help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",
+                        help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Typical computation hardware",
@@ -903,7 +903,7 @@ class Migration(migrations.Migration):
                 (
                     "technical_data_anchored_in_the_model",
                     models.CharField(
-                        help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",
+                        help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Technical data anchored in the model",
@@ -912,7 +912,7 @@ class Migration(migrations.Migration):
                 (
                     "example_research_questions",
                     models.CharField(
-                        help_text="What would be a good research question that could be answered with the model?",
+                        help_text="What would be a good research question that could be answered with the model?",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Example research questions",
@@ -930,7 +930,7 @@ class Migration(migrations.Migration):
                 (
                     "model_specific_properties",
                     models.CharField(
-                        help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",
+                        help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Model specific properties",

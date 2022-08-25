@@ -1,5 +1,5 @@
 {% load static %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 
 <!DOCTYPE html>
@@ -18,8 +18,8 @@
 
     {% fontawesome_5_static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
-
     {% block after-head %}{% endblock after-head %}
 </head>
 
@@ -80,17 +80,17 @@
                 </ul>
             </div>
             {% if user.is_authenticated %} {# This should stay here - later the above if becomes obsolete #}
-    
+
                 <div class="btn profile-bar">
                     <a class="btn-profile" href="/user/profile/{{ user.pk }}">{% fa5_icon 'user' 'fas' %} {{ user }}</a>
                     <a class="btn-logout" href="/user/logout/?next=/">{% fa5_icon 'arrow-right' 'fas' %} Logout</a>
                 </div>
-    
+
             {% else %}
                 <a class="btn btn-info" style="float: right;margin:5px"
                    href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
             {% endif %}
-    
+
             </div>
                 </ul>
             </div>
@@ -158,15 +158,12 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    <script
-        src="https://code.jquery.com/jquery-3.6.0.js"
-        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
-        crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js" integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
-    <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
+    <script src="{% static 'js/jsi18n.js' %}"></script>
+    <script src="{% static 'js/oep-tags.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

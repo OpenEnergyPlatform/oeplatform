@@ -1,6 +1,7 @@
 from functools import partial
-from api.tests import APITestCase
+
 from api.actions import MAX_TABLE_NAME_LENGTH
+from api.tests import APITestCase
 
 
 class TestTableNameLength(APITestCase):

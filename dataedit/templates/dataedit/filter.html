@@ -1,5 +1,10 @@
 {% extends "dataedit/base.html" %}
+{% load static %}
 
+{% block after-head %}
+    <!-- Latest compiled and minified CSS -->
+    <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+{% endblock after-head %}
 
 {% block main-right-sidebar-filter %}
 <!-- extending the filter block to add wizard button -->
@@ -9,15 +14,21 @@
     Create new table
 </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
 <hr>
+<h3>Create oemetadata</h3>
+<a class="btn btn-success" href="{% url 'standalone_meta_edit' %}"> Create new oemetadata </a> in version 1.5.1
+<a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
+    <i class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i>
+</a>
+<hr>
 <div style="display: flex;">
     <h3>Search & filter</h3>
-    <button type="button" 
-    class="btn btn-outline-light" 
-    data-toggle="popover" 
-    data-trigger="focus" 
-    title="How to use search and filter" 
+    <button type="button"
+    class="btn btn-outline-light"
+    data-toggle="popover"
+    data-trigger="focus"
+    title="How to use search and filter"
     {% if not tables%}
-    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button." 
+    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
     {% else %}
     data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
     {% endif %}
@@ -25,17 +36,17 @@
         <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
     </button>
 </div>
-<form action="{{ request.path }}" method="get">
+<form id="form-filter" action="{{ request.path }}" method="get">
     <h5>Text</h5>
     <div class="searchbox_container small">
-        <input type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
+        <input id="search-filter" type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
     </div>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <h5>Tags</h5>    
+    <h5>Tags</h5>
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-            <select name="tags" class="form-control selectpicker" multiple data-live-search="true"
+            <select id="tag-select" name="tags" class="form-control selectpicker" multiple data-live-search="true"
                 title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
                 {% for t in all_tags %}
                 <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
@@ -45,9 +56,11 @@
             </select>
         </div>
         <div style="padding-bottom: 15px;">
+            <!--
             <button type="submit" class="btn btn-success">
                 Apply Filters
             </button>
+            -->
             <a class="btn btn-danger" href="{{ request.path }}">
                 Reset Filters
             </a>
@@ -66,10 +79,8 @@
 {% endblock main-right-sidebar-filter %}
 
 {% block after-body-bottom-js %}
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.0/dist/css/bootstrap-select.min.css">
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.0/dist/js/bootstrap-select.min.js"></script>
+<script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
 <script>
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
@@ -77,5 +88,21 @@
             trigger: 'focus'
         })
     })
+
+    /* update filter when changing selection */
+    /*
+    $('#tag-select').on('change', function (e) {
+        $("#form-filter").submit();
+    });
+    */
+    /* update filter when closing tag select dropdown */
+    $('#tag-select').on('hide.bs.select', function (e) {
+        $("#form-filter").submit();
+    });
+    /* also update filter if leave search field */
+    $('#search-filter').on('blur', function (e) {
+        $("#form-filter").submit();
+    });
+
 </script>
 {% endblock after-body-bottom-js %}

@@ -1,11 +1,11 @@
 {% extends "modelview/base.html" %}
-{% load bootstrap5 %}
+{% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
 {% block after-head %}
 <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+<link href="{% static 'dataedit/jquery.dataTables.min.css' %}" rel="stylesheet"><!-- src: https://cdn.datatables.net/1.10.20/css/jimages/query.dataTables.min.css -->
 
 
 <style>
@@ -85,7 +85,7 @@
 {% endblock %}
 
 {% block after-body-bottom-js %}
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
 
     <script>
     var dt;

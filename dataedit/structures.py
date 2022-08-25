@@ -1,14 +1,13 @@
 import re
+
 from sqlalchemy import (
     BigInteger,
     Boolean,
     Column,
     DateTime,
-    Float,
     ForeignKey,
     Integer,
     String,
-    Table,
     Text,
     text,
 )
@@ -29,11 +28,13 @@ class Tag(Base):
     usage_count = Column(BigInteger, server_default="0")
     usage_tracked_since = Column(DateTime(), server_default=func.now())
     name_normalized = Column(String(40), nullable=False, unique=True)
+    default_color = int("2E3638", 16)
 
     def __init__(self, **kwargs):
         # sanitize name, auto fill name_normalized
         kwargs["name"] = self.create_name_clean(kwargs["name"])
         kwargs["name_normalized"] = self.create_name_normalized(kwargs["name"])
+        kwargs["color"] = kwargs.get("color", self.default_color)
         super().__init__(**kwargs)
 
     @staticmethod
@@ -41,7 +42,7 @@ class Tag(Base):
         """
         Args:
             name(str): tag name
-        
+
         Returns:
             str: normalized tag name
 
@@ -54,13 +55,13 @@ class Tag(Base):
         name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
         name_norm = name_norm.strip("_")
         return name_norm
-    
+
     @staticmethod
     def create_name_clean(name):
         """
         Args:
             name(str): tag name
-        
+
         Returns:
             str: sanitized tag name
 
@@ -69,12 +70,9 @@ class Tag(Base):
             'not a good TAG'
         """
         name_norm = name or ""
-        re.sub("\s+", " ", name_norm)
+        re.sub(r"\s+", " ", name_norm)
         name_norm = name_norm.strip()
         return name_norm
-
-        
-
 
 
 class TableTags(Base):

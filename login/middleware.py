@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.http import HttpResponseRedirect
 
 DETACH_PATH = "/user/detach"
@@ -6,7 +5,6 @@ ACTIVATE_PATH = "/user/activate"
 
 
 class DetachMiddleware:
-
     def __init__(self, get_response):
         self.get_response = get_response
 

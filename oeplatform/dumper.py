@@ -2,9 +2,8 @@ import os
 import tarfile
 from subprocess import call
 
-import sqlalchemy as sqla
-
 import securitysettings as sec
+import sqlalchemy as sqla
 
 excluded_schemas = ["information_schema", "public", "topology", "reference"]
 

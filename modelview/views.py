@@ -14,13 +14,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import HttpResponse, Http404, JsonResponse, HttpResponseForbidden
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
-from rdflib import Graph
-from rdflib.compare import graph_diff, to_canonical_graph
 
 from api.actions import _get_engine
 from dataedit.structures import Tag
@@ -32,9 +30,10 @@ from .forms import (
     EnergystudyForm,
 )
 from .models import Energyframework, Energymodel, Energyscenario, Energystudy
-from .rdf import factory, connection, namespace
+from .rdf import connection, factory, namespace
 
 _factory_mappings = {"study": factory.Study, "scenario": factory.Scenario}
+
 
 def getClasses(sheettype):
     """
@@ -140,7 +139,7 @@ def show(request, sheettype, model_name):
         model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
-    http = urllib3.PoolManager(headers=user_agent)
+    urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
     if sheettype != "scenario" and sheettype != "studie":
@@ -152,14 +151,20 @@ def show(request, sheettype, model_name):
                 )
                 org = match.group("org")
                 repo = match.group("repo")
-                gh_url = _handle_github_contributions(org, repo)
-            except:
+                _handle_github_contributions(org, repo)
+            except Exception:
                 org = None
                 repo = None
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
-        {"model": model, "model_study": model_study, "gh_org": org, "gh_repo": repo, "displaySheetType": sheettype.capitalize()},
+        {
+            "model": model,
+            "model_study": model_study,
+            "gh_org": org,
+            "gh_repo": repo,
+            "displaySheetType": sheettype.capitalize(),
+        },
     )
 
 
@@ -183,7 +188,7 @@ def model_to_csv(request, sheettype):
     tag_ids = request.GET.get("tags")
     if tag_ids:
         for label in tag_ids.split(","):
-            match = re.match("^select_(?P<tid>\d+)$", label)
+            match = re.match(r"^select_(?P<tid>\d+)$", label)
             tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
     header = list(
@@ -214,7 +219,7 @@ def processPost(post, c, f, files=None, pk=None, key=None):
         if type(field) == ArrayField:
             parts = []
             for fi in fields.keys():
-                if re.match("^{}_\d$".format(field.name), str(fi)) and fields[fi]:
+                if re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]:
                     parts.append(fi)
             parts.sort()
             fields[field.name] = ",".join(fields[k].replace(",", ";") for k in parts)
@@ -261,7 +266,7 @@ class FSAdd(LoginRequiredMixin, View):
         if method == "add":
             form = f()
             if sheettype == "scenario":
-                c_study, f_study = getClasses("studie")
+                _c_study, f_study = getClasses("studie")
                 formstudy = f_study()
                 return render(
                     request,
@@ -275,13 +280,14 @@ class FSAdd(LoginRequiredMixin, View):
                     {"form": form, "method": method},
                 )
         else:
-            model = get_object_or_404(c, pk=model_name)
-            form = f(instance=model)
-            return render(
-                request,
-                "modelview/edit{}.html".format(sheettype),
-                {"form": form, "name": model.pk, "method": method},
-            )
+            raise NotImplementedError()  # FIXME: model_name not defined
+            # model = get_object_or_404(c, pk=model_name)
+            # form = f(instance=model)
+            # return render(
+            #     request,
+            #     "modelview/edit{}.html".format(sheettype),
+            #     {"form": form, "name": model.pk, "method": method},
+            # )
 
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)
@@ -336,7 +342,7 @@ class FSAdd(LoginRequiredMixin, View):
 
                 model = form.save()
                 if hasattr(model, "license") and model.license:
-                    if model.license != 'Other':
+                    if model.license != "Other":
                         model.license_other_text = None
                 ids = {
                     int(field[len("tag_") :])
@@ -392,7 +398,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
                 org, repo
             ),
         ).data.decode("utf8")
-    except:
+    except Exception:
         pass
 
     reply = json.loads(reply)
@@ -408,9 +414,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     (times, commits) = zip(
         *[
             (
-                datetime.datetime.fromtimestamp(int(week["week"])).strftime(
-                    "%m-%d"
-                ),
+                datetime.datetime.fromtimestamp(int(week["week"])).strftime("%m-%d"),
                 sum(map(int, week["days"])),
             )
             for week in reply
@@ -427,11 +431,13 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
         density = stats.kde.gaussian_kde(commits_ids, bw_method=0.2)
     else:
         # if there are no commits the density is a constant 0
-        density = lambda x: 0
+        def density(x):
+            return 0
+
     # plot this distribution
     x = numpy.arange(0.0, len(commits), 0.01)
     c_real_max = max(density(xv) for xv in x)
-    fig1 = plt.figure(figsize=(4, 2))  # facecolor='white',
+    plt.figure(figsize=(4, 2))  # facecolor='white',
 
     # replace labels by dates and numbers of commits
     ax1 = plt.axes(frameon=False)
@@ -446,10 +452,11 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
-import json
+
 
 class RDFFactoryView(View):
     _template = "modelview/display_rdf.html"
+
     def get(self, request, factory_id, identifier):
         format = request.GET.get("format", "html")
         if format == "json":
@@ -473,10 +480,12 @@ class RDFFactoryView(View):
             return render(
                 request,
                 self._template,
-                {"iri": identifier, "factory": factory_id,
-                 "rdf_templates": json.dumps(factory.get_factory_templates())},
+                {
+                    "iri": identifier,
+                    "factory": factory_id,
+                    "rdf_templates": json.dumps(factory.get_factory_templates()),
+                },
             )
-
 
     def post(self, request, factory_id, identifier):
 
@@ -487,7 +496,7 @@ class RDFFactoryView(View):
         query = json.loads(request.POST["query"])
         property = query["property"]
 
-        if (factory_id == "study" and identifier == "new"):
+        if factory_id == "study" and identifier == "new":
             context.insert_new_study(property)
 
         try:
@@ -510,16 +519,26 @@ class RDFFactoryView(View):
             new_value = pf.process_data(raw_new_value)
 
         if not old_value and not new_value:
-            result = context.insert_new_instance(subject, pf.rdf_name, inverse=pf.inverse, new_name=raw_new_value["literal"])
-            result = dict(iri=str(result.rpartition('/')[0] + "/" + raw_new_value["literal"]))
+            result = context.insert_new_instance(
+                subject,
+                pf.rdf_name,
+                inverse=pf.inverse,
+                new_name=raw_new_value["literal"],
+            )
+            result = dict(
+                iri=str(result.rpartition("/")[0] + "/" + raw_new_value["literal"])
+            )
         else:
-            context.update_property(subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse)
+            context.update_property(
+                subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse
+            )
             result = {}
         return JsonResponse(result)
 
     def add_study(self, name):
-        result = context.insert_new_study(name)
-        return JsonResponse(result)
+        # result = context.insert_new_study(name)
+        # return JsonResponse(result)
+        raise NotImplementedError()  # FIXME: context not defined
 
 
 class RDFInstanceView(View):
@@ -530,12 +549,17 @@ class RDFInstanceView(View):
             raise HttpResponse(status=400)
         subclass = request.GET.get("subclass", False)
         result = context.get_all_instances(cls, subclass=subclass)
-        instances = [dict(iri=row["s"]["value"], label=row["l"]["value"]) if row.get("l") else dict(iri=row["s"]["value"]) for row in result["results"]["bindings"] if not row["s"]["type"] == "bnode"]
+        instances = [
+            dict(iri=row["s"]["value"], label=row["l"]["value"])
+            if row.get("l")
+            else dict(iri=row["s"]["value"])
+            for row in result["results"]["bindings"]
+            if not row["s"]["type"] == "bnode"
+        ]
         return JsonResponse(dict(instances=instances))
 
 
 class RDFView(View):
-
     def get(self, request, factory_id=None):
 
         try:
@@ -545,10 +569,9 @@ class RDFView(View):
         context = connection.ConnectionContext()
         instances = fac.load_all_instances(context)
         return render(
-            request,
-            "modelview/list_rdf_instances.html",
-            {"instances": instances}
+            request, "modelview/list_rdf_instances.html", {"instances": instances}
         )
+
 
 BASE_VIEW_PROPS = OrderedDict(
     [
