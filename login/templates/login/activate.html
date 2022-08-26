@@ -19,7 +19,7 @@
             please set a new one:
             <form method="post">{% csrf_token %}
                 <fieldset class="module aligned">
-                    <div class="mb-3 d-flex field-email">
+                    <div class="mb-3 field-email">
                         {{ form.email.errors }}
                         <label class="form-label" for="id_email">{% trans 'Email address:' %}</label>
                         {{ form.email | addclass:"form-control" }}
