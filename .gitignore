@@ -17,6 +17,7 @@ local
 # Distribution / packaging
 .Python
 env/
+/env
 build/
 develop-eggs/
 downloads/
