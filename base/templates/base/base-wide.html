@@ -21,7 +21,7 @@
     {% block after-head %}{% endblock after-head %}
 </head>
 
-<body>
+<body class="d-flex flex-column h-100">
 {% block header %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
@@ -97,10 +97,11 @@
 
 {% endblock header %}
 
-<div class="container-fluid base">
+{% block main %}
+<main class="flex-shrink-0 py-3">
     {% block site-header %}
     {% endblock site-header %}
-    {% block main %}
+    <div class="container-fluid">
         <div class="row">
             {% block main-content %}
                 <div class="">
@@ -108,12 +109,14 @@
                 </div>
             {% endblock main-content %}
         </div>
-    {% endblock main %}
-    {% block footer %}
-        <footer class="navbar-footer bg-primary">
-            <nav class="navbar navbar-expand navbar-dark bg-primary">
+    </div>
+    </main>
+{% endblock main %}
+{% block footer %}
+    <footer class="footer mt-auto py-3 bg-primary">
+        <nav class="navbar navbar-expand navbar-dark bg-primary">
+            <div class="container-fluid justify-content-end">
                 <ul class="navbar-nav mr-auto">
-
                     <li class="nav-item">
                         <a class="nav-link" href="/contact/">Contact</a>
                     </li>
@@ -124,10 +127,10 @@
                         <a class="nav-link" href="/legal/tou/">Terms of Use</a>
                     </li>
                 </ul>
-            </nav>
-        </footer>
-    {% endblock footer %}
-</div>
+            </div>
+        </nav>
+    </footer>
+{% endblock footer %}
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
