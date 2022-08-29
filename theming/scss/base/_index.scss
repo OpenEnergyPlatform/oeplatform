@@ -1,0 +1,30 @@
+@use '../../variables' as *;
+
+@forward '../../bootstrap/scss/bootstrap.scss' with(
+    $primary: $primary,
+    $secondary: $secondary,
+    $card-border-radius: $card-border-radius,
+    $input-border-radius: $input-border-radius,
+    $input-border-radius-lg: $input-border-radius-lg,
+    $dropdown-inner-border-radius: $dropdown-inner-border-radius,
+    $modal-content-border-radius: $modal-content-border-radius,
+    $breadcrumb-border-radius: $breadcrumb-border-radius,
+    $list-group-border-radius: $list-group-border-radius,
+    $card-inner-border-radius: $card-inner-border-radius,
+    $thumbnail-border-radius: $thumbnail-border-radius,
+    $nav-pills-border-radius: $nav-pills-border-radius,
+    $progress-border-radius: $progress-border-radius,
+    $dropdown-border-radius: $dropdown-border-radius,
+    $nav-tabs-border-radius: $nav-tabs-border-radius,
+    $popover-border-radius: $popover-border-radius,
+    $tooltip-border-radius: $tooltip-border-radius,
+    $alert-border-radius: $alert-border-radius,
+    $badge-border-radius: $badge-border-radius,
+    $toast-border-radius: $toast-border-radius,
+    $input-border-radius-sm: $input-border-radius-sm,
+    $border-radius: $border-radius,
+    $border-radius-lg: $border-radius,
+    $border-radius-sm: $border-radius-sm
+);
+
+@forward 'custom_variables';
