@@ -5,7 +5,7 @@
         {% assign_field model field as val %}
         {% get_field_attr model field 'verbose_name' fieldNameOverride %}
         {% if vname %}
-            <i data-toggle='tooltip' title="{{ vname }}">
+            <i data-bs-toggle='tooltip' title="{{ vname }}">
                 <span class='fas fa-question'></span>
             </i>
         {% endif %}

@@ -1,7 +1,7 @@
 {% extends "dataedit/base.html" %}
 {% load dataedit.metadata %}
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 
 {% block site-header %}
@@ -20,7 +20,7 @@
       href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
   </li>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-toggle="dropdown"
+    <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
       href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
     <div class="dropdown-menu">
       {% for view in views %}
@@ -33,7 +33,7 @@
     </div>
   </li>
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-toggle="dropdown"
+    <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
       href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
     <div class="dropdown-menu">
       {% for view in views %}
@@ -60,14 +60,14 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
-            <a data-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
+            <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
           </h4>
         </div>
         <div id="collapseBuilder" class="panel-collapse collapse">
           <div class="panel-body">
             <div id="builder" style="width: 100%"></div>
-            <button id="btn-set" class="btn btn-success set-json" data-target="basic">Set rules</button>
-            <button id="btn-download-view" class="btn btn-success set-json" data-target="basic">Download View</button>
+            <button id="btn-set" class="btn btn-success set-json" bs-target="basic">Set rules</button>
+            <button id="btn-download-view" class="btn btn-success set-json" data-bs-target="basic">Download View</button>
           </div>
         </div>
       </div>
@@ -107,9 +107,9 @@
       href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i
         class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
   </h4>
-  <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-toggle="tooltip"
+  <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip"
     title="Download metadata in JSON format">Download JSON</button>
-  <span class="mb-2" {% if not can_add %} data-toggle="tooltip"
+  <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
     title="You need write permissions on this table to edit metadata" {% endif %}>
     <a href="{{table}}/meta_edit" type="button"
       class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
@@ -140,7 +140,7 @@
 
 {% if schema == "model_draft" %}
 <h4>Uploads</h4>
-<span class="mb-2" {% if not can_add %} data-toggle="tooltip"
+<span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
   title="You need write permissions on this table to upload data" {% endif %}>
   <a class="btn btn-sm btn-success {% if not can_add %} disabled {% endif %}"
     href="{% url 'wizard_upload' schema=schema table=table %}">
@@ -226,7 +226,7 @@ for row in result.json():
   };
 
   $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-bs-toggle="tooltip"]').tooltip()
   })
 </script>
 {% endblock after-body-bottom-js %}

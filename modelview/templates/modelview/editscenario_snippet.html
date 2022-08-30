@@ -3,5 +3,5 @@
     <td>{{ field.label }}{% if field.field.required and field.is_checkbox %}*{% endif %}: </td>
     <td> {% if not field.is_checkbox or not add %}
             {{ field }}
-         {% if field.help_text != "" %}<a href='#' data-toggle='tooltip' title='{{ field.help_text }}'><span class='fas fa-question'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %} </td>
+         {% if field.help_text != "" %}<a href='#' data-bs-toggle='tooltip' title='{{ field.help_text }}'><span class='fas fa-question'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %} </td>
 </tr>

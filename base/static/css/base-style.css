@@ -77,7 +77,7 @@ h6 {
 .footer {
   position: relative;
   margin-top: -150px; /* negative value of footer height */
-  height: 150px;
+  height: 5rem;
   clear: both;
   padding-top: 20px;
 }

@@ -177,7 +177,7 @@ var MetaEdit = function(config) {
             .popover({
               placement: 'top',
               trigger: 'hover',
-              template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>',
+              template: '<div class="popover"><div class="popover-arrow"></div><div class="popover-body"></div></div>',
             });
         descr.addClass('d-none');
       }
@@ -189,7 +189,7 @@ var MetaEdit = function(config) {
     });
 
     // inputs
-    config.form.find('.form-group>.form-text').not('.d-none').each(function(_i, e) {
+    config.form.find('.mb-3>.form-text').not('.d-none').each(function(_i, e) {
       convert($(e), $(e).parent().find('>label'));
     });
 
@@ -235,7 +235,7 @@ var MetaEdit = function(config) {
 
     // Cancel
     $('#metaedit-cancel').bind('click', function cancel() {
-      window.location = config.cancle_url;
+      window.location = config.url_view_table;
     });
   }
 
@@ -244,114 +244,65 @@ var MetaEdit = function(config) {
 
     config.form = $('#metaedit-form');
 
-    // check if the editor should be initialized with metadata from table or as standalone withou any initial data
-    if (config.standalone == false) {
-      $.when(
-          $.getJSON(config.url_api_meta),
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(data, schema) {
-        config.schema = fixSchema(schema[0]);
-        config.initialData = fixData(data[0]);
+    $.when(
+        $.getJSON(config.url_api_meta),
+        $.getJSON('/static/metaedit/schema.json'),
+        // $.getJSON('https://raw.githubusercontent.com/OpenEnergyPlatform/oemetadata/develop/metadata/v140/schema.json')
+
+    ).done(function(data, schema) {
+      config.schema = fixSchema(schema[0]);
+      config.initialData = fixData(data[0]);
 
 
-        /*  https://github.com/json-editor/json-editor */
-        options = {
-          startval: config.initialData,
-          schema: config.schema,
-          theme: 'bootstrap4',
-          iconlib: 'fontawesome5',
-          mode: 'form',
-          compact: true,
-          remove_button_labels: true,
-          disable_collapse: true,
-          prompt_before_delete: false,
-          object_layout: "normal",
-          disable_properties: false,
-          disable_edit_json: true,
-          disable_array_delete_last_row: true,
-          disable_array_delete_all_rows: true,
-          disable_array_reorder: true,
-          array_controls_top: true,
-          no_additional_properties: true,
-          required_by_default: false,
-          remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
-        };
+      /*  https://github.com/json-editor/json-editor */
+      options = {
+        startval: config.initialData,
+        schema: config.schema,
+        theme: 'bootstrap4',
+        iconlib: 'fontawesome5',
+        mode: 'form',
+        compact: true,
+        remove_button_labels: true,
+        disable_collapse: true,
+        prompt_before_delete: false,
+        object_layout: "normal",
+        disable_properties: false,
+        disable_edit_json: true,
+        disable_array_delete_last_row: true,
+        disable_array_delete_all_rows: true,
+        disable_array_reorder: true,
+        array_controls_top: true,
+        no_additional_properties: true,
+        required_by_default: false,
+        remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
+      };
 
-        config.editor = new JSONEditor(config.form[0], options);
+      // console.log(options)
 
-        /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
+      config.editor = new JSONEditor(config.form[0], options);
 
-        bindButtons();
+      /* patch labels */
+      var mainEditBox = config.form.find('.je-object__controls').first();
+      mainEditBox.find('.json-editor-btntype-save').text('Apply');
+      mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
+      mainEditBox.find('.json-editor-btntype-cancel').text('Close');
+      mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
 
+      bindButtons();
+
+      convertDescriptionIntoPopover();
+      // check for new items in dom
+      (new MutationObserver(function(_mutationsList, _observer) {
         convertDescriptionIntoPopover();
-        // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
-          convertDescriptionIntoPopover();
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
+      })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
 
-        // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
+      // all done
+      $('#metaedit-loading').addClass('d-none');
+      $('#metaedit-icon').removeClass('d-none');
+      $('#metaedit-controls').removeClass('d-none');
 
-        // TODO catch init error
-      });
-    } else {
-      $.when(
-          $.getJSON('/static/metaedit/schema.json'),
-      ).done(function(schema) {
-        config.schema = fixSchema(schema);
-
-        standalone_options = {
-          schema: config.schema,
-          theme: 'bootstrap4',
-          iconlib: 'fontawesome5',
-          mode: 'form',
-          compact: true,
-          remove_button_labels: true,
-          disable_collapse: true,
-          prompt_before_delete: false,
-          object_layout: "normal",
-          disable_properties: false,
-          disable_edit_json: true,
-          disable_array_delete_last_row: true,
-          disable_array_delete_all_rows: true,
-          disable_array_reorder: true,
-          array_controls_top: true,
-          no_additional_properties: true,
-          required_by_default: false,
-          remove_empty_properties: true, // don't remove, otherwise the metadata will not pass the validation on the server
-        };
-        config.editor = new JSONEditor(config.form[0], standalone_options);
-
-        /* patch labels */
-        var mainEditBox = config.form.find('.je-object__controls').first();
-        mainEditBox.find('.json-editor-btntype-save').text('Apply');
-        mainEditBox.find('.json-editor-btntype-copy').text('Copy to Clipboard');
-        mainEditBox.find('.json-editor-btntype-cancel').text('Close');
-        mainEditBox.find('.json-editor-btntype-editjson').text('Edit raw JSON');
-
-        bindButtons();
-
-        convertDescriptionIntoPopover();
-        // check for new items in dom
-        (new MutationObserver(function(_mutationsList, _observer) {
-          convertDescriptionIntoPopover();
-        })).observe(config.form[0], {attributes: false, childList: true, subtree: true});
-
-        // all done
-        $('#metaedit-loading').addClass('d-none');
-        $('#metaedit-icon').removeClass('d-none');
-        $('#metaedit-controls').removeClass('d-none');
-
-        // TODO catch init error
-      });
-    }
+      // TODO catch init error
+    });
   })();
 
   return config;

@@ -36,7 +36,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap4",
+    "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",
@@ -54,7 +54,6 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "jquery",
     "django_better_admin_arrayfield",
     "oeo_viewer",
 )
