@@ -450,9 +450,17 @@
                                                     },
                                                     "name": {
                                                         "description": "Full name of the value",
-                                                        "type": "string",
+                                                        "type": "autocomplete",
                                                         "title": "Name",
-                                                        "format": "uri"
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                          "autocomplete": {
+                                                              "search": "search_za",
+                                                              "getResultValue": "getResultValue_za",
+                                                              "renderResult": "renderResult_za",
+                                                              "autoSelect": true
+                                                          }
+                                                      }
                                                     },
                                                     "path": {
                                                         "description": "Path to the OEO",
@@ -475,7 +483,7 @@
                                     "additionalProperties": false,
                                     "title": "Field"
                                 },
-                                "title": "Field"
+                                "title": "f"
                             },
                             "primaryKey": {
                                 "description": "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns. Example: id",

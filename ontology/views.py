@@ -193,8 +193,6 @@ class OntologyOverview(View):
                 if module_or_id in classes_notes.keys():
                     class_notes = classes_notes[module_or_id]
 
-                print("ontology classes!")
-                print(module_or_id)
                 return render(request, "ontology/class.html", dict(
                     class_id=module_or_id,
                     class_name=class_name,

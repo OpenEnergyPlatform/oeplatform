@@ -3,7 +3,6 @@
 
 
 var MetaEdit = function (config) {
-
     /*
     TODO: consolidate functions (same as in wizard and other places)
     */
@@ -247,10 +246,11 @@ var MetaEdit = function (config) {
     }
 
     (function init() {
+
         $('#metaedit-loading').removeClass('d-none');
 
         config.form = $('#metaedit-form');
-        
+
         // check if the editor should be initialized with metadata from table or as standalone withou any initial data
         if (config.standalone == false) {
             $.when(
@@ -285,7 +285,7 @@ var MetaEdit = function (config) {
                 }
 
                 config.editor = new JSONEditor(config.form[0], options);
-                            
+
                 /* patch labels */
                 var mainEditBox = config.form.find('.je-object__controls').first();
                 mainEditBox.find('.json-editor-btntype-save').text('Apply');
@@ -307,6 +307,36 @@ var MetaEdit = function (config) {
                 $('#metaedit-controls').removeClass('d-none');
 
                 // TODO catch init error
+                console.log(config);
+
+                window.JSONEditor.defaults.callbacks = {
+                "autocomplete": {
+                    // This is callback functions for the "autocomplete" editor
+                    // In the schema you refer to the callback function by key
+                    // Note: 1st parameter in callback is ALWAYS a reference to the current editor.
+                    // So you need to add a variable to the callback to hold this (like the
+                    // "jseditor_editor" variable in the examples below.)
+
+                    // Setup API calls
+                    "search_za": function search(jseditor_editor, input) {
+                        return ([
+                                  {'name': 'energy', 'class': 'OEO_00000150'},
+                                  {'name': 'energy storage', 'class': 'OEO_00000012'},
+                                  {'name': 'energy converting component', 'class': 'OEO_00000011'},
+                                  {'name': 'energy carrier disposition', 'class': 'OEO_00000151'}
+                                ]);
+                    },
+                    "renderResult_za": function(jseditor_editor, result, props) {
+                        return ['<li ' + props + '>',
+                            '<div class="eiao-object-snippet">' + result.name.substring(0,50) + ' <small>' + result.class.substring(0,10) + '<small></div>',
+                            '</li>'].join('');
+                    },
+                    "getResultValue_za": function getResultValue(jseditor_editor, result) {
+                        return result.key;
+                    }
+                }
+              };
+
             });
 
         } else {
