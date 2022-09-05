@@ -1,13 +1,9 @@
 @charset "UTF-8";
 
 .index-home {
-  height: 100%;
-
   text-align: center;
-
   display: grid;
   grid-template-rows: 1fr auto;
-
   align-items: center;
 }
 
@@ -17,7 +13,6 @@
 
 .index-group {
   height: 100%;
-
   display: flex;
   flex-flow: column;
   align-items: center;

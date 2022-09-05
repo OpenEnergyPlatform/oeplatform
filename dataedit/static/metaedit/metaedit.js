@@ -4,8 +4,8 @@
 
 var MetaEdit = function(config) {
   /*
-    TODO: consolidate functions (same as in wizard and other places)
-    */
+  TODO: consolidate functions (same as in wizard and other places)
+  */
 
   function getCookie(name) {
     var cookieValue = null;

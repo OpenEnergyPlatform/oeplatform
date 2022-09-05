@@ -1,12 +1,12 @@
 {% extends "base/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load ontology.rdf %}
 {% block main-content-body %}
 {% load static %}
 
 
 
-<h2>{{ main_module.name }}<div class="btn-group float-right" role="group" aria-label="Basic example">
+<h2>{{ main_module.name }}<div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in main_module.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{main_module.name}}.{{ex}}">
                             {{ex}}
@@ -22,7 +22,7 @@
 
 <div class="card">
     <div class="card-header">
-        <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+        <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
             {{ ontology_description }}
         </a>
     </div>
@@ -36,10 +36,10 @@
     {% for module, about in submodules %}
         <div class="card">
             <div class="card-header">
-                <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
-                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                <div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in about.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/{{module}}.{{ex}}">
                             {{ex}}
@@ -47,7 +47,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#accordion">
+            <div id="collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#accordion">
                 <div class="card-body">
                     {{ about.comment }}
                 </div>
@@ -63,10 +63,10 @@
     {% for module, about in imports %}
         <div class="card">
             <div class="card-header">
-                <a class="card-link" data-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
+                <a class="card-link" data-bs-toggle="collapse" href="#imports_collapse{{ forloop.counter }}">
                     {{module}}
                 </a>
-                <div class="btn-group float-right" role="group" aria-label="Basic example">
+                <div class="btn-group float-end" role="group" aria-label="Basic example">
                     {% for ex in about.extensions %}
                         <a class="btn btn-secondary" href="/ontology/{{ontology}}/releases/imports/{{module}}.{{ex}}">
                             {{ex}}
@@ -74,7 +74,7 @@
                     {% endfor %}
                 </div>
             </div>
-            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-parent="#imports_accordion">
+            <div id="imports_collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#imports_accordion">
                 <div class="card-body">
                     {{ about.comment }}
                 </div>

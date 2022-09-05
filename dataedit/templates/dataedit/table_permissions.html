@@ -1,10 +1,4 @@
 {% extends "dataedit/base.html" %}
-{% block before-head %}
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css" rel="stylesheet"/>
-    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/css/bootstrap.css" rel="stylesheet"/>
-{% endblock %}
 {% block title %} - {{schema}}{% endblock %}
 
 {% block main-right-sidebar-content-additional %}
@@ -39,25 +33,7 @@
             </div>
         </div>
         {% if is_admin %}
-        <script>
-            $('#group_field').bind('input', function() {
-                var dfd = new $.Deferred();
-                var request = $.ajax({type: 'GET',
-                    url:'/api/grpprop/', dataType:'json',
-                    data: {
-                        name: $(this).val()
-                    }
-                });
-                request.done(function(users)
-                {
-                    console.log(users);
-                    $('#group_field').autocomplete({
-                        source: users
-                    });
-                    dfd.resolve({})
-                });
-            });
-        </script>
+        
         {% endif %}
         {% if not group_perms %}
             No permissions for groups set, yet.
@@ -66,7 +42,7 @@
             <div class="card-body">
                 <div>
                     {% if is_admin %}
-                        <label for="group_level">{{ perm.holder.name }}</label>
+                        <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
 
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
@@ -108,27 +84,6 @@
                 <h4>User Permissions</h4>
             </div>
         </div>
-        {% if is_admin %}
-            <script>
-                $('#user_field').bind('input', function() {
-                    var dfd = new $.Deferred();
-                    var request = $.ajax({type: 'GET',
-                        url:'/api/usrprop/', dataType:'json',
-                        data: {
-                            name: $(this).val()
-                        }
-                    });
-                    request.done(function(users)
-                    {
-                        console.log(users);
-                        $('#user_field').autocomplete({
-                            source: users
-                        });
-                        dfd.resolve({})
-                    });
-                });
-            </script>
-        {% endif %}
         {% if not user_perms %}
             No permissions for users set, yet.
         {% endif %}
@@ -136,7 +91,7 @@
             <div class="card-body">
                 <div>
                     {% if is_admin %}
-                        <label for="level">{{ perm.holder.name }}</label>
+                        <label class="form-label" for="level">{{ perm.holder.name }}</label>
                         <form class="form-inline" action="permissions" method="post" style ="display:inline-block;">
                             {% csrf_token %}
                             <input type="hidden" name="mode" value="alter_user">
@@ -164,3 +119,29 @@
     </div>
 
 {% endblock %}
+
+{% block after-body-bottom-js %}
+
+{% if is_admin %}
+<script>                            
+    $('#group_field').bind('input', function() {
+        var dfd = new $.Deferred();
+        var request = $.ajax({type: 'GET',
+            url:'/api/grpprop/', dataType:'json',
+            data: {
+                name: $(this).val()
+            }
+        });
+        request.done(function(users)
+        {
+            console.log(users);
+            $('#group_field').autocomplete({
+                source: users
+            });
+            dfd.resolve({})
+        });
+    });
+</script>
+{% endif %}
+
+{% endblock after-body-bottom-js %}
