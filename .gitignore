@@ -75,6 +75,7 @@ target/
 venv*/
 src
 0_env/
+/envs
 
 .DS_Store
 
