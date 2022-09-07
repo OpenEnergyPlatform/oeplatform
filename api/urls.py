@@ -103,10 +103,6 @@ urlpatterns = [
         views.create_ajax_handler(actions.get_unique_constraints),
     ),
     url(
-        r"^v0/advanced/request_dump",
-        views.create_ajax_handler(actions.get_unique_constraints),
-    ),
-    url(
         r"^v0/advanced/connection/open",
         views.create_ajax_handler(actions.open_raw_connection),
         name="api_con_open",
@@ -166,10 +162,6 @@ urlpatterns = [
     url(
         r"^v0/advanced/do_recover_twophase",
         views.create_ajax_handler(actions.do_recover_twophase),
-    ),
-    url(
-        r"^v0/advanced/show_revisions",
-        views.create_ajax_handler(actions.get_unique_constraints),
     ),
     url(r"^v0/image/upload", views.ImageUpload.as_view()),
     url(r"usrprop/", views.get_users),
