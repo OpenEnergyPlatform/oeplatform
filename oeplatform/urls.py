@@ -20,6 +20,10 @@ from .views import ImagesView
 
 from oeplatform import settings
 
+from graphene_django.views import GraphQLView
+from django.views.decorators.csrf import csrf_exempt
+
+
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
 
@@ -28,10 +32,10 @@ urlpatterns = [
     url(r"^", include("base.urls")),
     url(r"^user/", include("login.urls")),
     url(r"^factsheets/", include("modelview.urls")),
-    url(r"^dataedit/", include("dataedit.urls")),    
+    url(r"^dataedit/", include("dataedit.urls")),
     url(r"^ontology/", include("ontology.urls")),
     url(r"^tutorials/", include("tutorials.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
-    url(r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$", ImagesView.as_view())
-
+    url(r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$", ImagesView.as_view()),
+    url(r"^graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True)))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

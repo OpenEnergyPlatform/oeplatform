@@ -18,7 +18,7 @@ except:
     import logging
     import os
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    SECRET_KEY = os.environ.get("SECRET_KEY", "0")   
+    SECRET_KEY = os.environ.get("SECRET_KEY", "0")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
     URL = os.environ.get("URL")
 
@@ -45,7 +45,7 @@ INSTALLED_APPS = (
     "base.templatetags.base_tags",
     "widget_tweaks",
     "dataedit",
-    "colorfield",    
+    "colorfield",
     "api",
     "ontology",
     "axes",
@@ -56,6 +56,9 @@ INSTALLED_APPS = (
     "jquery",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "graphene_django",
+    "factsheet",
+    "corsheaders"
 )
 
 MIDDLEWARE = (
@@ -68,6 +71,8 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware"
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -87,6 +92,15 @@ TEMPLATES = [
         },
     }
 ]
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+
+GRAPHENE = {
+    'SCHEMA': 'factsheet.schema.schema'
+}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
