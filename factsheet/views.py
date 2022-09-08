@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def factsheets_index(request, *args, **kwargs):
+    return render(request, 'build/index.html')
