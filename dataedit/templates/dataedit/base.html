@@ -2,20 +2,20 @@
 {% load static %}
 
 {% block after-head %}
-    <link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
+<link rel="stylesheet" href="{% static 'dataedit/dataedit.css' %}">
 {% endblock after-head %}
 
 
 {% block main-right-sidebar-content %}
-    {% block main-right-sidebar-disclaimer %}
-    {% endblock main-right-sidebar-disclaimer %}
+{% block main-right-sidebar-disclaimer %}
+{% endblock main-right-sidebar-disclaimer %}
 
-    {% block main-right-sidebar-content-additional %}
-    {% endblock main-right-sidebar-content-additional %}
+{% block main-right-sidebar-content-additional %}
+{% endblock main-right-sidebar-content-additional %}
 
 
-    {% block main-right-sidebar-filter %}
-    {% endblock main-right-sidebar-filter %}
+{% block main-right-sidebar-filter %}
+{% endblock main-right-sidebar-filter %}
 
 {% endblock %}
 {% block main-content-body %}
@@ -25,5 +25,5 @@
 {% endblock %}
 
 {% block after-body-bottom-js %}
-    <script type="text/javascript" src="{% static '/dataedit/dataedit.js' %}"></script>
+<script src="{% static '/dataedit/dataedit.js' %}"></script>
 {% endblock after-body-bottom-js %}

@@ -2,7 +2,7 @@
 
 {% block data_content %}
 {% load static %}
-<script type="text/javascript" src="{% static 'colorfield/jscolor/jscolor.js'%}"></script>
+<script src="{% static 'colorfield/jscolor/jscolor.js'%}"></script>
 
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}

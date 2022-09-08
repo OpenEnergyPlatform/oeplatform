@@ -47,7 +47,7 @@
     <div id="tags">
         <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
             <select id="tag-select" name="tags" class="form-control selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true">
                 {% for t in all_tags %}
                 <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
                     {{ t.name }}
