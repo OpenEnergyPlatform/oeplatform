@@ -6,8 +6,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "parcel build source-code/index.html --out-dir ../static && npm run build:clean",
-    "build:clean": "cd ../static && mv *.js main.js && mv *.css main.css"
+    "build": "parcel build --no-source-maps source-code/index.html --out-dir ../static/oeo_viewer && npm run build:clean",
+    "build:clean": "cd ../static/oeo_viewer && mv scripts*.js main.min.js && mv scripts*.css main.min.css"
   },
   "keywords": [
     "Graph"
