@@ -77,6 +77,7 @@ venv*/
 src
 0_env/
 /envs
+/node_env
 
 .DS_Store
 
