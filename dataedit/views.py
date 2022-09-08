@@ -1496,6 +1496,7 @@ def update_table_tags(request):
 
     with _get_engine().connect() as con:
         with con.begin():
+            # TODO Add metadata to table (JSONB field) somewhere here 
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=con
             )
