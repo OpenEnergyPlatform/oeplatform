@@ -1,7 +1,7 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 
 <style>
@@ -15,25 +15,7 @@
 }
 </style>
 
-<script type="text/javascript">
-    var confirmOnLeave = function(msg) {
- 
-      window.onbeforeunload = function (e) {
-        e = e || window.event;
-        msg = msg || '';
- 
-        // For IE and Firefox
-        if (e) {e.returnValue = msg;}
- 
-        // For Chrome and Safari
-        return msg;
-    };
- 
-};
- 
-confirmOnLeave();
 
-</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Model </h1>
 <sup color="light grey">* required field</sup>
@@ -51,14 +33,14 @@ confirmOnLeave();
 <div style="width:100%">
 
 <ul class="nav nav-tabs" style="width:100%">
-  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Basic">General Information</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Openness">Openness</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Software">Software</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Coverage">Coverage</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Math">Mathematical Properties</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Integration">Model Integration</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#References">References</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Tags">Tags</a></li>
+  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Basic">General Information</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Openness">Openness</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Software">Software</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Coverage">Coverage</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Math">Mathematical Properties</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Integration">Model Integration</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#References">References</a></li>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li>
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
@@ -74,7 +56,7 @@ confirmOnLeave();
             <tr>
                 <th class="formlabel">{% bootstrap_label form.methodical_focus_1.label %}*
                     {% if form.methodical_focus_1.help_text != "" %}
-                        <i data-toggle="tooltip" title="{{ form.methodical_focus_1.help_text }}">
+                        <i data-bs-toggle="tooltip" title="{{ form.methodical_focus_1.help_text }}">
                             <span class='fas fa-question'></span>
                         </i>
                     {% endif %}
@@ -119,8 +101,8 @@ confirmOnLeave();
                 sty_no = ''
             if (cb.checked) {
                 sty_no = 'none'
-                sty_yes = ''                
-            } 
+                sty_yes = ''
+            }
             for (i = 0; i < yes.length; i++) {
                 yes[i].style.display = sty_yes;
             }
@@ -131,11 +113,11 @@ confirmOnLeave();
 
         function modeled_technology_renewables_click(cb) {
             var ren = document.getElementsByClassName('renewable_tec')
-            if (cb.checked) { 
+            if (cb.checked) {
                 for (i = 0; i < ren.length; i++) {
                     ren[i].style.display = '';
                 }
-            } 
+            }
             else {
                 for (i = 0; i < ren.length; i++) {
                     ren[i].style.display = 'none';
@@ -145,11 +127,11 @@ confirmOnLeave();
 
         function modeled_technology_conventional_click(cb) {
             var ren = document.getElementsByClassName('conventional_tec')
-            if (cb.checked) { 
+            if (cb.checked) {
                 for (i = 0; i < ren.length; i++) {
                     ren[i].style.display = '';
                 }
-            } 
+            }
             else {
                 for (i = 0; i < ren.length; i++) {
                     ren[i].style.display = 'none';
@@ -192,12 +174,12 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_heat %}
             {% include 'modelview/editmodel_snippet.html' with field=form.energy_sectors_others add=form.energy_sectors_others_text%}
         </table></td></tr>
-        
-        
+
+
         <tr>
             <th> Modeled demand sectors </th>
             <td>
-                <table class="checktable"  align="center"> 
+                <table class="checktable"  align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_households %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_industry %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.demand_sectors_commercial_sector %}
@@ -207,7 +189,7 @@ confirmOnLeave();
         </tr>
         <tr>
             <th> Modeled technologies: components for power generation or conversion </th>
-            <td align="left">         
+            <td align="left">
                 <table  class="modeledTec">
                 {% include 'modelview/editmodel_snippet.html' with     field=form.modeled_technology_renewables  event='onclick'%}
                 </table>
@@ -216,7 +198,7 @@ confirmOnLeave();
         <tr>
             <td></td>
             <td>
-                <table class="checktable"  align="right"> 
+                <table class="checktable"  align="right">
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV  class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind class='renewable_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro class='renewable_tec' visible='none' %}
@@ -230,7 +212,7 @@ confirmOnLeave();
         <tr></tr>
         <tr>
             <td></td>
-            <td align="left">         
+            <td align="left">
                 <table  class="modeledTec">
                     {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional  event='onclick'%}
                 </table>
@@ -239,7 +221,7 @@ confirmOnLeave();
         <tr>
             <td></td>
             <td>
-                <table class="checktable"  align="right"> 
+                <table class="checktable"  align="right">
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas  class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_lignite   class='conventional_tec' visible='none' %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_hard_coal   class='conventional_tec' visible='none' %}
@@ -248,11 +230,11 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear   class='conventional_tec' visible='none' %}
                 </table>
             </td>
-        </tr>        
+        </tr>
         <tr>
             <th> Modeled technologies: components for transfer, infrastructure or grid </th>
             <td>
-                <table class="formtable" align="center"> 
+                <table class="formtable" align="center">
                     <tr>
                         <th>
                             Electricity
@@ -263,7 +245,7 @@ confirmOnLeave();
                                 {% include 'modelview/editmodel_snippet.html' with field=form.transfer_electricity_transition %}
                             </table>
                         </td>
-                    </tr> 
+                    </tr>
                     <tr>
                         <th>
                             Gas
@@ -274,7 +256,7 @@ confirmOnLeave();
                                 {% include 'modelview/editmodel_snippet.html' with field=form.transfer_gas_transition %}
                             </table>
                         </td>
-                    </tr> 
+                    </tr>
                     <tr>
                         <th>
                             Heat
@@ -282,20 +264,20 @@ confirmOnLeave();
                         <td>
                             <table class="checktable" align="center">
                                 {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_distribution %}
-                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_transition %}  
+                                {% include 'modelview/editmodel_snippet.html' with field=form.transfer_heat_transition %}
                             </table>
                         </td>
-                    </tr>     
+                    </tr>
                 </table>
             </td>
         </tr>
         <tr>
             <th> Properties electrical grid </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_AC %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_DC %}
-                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_TM %}                    
+                    {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_TM %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_SN %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.network_coverage_other add=form.network_coverage_other_text %}
                 </table>
@@ -304,7 +286,7 @@ confirmOnLeave();
         <tr>
             <th> Modeled technologies: components for storage </th>
             <td>
-                <table class="formtable" align="center"> 
+                <table class="formtable" align="center">
                     <tr>
                         <th> Storage (electricity) </th>
                         <td>
@@ -316,7 +298,7 @@ confirmOnLeave();
                                 {% include 'modelview/editmodel_snippet.html' with field=form.storage_electricity_chemical %}
                              </table>
                         </td>
-                    </tr> 
+                    </tr>
                     <tr>
                         <th> Storage (other) </th>
                         <td>
@@ -326,7 +308,7 @@ confirmOnLeave();
                                 {% include 'modelview/editmodel_snippet.html' with field=form.storage_gas %}
                             </table>
                         </td>
-                    </tr> 
+                    </tr>
                 </table>
             </td>
         </tr>
@@ -337,7 +319,7 @@ confirmOnLeave();
             <tr>
             <th> Geographic (spatial) resolution </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.geo_resolution_global %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.geo_resolution_continents %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.geo_resolution_national_states %}
@@ -352,12 +334,12 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.geo_resolution_others add=form.geo_resolution_others_text%}
                 </table>
             </td>
-        </tr>            
+        </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.comment_on_geo_resolution %}
         <tr>
             <th> Time resolution </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_anual %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_hour %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_15_min %}
@@ -365,11 +347,11 @@ confirmOnLeave();
                     {% include 'modelview/editmodel_snippet.html' with field=form.time_resolution_other add=form.time_resolution_other_text %}
                 </table>
             </td>
-        </tr>            
+        </tr>
         <tr>
             <th> Observation period </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.observation_period_less_1_year %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.observation_period_1_year %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.observation_period_more_1_year %}
@@ -380,7 +362,7 @@ confirmOnLeave();
         <tr>
             <th> Additional dimensions </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_ecological add=form.additional_dimensions_sector_ecological_text %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_economic add=form.additional_dimensions_sector_economic_text%}
                     {% include 'modelview/editmodel_snippet.html' with field=form.additional_dimensions_sector_social add=form.additional_dimensions_sector_social_text%}
@@ -388,16 +370,16 @@ confirmOnLeave();
                 </table>
             </td>
         </tr>
-        
+
         </table>
     </div>
     <div id="Math" class="tab-pane fade">
         <table class="formtable">
-        
+
         <tr>
             <th> Model class </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_optimization_LP %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_optimization_MILP %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.model_class_optimization_Nonlinear add=form.model_class_optimization_LP_MILP_Nonlinear_text%}
@@ -412,14 +394,14 @@ confirmOnLeave();
             </td>
         </tr>
 
-        
+
 
             {% include 'modelview/editmodel_snippet.html' with field=form.short_description_of_mathematical_model_class %}
-            
+
         <tr>
             <th> Mathematical objective </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.mathematical_objective_cO2 %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.mathematical_objective_costs %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.mathematical_objective_rEshare %}
@@ -430,13 +412,13 @@ confirmOnLeave();
         <tr>
             <th> Approach to uncertainty </th>
             <td>
-                <table class="checktable" align="center"> 
+                <table class="checktable" align="center">
                     {% include 'modelview/editmodel_snippet.html' with field=form.uncertainty_deterministic %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.uncertainty_Stochastic %}
                     {% include 'modelview/editmodel_snippet.html' with field=form.uncertainty_Other add=form.uncertainty_Other_text %}
                 </table>
             </td>
-        </tr>   
+        </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.montecarlo %}
             {% include 'modelview/editmodel_snippet.html' with field=form.typical_computation_time %}
             {% include 'modelview/editmodel_snippet.html' with field=form.typical_computation_hardware %}
@@ -449,7 +431,7 @@ confirmOnLeave();
             {% include 'modelview/editmodel_snippet.html' with field=form.citation_DOI %}
             {% include 'modelview/editmodel_snippet.html' with field=form.references_to_reports_produced_using_the_model %}
             {% include 'modelview/editmodel_snippet.html' with field=form.larger_scale_usage %}
-            
+
             <tr><th> Model Validation </th><td>
 		<table class="checktable">
 		    {% include 'modelview/editmodel_snippet.html' with field=form.validation_models %}
@@ -474,4 +456,26 @@ confirmOnLeave();
     {%include 'modelview/tag_selector.html'%}
 </div>
 </form>
+{% endblock %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript">
+    var confirmOnLeave = function(msg) {
+
+      window.onbeforeunload = function (e) {
+        e = e || window.event;
+        msg = msg || '';
+
+        // For IE and Firefox
+        if (e) {e.returnValue = msg;}
+
+        // For Chrome and Safari
+        return msg;
+    };
+
+};
+
+confirmOnLeave();
+
+</script>
 {% endblock %}

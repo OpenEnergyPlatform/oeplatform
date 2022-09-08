@@ -1,5 +1,5 @@
-from django import forms
 from captcha.fields import CaptchaField
+from django import forms
 
 
 class ContactForm(forms.Form):

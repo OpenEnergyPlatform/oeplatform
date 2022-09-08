@@ -21,6 +21,6 @@
     "funding": "", // grant number without the last character e.g. for lod-geoss 03EI1005
     "logo": ".png", // file name of a logo that is present in base/static/logos/projects
     "meta": {
-        "lastUpdated": "" // Data when the editor changed this file (format yyyy-mm-dd) 
+        "lastUpdated": "" // Data when the editor changed this file (format yyyy-mm-dd)
     }
 }

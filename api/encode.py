@@ -1,7 +1,7 @@
+import itertools as it
 from json.encoder import INFINITY, encode_basestring, encode_basestring_ascii
 from types import GeneratorType
-import itertools as it
-    
+
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -66,7 +66,7 @@ def _make_iterencode(
     _sort_keys,
     _skipkeys,
     _one_shot,
-    ## HACK: hand-optimized bytecode; turn globals into locals
+    # HACK: hand-optimized bytecode; turn globals into locals
     ValueError=ValueError,
     dict=dict,
     float=float,

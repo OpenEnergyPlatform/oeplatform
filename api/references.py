@@ -10,7 +10,6 @@ from sqlalchemy import (
     create_engine,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, relationship
 

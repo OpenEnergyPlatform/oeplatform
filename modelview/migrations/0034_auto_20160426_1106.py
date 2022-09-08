@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 (
                     "author_Institution",
                     models.CharField(
-                        help_text="Who are the authors of the study and for which institution do they work?",
+                        help_text="Who are the authors of the study and for which institution do they work?",  # noqa
                         max_length=1000,
                         verbose_name="Author, Institution",
                     ),
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 (
                     "aim",
                     models.CharField(
-                        help_text="What is the purpose (hypothesis) and research question of the study?",
+                        help_text="What is the purpose (hypothesis) and research question of the study?",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Aim",
@@ -159,25 +159,25 @@ class Migration(migrations.Migration):
                 (
                     "economic_behavioral_perfect",
                     models.BooleanField(
-                        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"
+                        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_myopic",
                     models.BooleanField(
-                        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"
+                        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_qualitative",
                     models.BooleanField(
-                        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"
+                        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_agentbased",
                     models.BooleanField(
-                        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"
+                        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"  # noqa
                     ),
                 ),
                 (
@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                 (
                     "endogenous_variables",
                     models.CharField(
-                        help_text="Which time series and variables are generated inside the model?",
+                        help_text="Which time series and variables are generated inside the model?",  # noqa
                         max_length=1000,
                         null=True,
                         verbose_name="Endogenous variables",

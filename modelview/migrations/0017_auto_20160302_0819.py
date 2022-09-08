@@ -16,13 +16,13 @@ class Migration(migrations.Migration):
             name="authors",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
-                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
                     max_length=300,
                 ),
                 default=list,
                 null=True,
                 size=None,
-                verbose_name="Author(s) (institution, working field, active time period) (comma-separated)",
+                verbose_name="Author(s) (institution, working field, active time period) (comma-separated)",  # noqa
             ),
         )
     ]

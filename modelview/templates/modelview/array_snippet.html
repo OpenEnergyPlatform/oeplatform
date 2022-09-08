@@ -1,6 +1,6 @@
 {% load modelview_extras %}
 <script>
-var counter_{{ field.name }} = 1; 
+var counter_{{ field.name }} = 1;
 function addInput_{{ field.name }}(val){
     var newdiv = document.createElement('div');
     newdiv.id = "div_{{ field.name }}_" + counter_{{ field.name }};
@@ -18,7 +18,7 @@ function delInput_{{ field.name }}(c){
 <div>
 <div id="{{ field.name }}_container">
     <script>
-    {% for entry in field|splitarray %}  
+    {% for entry in field|splitarray %}
             addInput_{{ field.name }}("{{ entry }}")
     {% endfor %}
     </script>

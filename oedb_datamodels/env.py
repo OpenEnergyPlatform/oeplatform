@@ -7,9 +7,7 @@ from logging.config import fileConfig
 import django
 from alembic import context
 from alembic.config import Config
-from sqlalchemy import engine_from_config, pool
 
-import dataedit.structures
 from api.connection import _get_engine, get_connection_string
 from base.structures import metadata as target_metadata
 
@@ -20,7 +18,7 @@ django.setup()
 
 alembic_cfg = Config()
 db_url = get_connection_string()
-db_url = db_url.replace('%', '%%')
+db_url = db_url.replace("%", "%%")
 alembic_cfg.set_main_option("url", db_url)
 
 # this is the Alembic Config object, which provides

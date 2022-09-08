@@ -6,9 +6,10 @@ __pycache__/
 *$py.class
 *~
 
-media/
-local/
-static/
+media
+local
+# only on root dir
+/static
 
 # C extensions
 *.so
@@ -73,6 +74,8 @@ target/
 # Other generated files
 venv*/
 src
+0_env/
+/envs
 
 .DS_Store
 

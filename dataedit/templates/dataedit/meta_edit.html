@@ -1,6 +1,6 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block after-head %}
 <link href="/static/metaedit/metaedit.css" rel="stylesheet">
@@ -40,7 +40,7 @@
         var config = JSON.parse("{{ config|escapejs }}");
         MetaEdit(config);
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
+            $('[data-bs-toggle="tooltip"]').tooltip()
         })
     </script>
 {% endblock after-body-bottom-js %}

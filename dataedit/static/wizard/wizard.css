@@ -1,30 +1,32 @@
 #wizard-upload-progress {
-    width: 200px;
-    height: 8px;
+  width: 200px;
+  height: 8px;
 }
 
-#wizard-column-template,#wizard-csv-column-template {
-    display: none;
+#wizard-column-template,
+#wizard-csv-column-template {
+  display: none;
 }
 
-#wizard-csv-example, #wizard-csv-text{
-    min-height: 10em;
+#wizard-csv-example,
+#wizard-csv-text {
+  min-height: 10em;
 }
 
-.label{
-    font-weight: bolder;
+.label {
+  font-weight: bolder;
 }
 
-.help-title{
-    text-decoration: none;
-  }
+.help-title {
+  text-decoration: none;
+}
 
-.help-title::after{
-    color: var(--primary);
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    content: "\f05a";
-    vertical-align: super;
-    font-size: 70%;
-    margin-left: 2px
-  }
+.help-title::after {
+  color: var(--primary);
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f05a";
+  vertical-align: super;
+  font-size: 70%;
+  margin-left: 2px;
+}

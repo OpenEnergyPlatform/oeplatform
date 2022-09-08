@@ -1,5 +1,7 @@
 import re
+
 from django.urls import reverse
+
 from api.tests import APITestCase
 
 # test indivisually:
@@ -40,7 +42,7 @@ class Test_879(APITestCase):
         byte_data = b"".join(stream)
         str_data = byte_data.decode()
         # remove newlines for regexp comparison
-        str_data = re.sub("\s+", " ", str_data)
+        str_data = re.sub(r"\s+", " ", str_data)
 
         # check for quotes around numbers
         self.assertFalse(re.match('.*"[0-9-]', str_data), "Quoted numbers")
