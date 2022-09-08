@@ -994,9 +994,10 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
+        # TODO change this load metadata from SQL comment on table to load from table.oemetadata(JSONB) field to avoid performance issues
         # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
-
+        
         meta_widget = MetaDataWidget(metadata)
 
         revisions = []

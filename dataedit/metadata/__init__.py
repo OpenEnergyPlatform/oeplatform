@@ -123,6 +123,7 @@ def load_metadata_from_db(schema, table):
     :param table: name of the OEP table in the OEP schema
     :return:
     """
+    # TODO maybe change this function to load metadata from Table.oemetadata(JSONB) field? or keep old functionality?
     metadata = actions.get_comment_table(schema, table)
     metadata = parse_meta_data(metadata, schema, table)
     return metadata

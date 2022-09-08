@@ -40,6 +40,9 @@ class Schema(Tagable):
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
+    # Add field to store oemetadata related to the table and avoide performance issues
+    # due to oem string (json) parsing like when reading the oem form comment on table
+    oemetadata = JSONField(null=True)
 
     @classmethod
     def load(cls, schema, table):
@@ -74,3 +77,16 @@ class Filter(models.Model):
     type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
     value = JSONField(null=False)
     view = ForeignKey(View, on_delete=models.CASCADE, related_name="filter")
+
+
+# class OEMetadataStorage(models.Model):
+#     '''
+#     Store oemetadata if present on table. As this was stored as SQL comment on 
+#     table before we will keep the comment but from now on also store it in this 
+#     table as soon as it is added to the table (as SQL comment on table). This 
+#     ensures not to breake the legacy functionality.
+#     '''
+
+#     schema = CharField(max_length=100, null=False)
+#     table = CharField(max_length=100, null=False)
+#     oem = JSONField(null=False)
