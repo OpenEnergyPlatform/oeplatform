@@ -21,5 +21,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         pwd = os.path.join(os.path.dirname(__file__), "..", "..", "client")
-        execute(["npm", "install", "--legacy-peer-deps"], cwd=pwd)
+        execute(["npm", "install", "--legacy-peer-deps", "--no-save"], cwd=pwd)
         execute(["npm", "run", "build"], cwd=pwd)
