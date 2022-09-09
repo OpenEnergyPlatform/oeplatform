@@ -1,8 +1,4 @@
-import json
-
 from api.tests import APITestCase
-
-from ..util import load_content_as_json
 
 
 class TestAliasesTracking(APITestCase):
@@ -32,34 +28,12 @@ class TestAliasesTracking(APITestCase):
             ],
         }
 
-        resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        # Check HTTP-response (201 = Successful create)
-        self.assertEqual(
-            resp.status_code, 201, resp.json().get("reason", "No reason returned")
-        )
-
-        resp = self.__class__.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/rows/new".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": [{"name": "Hans"}, {"name": "Petra"}]}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        # Check HTTP-response (201 = Successful create)
-        self.assertEqual(
-            resp.status_code,
-            201,
-            load_content_as_json(resp).get("reason", "No reason returned"),
+        self.api_req("put", data={"query": self._structure_data})
+        self.api_req(
+            "post",
+            path="rows/new",
+            data={"query": [{"name": "Hans"}, {"name": "Petra"}]},
+            exp_code=201,
         )
 
     def test_aliases_in_form_clauses(self):
@@ -104,18 +78,7 @@ class TestAliasesTracking(APITestCase):
             }
         }
 
-        self.check_api_post("/api/v0/advanced/search", data=data, expected_result=[[1]])
+        self.api_req("post", path="/advanced/search", data=data, exp_res=[[1]])
 
     def tearDown(self):
-        resp = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        # Check HTTP-response (200 = Successful request)
-        self.assertEqual(
-            resp.status_code, 200, resp.json().get("reason", "No reason returned")
-        )
+        self.api_req("delete")

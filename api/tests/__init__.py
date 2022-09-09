@@ -6,9 +6,16 @@ from rest_framework.authtoken.models import Token
 from api import actions
 from login.models import myuser
 
-from .util import content2json, load_content, load_content_as_json
+from .util import load_content_as_json
 
 # Create your tests here.
+
+
+def assertEqualJson(o1, o2, msg=None):
+    o1 = json.dumps(o1, sort_keys=True, indent=2)
+    o2 = json.dumps(o2, sort_keys=True, indent=2)
+    msg = msg or f"{o1} != {o2}"
+    assert o1 == o2, msg
 
 
 class APITestCase(TestCase):
@@ -55,6 +62,9 @@ class APITestCase(TestCase):
 
         cls.client = Client()
 
+    def assertEqualJson(self, o1, o2, msg=None):
+        return assertEqualJson(o1, o2, msg)
+
     def assertDictEqualKeywise(self, d1, d2, excluded=None):
         if not excluded:
             excluded = []
@@ -73,104 +83,80 @@ class APITestCase(TestCase):
                     value, covalue, "Key '{key}' does not match.".format(key=key)
                 )
 
-    def create_table(self, structure, data=None, schema=None, table=None):
-
-        if not schema:
-            schema = self.test_schema
-        if not table:
-            table = self.test_table
-
-        resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=schema, table=table
-            ),
-            data=json.dumps({"query": structure}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            resp.status_code, 201, resp.json().get("reason", "No reason returned")
-        )
-
-        if data:
-            resp = self.__class__.client.post(
-                "/api/v0/schema/{schema}/tables/{table}/rows/new".format(
-                    schema=schema, table=table
-                ),
-                data=json.dumps({"query": data}),
-                HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-                content_type="application/json",
-            )
-
-            self.assertEqual(
-                resp.status_code,
-                201,
-                load_content_as_json(resp).get("reason", "No reason returned"),
-            )
-
-    def check_api_send(
-        self, request, url, data=None, expected_result=None, expected_code=200
+    def api_req(
+        self,
+        method,
+        table=None,
+        schema=None,
+        path=None,
+        data=None,
+        auth=None,
+        exp_code=None,
+        exp_res=None,
     ):
+        path = path or ""
+        if path.startswith("/"):
+            assert not table and not schema
+            url = f"/api/v0{path}"
+        else:
+            table = table or self.test_table
+            schema = schema or self.test_schema
+            url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
 
-        params = dict(
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
+        data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
+
+        method = method.lower()
+        if auth is None:
+            auth = method != "get"
+        if auth is True:  # default token
+            auth = self.token
+        if auth:
+            auth = "Token %s" % auth
+        else:
+            auth = ""
+        request = getattr(self.client, method)
+
+        resp = request(
+            path=url,
+            data=data,
             content_type="application/json",
+            HTTP_AUTHORIZATION=auth,
         )
+
+        try:
+            json_resp = load_content_as_json(resp)
+        except Exception:
+            json_resp = None
+
+        print(
+            f"{resp.status_code} {method} {url} auth={bool(auth)} data={bool(data)} resp={bool(json_resp)}"  # noqa
+        )
+
+        if not exp_code:
+            if method == "put":
+                exp_code = 201
+            else:
+                exp_code = 200
+        assertEqualJson(resp.status_code, exp_code)
+
+        if exp_res:
+            if json_resp and "data" in json_resp:
+                json_resp = json_resp["data"]
+            assertEqualJson(exp_res, json_resp)
+
+        return json_resp
+
+    def create_table(self, structure, data=None, schema=None, table=None):
+        self.api_req("put", table, schema, data={"query": structure})
         if data:
-            params["data"] = json.dumps(data)
-
-        resp = request(url, **params)
-
-        content = load_content(resp)
-
-        self.assertEqual(
-            resp.status_code,
-            expected_code,
-            content.get("reason", "No reason returned")
-            if isinstance(content, dict)
-            else content,
-        )
-
-        json_resp = content2json(content)
-
-        if "data" in json_resp or expected_result:
-            if isinstance(json_resp, dict):
-                if "data" in json_resp:
-                    self.assertTrue(
-                        "data" in json_resp,
-                        '%s does not contain a "data"-entry' % str(json_resp),
-                    )
-                    json_resp = json_resp["data"]
-
-            if expected_result:
-                if isinstance(expected_result, list):
-                    self.assertListEqual(json_resp, expected_result)
-                elif isinstance(expected_result, dict):
-                    self.assertDictEqual(json_resp, expected_result)
-                else:
-                    self.assertEqual(json_resp, expected_result)
-
-    def check_api_post(self, *args, **kwargs):
-        self.check_api_send(self.__class__.client.post, *args, **kwargs)
-
-    def check_api_get(self, *args, **kwargs):
-        self.check_api_send(self.__class__.client.get, *args, **kwargs)
+            self.api_req(
+                "post",
+                table,
+                schema,
+                "rows/new",
+                data={"query": data},
+                exp_code=201,
+            )
 
     def drop_table(self, schema=None, table=None):
-        if not schema:
-            schema = self.test_schema
-        if not table:
-            table = self.test_table
-
-        resp = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=schema, table=table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            resp.status_code, 200, resp.json().get("reason", "No reason returned")
-        )
+        self.api_req("delete", table, schema)

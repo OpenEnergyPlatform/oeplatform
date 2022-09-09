@@ -1,5 +1,3 @@
-import json
-
 from api.tests import APITestCase
 
 
@@ -49,12 +47,7 @@ class IntegrationTestCase(APITestCase):
         pass
 
     def checkStructure(self):
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            )
-        )
-        body = json.loads(response.content.decode("utf-8"))
+        body = self.api_req("get")
 
         self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
@@ -75,33 +68,11 @@ class IntegrationTestCase(APITestCase):
                     "Key '{key}' does not match.".format(key=key),
                 )
 
-        self.assertEqual(response.status_code, 200, "Status Code is not 200.")
-
     def checkContent(self):
-        self.check_api_get(
-            "/api/v0/schema/{schema}/tables/{table}/rows/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            expected_result=self.content_data,
-        )
+        self.api_req("get", path="rows/", exp_res=self.content_data)
 
     def step_create_table(self):
-
-        c_basic_resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self.structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_basic_resp.status_code,
-            201,
-            "Status Code is not 201: "
-            + c_basic_resp.json().get("reason", "No reason returned"),
-        )
+        self.api_req("put", data={"query": self.structure_data})
         self.checkStructure()
 
     def step_modify_table(self):
@@ -121,35 +92,8 @@ class IntegrationTestCase(APITestCase):
             "constraint_parameter": "number",
         }
 
-        # j_data_column = json.dumps(data_column)
-        # j_data_constraint = json.dumps(data_constraint)
-
-        # headerInfo = {"content-type": "application/json"}
-
-        c_column_resp = self.__class__.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps(data_column),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        c_constraint_resp = self.__class__.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps(data_constraint),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_column_resp.status_code,
-            200,
-            c_column_resp.get("reason", "No reason returned"),
-        )
-        self.assertEqual(c_constraint_resp.status_code, 200, "Status Code is not 200.")
+        self.api_req("post", data=data_column)
+        self.api_req("post", data=data_constraint)
 
     def step_insert_data(self):
 
@@ -171,18 +115,8 @@ class IntegrationTestCase(APITestCase):
         ]
 
         for row in insert_data:
-            response = self.__class__.client.put(
-                "/api/v0/schema/{schema}/tables/{table}/rows/{rid}".format(
-                    schema=self.test_schema,
-                    table=self.test_table,
-                    rid=row["query"]["id"],
-                ),
-                data=json.dumps(row),
-                HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-                content_type="application/json",
-            )
-
-            self.assertEqual(response.status_code, 201, "Status Code is not 201.")
+            rid = row["query"]["id"]
+            self.api_req("put", path=f"rows/{rid}", data=row)
             self.content_data.append(row["query"])
 
         self.checkContent()

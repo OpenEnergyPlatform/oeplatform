@@ -33,14 +33,10 @@ class Test270(APITestCase):
         self.create_table(structure, data=data)
 
     def test_270(self):
-        self.check_api_get(
-            "/api/v0/schema/{schema}/tables/{table}/rows/?where={where_1}&where={where_2}".format(  # noqa
-                where_1="name<>Hans",
-                where_2="name<>Dieter",
-                schema=self.test_schema,
-                table=self.test_table,
-            ),
-            expected_result=[{"name": "Petra", "id": 2}],
+        self.api_req(
+            "get",
+            path="rows/?where=name<>Hans&where=name<>Dieter",
+            exp_res=[{"name": "Petra", "id": 2}],
         )
 
     def tearDown(self):
