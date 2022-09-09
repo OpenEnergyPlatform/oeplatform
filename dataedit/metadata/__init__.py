@@ -123,15 +123,20 @@ def load_metadata_from_db(schema, table):
     :param table: name of the OEP table in the OEP schema
     :return:
     """
+    from dataedit.models import Table, Schema
+    schema_name = Schema.objects.get(name=schema)
+    
     # TODO maybe change this function to load metadata from Table.oemetadata(JSONB) field? or keep old functionality?
-    metadata = actions.get_comment_table(schema, table)
+    # metadata = actions.get_comment_table(schema, table)
+    metadata = Table.load(schema=schema, table=table).oemetadata  
+    
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
 
 
 def parse_meta_data(metadata, schema, table):
-    if "error" in metadata:
-        return metadata
+    # if "error" in metadata:
+    #     return metadata
     if not metadata:
         metadata = __LATEST.get_empty(schema, table)
     else:
