@@ -2244,7 +2244,11 @@ def set_table_metadata(table, schema, metadata, cursor):
         metadata(object): json serializable meta data object
         cursor: sql alchemy connection cursor
     """
-
+    if metadata is not None:
+        from dataedit.models import Table, Schema
+        from django.core.serializers.json import DjangoJSONEncoder
+        schema_name = Schema.objects.get(name=schema)
+    
     table_obj = _get_table(schema=schema, table=table)
     compiler_14 = JSONCompiler()
 
@@ -2252,7 +2256,13 @@ def set_table_metadata(table, schema, metadata, cursor):
     compiler_15 = dialect_15._compiler()
 
     try:
-        table_obj.comment = json.dumps(compiler_15.visit(metadata))
+        meta_15_omi_visit = json.dumps(compiler_15.visit(metadata), cls=DjangoJSONEncoder, ensure_ascii=False)
+        # prepare SQL comment on table
+        table_obj.comment = meta_15_omi_visit
+
+        # prepare data for django models dataedit.Tables JSON field and update record
+        meta = json.loads(meta_15_omi_visit)
+        Table.objects.filter(name=table, schema=schema_name.id).update(oemetadata=meta)
     except Exception as e:
         APIError(
             "Metadata is not compilable using metadat aversion 1.5 compiler {}".format(
@@ -2260,7 +2270,13 @@ def set_table_metadata(table, schema, metadata, cursor):
             )
         )
         try:
-            table_obj.comment = json.dumps(compiler_14.visit(metadata))
+            # prepare SQL comment on table
+            meta_14_omi_visit = json.dumps(compiler_14.visit(metadata))
+            table_obj.comment = meta_14_omi_visit
+
+            # prepare data for django models dataedit.Tables JSON field and update record
+            meta = json.loads(meta_14_omi_visit)
+            Table.objects.filter(name=table, schema=schema_name.id).update(oemetadata=meta)
         except Exception as e:
             raise APIError(
                 "Metadata is not compilable using metadat aversion 1.4 compiler{}".format(  # noqa
