@@ -2246,8 +2246,6 @@ def set_table_metadata(table, schema, metadata, cursor):
     """
     if metadata is not None:
         from dataedit.models import Table, Schema
-        from django.core.serializers.json import DjangoJSONEncoder
-        from collections import OrderedDict
         schema_name = Schema.objects.get(name=schema)
     
     table_obj = _get_table(schema=schema, table=table)
@@ -2263,13 +2261,12 @@ def set_table_metadata(table, schema, metadata, cursor):
 
         # prepare data for django models dataedit.Tables JSON field and update record
         meta = json.loads(meta_15_omi_visit)
-        print(meta)
         Table.objects.filter(name=table, schema=schema_name.id).update(oemetadata=meta)
         # Table.load(schema=schema, table=table).oemetadata = meta
         # Table.save()
     except Exception as e:
         APIError(
-            "Metadata is not compilable using metadat aversion 1.5 compiler {}".format(
+            "Metadata is not compilable using metadat version 1.5 compiler {}".format(
                 e
             )
         )
