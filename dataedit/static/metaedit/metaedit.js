@@ -73,10 +73,16 @@ var MetaEdit = function(config) {
     fixRecursive(json.properties);
 
     // make some readonly
+    if (config.standalone == false) {
     json.properties.id.readonly = true;
     json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
     json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
-
+    }
+    else {
+    json.properties.id.readonly = false;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
+    }
     // hide some
     json.properties.resources.items.properties.profile.options = {hidden: true};
     json.properties.resources.items.properties.encoding.options = {hidden: true};
