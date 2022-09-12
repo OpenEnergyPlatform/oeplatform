@@ -77,16 +77,3 @@ class Filter(models.Model):
     type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
     value = JSONField(null=False)
     view = ForeignKey(View, on_delete=models.CASCADE, related_name="filter")
-
-
-# class OEMetadataStorage(models.Model):
-#     '''
-#     Store oemetadata if present on table. As this was stored as SQL comment on 
-#     table before we will keep the comment but from now on also store it in this 
-#     table as soon as it is added to the table (as SQL comment on table). This 
-#     ensures not to breake the legacy functionality.
-#     '''
-
-#     schema = CharField(max_length=100, null=False)
-#     table = CharField(max_length=100, null=False)
-#     oem = JSONField(null=False)
