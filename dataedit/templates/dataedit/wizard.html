@@ -11,104 +11,6 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">
-                    <a href="" data-bs-toggle="collapse" data-bs-target="#wizard-container-create">Create Table</a>
-                </h2>
-            </div>
-            <div id="wizard-container-create" class="collapse" data-bs-parent="#wizard-container">
-                <div class="card-body container-fluid">
-                    <div class="row my-2">
-                        <div class="col">
-                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-bs-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
-                        </div>
-                    </div>
-
-                    <div class="row wizard-column">
-                        <div class="col-12">
-                            <datalist id="wizard-column-types">
-                                <option value="boolean"></option>
-                                <option value="smallint"></option>
-                                <option value="integer"></option>
-                                <option value="bigint"></option>
-                                <option value="float"></option>
-                                <option value="real"></option>
-                                <option value="date"></option>
-                                <option value="time"></option>
-                                <option value="datetime"></option>
-                                <option value="char(5)"></option>
-                                <option value="varchar(128)"></option>
-                                <option value="text"></option>
-                                <option value="decimal(9, 6)"></option>
-                            </datalist>
-
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <td>
-                                        </td>
-                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
-                                            Column name
-                                        </span></td>
-                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid sql data type for this column">
-                                            Column type
-                                        </span></td>
-                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)">
-                                            Nullable
-                                        </span></td>
-                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
-                                            Primary key
-                                        </span></td>
-                                    </tr>
-                                    <tr class="wizard-column" id="wizard-column-template">
-                                        <td>
-                                            <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
-                                        </td>
-                                        <td>
-                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-bs-toggle="tooltip" title="Valid sql data type for this column" />
-                                        </td>
-                                        <td>
-                                            <input class="wizard-column-nullable" type="checkbox" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)" />
-                                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
-                                        </td>
-
-                                        <td>
-                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
-                                            <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
-                                        </td>
-                                    </tr>
-                                </thead>
-                                <tbody id="wizard-columns">
-                                    <!-- placeholder for dynamic items -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="row my-2">
-                        <div class="col-4">
-                            <button class="btn btn-primary" id="wizard-column-add"><i class="fa fa-plus"></i> Add column</button>
-                        </div>
-                    </div>
-                    <div class="row mt-5">
-                        <div class="col-2">
-                            <button class="btn btn-success mt-2" id="wizard-table-create"><i class="fa fa-table mr-2"></i>Create table</button>
-                            <button class="btn btn-danger mt-2" id="wizard-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
-                        </div>
-                        <div class="col-10 align-self-end">
-                            <div id="wizard-table-create-msg" class="invisible wizard-status">
-                                <span class="spinner spinner-border spinner-border-sm"></span>
-                                <span class="message"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h2 class="mb-0">
                     <a href="" data-bs-toggle="collapse" data-bs-target="#wizard-container-upload">Upload CSV</a>
                     <span id="wizard-title-table"></span>
                 </h2>
@@ -266,14 +168,14 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">
-                    <a href="" data-toggle="collapse" data-target="#wizard-container-create">Create Table</a>
+                    <a href="" data-bs-toggle="collapse" data-bs-target="#wizard-container-create">Create Table</a>
                 </h2>
             </div>
-            <div id="wizard-container-create" class="collapse" data-parent="#wizard-container">
+            <div id="wizard-container-create" class="collapse" data-bs-parent="#wizard-container">
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
+                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-bs-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
                         </div>
                     </div>
 
@@ -300,16 +202,16 @@
                                     <tr>
                                         <td>
                                         </td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
                                             Column name
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid sql data type for this column">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid sql data type for this column">
                                             Column type
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Allow column values to be empty (NULL)">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)">
                                             Nullable
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
                                             Primary key
                                         </span></td>
                                     </tr>
@@ -318,18 +220,18 @@
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
+                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-bs-toggle="tooltip" title="Valid sql data type for this column" />
                                         </td>
                                         <td>
-                                            <input class="wizard-column-nullable" type="checkbox" data-toggle="tooltip" title="Allow column values to be empty (NULL)" />
+                                            <input class="wizard-column-nullable" type="checkbox" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)" />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
 
                                         <td>
-                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
+                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
                                     </tr>
