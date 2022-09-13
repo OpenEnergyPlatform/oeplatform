@@ -1,10 +1,12 @@
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% block before-head %}{% endblock before-head %}
+
     <!-- Meta Tags, which should be implemented -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,46 +18,46 @@
 
     {% fontawesome_5_static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
-
     {% block after-head %}{% endblock after-head %}
 </head>
 
-<body>
+
+<body class="d-flex flex-column h-100">
 {% block header %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <a class="navbar-brand" href="/">
             <img style="width:45px;height: 45px;" src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"/>
         </a>
-
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="/dataedit/schemas">Database</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFS" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Factsheets
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
                         <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
                         <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                         <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
                         <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a>
-                        <a class="dropdown-item" href="/factsheets/rdf/study/">Study  Factsheet<sup class="small text-muted">Alpha</sup></a>
+                        <!-- <a class="dropdown-item" href="/factsheets/rdf/study/">Study  Factsheet<sup class="small text-muted">Alpha</sup></a> -->
                     </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownOntology" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ontology
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
                         <a class="dropdown-item" href="/ontology/">Overview</a>
                         <a class="dropdown-item" href="/ontology/oeo/">OEO Modules</a>
                         <a class="dropdown-item" href="/viewer/oeo/">OEO Viewer</a>
@@ -66,13 +68,13 @@
                     <a class="nav-link" href="/tutorials/">Tutorials</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAbout" role="button"
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         About
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
                         <a class="dropdown-item" href="/about/">Overview</a>
-                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/">Developer Documentation</a>
+                        <a class="dropdown-item" href="https://oep-data-interface.readthedocs.io/en/latest/" target="_blank">Developer Documentation</a>
                         <a class="dropdown-item" href="/tutorials/17/">FAQ</a>
                     </div>
                 </li>
@@ -90,16 +92,16 @@
                href="/user/login/?next={{ request.get_full_path|urlencode }}">{% fa5_icon 'log-in' 'fas' %} Login</a>
         {% endif %}
 
-        </div>
-
-    </nav>
+    </div>
+</nav>
 
 {% endblock header %}
 
-<div class="container-fluid base">
+{% block main %}
+<main class="flex-shrink-0 py-3">
     {% block site-header %}
     {% endblock site-header %}
-    {% block main %}
+    <div class="container-fluid">
         <div class="row">
             {% block main-content %}
                 <div class="">
@@ -107,12 +109,14 @@
                 </div>
             {% endblock main-content %}
         </div>
-    {% endblock main %}
-    {% block footer %}
-        <footer class="navbar-footer bg-primary">
-            <nav class="navbar navbar-expand navbar-dark bg-primary">
+    </div>
+    </main>
+{% endblock main %}
+{% block footer %}
+    <footer class="footer mt-auto py-3 bg-primary">
+        <nav class="navbar navbar-expand navbar-dark bg-primary">
+            <div class="container-fluid justify-content-end">
                 <ul class="navbar-nav mr-auto">
-
                     <li class="nav-item">
                         <a class="nav-link" href="/contact/">Contact</a>
                     </li>
@@ -123,16 +127,19 @@
                         <a class="nav-link" href="/legal/tou/">Terms of Use</a>
                     </li>
                 </ul>
-            </nav>
-        </footer>
-    {% endblock footer %}
-</div>
+            </div>
+        </nav>
+    </footer>
+{% endblock footer %}
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    {% bootstrap_javascript jquery=1 %}
-    <script type="text/javascript" src="{% static '/js/jsi18n' %}"></script>
-    <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
+    <script src="{% static 'js/jsi18n.js' %}"></script>
+    <script src="{% static 'js/oep-tags.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

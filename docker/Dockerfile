@@ -20,4 +20,3 @@ RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysetti
 EXPOSE 80
 
 CMD ["/bin/bash", "/app/docker-entrypoint.sh"]
-

@@ -1,29 +1,21 @@
 import itertools
-import json
 
 import requests
 from django.conf import settings
-from django.contrib import auth
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    UserManager,
-    Group,
-    PermissionsMixin,
-    User,
-)
+from django.contrib.auth.models import AbstractBaseUser, Group, UserManager
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 import dataedit.models as datamodels
+
 try:
-    import oeplatform.securitysettings as sec
-except:
+    import oeplatform.securitysettings as sec  # noqa
+except Exception:
     import logging
+
     logging.error("No securitysettings found. Triggerd in login/models.py")
 
 from login.mail import send_verification_mail
@@ -62,8 +54,11 @@ class OEPUserManager(UserManager):
         if not name:
             raise ValueError("A name must be entered")
         user = self.model(
-            name=name, email=self.normalize_email(email), affiliation=name, is_mail_verified=True
-            )
+            name=name,
+            email=self.normalize_email(email),
+            affiliation=name,
+            is_mail_verified=True,
+        )
         user.save(using=self._db)
         return user
 
@@ -214,11 +209,15 @@ class ActivationToken(models.Model):
 
 
 class UserPermission(TablePermission):
-    holder = models.ForeignKey(myuser, related_name="table_permissions", on_delete=models.CASCADE)
+    holder = models.ForeignKey(
+        myuser, related_name="table_permissions", on_delete=models.CASCADE
+    )
 
 
 class GroupPermission(TablePermission):
-    holder = models.ForeignKey(UserGroup, related_name="table_permissions", on_delete=models.CASCADE)
+    holder = models.ForeignKey(
+        UserGroup, related_name="table_permissions", on_delete=models.CASCADE
+    )
 
 
 class GroupMembership(models.Model):
@@ -228,8 +227,12 @@ class GroupMembership(models.Model):
         (DELETE_PERM, "Remove"),
         (ADMIN_PERM, "Admin"),
     )
-    user = models.ForeignKey(myuser, related_name="memberships", on_delete=models.CASCADE)
-    group = models.ForeignKey(UserGroup, related_name="memberships", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        myuser, related_name="memberships", on_delete=models.CASCADE
+    )
+    group = models.ForeignKey(
+        UserGroup, related_name="memberships", on_delete=models.CASCADE
+    )
     level = models.IntegerField(choices=choices, default=WRITE_PERM)
 
     class Meta:
@@ -272,7 +275,7 @@ class UserBackend(object):
             login_req = requests.post(url, data, cookies=token_req.cookies)
 
             if login_req.json()["login"]["result"] == "Success":
-                return myuser.objects.get_or_create(name=username)[0]
+                return myuser.objects.get(name=username)
             else:
                 return None
 

@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modelview', '0058_auto_20210112_1920'),
+        ("modelview", "0058_auto_20210112_1920"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='energyframework',
-            name='link_to_installation_guide',
-            field=models.CharField(help_text='Is an installation guide availaibe for the framework? Please insert the link!', max_length=200, null=True, verbose_name='Link to installation guide'),
+            model_name="energyframework",
+            name="link_to_installation_guide",
+            field=models.CharField(
+                help_text="Is an installation guide availaibe for the framework? Please insert the link!",  # noqa
+                max_length=200,
+                null=True,
+                verbose_name="Link to installation guide",
+            ),
         ),
     ]

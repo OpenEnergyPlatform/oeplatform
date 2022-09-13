@@ -1,0 +1,45 @@
+{
+  "id": "open_modex",
+  "fullTitle": "open_MODEX: Model experiment to compare and determine synergy potentials of open-source frameworks in energy system analysis",
+  "acronym": "open_MODEX",
+  "start": "2019-01-01",
+  "end": "2022-05-31",
+  "projectStatus": "isFinished",
+  "general": "In the open_MODEX project, five open source frameworks for energy system analysis are being examined and compared with each other. The aim is to highlight the strengths and weaknesses of the individual frameworks and to analyse commonalities, differences and possible synergies between the them.",
+  "tasks": "The aim is to develop open modelling frameworks and use the OEP to give access to the scenario data. Most of the input data and alls results from open_MODEX are available on the OEP under open licences. The main result is the development of the Open Energy Datamodel (OEDatamodel) and an API for automated data access in the models.",
+  "partners": [
+    {
+      "name": "Reiner Lemoine Institut",
+      "logo": "RLI.png"
+    },
+    {
+      "name": "Forschungsnetzwerk Energie",
+      "logo": "partner_logo_fortiss.png"
+    },
+    {
+      "name": "RWTH Aachen",
+      "logo": ""
+    },
+    {
+      "name": "Technical University of Denmark",
+      "logo": ""
+    },
+    {
+      "name": "TU Berlin",
+      "logo": ""
+    },
+    {
+      "name": "Europa-Universität Flensburg",
+      "logo": "EUF.png"
+    },
+    {
+      "name": "TU München",
+      "logo": ""
+    }
+  ],
+  "funding": "03ET4076",
+  "logo": "open_MODEX_Header.jpg",
+  "meta": {
+    "lastUpdated": "2022-05-31"
+  }
+}

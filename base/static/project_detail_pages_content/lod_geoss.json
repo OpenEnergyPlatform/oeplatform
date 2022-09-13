@@ -1,0 +1,45 @@
+{
+  "id": "lod_geoss",
+  "fullTitle": "LOD-GEOSS: Linked Open Data and use of the Global Earth Observation System GEOSS in energy system analysis",
+  "acronym": "LOD-GEOSS",
+  "start": "2019-08-01",
+  "end": "2022-12-31",
+  "projectStatus": "isActive",
+  "general": "In the LOD-GEOSS project, a networked database concept is to be developed on the basis of Linked Open Data (LOD) and the Semantic Web for input and result data of modelling in energy system analysis. In addition, a connection to the global earth observation system (GEOSS) will be realised, especially for spatio-temporally resolved input data.",
+  "tasks": "The Energy Databus is created as a data publication and search index. All data of the OEP will be registered.",
+  "partners": [
+    {
+      "name": "Reiner Lemoine Institut",
+      "logo": "RLI.png"
+    },
+    {
+      "name": "Deutsches Zentrum für Luft- und Raumfahrt",
+      "logo": "DLR-VE.png"
+    },
+    {
+      "name": "Deutsches Zentrum für Luft- und Raumfahrt – Institut für Vernetzte Energiesysteme",
+      "logo": "DLR-VE.png"
+    },
+    {
+      "name": "Jülich Fosrschungszentrum",
+      "logo": "FZJuelich-1.jpg"
+    },
+    {
+      "name": "Potsdam Institute for Climate Impact Research",
+      "logo": "pik_logo.png"
+    },
+    {
+      "name": "Institut für Angewandte Informatik",
+      "logo": "InfAI-Logo.png"
+    },
+    {
+      "name": "Universität Stuttgart – IER",
+      "logo": "Logo_IER_UniStuttgart-1200x386.png"
+    }
+  ],
+  "funding": "03EI1005",
+  "logo": "LOD-GEOSS_Header.png",
+  "meta": {
+    "lastUpdated": "2022-05-31"
+  }
+}

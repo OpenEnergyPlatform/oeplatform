@@ -18,7 +18,7 @@
     <tbody>
         {% for table, label, tags in tables %}
 
-            <tr onclick="window.location='/dataedit/view/{{ schema }}/{{ table }}'">
+            <tr onclick="window.open('/dataedit/view/{{ schema }}/{{ table }}', name='_blank')">
                 {% if label %}
                     <td>{{ label }}</td>
                 {% else %}
@@ -36,4 +36,3 @@
 </table>
 
 {% endblock %}
-

@@ -1,7 +1,7 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block factsheets_content %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 
 <style>
@@ -17,31 +17,7 @@
 </style>
 
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-    });
 
-    var confirmOnLeave = function (msg) {
-
-        window.onbeforeunload = function (e) {
-            e = e || window.event;
-            msg = msg || '';
-
-            // For IE and Firefox
-            if (e) {
-                e.returnValue = msg;
-            }
-
-            // For Chrome and Safari
-            return msg;
-        };
-
-    };
-
-    confirmOnLeave();
-
-</script>
 <link rel="stylesheet" href="{% static 'css/form-style.css' %}">
 <h1> Framework </h1>
 <sup color="light grey">* required field</sup>
@@ -57,15 +33,15 @@
 {% include 'modelview/error_snipet.html' with errors=errors %}
 
 <ul class="nav nav-tabs">
-    <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Overview">Overview</a>
+    <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Overview">Overview</a>
     </li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#General">General Information</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#MathematicalDescription">Mathematical
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#General">General Information</a></li>
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#MathematicalDescription">Mathematical
         Description</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Openness">Openness</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#ModelBuilding">Model Building</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#References">References</a></li>
-    <li style="padding-right: 5px; padding-left: 5px"><a data-toggle="tab" href="#Tags">Tags</a></li>
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Openness">Openness</a></li>
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#ModelBuilding">Model Building</a></li>
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#References">References</a></li>
+    <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li>
     <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all"/>
   </span>
@@ -94,7 +70,7 @@
         <table class="formtable">
             <th>
                 Geographical Scope
-                <a data-toggle="tooltip" title="What geographical scope was modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="What geographical scope was modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a>
             </th>
@@ -112,7 +88,7 @@
         <table class="formtable">
             <th>
                 Sectoral Scope
-                <a data-toggle="tooltip" title="What sectoral scope was modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="What sectoral scope was modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a>
             </th>
@@ -130,7 +106,7 @@
         <table class="formtable">
             <th>
                 General Problem Scope
-                <a data-toggle="tooltip" title="What is the primary purpose of the framework?">
+                <a data-bs-toggle="tooltip" title="What is the primary purpose of the framework?">
                     <span class='fas fa-question '></span>
                 </a>
             </th>
@@ -146,7 +122,7 @@
         <table class="formtable">
             <th>
                 Specific Problem Scope
-                <a data-toggle="tooltip" title="What is/are the specific purpose(s) of the framework?">
+                <a data-bs-toggle="tooltip" title="What is/are the specific purpose(s) of the framework?">
                     <span class='fas fa-question '></span>
                 </a>
             </th>
@@ -202,7 +178,7 @@
             <table class="formtable">
                 <th>
                     Programming Framework
-                    <a data-toggle="tooltip"
+                    <a data-bs-toggle="tooltip"
                        title="Which programming framework/language is used to develop the framework?">
                         <span class='fas fa-question '></span>
                     </a>
@@ -228,7 +204,7 @@
             <table class="formtable">
                 <th>
                     External Solver
-                    <a data-toggle="tooltip" title="Which external solver(s) can the framework apply? Please list!">
+                    <a data-bs-toggle="tooltip" title="Which external solver(s) can the framework apply? Please list!">
                         <span class='fas fa-question '></span>
                     </a>
                 </th>
@@ -246,7 +222,7 @@
             <table class="formtable">
                 <th>
                     Input Data Format
-                    <a data-toggle="tooltip" title="Which input format(s) can the framework apply? Please list!">
+                    <a data-bs-toggle="tooltip" title="Which input format(s) can the framework apply? Please list!">
                         <span class='fas fa-question '></span>
                     </a>
                 </th>
@@ -272,7 +248,7 @@
             <table class="formtable">
                 <th>
                     Output Data Format
-                    <a data-toggle="tooltip" title="Which output format(s) can the framework apply? Please list!">
+                    <a data-bs-toggle="tooltip" title="Which output format(s) can the framework apply? Please list!">
                         <span class='fas fa-question '></span>
                     </a>
                 </th>
@@ -298,7 +274,7 @@
             <table class="formtable">
                 <th>
                     The analytical approach
-                    <a data-toggle="tooltip" title="What is the analytical approach that the framework applies?">
+                    <a data-bs-toggle="tooltip" title="What is the analytical approach that the framework applies?">
                         <span class='fas fa-question '></span>
                     </a>
                 </th>
@@ -317,7 +293,7 @@
                 <table class="formtable">
                     <th>
                         The mathematical approach
-                        <a data-toggle="tooltip" title="What is the mathematical approach that the framework applies?">
+                        <a data-bs-toggle="tooltip" title="What is the mathematical approach that the framework applies?">
                             <span class='fas fa-question '></span>
                         </a>
                     </th>
@@ -336,7 +312,7 @@
                 <table class="formtable">
                     <th>
                         The underlying methodology
-                        <a data-toggle="tooltip"
+                        <a data-bs-toggle="tooltip"
                            title="What underlying methodology(-y/-ies) is the framework based on?">
                             <span class='fas fa-question '></span>
                         </a>
@@ -361,7 +337,7 @@
                 <table class="formtable">
                     <th>
                         Objective function type
-                        <a data-toggle="tooltip"
+                        <a data-bs-toggle="tooltip"
                            title="If the framework is applying optimization, what objectives are commonly formulated?">
                             <span class='fas fa-question '></span>
                         </a>
@@ -404,7 +380,7 @@
         <table class="formtable">
             <th>
                 Support
-                <a data-toggle="tooltip"
+                <a data-bs-toggle="tooltip"
                    title="Click the check box if there is a support or Q and A Forum for the Model">
                     <span class='fas fa-question '></span>
                 </a>
@@ -446,7 +422,7 @@
         <table class="formtable">
             <th>
                 Renewable Technology Inclusion
-                <a data-toggle="tooltip"
+                <a data-bs-toggle="tooltip"
                    title="Which renewable energy technologies are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a>
@@ -466,7 +442,7 @@
         <table class="formtable">
             <th>
                 Storage Technology Inclusion
-                <a data-toggle="tooltip" title="Which storage technologies are already modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="Which storage technologies are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -481,7 +457,7 @@
         <table class="formtable">
             <th>
                 Transport Demand
-                <a data-toggle="tooltip" title="Which transportation demands were already modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="Which transportation demands were already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -498,7 +474,7 @@
         <table class="formtable">
             <th>
                 Residential Demand
-                <a data-toggle="tooltip" title="Which residential demands are already modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="Which residential demands are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -514,7 +490,7 @@
         <table class="formtable">
             <th>
                 Commercial Demand
-                <a data-toggle="tooltip" title="Which commercial demands are already modelled with the framework?">
+                <a data-bs-toggle="tooltip" title="Which commercial demands are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -531,7 +507,7 @@
         <table class="formtable">
             <th>
                 Grid model
-                <a data-toggle="tooltip" title="How is the (power) grid modelled?">
+                <a data-bs-toggle="tooltip" title="How is the (power) grid modelled?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -545,7 +521,7 @@
         <table class="formtable">
             <th>
                 Cost Inclusion
-                <a data-toggle="tooltip" title="Which cost types are already modelled are the framework?">
+                <a data-bs-toggle="tooltip" title="Which cost types are already modelled are the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
             <td>
@@ -567,7 +543,7 @@
         <table class="formtable">
             <th>
                 Commonly used time step
-                <a data-toggle="tooltip"
+                <a data-bs-toggle="tooltip"
                    title="What is/are commonly used time step(s) that are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
@@ -585,7 +561,7 @@
         <table class="formtable">
             <th>
                 Commonly modelled time horizon
-                <a data-toggle="tooltip"
+                <a data-bs-toggle="tooltip"
                    title="What is/are commonly used time horizon(S) that are already modelled with the framework?">
                     <span class='fas fa-question '></span>
                 </a></th>
@@ -612,4 +588,32 @@
 </div>
 
 </form>
+{% endblock %}
+
+{% block after-body-bottom-js %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+
+    var confirmOnLeave = function (msg) {
+
+        window.onbeforeunload = function (e) {
+            e = e || window.event;
+            msg = msg || '';
+
+            // For IE and Firefox
+            if (e) {
+                e.returnValue = msg;
+            }
+
+            // For Chrome and Safari
+            return msg;
+        };
+
+    };
+
+    confirmOnLeave();
+
+</script>
 {% endblock %}

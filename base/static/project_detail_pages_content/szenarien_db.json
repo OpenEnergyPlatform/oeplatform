@@ -1,0 +1,33 @@
+{
+  "id": "szenarien_db",
+  "fullTitle": "SzenarienDB",
+  "acronym": "SzenarienDB",
+  "start": "2018-01-01",
+  "end": "2020-12-31",
+  "projectStatus": "isFinished",
+  "general": "The aim of SzenarienDB is to create a publicly accessible database on which scenario data, i.e. all data related to a scenario calculation, are summarised and published. This includes both input and output data of the calculation. In addition, the data is linked to the model descriptions. ",
+  "tasks": "The Open Energy Platform (OEP) has been reworked and redesigned. As a major output, the Open Energy Ontology (OEO) has been created and developed collaboratively. This is significantly improving transparency and the exchange of scenario data.",
+  "partners": [
+    {
+      "name": "Reiner Lemoine Institut",
+      "logo": "RLI.png"
+    },
+    {
+      "name": "Frauenhofer IEE",
+      "logo": "IEE.png"
+    },
+    {
+      "name": "Öko-Institut e.V.",
+      "logo": "OEI.png"
+    },
+    {
+      "name": "Otto von Guericke Universität Magdeburg",
+      "logo": "OvGU.png"
+    }
+  ],
+  "funding": "03ET4057",
+  "logo": "SzenarienDB_Header.png",
+  "meta": {
+    "lastUpdated": "2022-05-24"
+  }
+}

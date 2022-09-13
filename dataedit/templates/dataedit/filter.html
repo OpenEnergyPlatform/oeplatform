@@ -1,71 +1,108 @@
 {% extends "dataedit/base.html" %}
+{% load static %}
 
+{% block after-head %}
+    <!-- Latest compiled and minified CSS -->
+    <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+{% endblock after-head %}
 
 {% block main-right-sidebar-filter %}
 <!-- extending the filter block to add wizard button -->
 
-    <h3>Create Table</h3>
-    <a class="btn btn-success" href="{% url 'wizard_create' %}" >
-        Create new table
-    </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
-    <hr>
-    <h3>Filters</h3>
-    <form action="{{ request.path }}" method="get">
+<h3>Create Table</h3>
+<a class="btn btn-success" href="{% url 'wizard_create' %}">
+    Create new table
+</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
+<hr>
+<h3>Create oemetadata</h3>
+<a class="btn btn-success" href="{% url 'standalone_meta_edit' %}"> Create new oemetadata </a> in version 1.5.1
+<a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
+    <i class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i>
+</a>
+<hr>
+<div style="display: flex;">
+    <h3>Search & filter</h3>
+    <button type="button"
+    class="btn btn-outline-light"
+    data-toggle="popover"
+    data-trigger="focus"
+    title="How to use search and filter"
+    {% if not tables%}
+    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
+    {% else %}
+    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
+    {% endif %}
+    style="margin-left: 10px;">
+        <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+    </button>
+</div>
+<form id="form-filter" action="{{ request.path }}" method="get">
+    <h5>Text</h5>
     <div class="searchbox_container small">
-        <input type="text" name="query" placeholder="Search" value="{% firstof query "" %}" class="form-control" />
+        <input id="search-filter" type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
     </div>
-    <hr>
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <div class="foldable-entry" style="padding-top: 15px;">
-        <h5>How to work with Tags and Filter</h6>
-        <span class="fa fa-caret-up" data-toggle="collapse" data-target="#howto"></span>
-        <div id="howto" class="collapse show foldable-entry-body">
-            <ul class="list-group">
-                <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p> <li class="list-group-item">Tags can be added when viewing a table.</li>
-                <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p> <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
-                <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Find data resources:</p> <li class="list-group-item"> Use the Filters on Tags or try searching for strings that occur in table names. You can combine text and Tags filters to get more precise results. If you filter for multiple Tags, only tables containing all filtered Tags will be displayed. </li>
-            </ul>
+    <h5>Tags</h5>
+    <div id="tags">
+        <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
+            <select id="tag-select" name="tags" class="form-control selectpicker" multiple data-live-search="true"
+                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
+                {% for t in all_tags %}
+                <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
+                    {{ t.name }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
-        <div class="foldable-entry" style="padding-top: 15px;">
-            <h5>Tags</h5>
-            <span class="fa fa-caret-up" data-toggle="collapse" data-target="#tags"></span>
-            <div id="tags" class="collapse show foldable-entry-body">
-                <div style="padding-bottom: 15px;">
-                <button type="submit" class="btn btn-success">
-                    Apply Filters
-                </button>
-                <a class="btn btn-danger" href="{{ request.path }}" >
-                    Reset Filters
-                </a>
-                </div>
-                <hr>
-                <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-                    {% for t in all_tags %}
-                        <label class="tag-checkbox-container {% if t.id in tags %} tag-checkbox-checked {% endif %}" style="background:{{ t.color }};color:{% readable_text_color t.color %}">
-                            <input {% if t.id in tags %} checked="checked" {% endif %} type="checkbox" class="tag-checkbox" name="tags" value="{{ t.id }}">
-                            <span>{{ t.name }}</span>
-                            <span class="tag-checkbox-icon fas fa-check"></span>
-                        </label>
-                    {% endfor %}
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- <div class="foldable-entry">
-        <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
-                <div class="d-flex flex-column w-100 justify-content-between">
-                    <h5 class="mb-1">Add Tags to a table</h5>
-                    <p class="mb-1">Tags can be added when viewing a table.</p>
-                </div>
+        <div style="padding-bottom: 15px;">
+            <!--
+            <button type="submit" class="btn btn-success">
+                Apply Filters
+            </button>
+            -->
+            <a class="btn btn-danger" href="{{ request.path }}">
+                Reset Filters
             </a>
         </div>
-    </div> -->
-
+    </div>
 </form>
-
-
+<hr>
+<div id="howto" class="collapse show foldable-entry-body">
+    <ul class="list-group">
+        <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p>
+        <li class="list-group-item">Tags can be added when viewing a table.</li>
+        <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p>
+        <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
+    </ul>
+</div>
 {% endblock main-right-sidebar-filter %}
+
+{% block after-body-bottom-js %}
+<!-- Latest compiled and minified JavaScript -->
+<script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+<script>
+    $(function () {
+        $('[data-bs-toggle="popover"]').popover()
+        $('.popover-dismiss').popover({
+            trigger: 'focus'
+        })
+    })
+
+    /* update filter when changing selection */
+    /*
+    $('#tag-select').on('change', function (e) {
+        $("#form-filter").submit();
+    });
+    */
+    /* update filter when closing tag select dropdown */
+    $('#tag-select').on('hide.bs.select', function (e) {
+        $("#form-filter").submit();
+    });
+    /* also update filter if leave search field */
+    $('#search-filter').on('blur', function (e) {
+        $("#form-filter").submit();
+    });
+
+</script>
+{% endblock after-body-bottom-js %}

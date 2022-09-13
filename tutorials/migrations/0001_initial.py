@@ -9,19 +9,43 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Tutorial',
+            name="Tutorial",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category', models.CharField(blank=True, choices=[('io', 'I/O'), ('intro', 'Introduction')], max_length=15)),
-                ('title', models.TextField()),
-                ('html', models.TextField()),
-                ('markdown', models.TextField()),
-                ('level', models.IntegerField(choices=[(1, 'Beginners'), (2, 'Intermediates'), (3, 'Advanced')], null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "category",
+                    models.CharField(
+                        blank=True,
+                        choices=[("io", "I/O"), ("intro", "Introduction")],
+                        max_length=15,
+                    ),
+                ),
+                ("title", models.TextField()),
+                ("html", models.TextField()),
+                ("markdown", models.TextField()),
+                (
+                    "level",
+                    models.IntegerField(
+                        choices=[
+                            (1, "Beginners"),
+                            (2, "Intermediates"),
+                            (3, "Advanced"),
+                        ],
+                        null=True,
+                    ),
+                ),
             ],
         ),
     ]

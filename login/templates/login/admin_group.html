@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% block main-content-body %}
 {% block title %} - {{group.name}} {% endblock %}
 
@@ -21,7 +21,7 @@
 	    </a>
 	{% endfor %}
 	</div>
- 
+
 {% endif %}
 {% endblock %}
 {% block main-right-sidebar-content %}

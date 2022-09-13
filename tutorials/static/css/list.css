@@ -1,16 +1,16 @@
 .icon-container {
-    display: flex;
-    flex-flow: row;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
 
-    width: 100%;
+  width: 100%;
 }
 
 td {
-    vertical-align: middle!important;
+  vertical-align: middle !important;
 }
 
 .icon-container > img {
-    margin: 0 5px;
+  margin: 0 5px;
 }
