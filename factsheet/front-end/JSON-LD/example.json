@@ -1,0 +1,22 @@
+{
+  "@context": {
+    "@base": "https://openenergy-platform.org/oekg/",
+    "oeo": "https://openenergy-platform.org/ontology/oeo/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "dc": "http://purl.org/dc/elements/1.1/"
+  },
+  "@id": "KS-2050",
+  "@type": "oeo:OEO_00010250",
+  "foaf:name": "Klimaschutzszenario 2050",
+  "dc:description": "The project develops a vision of the future in the form of three scenarios that meet the ambitious climate protection goals of the Federal Republic of Germany when considering all sectors and uses the national potential of renewable energies",
+  "oeo:OEO_00000506": {
+    "@id": "AdelMemariani",
+    "@type": "oeo:OEO_00000064",
+    "foaf:name": "Adel Memariani"
+  },
+  "oeo:OEO_00000509": {
+    "@id": "OvGU",
+    "@type": "oeo:OEO_00090001",
+    "foaf:name": "Otto von Guericke University Magdeburg"
+  }
+}

@@ -18,6 +18,7 @@
     "apollo-boost": "^0.4.9",
     "graphql": "^15.8.0",
     "jquery": "^3.6.0",
+    "jsonld": "^8.1.0",
     "react": "^17.0.2",
     "react-apollo": "^3.1.5",
     "react-dom": "^17.0.2",
@@ -32,9 +33,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "BUILD_PATH='../static/temp' react-scripts build && npm run build:relocate",
-    "build:relocate":  "mv ../static/temp/static/css ../static/factsheet/ && mv ../static/temp/static/js ../static/factsheet/ && npm run build:rename",
-    "build:rename":  "mv ../static/factsheet/js/main*.js ../static/factsheet/js/main.js && mv ../static/factsheet/css/*.css ../static/factsheet/css/main.css && npm run build:clean",
+    "build": "BUILD_PATH='../static/temp' react-scripts build && npm run build:remove",
+    "build:remove": "rm -rf ../static/factsheet/css && rm -rf ../static/factsheet/js && npm run build:relocate",
+    "build:relocate": "mv ../static/temp/static/css ../static/factsheet/ && mv ../static/temp/static/js ../static/factsheet/ && npm run build:rename",
+    "build:rename": "mv ../static/factsheet/js/main*.js ../static/factsheet/js/main.js && mv ../static/factsheet/css/*.css ../static/factsheet/css/main.css && npm run build:clean",
     "build:clean": "rm -rf ../static/temp",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
