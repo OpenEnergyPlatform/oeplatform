@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dataedit', '0018_auto_20220607_1829'),
+        ("dataedit", "0018_auto_20220607_1829"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='table',
-            name='oemetadata',
+            model_name="table",
+            name="oemetadata",
             field=models.JSONField(null=True),
         ),
     ]
