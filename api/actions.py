@@ -3,12 +3,19 @@ import logging
 import re
 from datetime import datetime
 
+import dataedit.metadata
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
+import login.models as login_models
 import psycopg2
 import sqlalchemy as sa
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.structures import TableTags as OEDBTableTags
+from dataedit.structures import Tag as OEDBTag
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import ParserException
@@ -20,23 +27,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
 import api
-import dataedit.metadata
-import login.models as login_models
 from api import DEFAULT_SCHEMA
 from api.connection import _get_engine
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
-from api.sessions import (
-    SessionContext,
-    close_all_for_user,
-    load_cursor_from_context,
-    load_session_from_context,
-)
-from dataedit.models import Schema as DBSchema
-from dataedit.models import Table as DBTable
-from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tag as OEDBTag
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from api.sessions import (SessionContext, close_all_for_user,
+                          load_cursor_from_context, load_session_from_context)
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -139,15 +135,7 @@ def try_parse_metadata(inp):
         Tuple[OEPMetadata or None, string or None]:
         The first component is the result of the parsing procedure or `None` if
         the parsing failed. The second component is None, if the parsing failed,
-        otherwise an error message.
-
-    Examples:
-
-        >>> from api.actions import try_parse_metadata
-        >>> result, error = try_parse_metadata('{"id":"id"}')
-        >>> error is None
-        True
-
+        otherwise an error message.    
     """
 
     if isinstance(inp, Compilable):
