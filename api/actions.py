@@ -3,23 +3,16 @@ import logging
 import re
 from datetime import datetime
 
-import dataedit.metadata
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
-import login.models as login_models
 import psycopg2
 import sqlalchemy as sa
-from dataedit.models import Schema as DBSchema
-from dataedit.models import Table as DBTable
-from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tag as OEDBTag
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
-from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
+from omi.dialects.oep import OEP_V_1_4_Dialect as OmiDialect_14
+from omi.dialects.oep import OEP_V_1_5_Dialect as OmiDialect_15
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import ParserException
-from omi.structure import Compilable
 from shapely import wkb
 from sqlalchemy import Column, ForeignKey, MetaData, Table, exc, func, sql
 from sqlalchemy import types as sqltypes
@@ -27,12 +20,23 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm.session import sessionmaker
 
 import api
+import dataedit.metadata
+import login.models as login_models
 from api import DEFAULT_SCHEMA
 from api.connection import _get_engine
 from api.error import APIError
 from api.parser import get_or_403, parse_type, read_bool, read_pgid
-from api.sessions import (SessionContext, close_all_for_user,
-                          load_cursor_from_context, load_session_from_context)
+from api.sessions import (
+    SessionContext,
+    close_all_for_user,
+    load_cursor_from_context,
+    load_session_from_context,
+)
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.structures import TableTags as OEDBTableTags
+from dataedit.structures import Tag as OEDBTag
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -44,10 +48,6 @@ __UPDATE = 1
 __DELETE = 2
 
 MAX_TABLE_NAME_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
-
-# instances of metadata parsers / compilers, order of priority
-METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect()]
-METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), JSONCompiler()]
 
 
 def get_column_obj(table, column):
@@ -127,65 +127,48 @@ def _translate_sqla_type(column):
 
 def try_parse_metadata(inp):
     """
-
-    Args:
-        inp: string or dict or OEPMetadata
-
-    Returns:
-        Tuple[OEPMetadata or None, string or None]:
+    :param inp: string or dict
+    :return: Tuple[OEPMetadata or None, string or None]:
         The first component is the result of the parsing procedure or `None` if
         the parsing failed. The second component is None, if the parsing failed,
-        otherwise an error message.    
+        otherwise an error message.
+
+    .. doctest::
+
+        >>> from api.actions import try_parse_metadata
+        >>> result, error = try_parse_metadata('{"id":"id"}')
+        >>> error is None
+        True
+
     """
-
-    if isinstance(inp, Compilable):
-        # already parsed
-        return inp, None
-    elif not isinstance(inp, (str, bytes)):
-        # in order to use the omi parsers, input needs to be str (or bytes)
+    dialect14 = OmiDialect_14()
+    dialect15 = OmiDialect_15()
+    parser_14 = dialect14._parser()
+    parser_15 = dialect15._parser()
+    # Add here
+    if isinstance(inp, dict):
+        jsn = inp
+    else:
         try:
-            inp = json.dumps(inp)
+            jsn = json.loads(inp)
         except Exception:
-            return None, "Could not serialize json"
-
-    last_err = None
-    # try all the dialects
-    for parser in METADATA_PARSERS:
+            return None, "Could not parse json"
+    try:
+        metadata = parser_15.parse(jsn)
+    except ParserException as e:
+        return None, str(e)
+    except Exception as e:
+        APIError("Metadata could not be parsed{}".format(e))
         try:
-            return parser.parse(inp), None
+            metadata = parser_14.parse(jsn)
         except ParserException as e:
             return None, str(e)
         except Exception as e:
-            last_err = e
-            # APIError(f"Metadata could not be parsed: {last_err}")
-            # try next dialect
-
-    raise APIError(f"Metadata could not be parsed: {last_err}")
-
-
-def try_compile_metadata(inp):
-    """
-
-    Args:
-        inp: OEPMetadata
-
-    Returns:
-        Tuple[str or None, str or None]:
-        The first component is the result of the compiling procedure or `None` if
-        the compiling failed. The second component is None if the compiling failed,
-        otherwise an error message.
-    """
-    last_err = None
-    # try all the dialects
-    for compiler in METADATA_COMPILERS:
-        try:
-            return compiler.compile(inp), None
-        except Exception as e:
-            last_err = e
-            # APIError(f"Metadata could not be compiled: {last_err}")
-            # try next dialect
-
-    raise APIError(f"Metadata could not be compiled: {last_err}")
+            raise APIError("Metadata could not be parsed{}".format(e))
+        else:
+            return metadata, None
+    else:
+        return metadata, None
 
 
 def describe_columns(schema, table):
@@ -791,6 +774,41 @@ def table_create(
     :return: Dictionary with results
     """
 
+    # Building and joining a string array seems to be more efficient
+    # than native string concats.
+    # https://waymoot.org/home/python_string/
+
+    # id_columns = [c for c in columns if c['name'] == 'id']
+    # if not id_columns:
+    #   raise APIError('Your table must have one column "id" of type "bigserial"')
+    # cid = id_columns[0]
+    # if not get_or_403(cid, 'data_type').lower() == 'bigserial':
+    #    raise APIError('Your column "id" must have type "bigserial"')
+
+    # NOTE: THIS SECTION HANDEL OEMETADATA when table is created
+    if table_metadata is not None:
+        omi_dialect_14 = OmiDialect_14()
+        omi_dialect_15 = OmiDialect_15()
+        try:
+            comment_on_table = omi_dialect_15._parser().parse(table_metadata)
+        except ParserException as e:
+            APIError(str(e))
+            try:
+                comment_on_table = omi_dialect_14._parser().parse(table_metadata)
+            except ParserException as e:
+                raise APIError(str(e))
+        try:
+            comment_on_table = json.dumps(omi_dialect_15.compile(comment_on_table))
+        except Exception as e:
+            APIError(str(e))
+            try:
+                comment_on_table = json.dumps(omi_dialect_14.compile(comment_on_table))
+            except Exception as e:
+                raise APIError(str(e))
+
+    else:
+        comment_on_table = None
+
     metadata = MetaData()
 
     primary_key_col_names = None
@@ -866,19 +884,17 @@ def table_create(
     if tuple(primary_key_col_names) != ("id",):
         raise APIError("Primary key must be column id")
 
-    t = Table(table, metadata, *(columns + constraints), schema=schema)
+    t = Table(
+        table,
+        metadata,
+        *(columns + constraints),
+        schema=schema,
+        comment=comment_on_table,
+    )
     t.create(_get_engine())
 
     # Create Metatables
     get_edit_table_name(schema, table)
-
-    # set metadata
-    if table_metadata:
-        with _get_engine().connect() as cur:
-            set_table_metadata(
-                table=table, schema=schema, metadata=table_metadata, cursor=cur
-            )
-
     return get_response_dict(success=True)
 
 
@@ -2195,9 +2211,6 @@ def apply_deletion(session, table, rows, rids):
 
 
 def update_meta_search(table, schema):
-    """
-    TODO: also update JSONB index fields
-    """
     schema_obj, _ = DBSchema.objects.get_or_create(
         name=schema if schema is not None else DEFAULT_SCHEMA
     )
@@ -2228,54 +2241,57 @@ def set_table_metadata(table, schema, metadata, cursor):
     Args:
         table(str): name of table
         schema(str): schema of table
-        metadata: OEPMetadata or metadata object (dict) or metadata str
+        metadata(object): json serializable meta data object
         cursor: sql alchemy connection cursor
     """
+    if metadata is not None:
+        from dataedit.models import Table, Schema
+        schema_name = Schema.objects.get(name=schema)
+    
+    table_obj = _get_table(schema=schema, table=table)
+    compiler_14 = JSONCompiler()
 
-    # ---------------------------------------
-    # metadata parsing
-    # ---------------------------------------
+    dialect_15 = OmiDialect_15()
+    compiler_15 = dialect_15._compiler()
 
-    # parse the metadata object (various types) into proper OEPMetadata instance
-    metadata_oep, err = try_parse_metadata(metadata)
-    if err:
-        raise APIError(err)
-    # compile OEPMetadata instance back into native python object (dict)
-    # TODO: we should try to convert to the latest standard in this step?
-    metadata_obj, err = try_compile_metadata(metadata_oep)
-    if err:
-        raise APIError(err)
-    # dump the metadata dict into json string
     try:
-        metadata_str = json.dumps(metadata_obj, ensure_ascii=False)
-    except Exception:
-        raise APIError("Cannot serialize metadata")
+        meta_15_omi_visit = json.dumps(compiler_15.visit(metadata), ensure_ascii=False)
+        # prepare SQL comment on table
+        table_obj.comment = meta_15_omi_visit
 
-    # ---------------------------------------
-    # update the oemetadata field (JSONB) in django db
-    # ---------------------------------------
+        # prepare data for django models dataedit.Tables JSON field and update record
+        meta = json.loads(meta_15_omi_visit)
+        Table.objects.filter(name=table, schema=schema_name.id).update(oemetadata=meta)
+        # Table.load(schema=schema, table=table).oemetadata = meta
+        # Table.save()
+    except Exception as e:
+        APIError(
+            "Metadata is not compilable using metadat version 1.5 compiler {}".format(
+                e
+            )
+        )
+        try:
+            # prepare SQL comment on table
+            meta_14_omi_visit = json.dumps(compiler_14.visit(metadata))
+            table_obj.comment = meta_14_omi_visit
 
-    django_table_obj = DBTable.objects.get(name=table, schema__name=schema)
-    django_table_obj.oemetadata = metadata_obj
-    django_table_obj.save()
+            # prepare data for django models dataedit.Tables JSON field and update record
+            meta = json.loads(meta_14_omi_visit)
+            Table.objects.filter(name=table, schema=schema_name.id).update(oemetadata=meta)
+        except Exception as e:
+            raise APIError(
+                "Metadata is not compilable using metadat aversion 1.4 compiler{}".format(  # noqa
+                    e
+                )
+            )
 
-    # ---------------------------------------
-    # update the table comment in oedb table
-    # ---------------------------------------
-
-    oedb_table_obj = _get_table(schema=schema, table=table)
-    oedb_table_obj.comment = metadata_str
+    # table_obj.comment = json.dumps(compiler_15.visit(metadata))
     # Surprisingly, SQLAlchemy does not seem to escape comment strings
     # properly. Certain strings cause errors database errors.
     # This MAY be a security issue. Therefore, we do not use
     # SQLAlchemy's compiler here but do it manually.
     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-        schema=oedb_table_obj.schema, table=oedb_table_obj.name
+        schema=table_obj.schema, table=table_obj.name
     )
-    cursor.execute(sql, (metadata_str,))
-
-    # ---------------------------------------
-    # update search index
-    # ---------------------------------------
-
+    cursor.execute(sql, (table_obj.comment,))
     update_meta_search(table, schema)

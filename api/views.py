@@ -274,9 +274,8 @@ class Metadata(APIView):
                 table=table, schema=schema, keywords_new=keywords
             )
             metadata.keywords = _metadata["keywords"]
-
-            # Write oemetadata json to dataedit.models.tables oemetadata (JSONB) field
-            # and to SQL comment on table
+            
+            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
