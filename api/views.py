@@ -274,8 +274,9 @@ class Metadata(APIView):
                 table=table, schema=schema, keywords_new=keywords
             )
             metadata.keywords = _metadata["keywords"]
-            
-            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field and to SQL comment on table
+
+            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field
+            # and to SQL comment on table
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
@@ -453,12 +454,15 @@ class Table(APIView):
             table,
             column_definitions,
             constraint_definitions,
-            cursor,
-            table_metadata=metadata,
         )
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
+
+        if metadata:
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
 
     @api_exception
     @require_delete_permission

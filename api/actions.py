@@ -786,20 +786,13 @@ def assert_valid_table_name(table):
         )
 
 
-def table_create(
-    schema,
-    table,
-    column_definitions,
-    constraints_definitions,
-    cursor,
-    table_metadata=None,
-):
+def table_create(schema, table, column_definitions, constraints_definitions):
     """
     Creates a new table.
     :param schema: schema
     :param table: table
     :param column_definitions: Description of columns
-    :param constraints: Description of constraints
+    :param constraints_definitions: Description of constraints
     :return: Dictionary with results
     """
 
@@ -883,12 +876,6 @@ def table_create(
 
     # Create Metatables
     get_edit_table_name(schema, table)
-
-    # set metadata
-    if table_metadata:
-        set_table_metadata(
-            table=table, schema=schema, metadata=table_metadata, cursor=cursor
-        )
 
     return get_response_dict(success=True)
 
