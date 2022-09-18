@@ -18,7 +18,7 @@
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-bs-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
+                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-bs-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars)" />
                         </div>
                     </div>
 
@@ -45,7 +45,7 @@
                                     <tr>
                                         <td>
                                         </td>
-                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)">
                                             Column name
                                         </span></td>
                                         <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid sql data type for this column">
@@ -63,7 +63,7 @@
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)" />
                                         </td>
                                         <td>
                                             <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-bs-toggle="tooltip" title="Valid sql data type for this column" />
