@@ -47,7 +47,9 @@ __INSERT = 0
 __UPDATE = 1
 __DELETE = 2
 
-MAX_TABLE_NAME_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
+
+MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
+IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 
 def get_column_obj(table, column):
@@ -687,6 +689,7 @@ def get_column_definition_query(d):
     if d.get("character_maximum_length", False):
         dt = dt(int(d["character_maximum_length"]))
 
+    assert_valid_identifier_name(name)
     c = Column(name, dt, *args, **kwargs)
 
     return c
@@ -743,17 +746,13 @@ def column_add(schema, table, column, description):
     return get_response_dict(success=True)
 
 
-def assert_valid_table_name(table):
-    if len(table) > MAX_TABLE_NAME_LENGTH:
+def assert_valid_identifier_name(identifier):
+    if not IDENTIFIER_PATTERN.match(identifier):
         raise APIError(
-            f"'{table}' exceeds the maximal character limit ({len(table)} > {MAX_TABLE_NAME_LENGTH})"  # noqa
-        )
-    if len(table) == 0:
-        raise APIError("Empty table name")
-    if not re.match(r"[a-z][a-z0-9_]*", table):
-        raise APIError(
-            "Unsupported table name. Names must consist of lowercase alpha-numeric words or underscores "  # noqa
-            "and start with a letter."
+            "Invalid name. "
+            "Names must consist of lowercase alpha-numeric words or underscores "
+            "and start with a letter "
+            "and must be have a maximumlength of %s" % MAX_IDENTIFIER_LENGTH
         )
 
 
@@ -863,7 +862,7 @@ def table_create(
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(sa.schema.UniqueConstraint(*ccolumns, **kwargs))
 
-    assert_valid_table_name(table)
+    assert_valid_identifier_name(table)
 
     # autogenerate id column if missing
     if "id" not in columns_by_name:
