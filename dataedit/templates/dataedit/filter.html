@@ -103,6 +103,12 @@
     $('#search-filter').on('blur', function (e) {
         $("#form-filter").submit();
     });
+    /* also update filter on key=Enter in search field */
+    $('#search-filter').on('keydown', function (e) {                    
+        if (e.keyCode == 13) {
+            $("#form-filter").submit();
+        }
+    });
 
 </script>
 {% endblock after-body-bottom-js %}
