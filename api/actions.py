@@ -2253,7 +2253,7 @@ def set_table_metadata(table, schema, metadata, cursor):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(name=table, schema=schema)
+    django_table_obj = DBTable.load(table=table, schema=schema)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 
