@@ -1,40 +1,8 @@
-from api.tests import APITestCase
+from api.tests import APITestCaseWithTable
 
 
-class Test271(APITestCase):
-    def setUp(self):
-        self._structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 123,
-                },
-            ],
-        }
-
-        self.api_req("put", data={"query": self._structure_data})
-        self.api_req(
-            "post",
-            path="rows/new",
-            data={"query": [{"name": "Hans"}, {"name": "Petra"}]},
-            exp_code=201,
-        )
+class Test271(APITestCaseWithTable):
+    test_data = [{"name": "Hans"}, {"name": "Petra"}]
 
     def test_271(self):
         data = {
@@ -76,6 +44,3 @@ class Test271(APITestCase):
             "post", path="/advanced/search", data=data, exp_code=400
         )
         self.assertEqual(json_resp["reason"], 'column "does_not_exist" does not exist')
-
-    def tearDown(self):
-        self.api_req("delete")

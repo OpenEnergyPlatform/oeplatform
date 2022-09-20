@@ -1,25 +1,17 @@
 import json
 
-from api import actions
 from django.test import Client, TestCase
-from login.models import myuser
 from rest_framework.authtoken.models import Token
 
+from api import actions
+from login.models import myuser
+
 from .util import load_content_as_json
-
-# Create your tests here.
-
-
-def assertEqualJson(o1, o2, msg=None):
-    o1 = json.dumps(o1, sort_keys=True, indent=2)
-    o2 = json.dumps(o2, sort_keys=True, indent=2)
-    msg = msg or f"{o1} != {o2}"
-    assert o1 == o2, msg
 
 
 class APITestCase(TestCase):
     test_schema = "test"
-    test_table = "population2"
+    test_table = "test_table"
 
     @classmethod
     def setUpClass(cls):
@@ -51,7 +43,11 @@ class APITestCase(TestCase):
         cls.client = Client()
 
     def assertEqualJson(self, o1, o2, msg=None):
-        return assertEqualJson(o1, o2, msg)
+        """test equality of nested objects by comparing json string"""
+        o1 = json.dumps(o1, sort_keys=True, indent=2)
+        o2 = json.dumps(o2, sort_keys=True, indent=2)
+        msg = msg or f"{o1} != {o2}"
+        self.assertEqual(o1, o2, msg=msg)
 
     def assertDictEqualKeywise(self, d1, d2, excluded=None):
         if not excluded:
@@ -116,21 +112,17 @@ class APITestCase(TestCase):
         except Exception:
             json_resp = None
 
-        print(
-            f"{resp.status_code} {method} {url} auth={bool(auth)} data={bool(data)} resp={bool(json_resp)}"  # noqa
-        )
-
         if not exp_code:
             if method == "put":
                 exp_code = 201
             else:
                 exp_code = 200
-        assertEqualJson(resp.status_code, exp_code)
+        self.assertEqualJson(resp.status_code, exp_code, msg=json_resp)
 
         if exp_res:
             if json_resp and "data" in json_resp:
                 json_resp = json_resp["data"]
-            assertEqualJson(exp_res, json_resp)
+            self.assertEqualJson(exp_res, json_resp)
 
         return json_resp
 
@@ -148,3 +140,47 @@ class APITestCase(TestCase):
 
     def drop_table(self, schema=None, table=None):
         self.api_req("delete", table, schema)
+
+
+class APITestCaseWithTable(APITestCase):
+    """Test class with that creates/deletes the table alreadyon setup/teardown"""
+
+    test_structure = {
+        "constraints": [
+            {
+                "constraint_type": "PRIMARY KEY",
+                "constraint_parameter": "id",
+                "reference_table": None,
+                "reference_column": None,
+            }
+        ],
+        "columns": [
+            {
+                "name": "id",
+                "data_type": "bigserial",
+                "is_nullable": False,
+            },
+            {
+                "name": "name",
+                "data_type": "character varying",
+                "is_nullable": True,
+                "character_maximum_length": 50,
+            },
+            {
+                "name": "address",
+                "data_type": "character varying",
+                "is_nullable": True,
+                "character_maximum_length": 150,
+            },
+            {"name": "geom", "data_type": "Geometry (Point)", "is_nullable": True},
+        ],
+    }
+    test_data = None
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.create_table(structure=self.test_structure, data=self.test_data)
+
+    def tearDown(self) -> None:
+        super().setUp()
+        self.drop_table()

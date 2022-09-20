@@ -1,40 +1,8 @@
-from api.tests import APITestCase
+from api.tests import APITestCaseWithTable
 
 
-class TestAliasesTracking(APITestCase):
-    def setUp(self):
-        self._structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 123,
-                },
-            ],
-        }
-
-        self.api_req("put", data={"query": self._structure_data})
-        self.api_req(
-            "post",
-            path="rows/new",
-            data={"query": [{"name": "Hans"}, {"name": "Petra"}]},
-            exp_code=201,
-        )
+class TestAliasesTracking(APITestCaseWithTable):
+    test_data = [{"name": "Hans"}, {"name": "Petra"}]
 
     def test_aliases_in_form_clauses(self):
         data = {
@@ -79,6 +47,3 @@ class TestAliasesTracking(APITestCase):
         }
 
         self.api_req("post", path="/advanced/search", data=data, exp_res=[[1]])
-
-    def tearDown(self):
-        self.api_req("delete")

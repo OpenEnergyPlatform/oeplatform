@@ -1,79 +1,7 @@
-from api import actions
-
-from . import APITestCase
+from . import APITestCaseWithTable
 
 
-class TestPut(APITestCase):
-    def setUp(self):
-        self.test_table = "test_table_column"
-        self.test_schema = "test"
-        self.structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 50,
-                },
-                {
-                    "name": "address",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 150,
-                },
-                {"name": "geom", "data_type": "Geometry (Point)", "is_nullable": True},
-            ],
-        }
-
-        self.api_req("put", data={"query": self.structure_data})
-
-    def tearDown(self):
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
+class TestPut(APITestCaseWithTable):
     def test_simple(self):
         structure_data = {"data_type": "varchar", "character_maximum_length": 30}
         self.api_req(
@@ -89,10 +17,10 @@ class TestPut(APITestCase):
             {
                 "character_maximum_length": 30,
                 "numeric_scale": None,
-                "dtd_identifier": "5",
+                "dtd_identifier": "5",  # default table has 4 columns
                 "is_nullable": True,
                 "datetime_precision": None,
-                "ordinal_position": 5,
+                "ordinal_position": 5,  # default table has 4 columns
                 "data_type": "character varying",
                 "maximum_cardinality": None,
                 "is_updatable": True,
@@ -120,87 +48,13 @@ class TestPut(APITestCase):
         )
 
 
-class TestPost(APITestCase):
-    def setUp(self):
-        self.test_table = "test_table_column"
-        self.test_schema = "test"
-        self.structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 50,
-                },
-                {
-                    "name": "address",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 150,
-                },
-                {"name": "geom", "data_type": "Geometry (Point)", "is_nullable": True},
-            ],
-        }
-
-        self.api_req(
-            "put",
-            data={"query": self.structure_data},
-            exp_code=201,
-        )
-
-    def tearDown(self):
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
+class TestPost(APITestCaseWithTable):
     def test_rename(self):
-        self.structure_data = {"name": "name2"}
+        structure_data = {"name": "name2"}
         self.api_req(
             "post",
             path="columns/name",
-            data={"query": self.structure_data},
+            data={"query": structure_data},
             exp_code=200,
         )
         self.api_req(
@@ -227,12 +81,12 @@ class TestPost(APITestCase):
         )
 
     def test_type_change(self):
-        self.structure_data = {"data_type": "text"}
+        structure_data = {"data_type": "text"}
 
         self.api_req(
             "post",
             path="columns/name",
-            data={"query": self.structure_data},
+            data={"query": structure_data},
             exp_code=200,
         )
 

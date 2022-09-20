@@ -43,9 +43,6 @@ class IntegrationTestCase(APITestCase):
         self.step_modify_data()
         self.step_remove_data()
 
-    def setUp(self):
-        pass
-
     def checkStructure(self):
         body = self.api_req("get")
 

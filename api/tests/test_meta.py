@@ -2,66 +2,10 @@ import json
 
 from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
 
-from api import actions
-
-from . import APITestCase
+from . import APITestCaseWithTable
 
 
-class TestPut(APITestCase):
-    def setUp(self):
-        structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-            ],
-        }
-        self.api_req("put", data={"query": structure_data})
-
-    def tearDown(self):
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
+class TestPut(APITestCaseWithTable):
     def metadata_roundtrip(self, meta):
         self.api_req("post", path="meta/", data=meta)
         omi_meta_return = self.api_req("get", path="meta/")

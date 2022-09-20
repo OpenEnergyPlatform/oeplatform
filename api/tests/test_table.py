@@ -1,5 +1,4 @@
-from api import actions
-from api.tests import APITestCase
+from api.tests import APITestCase, APITestCaseWithTable
 
 _TYPES = [
     "bigint",
@@ -275,102 +274,15 @@ class TestPut(APITestCase):
         )
 
 
-class TestDelete(APITestCase):
-    def setUp(self):
-        super(TestDelete, self).setUp()
-        self.rows = [
-            {
-                "id": 1,
-                "name": "John Doe",
-                "address": None,
-                "geom": "Point(-71.160281 42.258729)",
-            }
-        ]
-        self.test_table = "test_table_rows"
-        structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 50,
-                },
-                {
-                    "name": "address",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 150,
-                },
-                {"name": "geom", "data_type": "geometry (point)", "is_nullable": True},
-            ],
-        }
-        self.api_req("put", data={"query": structure_data})
-
-        self.rows = [
-            {
-                "id": i,
-                "name": "Mary Doe",
-                "address": "Mary's Street",
-                "geom": "0101000000E44A3D0B42CA51C06EC328081E214540",
-            }
-            for i in range(10)
-        ]
-        self.api_req("post", path="rows/new", data={"query": self.rows}, exp_code=201)
-
-    def tearDown(self):
-        super(TestDelete, self).tearDown()
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
-    def test_simple(self):
-        self.api_req("delete")
-        self.api_req("get", exp_code=404)
-
+class TestDelete(APITestCaseWithTable):
     def test_anonymous(self):
         self.api_req("delete", auth=False, exp_code=403)
 
     def test_wrong_user(self):
         self.api_req("delete", auth=self.other_token, exp_code=403)
+
+    def test_simple(self):
+        self.api_req("delete")
+        self.api_req("get", exp_code=404)
+        # create table again so that teardown works
+        self.create_table(self.test_structure)
