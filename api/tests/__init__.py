@@ -1,10 +1,9 @@
 import json
 
-from django.test import Client, TestCase
-from rest_framework.authtoken.models import Token
-
 from api import actions
+from django.test import Client, TestCase
 from login.models import myuser
+from rest_framework.authtoken.models import Token
 
 from .util import load_content_as_json
 
@@ -26,20 +25,9 @@ class APITestCase(TestCase):
     def setUpClass(cls):
 
         actions.perform_sql("DROP SCHEMA IF EXISTS test CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema2 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS schema3 CASCADE")
-
         actions.perform_sql("CREATE SCHEMA test")
-        actions.perform_sql("CREATE SCHEMA schema2")
-        actions.perform_sql("CREATE SCHEMA schema3")
-
         actions.perform_sql("DROP SCHEMA IF EXISTS _test CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema2 CASCADE")
-        actions.perform_sql("DROP SCHEMA IF EXISTS _schema3 CASCADE")
-
         actions.perform_sql("CREATE SCHEMA _test")
-        actions.perform_sql("CREATE SCHEMA _schema2")
-        actions.perform_sql("CREATE SCHEMA _schema3")
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
