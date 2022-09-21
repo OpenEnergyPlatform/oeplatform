@@ -1,7 +1,4 @@
-import json
-
-from api import actions
-from api.tests import APITestCase
+from api.tests import APITestCase, APITestCaseWithTable
 
 _TYPES = [
     "bigint",
@@ -45,12 +42,7 @@ _TYPEMAP = {
 
 class TestPut(APITestCase):
     def checkStructure(self):
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            )
-        )
-        body = response.json()
+        body = self.api_req("get")
 
         self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
@@ -74,8 +66,6 @@ class TestPut(APITestCase):
                             key=key, name=name
                         ),
                     )
-
-        self.assertEqual(response.status_code, 200, "Status Code is not 200.")
 
     def test_create_table(self):
         self._structure_data = {
@@ -116,20 +106,7 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "table_all_columns"
-        c_basic_resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_basic_resp.status_code,
-            201,
-            c_basic_resp.json().get("reason", "No reason returned"),
-        )
+        self.api_req("put", data={"query": self._structure_data})
         self.checkStructure()
 
     def test_create_and_drop_uppercase_table(self):
@@ -159,21 +136,7 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "Table_all_columns"
-
-        c_basic_resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_basic_resp.status_code,
-            400,
-            c_basic_resp.json().get("reason", "No reason returned"),
-        )
+        self.api_req("put", data={"query": self._structure_data}, exp_code=400)
 
     def test_create_table_defaults(self):
         self._structure_data = {
@@ -187,27 +150,8 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "table_defaults"
-        response = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            response.status_code,
-            201,
-            response.json().get("reason", "No reason returned"),
-        )
-
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            )
-        )
-        body = response.json()
+        self.api_req("put", data={"query": self._structure_data})
+        body = self.api_req("get")
 
         self.assertEqual(body["schema"], self.test_schema, "Schema does not match.")
         self.assertEqual(body["name"], self.test_table, "Table does not match.")
@@ -281,23 +225,10 @@ class TestPut(APITestCase):
         }
 
         self.test_table = "table_anonymous"
-        response = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            content_type="application/json",
+        self.api_req(
+            "put", data={"query": self._structure_data}, auth=False, exp_code=403
         )
-
-        self.assertEqual(response.status_code, 403)
-
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            )
-        )
-
-        self.assertEqual(response.status_code, 404, response.json())
+        self.api_req("get", exp_code=404)
 
     def test_anonymous(self):
         self._structure_data = {
@@ -338,167 +269,20 @@ class TestPut(APITestCase):
             ],
         }
         self.test_table = "table_all_columns"
-        c_basic_resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self._structure_data}),
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            c_basic_resp.status_code,
-            403,
-            c_basic_resp.json().get("reason", "No reason returned"),
+        self.api_req(
+            "put", data={"query": self._structure_data}, auth=False, exp_code=403
         )
 
 
-class TestDelete(APITestCase):
-    def setUp(self):
-        super(TestDelete, self).setUp()
-        self.rows = [
-            {
-                "id": 1,
-                "name": "John Doe",
-                "address": None,
-                "geom": "Point(-71.160281 42.258729)",
-            }
-        ]
-        self.test_table = "test_table_rows"
-        structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-                {
-                    "name": "name",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 50,
-                },
-                {
-                    "name": "address",
-                    "data_type": "character varying",
-                    "is_nullable": True,
-                    "character_maximum_length": 150,
-                },
-                {"name": "geom", "data_type": "geometry (point)", "is_nullable": True},
-            ],
-        }
-
-        c_basic_resp = self.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.token,
-            content_type="application/json",
-        )
-
-        assert c_basic_resp.status_code == 201, c_basic_resp.json()
-
-        self.rows = [
-            {
-                "id": i,
-                "name": "Mary Doe",
-                "address": "Mary's Street",
-                "geom": "0101000000E44A3D0B42CA51C06EC328081E214540",
-            }
-            for i in range(10)
-        ]
-
-        response = self.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/rows/new".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": self.rows}),
-            HTTP_AUTHORIZATION="Token %s" % self.token,
-            content_type="application/json",
-        )
-
-        assert response.status_code == 201, response.json().get(
-            "reason", "No reason returned"
-        )
-
-    def tearDown(self):
-        super(TestDelete, self).tearDown()
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
-    def test_simple(self):
-        response = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 200)
-
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 404)
-
+class TestDelete(APITestCaseWithTable):
     def test_anonymous(self):
-        response = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 403)
+        self.api_req("delete", auth=False, exp_code=403)
 
     def test_wrong_user(self):
-        response = self.__class__.client.delete(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.other_token,
-            content_type="application/json",
-        )
-        self.assertEqual(response.status_code, 403)
+        self.api_req("delete", auth=self.other_token, exp_code=403)
+
+    def test_simple(self):
+        self.api_req("delete")
+        self.api_req("get", exp_code=404)
+        # create table again so that teardown works
+        self.create_table(self.test_structure)
