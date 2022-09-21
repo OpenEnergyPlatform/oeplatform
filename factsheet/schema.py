@@ -64,9 +64,8 @@ class CreateFactsheet(graphene.Mutation):
         funding_sources = graphene.List(FundingSourceInput)
 
     def mutate(self, info, name, uri, funding_sources):
-        qs = FactsheetModel.objects.filter(funding_source=5)
         funding_source_list = [FactsheetModel.objects.filter(funding_source=funding_source.id).update_or_create(**funding_source) for funding_source in funding_sources]
-        return CreateFactsheet(funding_sources=funding_source_list)
+        return CreateFactsheet(name=name, uri=uri, funding_sources=funding_source_list)
 
 
 class Mutation(graphene.ObjectType):
