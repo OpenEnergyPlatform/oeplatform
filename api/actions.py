@@ -97,6 +97,34 @@ def assert_permission(user, table, permission, schema=None):
         raise PermissionDenied
 
 
+def assert_add_tag_permission(user, table, permission, schema):
+    """
+    Tags can be added to tables that are in any schema. However, 
+    it is necessary to check whether the user has write permission 
+    to the table, since not every user should be able to add tags 
+    to every table.
+
+    Args:
+        user (_type_): _description_
+        table (_type_): _description_
+        permission (_type_): _description_
+        schema (_type_): _description_
+
+    Raises:
+        PermissionDenied: _description_
+    
+    """
+    # if not request.user.is_anonymous:
+    #         level = request.user.get_table_permission_level(table)
+    #         can_add = level >= login_models.WRITE_PERM
+
+    if (
+        user.is_anonymous
+        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
+    ):
+        raise PermissionDenied
+
+
 def _translate_fetched_cell(cell):
     if isinstance(cell, geoalchemy2.WKBElement):
         return _get_engine().execute(cell.ST_AsText()).scalar()
