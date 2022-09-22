@@ -2220,7 +2220,7 @@ def update_meta_search(table, schema):
     t.save()
 
 
-def set_table_metadata(table, schema, metadata, cursor):
+def set_table_metadata(table, schema, metadata, cursor=None):
     """saves metadata as json string on table comment.
 
     Args:
@@ -2258,19 +2258,21 @@ def set_table_metadata(table, schema, metadata, cursor):
     django_table_obj.save()
 
     # ---------------------------------------
-    # update the table comment in oedb table
+    # update the table comment in oedb table if sqlalchemy curser is provided
     # ---------------------------------------
 
+    # TODO: The following 2 lines seems to duplicate with the lines below the if block 
     oedb_table_obj = _get_table(schema=schema, table=table)
     oedb_table_obj.comment = metadata_str
-    # Surprisingly, SQLAlchemy does not seem to escape comment strings
-    # properly. Certain strings cause errors database errors.
-    # This MAY be a security issue. Therefore, we do not use
-    # SQLAlchemy's compiler here but do it manually.
-    sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-        schema=oedb_table_obj.schema, table=oedb_table_obj.name
-    )
-    cursor.execute(sql, (metadata_str,))
+    if cursor is not None:
+        # Surprisingly, SQLAlchemy does not seem to escape comment strings
+        # properly. Certain strings cause errors database errors.
+        # This MAY be a security issue. Therefore, we do not use
+        # SQLAlchemy's compiler here but do it manually.
+        sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+            schema=oedb_table_obj.schema, table=oedb_table_obj.name
+        )
+        cursor.execute(sql, (metadata_str,))
 
     # ---------------------------------------
     # update search index
