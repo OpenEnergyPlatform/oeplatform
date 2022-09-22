@@ -6,6 +6,7 @@ import re
 import time
 import psycopg2
 import zipstream
+import requests
 
 from decimal import Decimal
 
@@ -1092,3 +1093,14 @@ class ImageUpload(APIView):
 
             except:
                 raise ParseError("Unsupported image type")
+
+
+def oeo_search(request):
+    # call local search service
+    query = request.GET["query"]
+    # TODO validate input to prevent sneaky stuff
+    print(query)
+    url = f"http://localhost:9274?query={query}"
+    res = requests.get(url).json()
+    print(res)
+    return JsonResponse([{"label": "testlabel", "resource": "testresource"}], safe=False)

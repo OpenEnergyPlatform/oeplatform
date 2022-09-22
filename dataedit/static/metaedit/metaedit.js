@@ -319,7 +319,7 @@ var MetaEdit = function (config) {
                     // Setup API calls
                     "search_za": function search(jseditor_editor, input) {
 
-                      var url = "http://localhost:9274/lookup-application/api/search?query=" + input
+                      var url = "/api/v0/oeo-search?query=" + input
 
                       return new Promise(function (resolve) {
                           fetch(url, {
