@@ -4,43 +4,41 @@ import json
 import logging
 import re
 import time
-import psycopg2
-import zipstream
-import requests
-
 from decimal import Decimal
 
 import geoalchemy2  # Although this import seems unused is has to be here
+import login.models as login_models
+import psycopg2
+import requests
 import sqlalchemy as sqla
+import zipstream
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.views import (get_tag_keywords_synchronized_metadata,
+                            schema_whitelist)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import FileSystemStorage
+from django.core.validators import validate_image_file_extension
 from django.db.models import Q
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import (Http404, HttpResponse, JsonResponse,
+                         StreamingHttpResponse)
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
-from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError
-from django.core.validators import validate_image_file_extension
-from django.core.files.storage import FileSystemStorage
+from rest_framework.parsers import FileUploadParser, MultiPartParser
+from rest_framework.views import APIView
 
 import api.parser
-import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.models import UploadedImages
-from dataedit.models import Table as DBTable, Schema as DBSchema
-from dataedit.views import schema_whitelist
-from dataedit.views import get_tag_keywords_synchronized_metadata
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
-
-import json
-
-from rest_framework.parsers import FileUploadParser, MultiPartParser
 
 logger = logging.getLogger("oeplatform")
 
@@ -1096,11 +1094,11 @@ class ImageUpload(APIView):
 
 
 def oeo_search(request):
+    # get query from user request # TODO validate input to prevent sneaky stuff
+    query = request.GET["query"]        
     # call local search service
-    query = request.GET["query"]
-    # TODO validate input to prevent sneaky stuff
-    print(query)
-    url = f"http://localhost:9274?query={query}"
+    url = f"http://localhost:9274/lookup-application/api/search?query={query}"
     res = requests.get(url).json()
-    print(res)
-    return JsonResponse([{"label": "testlabel", "resource": "testresource"}], safe=False)
+    # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    # send back to client
+    return JsonResponse(res, safe=False)
