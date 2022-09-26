@@ -334,15 +334,15 @@ var MetaEdit = function (config) {
                     },
                     "renderResult_name": function(jseditor_editor, result, props) {
                         return ['<li ' + props + '>',
-                            '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:blue"><a href=' + result.resource + '>'  + ' ' + result.definition + '</span>'  + '<small> </div>',
+                            '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
                             '</li>'].join('');
                     },
                     "getResultValue_name": function getResultValue(jseditor_editor, result) {
                         selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
 
                         let path = String(jseditor_editor.path).replace("name", "path");
-                        let thePath = config.editor.getEditor(path);
-                        thePath.setValue(String(result.resource));
+                        let path_uri = config.editor.getEditor(path);
+                        path_uri.setValue(String(result.resource));
 
                         return selected_value;
                     }
