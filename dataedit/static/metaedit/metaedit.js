@@ -99,6 +99,8 @@ var MetaEdit = function (config) {
     }
 
     function fixData(json) {
+
+
         // MUST have ID
         json["id"] = json["id"] || config["url_table_id"];
 
@@ -120,6 +122,7 @@ var MetaEdit = function (config) {
             field.type = field.type || column.data_type;
             json["resources"][0]["schema"]["fields"].push(field);
         })
+
 
         // add empty value for all missing so they show up in editor
         // these will be removed at the end
@@ -308,15 +311,9 @@ var MetaEdit = function (config) {
 
                 // TODO catch init error
 
+
                 window.JSONEditor.defaults.callbacks = {
                 "autocomplete": {
-                    // This is callback functions for the "autocomplete" editor
-                    // In the schema you refer to the callback function by key
-                    // Note: 1st parameter in callback is ALWAYS a reference to the current editor.
-                    // So you need to add a variable to the callback to hold this (like the
-                    // "jseditor_editor" variable in the examples below.)
-
-                    // Setup API calls
                     "search_name": function search(jseditor_editor, input) {
 
                       var url = "/api/v0/oeo-search?query=" + input
@@ -341,11 +338,18 @@ var MetaEdit = function (config) {
                             '</li>'].join('');
                     },
                     "getResultValue_name": function getResultValue(jseditor_editor, result) {
-                        selected_value = String(result.label).replace("<B>", "").replace("</B>", "");
+                        selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+
+                        let path = String(jseditor_editor.path).replace("name", "path");
+                        let thePath = config.editor.getEditor(path);
+                        thePath.setValue(String(result.resource));
+
                         return selected_value;
                     }
                 }
               };
+
+
 
             });
 
@@ -402,6 +406,7 @@ var MetaEdit = function (config) {
             });
         }
     })();
+
 
     return config;
 
