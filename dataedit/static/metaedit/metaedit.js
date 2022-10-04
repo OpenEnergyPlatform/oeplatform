@@ -306,6 +306,38 @@ var MetaEdit = function(config) {
         $('#metaedit-controls').removeClass('d-none');
 
         // TODO catch init error
+
+
+        console.log(config);
+
+        window.JSONEditor.defaults.callbacks = {
+        "autocomplete": {
+            // This is callback functions for the "autocomplete" editor
+            // In the schema you refer to the callback function by key
+            // Note: 1st parameter in callback is ALWAYS a reference to the current editor.
+            // So you need to add a variable to the callback to hold this (like the
+            // "jseditor_editor" variable in the examples below.)
+
+            // Setup API calls
+            "search_za": function search(jseditor_editor, input) {
+                return ([
+                          {'name': 'energy', 'class': 'OEO_00000150'},
+                          {'name': 'energy storage', 'class': 'OEO_00000012'},
+                          {'name': 'energy converting component', 'class': 'OEO_00000011'},
+                          {'name': 'energy carrier disposition', 'class': 'OEO_00000151'}
+                        ]);
+            },
+            "renderResult_za": function(jseditor_editor, result, props) {
+                return ['<li ' + props + '>',
+                    '<div class="eiao-object-snippet">' + result.name.substring(0,50) + ' <small>' + result.class.substring(0,10) + '<small></div>',
+                    '</li>'].join('');
+            },
+            "getResultValue_za": function getResultValue(jseditor_editor, result) {
+                return result.key;
+            }
+          }
+        };
+
       });
     } else {
       $.when(

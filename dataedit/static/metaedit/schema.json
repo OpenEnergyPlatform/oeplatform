@@ -446,7 +446,15 @@
                             "description": "Full name of the value",
                             "type": "string",
                             "title": "Name",
-                            "format": "uri"
+                            "format": "autocomplete",
+                            "options": {
+                              "autocomplete": {
+                                  "search": "search_za",
+                                  "getResultValue": "getResultValue_za",
+                                  "renderResult": "renderResult_za",
+                                  "autoSelect": true
+                              }
+                            }
                           },
                           "path": {
                             "description": "Path to the OEO",
