@@ -4,7 +4,7 @@
 - add oeo builder command (need nodejs installed) (PR#1056)
 - API enforce column name format as well as table names (PR#1065)
 - API simplify api tests (PR#1067)
-- improve tables oemetadata json parsing/website loading time (PR#1059)
+- improve tables oemetadata json parsing/website loading time by reworking the oemetadata storage system (PR#1059)
 
 ### Features
 
