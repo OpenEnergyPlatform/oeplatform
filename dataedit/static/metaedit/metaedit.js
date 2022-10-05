@@ -329,11 +329,11 @@ var MetaEdit = function(config) {
             },
             "renderResult_za": function(jseditor_editor, result, props) {
                 return ['<li ' + props + '>',
-                    '<div class="eiao-object-snippet">' + result.name.substring(0,50) + ' <small>' + result.class.substring(0,10) + '<small></div>',
+                    '<div class="eiao-object-snippet">' + result.name + ' <small>' + result.resource + '<small></div>',
                     '</li>'].join('');
             },
             "getResultValue_za": function getResultValue(jseditor_editor, result) {
-                return result.key;
+                return result.name;
             }
           }
         };
