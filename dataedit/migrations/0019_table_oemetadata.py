@@ -20,6 +20,11 @@ def migrate_metadata(apps, schema_editor):
                 pass
 
 
+def migrate_metadata_rev(apps, schema_editor):
+    """no reverse required"""
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -32,5 +37,5 @@ class Migration(migrations.Migration):
             name="oemetadata",
             field=models.JSONField(null=True),
         ),
-        migrations.RunPython(migrate_metadata),
+        migrations.RunPython(migrate_metadata, migrate_metadata_rev),
     ]
