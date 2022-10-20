@@ -100,11 +100,9 @@
     {% block site-header %}
     {% endblock site-header %}
     {% block main %}
-        <div class="row">
+        <div class="">
             {% block main-content %}
-                <div class="">
-                    {% block main-content-body %}{% endblock %}
-                </div>
+                {% block main-content-body %}{% endblock %}
             {% endblock main-content %}
         </div>
     {% endblock main %}

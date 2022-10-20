@@ -19,7 +19,7 @@ alembic
 django-simple-captcha
 django-bootstrap4
 django-fontawesome-5
-omi>=0.0.7
+omi==0.0.8
 django-jquery
 zipstream-new
 rdflib<6.0
