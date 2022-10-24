@@ -57,8 +57,8 @@ INSTALLED_APPS = (
     "django_better_admin_arrayfield",
     "oeo_viewer",
     #"graphene_django",
-    "factsheet",
-    "corsheaders"
+    #"corsheaders"
+    "factsheet"
 )
 
 MIDDLEWARE = (
@@ -71,7 +71,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    #"corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware"
 )
 
