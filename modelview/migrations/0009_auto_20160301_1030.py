@@ -277,7 +277,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="example_research_questions",
             field=models.CharField(
-                help_text="What would be a good research question that could be answered with the model?",
+                help_text="What would be a good research question that could be answered with the model?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Example research questions",
@@ -289,7 +289,7 @@ class Migration(migrations.Migration):
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
                     default="",
-                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+                    help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
                     max_length=1000,
                 ),
                 default=list,
@@ -310,7 +310,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="model_specific_properties",
             field=models.CharField(
-                help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",
+                help_text="What are main specific characteristics (strengths and weaknesses) of this model regarding the purpose of the recommendation?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Model specific properties",
@@ -329,7 +329,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="technical_data_anchored_in_the_model",
             field=models.CharField(
-                help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",
+                help_text="If there is technical data already embedded (hard code) in the model and not part of the scenario, please make that transparent here.",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Technical data anchored in the model",
@@ -339,7 +339,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="typical_computation_hardware",
             field=models.CharField(
-                help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",
+                help_text="Here you can specify which hardware was assumed to estimate above time (e.g. RAM, CPU, GPU, etc).",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Typical computation hardware",
@@ -359,7 +359,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="aim",
             field=models.CharField(
-                help_text="What is the purpose (hypothesis) and research question of the study?",
+                help_text="What is the purpose (hypothesis) and research question of the study?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Aim",
@@ -369,7 +369,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="author_Institution",
             field=models.CharField(
-                help_text="Who are the authors of the study and for which institution do they work?",
+                help_text="Who are the authors of the study and for which institution do they work?",  # noqa
                 max_length=1000,
                 verbose_name="Author, Institution",
             ),
@@ -410,7 +410,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="comparability_Validation",
             field=models.CharField(
-                help_text="How far do the modelling results fit in compared to similar scientific research?",
+                help_text="How far do the modelling results fit in compared to similar scientific research?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Comparability / Validation",
@@ -420,7 +420,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="conclusions",
             field=models.CharField(
-                help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",
+                help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Conclusions",
@@ -440,7 +440,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="ecological_data",
             field=models.CharField(
-                help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",
+                help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Ecological data",
@@ -475,7 +475,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="economical_data",
             field=models.CharField(
-                help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",
+                help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Economical data",
@@ -513,7 +513,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="endogenous_variables",
             field=models.CharField(
-                help_text="Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)",
+                help_text="Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Endogenous variables",
@@ -643,7 +643,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="preProcessing",
             field=models.CharField(
-                help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",
+                help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Pre-Processing",
@@ -780,7 +780,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="social_data",
             field=models.CharField(
-                help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+                help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                 max_length=1000,
                 verbose_name="Social data",
             ),
@@ -789,7 +789,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="social_developement",
             field=models.CharField(
-                help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",
+                help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Social developement",
@@ -819,7 +819,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="technical_data",
             field=models.CharField(
-                help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",
+                help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Technical data + usage",
@@ -859,7 +859,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="uncertainty_assessment",
             field=models.CharField(
-                help_text="How are the identified uncertain factors considered in the study?",
+                help_text="How are the identified uncertain factors considered in the study?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Uncertainty assessment",

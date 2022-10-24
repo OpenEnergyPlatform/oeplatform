@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="properties_missed",
             field=models.TextField(
-                help_text="Which properties of your model have not been mentioned on this factsheet? Please nite them.",
+                help_text="Which properties of your model have not been mentioned on this factsheet? Please nite them.",  # noqa
                 null=True,
                 verbose_name="further properties",
             ),

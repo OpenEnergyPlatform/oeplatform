@@ -1,4 +1,4 @@
-{% extends "dataedit/base.html" %} {% load static %} {% load bootstrap4 %} {% block after-head %}
+{% extends "dataedit/base.html" %} {% load static %} {% load django_bootstrap5 %} {% block after-head %}
 <link href="/static/wizard/wizard.css" rel="stylesheet"> {% endblock after-head %} {% block site-header %}
 <h2 class="site-header"><span class="spinner-border text-primary" id="wizard-loading"></span>
     <i class="fa fa-table mr-2"></i>Table Upload</span>
@@ -11,14 +11,14 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">
-                    <a href="" data-toggle="collapse" data-target="#wizard-container-create">Create Table</a>
+                    <a href="" data-bs-toggle="collapse" data-bs-target="#wizard-container-create">Create Table</a>
                 </h2>
             </div>
-            <div id="wizard-container-create" class="collapse" data-parent="#wizard-container">
+            <div id="wizard-container-create" class="collapse" data-bs-parent="#wizard-container">
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <div class="col">
-                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore)" />
+                            <input type="text" class="form-control col-auto is-invalid" placeholder="insert table name" id="wizard-tablename"  data-bs-toggle="tooltip" title="Valid table name (only lower case letters, numbers and underscore, max. 50 chars)" />
                         </div>
                     </div>
 
@@ -45,16 +45,16 @@
                                     <tr>
                                         <td>
                                         </td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)">
                                             Column name
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Valid sql data type for this column">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Valid sql data type for this column">
                                             Column type
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Allow column values to be empty (NULL)">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)">
                                             Nullable
                                         </span></td>
-                                        <td><span class="label help-title" data-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
+                                        <td><span class="label help-title" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table.">
                                             Primary key
                                         </span></td>
                                     </tr>
@@ -63,18 +63,18 @@
                                             <button class="btn btn-danger wizard-column-drop"><i class="fa fa-trash-alt"></i></button>
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore)" />
+                                            <input type="text" class="form-control wizard-column-name is-invalid" placeholder="" data-bs-toggle="tooltip" title="Valid column name (only lower case letters, numbers and underscore, max. 50 chars)" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-toggle="tooltip" title="Valid sql data type for this column" />
+                                            <input type="text" class="form-control wizard-column-type is-invalid" list="wizard-column-types" placeholder="" data-bs-toggle="tooltip" title="Valid sql data type for this column" />
                                         </td>
                                         <td>
-                                            <input class="wizard-column-nullable" type="checkbox" data-toggle="tooltip" title="Allow column values to be empty (NULL)" />
+                                            <input class="wizard-column-nullable" type="checkbox" data-bs-toggle="tooltip" title="Allow column values to be empty (NULL)" />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
 
                                         <td>
-                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
+                                            <input class="wizard-column-pk" type="radio" name="wizard-column-pk" value="" data-bs-toggle="tooltip" title="Column is the primary key (index/id) of this table." />
                                             <!-- NOTE: Currently, the api to create tables only allows single fields primary keys-->
                                         </td>
                                     </tr>
@@ -109,33 +109,33 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="mb-0">
-                    <a href="" data-toggle="collapse" data-target="#wizard-container-upload">Upload CSV</a>
+                    <a href="" data-bs-toggle="collapse" data-bs-target="#wizard-container-upload">Upload CSV</a>
                     <span id="wizard-title-table"></span>
                 </h2>
             </div>
 
-            <div id="wizard-container-upload" class="collapse" data-parent="#wizard-container">
+            <div id="wizard-container-upload" class="collapse" data-bs-parent="#wizard-container">
                 <div class="card-body container-fluid">
                     <div class="row my-2">
                         <h4>Select csv options</h4>
                     </div>
 
                     <div class="row align-items-left">
-                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Character encoding of the csv file.">Encoding</span></div>
-                        <div class="col-5"><span class="label help-title" data-toggle="tooltip" title="Field separation character of the csv file.">Delimiter</span></div>
-                        <div class="col-2"><span class="label help-title" data-toggle="tooltip" title="First row of the csv file contains column names.">Header</span></div>
+                        <div class="col-5"><span class="label help-title" data-bs-toggle="tooltip" title="Character encoding of the csv file.">Encoding</span></div>
+                        <div class="col-5"><span class="label help-title" data-bs-toggle="tooltip" title="Field separation character of the csv file.">Delimiter</span></div>
+                        <div class="col-2"><span class="label help-title" data-bs-toggle="tooltip" title="First row of the csv file contains column names.">Header</span></div>
                     </div>
 
                     <div class="row my-3">
                         <div class="col-5">
-                            <select id="wizard-encoding" name="encoding" class="form-control" data-toggle="tooltip" title="Character encoding of the csv file.">
+                            <select id="wizard-encoding" name="encoding" class="form-control" data-bs-toggle="tooltip" title="Character encoding of the csv file.">
                                 <option value=""></option>
                                 <option value="iso-8859-1">ISO-8859-1</option>
                                 <option value="utf-8">UTF-8</option>
                             </select>
                         </div>
                         <div class="col-5">
-                            <select id="wizard-delimiter" name="delimiter" class="form-control" data-toggle="tooltip" title="Field separation character of the csv file.">
+                            <select id="wizard-delimiter" name="delimiter" class="form-control" data-bs-toggle="tooltip" title="Field separation character of the csv file.">
                                 <option value="">(autodetect)</option>
                                 <option value=";">semicolon</option>
                                 <option value=",">comma</option>
@@ -144,13 +144,13 @@
                             </select>
                         </div>
                         <div class="col-2">
-                            <input id="wizard-header" type="checkbox" checked data-toggle="tooltip" title="First row of the csv file contains column names." />
+                            <input id="wizard-header" type="checkbox" checked data-bs-toggle="tooltip" title="First row of the csv file contains column names." />
                         </div>
                     </div>
 
                     <div class="row my-2">
                         <h5>
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-csv-example-container">
+                            <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#wizard-csv-example-container">
                             Show example csv for current configuration
                             </button>
                         </h5>
@@ -173,7 +173,7 @@
 
                     <div class="row my-2">
                         <h5>
-                            <button class="btn btn-link" data-toggle="collapse" data-target="#wizard-csv-text-container">
+                            <button class="btn btn-link" data-bs-toggle="collapse" data-bs-target="#wizard-csv-text-container">
                             Show preview
                         </button>
                         </h5>
@@ -210,10 +210,10 @@
                         <div class="col-3"><span class="label">
                             Column name in database
                         </span></div>
-                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="Modify values in this column before upload">
+                        <div class="col-3"><span class="label help-title" data-bs-toggle="tooltip" title="Modify values in this column before upload">
                             (optional) Converter
                         </span></div>
-                        <div class="col-3"><span class="label help-title" data-toggle="tooltip" title="String that should be interpreted as NULL (missing value)">
+                        <div class="col-3"><span class="label help-title" data-bs-toggle="tooltip" title="String that should be interpreted as NULL (missing value)">
                             (optional) Null value
                             <datalist id="wizard-null-values">
                                 <option value=""></option>
@@ -244,7 +244,7 @@
 
                     <div class="row my-3">
                         <div class="col-2">
-                            <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
+                            <span class="" {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
                                 <a href="#wizard-table-upload" class="btn btn-primary {% if not can_add %} disabled {% endif %}" id="wizard-table-upload"><i class="fa fa-upload"></i> Upload</a>
                             </span>
                             <button class="btn btn-danger" id="wizard-table-upload-cancel"><i class="fa fa-stop-circle"></i> Cancel</button>
@@ -308,7 +308,7 @@
     var wizard = Wizard(config);
 
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-bs-toggle="tooltip"]').tooltip()
     })
 </script>
 {% endblock after-body-bottom-js %}

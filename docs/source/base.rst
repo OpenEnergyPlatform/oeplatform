@@ -16,4 +16,3 @@ The navigation bar is done in ``base/templates/base``:
 * ``base-wide.html``
 
 It is either a link or a submenu with individual links.
-

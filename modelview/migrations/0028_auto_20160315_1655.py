@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
             name="integrated_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.TextField(),
-                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",
+                help_text="Which models are integrated in the model? Where are these models available? (comma-separated)",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration of other models",
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
             name="integrating_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.TextField(),
-                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available? (comma-separated)",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration with other models",

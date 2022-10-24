@@ -1,17 +1,19 @@
 {% extends "base/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% block main-content-body %}
 {% load static %}
-<h3>Sorry, something went wrong!</h3> <br>
-It looks as though we have unexpectedly broken something on our system, while processing your request.<br>
-
-An e-mail has already been sent to the admin, thus the admin will be informed about this incident. The admin will fix this problem as soon as possible.<br>
-
-<br>
-In the meantime, you are welcome to ask further questions here:  <a href="/contact">contact form</a>.<br>
-Thanks a lot for your feedback!
-<br>
 <center>
-    <img src="{% static 'OEP_logo_2.png' %}" width="200px"/>
+<h3>This page seems to have an unexpected error!</h3> <br>
+
+It might be due to problems in the data or metadata.<br>
+Please use the navigation bar above to continue.<br>
+
+In return, you have the increasingly rare opportunity to marvel at the endangered OEPlatypus:
+
+<a href="{% static 'img/OpenEnergyFamily_OEPlatypus.png' %}">
+    <img style="width:50%" class="mx-auto d-block"
+        src="{% static 'img/OpenEnergyFamily_OEPlatypus.png' %}" alt="OEPlatypus" />
+</a>
+
 </center>
 {% endblock %}

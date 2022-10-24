@@ -92,7 +92,7 @@
 }
 
 .ok_button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   border: none;
   color: black;
   padding: 8px 16px;
@@ -138,7 +138,6 @@
 .add_new_entry > div:last-of-type div:last-of-type {
   text-align: right;
 }
-
 
 #hint_for_edit {
   border: none;
