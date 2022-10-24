@@ -56,7 +56,7 @@ INSTALLED_APPS = (
     "tutorials",
     "django_better_admin_arrayfield",
     "oeo_viewer",
-    "graphene_django",
+    #"graphene_django",
     "factsheet",
     "corsheaders"
 )

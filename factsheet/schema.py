@@ -1,5 +1,5 @@
 import graphene
-from graphene_django import DjangoObjectType
+#from graphene_django import DjangoObjectType
 
 from factsheet.models import UserModel
 
