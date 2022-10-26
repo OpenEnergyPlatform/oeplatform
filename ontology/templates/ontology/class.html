@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load ontology.rdf %}
 {% block main-content-body %}
 {% load static %}
@@ -43,16 +43,16 @@
         {% for sub_class in sub_classes %}
           <div class="card">
               <div class="card-header">
-                  <a class="card-link" data-toggle="collapse" href="#collapse{{ forloop.counter }}">
+                  <a class="card-link" data-bs-toggle="collapse" href="#collapse{{ forloop.counter }}">
                       {{sub_class.name}}
                   </a>
-                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                  <div class="btn-group float-end" role="group" aria-label="Basic example">
                     <a class="btn btn-secondary" href="{{ sub_class.ID }}">
                         view
                     </a>
                   </div>
               </div>
-                  <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#sub_classes_accordion">
+                  <div id="collapse{{ forloop.counter }}" class="collapse" data-bs-parent="#sub_classes_accordion">
                       <div class="card-body">
                         {% if sub_class.definitions != '' %}
                           {% for definition in sub_class.definitions %}
@@ -88,16 +88,16 @@
         {% for super_class in super_classes %}
           <div class="card">
               <div class="card-header">
-                  <a class="card-link" data-toggle="collapse" href="#super_classes_accordion{{ forloop.counter }}">
+                  <a class="card-link" data-bs-toggle="collapse" href="#super_classes_accordion{{ forloop.counter }}">
                       {{super_class.name}}
                   </a>
-                  <div class="btn-group float-right" role="group" aria-label="Basic example">
+                  <div class="btn-group float-end" role="group" aria-label="Basic example">
                     <a class="btn btn-secondary" href="{{ super_class.ID }}">
                         view
                     </a>
                   </div>
               </div>
-              <div id="super_classes_accordion{{ forloop.counter }}" class="collapse" data-parent="#super_classes_accordion">
+              <div id="super_classes_accordion{{ forloop.counter }}" class="collapse" data-bs-parent="#super_classes_accordion">
                   <div class="card-body">
                       {% if super_class.definitions != '' %}
                         {% for definition in super_class.definitions %}

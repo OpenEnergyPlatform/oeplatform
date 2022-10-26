@@ -6,58 +6,76 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modelview', '0050_auto_20200317_1108'),
+        ("modelview", "0050_auto_20200317_1108"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='energyframework',
-            name='es_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="es_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='gps_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="gps_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='gs_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="gs_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='idf_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="idf_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='pf_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="pf_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AddField(
-            model_name='energyframework',
-            name='sps_other',
-            field=models.CharField(max_length=400, null=True, verbose_name='Other'),
+            model_name="energyframework",
+            name="sps_other",
+            field=models.CharField(max_length=400, null=True, verbose_name="Other"),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='contact_phone',
-            field=models.CharField(help_text='WWhat is the website of the framework? Please provide a link!', max_length=200, null=True, verbose_name='Phone'),
+            model_name="basicfactsheet",
+            name="contact_phone",
+            field=models.CharField(
+                help_text="WWhat is the website of the framework? Please provide a link!",  # noqa
+                max_length=200,
+                null=True,
+                verbose_name="Phone",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='open_source',
-            field=models.BooleanField(default=False, help_text='Is the framework published under an open source license?', verbose_name='Open Source'),
+            model_name="basicfactsheet",
+            name="open_source",
+            field=models.BooleanField(
+                default=False,
+                help_text="Is the framework published under an open source license?",
+                verbose_name="Open Source",
+            ),
         ),
         migrations.AlterField(
-            model_name='energyframework',
-            name='data_preprocessing',
-            field=models.BooleanField(default=False, help_text='Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available', verbose_name='data preprocessing'),
+            model_name="energyframework",
+            name="data_preprocessing",
+            field=models.BooleanField(
+                default=False,
+                help_text="Are there any scripts for data pre-processing (e.g. calculating demand, economic functions) available",  # noqa
+                verbose_name="data preprocessing",
+            ),
         ),
         migrations.AlterField(
-            model_name='energystudy',
-            name='contact_email',
-            field=models.EmailField(help_text='What is the e-mail contact of the developer (group)', max_length=254, null=True, verbose_name='Contact (e-mail)'),
+            model_name="energystudy",
+            name="contact_email",
+            field=models.EmailField(
+                help_text="What is the e-mail contact of the developer (group)",
+                max_length=254,
+                null=True,
+                verbose_name="Contact (e-mail)",
+            ),
         ),
     ]

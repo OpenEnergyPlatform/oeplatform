@@ -39,13 +39,17 @@ from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.models import UploadedImages
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
-    "^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
-    + "|".join(parser.sql_operators)
-    + ")\s*(?P<second>(?![>=]).+)$"
+    r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
+    + r"|".join(parser.sql_operators)
+    + r")\s*(?P<second>(?![>=]).+)$"
 )
 
 
@@ -59,7 +63,6 @@ def transform_results(cursor, triggers, trigger_args):
 
 
 class OEPStream(StreamingHttpResponse):
-
     def __init__(self, *args, session=None, **kwargs):
         self.session = session
         super(OEPStream, self).__init__(*args, **kwargs)
@@ -103,12 +106,18 @@ def load_cursor(named=False):
                         result = {}
                     # Initial server-side cursors do not contain any description before
                     # the first row is fetched. Therefore, we have to try to fetch the
-                    # first one - if successful, we a description if not, nothing is returned.
+                    # first one - if successful, we a description if not,
+                    # nothing is returned.
                     # But: After the last row the cursor will 'forget' its description.
                     # Therefore we have to fetch the remaining data later.
 
-                    # Set of triggers after all the data was fetched. The cursor must not be closed earlier!
-                    triggers = [actions.close_cursor, actions.close_raw_connection, session.connection.commit]
+                    # Set of triggers after all the data was fetched.
+                    # The cursor must not be closed earlier!
+                    triggers = [
+                        actions.close_cursor,
+                        actions.close_raw_connection,
+                        session.connection.commit,
+                    ]
                     trigger_args = [({}, context), ({}, context), tuple()]
                     first = None
                     if not named or cursor.statusmessage:
@@ -134,7 +143,13 @@ def load_cursor(named=False):
                                 ]
                                 for col in cursor.description
                             ]
-                            result["data"] = (x for x in itertools.chain([first],transform_results(cursor, triggers, trigger_args)))
+                            result["data"] = (
+                                x
+                                for x in itertools.chain(
+                                    [first],
+                                    transform_results(cursor, triggers, trigger_args),
+                                )
+                            )
                             result["description"] = description
                             result["context"] = context
                             result["rowcount"] = cursor.rowcount
@@ -150,6 +165,7 @@ def load_cursor(named=False):
             return result
 
         return wrapper
+
     return inner
 
 
@@ -242,14 +258,13 @@ class Sequence(APIView):
         seq.create(bind=actions._get_engine())
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
-class Metadata(APIView):
 
+class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
         table_obj = actions._get_table(schema=schema, table=table)
         comment = table_obj.comment
         return JsonResponse(json.loads(comment) if comment else {})
-
 
     @api_exception
     @require_write_permission
@@ -267,14 +282,20 @@ class Metadata(APIView):
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
             # so we only copy the resulting keywords before storing the metadata
-            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)
+            _metadata = get_tag_keywords_synchronized_metadata(
+                table=table, schema=schema, keywords_new=keywords
+            )
             metadata.keywords = _metadata["keywords"]
 
-
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)
+            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field
+            # and to SQL comment on table
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
+
 
 class Table(APIView):
     """
@@ -367,7 +388,8 @@ class Table(APIView):
         """
         Every request to unsave http methods have to contain a "csrftoken".
         This token is used to deny cross site reference forwarding.
-        In every request the header had to contain "X-CSRFToken" with the actual csrftoken.
+        In every request the header had to contain "X-CSRFToken"
+        with the actual csrftoken.
         The token can be requested at / and will be returned as cookie.
 
         :param request:
@@ -398,8 +420,13 @@ class Table(APIView):
             column_definitions.append(column_definition)
         metadata = json_data.get("metadata")
 
-        result = self.__create_table(
-            request, schema, table, column_definitions, constraint_definitions, metadata=metadata
+        self.__create_table(
+            request,
+            schema,
+            table,
+            column_definitions,
+            constraint_definitions,
+            metadata=metadata,
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
@@ -419,7 +446,13 @@ class Table(APIView):
 
     @load_cursor()
     def __create_table(
-        self, request, schema, table, column_definitions, constraint_definitions, metadata=None
+        self,
+        request,
+        schema,
+        table,
+        column_definitions,
+        constraint_definitions,
+        metadata=None,
     ):
 
         self.validate_column_names(column_definitions)
@@ -429,11 +462,19 @@ class Table(APIView):
         }
         cursor = sessions.load_cursor_from_context(context)
         actions.table_create(
-            schema, table, column_definitions, constraint_definitions, cursor, table_metadata=metadata
+            schema,
+            table,
+            column_definitions,
+            constraint_definitions,
         )
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
+
+        if metadata:
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
 
     @api_exception
     @require_delete_permission
@@ -444,27 +485,29 @@ class Table(APIView):
 
         edit_table = actions.get_edit_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
+            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         edit_table = actions.get_insert_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
+            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         edit_table = actions.get_delete_table_name(schema, table)
         actions._get_engine().execute(
-            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(
+            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
                 schema=meta_schema, table=edit_table
             )
         )
 
         actions._get_engine().execute(
-            "DROP TABLE \"{schema}\".\"{table}\" CASCADE;".format(schema=schema, table=table)
+            'DROP TABLE "{schema}"."{table}" CASCADE;'.format(
+                schema=schema, table=table
+            )
         )
         table_object = DBTable.objects.get(name=table, schema__name=schema)
         table_object.delete()
@@ -539,7 +582,6 @@ class Fields(APIView):
 
 
 class Move(APIView):
-
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
@@ -594,7 +636,8 @@ class Rows(APIView):
 
         # OPERATORS could be EQUALS, GREATER, LOWER, NOTEQUAL, NOTGREATER, NOTLOWER
         # CONNECTORS could be AND, OR
-        # If you connect two values with an +, it will convert the + to a space. Whatever.
+        # If you connect two values with an +, it will convert the + to a space.
+        # Whatever.
 
         where_clauses = self.__read_where_clause(where)
 
@@ -621,7 +664,11 @@ class Rows(APIView):
         }
 
         return_obj = self.__get_rows(request, data)
-        session = sessions.load_session_from_context(return_obj.pop("context")) if "context" in return_obj else None
+        session = (
+            sessions.load_session_from_context(return_obj.pop("context"))
+            if "context" in return_obj
+            else None
+        )
         # Extract column names from description
         if "description" in return_obj:
             cols = [col[0] for col in return_obj["description"]]
@@ -655,19 +702,23 @@ class Rows(APIView):
         elif format == "datapackage":
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_ALL)
-            zf = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
-            csv_name = "{schema}__{table}.csv".format(
-                schema=schema, table=table
+            zf = zipstream.ZipFile(mode="w", compression=zipstream.ZIP_DEFLATED)
+            csv_name = "{schema}__{table}.csv".format(schema=schema, table=table)
+            zf.write_iter(
+                csv_name,
+                (
+                    writer.writerow(x).encode("utf-8")
+                    for x in itertools.chain([cols], return_obj["data"])
+                ),
             )
-            zf.write_iter(csv_name, (
-                writer.writerow(x).encode("utf-8")
-                for x in itertools.chain([cols], return_obj["data"])
-            ))
             table_obj = actions._get_table(schema=schema, table=table)
             if table_obj.comment:
                 zf.writestr("datapackage.json", table_obj.comment.encode("utf-8"))
             else:
-                zf.writestr("datapackage.json", json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"))
+                zf.writestr(
+                    "datapackage.json",
+                    json.dumps(JSONCompiler().visit(OEPMetadata())).encode("utf-8"),
+                )
             response = OEPStream(
                 (chunk for chunk in zf),
                 content_type="application/zip",
@@ -689,7 +740,9 @@ class Rows(APIView):
                 # TODO: Figure out what JsonResponse does different.
                 return JsonResponse(dict_list, safe=False)
 
-            return stream((dict(zip(cols, row)) for row in return_obj["data"]), session=session)
+            return stream(
+                (dict(zip(cols, row)) for row in return_obj["data"]), session=session
+            )
 
     @api_exception
     @require_write_permission
@@ -873,8 +926,8 @@ class Rows(APIView):
     @load_cursor(named=True)
     def __get_rows(self, request, data):
         table = actions._get_table(data["schema"], table=data["table"])
-        params = {}
-        params_count = 0
+        # params = {}
+        # params_count = 0
         columns = data.get("columns")
 
         if not columns:
@@ -908,6 +961,7 @@ class Rows(APIView):
         cursor = sessions.load_cursor_from_context(request.data)
         actions._execute_sqla(query, cursor)
 
+
 class Session(APIView):
     def get(self, request, length=1):
         return request.session["resonse"]
@@ -917,7 +971,8 @@ def date_handler(obj):
     """
     Implements a handler to serialize dates in JSON-strings
     :param obj: An object
-    :return: The str method is called (which is the default serializer for JSON) unless the object has an attribute  *isoformat*
+    :return: The str method is called (which is the default serializer for JSON)
+        unless the object has an attribute  *isoformat*
     """
     if isinstance(obj, Decimal):
         return str(obj)
@@ -935,7 +990,8 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
-    :return: A JSON-Response that contains a dictionary with the corresponding response stored in *content*
+    :return: A JSON-Response that contains a dictionary with
+      the corresponding response stored in *content*
     """
 
     class AJAX_View(APIView):
@@ -950,8 +1006,16 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
         @api_exception
         def post(self, request):
             result = self.execute(request)
-            session = sessions.load_session_from_context(result.pop("context")) if "context" in result else None
-            return stream(result, allow_cors=allow_cors and request.user.is_anonymous, session=session)
+            session = (
+                sessions.load_session_from_context(result.pop("context"))
+                if "context" in result
+                else None
+            )
+            return stream(
+                result,
+                allow_cors=allow_cors and request.user.is_anonymous,
+                session=session,
+            )
 
         def execute(self, request):
             if requires_cursor:
@@ -973,7 +1037,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                     query = query[0]
                 if isinstance(query, str):
                     query = json.loads(query)
-            except:
+            except Exception:
                 raise APIError("Your query is not properly formated.")
             data = func(query, context)
 
@@ -1031,7 +1095,10 @@ class FetchView(APIView):
 def stream(data, allow_cors=False, status_code=status.HTTP_200_OK, session=None):
     encoder = GeneratorJSONEncoder()
     response = OEPStream(
-        encoder.iterencode(data), content_type="application/json", status=status_code, session=session,
+        encoder.iterencode(data),
+        content_type="application/json",
+        status=status_code,
+        session=session,
     )
     if allow_cors:
         response["Access-Control-Allow-Origin"] = "*"
@@ -1067,13 +1134,14 @@ class ImageUpload(APIView):
     :param
     :return Response contains path to image.
     """
+
     parser_classes = (MultiPartParser,)
 
     # TODO: PUT might be better in this case?
     def post(self, request):
         if request.method == "POST":
 
-            f = request.data['image']
+            f = request.data["image"]
             # attempt to validate image format
             try:
                 from PIL import Image
@@ -1089,7 +1157,7 @@ class ImageUpload(APIView):
 
                 return JsonResponse({"data": {"filePath": process_url}})
 
-            except:
+            except Exception:
                 raise ParseError("Unsupported image type")
 
 

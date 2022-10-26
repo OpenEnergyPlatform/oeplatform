@@ -1,10 +1,7 @@
 from django import forms
-from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
-from django.contrib.auth.views import PasswordChangeView, PasswordResetView
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.http import Http404
+from django.contrib.auth.views import PasswordChangeView
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
@@ -15,12 +12,12 @@ from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, Gr
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
-from oeplatform.settings import URL
 
 class ProfileView(View):
     def get(self, request, user_id):
         """
-        Load the user identified by user_id and is OAuth-token. If latter does not exist yet, create one.
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
@@ -41,10 +38,10 @@ class ProfileView(View):
 class GroupManagement(View, LoginRequiredMixin):
     def get(self, request):
         """
-        Load and list the available groups by groupadmin. 
+        Load and list the available groups by groupadmin.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
 
         membership = request.user.memberships
@@ -77,8 +74,8 @@ class GroupCreate(View, LoginRequiredMixin):
 
     def post(self, request, group_id=None):
         """
-        Performs selected action(save or delete) for a group. If a groupname already exists, then a error
-        will be output.
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
@@ -126,11 +123,11 @@ class GroupView(View, LoginRequiredMixin):
 class GroupEdit(View, LoginRequiredMixin):
     def get(self, request, group_id):
         """
-        Load the chosen action(create or edit) for a group. 
+        Load the chosen action(create or edit) for a group.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param user_id: An group id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
         group = get_object_or_404(UserGroup, pk=group_id)
         is_admin = False
@@ -147,13 +144,13 @@ class GroupEdit(View, LoginRequiredMixin):
 
     def post(self, request, group_id):
         """
-        Performs selected action(save or delete) for a group. If a groupname already exists, then a error 
-        will be output. 
+        Performs selected action(save or delete) for a group.
+        If a groupname already exists, then a error will be output.
         The selected users become members of this group. The groupadmin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :param user_id: An group id
-        :return: Profile renderer   
+        :return: Profile renderer
         """
         mode = request.POST["mode"]
         group = get_object_or_404(UserGroup, id=group_id)
@@ -255,7 +252,7 @@ class CreateUserView(View):
     def post(self, request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             return redirect("activate")
         else:
             return render(request, "login/oepuser_create_form.html", {"form": form})

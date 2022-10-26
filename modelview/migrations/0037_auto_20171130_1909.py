@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="properties_missed",
             field=models.CharField(
-                help_text="Which properties of your model have not been mentioned on this factsheet? Please nite them.",
+                help_text="Which properties of your model have not been mentioned on this factsheet? Please nite them.",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="further properties",
@@ -49,17 +49,17 @@ class Migration(migrations.Migration):
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=300),
                 default=list,
-                help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
                 null=True,
                 size=None,
-                verbose_name="Author(s) (institution, working field, active time period)",
+                verbose_name="Author(s) (institution, working field, active time period)",  # noqa
             ),
         ),
         migrations.AlterField(
             model_name="basicfactsheet",
             name="citation_DOI",
             field=models.CharField(
-                help_text="If  there are publications about the model that have a DOI please liste the DOIs",
+                help_text="If  there are publications about the model that have a DOI please liste the DOIs",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Citation DOI",
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="code_documentation",
             field=models.CharField(
-                help_text="If a code documentation and or a developer documentation is publicly available please insert the link",
+                help_text="If a code documentation and or a developer documentation is publicly available please insert the link",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Link to Developer/Code Documentation",
@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
             name="external_optimizer",
             field=models.BooleanField(
                 default=False,
-                help_text="Which external optimizer(s) can the model apply? Please list them.",
+                help_text="Which external optimizer(s) can the model apply? Please list them.",  # noqa
                 verbose_name="External optimizer",
             ),
         ),
@@ -137,7 +137,7 @@ class Migration(migrations.Migration):
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
                 default=list,
-                help_text="Which data processing software is required? Please list all software (packages) that are used for internal data processing",
+                help_text="Which data processing software is required? Please list all software (packages) that are used for internal data processing",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Internal data processing software",
@@ -147,7 +147,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="larger_scale_usage",
             field=models.CharField(
-                help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",
+                help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Larger scale usage",
@@ -190,14 +190,14 @@ class Migration(migrations.Migration):
                 help_text="Which studies have been calculated with this model?",
                 max_length=10000,
                 null=True,
-                verbose_name="Please list references to reports and studies which were produced using the model",
+                verbose_name="Please list references to reports and studies which were produced using the model",  # noqa
             ),
         ),
         migrations.AlterField(
             model_name="basicfactsheet",
             name="source_of_funding",
             field=models.CharField(
-                help_text="What is the main source of funding for the development of the model?",
+                help_text="What is the main source of funding for the development of the model?",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Source of funding",
@@ -208,7 +208,7 @@ class Migration(migrations.Migration):
             name="support",
             field=models.BooleanField(
                 default=False,
-                help_text="Click the check box if there is a support or Q and A Forum for the Model",
+                help_text="Click the check box if there is a support or Q and A Forum for the Model",  # noqa
                 verbose_name="Support / Community / Forum",
             ),
         ),
@@ -216,7 +216,7 @@ class Migration(migrations.Migration):
             model_name="basicfactsheet",
             name="user_documentation",
             field=models.CharField(
-                help_text="If an user documentation is publicly available please insert the link",
+                help_text="If an user documentation is publicly available please insert the link",  # noqa
                 max_length=200,
                 null=True,
                 verbose_name="Link to User Documentation",
@@ -236,7 +236,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="changes_in_efficiency",
             field=models.TextField(
-                help_text="Can changes in efficiency be considered in the model? If yes please shortly explain how that is realised.",
+                help_text="Can changes in efficiency be considered in the model? If yes please shortly explain how that is realised.",  # noqa
                 null=True,
                 verbose_name="Changes in efficiency",
             ),
@@ -245,7 +245,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="example_research_questions",
             field=models.CharField(
-                help_text="Which would be good research questions that could be answered with the model?",
+                help_text="Which would be good research questions that could be answered with the model?",  # noqa
                 max_length=10000,
                 null=True,
                 verbose_name="Example research questions",
@@ -259,7 +259,7 @@ class Migration(migrations.Migration):
                     ("fundamental model", "fundamental model"),
                     ("stochastic model", "stochastic model"),
                 ],
-                help_text="If the described model is not a market model itself please indicate if a market model is included - if yes,  which one?",
+                help_text="If the described model is not a market model itself please indicate if a market model is included - if yes,  which one?",  # noqa
                 max_length=20,
                 null=True,
                 verbose_name="Market models",
@@ -269,7 +269,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="short_description_of_mathematical_model_class",
             field=models.TextField(
-                help_text="Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.",
+                help_text="Here you can explain little more the model class in your own words if you think that the above categorisation is not explicative enough.",  # noqa
                 null=True,
                 verbose_name="Short description of mathematical model class",
             ),
@@ -284,7 +284,7 @@ class Migration(migrations.Migration):
             name="user_behaviour",
             field=models.BooleanField(
                 default=False,
-                help_text="Can user behaviour and demand side management be considered in the model? If yes please shortly explain how that is realised.",
+                help_text="Can user behaviour and demand side management be considered in the model? If yes please shortly explain how that is realised.",  # noqa
                 verbose_name="User behaviour and demand side management",
             ),
         ),

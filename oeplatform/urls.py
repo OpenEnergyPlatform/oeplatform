@@ -15,14 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.conf.urls.static import static
-from django.contrib import admin
-from .views import ImagesView
 
 from oeplatform import settings
 
-from graphene_django.views import GraphQLView
-from django.views.decorators.csrf import csrf_exempt
-
+from .views import ImagesView
 
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
@@ -36,5 +32,8 @@ urlpatterns = [
     url(r"^ontology/", include("ontology.urls")),
     url(r"^tutorials/", include("tutorials.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
-    url(r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$", ImagesView.as_view()),
+    url(
+        r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$",
+        ImagesView.as_view(),
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

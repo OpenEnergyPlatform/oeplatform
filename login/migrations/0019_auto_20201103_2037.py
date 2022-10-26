@@ -2,26 +2,27 @@
 
 import django.contrib.auth.models
 from django.db import migrations
+
 import login.models
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('login', '0018_auto_20190304_1306'),
+        ("login", "0018_auto_20190304_1306"),
     ]
 
     operations = [
         migrations.AlterModelManagers(
-            name='myuser',
+            name="myuser",
             managers=[
-                ('objects', login.models.OEPUserManager()),
+                ("objects", login.models.OEPUserManager()),
             ],
         ),
         migrations.AlterModelManagers(
-            name='usergroup',
+            name="usergroup",
             managers=[
-                ('objects', django.contrib.auth.models.GroupManager()),
+                ("objects", django.contrib.auth.models.GroupManager()),
             ],
         ),
     ]

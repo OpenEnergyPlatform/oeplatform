@@ -1,26 +1,25 @@
-label[data-toggle="popover"]:after{
-    color: var(--primary);
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    content: "\f05a";
-    vertical-align: super;
-    font-size: small;
-    margin-left: 2px
+label[data-bs-toggle="popover"]:after {
+  color: var(--primary);
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f05a";
+  vertical-align: super;
+  font-size: small;
+  margin-left: 2px;
 }
 
-.json-editor-btn-add{
-    margin-left: 5px;
+.json-editor-btn-add {
+  margin-left: 5px;
 }
 
-.card-body{
-
-    /* more indented, no borders */
-    padding-left: 30px;
-    /*
+.card-body {
+  /* more indented, no borders */
+  padding-left: 30px;
+  /*
     border: none;
     */
 }
 
-.je-object__container{
-    margin-bottom: 20px;
+.je-object__container {
+  margin-bottom: 20px;
 }

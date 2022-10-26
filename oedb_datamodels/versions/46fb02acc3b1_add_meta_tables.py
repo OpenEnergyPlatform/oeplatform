@@ -1,7 +1,7 @@
 """Add meta tables
 
 Revision ID: 46fb02acc3b1
-Revises: 
+Revises:
 Create Date: 2017-11-23 11:08:50.199160
 
 """

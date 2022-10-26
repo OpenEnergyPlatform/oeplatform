@@ -6,19 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dataedit', '0017_alter_tablerevision_date'),
+        ("dataedit", "0017_alter_tablerevision_date"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='schema',
-            name='tags',
+            model_name="schema",
+            name="tags",
         ),
         migrations.RemoveField(
-            model_name='table',
-            name='tags',
+            model_name="table",
+            name="tags",
         ),
         migrations.DeleteModel(
-            name='Tag',
+            name="Tag",
         ),
     ]

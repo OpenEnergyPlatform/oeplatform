@@ -17,6 +17,7 @@ local
 # Distribution / packaging
 .Python
 env/
+/env
 build/
 develop-eggs/
 downloads/
@@ -74,6 +75,9 @@ target/
 # Other generated files
 venv*/
 src
+0_env/
+/envs
+/node_env
 
 .DS_Store
 

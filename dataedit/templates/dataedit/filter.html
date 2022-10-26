@@ -1,6 +1,11 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
 
+{% block after-head %}
+    <!-- Latest compiled and minified CSS -->
+    <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+{% endblock after-head %}
+
 {% block main-right-sidebar-filter %}
 <!-- extending the filter block to add wizard button -->
 
@@ -19,13 +24,13 @@
     <h3>Search & filter</h3>
     <button type="button"
     class="btn btn-outline-light"
-    data-toggle="popover"
+    data-bs-toggle="popover"
     data-trigger="focus"
     title="How to use search and filter"
     {% if not tables%}
-    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
+    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
     {% else %}
-    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
+    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
     {% endif %}
     style="margin-left: 10px;">
         <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
@@ -74,17 +79,19 @@
 {% endblock main-right-sidebar-filter %}
 
 {% block after-body-bottom-js %}
-<!-- Latest compiled and minified CSS -->
-<link href="{% static 'dataedit/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.0/dist/css/bootstrap-select.min.css -->
 <!-- Latest compiled and minified JavaScript -->
+<<<<<<< HEAD
 <script src="{% static 'dataedit/bootstrap-select.min.js' %}"></script><!-- src: https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.0/dist/js/bootstrap-select.min.js -->
 
 
 
 
+=======
+<script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+>>>>>>> develop
 <script>
     $(function () {
-        $('[data-toggle="popover"]').popover()
+        $('[data-bs-toggle="popover"]').popover()
         $('.popover-dismiss').popover({
             trigger: 'focus'
         })
@@ -104,6 +111,15 @@
     $('#search-filter').on('blur', function (e) {
         $("#form-filter").submit();
     });
+<<<<<<< HEAD
+=======
+    /* also update filter on key=Enter in search field */
+    $('#search-filter').on('keydown', function (e) {
+        if (e.keyCode == 13) {
+            $("#form-filter").submit();
+        }
+    });
+>>>>>>> develop
 
 </script>
 {% endblock after-body-bottom-js %}

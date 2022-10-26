@@ -19,83 +19,71 @@ var MetaEdit = function (config) {
                 }
             }
         }
-        return cookieValue;
+      }
     }
+    return cookieValue;
+  }
 
-    function getCsrfToken() {
-        var token1 = getCookie("csrftoken");
-        return token1;
-    }
+  function getCsrfToken() {
+    var token1 = getCookie("csrftoken");
+    return token1;
+  }
 
-    function sendJson(method, url, data, success, error) {
-        var token = getCsrfToken();
-        return $.ajax({
-            url: url,
-            headers: { "X-CSRFToken": token },
-            data_type: "json",
-            cache: false,
-            contentType: "application/json; charset=utf-8",
-            processData: false,
-            data: data,
-            type: method,
-            success: success,
-            error: error
-        });
-    }
+  function sendJson(method, url, data, success, error) {
+    var token = getCsrfToken();
+    return $.ajax({
+      url: url,
+      headers: {"X-CSRFToken": token},
+      data_type: "json",
+      cache: false,
+      contentType: "application/json; charset=utf-8",
+      processData: false,
+      data: data,
+      type: method,
+      success: success,
+      error: error,
+    });
+  }
 
 
-    function fixSchema(json) {
-        /* recursively remove null types */
-        function fixRecursive(elem) {
-            Object.keys(elem).map(function (key) {
-                var prop = elem[key];
-                prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1)
-                if (prop.type == 'array') {
-                    //prop.items = prop.items || {};
-                    prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
-                    fixRecursive({ "": prop.items });
-                } else if (prop.type == 'object') {
-                    //prop.properties = prop.properties || {};
-                    fixRecursive(prop.properties);
-                } else if (typeof prop.type == 'object') {
-                    // find and remove "null"
-                    var index = prop.type.indexOf("null");
-                    if (index >= 0) {
-                        prop.type.splice(index, 1);
-                    }
-                    // if only one type --> str
-                    if (prop.type.length == 1) {
-                        prop.type = prop.type[0];
-                    }
-                }
-            })
+  function fixSchema(json) {
+    /* recursively remove null types */
+    function fixRecursive(elem) {
+      Object.keys(elem).map(function(key) {
+        var prop = elem[key];
+        prop.title = prop.title || key[0].toLocaleUpperCase() + key.slice(1);
+        if (prop.type == 'array') {
+          // prop.items = prop.items || {};
+          prop.items.title = prop.items.title || key[0].toLocaleUpperCase() + key.slice(1); // missing title, otherwise the form label is just "item 1, ..."
+          fixRecursive({"": prop.items});
+        } else if (prop.type == 'object') {
+          // prop.properties = prop.properties || {};
+          fixRecursive(prop.properties);
+        } else if (typeof prop.type == 'object') {
+          // find and remove "null"
+          var index = prop.type.indexOf("null");
+          if (index >= 0) {
+            prop.type.splice(index, 1);
+          }
+          // if only one type --> str
+          if (prop.type.length == 1) {
+            prop.type = prop.type[0];
+          }
         }
-        fixRecursive(json.properties);
+      });
+    }
+    fixRecursive(json.properties);
 
-        // make some readonly
-        json.properties.id.readonly = true;
-        json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
-        json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
-
-        // hide some
-        json.properties.resources.items.properties.profile.options = { hidden: true };
-        json.properties.resources.items.properties.encoding.options = { hidden: true };
-        json.properties.resources.items.properties.dialect.options = { hidden: true };
-        json.properties.review.options = { hidden: true };
-        json.properties.metaMetadata.options = { hidden: true };
-
-        // add formats
-        json.properties.publicationDate.format = 'date';
-        json.properties.temporal.properties.referenceDate.format = 'date';
-        json.properties.context.properties.homepage.format = 'url';
-
-        json["options"] = {
-            "disable_edit_json": false, // show only for entire form
-        }
-        json["title"] = "Metadata for " + config.table
-
-
-        return json
+    // make some readonly
+    if (config.standalone == false) {
+    json.properties.id.readonly = true;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+    }
+    else {
+    json.properties.id.readonly = false;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
+    json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
     }
 
     function fixData(json) {
@@ -156,96 +144,45 @@ var MetaEdit = function (config) {
                 }
 
             });
+          }
+        } else { // value
+          if (elemObject[key] === undefined) {
+            // console.log('adding empty value: ' + path + '.' + key)
+            elemObject[key] = null;
+          }
         }
-
-        fixRecursive(config.schema.properties, json, 'root')
-
-        return json
+      });
     }
 
-    function getErrorMsg(x) {
-        try {
-            x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
-        } catch (e) {
-            x = x.statusText;
-        }
-        return x;
+    fixRecursive(config.schema.properties, json, 'root');
+
+    return json;
+  }
+
+  function getErrorMsg(x) {
+    try {
+      x = 'Upload failed: ' + JSON.parse(x.responseJSON).reason;
+    } catch (e) {
+      x = x.statusText;
     }
+    return x;
+  }
 
-    function convertDescriptionIntoPopover() {
-        function convert(descr, label) {
-            var description = $(descr).text(); // get description text
-            if (description && label) {
-                label
-                    .attr('data-content', description)
-                    .attr('title', label.text())
-                    .attr('data-toggle', "popover")
-                    .popover({
-                        placement: 'top',
-                        trigger: 'hover',
-                        template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
-                    });
-                descr.addClass('d-none')
-            }
-        }
-
-        // headings
-        config.form.find('.card-title').parent().find('>p').not('.d-none').each(function (i, e) {
-            convert($(e), $(e).parent().find('>.card-title>label'))
-        });
-
-        // inputs
-        config.form.find('.form-group>.form-text').not('.d-none').each(function (_i, e) {
-            convert($(e), $(e).parent().find('>label'))
-        });
-
-        // remove button groups
-        config.form.find('.btn-group').removeClass('btn-group');
-
-
-    }
-
-    function bindButtons() {
-        // download
-        $('#metaedit-download').bind('click', function downloadMetadata() {
-            var json = config.editor.getValue();
-            // create data url
-            json = JSON.stringify(json, null, 1);
-            blob = new Blob([json], { type: "application/json" }),
-                dataUrl = URL.createObjectURL(blob);
-            // create link
-            var a = document.createElement("a");
-            document.body.appendChild(a);
-            // assign url and click
-            a.style = "display: none";
-            a.href = dataUrl;
-            a.download = config.table + '.metadata.json';
-            a.click();
-            // cleanup
-            URL.revokeObjectURL(dataUrl);
-            a.parentNode.removeChild(a);
-        });
-
-        // submit
-        $('#metaedit-submit').bind('click', function sumbmitMetadata() {
-            $('#metaedit-submitting').removeClass('d-none');
-            var json = config.editor.getValue();
-            json = fixData(json);
-            json = JSON.stringify(json);
-            sendJson("POST", config.url_api_meta, json).then(function () {
-                window.location = config.url_view_table;
-            }).catch(function (err) {
-                // TODO evaluate error, show user message
-                $('#metaedit-submitting').addClass('d-none');
-                alert(getErrorMsg(err))
+  function convertDescriptionIntoPopover() {
+    function convert(descr, label) {
+      var description = $(descr).text(); // get description text
+      if (description && label) {
+        label
+            .attr('data-content', description)
+            .attr('title', label.text())
+            .attr('data-toggle', "popover")
+            .popover({
+              placement: 'top',
+              trigger: 'hover',
+              template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>',
             });
-        });
-
-        // Cancel
-        $('#metaedit-cancel').bind('click', function cancel() {
-            window.location = config.cancle_url;
-        })
-
+        descr.addClass('d-none');
+      }
     }
 
     (function init() {

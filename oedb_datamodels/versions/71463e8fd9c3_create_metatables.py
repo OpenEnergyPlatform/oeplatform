@@ -44,7 +44,7 @@ def upgrade():
                 keep_existing=True,
             )
         sess.commit()
-    except:
+    except Exception:
         sess.rollback()
         raise
     finally:

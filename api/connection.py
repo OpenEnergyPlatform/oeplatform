@@ -68,10 +68,9 @@ def table_exists_in_django(table, schema=None):
         return False
 
 
-
 def create_oedb_session():
     """Return a sqlalchemy session to the oedb
-    
+
     Should only be created once per user request.
     """
     return sessionmaker(bind=_get_engine())()

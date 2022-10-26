@@ -13,12 +13,10 @@
 # serve to show the default.
 
 import os
-import shlex
 import sys
 from unittest.mock import MagicMock
 
 import django
-from django.conf import settings
 
 # try:
 #     from oeplatform.oeplatform.securitysettings import SECRET_KEY
@@ -27,7 +25,6 @@ from django.conf import settings
 #     logging.error("No securitysettings found. Setting defaults")
 #     DEBUG = True
 #     SECRET_KEY = '0'
-    
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -74,9 +71,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"OpenEnergyPlatform"
-copyright = u"2016, open_eGo"
-author = u"open_eGo"
+project = "OpenEnergyPlatform"
+copyright = "2016, open_eGo"
+author = "open_eGo"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -233,14 +230,14 @@ htmlhelp_basename = "OpenEnergyPlatformdoc"
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
-    # Latex figure (float) alignment
-    #'figure_align': 'htbp',
+    # # The paper size ('letterpaper' or 'a4paper').
+    # 'papersize': 'letterpaper',
+    # # The font size ('10pt', '11pt' or '12pt').
+    # 'pointsize': '10pt',
+    # # Additional stuff for the LaTeX preamble.
+    # 'preamble': '',
+    # # Latex figure (float) alignment
+    # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -250,8 +247,8 @@ latex_documents = [
     (
         master_doc,
         "OpenEnergyPlatform.tex",
-        u"OpenEnergyPlatform Documentation",
-        u"open\\_eGo",
+        "OpenEnergyPlatform Documentation",
+        "open\\_eGo",
         "manual",
     )
 ]
@@ -282,7 +279,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "openenergyplatform", u"OpenEnergyPlatform Documentation", [author], 1)
+    (master_doc, "openenergyplatform", "OpenEnergyPlatform Documentation", [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -298,7 +295,7 @@ texinfo_documents = [
     (
         master_doc,
         "OpenEnergyPlatform",
-        u"OpenEnergyPlatform Documentation",
+        "OpenEnergyPlatform Documentation",
         author,
         "OpenEnergyPlatform",
         "One line description of project.",

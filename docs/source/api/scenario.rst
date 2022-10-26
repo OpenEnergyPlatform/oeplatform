@@ -31,4 +31,3 @@ Factories
 
 .. automodule:: modelview.rdf.factory
   :members:
-
