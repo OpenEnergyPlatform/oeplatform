@@ -55,10 +55,7 @@ INSTALLED_APPS = (
     "tutorials",
     "jquery",
     "django_better_admin_arrayfield",
-    "oeo_viewer",
-    "graphene_django",
-    "factsheet",
-    "corsheaders"
+    "oeo_viewer"
 )
 
 MIDDLEWARE = (
