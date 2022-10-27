@@ -4,6 +4,14 @@ object-assign
 @license MIT
 */
 
+/*!
+ * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
+ */
+
+/*!
+ * Copyright (c) 2016-2022 Digital Bazaar, Inc. All rights reserved.
+ */
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 

@@ -6,7 +6,11 @@
 {% endblock after-head %}
 
 {% block main-content-body %}
-<div id="root"></div>
+<div id="factsheet">
+  <div id="root">
+  </div>
+  {{ context }}
+</div>
 {% endblock main-content-body %}
 
 {% block after-body-bottom-js %}

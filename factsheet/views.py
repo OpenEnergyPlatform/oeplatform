@@ -1,4 +1,7 @@
 from django.shortcuts import render
 
 def factsheets_index(request, *args, **kwargs):
-    return render(request, 'factsheet/index.html')
+    context_dict = {
+        "user": 'Adel',
+    }
+    return render(request, 'factsheet/index.html', context='context')

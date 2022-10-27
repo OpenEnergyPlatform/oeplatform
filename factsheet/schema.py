@@ -1,76 +1,47 @@
 import graphene
-from graphene_django import DjangoObjectType
+#from graphene_django import DjangoObjectType
 
-from factsheet.models import FactsheetModel
-from factsheet.models import FundingSourceModel
+from factsheet.models import UserModel
 
-class FundingSourceType(DjangoObjectType):
+class UserType(DjangoObjectType):
     class Meta:
-        model = FundingSourceModel
+        model = UserModel
 
-class FundingSourceInput(graphene.InputObjectType):
-    id = graphene.Int(required=True)
-    name = graphene.String(required=True)
-    uri =  graphene.String(required=True)
-
-class FactsheetType(DjangoObjectType):
-    class Meta:
-        model = FactsheetModel
-
-class FactsheetInput(graphene.InputObjectType):
-    name = graphene.String(required=True)
-    uri =  graphene.String(required=True)
-    funding_sources = graphene.List(graphene.Int)
 
 class Query(graphene.ObjectType):
-    factsheets = graphene.List(FactsheetType)
-    factsheet_by_id = graphene.Field(FactsheetType, id=graphene.Int())
-    funding_sources = graphene.List(FundingSourceType)
+    users = graphene.List(UserType)
+    user_by_id = graphene.Field(UserType, id=graphene.Int())
 
-    def resolve_factsheets(self, info):
-        return FactsheetModel.objects.all()
+    def resolve_users(self, info):
+        return UserModel.objects.all()
 
-    def resolve_factsheet_by_id(self, info, id):
-        return FactsheetModel.objects.get(id=id)
+    def resolve_user_by_id(self, info, id):
+        return UserModel.objects.get(id=id)
 
-    def resolve_funding_sources(self, info):
-        return FundingSourceModel.objects.all()
 
-class CreateFundingSource(graphene.Mutation):
-    name = graphene.String()
-    uri = graphene.String()
+class CreateUser(graphene.Mutation):
+    id = graphene.Int()
+    firstName = graphene.String()
+    lastName = graphene.String()
 
     class Arguments:
-        name = graphene.String()
-        uri = graphene.String()
+        firstName = graphene.String()
+        lastName = graphene.String()
 
-    def mutate(self, info, name, uri):
-        funding_source = FundingSourceModel(name=name, uri=uri)
-        funding_source.save()
+    def mutate(self, info, firstName, lastName):
+        user = UserModel(firstName=firstName, lastName=lastName)
+        user.save()
 
-        return CreateFundingSource(
-            name=funding_source.name,
-            uri=funding_source.uri,
+        return CreateUser(
+            id=user.id,
+            firstName=user.firstName,
+            lastName=user.lastName,
         )
-
-class CreateFactsheet(graphene.Mutation):
-    name = graphene.String()
-    uri = graphene.String()
-    funding_sources = graphene.List(FundingSourceType)
-
-    class Arguments:
-        name = graphene.String()
-        uri = graphene.String()
-        funding_sources = graphene.List(FundingSourceInput)
-
-    def mutate(self, info, name, uri, funding_sources):
-        funding_source_list = [FactsheetModel.objects.filter(funding_source=funding_source.id).update_or_create(**funding_source) for funding_source in funding_sources]
-        return CreateFactsheet(name=name, uri=uri, funding_sources=funding_source_list)
 
 
 class Mutation(graphene.ObjectType):
-    create_factsheet = CreateFactsheet.Field()
-    create_funding_source = CreateFundingSource.Field()
+    create_user = CreateUser.Field()
+
 
 schema = graphene.Schema(
     query=Query,
