@@ -27,7 +27,7 @@
     "react-force-graph-3d": "^1.21.12",
     "react-force-graph-ar": "^1.5.7",
     "react-force-graph-vr": "^1.14.8",
-    "react-scripts": "5.0.0",
+    "react-scripts": "^5.0.0",
     "three-spritetext": "^1.6.5",
     "web-vitals": "^2.1.4"
   },
