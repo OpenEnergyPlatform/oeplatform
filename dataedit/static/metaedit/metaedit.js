@@ -328,7 +328,6 @@ var MetaEdit = function (config) {
                               return response.json();
                           }).then(function (data) {
                               resolve(data["docs"]);
-                              console.log(data);
                           });
                       });
 
