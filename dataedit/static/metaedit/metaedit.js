@@ -306,6 +306,43 @@ var MetaEdit = function(config) {
         $('#metaedit-controls').removeClass('d-none');
 
         // TODO catch init error
+        window.JSONEditor.defaults.callbacks = {
+                "autocomplete": {
+                    "search_name": function search(jseditor_editor, input) {
+
+                      var url = "/api/v0/oeo-search?query=" + input
+
+                      return new Promise(function (resolve) {
+                          fetch(url, {
+                            mode: 'cors',
+                            headers: {
+                              'Access-Control-Allow-Origin':'*'
+                            }
+                          }).then(function (response) {
+                              return response.json();
+                          }).then(function (data) {
+                              resolve(data["docs"]);
+                              console.log(data);
+                          });
+                      });
+
+                    },
+                    "renderResult_name": function(jseditor_editor, result, props) {
+                        return ['<li ' + props + '>',
+                            '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
+                            '</li>'].join('');
+                    },
+                    "getResultValue_name": function getResultValue(jseditor_editor, result) {
+                        selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+
+                        let path = String(jseditor_editor.path).replace("name", "path");
+                        let path_uri = config.editor.getEditor(path);
+                        path_uri.setValue(String(result.resource));
+
+                        return selected_value;
+                    }
+                }
+              };
       });
     } else {
       $.when(

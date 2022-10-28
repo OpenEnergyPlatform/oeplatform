@@ -409,56 +409,73 @@
                       "title": "Type"
                     },
                     "isAbout": {
-                      "description": "Ontology URI to describe the column header",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "name": {
-                            "description": "Name of the Dataset",
-                            "type": "string",
-                            "title": "Name"
-                          },
-                          "path": {
-                            "description": "Path to the OEO (URL)",
-                            "type": "string",
-                            "title": "Path",
-                            "format": "uri"
-                          }
+                        "description": "Ontology URI to describe the column header",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "Name of the Dataset",
+                                    "type": "string",
+                                    "title": "Name",
+                                    "format": "autocomplete",
+                                    "options": {
+                                      "autocomplete": {
+                                          "search": "search_name",
+                                          "getResultValue": "getResultValue_name",
+                                          "renderResult": "renderResult_name",
+                                          "autoSelect": true
+                                      }
+                                  }
+                                },
+                                "path": {
+                                    "description": "Path to the OEO (URL)",
+                                    "type": "string",
+                                    "title": "Path",
+                                    "format": "uri"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "title": "IsAbout"
                         },
-                        "additionalProperties": false,
                         "title": "IsAbout"
-                      },
-                      "title": "IsAbout"
                     },
                     "valueReference": {
-                      "description": "Ontology URI for an extended description of the values in the column",
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "value": {
-                            "description": "The value this reference is assinged to.",
-                            "type": "string",
-                            "title": "Value"
-                          },
-                          "name": {
-                            "description": "Full name of the value",
-                            "type": "string",
-                            "title": "Name",
-                            "format": "uri"
-                          },
-                          "path": {
-                            "description": "Path to the OEO",
-                            "type": "string",
-                            "title": "Path",
-                            "format": "uri"
-                          }
+                        "description": "Ontology URI for an extended description of the values in the column",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "description": "The value this reference is assinged to.",
+                                    "type": "string",
+                                    "title": "Value"
+                                },
+                                "name": {
+                                    "description": "Full name of the value",
+                                    "type": "autocomplete",
+                                    "title": "Name",
+                                    "format": "autocomplete",
+                                    "options": {
+                                      "autocomplete": {
+                                          "search": "search_name",
+                                          "getResultValue": "getResultValue_name",
+                                          "renderResult": "renderResult_name",
+                                          "autoSelect": true
+                                      }
+                                  }
+                                },
+                                "path": {
+                                    "description": "Path to the OEO",
+                                    "type": "string",
+                                    "title": "Path",
+                                    "format": "uri"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "title": "Value reference"
                         },
-                        "additionalProperties": false,
-                        "title": "Value reference"
-                      },
-                      "title": "valueReference"
+                        "title": "valueReference"
                     },
                     "unit": {
                       "description": "Unit, preferably SI-Unit, that values in this field are mapped to. If \"unit\" doesn't apply to a field, use \"null\". Example: MW",
