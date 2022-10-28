@@ -80,7 +80,15 @@
 
 {% block after-body-bottom-js %}
 <!-- Latest compiled and minified JavaScript -->
+<<<<<<< HEAD
 <script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
+=======
+<script src="{% static 'dataedit/bootstrap-select.min.js' %}"></script><!-- src: https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.0/dist/js/bootstrap-select.min.js -->
+
+
+
+
+>>>>>>> loep_service
 <script>
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
@@ -103,12 +111,15 @@
     $('#search-filter').on('blur', function (e) {
         $("#form-filter").submit();
     });
+<<<<<<< HEAD
     /* also update filter on key=Enter in search field */
-    $('#search-filter').on('keydown', function (e) {                    
+    $('#search-filter').on('keydown', function (e) {
         if (e.keyCode == 13) {
             $("#form-filter").submit();
         }
     });
+=======
+>>>>>>> loep_service
 
 </script>
 {% endblock after-body-bottom-js %}

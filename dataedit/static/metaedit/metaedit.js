@@ -311,13 +311,13 @@ var MetaEdit = function (config) {
 
                 // TODO catch init error
 
-                console.log('define callback...');
+
                 window.JSONEditor.defaults.callbacks = {
                 "autocomplete": {
                     "search_name": function search(jseditor_editor, input) {
 
                       var url = "/api/v0/oeo-search?query=" + input
-                      console.log('inside search');
+
                       return new Promise(function (resolve) {
                           fetch(url, {
                             mode: 'cors',

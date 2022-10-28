@@ -3,34 +3,66 @@ import itertools
 import json
 import logging
 import re
+<<<<<<< HEAD
 from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sqla
 import zipstream
+=======
+import time
+from decimal import Decimal
+
+import geoalchemy2  # Although this import seems unused is has to be here
+import login.models as login_models
+import psycopg2
+import requests
+import sqlalchemy as sqla
+import zipstream
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.views import (get_tag_keywords_synchronized_metadata,
+                            schema_whitelist)
+>>>>>>> loep_service
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import FileSystemStorage
+from django.core.validators import validate_image_file_extension
 from django.db.models import Q
+<<<<<<< HEAD
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+=======
+from django.http import (Http404, HttpResponse, JsonResponse,
+                         StreamingHttpResponse)
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+>>>>>>> loep_service
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.exceptions import ParseError
+<<<<<<< HEAD
 from rest_framework.parsers import MultiPartParser
+=======
+from rest_framework.parsers import FileUploadParser, MultiPartParser
+>>>>>>> loep_service
 from rest_framework.views import APIView
 
 import api.parser
-import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from api.models import UploadedImages
+<<<<<<< HEAD
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+=======
+>>>>>>> loep_service
 
 logger = logging.getLogger("oeplatform")
 
@@ -270,6 +302,7 @@ class Metadata(APIView):
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
             # so we only copy the resulting keywords before storing the metadata
+<<<<<<< HEAD
             _metadata = get_tag_keywords_synchronized_metadata(
                 table=table, schema=schema, keywords_new=keywords
             )
@@ -280,6 +313,13 @@ class Metadata(APIView):
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
+=======
+            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)
+            metadata.keywords = _metadata["keywords"]
+
+
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)
+>>>>>>> loep_service
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
