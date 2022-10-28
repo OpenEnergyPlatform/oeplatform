@@ -174,4 +174,5 @@ urlpatterns = [
     url(r"^v0/image/upload", views.ImageUpload.as_view()),
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
+    url("oeo-search", views.oeo_search),
 ]

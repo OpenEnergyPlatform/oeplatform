@@ -1147,3 +1147,15 @@ class ImageUpload(APIView):
 
             except Exception:
                 raise ParseError("Unsupported image type")
+
+def oeo_search(request):
+    # get query from user request # TODO validate input to prevent sneaky stuff
+    query = request.GET["query"]
+    # call local search service
+    url = f"http://loep/lookup-application/api/search?query={query}"
+    print('----------------')
+    print(url)
+    res = requests.get(url).json()
+    # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    # send back to client
+    return JsonResponse(res, safe=False)
