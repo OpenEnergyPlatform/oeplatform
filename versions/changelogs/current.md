@@ -5,6 +5,7 @@
 - API enforce column name format as well as table names (PR#1065)
 - API simplify api tests (PR#1067)
 - improve tables oemetadata json parsing/website loading time by reworking the oemetadata storage system (PR#1059)
+- adapt omi updates in tests (PR#1092)
 
 ### Features
 
