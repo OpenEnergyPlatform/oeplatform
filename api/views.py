@@ -20,16 +20,14 @@ import sqlalchemy as sqla
 import zipstream
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.views import (get_tag_keywords_synchronized_metadata,
-                            schema_whitelist)
+from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import FileSystemStorage
 from django.core.validators import validate_image_file_extension
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.http import (Http404, HttpResponse, JsonResponse,
-                         StreamingHttpResponse)
+from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
@@ -300,11 +298,14 @@ class Metadata(APIView):
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
-            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)
+            _metadata = get_tag_keywords_synchronized_metadata(
+                table=table, schema=schema, keywords_new=keywords
+            )
             metadata.keywords = _metadata["keywords"]
 
-
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -1173,13 +1174,13 @@ class ImageUpload(APIView):
             except Exception:
                 raise ParseError("Unsupported image type")
 
+
 def oeo_search(request):
     # get query from user request # TODO validate input to prevent sneaky stuff
     query = request.GET["query"]
     # call local search service
+    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
     url = f"http://loep/lookup-application/api/search?query={query}"
-    print('----------------')
-    print(url)
     res = requests.get(url).json()
     # res: something like [{"label": "testlabel", "resource": "testresource"}]
     # send back to client
