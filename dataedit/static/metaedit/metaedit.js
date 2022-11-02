@@ -92,7 +92,12 @@ var MetaEdit = function (config) {
         json["options"] = {
             "disable_edit_json": false, // show only for entire form
         }
-        json["title"] = "Metadata for " + config.table
+
+        if (config.standalone == false) {
+            json["title"] = "Metadata for " + config.table
+        } else {
+            json["title"] = "Create new Metadata"
+        }
 
 
         return json
