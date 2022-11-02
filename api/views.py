@@ -258,21 +258,21 @@ class Metadata(APIView):
     def post(self, request, schema, table):
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
-        
-        if metadata is not None:            
+
+        if metadata is not None:
             cursor = actions.load_cursor_from_context(request.data)
-            
+
             # update/sync keywords with tags before saving metadata
-            keywords = metadata.keywords or []            
-            
+            keywords = metadata.keywords or []
+
             # get_tag_keywords_synchronized_metadata returns the OLD metadata
             # but with the now harmonized keywords (harmonized with tags)
-            # so we only copy the resulting keywords before storing the metadata            
-            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)                        
-            metadata.keywords = _metadata["keywords"]     
-            
+            # so we only copy the resulting keywords before storing the metadata
+            _metadata = get_tag_keywords_synchronized_metadata(table=table, schema=schema, keywords_new=keywords)
+            metadata.keywords = _metadata["keywords"]
 
-            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)            
+
+            actions.set_table_metadata(table=table, schema=schema, metadata=metadata, cursor=cursor)
             return JsonResponse(raw_input)
         else:
             raise APIError(error)
@@ -632,10 +632,10 @@ class Rows(APIView):
             return_obj["rowcount"] = 0
         if format == "csv":
             pseudo_buffer = Echo()
-            
+
             # NOTE: the csv downloader for views (client side)
             # in dataedit/static/dataedit/backend.js: parse_download()
-            # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC 
+            # uses JSON.stringify, so we use csv.QUOTE_NONNUMERIC
             # to get somewhat consistent results
 
             writer = csv.writer(pseudo_buffer, quoting=csv.QUOTE_NONNUMERIC)
@@ -1092,3 +1092,10 @@ class ImageUpload(APIView):
 
             except:
                 raise ParseError("Unsupported image type")
+
+
+def get_factsheet(request):
+    #id = request.GET["id"]
+    id=11
+    res = {'factsheet': 'factsheet', 'id': id}
+    return JsonResponse(res, safe=False)
