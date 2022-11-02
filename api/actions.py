@@ -38,6 +38,7 @@ from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
+
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -81,6 +82,10 @@ def get_table_name(schema, table, restrict_schemas=True):
     if restrict_schemas:
         if schema not in PLAYGROUNDS + UNVERSIONED_SCHEMAS:
             raise PermissionDenied
+    # TODO check if table in schema_whitelist but circular import
+    # from dataedit.views import schema_whitelist
+    # if schema not in schema_whitelist
+    #     raise PermissionDenied
     return schema, table
 
 
@@ -94,6 +99,34 @@ class ResponsiveException(Exception):
 def assert_permission(user, table, permission, schema=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
+    if (
+        user.is_anonymous
+        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
+    ):
+        raise PermissionDenied
+
+
+def assert_add_tag_permission(user, table, permission, schema):
+    """
+    Tags can be added to tables that are in any schema. However, 
+    it is necessary to check whether the user has write permission 
+    to the table, since not every user should be able to add tags 
+    to every table.
+
+    Args:
+        user (_type_): _description_
+        table (_type_): _description_
+        permission (_type_): _description_
+        schema (_type_): _description_
+
+    Raises:
+        PermissionDenied: _description_
+    
+    """
+    # if not request.user.is_anonymous:
+    #         level = request.user.get_table_permission_level(table)
+    #         can_add = level >= login_models.WRITE_PERM
+
     if (
         user.is_anonymous
         or user.get_table_permission_level(DBTable.load(schema, table)) < permission

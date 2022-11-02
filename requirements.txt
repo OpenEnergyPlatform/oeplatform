@@ -29,3 +29,4 @@ nbconvert>=6.4.5
 ipython # needed for IPython3Lexer for nbconvert
 beautifulsoup4 # for markdown raw html cleanup
 pre-commit # only for dev
+uritemplate # allows python manage.py generateschema

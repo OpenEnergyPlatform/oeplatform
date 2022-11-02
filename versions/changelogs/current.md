@@ -6,6 +6,8 @@
 - API simplify api tests (PR#1067)
 - improve tables oemetadata json parsing/website loading time by reworking the oemetadata storage system (PR#1059)
 - add migration to update the new metadata storage (PR#1072)
+- adapt omi updates in tests (PR#1092)
+
 
 ### Features
 

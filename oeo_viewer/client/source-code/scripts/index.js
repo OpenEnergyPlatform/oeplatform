@@ -7,7 +7,6 @@ import { Button, Divider } from "semantic-ui-react";
 import App from "./app.js";
 
 import MainSideBar from "./components/functional/sideBarMain.js";
-import oepIcon from "../statics/oep.png";
 
 import "semantic-ui-css/semantic.min.css";
 
