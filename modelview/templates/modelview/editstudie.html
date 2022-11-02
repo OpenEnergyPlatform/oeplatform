@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 {% load modelview_extras %}
 {% block main-content-body %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 
 
@@ -17,16 +17,16 @@
   <span onclick="window.onbeforeunload = function (e) {};">
   <input class="btn btn-info right" type="submit" value="Submit all" />
   </span>
-  
+
 </ul>
-  
+
   <table class="formtable">
             {% include 'modelview/editmodel_snippet.html' with field=form.name_of_the_study %}
             {% include 'modelview/editmodel_snippet.html' with field=form.author_Institution %}
             {% include 'modelview/editmodel_snippet.html' with field=form.contact_email %}
             {% include 'modelview/editmodel_snippet.html' with field=form.client %}
             <tr>
-                <th> 
+                <th>
                     Funding
                 </th>
                 <td>
@@ -43,7 +43,7 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.new_aspects %}
             {% include 'modelview/editmodel_snippet.html' with field=form.spatial_Geographical_coverage %}
             <tr>
-                <th> 
+                <th>
                     Time frame
                 </th>
                 <td>
@@ -56,7 +56,7 @@
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Time frame
                 </th>
                 <td>
@@ -65,11 +65,11 @@
                             {% include 'modelview/editmodel_snippet.html' with field=form.time_frame_2_transformation_path %}
                     </table>
                 </td>
-            </tr>           
+            </tr>
             {% include 'modelview/editmodel_snippet.html' with field=form.tools_models %}
             {% include 'modelview/editmodel_snippet.html' with field=form.tools_other %}
             <tr>
-                <th> 
+                <th>
                     Modeled energy sectors
                 </th>
                 <td>
@@ -83,7 +83,7 @@
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Modeled demand sectors
                 </th>
                 <td>
@@ -96,7 +96,7 @@
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Economic (behavioural) rationale
                 </th>
                 <td>
@@ -110,7 +110,7 @@
                 </td>
             </tr>
             <tr>
-                <th> 
+                <th>
                     Technologies included
                 </th>
                 <td>
@@ -139,15 +139,15 @@
                     </table>
                 </td>
             </tr>
-            
-           
-            
+
+
+
             {% include 'modelview/editmodel_snippet.html' with field=form.economic_focuses_included %}
             {% include 'modelview/editmodel_snippet.html' with field=form.social_focuses_included %}
             {% include 'modelview/editmodel_snippet.html' with field=form.endogenous_variables %}
             {% include 'modelview/editmodel_snippet.html' with field=form.sensitivities %}
             <tr>
-                <th> 
+                <th>
                     Time steps
                 </th>
                 <td>
@@ -161,16 +161,16 @@
                     </table>
                 </td>
             </tr>
-           
+
         </table>
-  
+
 {% endblock %}
 
 {% block after-body-bottom-js %}
 <script type="text/javascript">
-    
+
     $(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-bs-toggle="tooltip"]').tooltip();
     });
     function Hide_Display(name)
     {
@@ -191,24 +191,24 @@
 	    divInfo1.style.display = 'inline';
 	    divInfo2.style.display = 'inline';
 	    divInfo3.style.display = 'none';
-	} 
+	}
     }
 
       var confirmOnLeave = function(msg) {
- 
+
       window.onbeforeunload = function (e) {
         e = e || window.event;
         msg = msg || '';
- 
+
         // For IE and Firefox
         if (e) {e.returnValue = msg;}
- 
+
         // For Chrome and Safari
         return msg;
     };
- 
+
 };
- 
+
 confirmOnLeave();
 
 

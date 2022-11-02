@@ -6,22 +6,35 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tutorials', '0007_auto_20210311_1844'),
+        ("tutorials", "0007_auto_20210311_1844"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='tutorial',
-            name='github',
+            model_name="tutorial",
+            name="github",
         ),
         migrations.AddField(
-            model_name='tutorial',
-            name='github_contact',
-            field=models.CharField(blank=True, max_length=50, verbose_name='github contact'),
+            model_name="tutorial",
+            name="github_contact",
+            field=models.CharField(
+                blank=True, max_length=50, verbose_name="github contact"
+            ),
         ),
         migrations.AlterField(
-            model_name='tutorial',
-            name='category',
-            field=models.CharField(blank=True, choices=[('general', 'General'), ('publication', 'Publication/Licensing'), ('io', 'Upload/Download'), ('data_structure', 'Data Structure'), ('ontology', 'Ontology'), ('other', 'Other Topics')], max_length=15),
+            model_name="tutorial",
+            name="category",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("general", "General"),
+                    ("publication", "Publication/Licensing"),
+                    ("io", "Upload/Download"),
+                    ("data_structure", "Data Structure"),
+                    ("ontology", "Ontology"),
+                    ("other", "Other Topics"),
+                ],
+                max_length=15,
+            ),
         ),
     ]

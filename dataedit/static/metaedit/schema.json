@@ -423,7 +423,16 @@
                                                     "name": {
                                                         "description": "Name of the Dataset",
                                                         "type": "string",
-                                                        "title": "Name"
+                                                        "title": "Name",
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        }
                                                     },
                                                     "path": {
                                                         "description": "Path to the OEO (URL)",
@@ -452,7 +461,15 @@
                                                         "description": "Full name of the value",
                                                         "type": "string",
                                                         "title": "Name",
-                                                        "format": "uri"
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        }
                                                     },
                                                     "path": {
                                                         "description": "Path to the OEO",
@@ -475,7 +492,7 @@
                                     "additionalProperties": false,
                                     "title": "Field"
                                 },
-                                "title": "Field"
+                                "title": "Fields"
                             },
                             "primaryKey": {
                                 "description": "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns. Example: id",

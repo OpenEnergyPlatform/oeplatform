@@ -1,12 +1,11 @@
 {% extends "modelview/detail_view.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
 
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
   <link rel="stylesheet" href="{% static 'css/custom_alert.css' %}">
-  <script type="text/javascript" src="/recline/vendor/jquery/1.7.1/jquery.js"></script>
 {% endblock after-head %}
 
 {% block main-right-sidebar-content-actions %}

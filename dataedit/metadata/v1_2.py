@@ -78,7 +78,7 @@ def from_v1_1(comment_on_table, schema, table):
                 comment_on_table["fields"] = comment_on_table["resources"][0]["fields"]
 
             commented_cols = [col["name"] for col in comment_on_table["fields"]]
-    except Exception as e:
+    except Exception:
         comment_on_table = {"description": comment_on_table, "fields": []}
         commented_cols = []
 

@@ -48,7 +48,7 @@ class SessionContext:
                     "If you are using the oedialect, this may be "
                     "caused by a known bug that has been fixed in"
                     "v0.0.5.dev0. You can close al your connections"
-                    "manually at https://openenergy-platform.org/api/v0/advanced/connection/close_all"
+                    "manually at https://openenergy-platform.org/api/v0/advanced/connection/close_all"  # noqa
                 )
 
         engine = _get_engine()
@@ -134,6 +134,7 @@ def _get_new_key(dictionary):
     while key in dictionary:
         key = randrange(0, sys.maxsize)
     return key
+
 
 def _add_entry(value, dictionary, key=None):
     if key is None:

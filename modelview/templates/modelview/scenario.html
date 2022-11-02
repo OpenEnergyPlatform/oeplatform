@@ -1,5 +1,5 @@
 {% extends "modelview/detail_view.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
 
@@ -14,7 +14,7 @@
   <div class="card-container">
     <div class="card">
       <div class="card-header">
-        <a data-toggle="collapse" href="#BasicInformation">Study</a>
+        <a data-bs-toggle="collapse" href="#BasicInformation">Study</a>
       </div>
       <div id="BasicInformation" class="title= expand in card-body">
 
@@ -110,7 +110,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
+        <a data-bs-toggle="collapse" href="#MathematicalProperties">Empirical Data</a>
       </div>
       <div id="MathematicalProperties" class="title= collapse card-body">
         <table class="profiletable">
@@ -135,7 +135,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#Coverage">Assumptions</a>
+        <a data-bs-toggle="collapse" href="#Coverage">Assumptions</a>
       </div>
       <div id="Coverage" class="title= collapse  card-body">
         <table class="profiletable">
@@ -222,7 +222,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#Results">Results</a>
+        <a data-bs-toggle="collapse" href="#Results">Results</a>
       </div>
       <div id="Results" class="title= collapse card-body">
         <table class="profiletable">

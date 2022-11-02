@@ -13,12 +13,13 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 try:
-    from .securitysettings import *
-except:
+    from .securitysettings import *  # noqa
+except ImportError:
     import logging
     import os
+
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
-    SECRET_KEY = os.environ.get("SECRET_KEY", "0")   
+    SECRET_KEY = os.environ.get("SECRET_KEY", "0")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
     URL = os.environ.get("URL")
 
@@ -35,7 +36,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap4",
+    "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",
@@ -45,7 +46,7 @@ INSTALLED_APPS = (
     "base.templatetags.base_tags",
     "widget_tweaks",
     "dataedit",
-    "colorfield",    
+    "colorfield",
     "api",
     "ontology",
     "axes",
@@ -53,9 +54,8 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "jquery",
     "django_better_admin_arrayfield",
-    "oeo_viewer",
+    "oeo_viewer"
 )
 
 MIDDLEWARE = (
@@ -68,6 +68,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
+    "django.middleware.common.CommonMiddleware"
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -88,10 +89,19 @@ TEMPLATES = [
     }
 ]
 
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+
+GRAPHENE = {
+    'SCHEMA': 'factsheet.schema.schema'
+}
+
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
 try:
-    ONTOLOGY_FOLDER
+    ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
@@ -126,10 +136,9 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    'axes.backends.AxesBackend',
-
+    "axes.backends.AxesBackend",
     # custom class extenging Django ModelBackend for login with username OR email
-    'login.backends.ModelBackendWithEmail',
+    "login.backends.ModelBackendWithEmail",
 ]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

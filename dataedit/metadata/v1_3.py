@@ -2,36 +2,23 @@ from api import actions
 
 from . import v1_2
 
-
 TEMPLATE_v1_3 = {
     "title": "",
     "description": "",
     "language": [""],
-    "spatial":
-        {
-            "location": "",
-            "extent": "",
-            "resolution": ""
-        },
-    "temporal":
-        {
-            "reference_date": "",
-            "start": "",
-            "end": "",
-            "resolution": ""
-        },
+    "spatial": {"location": "", "extent": "", "resolution": ""},
+    "temporal": {"reference_date": "", "start": "", "end": "", "resolution": ""},
     "sources": [
         {"name": "", "description": "", "url": "", "license": "", "copyright": ""},
     ],
-    "license":
-        {
-            "id": "",
-            "name": "",
-            "version": "",
-            "url": "",
-            "instruction": "",
-            "copyright": ""
-        },
+    "license": {
+        "id": "",
+        "name": "",
+        "version": "",
+        "url": "",
+        "instruction": "",
+        "copyright": "",
+    },
     "contributors": [
         {"name": "", "email": "", "date": "", "comment": ""},
     ],
@@ -43,8 +30,8 @@ TEMPLATE_v1_3 = {
                 {"name": "id", "description": "", "unit": ""},
                 {"name": "year", "description": "", "unit": ""},
                 {"name": "value", "description": "", "unit": ""},
-                {"name": "geom", "description": "", "unit": ""}
-            ]
+                {"name": "geom", "description": "", "unit": ""},
+            ],
         }
     ],
     "metadata_version": "1.3",
@@ -53,13 +40,13 @@ TEMPLATE_v1_3 = {
         "_copyright": "© Reiner Lemoine Institut",
         "_metadata_license": "Creative Commons Zero v1.0 Universal (CC0-1.0)",
         "_metadata_license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
-        "_contains": " http://www.json.org/; http://stackoverflow.com/questions/383692/what-is-json-and-why-would-i-use-it",
+        "_contains": " http://www.json.org/; http://stackoverflow.com/questions/383692/what-is-json-and-why-would-i-use-it",  # noqa
         "_additional_information": {
             "_dates": "Dates must follow the ISO8601 (JJJJ-MM-TT)",
             "_units": "Use a space between Numbers and units (100 m)",
-            "_none": "If not applicable use 'none'"
-        }
-    }
+            "_none": "If not applicable use 'none'",
+        },
+    },
 }
 
 
@@ -67,9 +54,9 @@ def from_v1_2(comment_on_table):
     if comment_on_table.get("spatial", False):
         s = comment_on_table.get("spatial")
         if isinstance(s, dict):
-           comment_on_table["spatial"] = s
+            comment_on_table["spatial"] = s
         else:
-           comment_on_table["spatial"] = s[0] if s else None
+            comment_on_table["spatial"] = s[0] if s else None
     else:
         comment_on_table["spatial"] = (
             {"location": "", "extent": "", "resolution": ""},
