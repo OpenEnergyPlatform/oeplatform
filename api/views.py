@@ -1095,7 +1095,6 @@ class ImageUpload(APIView):
 
 
 def get_factsheet(request):
-    #id = request.GET["id"]
-    id=11
+    id = request.GET["id"]
     res = {'factsheet': 'factsheet', 'id': id}
     return JsonResponse(res, safe=False)

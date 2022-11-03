@@ -1,5 +1,5 @@
 from django.db import models
 
-class UserModel(models.Model):
-    firstName = models.CharField(max_length=100)
-    lastName = models.CharField(max_length=100)
+class Factsheet(models.Model):
+    factsheetData = models.JSONField()
+    factsheetDataBackup = models.JSONField()
