@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import factsheets_index
+from factsheet import views
 
 urlpatterns = [
-    path(r"", factsheets_index)
+    path(r"", views.factsheets_index),
+    path(r"add/", views.create_factsheet, name='FS')
 ]

@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     "oeo_viewer",
     "graphene_django",
     "factsheet",
-    "corsheaders"
+    "corsheaders",
 )
 
 MIDDLEWARE = (
