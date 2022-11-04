@@ -25,7 +25,7 @@ export default function CustomAutocomplete(parameters) {
   })
 
   return (
-    <Box style={{ width: '100%' }}>
+    <Box style={{ width: '90%' }}>
       <Autocomplete
         multiple
         id="checkboxes-tags-demo"
@@ -48,7 +48,7 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         renderInput={(params) => (
-          <TextField {...params} label={'Select ' + parameters.kind} placeholder="Sectors" />
+          <TextField {...params} label={parameters.kind} placeholder="Sectors" />
         )}
       />
       <Box

@@ -12,9 +12,11 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import CustomSwap from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import '../styles/App.css';
-
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
+import CustomDatePicker from './customDatePicker.js'
+import Typography from '@mui/material/Typography';
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from "axios"
 
 function Factsheet(props) {
@@ -44,6 +46,7 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
+  const [scenarios, setScenarios] = useState(1);
 
   const handleSaveJSON = () => {
     //props.onChange(oekg);
@@ -64,6 +67,10 @@ function Factsheet(props) {
 
   const handleCloseOverView = () => {
     setOpenOverView(false);
+  };
+
+  const handleAddScenario = () => {
+    setScenarios(scenarios + 1);
   };
 
   const handleSwap = (mode) => {
@@ -159,22 +166,173 @@ function Factsheet(props) {
       factsheetObjectHandler('funding_source', fundingSourceList);
     };
 
+    const renderStudy = () => {
+      return <Grid container
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={institution} kind='Institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={funding_source} kind='Funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={authors} kind='Contact person' handler={authorsHandler} selectedElements={selectedAuthors}/>
+        </Grid>
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+          <Grid item xs={12} >
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+              Report:
+            </Typography>
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" />
+          </Grid>
+          <Grid item xs={6} >
+            <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors}/>
+          </Grid>
+          <Grid item xs={6} >
+            <CustomDatePicker label='Date of Publication' style={{ marginBottom:'10px' }}/>
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" />
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" />
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" variant="outlined" />
+          </Grid>
+        </Grid>
+      </Grid>
+    }
+
+    const renderScenario = () => {
+      return <Grid container
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={funding_source} kind='Interacting region' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={funding_source} kind='Energy carriers' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={funding_source} kind='Energy transformation process' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        </Grid>
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+          <Grid item xs={12} >
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+              Input dataset:
+            </Typography>
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
+          </Grid>
+          <Grid item xs={6}  style={{ marginTop:'20px' }}>
+            <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          </Grid>
+          <Grid item xs={6} >
+            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+          </Grid>
+        </Grid>
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          style={{ marginTop:'20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+          <Grid item xs={12} >
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+              Output dataset:
+            </Typography>
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+          </Grid>
+          <Grid item xs={6} >
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
+          </Grid>
+          <Grid item xs={6}  style={{ marginTop:'20px' }}>
+            <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          </Grid>
+          <Grid item xs={6} >
+            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+          </Grid>
+        </Grid>
+      </Grid>
+    }
 
     const items = {
-      titles: ['Responsibilities', 'Publication', 'Scenarios', 'Models and Frammeworks'],
+      titles: ['Study', 'Scenarios', 'Models', 'Frammeworks'],
       contents: [
-        <div>
-          <CustomAutocomplete optionsSet={authors} kind='author' handler={authorsHandler} selectedElements={selectedAuthors}/>
-          <CustomAutocomplete optionsSet={institution} kind='institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
-          <CustomAutocomplete optionsSet={funding_source} kind='funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
-          <CustomAutocompleteWithAddNew optionsSet={funding_source} kind='funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        renderStudy(),
+        <Grid
+          container
+          direction="column"
+          justifyContent="space-between"
+          style={{ 'marginTop': '20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+          <div style={{ 'textAlign': 'right' }}>
+            <Button disableElevation={true} startIcon={<AddBoxIcon />}  style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'zIndex': '1000'  }} variant="contained" color="primary" onClick={handleAddScenario}>Add</Button>
+          </div >
+          {Array(scenarios).fill().map((item, i) =>
+              <Grid item xs={12}  style={{ 'marginTop':'20px', 'marginBottom':'20px', 'padding': '20px', 'border': '1px solid #cecece', 'backgroundColor': i % 2 === 0 ? '#ffffff':'rgb(250 250 250)' }}>
+                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+                  Scenario {i + 1}
+                </Typography>
+                {renderScenario()}
+              </Grid>
 
-        </div >,
-
-        <CustomAutocomplete optionsSet={sectors} kind='sector' handler={sectorsHandler} selectedElements={selectedSectors}/>,
-        'Regions', 'Energy carriers', 'Scenarios', 'Models',
-        'Frameworks', 'Inputs', 'Outputs',
-        'Publications' ]
+          )}
+        </Grid>,
+        <CustomAutocomplete optionsSet={sectors} kind='Models' handler={sectorsHandler} selectedElements={selectedSectors}/>,
+        <CustomAutocomplete optionsSet={sectors} kind='Frameworks' handler={sectorsHandler} selectedElements={selectedSectors}/>,
+        ]
     }
 
     const convert2RDF = async () => {

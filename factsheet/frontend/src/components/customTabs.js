@@ -52,7 +52,7 @@ export default function CustomTabs(props) {
   };
 
   return (
-    <Box sx={{ 'marginTop': '10px', 'marginLeft': '10px', 'marginRight': '10px','paddingTop': '10px', 'paddingBottom': '10px', 'border': '1px solid #cecece', 'height':'70vh', 'overflow': 'auto'  }}>
+    <Box sx={{ 'marginTop': '10px', 'marginLeft': '10px', 'marginRight': '10px','paddingTop': '10px', 'paddingBottom': '10px', 'border': '1px solid #cecece', 'height':'90vh', 'overflow': 'auto'  }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange}  variant="scrollable" allowScrollButtonsMobile scrollButtons>
           {items.titles.map((item, index) => {
@@ -60,11 +60,14 @@ export default function CustomTabs(props) {
             })}
         </Tabs>
       </Box>
-      {items.contents.map((content, index) => {
-        return <TabPanel value={value} index={index}>
-          {content}
-        </TabPanel>;
-        })}
+      <Box>
+        {items.contents.map((content, index) => {
+          return <TabPanel value={value} index={index}>
+            {content}
+          </TabPanel>;
+          })}
+      </Box>
+
     </Box>
   );
 }
