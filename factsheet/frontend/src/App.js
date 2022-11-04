@@ -50,7 +50,6 @@ function App() {
   const handleCreateFactsheet = (name) => {
     setOpenFactsheetName(false);
     setShowFactsheetForm(true);
-    axios.post('http://localhost:8000/factsheet/add/', null, {params: {name: factsheetName}});
   };
 
   const handleChangeFactsheetName = e => {

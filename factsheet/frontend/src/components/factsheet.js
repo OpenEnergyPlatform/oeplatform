@@ -46,14 +46,42 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
+  const [acronym, setAcronym] = useState('');
+  const [studyName, setStudyName] = useState('');
+  const [abstract, setAbstract] = useState('');
   const [scenarios, setScenarios] = useState(1);
 
   const handleSaveJSON = () => {
     //props.onChange(oekg);
     setOpenJSON(true);
   };
+
+  const handleSaveFactsheet = () => {
+    axios.post('http://localhost:8000/factsheet/add/', null,
+     {  params:
+          {
+            name: factsheetName,
+            study_name: studyName,
+            acronym: acronym,
+            abstract: abstract,
+          }
+     });
+  };
+
   const handleCloseJSON = () => {
     setOpenJSON(false);
+  };
+
+  const handleAcronym = e => {
+    setAcronym(e.target.value);
+  };
+
+  const handleStudyName = e => {
+    setStudyName(e.target.value);
+  };
+
+  const handleAbstract = e => {
+    setAbstract(e.target.value);
   };
 
   const handleClickOpenTurtle = () => {
@@ -173,13 +201,13 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={studyName} onChange={handleStudyName}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={acronym} onChange={handleAcronym} />
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} />
+          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <CustomAutocomplete optionsSet={institution} kind='Institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
@@ -399,7 +427,7 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
-              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveJSON} >Save</Button>
+              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
               <Button disableElevation={true} startIcon={<ForwardToInboxIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle}>Submit</Button>
             </div >
           </Grid>
