@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
-from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
+from omi.dialects.oep import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import ParserException
 from omi.structure import Compilable
@@ -53,8 +53,8 @@ MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 # instances of metadata parsers / compilers, order of priority
-METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect()]
-METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), JSONCompiler()]
+METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), OEP_V_1_3_Dialect()]
+METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), OEP_V_1_3_Dialect(), JSONCompiler()]
 
 
 def get_column_obj(table, column):
@@ -2294,17 +2294,17 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # ---------------------------------------
 
     # TODO: The following 2 lines seems to duplicate with the lines below the if block 
-    oedb_table_obj = _get_table(schema=schema, table=table)
-    oedb_table_obj.comment = metadata_str
-    if cursor is not None:
-        # Surprisingly, SQLAlchemy does not seem to escape comment strings
-        # properly. Certain strings cause errors database errors.
-        # This MAY be a security issue. Therefore, we do not use
-        # SQLAlchemy's compiler here but do it manually.
-        sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-            schema=oedb_table_obj.schema, table=oedb_table_obj.name
-        )
-        cursor.execute(sql, (metadata_str,))
+    # oedb_table_obj = _get_table(schema=schema, table=table)
+    # oedb_table_obj.comment = metadata_str
+    # if cursor is not None:
+    #     # Surprisingly, SQLAlchemy does not seem to escape comment strings
+    #     # properly. Certain strings cause errors database errors.
+    #     # This MAY be a security issue. Therefore, we do not use
+    #     # SQLAlchemy's compiler here but do it manually.
+    #     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+    #         schema=oedb_table_obj.schema, table=oedb_table_obj.name
+    #     )
+    #     cursor.execute(sql, (metadata_str,))
 
     # ---------------------------------------
     # update search index
