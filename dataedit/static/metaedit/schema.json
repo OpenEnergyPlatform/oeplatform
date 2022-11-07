@@ -442,9 +442,9 @@
                                                     }
                                                 },
                                                 "additionalProperties": false,
-                                                "title": "IsAbout"
+                                                "title": "Is About"
                                             },
-                                            "title": "IsAbout"
+                                            "title": "Is About"
                                         },
                                         "valueReference": {
                                             "description": "Ontology URI for an extended description of the values in the column",
@@ -481,7 +481,7 @@
                                                 "additionalProperties": false,
                                                 "title": "Value reference"
                                             },
-                                            "title": "valueReference"
+                                            "title": "Value Reference"
                                         },
                                         "unit": {
                                             "description": "Unit, preferably SI-Unit, that values in this field are mapped to. If \"unit\" doesn't apply to a field, use \"null\". Example: MW",
