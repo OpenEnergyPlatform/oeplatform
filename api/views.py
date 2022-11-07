@@ -50,6 +50,9 @@ from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
+# TODO: keep and add later - /meta endpoint should retive data from oemetadata jsonb column
+# from dataedit.metadata import load_metadata_from_db
+
 logger = logging.getLogger("oeplatform")
 
 WHERE_EXPRESSION = re.compile(
@@ -271,6 +274,11 @@ class Metadata(APIView):
         table_obj = actions._get_table(schema=schema, table=table)
         comment = table_obj.comment
         return JsonResponse(json.loads(comment) if comment else {})
+        
+        # TODO: this is how it should be done - to manny follow up errors fix when no deadlines are creeping up
+        # TODO: keep and add later - ../meta endpoint should retive data from oemetadata jsonb column
+        # metadata = load_metadata_from_db(schema=schema, table=table)
+        # return JsonResponse(metadata if metadata else {})
 
     @api_exception
     @require_write_permission
