@@ -2294,17 +2294,20 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # ---------------------------------------
 
     # TODO: The following 2 lines seems to duplicate with the lines below the if block 
-    # oedb_table_obj = _get_table(schema=schema, table=table)
-    # oedb_table_obj.comment = metadata_str
-    # if cursor is not None:
-    #     # Surprisingly, SQLAlchemy does not seem to escape comment strings
-    #     # properly. Certain strings cause errors database errors.
-    #     # This MAY be a security issue. Therefore, we do not use
-    #     # SQLAlchemy's compiler here but do it manually.
-    #     sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
-    #         schema=oedb_table_obj.schema, table=oedb_table_obj.name
-    #     )
-    #     cursor.execute(sql, (metadata_str,))
+    # TODO: REMOVE THIS AS SOON AS oemetadata jsonb column is stable - currently we keep a duplicated 
+    #       oemetadata store 1. db 2. comment on table > remove 2. soon
+
+    oedb_table_obj = _get_table(schema=schema, table=table)
+    oedb_table_obj.comment = metadata_str
+    if cursor is not None:
+        # Surprisingly, SQLAlchemy does not seem to escape comment strings
+        # properly. Certain strings cause errors database errors.
+        # This MAY be a security issue. Therefore, we do not use
+        # SQLAlchemy's compiler here but do it manually.
+        sql = "COMMENT ON TABLE {schema}.{table} IS %s".format(
+            schema=oedb_table_obj.schema, table=oedb_table_obj.name
+        )
+        cursor.execute(sql, (metadata_str,))
 
     # ---------------------------------------
     # update search index
