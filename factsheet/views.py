@@ -4,6 +4,8 @@ from rest_framework import status
 from .models import Factsheet
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
+
 
 def factsheets_index(request, *args, **kwargs):
     return render(request, 'factsheet/index.html')
@@ -55,5 +57,15 @@ def create_factsheet(request, *args, **kwargs):
     fs.save()
     return JsonResponse(factsheet_obj, status=status.HTTP_201_CREATED)
 
-def factsheet_by_id(request, *args, **kwargs):
-    return render(request, 'factsheet/index.html')
+@csrf_exempt
+def factsheet_by_name(request, *args, **kwargs):
+    name = request.GET.get('name')
+    factsheet = Factsheet.objects.get(name=name)
+    factsheet_json = serializers.serialize('json', factsheet)
+    return JsonResponse(factsheet, safe=False, content_type='application/json')
+
+@csrf_exempt
+def get_all_factsheet(request, *args, **kwargs):
+    factsheets = Factsheet.objects.all()
+    factsheets_json = serializers.serialize('json', factsheets)
+    return JsonResponse(factsheets_json, safe=False, content_type='application/json')

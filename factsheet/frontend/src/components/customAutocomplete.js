@@ -40,7 +40,7 @@ export default function CustomAutocomplete(parameters) {
               style={{ marginRight: 8 }}
               checked={ selected }
             />
-            {option.id}
+            {option.name}
           </li>
         )}
         value={value}

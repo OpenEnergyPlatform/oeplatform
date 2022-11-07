@@ -11,17 +11,12 @@ export default function CustomCard(props) {
   const { top_img, title, text, create_new, create_new_button  } = props;
   return (
     <Card sx={{ maxWidth: 345 }}>
-      <CardMedia
-        component="img"
-        height="140"
-        alt="green iguana"
-      />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {title}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Do you want to learn more about scenarios and models related to the data? Then, this is the right place to look. Also if you contributed data and want to provide more context, Create your own factsheet here.
+          {text}
         </Typography>
       </CardContent>
       <CardActions>

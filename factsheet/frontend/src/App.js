@@ -30,7 +30,8 @@ const client = new ApolloClient({
 function App() {
 
   const [fs, setFs] = React.useState(1);
-
+  const [factsheets, setFactsheets] = React.useState([]);
+  const [loading, setLoading] = useState(true);
   const [openFactsheetName, setOpenFactsheetName] = useState(false);
   const [factsheetName, setFactsheetName] = useState('');
   const [showFactsheetForm, setShowFactsheetForm] = useState(false);
@@ -60,13 +61,21 @@ function App() {
     console.log(v);
   };
 
+  const getData = async () => {
+    const { data } = await axios.get(`http://localhost:8000/factsheet/all/`);
+    let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
+    setFactsheets(JSON.parse(JSON.stringify(factsheets)));
+    setLoading(false)
+  };
+  useEffect(() => {
+    getData();
+  }, []);
 
-
-  const card = (
+  const card =  (
       <Fragment>
         <CardContent>
           <Typography variant="h5" component="div">
-            Factsheet Name
+            Factsheet
           </Typography>
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
             Institution
@@ -111,7 +120,14 @@ function App() {
                       }
                     }}
                   >
-                    <Card variant="outlined">{card}</Card>
+                    {!loading &&  <CustomCard title={eval(factsheets)[0].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[1].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[2].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[3].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[4].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[5].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[6].fields.factsheetData.abstract} />}
+                    {!loading &&  <CustomCard title={eval(factsheets)[7].fields.factsheetData.abstract} />}
                     <Card variant="outlined">{card}</Card>
                     <Card variant="outlined">{card}</Card>
                     <Card variant="outlined">{card}</Card>

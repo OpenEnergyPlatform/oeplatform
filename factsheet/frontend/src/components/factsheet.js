@@ -46,6 +46,7 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
+  const [scenarioObject, setScenarioObject] = useState({});
   const [acronym, setAcronym] = useState('');
   const [studyName, setStudyName] = useState('');
   const [abstract, setAbstract] = useState('');
@@ -183,6 +184,12 @@ function Factsheet(props) {
       setFactsheetObject(newFactsheetObject);
     }
 
+    const scenariosObjectHandler = (key, obj) => {
+      let newFactsheetObject = factsheetObject;
+      newFactsheetObject[key] = obj
+      setFactsheetObject(newFactsheetObject);
+    }
+
     const renderFactsheet = (factsheetContent) => {
       if (Object.keys(factsheetContent).length !== 0) {
         return Object.keys(factsheetContent).map((item) => (
@@ -190,7 +197,6 @@ function Factsheet(props) {
              <b> {item.charAt(0).toUpperCase() + item.slice(1)} </b>
              {
                factsheetContent[item].map((v) => (
-
                    <div style={{ marginLeft: '25px' }}>
                     <span> {v.name} </span>
                    </div>
@@ -201,13 +207,12 @@ function Factsheet(props) {
       }
     }
 
-
-
     const [selectedSectors, setSelectedSectors] = useState([]);
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const [selectedInstitution, setSelectedInstitution] = useState([]);
     const [selectedFundingSource, setSelectedFundingSource] = useState([]);
     const [selectedContactPerson, setselectedContactPerson] = useState([]);
+
     const [selectedRegion, setSelectedRegion] = useState([]);
     const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
     const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
