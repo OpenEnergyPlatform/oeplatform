@@ -50,6 +50,17 @@ function Factsheet(props) {
   const [studyName, setStudyName] = useState('');
   const [abstract, setAbstract] = useState('');
   const [scenarios, setScenarios] = useState(1);
+  const [report_title, setReportTitle] = useState('');
+  const [doi, setDOI] = useState('');
+  const [place_of_publication, setPlaceOfPublication] = useState('');
+  const [link_to_study, setLinkToStudy] = useState('');
+  const [scenarioName, setScenarioName] = useState('');
+  const [scenarioAbstract, setScenarioAbstract] = useState('');
+  const [scenarioAcronym, setScenarioAcronym] = useState('');
+  const [scenarioInputDatasetName, setScenarioInputDatasetName] = useState('');
+  const [scenarioOutputDatasetName, setScenarioOutputDatasetName] = useState('');
+  const [scenarioInputDatasetIRI, setScenarioInputDatasetIRI] = useState('');
+  const [scenarioOutputDatasetIRI, setScenarioOutputDatasetIRI] = useState('');
 
   const handleSaveJSON = () => {
     //props.onChange(oekg);
@@ -57,14 +68,10 @@ function Factsheet(props) {
   };
 
   const handleSaveFactsheet = () => {
+    factsheetObjectHandler('name', factsheetName);
     axios.post('http://localhost:8000/factsheet/add/', null,
      {  params:
-          {
-            name: factsheetName,
-            study_name: studyName,
-            acronym: acronym,
-            abstract: abstract,
-          }
+          factsheetObject
      });
   };
 
@@ -72,16 +79,74 @@ function Factsheet(props) {
     setOpenJSON(false);
   };
 
+  const handleScenarioInpuDatasetName = e => {
+    setScenarioInputDatasetName(e.target.value);
+    factsheetObjectHandler('scenario_input_dataset_name', e.target.value);
+  };
+
+  const handleScenarioInputDatasetIRI = e => {
+    setScenarioInputDatasetIRI(e.target.value);
+    factsheetObjectHandler('scenario_input_dataset_IRI', e.target.value);
+  };
+
+  const handleScenarioOutputDatasetName = e => {
+    setScenarioOutputDatasetName(e.target.value);
+    factsheetObjectHandler('scenario_output_dataset_name', e.target.value);
+  };
+
+  const handleScenariooutputDatasetIRI = e => {
+    setScenarioOutputDatasetIRI(e.target.value);
+    factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
+  };
+
+  const handleScenarioName = e => {
+    setScenarioName(e.target.value);
+    factsheetObjectHandler('scenario_name', e.target.value);
+  };
+
+  const handleScenarioAcronym = e => {
+    setScenarioAcronym(e.target.value);
+    factsheetObjectHandler('scenario_acronym', e.target.value);
+  };
+
+  const handleScenarioAbstract = e => {
+    setScenarioAbstract(e.target.value);
+    factsheetObjectHandler('scenario_abstract', e.target.value);
+  };
+
   const handleAcronym = e => {
     setAcronym(e.target.value);
+    factsheetObjectHandler('acronym', e.target.value);
   };
 
   const handleStudyName = e => {
     setStudyName(e.target.value);
+    factsheetObjectHandler('study_name', e.target.value);
   };
 
   const handleAbstract = e => {
     setAbstract(e.target.value);
+    factsheetObjectHandler('abstract', e.target.value);
+  };
+
+  const handleReportTitle = e => {
+    setReportTitle(e.target.value);
+    factsheetObjectHandler('report_title', e.target.value);
+  };
+
+  const handleDOI = e => {
+    setDOI(e.target.value);
+    factsheetObjectHandler('doi', e.target.value);
+  };
+
+  const handlePlaceOfPublication = e => {
+    setPlaceOfPublication(e.target.value);
+    factsheetObjectHandler('place_of_publication', e.target.value);
+  };
+
+  const handleLinkToStudy = e => {
+    setLinkToStudy(e.target.value);
+    factsheetObjectHandler('link_to_study', e.target.value);
   };
 
   const handleClickOpenTurtle = () => {
@@ -107,7 +172,7 @@ function Factsheet(props) {
 
     }
     else if (mode === "overview") {
-        setOpenOverView(true);
+    setOpenOverView(true);
     }
   };
 
@@ -117,6 +182,7 @@ function Factsheet(props) {
       newFactsheetObject[key] = obj
       setFactsheetObject(newFactsheetObject);
     }
+
     const renderFactsheet = (factsheetContent) => {
       if (Object.keys(factsheetContent).length !== 0) {
         return Object.keys(factsheetContent).map((item) => (
@@ -141,6 +207,13 @@ function Factsheet(props) {
     const [selectedAuthors, setSelectedAuthors] = useState([]);
     const [selectedInstitution, setSelectedInstitution] = useState([]);
     const [selectedFundingSource, setSelectedFundingSource] = useState([]);
+    const [selectedContactPerson, setselectedContactPerson] = useState([]);
+    const [selectedRegion, setSelectedRegion] = useState([]);
+    const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
+    const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
+    const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
+    const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
+    const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
     const sectors = [
       { id: 'Agriculture forestry and land use sector', name: 'Agriculture forestry and land use sector' },
@@ -174,6 +247,36 @@ function Factsheet(props) {
       { id: 'Frauenhofer', name: "Frauenhofer"},
     ];
 
+    const contact_person = [
+      { id: 'Alex', name: 'Alex' },
+      { id: 'Markus', name: 'Markus' },
+    ];
+
+    const scenario_region = [
+      { id: '1', name: 'Germany' },
+      { id: '2', name: 'France' },
+    ];
+
+    const scenario_input_dataset_region = [
+      { id: '1', name: 'Germany' },
+      { id: '2', name: 'France' },
+    ];
+
+    const scenario_interacting_region = [
+      { id: '1', name: 'Germany' },
+      { id: '2', name: 'France' },
+      { id: '3', name: 'Spain' },
+    ];
+
+    const energy_carriers = [
+      { id: '1', name: 'Gas' },
+      { id: '3', name: 'Electricity' },
+    ];
+
+    const energy_transportation = [
+      { id: '1', name: 'Fuel' },
+    ];
+
     const sectorsHandler = (sectorsList) => {
       setSelectedSectors(sectorsList);
       factsheetObjectHandler('sectors', sectorsList);
@@ -182,16 +285,52 @@ function Factsheet(props) {
     const authorsHandler = (authorsList) => {
       setSelectedAuthors(authorsList);
       factsheetObjectHandler('authors', authorsList);
+      factsheetObjectHandler('authors', JSON.stringify(authorsList));
     };
 
     const institutionHandler = (institutionList) => {
       setSelectedInstitution(institutionList);
-      factsheetObjectHandler('institution', institutionList);
+      factsheetObjectHandler('institution', JSON.stringify(selectedInstitution));
     };
 
     const fundingSourceHandler = (fundingSourceList) => {
       setSelectedFundingSource(fundingSourceList);
-      factsheetObjectHandler('funding_source', fundingSourceList);
+      factsheetObjectHandler('funding_source', JSON.stringify(selectedFundingSource));
+    };
+
+    const contactPersonHandler = (contactPersonList) => {
+      setSelectedFundingSource(contactPersonList);
+      factsheetObjectHandler('contact_person', JSON.stringify(selectedContactPerson));
+    };
+
+    const scenarioRegionHandler = (regionList) => {
+      setSelectedRegion(regionList);
+      factsheetObjectHandler('scenario_region', JSON.stringify(selectedRegion));
+    };
+
+    const interactingRegionHandler = (interactionRegionList) => {
+      setSelectedInteractingRegion(interactionRegionList);
+      factsheetObjectHandler('scenario_interacting_region', JSON.stringify(setSelectedInteractingRegion));
+    };
+
+    const energyCarrierHandler = (energyCarrierList) => {
+      setSelectedsetEnergyCarriers(energyCarrierList);
+      factsheetObjectHandler('scenario_energy_carriers', JSON.stringify(selectedEnergyCarriers));
+    };
+
+    const energyTransportationHandler = (energyTransportationList) => {
+      setSelectedEnergyTransportation(energyTransportationList);
+      factsheetObjectHandler('scenario_energy_transportation', JSON.stringify(selectedEnergyTransportation));
+    };
+
+    const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
+      setSelectedScenarioInputDatasetRegion(inputDatasetRegionList);
+      factsheetObjectHandler('scenario_input_dataset_region', JSON.stringify(selectedScenarioInputDatasetRegion));
+    };
+
+    const scenarioOutputDatasetRegionHandler = (outputDatasetRegionList) => {
+      setSelectedScenarioOutputDatasetRegion(outputDatasetRegionList);
+      factsheetObjectHandler('scenario_output_dataset_region', JSON.stringify(selectedScenarioOutputDatasetRegion));
     };
 
     const renderStudy = () => {
@@ -216,7 +355,7 @@ function Factsheet(props) {
           <CustomAutocomplete optionsSet={funding_source} kind='Funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={authors} kind='Contact person' handler={authorsHandler} selectedElements={selectedAuthors}/>
+          <CustomAutocomplete optionsSet={contact_person} kind='Contact person' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         </Grid>
         <Grid
           container
@@ -231,7 +370,7 @@ function Factsheet(props) {
             </Typography>
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" />
+            <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" value={report_title} onChange={handleReportTitle} />
           </Grid>
           <Grid item xs={6} >
             <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors}/>
@@ -240,13 +379,13 @@ function Factsheet(props) {
             <CustomDatePicker label='Date of Publication' style={{ marginBottom:'10px' }}/>
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" />
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" value={doi} onChange={handleDOI} />
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" />
+            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" value={place_of_publication} onChange={handlePlaceOfPublication} />
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" variant="outlined" />
+            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
           </Grid>
         </Grid>
       </Grid>
@@ -259,28 +398,28 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioName} onChange={handleScenarioName}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} />
+          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={2} maxRows={10} />
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          <CustomAutocomplete optionsSet={scenario_region} kind='Region' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='Interacting region' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='Energy carriers' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='Energy transformation process' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete optionsSet={energy_transportation} kind='Energy transformation process' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
         </Grid>
         <Grid
           container
@@ -295,13 +434,13 @@ function Factsheet(props) {
             </Typography>
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioInputDatasetName} onChange={handleScenarioInpuDatasetName}/>
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
           </Grid>
           <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
           </Grid>
           <Grid item xs={6} >
             <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
@@ -320,13 +459,13 @@ function Factsheet(props) {
             </Typography>
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioOutputDatasetName} onChange={handleScenarioOutputDatasetName} />
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
+            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
           </Grid>
           <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={institution} kind='Region' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
           </Grid>
           <Grid item xs={6} >
             <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
