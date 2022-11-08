@@ -9,7 +9,7 @@ import sqlalchemy as sa
 from django.core.exceptions import PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
-from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
+from omi.dialects.oep import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.dialects.oep.parser import ParserException
 from omi.structure import Compilable
@@ -53,8 +53,8 @@ MAX_IDENTIFIER_LENGTH = 50  # postgres limit minus pre/suffix for meta tables
 IDENTIFIER_PATTERN = re.compile("^[a-z][a-z0-9_]{0,%s}$" % (MAX_IDENTIFIER_LENGTH - 1))
 
 # instances of metadata parsers / compilers, order of priority
-METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect()]
-METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), JSONCompiler()]
+METADATA_PARSERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), OEP_V_1_3_Dialect()]
+METADATA_COMPILERS = [OEP_V_1_5_Dialect(), OEP_V_1_4_Dialect(), OEP_V_1_3_Dialect(), JSONCompiler()]
 
 
 def get_column_obj(table, column):
