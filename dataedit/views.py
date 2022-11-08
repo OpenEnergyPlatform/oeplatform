@@ -1364,6 +1364,9 @@ def get_tag_keywords_synchronized_metadata(
     session = create_oedb_session()
 
     metadata = load_metadata_from_db(schema=schema, table=table)
+    if metadata["keywords"] is None:
+        metadata["keywords"] = []
+
     keywords_old = set(
         k for k in metadata.get("keywords", []) if Tag.create_name_normalized(k)
     )  # remove empy
