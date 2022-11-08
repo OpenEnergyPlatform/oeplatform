@@ -1,5 +1,5 @@
 from api import actions
-from dataedit.metadata import v1_5 as __LATEST
+from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
 from dataedit.metadata.v1_5 import TEMPLATE_V1_5
