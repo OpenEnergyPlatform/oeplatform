@@ -2,151 +2,124 @@ from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
 from api import actions
 
 TEMPLATE_V1_5 = {
-    "name": None,
-    "title": None,
-    "id": None,
-    "description": None,
-    "language": None,
-    "subject": 
+    "name": "",
+    "title": "",
+    "id": "",
+    "description": "",
+    "language": [],
+    "subject": [
         {
-            "name": None,
-            "path": None
-        },
-    "keywords": None,
-    "publicationDate": None,
+            "name": "",
+            "path": ""
+        }
+    ],
+    "keywords": [],
+    "publicationDate": "",
     "context": {
-        "homepage": None,
-        "documentation": None,
-        "sourceCode": None,
-        "contact": None,
-        "grantNo": None,
-        "fundingAgency": None,
-        "fundingAgencyLogo": None,
-        "publisherLogo": None
+        "homepage": "",
+        "documentation": "",
+        "sourceCode": "",
+        "contact": "",
+        "grantNo": "",
+        "fundingAgency": "",
+        "fundingAgencyLogo": "",
+        "publisherLogo": ""
     },
     "spatial": {
-        "location": None,
-        "extent": None,
-        "resolution": None
+        "location": "",
+        "extent": "",
+        "resolution": ""
     },
     "temporal": {
-        "referenceDate": None,
-        "timeseries": 
+        "referenceDate": "",
+        "timeseries": [
             {
-                "start": None,
-                "end": None,
-                "resolution": None,
-                "alignment": None,
-                "aggregationType": None
+                "start": "",
+                "end": "",
+                "resolution": "",
+                "alignment": "",
+                "aggregationType": ""
+            },
+            {
+                "start": "",
+                "end": "",
+                "resolution": "",
+                "alignment": "",
+                "aggregationType": ""
             }
+        ]
     },
-    "sources": 
+    "sources": [
         {
-            "title": None,
-            "description": None,
-            "path": None,
+            "title": "",
+            "description": "",
+            "path": "",
             "licenses": [
                 {
-                    "name": None,
-                    "title": None,
-                    "path": None,
-                    "instruction": None,
-                    "attribution": None
+                    "name": "",
+                    "title": "",
+                    "path": "",
+                    "instruction": "",
+                    "attribution": ""
                 }
             ]
         },
-    "licenses": 
         {
-            "name": None,
-            "title": None,
-            "path": None,
-            "instruction": None,
-            "attribution": None
-        },
-    "contributors":
+            "title": "",
+            "description": "",
+            "path": "",
+            "licenses": [
+                {
+                    "name": "",
+                    "title": "",
+                    "path": "",
+                    "instruction": "",
+                    "attribution": ""
+                }
+            ]
+        }
+    ],
+    "licenses": [
         {
-            "title": None,
-            "email": None,
-            "date": None,
-            "object": None,
-            "comment": None
-        },
+            "name": "",
+            "title": "",
+            "path": "",
+            "instruction": "",
+            "attribution": ""
+        }
+    ],
+    "contributors": [
+        {
+            "title": "",
+            "email": "",
+            "date": "",
+            "object": "",
+            "comment": ""
+        }
+    ],
     "resources": [
         {
-            "profile": None,
-            "name": None,
-            "path": None,
-            "format": None,
-            "encoding": None,
+            "profile": "",
+            "name": "",
+            "path": "",
+            "format": "",
+            "encoding": "",
             "schema": {
-                "fields": [
-                    {
-                        "name": None,
-                        "description": None,
-                        "type": None,
-                        "unit": None,
-                        "isAbout": [
-                            {
-                                "name": None,
-                                "path": None
-                            }
-                        ],
-                        "valueReference": [
-                            {
-                                "value": None,
-                                "name": None,
-                                "path": None
-                            }
-                        ]
-                    },
-                    {
-                        "name": None,
-                        "description": None,
-                        "type": None,
-                        "unit": None,
-                        "isAbout": [
-                            {
-                                "name": None,
-                                "path": None
-                            }
-                        ],
-                        "valueReference": [
-                            {
-                                "value": None,
-                                "name": None,
-                                "path": None
-                            }
-                        ]
-                    }
-                ],
-                "primaryKey": [
-                    None
-                ],
-                "foreignKeys": [
-                    {
-                        "fields": [
-                            None
-                        ],
-                        "reference": {
-                            "resource": None,
-                            "fields": [
-                                None
-                            ]
-                        }
-                    }
-                ]
+                "fields": [],
+                "primaryKey": [],
+                "foreignKeys": []
             },
             "dialect": {
-                "delimiter": None,
+                "delimiter": "",
                 "decimalSeparator": "."
             }
         }
     ],
-    "@id": None,
-    "@context": None,
+    "@id": "",
+    "@context": "",
     "review": {
-        "path": None,
-        "badge": None
+        "path": "",
+        "badge": ""
     },
     "metaMetadata": {
         "metadataVersion": "OEP-1.5.0",
@@ -163,7 +136,7 @@ TEMPLATE_V1_5 = {
         "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
         "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
         "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/blob/master/data-review/manual/review_manual.md)",
-        "Null": "If not applicable use: Null",
+        "Null": "If not applicable use: 'Null'",
         "todo": "If a value is not yet available, use: todo"
     }
 }
