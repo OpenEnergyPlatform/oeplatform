@@ -12,6 +12,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
+  const { manyItems } = parameters
   const [value, setValue] = useState(parameters.selectedElements);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
@@ -25,7 +26,7 @@ export default function CustomAutocomplete(parameters) {
   })
 
   return (
-    <Box style={{ width: '90%' }}>
+    <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
         multiple
         id="checkboxes-tags-demo"
@@ -55,13 +56,15 @@ export default function CustomAutocomplete(parameters) {
         mt={3}
         sx={{
           'marginTop': '10px',
+          'overflow': 'auto',
+          'height': manyItems ? '80px' :'40px',
           'marginBottom': '20px',
           '& > :not(:last-child)': { marginRight: 1 },
           '& > *': { marginBottom: 1 },
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.id} onDelete={onDelete(v.id)} color="primary" />
+          <Chip key={v.id} label={v.id} onDelete={onDelete(v.id)} color="primary" sx={{ 'marginBottom': '2px' }}/>
         ))}
       </Box>
     </Box>

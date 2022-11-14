@@ -20,7 +20,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from "axios"
 
 function Factsheet(props) {
-  const {factsheetName} = props;
+  const {factsheetName, factsheetDjangoObjectFromProps } = props;
   const jsonld = require('jsonld');
 
   const [factsheetJSON, setFactsheetJSON] = useState({
@@ -168,6 +168,7 @@ function Factsheet(props) {
   };
 
   const handleSwap = (mode) => {
+    console.log(mode);
     setMode(mode);
     if (mode === "wizard") {
 
@@ -191,6 +192,7 @@ function Factsheet(props) {
     }
 
     const renderFactsheet = (factsheetContent) => {
+      console.log(factsheetContent);
       if (Object.keys(factsheetContent).length !== 0) {
         return Object.keys(factsheetContent).map((item) => (
           <div style={{ marginTop: '30px', marginLeft: '50px', marginBottom: '10px' }}>
@@ -229,32 +231,49 @@ function Factsheet(props) {
     ];
 
     const authors = [
-      { id: 'Lüdwig', name: 'Lüdwig' },
-      { id: 'Chris', name: 'Chris' },
-      { id: 'Hanna', name: 'Hanna' },
-      { id: 'Mirjam', name: 'Mirjam' },
-      { id: 'Lukas', name: 'Lukas' },
-      { id: 'Alex', name: 'Alex' },
-      { id: 'Markus', name: 'Markus' },
-      { id: 'Martin', name: 'Martin' },
-      { id: 'Adel', name: 'Adel' },
-      { id: 'Jonas', name: 'Jonas' }
+      { id: 'Julia Repenning',  name: 'Julia Repenning' },
+      { id: 'Lukas Emele',  name: 'Lukas Emele' },
+      { id: 'Ruth Blanck',  name: 'Ruth Blanck' },
+      { id: 'Hannes Böttcher',  name: 'Hannes Böttcher' },
+      { id: 'Günter Dehoust',  name: 'Günter Dehoust' },
+      { id: 'Hannah Förster',  name: 'Hannah Förster' },
+      { id: 'Benjamin Greiner',  name: 'Benjamin Greiner' },
+      { id: 'Ralph Harthan',  name: 'Ralph Harthan' },
+      { id: 'Klaus Henneberg',  name: 'Klaus Henneberg' },
+      { id: 'Hauke Hermann',  name: 'Hauke Hermann' },
+      { id: 'Wolfram Jörß',  name: 'Wolfram Jörß' },
+      { id: 'Charlotte Loreck',  name: 'Charlotte Loreck' },
+      { id: 'Sylive Ludig',  name: 'Sylive Ludig' },
+      { id: 'Felix Chri. Matthes',  name: 'Felix Chri. Matthes' },
+      { id: 'Margarethe Scheffler',  name: 'Margarethe Scheffler' },
+      { id: 'Katja Schumachen',  name: 'Katja Schumachen' },
+      { id: 'Kirsten Wiegmann',  name: 'Kirsten Wiegmann' },
+      { id: 'Carina Zell-Ziegler',  name: 'Carina Zell-Ziegler' },
+      { id: 'Sibylle Braungardt',  name: 'Sibylle Braungardt' },
+      { id: 'Wolfgang Eichhammer',  name: 'Wolfgang Eichhammer' },
+      { id: 'Rainer Elsland',  name: 'Rainer Elsland' },
+      { id: 'Tobias Fleiter',  name: 'Tobias Fleiter' },
+      { id: 'Johannes Hartwig',  name: 'Johannes Hartwig' },
+      { id: 'Judit Kockat',  name: 'Judit Kockat' },
+      { id: 'Ben Pfluger',  name: 'Ben Pfluger' },
+      { id: 'Wolfgang Schade',  name: 'Wolfgang Schade' },
+      { id: 'Barbara Schlomann',  name: 'Barbara Schlomann' },
+      { id: 'Frank Sensfuß',  name: 'Frank Sensfuß' },
+      { id: 'Hans-Joachim Ziesing',  name: 'Hans-Joachim Ziesing' }
     ];
 
     const funding_source = [
-      { id: 'PTJ', name: "Projektträger Jülich"},
-      { id: 'RLI', name: "Reiner Lemoine Institut"},
-      { id: 'OvGU', name: "Otto von Guericke University Magdeburg"}
+      { id: 'Bundesministerium für Umwelt, Naturschutz, Bau und Reaktorsicherheit', name:'Bundesministerium für Umwelt, Naturschutz, Bau und Reaktorsicherheit' },
     ];
 
     const institution = [
       { id: 'Öko-Institut', name: "Öko-Institut"},
-      { id: 'Frauenhofer', name: "Frauenhofer"},
+      { id: 'Frauenhofer ISI', name: "Frauenhofer ISI"},
     ];
 
     const contact_person = [
-      { id: 'Alex', name: 'Alex' },
-      { id: 'Markus', name: 'Markus' },
+      { id: 'Lukas Emele', name: 'Lukas Emele' },
+      { id: 'Julia Repenning', name: 'Julia Repenning' },
     ];
 
     const scenario_region = [
@@ -351,7 +370,7 @@ function Factsheet(props) {
           <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={acronym} onChange={handleAcronym} />
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={2} maxRows={10} value={abstract} onChange={handleAbstract}/>
+          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <CustomAutocomplete optionsSet={institution} kind='Institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
@@ -378,9 +397,6 @@ function Factsheet(props) {
             <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" value={report_title} onChange={handleReportTitle} />
           </Grid>
           <Grid item xs={6} >
-            <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors}/>
-          </Grid>
-          <Grid item xs={6} >
             <CustomDatePicker label='Date of Publication' style={{ marginBottom:'10px' }}/>
           </Grid>
           <Grid item xs={6} >
@@ -390,7 +406,10 @@ function Factsheet(props) {
             <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" value={place_of_publication} onChange={handlePlaceOfPublication} />
           </Grid>
           <Grid item xs={6} >
-            <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
+            <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
+          </Grid>
+          <Grid item xs={6} >
+            <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
           </Grid>
         </Grid>
       </Grid>
@@ -418,7 +437,7 @@ function Factsheet(props) {
           <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
@@ -448,7 +467,7 @@ function Factsheet(props) {
             <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
           </Grid>
           <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
           </Grid>
         </Grid>
         <Grid
@@ -473,14 +492,14 @@ function Factsheet(props) {
             <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
           </Grid>
           <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }}/>
+            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
           </Grid>
         </Grid>
       </Grid>
     }
 
     const items = {
-      titles: ['Study', 'Scenarios', 'Models', 'Frammeworks'],
+      titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
       contents: [
         renderStudy(),
         <Grid
@@ -564,10 +583,6 @@ function Factsheet(props) {
           <div>
                <CustomSwap handleSwap={handleSwap} />
           </div >
-          <div>
-               {factsheetDjangoObject.id}
-          </div >
-
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
@@ -634,40 +649,35 @@ function Factsheet(props) {
                 </Button>
               </DialogActions>
             </Dialog>
-
-
-
-
-                {mode === "wizard" &&
-                  <div className='wizard'>
-                      <Grid container >
-                        <Grid item xs={12} >
-                          <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                            <b> {factsheetName} </b>
-                          </div>
-                          <CustomTabs
-                            factsheetObjectHandler={factsheetObjectHandler}
-                            items={items}
-                              />
-                        </Grid>
-                      </Grid>
-                  </div>
-                }
-
-                {mode === "overview" &&
-                  <div className='wizard'>
-                      <Grid container >
-                        <Grid item xs={12}>
-                          <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                            <b> {factsheetName} </b>
-                          </div>
-                          <div>
-                            {renderFactsheet(factsheetObject)}
-                          </div>
-                        </Grid>
-                      </Grid>
-                  </div>
-                }
+            {mode === "wizard" &&
+              <div className='wizard'>
+                  <Grid container >
+                    <Grid item xs={12} >
+                      <div style={{ "textAlign": "center", "fontSize": "25px" }}>
+                        <b> {factsheetName} </b>
+                      </div>
+                      <CustomTabs
+                        factsheetObjectHandler={factsheetObjectHandler}
+                        items={items}
+                          />
+                    </Grid>
+                  </Grid>
+              </div>
+            }
+            {mode === "overview" &&
+              <div className='wizard'>
+                  <Grid container >
+                    <Grid item xs={12}>
+                      <div style={{ "textAlign": "center", "fontSize": "25px" }}>
+                        <b> {factsheetName} </b>
+                      </div>
+                      <div>
+                        {renderFactsheet(factsheetObject)}
+                      </div>
+                    </Grid>
+                  </Grid>
+              </div>
+            }
         </Grid>
       </Grid>
     </div>

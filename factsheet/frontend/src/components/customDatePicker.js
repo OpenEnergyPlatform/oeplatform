@@ -10,7 +10,7 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 
 export default function CustomDatePicker(props) {
-  const { label } = props;
+  const { label, yearOnly } = props;
   const [value, setValue] = React.useState(dayjs('2022-10-11T21:11:54'));
 
   const handleChange = (newValue) => {
@@ -20,13 +20,22 @@ export default function CustomDatePicker(props) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Stack spacing={3} style={{ width: '90%' }}>
-        <DesktopDatePicker
-          label={label}
-          inputFormat="MM/DD/YYYY"
-          value={value}
-          onChange={handleChange}
-          renderInput={(params) => <TextField {...params} />}
-        />
+        {yearOnly ?
+          <DesktopDatePicker
+            label={label}
+            value={value}
+            onChange={handleChange}
+            renderInput={(params) => <TextField {...params} />}
+            views={["year"]}
+          />
+          :<DesktopDatePicker
+            label={label}
+            value={value}
+            onChange={handleChange}
+            renderInput={(params) => <TextField {...params} />}
+            inputFormat="MM/DD/YYYY"
+          />
+        }
       </Stack>
     </LocalizationProvider>
   );
