@@ -18,9 +18,13 @@ import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from "axios"
+import { useLocation, useHistory, useNavigate } from 'react-router-dom'
+
 
 function Factsheet(props) {
-  const {factsheetName, factsheetDjangoObjectFromProps } = props;
+  const location = useLocation()
+  const { fsData } = location.state;
+
   const jsonld = require('jsonld');
 
   const [factsheetJSON, setFactsheetJSON] = useState({
@@ -39,16 +43,18 @@ function Factsheet(props) {
     "oeo:OEO_00000509": []
   });
 
+
   const [factsheetRDF, setFactsheetRDF] = useState({});
-  const [factsheetDjangoObject, setFactsheetDjangoObject] = useState({});
+  const [factsheetDjangoObject, setFactsheetDjangoObject] = useState(fsData !== 'new' ? eval(fsData)[0].fields.factsheetData : 'new');
   const [openOverView, setOpenOverView] = useState(false);
   const [openJSON, setOpenJSON] = useState(false);
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
+  const [factsheetName, setFactsheetName] = useState(factsheetDjangoObject.name);
   const [scenarioObject, setScenarioObject] = useState({});
   const [acronym, setAcronym] = useState('');
-  const [studyName, setStudyName] = useState('');
+  const [studyName, setStudyName] = useState(factsheetDjangoObject.study_name);
   const [abstract, setAbstract] = useState('');
   const [scenarios, setScenarios] = useState(1);
   const [report_title, setReportTitle] = useState('');
@@ -63,17 +69,35 @@ function Factsheet(props) {
   const [scenarioInputDatasetIRI, setScenarioInputDatasetIRI] = useState('');
   const [scenarioOutputDatasetIRI, setScenarioOutputDatasetIRI] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSaveJSON = () => {
     //props.onChange(oekg);
     setOpenJSON(true);
   };
 
+
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
-    axios.post('http://localhost:8000/factsheet/add/', null,
-     {  params:
-          factsheetObject
-     });
+    console.log(factsheetDjangoObject);
+    console.log(factsheetDjangoObject === 'new');
+    if (factsheetDjangoObject === 'new') {
+      axios.post('http://localhost:8000/factsheet/add/', null,
+      {  params:
+        factsheetObject
+      });
+    } else {
+      const id = eval(fsData)[0].pk;
+      axios.post('http://localhost:8000/factsheet/update/', null,
+      {  params:
+          {
+            id: id,
+            study_name: studyName,
+            name: factsheetName,
+          }
+      });
+      navigate("/");
+    }
   };
 
   const handleCloseJSON = () => {
@@ -140,6 +164,11 @@ function Factsheet(props) {
     factsheetObjectHandler('doi', e.target.value);
   };
 
+  const handleFactsheetName = e => {
+    setFactsheetName(e.target.value);
+    factsheetObjectHandler('name', e.target.value);
+  };
+
   const handlePlaceOfPublication = e => {
     setPlaceOfPublication(e.target.value);
     factsheetObjectHandler('place_of_publication', e.target.value);
@@ -177,7 +206,6 @@ function Factsheet(props) {
     setOpenOverView(true);
     }
   };
-
 
     const factsheetObjectHandler = (key, obj) => {
       let newFactsheetObject = factsheetObject;
@@ -558,20 +586,6 @@ function Factsheet(props) {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
 
-
-
-    const getFS = axios.create({
-      baseURL: "http://localhost:8000/api/v0/get_factsheet/",
-      params: { id: 42 }
-    });
-
-    useEffect(() => {
-      getFS.get().then((response) => {
-        setFactsheetDjangoObject(response.data);
-      });
-    }, []);
-
-
     return (
       <div>
         <Grid container
@@ -654,7 +668,7 @@ function Factsheet(props) {
                   <Grid container >
                     <Grid item xs={12} >
                       <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                        <b> {factsheetName} </b>
+                        <TextField style={{ width: '50%' }} id="outlined-basic"  variant="standard" value={factsheetName} onChange={handleFactsheetName} />
                       </div>
                       <CustomTabs
                         factsheetObjectHandler={factsheetObjectHandler}

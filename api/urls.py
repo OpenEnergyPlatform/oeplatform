@@ -177,6 +177,4 @@ urlpatterns = [
     ),
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
-    url("get_factsheet/", views.get_factsheet),
-    url("create_factsheet/", views.create_factsheet),
 ]

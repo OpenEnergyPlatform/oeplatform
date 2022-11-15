@@ -11,7 +11,7 @@ import axios from "axios"
 
 export default function CustomCard(props) {
 
-  const { top_img, id, title, acronym, abstract, institution, create_new, create_new_button  } = props;
+  const { top_img, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
 
   const [factsheet, setFactsheet] = React.useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,17 +25,17 @@ export default function CustomCard(props) {
   useEffect(() => {
     getData();
     console.log(factsheet);
-    console.log(id);
   }, []);
+
 
   return (
     <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '300px' }} variant="outlined">
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          {id}
-        </Typography>
-        <Typography gutterBottom variant="h5" component="div">
           {title}
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
+          {study_name}
         </Typography>
         <Typography variant="h6" color="text.secondary">
           {acronym}
@@ -44,9 +44,8 @@ export default function CustomCard(props) {
           {abstract}
         </Typography>
       </CardContent>
-      <CardActions>
-        <Button variant="outlined" size="small" ><Link to="/factsheet">View</Link></Button>
-
+      <CardActions >
+        <Link to="/factsheet" style={{ textDecoration: 'none' }} state={{ fsData: factsheet }}>More</Link>
       </CardActions>
     </Card>
   );

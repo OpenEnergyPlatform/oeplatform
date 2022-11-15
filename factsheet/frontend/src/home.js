@@ -17,6 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 
 
@@ -92,6 +93,7 @@ function Home() {
                                               <CustomCard
                                                 id={item.pk}
                                                 title={item.fields.factsheetData.name}
+                                                study_name={item.fields.factsheetData.study_name}
                                                 acronym={item.fields.factsheetData.acronym}
                                                 abstract={item.fields.factsheetData.abstract}
                                               />
@@ -115,7 +117,7 @@ function Home() {
                 </DialogContent>
                 <DialogActions>
                   <Button variant="contained" onClick={handleCreateFactsheet} autoFocus >
-                    create
+                    <Link to="/factsheet" state={{ fsData: 'new', factsheetName: factsheetName }}>create</Link>
                   </Button>
                   <Button variant="contained" autoFocus >
                     Cancel
@@ -129,7 +131,7 @@ function Home() {
 
 
           {showFactsheetForm && <Grid item xs={12}>
-            <Factsheet factsheetName={factsheetName}/>
+            <Factsheet factsheetName={factsheetName} />
           </Grid>}
 
     </div>

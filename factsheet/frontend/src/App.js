@@ -15,7 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 
 import CustomCard from './components/customCard.js'
@@ -79,7 +79,6 @@ function App() {
       <Route path="/" element={< Home />} />
       <Route path="/factsheet" element={ <Factsheet /> } />
     </Routes>
-
   );
 }
 

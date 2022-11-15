@@ -37,7 +37,6 @@ from dataedit.views import schema_whitelist
 from dataedit.views import get_tag_keywords_synchronized_metadata
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
-from factsheet.views import create_factsheet
 import json
 
 from rest_framework.parsers import FileUploadParser, MultiPartParser
@@ -1093,9 +1092,3 @@ class ImageUpload(APIView):
 
             except:
                 raise ParseError("Unsupported image type")
-
-
-def get_factsheet(request):
-    id = request.GET["id"]
-    res = {'factsheet': 'factsheet', 'id': id}
-    return JsonResponse(res, safe=False)

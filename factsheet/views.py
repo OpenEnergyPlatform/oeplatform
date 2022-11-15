@@ -58,11 +58,31 @@ def create_factsheet(request, *args, **kwargs):
     return JsonResponse(factsheet_obj, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
+def update_factsheet(request, *args, **kwargs):
+    id = request.GET.get('id')
+    name = request.GET.get('name')
+    studyName = request.GET.get('study_name')
+
+    factsheet = Factsheet.objects.get(id=id)
+    factsheet.factsheetData['name'] = name
+    factsheet.factsheetData['study_name'] = studyName
+    factsheet.save()
+
+    return JsonResponse('updated', safe=False, status=status.HTTP_201_CREATED)
+
+
+@csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get('name')
     factsheet = Factsheet.objects.get(name=name)
-    factsheet_json = serializers.serialize('json', factsheet)
     return JsonResponse(factsheet, safe=False, content_type='application/json')
+
+@csrf_exempt
+def factsheet_by_id(request, *args, **kwargs):
+    id = request.GET.get('id')
+    factsheet = Factsheet.objects.filter(id=id)
+    factsheet_json = serializers.serialize('json', factsheet)
+    return JsonResponse(factsheet_json, safe=False, content_type='application/json')
 
 @csrf_exempt
 def get_all_factsheet(request, *args, **kwargs):
