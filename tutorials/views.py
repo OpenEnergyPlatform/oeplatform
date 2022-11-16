@@ -345,7 +345,7 @@ class ListTutorials(View):
         # to properly find tags
         for i, tut in enumerate(tutorials_overview):
             tut["html"] = tut["html"].replace(
-                'data-target="#collapsable', 'data-target="#t%d-collapsable' % i
+                'data-bs-target="#collapsable', 'data-bs-target="#t%d-collapsable' % i
             )
             tut["html"] = tut["html"].replace(
                 'id="collapsable', 'id="t%d-collapsable' % i
