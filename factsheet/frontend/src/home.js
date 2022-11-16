@@ -19,8 +19,6 @@ import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
-
-
 import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
 
@@ -73,10 +71,27 @@ function Home() {
     getData();
   }, []);
 
+  const renderCards = (fs) => {
+    if (Object.keys(fs).length !== 0) {
+      return fs.map(item =>
+          (<Grid item xs={3}>
+            <CustomCard
+              id={item.pk}
+              title={item.fields.factsheetData.name}
+              study_name={item.fields.factsheetData.study_name}
+              acronym={item.fields.factsheetData.acronym}
+              abstract={item.fields.factsheetData.abstract}
+              fs={item}
+            />
+          </Grid>)
+          )
+      }
+  }
+
   return (
     <ApolloProvider client={client}>
       <div >
-            {!showFactsheetForm && <Grid container spacing={2} direction="row" justifyContent="space-between">
+          {!showFactsheetForm && <Grid container spacing={2} direction="row" justifyContent="space-between">
               <Grid item xs={10}>
                 <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'A', label: 'Anguilla', phone: '1-264' },
                 { name: 'B', label: 'Albania', phone: '355' },
@@ -84,21 +99,12 @@ function Home() {
               </Grid>
 
               <Grid item xs={2}>
-                  <Button disableElevation={true} startIcon={<AddBoxIcon />}   style={{ 'textTransform': 'none', 'margin': '10px', 'margiBottom' : '10px', 'height': '55px', 'zIndex': '1000', 'float': 'right' }} variant="contained" color="primary" onClick={handleOpenFactsheetName} >Add a new Factsheet</Button>
+                  <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'margiBottom' : '10px', 'height': '55px', 'zIndex': '1000', 'float': 'right' }} variant="contained" color="primary" onClick={handleOpenFactsheetName} >Add a new Factsheet</Button>
               </Grid>
             </Grid>}
-
-            {!showFactsheetForm && <Grid container spacing={2} direction="row" >
-              {eval(factsheets).map(item => <Grid item xs={3}>
-                                              <CustomCard
-                                                id={item.pk}
-                                                title={item.fields.factsheetData.name}
-                                                study_name={item.fields.factsheetData.study_name}
-                                                acronym={item.fields.factsheetData.acronym}
-                                                abstract={item.fields.factsheetData.abstract}
-                                              />
-                                            </Grid> ) }
-
+            <Grid container spacing={2} direction="row" >
+              {renderCards(eval(factsheets))}
+            </Grid>
               <Grid item xs={12}>
                 <Dialog
                   fullWidth
@@ -117,7 +123,7 @@ function Home() {
                 </DialogContent>
                 <DialogActions>
                   <Button variant="contained" onClick={handleCreateFactsheet} autoFocus >
-                    <Link to="/factsheet" state={{ fsData: 'new', factsheetName: factsheetName }}>create</Link>
+                    <Link to="/fs" state={{ fsData: 'new', factsheetName: factsheetName }}>create</Link>
                   </Button>
                   <Button variant="contained" autoFocus >
                     Cancel
@@ -126,13 +132,10 @@ function Home() {
               </Dialog>
             </Grid>
 
-            </Grid>}
 
 
 
-          {showFactsheetForm && <Grid item xs={12}>
-            <Factsheet factsheetName={factsheetName} />
-          </Grid>}
+
 
     </div>
     </ApolloProvider>

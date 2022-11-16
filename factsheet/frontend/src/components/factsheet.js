@@ -22,9 +22,10 @@ import { useLocation, useHistory, useNavigate } from 'react-router-dom'
 
 
 function Factsheet(props) {
-  const location = useLocation()
+  const location = useLocation();
   const { fsData } = location.state;
-
+  console.log('---------------fsData');
+  console.log(fsData);
   const jsonld = require('jsonld');
 
   const [factsheetJSON, setFactsheetJSON] = useState({
@@ -45,7 +46,7 @@ function Factsheet(props) {
 
 
   const [factsheetRDF, setFactsheetRDF] = useState({});
-  const [factsheetDjangoObject, setFactsheetDjangoObject] = useState(fsData !== 'new' ? eval(fsData)[0].fields.factsheetData : 'new');
+  const [factsheetDjangoObject, setFactsheetDjangoObject] = useState(fsData !== 'new' ? fsData : 'new');
   const [openOverView, setOpenOverView] = useState(false);
   const [openJSON, setOpenJSON] = useState(false);
   const [openTurtle, setOpenTurtle] = useState(false);

@@ -31,54 +31,8 @@ const client = new ApolloClient({
 });
 
 function App() {
-
-  const [fs, setFs] = React.useState(1);
-  const [factsheets, setFactsheets] = React.useState([]);
-  const [loading, setLoading] = useState(true);
-  const [openFactsheetName, setOpenFactsheetName] = useState(false);
-  const [factsheetName, setFactsheetName] = useState('');
-  const [showFactsheetForm, setShowFactsheetForm] = useState(false);
-
-  const handleNewFactsheet = (fs) => {
-    setFs(fs);
-  };
-
-  const handleOpenFactsheetName = () => {
-    setOpenFactsheetName(true);
-  };
-
-  const handleCloseFactsheetName = () => {
-    setOpenFactsheetName(false);
-  };
-
-  const handleCreateFactsheet = (name) => {
-    setOpenFactsheetName(false);
-    setShowFactsheetForm(true);
-  };
-
-  const handleChangeFactsheetName = e => {
-    setFactsheetName(e.target.value);
-  };
-
-  const searchHandler = (v) => {
-    console.log(v);
-  };
-
-  const getData = async () => {
-    const { data } = await axios.get(`http://localhost:8000/factsheet/all/`);
-    let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
-    setFactsheets(JSON.parse(JSON.stringify(factsheets)));
-    setLoading(false)
-  };
-  useEffect(() => {
-    getData();
-  }, []);
-
   return (
-    <Routes>
-      <Route path="/" element={< Home />} />
-      <Route path="/factsheet" element={ <Factsheet /> } />
-    </Routes>
+    < Home />
   );
 }
 

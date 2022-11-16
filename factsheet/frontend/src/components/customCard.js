@@ -10,24 +10,9 @@ import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 
 export default function CustomCard(props) {
-
-  const { top_img, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
-
-  const [factsheet, setFactsheet] = React.useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const getData = async () => {
-    const { data } = await axios.get(`http://localhost:8000/factsheet/get/`, { params: { id: id } });
-    let factsheet = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
-    setFactsheet(JSON.parse(JSON.stringify(factsheet)));
-    setLoading(false)
-  };
-  useEffect(() => {
-    getData();
-    console.log(factsheet);
-  }, []);
-
-
+  const { fs, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
+  console.log(fs);
+  console.log(id);
   return (
     <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '300px' }} variant="outlined">
       <CardContent>
@@ -45,7 +30,7 @@ export default function CustomCard(props) {
         </Typography>
       </CardContent>
       <CardActions >
-        <Link to="/factsheet" style={{ textDecoration: 'none' }} state={{ fsData: factsheet }}>More</Link>
+        <Link to={`/factsheet/${id}`} style={{ textDecoration: 'none' }} state={{ fsData: fs.fields.factsheetData }}>More</Link>
       </CardActions>
     </Card>
   );

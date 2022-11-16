@@ -85,7 +85,7 @@ def factsheet_by_id(request, *args, **kwargs):
     return JsonResponse(factsheet_json, safe=False, content_type='application/json')
 
 @csrf_exempt
-def get_all_factsheet(request, *args, **kwargs):
+def get_all_factsheets(request, *args, **kwargs):
     factsheets = Factsheet.objects.all()
     factsheets_json = serializers.serialize('json', factsheets)
     return JsonResponse(factsheets_json, safe=False, content_type='application/json')
