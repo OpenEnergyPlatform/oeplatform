@@ -866,6 +866,8 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 ccolumns = [constraint["constraint_parameter"]]
 
             if primary_key_col_names:
+                if ccolumns in primary_key_col_names:
+                    continue
                 raise APIError("Multiple definitions of primary key")
             primary_key_col_names = ccolumns
 
