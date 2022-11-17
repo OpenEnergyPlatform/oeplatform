@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import CustomSwap from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
+import ShareIcon from '@mui/icons-material/Share';
 import '../styles/App.css';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
@@ -592,6 +593,7 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
+              <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
               <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
                 <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
               </Link>
