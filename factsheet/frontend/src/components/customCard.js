@@ -14,7 +14,7 @@ export default function CustomCard(props) {
 
 
   return (
-    <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '300px' }} variant="outlined">
+    <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '240px' }} variant="outlined">
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
           {title}
@@ -29,8 +29,12 @@ export default function CustomCard(props) {
           {abstract}
         </Typography>
       </CardContent>
-      <CardActions >
-        <Link to={`factsheet/fs/${id}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none' }} >More</Link>
+      <CardActions class="actions">
+        <Link to={`factsheet/fs/${id}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
+          <Button disableElevation={true} variant="text" color="primary" size="small" >
+            More...
+          </Button>
+        </Link>
       </CardActions>
     </Card>
   );

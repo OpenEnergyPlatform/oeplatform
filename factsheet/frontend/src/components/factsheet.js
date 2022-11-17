@@ -19,11 +19,12 @@ import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import axios from "axios"
 import { useLocation, useHistory, useNavigate } from 'react-router-dom'
-
+import { Route, Routes, Link } from 'react-router-dom';
 
 function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
+  console.log(id);
   const jsonld = require('jsonld');
   const [factsheetJSON, setFactsheetJSON] = useState({
     "@context": {
@@ -40,8 +41,6 @@ function Factsheet(props) {
     "oeo:OEO_00000505": [],
     "oeo:OEO_00000509": []
   });
-
-
   const [factsheetRDF, setFactsheetRDF] = useState({});
   const [factsheet, setFactsheet] = useState({});
   const [loading, setLoading] = useState(true);
@@ -50,11 +49,11 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
-  const [factsheetName, setFactsheetName] = useState(fsData.name);
+  const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
   const [scenarioObject, setScenarioObject] = useState({});
-  const [acronym, setAcronym] = useState(fsData.acronym);
-  const [studyName, setStudyName] = useState(fsData.study_name);
-  const [abstract, setAbstract] = useState(fsData.abstract);
+  const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
+  const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
+  const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [scenarios, setScenarios] = useState(1);
   const [report_title, setReportTitle] = useState('');
   const [doi, setDOI] = useState('');
@@ -67,9 +66,7 @@ function Factsheet(props) {
   const [scenarioOutputDatasetName, setScenarioOutputDatasetName] = useState('');
   const [scenarioInputDatasetIRI, setScenarioInputDatasetIRI] = useState('');
   const [scenarioOutputDatasetIRI, setScenarioOutputDatasetIRI] = useState('');
-
   const navigate = useNavigate();
-
   const handleSaveJSON = () => {
     //props.onChange(oekg);
     setOpenJSON(true);
@@ -91,7 +88,8 @@ function Factsheet(props) {
             name: factsheetName,
           }
       });
-      navigate("/");
+      navigate("/factsheet/");
+      window.location.reload();
     }
   };
 
@@ -594,7 +592,9 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
-              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
+              <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
+                <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
+              </Link>
               <Button disableElevation={true} startIcon={<ForwardToInboxIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle}>Submit</Button>
             </div >
           </Grid>
@@ -662,7 +662,7 @@ function Factsheet(props) {
                   <Grid container >
                     <Grid item xs={12} >
                       <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                        <TextField style={{ width: '50%' }} id="outlined-basic"  variant="standard" value={factsheetName} onChange={handleFactsheetName} />
+                        <TextField style={{ width: '50%', marginBottom: '20px', }} inputProps={{min: 0, style: { textAlign: 'center', fontWeight: 'bold' }}} id="outlined-basic"  variant="standard" value={factsheetName} onChange={handleFactsheetName} />
                       </div>
                       <CustomTabs
                         factsheetObjectHandler={factsheetObjectHandler}
