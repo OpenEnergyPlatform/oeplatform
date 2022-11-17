@@ -17,6 +17,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import LinearProgress from '@mui/material/LinearProgress';
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 import './styles/App.css';
@@ -88,58 +89,59 @@ function Home() {
       }
   }
 
-  return (
-    <ApolloProvider client={client}>
-      <div >
-          {!showFactsheetForm && <Grid container spacing={2} direction="row" justifyContent="space-between">
-              <Grid item xs={10}>
-                <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'A', label: 'Anguilla', phone: '1-264' },
-                { name: 'B', label: 'Albania', phone: '355' },
-                { name: 'C', label: 'Armenia', phone: '374' }]}/>
+  if (loading === false) {
+    return (
+      <ApolloProvider client={client}>
+          <div >
+            <Grid container spacing={2} direction="row" justifyContent="space-between">
+                <Grid item xs={10}>
+                  <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'A', label: 'Anguilla', phone: '1-264' },
+                  { name: 'B', label: 'Albania', phone: '355' },
+                  { name: 'C', label: 'Armenia', phone: '374' }]}/>
+                </Grid>
+
+                <Grid item xs={2}>
+                    <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'margiBottom' : '10px', 'height': '55px', 'zIndex': '1000', 'float': 'right' }} variant="contained" color="primary" onClick={handleOpenFactsheetName} >Add a new Factsheet</Button>
+                </Grid>
               </Grid>
-
-              <Grid item xs={2}>
-                  <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'margiBottom' : '10px', 'height': '55px', 'zIndex': '1000', 'float': 'right' }} variant="contained" color="primary" onClick={handleOpenFactsheetName} >Add a new Factsheet</Button>
+              <Grid container spacing={2} direction="row" >
+                {renderCards(eval(factsheets))}
               </Grid>
-            </Grid>}
-            <Grid container spacing={2} direction="row" >
-              {renderCards(eval(factsheets))}
-            </Grid>
-              <Grid item xs={12}>
-                <Dialog
-                  fullWidth
-                  maxWidth="lg"
-                  open={openFactsheetName}
-                  onClose={handleOpenFactsheetName}
-                  aria-labelledby="responsive-dialog-title"
-                >
-                <DialogTitle id="responsive-dialog-title">
-                  <b>Create a new factsheet! </b>
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    <TextField style={{ "marginTop": "10px" }} id="outlined-basic" label="Name" variant="outlined" value={factsheetName} onChange={handleChangeFactsheetName} fullWidth />
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button variant="contained" onClick={handleCreateFactsheet} autoFocus >
-                    <Link to="/fs" state={{ fsData: 'new', factsheetName: factsheetName }}>create</Link>
-                  </Button>
-                  <Button variant="contained" autoFocus >
-                    Cancel
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
-
-
-
-
-
-
-    </div>
-    </ApolloProvider>
-  );
+                <Grid item xs={12}>
+                  <Dialog
+                    fullWidth
+                    maxWidth="lg"
+                    open={openFactsheetName}
+                    onClose={handleOpenFactsheetName}
+                    aria-labelledby="responsive-dialog-title"
+                  >
+                  <DialogTitle id="responsive-dialog-title">
+                    <b>Create a new factsheet! </b>
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      <TextField style={{ "marginTop": "10px" }} id="outlined-basic" label="Name" variant="outlined" value={factsheetName} onChange={handleChangeFactsheetName} fullWidth />
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button variant="contained" onClick={handleCreateFactsheet} autoFocus >
+                      <Link to="/fs" state={{ fsData: 'new', factsheetName: factsheetName }}>create</Link>
+                    </Button>
+                    <Button variant="contained" autoFocus >
+                      Cancel
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </Grid>
+          </div>
+      </ApolloProvider>
+    );
+  }
+  else {
+    return <Box sx={{ width: '100%' }}>
+            <LinearProgress />
+           </Box>
+  }
 }
 
 export default Home;

@@ -23,11 +23,8 @@ import { useLocation, useHistory, useNavigate } from 'react-router-dom'
 
 function Factsheet(props) {
   const location = useLocation();
-  const { fsData } = location.state;
-  console.log('---------------fsData');
-  console.log(fsData);
+  const { id, fsData } = props;
   const jsonld = require('jsonld');
-
   const [factsheetJSON, setFactsheetJSON] = useState({
     "@context": {
       "@base": "https://openenergy-platform.org/oekg/",
@@ -46,17 +43,18 @@ function Factsheet(props) {
 
 
   const [factsheetRDF, setFactsheetRDF] = useState({});
-  const [factsheetDjangoObject, setFactsheetDjangoObject] = useState(fsData !== 'new' ? fsData : 'new');
+  const [factsheet, setFactsheet] = useState({});
+  const [loading, setLoading] = useState(true);
   const [openOverView, setOpenOverView] = useState(false);
   const [openJSON, setOpenJSON] = useState(false);
   const [openTurtle, setOpenTurtle] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
-  const [factsheetName, setFactsheetName] = useState(factsheetDjangoObject.name);
+  const [factsheetName, setFactsheetName] = useState(fsData.name);
   const [scenarioObject, setScenarioObject] = useState({});
-  const [acronym, setAcronym] = useState('');
-  const [studyName, setStudyName] = useState(factsheetDjangoObject.study_name);
-  const [abstract, setAbstract] = useState('');
+  const [acronym, setAcronym] = useState(fsData.acronym);
+  const [studyName, setStudyName] = useState(fsData.study_name);
+  const [abstract, setAbstract] = useState(fsData.abstract);
   const [scenarios, setScenarios] = useState(1);
   const [report_title, setReportTitle] = useState('');
   const [doi, setDOI] = useState('');
@@ -77,18 +75,14 @@ function Factsheet(props) {
     setOpenJSON(true);
   };
 
-
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
-    console.log(factsheetDjangoObject);
-    console.log(factsheetDjangoObject === 'new');
-    if (factsheetDjangoObject === 'new') {
+    if (id === 'new') {
       axios.post('http://localhost:8000/factsheet/add/', null,
       {  params:
         factsheetObject
       });
     } else {
-      const id = eval(fsData)[0].pk;
       axios.post('http://localhost:8000/factsheet/update/', null,
       {  params:
           {
@@ -221,7 +215,6 @@ function Factsheet(props) {
     }
 
     const renderFactsheet = (factsheetContent) => {
-      console.log(factsheetContent);
       if (Object.keys(factsheetContent).length !== 0) {
         return Object.keys(factsheetContent).map((item) => (
           <div style={{ marginTop: '30px', marginLeft: '50px', marginBottom: '10px' }}>
@@ -674,7 +667,7 @@ function Factsheet(props) {
                       <CustomTabs
                         factsheetObjectHandler={factsheetObjectHandler}
                         items={items}
-                          />
+                      />
                     </Grid>
                   </Grid>
               </div>

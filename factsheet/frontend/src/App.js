@@ -16,6 +16,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { Route, Routes, Link } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
+
 import axios from "axios"
 
 import CustomCard from './components/customCard.js'
@@ -25,15 +28,41 @@ import Factsheet from './components/factsheet.js'
 import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
 
+const url_id = String(window.location.href).split('/').pop()
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
 });
 
 function App() {
-  return (
-    < Home />
-  );
+  const [factsheet, setFactsheet] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const url_id = String(window.location.href).split('/').pop();
+  const getData = async () => {
+    if (url_id !== '') {
+      const { data } = await axios.get(`http://localhost:8000/factsheet/get/`, { params: { id: url_id } });
+        const fsd = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
+        const result = eval(fsd)[0].fields.factsheetData;
+        return result;
+    }
+  };
+  useEffect(() => {
+    getData().then((data) => {
+      setFactsheet(data);
+      setLoading(false);
+  });;
+  }, []);
+
+  if (url_id === '') {
+    return < Home />
+  } else {
+    if (loading === false) {
+      return <Factsheet id={url_id} fsData={factsheet}/>
+    } else {
+      return <LinearProgress />
+    }
+  }
 }
 
 export default App;

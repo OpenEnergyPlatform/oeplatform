@@ -11,8 +11,8 @@ import axios from "axios"
 
 export default function CustomCard(props) {
   const { fs, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
-  console.log(fs);
-  console.log(id);
+
+
   return (
     <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '300px' }} variant="outlined">
       <CardContent>
@@ -30,7 +30,7 @@ export default function CustomCard(props) {
         </Typography>
       </CardContent>
       <CardActions >
-        <Link to={`/factsheet/${id}`} style={{ textDecoration: 'none' }} state={{ fsData: fs.fields.factsheetData }}>More</Link>
+        <Link to={`factsheet/fs/${id}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none' }} >More</Link>
       </CardActions>
     </Card>
   );
