@@ -1,16 +1,20 @@
 {% extends "dataedit/base.html" %}
-{% load dataedit.metadata %}
 {% load static %}
 {% load django_bootstrap5 %}
 
+{% block after-head %}
+<link href="/static/metaedit/metaedit.css" rel="stylesheet">
+{% endblock after-head %}
 
 {% block site-header %}
-<h2>See all parts of the metadatastring below, divided in each section.
+<h2 class="site-header"><span class="spinner-border text-primary d-none" id="metaedit-loading"></span>
+    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>Metadata</span>
 </h2>
 {% endblock site-header %}
 
-
 {% block main %}
+<h1>Metadata review</h1>
+<p>Check all metadata </p>
 
 <nav class="nav nav-pills nav-justified">
   <a class="nav-link active" href="#">General Keys</a>
@@ -20,5 +24,38 @@
   <a class="nav-link" href="#">Contributor</a>
   <a class="nav-link" href="#">Resource Keys</a>
   <a class="nav-link" href="#">Summary</a>
+    <h2>{{ meta.id }}</h2>
+    {% for i in meta %}
 </nav>
+
+<div class="row">
+
+    <div class="col">
+        <form iv id="metaedit-form">
+            <!-- placeholder -->
+        </form>
+    </div>
+</div>
+<div class="row d-none" id="metaedit-controls">
+    <div class="col">
+        <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+            <a href="#metaedit-submit" class="btn btn-sm btn-success mr-2 {% if not can_add %} disabled {% endif %}" id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>Submit</a>
+        </span>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">Download</buttton>
+    </div>
+</div>
+
 {% endblock main %}
+
+{% block after-body-bottom-js %}
+    <script src="/static/metaedit/vendor/jsoneditor-2.5.1/jsoneditor.min.js"></script>
+    <script src="/static/metaedit/metaedit.js"></script>
+    <script>
+        var config = JSON.parse("{{ config|escapejs }}");
+        MetaEdit(config);
+        $(function () {
+            $('[data-bs-toggle="tooltip"]').tooltip()
+        })
+    </script>
+{% endblock after-body-bottom-js %}

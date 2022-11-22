@@ -1811,5 +1811,59 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
 
 
 class PeerReview(LoginRequiredMixin, View):
+    def separate_metadata(self, request):
+        pass
+
     def get(self, request, schema, table):
-        return render(request, 'dataedit/peer_review.html')
+
+
+        metadata = [{
+            "name": "hello",
+            "id": "hello id",
+            "description": "description for hello"
+        }, {
+            "name": "goodbye",
+            "id": "goodbye id",
+            "description": "description for goodbye"
+        }]
+
+        columns = get_column_description(schema, table)
+
+        can_add = False
+        table_obj = Table.load(schema, table)
+        if not request.user.is_anonymous:
+            level = request.user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
+
+        url_table_id = request.build_absolute_uri(
+            reverse("view", kwargs={"schema": schema, "table": table})
+        )
+
+        # Für metadaten nutzen: load_metadata_from_db(schema, table) !!!!!!!!!
+        metadata = { "meta" : load_metadata_from_db(schema, table)}
+
+        # nur für meta_edit relevant
+        context_dict = {
+            "config": json.dumps(
+                {
+                    "schema": schema,
+                    "table": table,
+                    "columns": columns,
+                    "url_table_id": url_table_id,
+                    "url_api_meta": reverse(
+                        "api_table_meta", kwargs={"schema": schema, "table": table}
+                    ),
+                    "url_view_table": reverse(
+                        "view", kwargs={"schema": schema, "table": table}
+                    ),
+                    "cancle_url": get_cancle_state(self.request),
+                    "standalone": False,
+                }
+            ),
+            "can_add": can_add,
+        }
+
+        context_meta = metadata
+
+        return render(request, 'dataedit/peer_review.html',
+            context=context_meta)

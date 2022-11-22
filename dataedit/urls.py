@@ -104,7 +104,7 @@ urlpatterns = [
         name="standalone_meta_edit",
     ),
     url(
-        r"^view/(?P<schema>{qual})/(?P<table>{qual}/open_peer_review)$".format(qual=pgsql_qualifier),
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(qual=pgsql_qualifier),
         views.PeerReview.as_view(), name="peer_review"
     )
 ]
