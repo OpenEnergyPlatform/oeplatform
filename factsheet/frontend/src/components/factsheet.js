@@ -70,7 +70,8 @@ function Factsheet(props) {
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
   const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : []);
-  const [date_of_publication, setDateOfPublication] = useState(fsData.date_of_publication !== null ? fsData.date_of_publication : '2022-04-07');
+  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '2022-04-07');
+
 
   const [selectedRegion, setSelectedRegion] = useState([]);
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
@@ -126,6 +127,14 @@ function Factsheet(props) {
 
     }
   };
+
+  const handleRemoveFactsheet = () => {
+    axios.post('http://localhost:8000/factsheet/delete/', null, { params: { id: id } });
+    navigate("/factsheet/");
+    window.location.reload();
+  }
+
+
 
   const handleCloseJSON = () => {
     setOpenJSON(false);
@@ -627,7 +636,7 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
-              <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" >Remove</Button>
+              <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" onClick={handleRemoveFactsheet}>Remove</Button>
               <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
               <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
                 <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>

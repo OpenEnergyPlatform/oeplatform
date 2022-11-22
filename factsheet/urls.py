@@ -9,5 +9,6 @@ urlpatterns = [
     path(r"update/", views.update_factsheet),
     path(r"name/", views.factsheet_by_name),
     path(r"get/", views.factsheet_by_id),
+    path(r"delete/", views.delete_factsheet_by_id),
     path(r"all/", views.get_all_factsheets)
 ]
