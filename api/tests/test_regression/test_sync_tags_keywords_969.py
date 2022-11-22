@@ -1,8 +1,6 @@
 """
 changing tags in the UI and changing keywords in metadata should be synchronized
 """
-import json
-
 from api.connection import create_oedb_session
 from api.tests import APITestCase, Client
 from dataedit.structures import TableTags, Tag
@@ -12,10 +10,6 @@ class Test_sync_tags_keywords_969(APITestCase):
     def test_sync_tags_keywords_969(self):
         table = "test_keyword_tags"
         structure = {"columns": [{"name": "id", "data_type": "bigserial"}]}
-        table_url = "/api/v0/schema/{schema}/tables/{table}/".format(
-            schema=self.test_schema, table=table
-        )
-        meta_url = table_url + "meta/"
         post_tag_url = "/dataedit/tags/add/"
         meta_template = {"id": "id"}  # must have id
 
@@ -28,30 +22,24 @@ class Test_sync_tags_keywords_969(APITestCase):
         other_client.force_login(self.other_user)
 
         # create table
-        self.assertEqual(
-            client.put(
-                table_url,
-                data=json.dumps({"query": structure}),
-                HTTP_AUTHORIZATION="Token %s" % client.token,
-                content_type="application/json",
-            ).status_code,
-            201,
-        )
+        self.api_req("put", table=table, data={"query": structure})
 
         # get existing keywords (none)
         def get_keywords():
-            meta = client.get(meta_url).json()
+            meta = self.api_req("get", table=table, path="meta/")
             keywords = meta.get("keywords", [])
             names = [Tag.create_name_normalized(k) for k in keywords]
             return sorted(names)
 
-        def set_keywords(keywords, client=client):
+        def set_keywords(keywords, exp_code=200, auth=self.token):
             meta_template["keywords"] = keywords
-            return client.post(
-                meta_url,
-                data=json.dumps(meta_template),
-                HTTP_AUTHORIZATION="Token %s" % client.token,
-                content_type="application/json",
+            self.api_req(
+                "post",
+                table=table,
+                data=meta_template,
+                path="meta/",
+                exp_code=exp_code,
+                auth=auth,
             )
 
         def load_tag_names_from_db():
@@ -122,10 +110,10 @@ class Test_sync_tags_keywords_969(APITestCase):
         # set empty twice in case test database has not been cleared properly
         # because test tables are being reused
         set_tag_names_in_db([])
-        self.assertEqual(set_keywords([]).status_code, 200)
+        set_keywords([])
         self.assertListEqual(get_keywords(), [])
 
-        self.assertEqual(set_keywords(["Keyword One"]).status_code, 200)
+        set_keywords(["Keyword One"])
         self.assertListEqual(get_keywords(), ["keyword_one"])
         self.assertListEqual(load_tag_names_from_db(), ["keyword_one"])
 
@@ -143,7 +131,7 @@ class Test_sync_tags_keywords_969(APITestCase):
         self.assertListEqual(load_tag_names_from_db(), ["keyword_one", "new_tag"])
 
         # check write permission of metadata for other user (should fail)
-        self.assertEqual(set_keywords(["nope"], client=other_client).status_code, 403)
+        set_keywords(["nope"], exp_code=403, auth=self.other_token)
 
         # check write permission of tags for other user (should fail)
         self.assertEqual(

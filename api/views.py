@@ -9,19 +9,37 @@ import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sqla
 import zipstream
+import time
+from decimal import Decimal
+
+import geoalchemy2  # Although this import seems unused is has to be here
+import login.models as login_models
+import psycopg2
+import requests
+import sqlalchemy as sqla
+import zipstream
+from dataedit.models import Schema as DBSchema
+from dataedit.models import Table as DBTable
+from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.core.files.storage import FileSystemStorage
+from django.core.validators import validate_image_file_extension
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
+from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.views import APIView
 
 import api.parser
-import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
@@ -275,6 +293,16 @@ class Metadata(APIView):
             )
             metadata.keywords = _metadata["keywords"]
 
+            # Write oemetadata json to dataedit.models.tables oemetadata(JSONB) field
+            # and to SQL comment on table
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
+            _metadata = get_tag_keywords_synchronized_metadata(
+                table=table, schema=schema, keywords_new=keywords
+            )
+            metadata.keywords = _metadata["keywords"]
+
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=cursor
             )
@@ -452,12 +480,15 @@ class Table(APIView):
             table,
             column_definitions,
             constraint_definitions,
-            cursor,
-            table_metadata=metadata,
         )
         schema_object, _ = DBSchema.objects.get_or_create(name=schema)
         table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
+
+        if metadata:
+            actions.set_table_metadata(
+                table=table, schema=schema, metadata=metadata, cursor=cursor
+            )
 
     @api_exception
     @require_delete_permission
@@ -1142,3 +1173,15 @@ class ImageUpload(APIView):
 
             except Exception:
                 raise ParseError("Unsupported image type")
+
+
+def oeo_search(request):
+    # get query from user request # TODO validate input to prevent sneaky stuff
+    query = request.GET["query"]
+    # call local search service
+    # TODO: this url should not be hardcoded here - get it from oeplatform/settings.py
+    url = f"http://loep/lookup-application/api/search?query={query}"
+    res = requests.get(url).json()
+    # res: something like [{"label": "testlabel", "resource": "testresource"}]
+    # send back to client
+    return JsonResponse(res, safe=False)

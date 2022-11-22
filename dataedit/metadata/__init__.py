@@ -2,10 +2,12 @@ from api import actions
 from dataedit.metadata import v1_4 as __LATEST
 from dataedit.metadata.v1_3 import TEMPLATE_v1_3
 from dataedit.metadata.v1_4 import TEMPLATE_V1_4
+from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 
 from .error import MetadataException
 
 METADATA_TEMPLATE = {
+    5: TEMPLATE_V1_5, 
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
 }
@@ -123,14 +125,19 @@ def load_metadata_from_db(schema, table):
     :param table: name of the OEP table in the OEP schema
     :return:
     """
-    metadata = actions.get_comment_table(schema, table)
+    from dataedit.models import Table
+    
+    # TODO maybe change this function to load metadata from Table.oemetadata(JSONB) field? or keep old functionality?
+    # metadata = actions.get_comment_table(schema, table)
+    metadata = Table.load(schema=schema, table=table).oemetadata  
+    
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
 
 
 def parse_meta_data(metadata, schema, table):
-    if "error" in metadata:
-        return metadata
+    # if "error" in metadata:
+    #     return metadata
     if not metadata:
         metadata = __LATEST.get_empty(schema, table)
     else:

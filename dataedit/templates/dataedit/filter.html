@@ -14,23 +14,24 @@
     Create new table
 </a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
 <hr>
-<h3>Create oemetadata</h3>
-<a class="btn btn-success" href="{% url 'standalone_meta_edit' %}"> Create new oemetadata </a> in version 1.5.1
+<h3>OEMetaBuilder</h3>
+<a class="btn btn-success" href="{% url 'oemetabuilder' %}"> OEMetaBuilder </a>
 <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
     <i class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i>
-</a>
+</a> 
+OEMetadata - Key Description
 <hr>
 <div style="display: flex;">
     <h3>Search & filter</h3>
     <button type="button"
     class="btn btn-outline-light"
-    data-toggle="popover"
+    data-bs-toggle="popover"
     data-trigger="focus"
     title="How to use search and filter"
     {% if not tables%}
-    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
+    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
     {% else %}
-    data-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
+    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
     {% endif %}
     style="margin-left: 10px;">
         <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
@@ -102,6 +103,12 @@
     /* also update filter if leave search field */
     $('#search-filter').on('blur', function (e) {
         $("#form-filter").submit();
+    });
+    /* also update filter on key=Enter in search field */
+    $('#search-filter').on('keydown', function (e) {
+        if (e.keyCode == 13) {
+            $("#form-filter").submit();
+        }
     });
 
 </script>

@@ -2,105 +2,16 @@ import json
 
 from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
 
-from api import actions
-
-from . import APITestCase
+from . import APITestCaseWithTable
 
 
-class TestPut(APITestCase):
-    def setUp(self):
-        structure_data = {
-            "constraints": [
-                {
-                    "constraint_type": "PRIMARY KEY",
-                    "constraint_parameter": "id",
-                    "reference_table": None,
-                    "reference_column": None,
-                }
-            ],
-            "columns": [
-                {
-                    "name": "id",
-                    "data_type": "bigserial",
-                    "is_nullable": False,
-                    "character_maximum_length": None,
-                },
-            ],
-        }
-
-        c_basic_resp = self.__class__.client.put(
-            "/api/v0/schema/{schema}/tables/{table}/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps({"query": structure_data}),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        assert c_basic_resp.status_code == 201, c_basic_resp.json().get(
-            "reason", "No reason returned"
-        )
-
-    def tearDown(self):
-        meta_schema = actions.get_meta_schema_name(self.test_schema)
-        if actions.has_table(dict(table=self.test_table, schema=self.test_schema)):
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_insert_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_edit_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=meta_schema,
-                    table=actions.get_delete_table_name(
-                        self.test_schema, self.test_table
-                    ),
-                )
-            )
-            actions.perform_sql(
-                "DROP TABLE IF EXISTS {schema}.{table} CASCADE".format(
-                    schema=self.test_schema, table=self.test_table
-                )
-            )
-
+class TestPut(APITestCaseWithTable):
     def metadata_roundtrip(self, meta):
-        response = self.__class__.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/meta/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps(meta),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
-        self.assertEqual(
-            response.status_code,
-            200,
-            response.content,
-        )
-        response = self.__class__.client.get(
-            "/api/v0/schema/{schema}/tables/{table}/meta/".format(
-                schema=self.test_schema, table=self.test_table
-            )
-        )
-
-        self.assertEqual(response.status_code, 200, response.json())
+        self.api_req("post", path="meta/", data=meta)
+        omi_meta_return = self.api_req("get", path="meta/")
 
         d_15 = OEP_V_1_5_Dialect()
         omi_meta = json.loads(json.dumps((d_15.compile(d_15.parse(json.dumps(meta))))))
-
-        omi_meta_return = response.json()
 
         # ignore diff in keywords (by setting resulting keywords == input keywords)
         # REASON: the test re-uses the same test table,
@@ -113,22 +24,8 @@ class TestPut(APITestCase):
 
     def test_nonexistent_key(self):
         meta = {"id": "id", "nonexistent_key": ""}
-        response = self.__class__.client.post(
-            "/api/v0/schema/{schema}/tables/{table}/meta/".format(
-                schema=self.test_schema, table=self.test_table
-            ),
-            data=json.dumps(meta),
-            HTTP_AUTHORIZATION="Token %s" % self.__class__.token,
-            content_type="application/json",
-        )
-
         # This should fail, but OMI does not warn about excess keys
-
-        self.assertEqual(
-            response.status_code,
-            200,
-            response.content,
-        )
+        self.api_req("post", path="meta/", data=meta)
 
     def test_set_meta(self):
         meta = {"id": self.test_table}

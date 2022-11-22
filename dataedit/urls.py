@@ -99,9 +99,9 @@ urlpatterns = [
         name="wizard_create",
     ),
     url(
-        r"^standalone_meta_edit/$",
+        r"^oemetabuilder/$",
         views.StandaloneMetaEditView.as_view(),
-        name="standalone_meta_edit",
+        name="oemetabuilder",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(qual=pgsql_qualifier),

@@ -995,10 +995,23 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
+        # TODO change this load metadata from SQL comment on table to load from table.oemetadata(JSONB) field to avoid performance issues
         # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
+        
+        # setup oemetadata string order according to oem v1.5.1
+        from dataedit.metadata import TEMPLATE_V1_5
+        
+        def iter_oem_key_order(metadata: dict):
+            oem_151_key_order = [key for key in TEMPLATE_V1_5.keys()]
+            for key in oem_151_key_order:
+                yield key, metadata.get(key)
 
-        meta_widget = MetaDataWidget(metadata)
+        
+        ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
+
+        # the key order of the metadata matters
+        meta_widget = MetaDataWidget(ordered_oem_151)
 
         revisions = []
 
@@ -1034,7 +1047,8 @@ class DataView(View):
         table_views = list(chain((default,), table_views))
 
         context_dict = {
-            "comment_on_table": dict(metadata),
+            # Not in use?
+            # "comment_on_table": dict(metadata),
             "meta_widget": meta_widget.render(),
             "revisions": revisions,
             "kinds": ["table", "map", "graph"],
@@ -1477,11 +1491,11 @@ def update_table_tags(request):
     """
     # check if valid table / schema
     schema, table = actions.get_table_name(
-        schema=request.POST["schema"], table=request.POST["table"]
+        schema=request.POST["schema"], table=request.POST["table"], restrict_schemas=False
     )
 
     # check write permission
-    actions.assert_permission(
+    actions.assert_add_tag_permission(
         request.user, table, login_models.WRITE_PERM, schema=schema
     )
 
@@ -1496,6 +1510,7 @@ def update_table_tags(request):
 
     with _get_engine().connect() as con:
         with con.begin():
+            # TODO Add metadata to table (JSONB field) somewhere here 
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=con
             )
