@@ -14,6 +14,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 export default function CustomAutocomplete(parameters) {
   const { manyItems } = parameters
   const [value, setValue] = useState(parameters.selectedElements);
+  console.log(value);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
 

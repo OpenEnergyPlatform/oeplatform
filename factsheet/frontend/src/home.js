@@ -48,6 +48,7 @@ function Home() {
 
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
+      console.log('f');
       return fs.map(item =>
           (<Grid item xs={3}>
             <CustomCard

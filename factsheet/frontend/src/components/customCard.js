@@ -16,17 +16,17 @@ export default function CustomCard(props) {
   return (
     <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '240px' }} variant="outlined">
       <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
-          {title}
+        <Typography gutterBottom variant="subtitle1" component="div">
+          <b>{title.substring(0,50)}</b>
         </Typography>
-        <Typography variant="h6" color="text.secondary">
-          {study_name}
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          {acronym}
+        <Typography variant="subtitle2" color="text.secondary">
+          <b> Study name: </b> {study_name.substring(0,50)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {abstract}
+          <b> Acronym: </b> {acronym.substring(0,50)}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          <b> Abstract: </b> {abstract.substring(0,180) + '...'}
         </Typography>
       </CardContent>
       <CardActions class="actions">

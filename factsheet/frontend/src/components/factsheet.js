@@ -18,14 +18,22 @@ import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
 import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import axios from "axios"
 import { useLocation, useHistory, useNavigate } from 'react-router-dom'
 import { Route, Routes, Link } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
+import Stack from '@mui/material/Stack';
 
 function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
-  console.log(id);
   const jsonld = require('jsonld');
   const [factsheetJSON, setFactsheetJSON] = useState({
     "@context": {
@@ -55,11 +63,26 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
+
+  const [selectedSectors, setSelectedSectors] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
+  const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
+  const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
+  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
+  const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : []);
+  const [date_of_publication, setDateOfPublication] = useState(fsData.date_of_publication !== null ? fsData.date_of_publication : '2022-04-07');
+
+  const [selectedRegion, setSelectedRegion] = useState([]);
+  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
+  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
+  const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
+  const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
+  const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
+
   const [scenarios, setScenarios] = useState(1);
-  const [report_title, setReportTitle] = useState('');
-  const [doi, setDOI] = useState('');
-  const [place_of_publication, setPlaceOfPublication] = useState('');
-  const [link_to_study, setLinkToStudy] = useState('');
+  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
+  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
+  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
   const [scenarioName, setScenarioName] = useState('');
   const [scenarioAbstract, setScenarioAbstract] = useState('');
   const [scenarioAcronym, setScenarioAcronym] = useState('');
@@ -87,10 +110,20 @@ function Factsheet(props) {
             id: id,
             study_name: studyName,
             name: factsheetName,
+            acronym: acronym,
+            abstract: abstract,
+            institution: JSON.stringify(selectedInstitution),
+            funding_source: JSON.stringify(selectedFundingSource),
+            contact_person: JSON.stringify(selectedContactPerson),
+            report_title: report_title,
+            date_of_publication: date_of_publication,
+            doi: doi,
+            place_of_publication: place_of_publication,
+            link_to_study: link_to_study,
+            authors: JSON.stringify(selectedAuthors)
           }
       });
-      navigate("/factsheet/");
-      window.location.reload();
+
     }
   };
 
@@ -173,6 +206,12 @@ function Factsheet(props) {
     factsheetObjectHandler('link_to_study', e.target.value);
   };
 
+
+  const handleDateOfPublication = e => {
+    setDateOfPublication(e.target.value);
+    factsheetObjectHandler('date_of_publication', e.target.value);
+  };
+
   const handleClickOpenTurtle = () => {
     setOpenTurtle(true);
     convert2RDF();
@@ -230,18 +269,7 @@ function Factsheet(props) {
       }
     }
 
-    const [selectedSectors, setSelectedSectors] = useState([]);
-    const [selectedAuthors, setSelectedAuthors] = useState([]);
-    const [selectedInstitution, setSelectedInstitution] = useState([]);
-    const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-    const [selectedContactPerson, setselectedContactPerson] = useState([]);
 
-    const [selectedRegion, setSelectedRegion] = useState([]);
-    const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
-    const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
-    const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
-    const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
-    const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
     const sectors = [
       { id: 'Agriculture forestry and land use sector', name: 'Agriculture forestry and land use sector' },
@@ -329,23 +357,22 @@ function Factsheet(props) {
 
     const authorsHandler = (authorsList) => {
       setSelectedAuthors(authorsList);
-      factsheetObjectHandler('authors', authorsList);
       factsheetObjectHandler('authors', JSON.stringify(authorsList));
     };
 
     const institutionHandler = (institutionList) => {
       setSelectedInstitution(institutionList);
-      factsheetObjectHandler('institution', JSON.stringify(selectedInstitution));
+      factsheetObjectHandler('institution', JSON.stringify(institutionList));
     };
 
     const fundingSourceHandler = (fundingSourceList) => {
       setSelectedFundingSource(fundingSourceList);
-      factsheetObjectHandler('funding_source', JSON.stringify(selectedFundingSource));
+      factsheetObjectHandler('funding_source', JSON.stringify(fundingSourceList));
     };
 
     const contactPersonHandler = (contactPersonList) => {
-      setSelectedFundingSource(contactPersonList);
-      factsheetObjectHandler('contact_person', JSON.stringify(selectedContactPerson));
+      setselectedContactPerson(contactPersonList);
+      factsheetObjectHandler('contact_person', JSON.stringify(contactPersonList));
     };
 
     const scenarioRegionHandler = (regionList) => {
@@ -410,7 +437,7 @@ function Factsheet(props) {
           style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
         >
           <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
               Report:
             </Typography>
           </Grid>
@@ -418,7 +445,20 @@ function Factsheet(props) {
             <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" value={report_title} onChange={handleReportTitle} />
           </Grid>
           <Grid item xs={6} >
-            <CustomDatePicker label='Date of Publication' style={{ marginBottom:'10px' }}/>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Stack spacing={3} style={{ width: '90%' }}>
+                <DesktopDatePicker
+                    label='Date of publication'
+                    inputFormat="MM/DD/YYYY"
+                    value={date_of_publication}
+                    onChange={(newValue) => {
+                      setDateOfPublication(newValue);
+                      factsheetObjectHandler('date_of_publication', newValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+              </Stack>
+            </LocalizationProvider>
           </Grid>
           <Grid item xs={6} >
             <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" value={doi} onChange={handleDOI} />
@@ -435,6 +475,7 @@ function Factsheet(props) {
         </Grid>
       </Grid>
     }
+
 
     const renderScenario = () => {
       return <Grid container
@@ -549,13 +590,6 @@ function Factsheet(props) {
 
     const convert2RDF = async () => {
 
-      factsheetJSON["oeo:OEO_00000506"] = [];
-      selectedFundingSource.map(fundingSource => {
-        factsheetJSON["oeo:OEO_00000506"].push({
-          "@id": fundingSource.id.replaceAll(" ", "_"),
-        });
-      });
-
       factsheetJSON["oeo:OEO_00000505"] = [];
       selectedSectors.map(sector => {
         factsheetJSON["oeo:OEO_00000505"].push({
@@ -593,6 +627,7 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
+              <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" >Remove</Button>
               <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
               <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
                 <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
@@ -628,33 +663,6 @@ function Factsheet(props) {
                   Download
                 </Button>
                 <Button variant="contained" autoFocus onClick={handleCloseTurtle}>
-                  Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
-            <Dialog
-              fullWidth
-              maxWidth="lg"
-              open={openJSON}
-              onClose={handleCloseJSON}
-              aria-labelledby="responsive-dialog-title"
-            >
-              <DialogTitle id="responsive-dialog-title">
-                <b>Save </b>
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  <div>
-                      {/* <pre>{JSON.stringify(oekg, null, '\t')}</pre> */}
-                    <pre>{JSON.stringify({factsheetObject}, null, '\t')}</pre>
-                  </div>
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button variant="contained" onClick={handleCloseJSON} autoFocus>
-                  Download
-                </Button>
-                <Button variant="contained" autoFocus onClick={handleCloseJSON}>
                   Cancel
                 </Button>
               </DialogActions>

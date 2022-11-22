@@ -36,7 +36,7 @@ def create_factsheet(request, *args, **kwargs):
         'acronym': acronym,
         'study_name': study_name,
         'abstract': abstract,
-        'institution': institution,
+        'institution': json.loads(institution),
         'funding_source': funding_source,
         'authors': authors,
         'contact_person': contact_person,
@@ -53,7 +53,6 @@ def create_factsheet(request, *args, **kwargs):
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
-
     fs.save()
     return JsonResponse(factsheet_obj, status=status.HTTP_201_CREATED)
 
@@ -62,10 +61,33 @@ def update_factsheet(request, *args, **kwargs):
     id = request.GET.get('id')
     name = request.GET.get('name')
     studyName = request.GET.get('study_name')
+    acronym = request.GET.get('acronym')
+    abstract = request.GET.get('abstract')
+    institution = request.GET.get('institution')
+    funding_source = request.GET.get('funding_source')
+    contact_person = request.GET.get('contact_person')
+    report_title = request.GET.get('report_title')
+    date_of_publication = request.GET.get('date_of_publication')
+    doi = request.GET.get('doi')
+    place_of_publication = request.GET.get('place_of_publication')
+    link_to_study = request.GET.get('link_to_study')
+    authors = request.GET.get('authors')
 
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
     factsheet.factsheetData['study_name'] = studyName
+    factsheet.factsheetData['acronym'] = acronym
+    factsheet.factsheetData['abstract'] = abstract
+    factsheet.factsheetData['institution'] = json.loads(institution)
+    factsheet.factsheetData['funding_source'] = json.loads(funding_source)
+    factsheet.factsheetData['contact_person'] = json.loads(contact_person)
+    factsheet.factsheetData['report_title'] = report_title
+    factsheet.factsheetData['date_of_publication'] = date_of_publication
+    factsheet.factsheetData['doi'] = doi
+    factsheet.factsheetData['place_of_publication'] = place_of_publication
+    factsheet.factsheetData['link_to_study'] = link_to_study
+    factsheet.factsheetData['authors'] = authors
+
     factsheet.save()
 
     return JsonResponse('updated', safe=False, status=status.HTTP_201_CREATED)
