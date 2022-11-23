@@ -13,38 +13,60 @@
 {% endblock site-header %}
 
 {% block main %}
-<h1>Metadata review</h1>
-<p>Check all metadata </p>
+<h2></h2>
+<h2>Open Peer Review for '{{meta.name}}'</h2>
+<h2></h2>
 
-<nav class="nav nav-pills nav-justified">
-  <a class="nav-link active" href="#">General Keys</a>
-  <a class="nav-link" href="#">Spatial and Temporal Keys</a>
-  <a class="nav-link" href="#">Source Keys</a>
-  <a class="nav-link" href="#">License Keys</a>
-  <a class="nav-link" href="#">Contributor</a>
-  <a class="nav-link" href="#">Resource Keys</a>
-  <a class="nav-link" href="#">Summary</a>
-    <h2>{{ meta.id }}</h2>
-    {% for i in meta %}
-</nav>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="spatialandtemporal-tab" data-bs-toggle="tab" data-bs-target="#spatialandtemporal" type="button" role="tab" aria-controls="spatialandtemporal" aria-selected="false">Spatial and Temporal Keys</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source Keys</button>
+  </li>
+    <li class="nav-item" role="presentation">
+    <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License Keys</button>
+  </li>
+    <li class="nav-item" role="presentation">
+    <button class="nav-link" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor Keys</button>
+  </li>
+    <li class="nav-item" role="presentation">
+    <button class="nav-link" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource Keys</button>
+  </li>
+    <li class="nav-item" role="presentation">
+    <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
+  </li>
+</ul>
 
-<div class="row">
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">id: {{meta}}</div>
+  <div class="tab-pane fade" id="spatialandtemporal" role="tabpanel" aria-labelledby="spatialandtemporal-tab">Add 'Spatial and Temporal Key' content here</div>
+  <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">Add 'Source Key' content here</div>
+  <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">Add 'License Key' content here</div>
+  <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">Add 'Contributor Key' content here</div>
+  <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">Add 'Resource Key' content here</div>
+  <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">Add Summary content here
+  </div>
 
-    <div class="col">
-        <form iv id="metaedit-form">
-            <!-- placeholder -->
-        </form>
-    </div>
-</div>
-<div class="row d-none" id="metaedit-controls">
     <div class="col">
         <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-            <a href="#metaedit-submit" class="btn btn-sm btn-success mr-2 {% if not can_add %} disabled {% endif %}" id="metaedit-submit"><span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting"></span>Submit</a>
+            <a href="#metaedit-submit" class="btn btn-sm btn-success mr-2 {% if not can_add %} disabled {% endif %}" id="metaedit-submit">
+                <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="metaedit-submitting">
+                </span>Save
+            </a>
         </span>
-        <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</buttton>
-        <button class="btn btn-sm btn-primary mr-2" id="metaedit-download">Download</buttton>
+        <button class="btn btn-sm btn-primary mr-2" id="metaedit-cancel">Cancel</button>
+
+
+        <button class="btn btn-sm btn-primary mr-2" id="submit_summary">Submit summary</button>
+
+
     </div>
 </div>
+
 
 {% endblock main %}
 
