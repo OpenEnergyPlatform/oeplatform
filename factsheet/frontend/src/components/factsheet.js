@@ -59,11 +59,9 @@ function Factsheet(props) {
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
-  const [scenarioObject, setScenarioObject] = useState({});
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-
   const [selectedSectors, setSelectedSectors] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
@@ -71,7 +69,13 @@ function Factsheet(props) {
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
   const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : []);
   const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '2022-04-07');
+  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
+  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
+  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
 
+  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios_info.length : 1);
+  const [scenarioObject, setScenarioObject] = useState({});
+  const [scenariosInfo, setScenariosInfo] = useState(id !== 'new' ? fsData.scenarios_info : [{"name": ""}]);
 
   const [selectedRegion, setSelectedRegion] = useState([]);
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
@@ -80,11 +84,7 @@ function Factsheet(props) {
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
-  const [scenarios, setScenarios] = useState(1);
-  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
-  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
-  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
-  const [scenarioName, setScenarioName] = useState('');
+  const [scenarioName, setScenarioName] = useState({});
   const [scenarioAbstract, setScenarioAbstract] = useState('');
   const [scenarioAcronym, setScenarioAcronym] = useState('');
   const [scenarioInputDatasetName, setScenarioInputDatasetName] = useState('');
@@ -105,6 +105,11 @@ function Factsheet(props) {
         factsheetObject
       });
     } else {
+      let scenariosInfoList = [];
+      Array(scenarios).fill().map((item, i) => {
+        const sc_name = scenarioName[i];
+        scenariosInfoList.push({ name: sc_name });
+      });
       axios.post('http://localhost:8000/factsheet/update/', null,
       {  params:
           {
@@ -121,7 +126,8 @@ function Factsheet(props) {
             doi: doi,
             place_of_publication: place_of_publication,
             link_to_study: link_to_study,
-            authors: JSON.stringify(selectedAuthors)
+            authors: JSON.stringify(selectedAuthors),
+            scenarios_info: JSON.stringify(scenariosInfoList),
           }
       });
 
@@ -133,8 +139,6 @@ function Factsheet(props) {
     navigate("/factsheet/");
     window.location.reload();
   }
-
-
 
   const handleCloseJSON = () => {
     setOpenJSON(false);
@@ -160,10 +164,21 @@ function Factsheet(props) {
     factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
   };
 
-  const handleScenarioName = e => {
-    setScenarioName(e.target.value);
-    factsheetObjectHandler('scenario_name', e.target.value);
+
+  const handleScenarioName = ({ target }) => {
+    const { name: key, value } = target;
+    setScenarioName(state => ({
+      ...state,
+      [key]: value
+    }));
+    let scenariosInfoList = [];
+    Array(scenarios).fill().map((item, i) => {
+      const sc_name = scenarioName[i];
+      scenariosInfoList.push({ name: sc_name });
+    });
+    factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfoList));
   };
+
 
   const handleScenarioAcronym = e => {
     setScenarioAcronym(e.target.value);
@@ -485,15 +500,15 @@ function Factsheet(props) {
       </Grid>
     }
 
-
-    const renderScenario = () => {
+    console.log(scenariosInfo);
+    const renderScenario = (i) => {
       return <Grid container
         direction="row"
         justifyContent="space-between"
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioName} onChange={handleScenarioName}/>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i - 1} onChange={handleScenarioName} defaultValue={id === 'new' ? '' :scenariosInfo[i - 1].name}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
@@ -587,7 +602,7 @@ function Factsheet(props) {
                 <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
                   Scenario {i + 1}
                 </Typography>
-                {renderScenario()}
+                {renderScenario(i + 1)}
               </Grid>
 
           )}
@@ -621,6 +636,8 @@ function Factsheet(props) {
     useEffect(() => {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
+
+
 
     return (
       <div>

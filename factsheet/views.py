@@ -23,13 +23,7 @@ def create_factsheet(request, *args, **kwargs):
     doi = request.GET.get('doi')
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
-    scenario_name = request.GET.get('scenario_name')
-    scenario_abstract = request.GET.get('scenario_abstract')
-    scenario_acronym = request.GET.get('scenario_acronym')
-    scenario_region = request.GET.get('scenario_region')
-    scenario_interacting_region = request.GET.get('scenario_interacting_region')
-    energy_carriers = request.GET.get('energy_carriers')
-    energy_transportation = request.GET.get('energy_transportation')
+    scenarios_info = request.GET.get('scenarios_info')
 
     factsheet_obj = {
         'name': name,
@@ -43,13 +37,7 @@ def create_factsheet(request, *args, **kwargs):
         'doi': doi,
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
-        'scenario_name': scenario_name,
-        'scenario_abstract': scenario_abstract,
-        'scenario_acronym': scenario_acronym,
-        'scenario_region': scenario_region,
-        'scenario_interacting_region': scenario_interacting_region,
-        'energy_carriers': energy_carriers,
-        'energy_transportation': energy_transportation,
+        'scenarios_info': json.loads(scenarios_info),
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -72,6 +60,7 @@ def update_factsheet(request, *args, **kwargs):
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
     authors = request.GET.get('authors')
+    scenarios_info = request.GET.get('scenarios_info')
 
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
@@ -87,6 +76,7 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['place_of_publication'] = place_of_publication
     factsheet.factsheetData['link_to_study'] = link_to_study
     factsheet.factsheetData['authors'] = authors
+    factsheet.factsheetData['scenarios_info'] = json.loads(scenarios_info)
 
     factsheet.save()
 
@@ -110,7 +100,6 @@ def factsheet_by_id(request, *args, **kwargs):
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     factsheet = Factsheet.objects.filter(id=id)
-    print(factsheet)
     print(id)
     factsheet.delete()
     return JsonResponse('deleted!', safe=False, content_type='application/json')
