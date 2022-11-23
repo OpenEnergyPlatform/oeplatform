@@ -24,6 +24,10 @@ from django.views.generic import View
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
+from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
+from omi.oem_structures.oem_v15 import OEPMetadata
+
+
 import api.parser
 from api.actions import describe_columns
 
@@ -1826,24 +1830,201 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
 
 
 class PeerReview(LoginRequiredMixin, View):
-    def separate_metadata(self, request):
-        pass
+    key_list = []
+
+    def omi_metadata(self, schema, table):
+
+        dialect15 = OEP_V_1_5_Dialect()
+        parser = dialect15._parser()
+        metadata = parser.parse(load_metadata_from_db(schema, table))
+
+        return metadata
+
+    def separateGenKey(self, request, schema, table):
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+
+        for key, value in metadata_class.__dict__.items():
+            self.key_list.append(key)
+            if key == "subject":
+                lists_count = 1
+                for subjectlists in value:
+                    for subjectkey, subjectvalue in subjectlists.__dict__.items():
+                        self.key_list.append(subjectkey)
+                        # comment_key(self.key_list, subjectvalue, lists_count)
+                        self.key_list.pop()
+                    lists_count += 1
+                self.key_list.pop()
+            elif key == "context":
+                for contextkey, contextvalue in value.__dict__.items():
+                    self.key_list.append(contextkey)
+                    # comment_key(self.key_list, contextvalue)
+                    self.key_list.pop()
+            elif key == "spatial":
+                break
+            else:
+                # comment_key(self.key_list, value)
+                self.key_list.pop()
+
+    def separateSpatandTempKey(self, request, schema, table):
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+
+        self.key_list.append("spatial")
+        for key, value in metadata_class.spatial.__dict__.items():
+            self.key_list.append(key)
+            self.comment_key(self.key_list, value)
+            self.key_list.pop()
+        self.key_list.pop()
+
+        self.key_list.append("temporal")
+        for key, value in metadata_class.temporal.__dict__.items():
+            self.key_list.append(key)
+            if isinstance(value, list):
+                lists_count = 1
+                for timeserieslists in value:
+                    for timekeys, timevalues in timeserieslists.__dict__.items():
+                        self.key_list.append(timekeys)
+                        self.comment_key(self.key_list, timevalues, lists_count)
+                        self.key_list.pop()
+                    lists_count += 1
+            else:
+                self.comment_key(self.key_list, value)
+                self.key_list.pop()
+        self.key_list.pop()
+
+    def separateSourceKey(self, request, schema, table):
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+        lists_count = 1
+
+        self.key_list.append("sources")
+        for k in metadata_class.sources:
+            for key, value in k.__dict__.items():
+                self.key_list.append(key)
+                if isinstance(value, list):
+                    for sourcelists in value:
+                        for sourcekey, sourcevalue in sourcelists.__dict__.items():
+                            if sourcekey == "license":
+                                for licensekey, licensevalue in sourcevalue.__dict__.items():
+                                    self.key_list.append(licensekey)
+                                    self.comment_key(self.key_list, licensevalue, lists_count)
+                                    self.key_list.pop()
+                            else:
+                                self.key_list.append(sourcekey)
+                                self.comment_key(self.key_list, sourcevalue, lists_count)
+                                self.key_list.pop()
+                else:
+                    self.comment_key(self.key_list, value, lists_count)
+                    self.key_list.pop()
+            self.key_list.pop()
+            lists_count += 1
+
+    def separateLiceKey(self, request, schema, table):
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+        lists_count = 1
+
+        self.key_list.append("licenses")
+        for k in metadata_class.license:
+            for key, value in k.__dict__.items():
+                if key == "license":
+                    for licensekey, licensevalue in value.__dict__.items():
+                        self.key_list.append(licensekey)
+                        self.comment_key(self.key_list, licensevalue, lists_count)
+                        self.key_list.pop()
+                else:
+                    self.key_list.append(key)
+                    self.comment_key(self.key_list, value, lists_count)
+                    self.key_list.pop()
+            lists_count += 1
+
+    def separateContKey(self, request, schema, table):
+        # Umwandlung von omi: name in templ: title funktioniert nicht
+
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+        lists_count = 1
+
+        self.key_list.append("contributors")
+        for k in metadata_class.contributions:
+            for key, value in k.__dict__.items():
+                if key == "contributor":
+                    for contkey, contvalue in value.__dict__.items():
+                        self.key_list.append(contkey)
+                        self.comment_key(self.key_list, contvalue, lists_count)
+                        self.key_list.pop()
+                else:
+                    self.key_list.append(key)
+                    self.comment_key(self.key_list, value, lists_count)
+                    self.key_list.pop()
+            lists_count += 1
+
+    def separateResoKey(self, request, schema, table):
+        metadata_class: OEPMetadata = self.omi_metadata(schema, table)
+        lists_count = 1
+
+        self.key_list.append("resources")
+        for k in metadata_class.resources:
+            for key, value in k.__dict__.items():
+                self.key_list.append(key)
+                if key == "schema":
+                    for schemakey, schemavalue in value.__dict__.items():
+                        self.key_list.append(schemakey)
+                        if schemakey == "fields":
+                            for fields in schemavalue:
+                                for fieldkey, fieldvalue in fields.__dict__.items():
+                                    self.key_list.append(fieldkey)
+                                    if fieldkey == "isAbout":
+                                        for isAbouts in fieldvalue:
+                                            for isAboutkey, isAboutvalue in isAbouts.__dict__.items():
+                                                self.key_list.append(isAboutkey)
+                                                self.comment_key(self.key_list, isAboutvalue, lists_count)
+                                                self.key_list.pop()
+                                        self.key_list.pop()
+                                    elif fieldkey == "valueReference":
+                                        for valueReferences in fieldvalue:
+                                            for valueReferencekey, valueReferencevalue in valueReferences.__dict__.items():
+                                                self.key_list.append(valueReferencekey)
+                                                self.comment_key(self.key_list, valueReferencevalue, lists_count)
+                                                self.key_list.pop()
+                                        self.key_list.pop()
+                                    else:
+                                        self.comment_key(self.key_list, fieldvalue, lists_count)
+                                        self.key_list.pop()
+                                lists_count += 1
+                            self.key_list.pop()
+                        else:
+                            pass
+                        # ask primary_key and foreign_key here
+                else:
+                    self.comment_key(self.key_list, value)
+                    self.key_list.pop()
+            lists_count += 1
+
+    def comment_key(self, request, schema, table, list_of_key: list, value, list_count=None):
+        if list_count is None:
+            iterate_entrances = 0
+        else:
+            iterate_entrances = list_count
+
+        ask_comment = input(f"--- Do you want to comment: '{list_of_key}' on {iterate_entrances}: '{value}'? "
+                            f"Press 'y' or any other letter! --- ")
+        if ask_comment == "y":
+            comment = input(f"--- Add your comment on '{list_of_key}' = '{value}': ")
+            ask_value_suggestion = input(f"--- Do you want to suggest a new value for "
+                                         f"'{list_of_key}'on {iterate_entrances}: '{value}'? "
+                                         f"Press 'y' or any other letter! --- ")
+            if ask_value_suggestion == "y":
+                value_suggestions = input(f"--- Add your suggested value on '{list_of_key}' = '{value}': ")
+                # reviewer_comments_csv(list_of_key, comment, iterate_entrances, value_suggestions)
+
+            else:
+                print("--- No value suggestion added ---")
+                # reviewer_comments_csv(list_of_key, comment, iterate_entrances)
+
+                return value
+
+        else:
+            print("--- Next field ---")
 
     def get(self, request, schema, table):
-
-
-        metadata = [{
-            "name": "hello",
-            "id": "hello id",
-            "description": "description for hello"
-        }, {
-            "name": "goodbye",
-            "id": "goodbye id",
-            "description": "description for goodbye"
-        }]
-
         columns = get_column_description(schema, table)
-
         can_add = False
         table_obj = Table.load(schema, table)
         if not request.user.is_anonymous:
@@ -1855,30 +2036,11 @@ class PeerReview(LoginRequiredMixin, View):
         )
 
         # Für metadaten nutzen: load_metadata_from_db(schema, table) !!!!!!!!!
-        metadata = { "meta" : load_metadata_from_db(schema, table)}
-
-        # nur für meta_edit relevant
-        context_dict = {
-            "config": json.dumps(
-                {
-                    "schema": schema,
-                    "table": table,
-                    "columns": columns,
-                    "url_table_id": url_table_id,
-                    "url_api_meta": reverse(
-                        "api_table_meta", kwargs={"schema": schema, "table": table}
-                    ),
-                    "url_view_table": reverse(
-                        "view", kwargs={"schema": schema, "table": table}
-                    ),
+        metadata = {"meta": self.omi_metadata(schema, table),
                     "cancle_url": get_cancle_state(self.request),
-                    "standalone": False,
-                }
-            ),
-            "can_add": can_add,
-        }
+                    "can_add": can_add}
+
 
         context_meta = metadata
 
-        return render(request, 'dataedit/peer_review.html',
-            context=context_meta)
+        return render(request, 'dataedit/peer_review.html', context=context_meta)
