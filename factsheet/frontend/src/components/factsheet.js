@@ -103,12 +103,12 @@ function Factsheet(props) {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
       factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
-      axios.post('http://localhost:8000/factsheet/add/', null,
+      axios.post('http://toep.iks.cs.ovgu.de/factsheet/add/', null,
       {  params:
         factsheetObject
       });
     } else {
-      axios.post('http://localhost:8000/factsheet/update/', null,
+      axios.post('http://toep.iks.cs.ovgu.de/factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -132,7 +132,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post('http://localhost:8000/factsheet/delete/', null, { params: { id: id } });
+    axios.post('http://toep.iks.cs.ovgu.de/factsheet/delete/', null, { params: { id: id } });
     navigate("/factsheet/");
     window.location.reload();
   }
