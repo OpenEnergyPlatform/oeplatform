@@ -96,8 +96,8 @@ function Factsheet(props) {
     setOpenJSON(true);
   };
 
+  console.log(scenariosInfo);
   console.log(scenarios);
-  console.log(Object.keys(fsData.scenarios_info).length);
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
