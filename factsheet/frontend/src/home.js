@@ -37,7 +37,7 @@ function Home() {
     console.log(v);
   };
   const getData = async () => {
-    const { data } = await axios.get(`http://localhost:8000/factsheet/all/`);
+    const { data } = await axios.get(`http://toep.iks.cs.ovgu.de/factsheet/all/`);
     let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
     setFactsheets(JSON.parse(JSON.stringify(factsheets)));
     setLoading(false)
