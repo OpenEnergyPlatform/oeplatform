@@ -1,6 +1,6 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block after-head %}
 <link href="/static/metaedit/metaedit.css" rel="stylesheet">
@@ -8,7 +8,7 @@
 
 {% block site-header %}
 <h2 class="site-header"><span class="spinner-border text-primary d-none" id="metaedit-loading"></span>
-    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>Metadata</span>
+    <i class="fa fa-tags d-none mr-2" id="metaedit-icon"></i>OEMetaBuilder</span>
 </h2>
 {% endblock site-header %}
 
@@ -36,7 +36,7 @@
 {% block after-body-bottom-js %}
     <script src="/static/metaedit/vendor/jsoneditor-2.5.1/jsoneditor.min.js"></script>
     <script src="/static/metaedit/metaedit.js"></script>
-
+    <!-- fix imports below - we dont use cdn anymore -->
     <script src="https://unpkg.com/@trevoreyre/autocomplete-js"></script>
     <link
       rel="stylesheet"
@@ -47,7 +47,7 @@
         var config = JSON.parse("{{ config|escapejs }}");
         MetaEdit(config);
         $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
+            $('[data-bs-toggle="tooltip"]').tooltip()
         })
     </script>
 {% endblock after-body-bottom-js %}

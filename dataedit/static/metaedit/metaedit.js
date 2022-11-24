@@ -73,9 +73,16 @@ var MetaEdit = function (config) {
         fixRecursive(json.properties);
 
         // make some readonly
-        json.properties.id.readonly = true;
-        json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
-        json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+        if (config.standalone == false) {
+            json.properties.id.readonly = true;
+            json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = true;
+            json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = true;
+        }
+        else {
+            json.properties.id.readonly = false;
+            json.properties.resources.items.properties.schema.properties.fields.items.properties.name.readonly = false;
+            json.properties.resources.items.properties.schema.properties.fields.items.properties.type.readonly = false;
+        }
 
         // hide some
         json.properties.resources.items.properties.profile.options = { hidden: true };
@@ -92,13 +99,20 @@ var MetaEdit = function (config) {
         json["options"] = {
             "disable_edit_json": false, // show only for entire form
         }
-        json["title"] = "Metadata for " + config.table
+
+        if (config.standalone == false) {
+            json["title"] = "Metadata for " + config.table
+        } else {
+            json["title"] = "Create new Metadata"
+        }
 
 
         return json
     }
 
     function fixData(json) {
+
+
         // MUST have ID
         json["id"] = json["id"] || config["url_table_id"];
 
@@ -120,6 +134,7 @@ var MetaEdit = function (config) {
             field.type = field.type || column.data_type;
             json["resources"][0]["schema"]["fields"].push(field);
         })
+
 
         // add empty value for all missing so they show up in editor
         // these will be removed at the end
@@ -307,35 +322,46 @@ var MetaEdit = function (config) {
                 $('#metaedit-controls').removeClass('d-none');
 
                 // TODO catch init error
-                console.log(config);
+
 
                 window.JSONEditor.defaults.callbacks = {
                 "autocomplete": {
-                    // This is callback functions for the "autocomplete" editor
-                    // In the schema you refer to the callback function by key
-                    // Note: 1st parameter in callback is ALWAYS a reference to the current editor.
-                    // So you need to add a variable to the callback to hold this (like the
-                    // "jseditor_editor" variable in the examples below.)
+                    "search_name": function search(jseditor_editor, input) {
 
-                    // Setup API calls
-                    "search_za": function search(jseditor_editor, input) {
-                        return ([
-                                  {'name': 'energy', 'class': 'OEO_00000150'},
-                                  {'name': 'energy storage', 'class': 'OEO_00000012'},
-                                  {'name': 'energy converting component', 'class': 'OEO_00000011'},
-                                  {'name': 'energy carrier disposition', 'class': 'OEO_00000151'}
-                                ]);
+                      var url = "/api/v0/oeo-search?query=" + input
+
+                      return new Promise(function (resolve) {
+                          fetch(url, {
+                            mode: 'cors',
+                            headers: {
+                              'Access-Control-Allow-Origin':'*'
+                            }
+                          }).then(function (response) {
+                              return response.json();
+                          }).then(function (data) {
+                              resolve(data["docs"]);
+                          });
+                      });
+
                     },
-                    "renderResult_za": function(jseditor_editor, result, props) {
+                    "renderResult_name": function(jseditor_editor, result, props) {
                         return ['<li ' + props + '>',
-                            '<div class="eiao-object-snippet">' + result.name.substring(0,50) + ' <small>' + result.class.substring(0,10) + '<small></div>',
+                            '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
                             '</li>'].join('');
                     },
-                    "getResultValue_za": function getResultValue(jseditor_editor, result) {
-                        return result.key;
+                    "getResultValue_name": function getResultValue(jseditor_editor, result) {
+                        selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+
+                        let path = String(jseditor_editor.path).replace("name", "path");
+                        let path_uri = config.editor.getEditor(path);
+                        path_uri.setValue(String(result.resource));
+
+                        return selected_value;
                     }
                 }
               };
+
+
 
             });
 
@@ -388,10 +414,49 @@ var MetaEdit = function (config) {
                 $('#metaedit-controls').removeClass('d-none');
 
                 // TODO catch init error
-
+                
+                window.JSONEditor.defaults.callbacks = {
+                    "autocomplete": {
+                        "search_name": function search(jseditor_editor, input) {
+    
+                          var url = "/api/v0/oeo-search?query=" + input
+    
+                          return new Promise(function (resolve) {
+                              fetch(url, {
+                                mode: 'cors',
+                                headers: {
+                                  'Access-Control-Allow-Origin':'*'
+                                }
+                              }).then(function (response) {
+                                  return response.json();
+                              }).then(function (data) {
+                                  resolve(data["docs"]);
+                              });
+                          });
+    
+                        },
+                        "renderResult_name": function(jseditor_editor, result, props) {
+                            return ['<li ' + props + '>',
+                                '<div class="eiao-object-snippet">' + result.label + '<small>' + '<span style="color:green">' + ' : ' + result.definition + '</span></div>',
+                                '</li>'].join('');
+                        },
+                        "getResultValue_name": function getResultValue(jseditor_editor, result) {
+                            selected_value = String(result.label).replaceAll("<B>", "").replaceAll("</B>", "");
+    
+                            let path = String(jseditor_editor.path).replace("name", "path");
+                            let path_uri = config.editor.getEditor(path);
+                            path_uri.setValue(String(result.resource));
+    
+                            return selected_value;
+                        }
+                    }
+                  };
+    
+    
             });
         }
     })();
+
 
     return config;
 

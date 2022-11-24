@@ -1,12 +1,13 @@
 """
-inserting the string "1000" in a varchar column 
+inserting the string "1000" in a varchar column
 that has unique constraint  leads to an error.
 """
 import json
 
-from api.tests import APITestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
+
+from api.tests import APITestCase
 
 
 class Test_issue_739_enforce_id_pk(APITestCase):

@@ -6,48 +6,70 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tutorials', '0005_auto_20200108_1540'),
+        ("tutorials", "0005_auto_20200108_1540"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tutorial',
-            name='creator',
-            field=models.CharField(max_length=254, null=True, verbose_name='creator/copyright'),
+            model_name="tutorial",
+            name="creator",
+            field=models.CharField(
+                max_length=254, null=True, verbose_name="creator/copyright"
+            ),
         ),
         migrations.AddField(
-            model_name='tutorial',
-            name='email_contact',
-            field=models.EmailField(max_length=255, null=True, verbose_name='email contact'),
+            model_name="tutorial",
+            name="email_contact",
+            field=models.EmailField(
+                max_length=255, null=True, verbose_name="email contact"
+            ),
         ),
         migrations.AddField(
-            model_name='tutorial',
-            name='github',
-            field=models.CharField(blank=True, max_length=50, verbose_name='github name'),
+            model_name="tutorial",
+            name="github",
+            field=models.CharField(
+                blank=True, max_length=50, verbose_name="github name"
+            ),
         ),
         migrations.AddField(
-            model_name='tutorial',
-            name='language',
-            field=models.CharField(choices=[('de', 'german'), ('en', 'english'), ('fr', 'french')], max_length=20, null=True),
+            model_name="tutorial",
+            name="language",
+            field=models.CharField(
+                choices=[("de", "german"), ("en", "english"), ("fr", "french")],
+                max_length=20,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='tutorial',
-            name='medium',
-            field=models.CharField(choices=[('video', 'video'), ('text', 'text'), ('jupyter', 'jupyter notebook')], max_length=20, null=True),
+            model_name="tutorial",
+            name="medium",
+            field=models.CharField(
+                choices=[
+                    ("video", "video"),
+                    ("text", "text"),
+                    ("jupyter", "jupyter notebook"),
+                ],
+                max_length=20,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='tutorial',
-            name='level',
-            field=models.IntegerField(choices=[(1, 'Beginner'), (2, 'Intermediate'), (3, 'Expert')], null=True),
+            model_name="tutorial",
+            name="level",
+            field=models.IntegerField(
+                choices=[(1, "Beginner"), (2, "Intermediate"), (3, "Expert")], null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='tutorial',
-            name='media_src',
-            field=models.URLField(blank=True, null=True, verbose_name='youtube video url'),
+            model_name="tutorial",
+            name="media_src",
+            field=models.URLField(
+                blank=True, null=True, verbose_name="youtube video url"
+            ),
         ),
         migrations.AlterField(
-            model_name='tutorial',
-            name='title',
+            model_name="tutorial",
+            name="title",
             field=models.CharField(max_length=255),
         ),
     ]

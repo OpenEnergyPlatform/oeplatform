@@ -1,30 +1,30 @@
-.metacontainer{
-    border-color:rgb(32, 80, 128);
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 5px;
+.metacontainer {
+  border-color: rgb(32, 80, 128);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
 }
 
-.metacontainer-header{
-    background:rgb(32, 80, 128);
-    border-top-radius: 5px;
-    padding-right:2px;
-    text-align:right;
+.metacontainer-header {
+  background: rgb(32, 80, 128);
+  border-top-radius: 5px;
+  padding-right: 2px;
+  text-align: right;
 }
 
-.metahiddenfield{
-    display:none;
+.metahiddenfield {
+  display: none;
 }
 
-.metaformframe{
-   padding:5px;
+.metaformframe {
+  padding: 5px;
 }
 
-.metaproperty{
-    font-weight: bold;
-    margin-right:10px;
+.metaproperty {
+  font-weight: bold;
+  margin-right: 10px;
 }
 
-.metavalue{
-   width:100%
+.metavalue {
+  width: 100%;
 }

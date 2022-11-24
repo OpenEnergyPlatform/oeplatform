@@ -13,10 +13,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
 try:
-    from .securitysettings import *
-except:
+    from .securitysettings import *  # noqa
+except ImportError:
     import logging
     import os
+
     logging.error("No securitysettings found. Triggerd in oeplatform/settings.py")
     SECRET_KEY = os.environ.get("SECRET_KEY", "0")
     DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
@@ -35,7 +36,7 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sessions.backends.signed_cookies",
-    "bootstrap4",
+    "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
     "modelview",
@@ -53,7 +54,6 @@ INSTALLED_APPS = (
     "django.contrib.postgres",
     "fontawesome_5",
     "tutorials",
-    "jquery",
     "django_better_admin_arrayfield",
     "oeo_viewer",
     "graphene_django",
@@ -71,7 +71,6 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware"
 )
 
@@ -105,7 +104,7 @@ GRAPHENE = {
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 
 try:
-    ONTOLOGY_FOLDER
+    ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
@@ -140,10 +139,9 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    'axes.backends.AxesBackend',
-
+    "axes.backends.AxesBackend",
     # custom class extenging Django ModelBackend for login with username OR email
-    'login.backends.ModelBackendWithEmail',
+    "login.backends.ModelBackendWithEmail",
 ]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

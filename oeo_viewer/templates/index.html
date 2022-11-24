@@ -1,9 +1,14 @@
 {% extends "base/base-wide.html" %}
+{% load static %}
+
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'oeo_viewer/main.min.css' %}">
+{% endblock after-head %}
 
 {% block main-content-body %}
-<script>
-</script>
+<div id="app"></div>
+{% endblock main-content-body %}
 
-<html><link rel="stylesheet" href="/static/main.css"><body> <div id="app"></div> <script src="/static/main.js"></script> </body></html>
-
-{% endblock %}
+{% block after-body-bottom-js %}
+<script src="{% static 'oeo_viewer/main.min.js' %}"></script>
+{% endblock after-body-bottom-js %}

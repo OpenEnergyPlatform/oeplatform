@@ -6,7 +6,7 @@
 </h3>
 <form action="" method="post">{% csrf_token %}
     {% for field in form %}
-    <div class="form-group">
+    <div class="mb-3">
         {{ field.label_tag }}
         {% for error in field.errors %}
             <div class="alert alert-danger">

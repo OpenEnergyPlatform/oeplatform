@@ -53,13 +53,13 @@ class Migration(migrations.Migration):
             name="authors",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(
-                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",
+                    help_text="Who are the authors? Where do / did they work, on which parts of the model, during which time period?",  # noqa
                     max_length=300,
                 ),
                 default=list,
                 null=True,
                 size=None,
-                verbose_name="Author(s) (institution, working field, active time period)",
+                verbose_name="Author(s) (institution, working field, active time period)",  # noqa
             ),
         ),
         migrations.AlterField(
@@ -146,7 +146,7 @@ class Migration(migrations.Migration):
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.CharField(max_length=1000),
                 default=list,
-                help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",
+                help_text="What regions are covered? Please, list the regions covered by the model. Leave blank, if the model and data are not limited to a specific region. Example input: USA, Canada, Mexico",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Geographical coverage",
@@ -157,7 +157,7 @@ class Migration(migrations.Migration):
             name="integrated_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.TextField(),
-                help_text="Which models are integrated in the model? Where are these models available?",
+                help_text="Which models are integrated in the model? Where are these models available?",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration of other models",
@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
             name="integrating_models",
             field=django.contrib.postgres.fields.ArrayField(
                 base_field=models.TextField(),
-                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?",
+                help_text="With which models has this model been integrated into (providing a link)? Where is the combined model available?",  # noqa
                 null=True,
                 size=None,
                 verbose_name="Integration with other models",

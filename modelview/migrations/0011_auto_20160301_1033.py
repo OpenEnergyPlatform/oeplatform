@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="energyscenario",
             name="social_data",
             field=models.CharField(
-                help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+                help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                 max_length=1000,
                 null=True,
                 verbose_name="Social data",

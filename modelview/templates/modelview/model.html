@@ -1,5 +1,5 @@
 {% extends "modelview/detail_view.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
@@ -14,7 +14,7 @@
   <div class="card-container">
     <div class="card ">
       <div class="card-header">
-            <a class="fill-div" data-toggle="collapse" href="#GeneralInformation">General Information</a>
+            <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation">General Information</a>
       </div>
       <div id="GeneralInformation" class="card-body expand in  in">
 
@@ -25,7 +25,7 @@
           <tr>
             <td class="sheetlabel">
               {% get_field_attr model 'methodical_focus_1' 'verbose_name' %}
-              <i data-toggle='tooltip'
+              <i data-bs-toggle='tooltip'
                  title="{% get_field_attr model 'methodical_focus_1' 'help_text' %}">
                 <span class='fas fa-question'></span>
               </i>
@@ -69,7 +69,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#Openness">Openness</a>
+        <a data-bs-toggle="collapse" href="#Openness">Openness</a>
       </div>
       <div id="Openness" class="card-body collapse in ">
         <table class="profiletable">
@@ -112,7 +112,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a href="#Software" data-toggle="collapse">Software</a>
+        <a href="#Software" data-bs-toggle="collapse">Software</a>
       </div>
       <div id="Software" class="card-body collapse in ">
         <table class="profiletable">
@@ -126,7 +126,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#Coverage">Coverage</a>
+        <a data-bs-toggle="collapse" href="#Coverage">Coverage</a>
       </div>
       <div id="Coverage" class="card-body collapse  ">
         <table class="profiletable">
@@ -293,7 +293,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
+        <a data-bs-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
       </div>
       <div id="MathematicalProperties" class="card-body collapse ">
         <table class="profiletable">
@@ -342,7 +342,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a class="fill-div" data-toggle="collapse" href="#Integration">Model Integration</a>
+        <a class="fill-div" data-bs-toggle="collapse" href="#Integration">Model Integration</a>
       </div>
       <div id="Integration" class="card-body collapse in  in">
         <table class="profiletable">
@@ -357,7 +357,7 @@
     </div>
     <div class="card ">
       <div class="card-header">
-        <a data-toggle="collapse" href="#References">References</a>
+        <a data-bs-toggle="collapse" href="#References">References</a>
       </div>
       <div id="References" class="card-body collapse  ">
         <div>

@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 (
                     "author_Institution",
                     models.CharField(
-                        help_text="Who are the authors of the study and for which institution do they work?",
+                        help_text="Who are the authors of the study and for which institution do they work?",  # noqa
                         max_length=100,
                         verbose_name="Author, Institution",
                     ),
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                 (
                     "aim",
                     models.CharField(
-                        help_text="What is the purpose (hypothesis) and research question of the study?",
+                        help_text="What is the purpose (hypothesis) and research question of the study?",  # noqa
                         max_length=100,
                         verbose_name="Aim",
                     ),
@@ -155,25 +155,25 @@ class Migration(migrations.Migration):
                 (
                     "economic_behavioral_perfect",
                     models.BooleanField(
-                        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"
+                        verbose_name="single fictive decision-maker with perfect knowledge (perfect foresight optimization)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_myopic",
                     models.BooleanField(
-                        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"
+                        verbose_name="single fictive decision-maker with myopic foresight (time-step optimization)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_qualitative",
                     models.BooleanField(
-                        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"
+                        verbose_name="decisions simulated by modeller due to qualitative criteria (spread-sheet simulation)"  # noqa
                     ),
                 ),
                 (
                     "economic_behavioral_agentbased",
                     models.BooleanField(
-                        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"
+                        verbose_name="representation of heterogenous decision rules for multiple agents (agent-based approach)"  # noqa
                     ),
                 ),
                 (
@@ -238,7 +238,7 @@ class Migration(migrations.Migration):
                 (
                     "endogenous_variables",
                     models.CharField(
-                        help_text="Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)",
+                        help_text="Which time series and variables are generated inside the model? (Does this question belong into the scenario fact sheet?)",  # noqa
                         max_length=100,
                         verbose_name="Endogenous variables",
                     ),
@@ -280,7 +280,7 @@ class Migration(migrations.Migration):
                 (
                     "technical_data",
                     models.CharField(
-                        help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",
+                        help_text="What kind of technical data(sets) are included /used? (heat-/powerplants; grid infrastructure;...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                         max_length=100,
                         verbose_name="Technical data + usage",
                     ),
@@ -288,7 +288,7 @@ class Migration(migrations.Migration):
                 (
                     "social_data",
                     models.CharField(
-                        help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",
+                        help_text="What kind of social data(sets) are included / were used / considered? (e.g. demographic changes, employment rate; social structure, ...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                         max_length=100,
                         verbose_name="Social data",
                     ),
@@ -296,7 +296,7 @@ class Migration(migrations.Migration):
                 (
                     "economical_data",
                     models.CharField(
-                        help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",
+                        help_text="What kind of economical data(sets) are included / were used? (e.g. price structures, market settings,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                         max_length=100,
                         verbose_name="Economical data",
                     ),
@@ -304,7 +304,7 @@ class Migration(migrations.Migration):
                 (
                     "ecological_data",
                     models.CharField(
-                        help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",
+                        help_text="What kind of ecological data(sets) are included / were used? (e.g. landuse, CO2 emissions,...) What were the data(sets) used for (e.g. model calibration)?",  # noqa
                         max_length=100,
                         verbose_name="Ecological data",
                     ),
@@ -312,7 +312,7 @@ class Migration(migrations.Migration):
                 (
                     "preProcessing",
                     models.CharField(
-                        help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",
+                        help_text="Have the mentioned values been modified before being used for the modelling exercise or are they used directly? Please, describe what kind of modification have been made? Additionally, you can link to data processing scripts.",  # noqa
                         max_length=100,
                         verbose_name="Pre-Processing",
                     ),
@@ -455,7 +455,7 @@ class Migration(migrations.Migration):
                 (
                     "technological_innovations",
                     models.CharField(
-                        help_text="Have future technological innovations been regarded?",
+                        help_text="Have future technological innovations been regarded?",  # noqa
                         max_length=100,
                         verbose_name="Technological innovations",
                     ),
@@ -579,7 +579,7 @@ class Migration(migrations.Migration):
                 (
                     "social_developement",
                     models.CharField(
-                        help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",
+                        help_text="How are changes of social structure considered? (e.g. demographic changes, employment rate, ...)",  # noqa
                         max_length=100,
                         verbose_name="Social developement",
                     ),
@@ -603,21 +603,21 @@ class Migration(migrations.Migration):
                 (
                     "postprocessing",
                     models.BooleanField(
-                        help_text="Are the presented results directly taken from the models’ outcome or are they modified?",
+                        help_text="Are the presented results directly taken from the models’ outcome or are they modified?",  # noqa
                         verbose_name="Post-processing",
                     ),
                 ),
                 (
                     "further_assumptions_for_postprocessing",
                     models.BooleanField(
-                        help_text="Are additional assumptions applied for this modification?",
+                        help_text="Are additional assumptions applied for this modification?",  # noqa
                         verbose_name="Further assumptions for post-processing",
                     ),
                 ),
                 (
                     "uncertainty_assessment",
                     models.CharField(
-                        help_text="How are the identified uncertain factors considered in the study?",
+                        help_text="How are the identified uncertain factors considered in the study?",  # noqa
                         max_length=100,
                         verbose_name="Uncertainty assessment",
                     ),
@@ -633,7 +633,7 @@ class Migration(migrations.Migration):
                 (
                     "comparability_Validation",
                     models.CharField(
-                        help_text="How far do the modelling results fit in compared to similar scientific research?",
+                        help_text="How far do the modelling results fit in compared to similar scientific research?",  # noqa
                         max_length=100,
                         verbose_name="Comparability / Validation",
                     ),
@@ -641,7 +641,7 @@ class Migration(migrations.Migration):
                 (
                     "conclusions",
                     models.CharField(
-                        help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",
+                        help_text="What political, social (or in another way) relevant conclusions are drawn from the scenario analysis? ",  # noqa
                         max_length=100,
                         verbose_name="Conclusions",
                     ),

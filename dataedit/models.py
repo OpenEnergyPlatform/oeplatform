@@ -40,6 +40,9 @@ class Schema(Tagable):
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
+    # Add field to store oemetadata related to the table and avoide performance issues
+    # due to oem string (json) parsing like when reading the oem form comment on table
+    oemetadata = JSONField(null=True)
 
     @classmethod
     def load(cls, schema, table):

@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tutorials', '0003_tutorial_media'),
+        ("tutorials", "0003_tutorial_media"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tutorial',
-            name='media',
+            model_name="tutorial",
+            name="media",
             field=models.URLField(blank=True, null=True),
         ),
     ]

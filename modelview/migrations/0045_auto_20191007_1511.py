@@ -8,77 +8,98 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modelview', '0044_auto_20191007_1227'),
+        ("modelview", "0044_auto_20191007_1227"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='energymodel',
-            name='network_coverage_NT',
+            model_name="energymodel",
+            name="network_coverage_NT",
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='generation_conventional_hard_coal',
-            field=models.BooleanField(default=False, verbose_name='hard coal'),
+            model_name="energymodel",
+            name="generation_conventional_hard_coal",
+            field=models.BooleanField(default=False, verbose_name="hard coal"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='generation_conventional_lignite',
-            field=models.BooleanField(default=False, verbose_name='lignite'),
+            model_name="energymodel",
+            name="generation_conventional_lignite",
+            field=models.BooleanField(default=False, verbose_name="lignite"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='generation_renewables_bio',
-            field=models.BooleanField(default=False, verbose_name='Biomass,Biogas,Biofuels'),
+            model_name="energymodel",
+            name="generation_renewables_bio",
+            field=models.BooleanField(
+                default=False, verbose_name="Biomass,Biogas,Biofuels"
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='generation_renewables_geothermal',
-            field=models.BooleanField(default=False, verbose_name='Geothermal heat'),
+            model_name="energymodel",
+            name="generation_renewables_geothermal",
+            field=models.BooleanField(default=False, verbose_name="Geothermal heat"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='modeled_technology_conventional',
-            field=models.BooleanField(default=False, verbose_name='conventional'),
+            model_name="energymodel",
+            name="modeled_technology_conventional",
+            field=models.BooleanField(default=False, verbose_name="conventional"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='modeled_technology_renewables',
-            field=models.BooleanField(default=False, verbose_name='renewables'),
+            model_name="energymodel",
+            name="modeled_technology_renewables",
+            field=models.BooleanField(default=False, verbose_name="renewables"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='network_coverage_SN',
-            field=models.BooleanField(default=False, verbose_name='single-node / copper plate model'),
+            model_name="energymodel",
+            name="network_coverage_SN",
+            field=models.BooleanField(
+                default=False, verbose_name="single-node / copper plate model"
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='network_coverage_TM',
-            field=models.BooleanField(default=False, verbose_name='transshipment model'),
+            model_name="energymodel",
+            name="network_coverage_TM",
+            field=models.BooleanField(
+                default=False, verbose_name="transshipment model"
+            ),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='network_coverage_other',
-            field=models.BooleanField(default=False, verbose_name='other'),
+            model_name="energymodel",
+            name="network_coverage_other",
+            field=models.BooleanField(default=False, verbose_name="other"),
         ),
         migrations.AddField(
-            model_name='energymodel',
-            name='network_coverage_other_text',
+            model_name="energymodel",
+            name="network_coverage_other_text",
             field=models.CharField(max_length=200, null=True),
         ),
         migrations.AddField(
-            model_name='energystudy',
-            name='contact_email',
-            field=models.EmailField(help_text='Please provide the mailadress of the contact person.', max_length=254, null=True, verbose_name='Contact (e-mail)'),
+            model_name="energystudy",
+            name="contact_email",
+            field=models.EmailField(
+                help_text="Please provide the mailadress of the contact person.",
+                max_length=254,
+                null=True,
+                verbose_name="Contact (e-mail)",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='larger_scale_usage',
-            field=models.CharField(help_text='Is this model used from various (maybe well known) institutions? If so, who uses it?', max_length=10000, null=True, verbose_name='Model usage'),
+            model_name="basicfactsheet",
+            name="larger_scale_usage",
+            field=models.CharField(
+                help_text="Is this model used from various (maybe well known) institutions? If so, who uses it?",  # noqa
+                max_length=10000,
+                null=True,
+                verbose_name="Model usage",
+            ),
         ),
         migrations.AlterField(
-            model_name='basicfactsheet',
-            name='link_to_source_code',
-            field=models.CharField(help_text='Is the necessary data to run a scenario available?', max_length=200, null=True, verbose_name='Access to source code'),
+            model_name="basicfactsheet",
+            name="link_to_source_code",
+            field=models.CharField(
+                help_text="Is the necessary data to run a scenario available?",
+                max_length=200,
+                null=True,
+                verbose_name="Access to source code",
+            ),
         ),
     ]

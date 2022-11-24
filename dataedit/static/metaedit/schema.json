@@ -423,7 +423,16 @@
                                                     "name": {
                                                         "description": "Name of the Dataset",
                                                         "type": "string",
-                                                        "title": "Name"
+                                                        "title": "Name",
+                                                        "format": "autocomplete",
+                                                        "options": {
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        }
                                                     },
                                                     "path": {
                                                         "description": "Path to the OEO (URL)",
@@ -433,9 +442,9 @@
                                                     }
                                                 },
                                                 "additionalProperties": false,
-                                                "title": "IsAbout"
+                                                "title": "Is About"
                                             },
-                                            "title": "IsAbout"
+                                            "title": "Is About"
                                         },
                                         "valueReference": {
                                             "description": "Ontology URI for an extended description of the values in the column",
@@ -450,17 +459,17 @@
                                                     },
                                                     "name": {
                                                         "description": "Full name of the value",
-                                                        "type": "autocomplete",
+                                                        "type": "string",
                                                         "title": "Name",
                                                         "format": "autocomplete",
                                                         "options": {
-                                                          "autocomplete": {
-                                                              "search": "search_za",
-                                                              "getResultValue": "getResultValue_za",
-                                                              "renderResult": "renderResult_za",
-                                                              "autoSelect": true
-                                                          }
-                                                      }
+                                                            "autocomplete": {
+                                                                "search": "search_name",
+                                                                "getResultValue": "getResultValue_name",
+                                                                "renderResult": "renderResult_name",
+                                                                "autoSelect": true
+                                                            }
+                                                        }
                                                     },
                                                     "path": {
                                                         "description": "Path to the OEO",
@@ -472,7 +481,7 @@
                                                 "additionalProperties": false,
                                                 "title": "Value reference"
                                             },
-                                            "title": "valueReference"
+                                            "title": "Value Reference"
                                         },
                                         "unit": {
                                             "description": "Unit, preferably SI-Unit, that values in this field are mapped to. If \"unit\" doesn't apply to a field, use \"null\". Example: MW",
@@ -483,7 +492,7 @@
                                     "additionalProperties": false,
                                     "title": "Field"
                                 },
-                                "title": "f"
+                                "title": "Fields"
                             },
                             "primaryKey": {
                                 "description": "A primary key is a field or set of fields that uniquely identifies each row in the table. It's recorded as a list of strings, since it is possible to define the primary key as made up of several columns. Example: id",

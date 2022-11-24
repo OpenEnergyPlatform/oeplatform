@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="methodical_focus_1",
             field=models.CharField(
                 default="",
-                help_text='1-3 Keyords descrybing the main methodical focus of the model e.g."open source", "sector coupling"',
+                help_text='1-3 Keyords descrybing the main methodical focus of the model e.g."open source", "sector coupling"',  # noqa
                 max_length=50,
                 verbose_name="Methodical Focus",
             ),
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             model_name="energymodel",
             name="properties_missed",
             field=models.TextField(
-                help_text="Which properties of your model have not been mentioned on this factsheet? Please note them.",
+                help_text="Which properties of your model have not been mentioned on this factsheet? Please note them.",  # noqa
                 null=True,
                 verbose_name="further properties",
             ),

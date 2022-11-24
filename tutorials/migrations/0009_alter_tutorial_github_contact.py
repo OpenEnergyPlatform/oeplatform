@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tutorials', '0008_auto_20210317_1225'),
+        ("tutorials", "0008_auto_20210317_1225"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tutorial',
-            name='github_contact',
-            field=models.CharField(blank=True, max_length=50, verbose_name='github username/handle'),
+            model_name="tutorial",
+            name="github_contact",
+            field=models.CharField(
+                blank=True, max_length=50, verbose_name="github username/handle"
+            ),
         ),
     ]

@@ -23,4 +23,3 @@ python manage.py alembic upgrade head
 echo "Starting apache2"
 
 /usr/sbin/apache2ctl -DFOREGROUND
-

@@ -1,7 +1,7 @@
+from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
+
 from api import actions
 from dataedit.metadata import v1_3
-
-from omi.dialects.oep.dialect import OEP_V_1_3_Dialect, OEP_V_1_4_Dialect
 
 TEMPLATE_V1_4 = {
     "name": "",
@@ -11,13 +11,8 @@ TEMPLATE_V1_4 = {
     "language": [],
     "keywords": [],
     "publicationDate": "",
-    "context": {        
-    },
-    "spatial": {
-        "location": "",
-        "extent": "",
-        "resolution": ""
-    },
+    "context": {},
+    "spatial": {"location": "", "extent": "", "resolution": ""},
     "temporal": {
         "referenceDate": "",
         "timeseries": {
@@ -25,78 +20,48 @@ TEMPLATE_V1_4 = {
             "end": "",
             "resolution": "",
             "alignment": "",
-            "aggregationType": ""
-        }
+            "aggregationType": "",
+        },
     },
     "sources": [
-        {
-            "title": "",
-            "description": "",
-            "path": "",
-            "licenses": [                
-            ]
-        },
-        {
-            "title": "",
-            "description": "",
-            "path": "",
-            "licenses": [                
-            ]
-        }
+        {"title": "", "description": "", "path": "", "licenses": []},
+        {"title": "", "description": "", "path": "", "licenses": []},
     ],
     "licenses": [
-        {
-            "name": "",
-            "title": "",
-            "path": "",
-            "instruction": "",
-            "attribution": ""
-        }
+        {"name": "", "title": "", "path": "", "instruction": "", "attribution": ""}
     ],
-    "contributors": [        
-    ],
+    "contributors": [],
     "resources": [
         {
             "profile": "",
             "name": "",
             "path": "",
             "format": "",
-            "encoding" : "",
+            "encoding": "",
             "schema": {
-                "fields": [                    
-                ],
+                "fields": [],
             },
-            "dialect":
-                {
-                    "delimiter": "",
-                    "decimalSeparator": "."
-                }
+            "dialect": {"delimiter": "", "decimalSeparator": "."},
         }
     ],
-    "review": {
-        "path": "",
-        "badge": ""
-    },
-    "metaMetadata":{
+    "review": {"path": "", "badge": ""},
+    "metaMetadata": {
         "metadataVersion": "OEP-1.4.0",
-        "metadataLicense":
-            {
-                "name": "CC0-1.0",
-                "title": "Creative Commons Zero v1.0 Universal",
-                "path": "https://creativecommons.org/publicdomain/zero/1.0/"
-            }
+        "metadataLicense": {
+            "name": "CC0-1.0",
+            "title": "Creative Commons Zero v1.0 Universal",
+            "path": "https://creativecommons.org/publicdomain/zero/1.0/",
+        },
     },
-    "_comment":
-        {
-            ""
-            "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",
-            "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",
-            "units": "Use a space between numbers and units (100 m)",
-            "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",
-            "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",
-            "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",
-            "null": "If not applicable use (null)"
-        }
+    "_comment": {
+        "metadata": "Metadata documentation and explanation (https://github.com/OpenEnergyPlatform/organisation/wiki/metadata)",  # noqa
+        "dates": "Dates and time must follow the ISO8601 including time zone (YYYY-MM-DD or YYYY-MM-DDThh:mm:ss±hh)",  # noqa
+        "units": "Use a space between numbers and units (100 m)",
+        "languages": "Languages must follow the IETF (BCP47) format (en-GB, en-US, de-DE)",  # noqa
+        "licenses": "License name must follow the SPDX License List (https://spdx.org/licenses/)",  # noqa
+        "review": "Following the OEP Data Review (https://github.com/OpenEnergyPlatform/data-preprocessing/wiki)",  # noqa
+        "null": "If not applicable use (null)",
+    },
 }
 
 
@@ -105,8 +70,7 @@ def get_empty(schema, table):
     columns = actions.analyze_columns(schema, table)
     # TODO: check how the fields should
     template["resources"][0]["schema"]["fields"] = [
-        {"name": col["id"], "description": "", "unit": ""}
-        for col in columns
+        {"name": col["id"], "description": "", "unit": ""} for col in columns
     ]
     return template
 
