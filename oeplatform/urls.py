@@ -33,6 +33,5 @@ urlpatterns = [
     url(r"^tutorials/", include("tutorials.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
     url(r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$", ImagesView.as_view()),
-    url(r"^graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
     url(r"^factsheet/", include("factsheet.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
