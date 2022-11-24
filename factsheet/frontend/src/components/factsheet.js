@@ -73,9 +73,9 @@ function Factsheet(props) {
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
 
-  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios_info.length : 1);
+  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_info).length : 1);
   const [scenarioObject, setScenarioObject] = useState({});
-  const [scenariosInfo, setScenariosInfo] = useState(id !== 'new' ? fsData.scenarios_info : [{"name": ""}]);
+  const [scenariosInfo, setScenariosInfo] = useState(id !== 'new' ? fsData.scenarios_info : {});
 
   const [selectedRegion, setSelectedRegion] = useState([]);
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
@@ -84,7 +84,6 @@ function Factsheet(props) {
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
-  const [scenarioName, setScenarioName] = useState({});
   const [scenarioAbstract, setScenarioAbstract] = useState('');
   const [scenarioAcronym, setScenarioAcronym] = useState('');
   const [scenarioInputDatasetName, setScenarioInputDatasetName] = useState('');
@@ -97,19 +96,18 @@ function Factsheet(props) {
     setOpenJSON(true);
   };
 
+  console.log(scenarios);
+  console.log(Object.keys(fsData.scenarios_info).length);
+
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
+      factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
       axios.post('http://localhost:8000/factsheet/add/', null,
       {  params:
         factsheetObject
       });
     } else {
-      let scenariosInfoList = [];
-      Array(scenarios).fill().map((item, i) => {
-        const sc_name = scenarioName[i];
-        scenariosInfoList.push({ name: sc_name });
-      });
       axios.post('http://localhost:8000/factsheet/update/', null,
       {  params:
           {
@@ -127,10 +125,9 @@ function Factsheet(props) {
             place_of_publication: place_of_publication,
             link_to_study: link_to_study,
             authors: JSON.stringify(selectedAuthors),
-            scenarios_info: JSON.stringify(scenariosInfoList),
+            scenarios_info: JSON.stringify(scenariosInfo),
           }
       });
-
     }
   };
 
@@ -165,20 +162,13 @@ function Factsheet(props) {
   };
 
 
-  const handleScenarioName = ({ target }) => {
+  const handleScenariosInfo = ({ target }) => {
     const { name: key, value } = target;
-    setScenarioName(state => ({
+    setScenariosInfo(state => ({
       ...state,
-      [key]: value
+      [key]: {...scenariosInfo[key], 'name': value}
     }));
-    let scenariosInfoList = [];
-    Array(scenarios).fill().map((item, i) => {
-      const sc_name = scenarioName[i];
-      scenariosInfoList.push({ name: sc_name });
-    });
-    factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfoList));
   };
-
 
   const handleScenarioAcronym = e => {
     setScenarioAcronym(e.target.value);
@@ -292,8 +282,6 @@ function Factsheet(props) {
         ))
       }
     }
-
-
 
     const sectors = [
       { id: 'Agriculture forestry and land use sector', name: 'Agriculture forestry and land use sector' },
@@ -500,7 +488,6 @@ function Factsheet(props) {
       </Grid>
     }
 
-    console.log(scenariosInfo);
     const renderScenario = (i) => {
       return <Grid container
         direction="row"
@@ -508,7 +495,7 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i - 1} onChange={handleScenarioName} defaultValue={id === 'new' ? '' :scenariosInfo[i - 1].name}/>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i} onChange={handleScenariosInfo} defaultValue={id === 'new' ? '' :scenariosInfo[i].name}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
@@ -602,7 +589,7 @@ function Factsheet(props) {
                 <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
                   Scenario {i + 1}
                 </Typography>
-                {renderScenario(i + 1)}
+                {renderScenario(i)}
               </Grid>
 
           )}

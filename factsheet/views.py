@@ -62,6 +62,8 @@ def update_factsheet(request, *args, **kwargs):
     authors = request.GET.get('authors')
     scenarios_info = request.GET.get('scenarios_info')
 
+    print(scenarios_info)
+
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
     factsheet.factsheetData['study_name'] = studyName
