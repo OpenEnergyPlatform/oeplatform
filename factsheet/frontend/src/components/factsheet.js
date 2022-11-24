@@ -96,9 +96,6 @@ function Factsheet(props) {
     setOpenJSON(true);
   };
 
-  console.log(scenariosInfo);
-  console.log(scenarios);
-
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
