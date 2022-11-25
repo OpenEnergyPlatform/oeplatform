@@ -23,6 +23,7 @@ import axios from "axios"
 import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
 
+import conf from "./conf.json";
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
@@ -37,7 +38,7 @@ function Home() {
     console.log(v);
   };
   const getData = async () => {
-    const { data } = await axios.get(`http://toep.iks.cs.ovgu.de/factsheet/all/`);
+    const { data } = await axios.get(conf.localhost + `factsheet/all/`);
     let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
     setFactsheets(JSON.parse(JSON.stringify(factsheets)));
     setLoading(false)
@@ -48,7 +49,6 @@ function Home() {
 
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
-      console.log('f');
       return fs.map(item =>
           (<Grid item xs={3}>
             <CustomCard

@@ -31,6 +31,9 @@ import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import Stack from '@mui/material/Stack';
 
+import conf from "../conf.json";
+
+
 function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
@@ -56,6 +59,8 @@ function Factsheet(props) {
   const [openOverView, setOpenOverView] = useState(false);
   const [openJSON, setOpenJSON] = useState(false);
   const [openTurtle, setOpenTurtle] = useState(false);
+  const [openSavedDialog, setOpenSavedDialog] = useState(false);
+  const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
@@ -100,12 +105,14 @@ function Factsheet(props) {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
       factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
-      axios.post('http://toep.iks.cs.ovgu.de/factsheet/add/', null,
+
+      axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
         factsheetObject
-      });
+      }).then(response => setOpenSavedDialog(true));
+
     } else {
-      axios.post('http://toep.iks.cs.ovgu.de/factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -124,18 +131,26 @@ function Factsheet(props) {
             authors: JSON.stringify(selectedAuthors),
             scenarios_info: JSON.stringify(scenariosInfo),
           }
-      });
+      }).then(response => setOpenUpdatedDialog(true));
     }
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post('http://toep.iks.cs.ovgu.de/factsheet/delete/', null, { params: { id: id } });
+    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } });
     navigate("/factsheet/");
     window.location.reload();
   }
 
   const handleCloseJSON = () => {
     setOpenJSON(false);
+  };
+
+  const handleCloseSavedDialog = () => {
+    setOpenSavedDialog(false);
+  };
+
+  const handleCloseUpdatedDialog = () => {
+    setOpenUpdatedDialog(false);
   };
 
   const handleScenarioInpuDatasetName = e => {
@@ -157,7 +172,6 @@ function Factsheet(props) {
     setScenarioOutputDatasetIRI(e.target.value);
     factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
   };
-
 
   const handleScenariosInfo = ({ target }) => {
     const { name: key, value } = target;
@@ -217,7 +231,6 @@ function Factsheet(props) {
     factsheetObjectHandler('link_to_study', e.target.value);
   };
 
-
   const handleDateOfPublication = e => {
     setDateOfPublication(e.target.value);
     factsheetObjectHandler('date_of_publication', e.target.value);
@@ -226,6 +239,14 @@ function Factsheet(props) {
   const handleClickOpenTurtle = () => {
     setOpenTurtle(true);
     convert2RDF();
+  };
+
+  const handleClickOpenSavedDialog = () => {
+    openSavedDialog(true);
+  };
+
+  const handleClickOpenUpdatedDialog = () => {
+    openSavedDialog(true);
   };
 
   const handleCloseTurtle = () => {
@@ -639,9 +660,7 @@ function Factsheet(props) {
             <div style={{ 'textAlign': 'right' }}>
               <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" onClick={handleRemoveFactsheet}>Remove</Button>
               <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
-              <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
-                <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
-              </Link>
+              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
               <Button disableElevation={true} startIcon={<ForwardToInboxIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle}>Submit</Button>
             </div >
           </Grid>
@@ -675,6 +694,62 @@ function Factsheet(props) {
                 <Button variant="contained" autoFocus onClick={handleCloseTurtle}>
                   Cancel
                 </Button>
+              </DialogActions>
+            </Dialog>
+
+
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openSavedDialog}
+              onClose={handleClickOpenSavedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>New Factsheet Saved!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your new factsheet has saved in the Open Energy Platform!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openUpdatedDialog}
+              onClose={handleClickOpenUpdatedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>Factsheet Updated!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your factsheet has updated!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
               </DialogActions>
             </Dialog>
             {mode === "wizard" &&
