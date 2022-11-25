@@ -29,7 +29,7 @@ const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
 });
 
-function Home() {
+function Home(props) {
 
   const [factsheets, setFactsheets] = React.useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ function Home() {
       setFactsheets(response.data);
       setLoading(false);
     });
-  }, []);
+  }, [setFactsheets, setLoading]);
 
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
@@ -62,9 +62,10 @@ function Home() {
       }
   }
   if (loading === false) {
+    console.log(props.location);
     return (
       <ApolloProvider client={client}>
-          <div >
+          <div key={props.id}>
             <Grid container spacing={2} direction="row" justifyContent="space-between">
                 <Grid item xs={10}>
                   <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'Factsheet A', label: 'Anguilla', phone: '1-264' },

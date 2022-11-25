@@ -725,7 +725,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>
@@ -752,7 +752,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>
@@ -779,7 +779,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>

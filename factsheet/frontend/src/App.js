@@ -56,7 +56,7 @@ function App() {
   }, []);
 
   if (url_id === '') {
-    return < Home />
+    return < Home id={url_id}/>
   } else {
     if (loading === false) {
       return <Factsheet id={url_id} fsData={factsheet}/>
