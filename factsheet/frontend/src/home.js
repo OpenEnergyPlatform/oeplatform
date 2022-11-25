@@ -39,6 +39,7 @@ function Home(props) {
   };
 
   useEffect(() => {
+    setLoading(true);
     axios.get(conf.toep + `factsheet/all/`).then(response => {
       setFactsheets(response.data);
       setLoading(false);
@@ -62,7 +63,6 @@ function Home(props) {
       }
   }
   if (loading === false) {
-    console.log(props.location);
     return (
       <ApolloProvider client={client}>
           <div key={props.id}>
