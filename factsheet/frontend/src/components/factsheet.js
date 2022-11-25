@@ -61,6 +61,7 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
+  const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
@@ -136,9 +137,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } });
-    navigate("/factsheet/");
-    window.location.reload();
+    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {
@@ -151,6 +150,10 @@ function Factsheet(props) {
 
   const handleCloseUpdatedDialog = () => {
     setOpenUpdatedDialog(false);
+  };
+
+  const handleCloseRemovedDialog = () => {
+    setOpenRemovedDialog(false);
   };
 
   const handleScenarioInpuDatasetName = e => {
@@ -247,6 +250,10 @@ function Factsheet(props) {
 
   const handleClickOpenUpdatedDialog = () => {
     openSavedDialog(true);
+  };
+
+  const handleClickOpenRemovedDialog = () => {
+    openRemoveddDialog(true);
   };
 
   const handleCloseTurtle = () => {
@@ -740,6 +747,33 @@ function Factsheet(props) {
                   <div>
                     <pre>
                       Your factsheet has updated!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.forceUpdate} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openRemoveddDialog}
+              onClose={handleClickOpenRemovedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>Factsheet Removed!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your factsheet has removed from the Open Energy Platform!
                     </pre>
                   </div>
                 </DialogContentText>
