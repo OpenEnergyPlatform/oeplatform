@@ -107,13 +107,13 @@ function Factsheet(props) {
     if (id === 'new') {
       factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
 
-      axios.post(conf.localhost + 'factsheet/add/', null,
+      axios.post(conf.toep + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.localhost + 'factsheet/update/', null,
+      axios.post(conf.toep + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -137,7 +137,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {

@@ -38,7 +38,7 @@ function Home() {
     console.log(v);
   };
   const getData = async () => {
-    const { data } = await axios.get(conf.localhost + `factsheet/all/`);
+    const { data } = await axios.get(conf.toep + `factsheet/all/`);
     let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
     setFactsheets(JSON.parse(JSON.stringify(factsheets)));
     setLoading(false)
