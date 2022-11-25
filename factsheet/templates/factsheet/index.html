@@ -1,14 +1,11 @@
 {% extends "base/base-wide-react.html" %}
 {% load static %}
 
-{% block header %}
+{% block after-head %}
+<link rel="stylesheet" href="{% static 'factsheet/css/main.css' %}">
 <meta http-equiv='cache-control' content='no-cache'>
 <meta http-equiv='expires' content='0'>
 <meta http-equiv='pragma' content='no-cache'>
-{% endblock header %}
-
-{% block after-head %}
-<link rel="stylesheet" href="{% static 'factsheet/css/main.css' %}">
 {% endblock after-head %}
 
 {% block main-content-body %}
