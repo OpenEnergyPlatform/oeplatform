@@ -12,7 +12,6 @@ import axios from "axios"
 export default function CustomCard(props) {
   const { fs, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
 
-
   return (
     <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '240px' }} variant="outlined">
       <CardContent>

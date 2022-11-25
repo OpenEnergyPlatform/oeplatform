@@ -37,14 +37,12 @@ function Home() {
   const searchHandler = (v) => {
     console.log(v);
   };
-  const getData = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/all/`);
-    let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
-    setFactsheets(JSON.parse(JSON.stringify(factsheets)));
-    setLoading(false)
-  };
+
   useEffect(() => {
-    getData();
+    axios.get(conf.toep + `factsheet/all/`).then(response => {
+      setFactsheets(response.data);
+      setLoading(false);
+    });
   }, []);
 
   const renderCards = (fs) => {
@@ -63,7 +61,6 @@ function Home() {
           )
       }
   }
-
   if (loading === false) {
     return (
       <ApolloProvider client={client}>
