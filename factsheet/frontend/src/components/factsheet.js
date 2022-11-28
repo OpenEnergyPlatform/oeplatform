@@ -15,6 +15,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import '../styles/App.css';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
+import VerticalTabs from './customVerticalTabs.js';
 import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -30,6 +31,11 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import Stack from '@mui/material/Stack';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Fab from '@mui/material/Fab';
 
 import conf from "../conf.json";
 
@@ -101,6 +107,12 @@ function Factsheet(props) {
     //props.onChange(oekg);
     setOpenJSON(true);
   };
+
+  const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
+
+  const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setScenarioTabValue(newValue);
+  }
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
@@ -265,6 +277,10 @@ function Factsheet(props) {
   };
 
   const handleAddScenario = () => {
+    setScenariosInfo(state => ({
+      ...state,
+      [scenarios]: {...scenariosInfo[scenarios], 'name': ''}
+    }));
     setScenarios(scenarios + 1);
   };
 
@@ -442,6 +458,33 @@ function Factsheet(props) {
       factsheetObjectHandler('scenario_output_dataset_region', JSON.stringify(selectedScenarioOutputDatasetRegion));
     };
 
+    function a11yProps(index: number) {
+      return {
+        id: `vertical-tab-${index}`,
+        'aria-controls': `vertical-tabpanel-${index}`,
+      };
+    }
+
+    function TabPanel(props: TabPanelProps) {
+      const { children, value, index, ...other } = props;
+
+      return (
+        <div
+          role="tabpanel"
+          hidden={value !== index}
+          id={`vertical-tabpanel-${index}`}
+          aria-labelledby={`vertical-tab-${index}`}
+          {...other}
+        >
+          {value === index && (
+            <Box sx={{ p: 3 }}>
+              <Typography>{children}</Typography>
+            </Box>
+          )}
+        </div>
+      );
+    }
+
     const renderStudy = () => {
       return <Grid container
         direction="row"
@@ -513,112 +556,117 @@ function Factsheet(props) {
       </Grid>
     }
 
-    const renderScenario = (i) => {
-      return <Grid container
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i} onChange={handleScenariosInfo} defaultValue={id === 'new' ? '' :scenariosInfo[i].name}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={2} maxRows={10} />
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={scenario_region} kind='Region' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={energy_transportation} kind='Energy transformation process' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
-        </Grid>
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Input dataset:
-            </Typography>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioInputDatasetName} onChange={handleScenarioInpuDatasetName}/>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
-          </Grid>
-          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
-          </Grid>
-          <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-          </Grid>
-        </Grid>
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ marginTop:'20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Output dataset:
-            </Typography>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioOutputDatasetName} onChange={handleScenarioOutputDatasetName} />
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
-          </Grid>
-          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
-          </Grid>
-          <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-          </Grid>
-        </Grid>
-      </Grid>
-    }
+    const renderScenario = () => {
+      return  <div>
+                <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+                  <Button disableElevation={true} startIcon={<AddBoxIcon />}  style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'zIndex': '1000'  }} variant="contained" color="primary" onClick={handleAddScenario}>Add scenario</Button>
+                </div >
+                <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'60vh', overflow: 'auto' }} >
+                  <Tabs
+                    orientation="vertical"
+                    variant="scrollable"
+                    value={scenarioTabValue}
+                    onChange={handleScenarioTabChange}
+                    aria-label="Vertical tabs example"
+                    sx={{ borderRight: 1, borderColor: 'divider' }}
+                  >
+                  {Array(scenarios).fill().map((item, i) =>
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} />
+                  )}
+                  </Tabs>
+                  {Array(scenarios).fill().map((item, i) =>
+                    <TabPanel value={scenarioTabValue} index={i} style={{  width: '90%', overflow: 'auto' }}>
+                    <Grid container
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <TextField autoFocus="autoFocus" style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i} key={'scenario_name_' + i} onChange={handleScenariosInfo} value={Object.keys(scenariosInfo).length !== 0 ? scenariosInfo[i].name : ''} />
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={2} maxRows={10} />
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <CustomAutocomplete optionsSet={scenario_region} kind='Region' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
+                        </Grid>
+                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+                          <CustomAutocomplete optionsSet={energy_transportation} kind='Energy transformation process' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
+                        </Grid>
+                        <Grid
+                          container
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+                        >
+                          <Grid item xs={12} >
+                            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+                              Input dataset:
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6} >
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioInputDatasetName} onChange={handleScenarioInpuDatasetName}/>
+                          </Grid>
+                          <Grid item xs={6} >
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
+                          </Grid>
+                          <Grid item xs={6}  style={{ marginTop:'20px' }}>
+                            <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
+                          </Grid>
+                          <Grid item xs={6} >
+                            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
+                          </Grid>
+                        </Grid>
+                        <Grid
+                          container
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          style={{ marginTop:'20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+                        >
+                          <Grid item xs={12} >
+                            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
+                              Output dataset:
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6} >
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioOutputDatasetName} onChange={handleScenarioOutputDatasetName} />
+                          </Grid>
+                          <Grid item xs={6} >
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
+                          </Grid>
+                          <Grid item xs={6}  style={{ marginTop:'20px' }}>
+                            <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
+                          </Grid>
+                          <Grid item xs={6} >
+                            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </TabPanel>
+                  )}
+                </Box>
+              </div >
+      }
 
     const items = {
       titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
       contents: [
         renderStudy(),
-        <Grid
-          container
-          direction="column"
-          justifyContent="space-between"
-          style={{ 'marginTop': '20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <div style={{ 'textAlign': 'right' }}>
-            <Button disableElevation={true} startIcon={<AddBoxIcon />}  style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'zIndex': '1000'  }} variant="contained" color="primary" onClick={handleAddScenario}>Add</Button>
-          </div >
-          {Array(scenarios).fill().map((item, i) =>
-              <Grid item xs={12}  style={{ 'marginTop':'20px', 'marginBottom':'20px', 'padding': '20px', 'border': '1px solid #cecece', 'backgroundColor': i % 2 === 0 ? '#ffffff':'rgb(250 250 250)' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-                  Scenario {i + 1}
-                </Typography>
-                {renderScenario(i)}
-              </Grid>
-
-          )}
-        </Grid>,
+        renderScenario(),
         <CustomAutocomplete optionsSet={sectors} kind='Models' handler={sectorsHandler} selectedElements={selectedSectors}/>,
         <CustomAutocomplete optionsSet={sectors} kind='Frameworks' handler={sectorsHandler} selectedElements={selectedSectors}/>,
         ]
@@ -648,8 +696,6 @@ function Factsheet(props) {
     useEffect(() => {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
-
-
 
     return (
       <div>
@@ -725,7 +771,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} state={{ testvalue: "hello" }} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>

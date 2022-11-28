@@ -21,8 +21,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 import './styles/App.css';
-import CustomSearchInput from "./components/customSearchInput"
-
+import CustomSearchInput from "./components/customSearchInput";
+import { useLocation } from 'react-router-dom';
 import conf from "./conf.json";
 
 const client = new ApolloClient({
@@ -31,6 +31,7 @@ const client = new ApolloClient({
 
 function Home(props) {
 
+  const { state } = useLocation()
   const [factsheets, setFactsheets] = React.useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +46,7 @@ function Home(props) {
       setLoading(false);
     });
   }, [setFactsheets, setLoading]);
+
 
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
@@ -62,6 +64,8 @@ function Home(props) {
           )
       }
   }
+
+  console.log(state);
   if (loading === false) {
     return (
       <ApolloProvider client={client}>
@@ -82,6 +86,7 @@ function Home(props) {
               </Grid>
               <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'75vh', 'width':'98%', 'overflow': 'auto'  }}>
                 {renderCards(eval(factsheets))}
+                {console.log(state)}
               </Grid>
           </div>
       </ApolloProvider>

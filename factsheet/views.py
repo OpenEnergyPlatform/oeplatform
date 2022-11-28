@@ -62,8 +62,6 @@ def update_factsheet(request, *args, **kwargs):
     authors = request.GET.get('authors')
     scenarios_info = request.GET.get('scenarios_info')
 
-    print(scenarios_info)
-
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
     factsheet.factsheetData['study_name'] = studyName
@@ -81,9 +79,7 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['scenarios_info'] = json.loads(scenarios_info)
 
     factsheet.save()
-
-    return JsonResponse('updated', safe=False, status=status.HTTP_201_CREATED)
-
+    return JsonResponse(factsheet, safe=False, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
