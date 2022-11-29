@@ -1,0 +1,28 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.db {
+    @include flex-column;
+    padding: 0 $C--padding-standard;
+
+    @include media-breakpoint-up(md) {
+        @include flex-row;
+    }
+
+    &__main {
+        width: 100%;
+
+        @include media-breakpoint-up(md) {
+            padding-right: $C--padding-standard;
+            width: calc(100vw - #{$C--db-side-width});
+        }
+    }
+
+    &__side {
+        width: 100%;
+
+        @include media-breakpoint-up(md) {
+            width: $C--db-side-width;
+        }
+    }
+}
