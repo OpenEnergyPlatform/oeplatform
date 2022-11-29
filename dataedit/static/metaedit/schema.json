@@ -50,7 +50,16 @@
                     "name": {
                         "description": "The class label (name) of the ontology term.",
                         "type": "string",
-                        "title": "Name"
+                        "title": "Name",
+                        "format": "autocomplete",
+                        "options": {
+                            "autocomplete": {
+                                "search": "search_name",
+                                "getResultValue": "getResultValue_name",
+                                "renderResult": "renderResult_name",
+                                "autoSelect": true
+                            }
+                        }
                     },
                     "path": {
                         "description": "The URI of the class.",
