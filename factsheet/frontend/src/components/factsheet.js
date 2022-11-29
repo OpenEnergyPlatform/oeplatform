@@ -36,6 +36,10 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Fab from '@mui/material/Fab';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
+import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 
 import conf from "../conf.json";
 
@@ -492,22 +496,39 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={studyName} onChange={handleStudyName}/>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={acronym} onChange={handleAcronym} />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+          <CustomAutocomplete optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={institution} kind='Institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          <CustomAutocomplete optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='Funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={contact_person} kind='Contact person' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={sectors} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <CustomAutocomplete optionsSet={sectors} kind='What additional keywords describe your study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid
           container
@@ -550,7 +571,7 @@ function Factsheet(props) {
             <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
           </Grid>
           <Grid item xs={6} >
-            <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
+            <CustomAutocomplete optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
           </Grid>
         </Grid>
       </Grid>
@@ -582,28 +603,25 @@ function Factsheet(props) {
                           alignItems="center"
                         >
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField autoFocus="autoFocus" style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i} key={'scenario_name_' + i} onChange={handleScenariosInfo} value={Object.keys(scenariosInfo).length !== 0 ? scenariosInfo[i].name : ''} />
+                          <TextField autoFocus="autoFocus" style={{  width: '90%' }} id="outlined-basic" label="What is the name of this scenario?" variant="outlined" name={i} key={'scenario_name_' + i} onChange={handleScenariosInfo} value={Object.keys(scenariosInfo).length !== 0 ? scenariosInfo[i].name : ''} />
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
+                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
+                        </Grid>
+                        <Grid item xs={12} style={{ marginBottom: '10px' }}>
+                          <TextField style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={4} maxRows={10} />
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={2} maxRows={10} />
+                          <CustomAutocomplete optionsSet={scenario_region} kind='Which spatial regions does this scenario focus on (study regions)?' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={scenario_region} kind='Region' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
+                          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Are there other, interacting regions considered?' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
+                          <CustomDatePicker label='Scenario years' style={{ marginBottom:'10px' }} yearOnly/>
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={energy_transportation} kind='Energy transformation process' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
+                          <CustomAutocomplete optionsSet={energy_transportation} kind='Keywords' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
                         </Grid>
                         <Grid
                           container
@@ -622,12 +640,6 @@ function Factsheet(props) {
                           </Grid>
                           <Grid item xs={6} >
                             <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
-                          </Grid>
-                          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-                            <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
-                          </Grid>
-                          <Grid item xs={6} >
-                            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
                           </Grid>
                         </Grid>
                         <Grid
@@ -648,12 +660,11 @@ function Factsheet(props) {
                           <Grid item xs={6} >
                             <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
                           </Grid>
-                          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-                            <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
-                          </Grid>
-                          <Grid item xs={6} >
-                            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-                          </Grid>
+                        </Grid>
+                        <Grid item xs={12} style={{ textAlign: 'right', marginTop: '30px' }}>
+                          <Fab color="primary" aria-label="add">
+                            <ContentCopyIcon />
+                          </Fab>
                         </Grid>
                       </Grid>
                     </TabPanel>

@@ -79,7 +79,7 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['scenarios_info'] = json.loads(scenarios_info)
 
     factsheet.save()
-    return JsonResponse(factsheet, safe=False, status=status.HTTP_201_CREATED)
+    return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
