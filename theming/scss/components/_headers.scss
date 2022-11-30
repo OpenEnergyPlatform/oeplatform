@@ -1,0 +1,13 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.main-header {
+    @extend .bg-light;
+    @extend .p-4;
+
+    &__title {
+        @extend .fs-4;
+        @extend .text-black;
+        @extend .fw-light;
+    }
+}

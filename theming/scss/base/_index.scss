@@ -1,6 +1,8 @@
 @use '../../variables' as *;
 
 @forward '../../bootstrap/scss/bootstrap.scss' with(
+    $gray-100: $gray-100,
+    $black: $black,
     $primary: $primary,
     $secondary: $secondary,
     $card-border-radius: $card-border-radius,
