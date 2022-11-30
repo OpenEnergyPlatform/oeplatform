@@ -40,6 +40,10 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
+import IconButton from '@mui/material/IconButton';
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import conf from "../conf.json";
 
@@ -393,7 +397,6 @@ function Factsheet(props) {
     ];
 
     const scenario_interacting_region = [
-      { id: '1', name: 'Germany' },
       { id: '2', name: 'France' },
       { id: '3', name: 'Spain' },
     ];
@@ -501,34 +504,70 @@ function Factsheet(props) {
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+        <Grid item xs={6} style={{ marginBottom: '0px' }}>
           <CustomAutocomplete optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+        <Grid item xs={6} style={{ marginBottom: '0px' }}>
           <CustomAutocomplete optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '10px' }}>
+          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <CustomAutocomplete optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={sectors} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={sectors} kind='What additional keywords describe your study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+            <Grid item xs={12} >
+              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+                Study content description:
+              </Typography>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+              <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+              <CustomAutocomplete optionsSet={sectors} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={12} style={{ marginBottom: '10px' }}>
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+              What additional keywords describe your study?
+            </Typography>
+            <div>
+              <FormGroup>
+                  <div>
+                    <FormControlLabel control={<Checkbox />} label="resilience" />
+                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox />} label="CO2 emissions" />
+                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox />} label="Greenhouse gas emissions" />
+                    <FormControlLabel control={<Checkbox />} label="Reallabor" />
+                    <FormControlLabel control={<Checkbox />} label="100% renewables" />
+                    <FormControlLabel control={<Checkbox />} label="acceptance" />
+                    <FormControlLabel control={<Checkbox />} label="sufficiency" />
+                    <FormControlLabel control={<Checkbox />} label="(changes in) demand" />
+                    <FormControlLabel control={<Checkbox />} label="degree of electrifiaction" />
+                    <FormControlLabel control={<Checkbox />} label="regionalisation" />
+                    <FormControlLabel control={<Checkbox />} label="total gross electricity generation" />
+                    <FormControlLabel control={<Checkbox />} label="total net electricity generation" />
+                    <FormControlLabel control={<Checkbox />} label="peak electricity generation" />
+                </div>
+              </FormGroup>
+            </div>
+            </Grid>
         </Grid>
         <Grid
           container
@@ -580,7 +619,15 @@ function Factsheet(props) {
     const renderScenario = () => {
       return  <div>
                 <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                  <Button disableElevation={true} startIcon={<AddBoxIcon />}  style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'zIndex': '1000'  }} variant="contained" color="primary" onClick={handleAddScenario}>Add scenario</Button>
+                <IconButton color="primary" aria-label="upload picture" component="label" onClick={handleAddScenario}>
+                  <AddBoxIcon />
+                </IconButton>
+                <IconButton color="primary" aria-label="upload picture" component="label">
+                  <ContentCopyIcon />
+                </IconButton>
+                <IconButton color="error" aria-label="upload picture" component="label">
+                  <DeleteOutlineIcon />
+                </IconButton>
                 </div >
                 <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'60vh', overflow: 'auto' }} >
                   <Tabs
@@ -606,10 +653,10 @@ function Factsheet(props) {
                           <TextField autoFocus="autoFocus" style={{  width: '90%' }} id="outlined-basic" label="What is the name of this scenario?" variant="outlined" name={i} key={'scenario_name_' + i} onChange={handleScenariosInfo} value={Object.keys(scenariosInfo).length !== 0 ? scenariosInfo[i].name : ''} />
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
+                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." variant="outlined" />
                         </Grid>
                         <Grid item xs={12} style={{ marginBottom: '10px' }}>
-                          <TextField style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={4} maxRows={10} />
+                          <TextField style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" variant="outlined"  multiline rows={4} maxRows={10} />
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
                           <CustomAutocomplete optionsSet={scenario_region} kind='Which spatial regions does this scenario focus on (study regions)?' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
@@ -618,7 +665,7 @@ function Factsheet(props) {
                           <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Are there other, interacting regions considered?' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomDatePicker label='Scenario years' style={{ marginBottom:'10px' }} yearOnly/>
+                          <CustomDatePicker label='Scenario years' style={{ marginBottom:'10px' }} yearOnly disabled={true}/>
                         </Grid>
                         <Grid item xs={6} style={{ marginBottom: '10px' }}>
                           <CustomAutocomplete optionsSet={energy_transportation} kind='Keywords' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
@@ -636,10 +683,10 @@ function Factsheet(props) {
                             </Typography>
                           </Grid>
                           <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioInputDatasetName} onChange={handleScenarioInpuDatasetName}/>
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
                           </Grid>
                           <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
                           </Grid>
                         </Grid>
                         <Grid
@@ -655,16 +702,11 @@ function Factsheet(props) {
                             </Typography>
                           </Grid>
                           <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioOutputDatasetName} onChange={handleScenarioOutputDatasetName} />
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined"  />
                           </Grid>
                           <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
+                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
                           </Grid>
-                        </Grid>
-                        <Grid item xs={12} style={{ textAlign: 'right', marginTop: '30px' }}>
-                          <Fab color="primary" aria-label="add">
-                            <ContentCopyIcon />
-                          </Fab>
                         </Grid>
                       </Grid>
                     </TabPanel>
