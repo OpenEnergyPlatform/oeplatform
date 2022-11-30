@@ -16,7 +16,19 @@
     <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {{ table }}
   </div>
 </div>
-<h2 class="site-header"></h2>
+
+<div class="table-tabs">
+  <div class="table-tabs__container">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">Data</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Meta information</a>
+      </li>
+    </ul>
+  </div>
+</div>
 {% endblock site-header %}
 
 {% block data_content %}

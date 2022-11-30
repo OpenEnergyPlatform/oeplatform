@@ -1,0 +1,22 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.table-tabs {
+    @include flex-row;
+    padding-top: $C--padding-large;
+    padding-bottom: $C--padding-standard;
+    
+    @include media-breakpoint-up(md) {
+        justify-content: center;
+    }
+
+    &__container {
+        @extend .border-bottom;
+        @include flex-row;
+
+        @include media-breakpoint-up(md) {
+            width: calc(#{$C--container-width} - #{$C--db-side-width} - #{$C--padding-standard});
+            margin-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+        }
+    }
+}
