@@ -1,6 +1,10 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
 
+body {
+    letter-spacing: 0.02rem;
+}
+
 main.main {
     padding-bottom: $C--padding-large;
     

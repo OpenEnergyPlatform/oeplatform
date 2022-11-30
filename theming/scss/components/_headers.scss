@@ -9,5 +9,13 @@
         @extend .fs-4;
         @extend .text-black;
         @extend .fw-light;
+
+        svg {
+            @include translateY(-3px);
+        }
+    }
+
+    &__wizard {
+        @extend .fw-semibold;
     }
 }
