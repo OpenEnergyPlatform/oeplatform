@@ -19,12 +19,12 @@
 
 <div class="table-tabs">
   <div class="table-tabs__container">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#">Data</a>
+    <ul class="nav nav-tabs" id="tableTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">Data</button>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Meta information</a>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">Meta information</button>
       </li>
     </ul>
   </div>
@@ -36,108 +36,114 @@
 {% include 'messages.html' %}
 </div>
 
-<ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link {% if current_view.type == " table" %}active{% endif %}"
-      href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
-  </li>
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
-      href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
-    <div class="dropdown-menu">
-      {% for view in views %}
-      {% if view.type == "graph" %}
-      <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-      {% endif %}
-      {% endfor %}
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
-    </div>
-  </li>
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
-      href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
-    <div class="dropdown-menu">
-      {% for view in views %}
-      {% if view.type == "map" %}
-      <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-      {% endif %}
-      {% endfor %}
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
-    </div>
-  </li>
-</ul>
-
-<div>
-  <div class="datatable">
-    <table class="display" id="datatable" style="width:100%">
-      <thead>
-        <tr></tr>
-      </thead>
-    </table>
-
-    <div class="panel-group">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
-          </h4>
+<div class="tab-content" id="tableTabsContent">
+  <div class="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link {% if current_view.type == " table" %}active{% endif %}"
+          href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
+          href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
+        <div class="dropdown-menu">
+          {% for view in views %}
+          {% if view.type == "graph" %}
+          <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+          {% endif %}
+          {% endfor %}
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
         </div>
-        <div id="collapseBuilder" class="panel-collapse collapse">
-          <div class="panel-body">
-            <div id="builder" style="width: 100%"></div>
-            <button id="btn-set" class="btn btn-success set-json" bs-target="basic">Set rules</button>
-            <button id="btn-download-view" class="btn btn-success set-json" data-bs-target="basic">Download View</button>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
+          href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
+        <div class="dropdown-menu">
+          {% for view in views %}
+          {% if view.type == "map" %}
+          <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+          {% endif %}
+          {% endfor %}
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
+          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
+        </div>
+      </li>
+    </ul>
+    
+    <div>
+      <div class="datatable">
+        <table class="display" id="datatable" style="width:100%">
+          <thead>
+            <tr></tr>
+          </thead>
+        </table>
+    
+        <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
+              </h4>
+            </div>
+            <div id="collapseBuilder" class="panel-collapse collapse">
+              <div class="panel-body">
+                <div id="builder" style="width: 100%"></div>
+                <button id="btn-set" class="btn btn-success set-json" bs-target="basic">Set rules</button>
+                <button id="btn-download-view" class="btn btn-success set-json" data-bs-target="basic">Download View</button>
+              </div>
+            </div>
           </div>
+        </div>
+    
+        <div>
+    
+        </div>
+        {% if current_view.type == "map" %}
+        <div style='height: 800px; width: 100%;' id="map"></div>
+        {% endif %}
+        {% if current_view.type == "graph" %}
+        <div id="datagraph"></div>
+        {% endif %}
+        <div id="loading-indicator" class="sk-fading-circle">
+          <div class="sk-circle1 sk-circle"></div>
+          <div class="sk-circle2 sk-circle"></div>
+          <div class="sk-circle3 sk-circle"></div>
+          <div class="sk-circle4 sk-circle"></div>
+          <div class="sk-circle5 sk-circle"></div>
+          <div class="sk-circle6 sk-circle"></div>
+          <div class="sk-circle7 sk-circle"></div>
+          <div class="sk-circle8 sk-circle"></div>
+          <div class="sk-circle9 sk-circle"></div>
+          <div class="sk-circle10 sk-circle"></div>
+          <div class="sk-circle11 sk-circle"></div>
+          <div class="sk-circle12 sk-circle"></div>
         </div>
       </div>
     </div>
+  </div>
 
+  <div class="tab-pane fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div>
-
-    </div>
-    {% if current_view.type == "map" %}
-    <div style='height: 800px; width: 100%;' id="map"></div>
-    {% endif %}
-    {% if current_view.type == "graph" %}
-    <div id="datagraph"></div>
-    {% endif %}
-    <div id="loading-indicator" class="sk-fading-circle">
-      <div class="sk-circle1 sk-circle"></div>
-      <div class="sk-circle2 sk-circle"></div>
-      <div class="sk-circle3 sk-circle"></div>
-      <div class="sk-circle4 sk-circle"></div>
-      <div class="sk-circle5 sk-circle"></div>
-      <div class="sk-circle6 sk-circle"></div>
-      <div class="sk-circle7 sk-circle"></div>
-      <div class="sk-circle8 sk-circle"></div>
-      <div class="sk-circle9 sk-circle"></div>
-      <div class="sk-circle10 sk-circle"></div>
-      <div class="sk-circle11 sk-circle"></div>
-      <div class="sk-circle12 sk-circle"></div>
+      <br>
+      <br>
+      <h4>
+        Meta Information<a
+          href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i
+            class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
+      </h4>
+      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip"
+        title="Download metadata in JSON format">Download JSON</button>
+      <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
+        title="You need write permissions on this table to edit metadata" {% endif %}>
+        <a href="{{table}}/meta_edit" type="button"
+          class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
+      </span>
+    
+      {{ meta_widget }}
     </div>
   </div>
-</div>
-
-<div>
-  <br>
-  <br>
-  <h4>
-    Meta Information<a
-      href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i
-        class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
-  </h4>
-  <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip"
-    title="Download metadata in JSON format">Download JSON</button>
-  <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
-    title="You need write permissions on this table to edit metadata" {% endif %}>
-    <a href="{{table}}/meta_edit" type="button"
-      class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
-  </span>
-
-  {{ meta_widget }}
 </div>
 {% endblock %}
 
