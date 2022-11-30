@@ -2,11 +2,20 @@
 @use '../base/mixins' as *;
 
 .db {
-    @include flex-column;
+    @include flex-row;
     padding: 0 $C--padding-standard;
 
     @include media-breakpoint-up(md) {
-        @include flex-row;
+        justify-content: center;
+    }
+
+    &__container {
+        @include flex-column;
+
+        @include media-breakpoint-up(md) {
+            @include flex-row;
+            width: $C--container-width;
+        }
     }
 
     &__main {
@@ -14,7 +23,7 @@
 
         @include media-breakpoint-up(md) {
             padding-right: $C--padding-standard;
-            width: calc(100vw - #{$C--db-side-width});
+            width: calc(100% - #{$C--db-side-width});
         }
     }
 
