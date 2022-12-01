@@ -21,10 +21,20 @@
   <div class="table-tabs__container">
     <ul class="nav nav-tabs" id="tableTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">Data</button>
+        <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-3x3" viewBox="0 0 16 16">
+            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13zM1.5 1a.5.5 0 0 0-.5.5V5h4V1H1.5zM5 6H1v4h4V6zm1 4h4V6H6v4zm-1 1H1v3.5a.5.5 0 0 0 .5.5H5v-4zm1 0v4h4v-4H6zm5 0v4h3.5a.5.5 0 0 0 .5-.5V11h-4zm0-1h4V6h-4v4zm0-5h4V1.5a.5.5 0 0 0-.5-.5H11v4zm-1 0V1H6v4h4z"/>
+          </svg>
+          Data
+        </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">Meta information</button>
+        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          </svg>
+          Meta information
+        </button>
       </li>
     </ul>
   </div>
@@ -38,39 +48,59 @@
 
 <div class="tab-content" id="tableTabsContent">
   <div class="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link {% if current_view.type == " table" %}active{% endif %}"
-          href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
-          href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
-        <div class="dropdown-menu">
-          {% for view in views %}
-          {% if view.type == "graph" %}
-          <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-          {% endif %}
-          {% endfor %}
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
-          href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
-        <div class="dropdown-menu">
-          {% for view in views %}
-          {% if view.type == "map" %}
-          <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-          {% endif %}
-          {% endfor %}
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
-          <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
-        </div>
-      </li>
-    </ul>
+    <div class="data-view">
+      <span class="data-view__label">View</span>
+      <ul class="nav nav-tabs data-view__tabs">
+        <li class="nav-item data-view__tab">
+          <a class="nav-link data-view__link {% if current_view.type == " table" %}active{% endif %}"
+            href="/dataedit/view/{{ schema }}/{{ table }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-layout-text-window-reverse" viewBox="0 0 16 16">
+              <path d="M13 6.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5zm0 3a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5zm-.5 2.5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1h5z"/>
+              <path d="M14 0a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12zM2 1a1 1 0 0 0-1 1v1h14V2a1 1 0 0 0-1-1H2zM1 4v10a1 1 0 0 0 1 1h2V4H1zm4 0v11h9a1 1 0 0 0 1-1V4H5z"/>
+            </svg>
+            Table
+          </a>
+        </li>
+        <li class="nav-item dropdown data-view__tab">
+          <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
+            href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+            </svg>
+            Graphs
+          </a>
+          <div class="dropdown-menu">
+            {% for view in views %}
+            {% if view.type == "graph" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+            {% endif %}
+            {% endfor %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown data-view__tab">
+          <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
+            href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+              <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+              <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            </svg>
+            Maps
+          </a>
+          <div class="dropdown-menu">
+            {% for view in views %}
+            {% if view.type == "map" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+            {% endif %}
+            {% endfor %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
+          </div>
+        </li>
+      </ul>
+    </div>
     
     <div>
       <div class="datatable">

@@ -9,6 +9,7 @@ main.main {
     padding-bottom: $C--padding-large;
     
     .content {
+        @extend .fs-7;
         @include flex-row;
         padding: 0 $C--padding-standard;
     

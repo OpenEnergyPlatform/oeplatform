@@ -2,6 +2,7 @@
 @use '../base/mixins' as *;
 
 .table-tabs {
+    @extend .fs-7;
     @include flex-row;
     padding-top: $C--padding-large;
     padding-bottom: $C--padding-standard;
@@ -19,15 +20,37 @@
             max-width: $C--container-width;
             padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
         }
+    }
 
-        .nav-tabs {
-            width: 100%;
+    .nav-tabs {
+        width: 100%;
+
+        .nav-item {
+            @extend .fw-semibold;
+            @extend .border-bottom;
+        }
+
+        .nav-link {
+            border: none;
+            border-bottom: 4px solid $white;
+        }
+
+        .nav-link.active {
+            border-bottom-color: $C--color-green;
+        }
+
+        .nav-link svg {
+            @extend .me-1;
+            fill: $primary;
+        }
+
+        .nav-link.active svg {
+            fill: $black;
         }
     }
 }
 
 .content .tab-content {
-    @extend .border;
     overflow: hidden;
     overflow-x: scroll;
     width: 100%;
@@ -35,5 +58,52 @@
 
     @include media-breakpoint-up(md) { 
         max-width: $C--db-main-max-width;
+    }
+
+    .data-view {
+        @include flex-row;
+        justify-content: center;
+        align-items: center;
+
+        &__label {
+            @extend .d-inline-block;
+            @extend .pe-2;
+        }
+
+        &__tabs {
+            @extend .border-0;
+            @include flex-row;
+            justify-content: center;
+        }
+
+        &__tab {
+            @extend .bg-light;
+            @extend .border;
+
+            &:first-of-type {
+                @extend .rounded-start;
+            }
+
+            &:last-of-type {
+                @extend .rounded-end;
+            }
+        }
+
+        &__link {
+            padding: 0.25rem 0.75rem 0.35rem;
+
+            svg {
+                @extend .me-1;
+                @include translateY(-1px);
+            }
+        }
+
+        .dropdown-menu {
+            @extend .fs-7;
+        }
+    }
+
+    .dataTables_scroll {
+        @extend .border;
     }
 }
