@@ -11,12 +11,17 @@
     }
 
     &__container {
-        @extend .border-bottom;
         @include flex-row;
+        width: 100%;
+        margin: 0 $C--padding-standard;
 
         @include media-breakpoint-up(md) {
-            width: $C--db-main-max-width;
-            margin-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+            max-width: $C--container-width;
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+        }
+
+        .nav-tabs {
+            width: 100%;
         }
     }
 }
