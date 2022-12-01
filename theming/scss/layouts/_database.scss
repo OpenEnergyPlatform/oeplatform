@@ -106,4 +106,21 @@
     .dataTables_scroll {
         @extend .border;
     }
+
+    .metadata {
+        &__options {
+            @extend .pb-2;
+            @include flex-row;
+            justify-content: flex-end;
+            align-items: center;
+
+            & > * {
+                @extend .ms-1;
+            }
+        }
+
+        &__container {
+            @extend .border;
+        }
+    }
 }

@@ -157,23 +157,20 @@
     </div>
   </div>
 
-  <div class="tab-pane fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
-    <div>
-      <br>
-      <br>
-      <h4>
-        Meta Information<a
-          href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i
-            class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
-      </h4>
-      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip"
-        title="Download metadata in JSON format">Download JSON</button>
-      <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
-        title="You need write permissions on this table to edit metadata" {% endif %}>
-        <a href="{{table}}/meta_edit" type="button"
-          class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
+  <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
+    <div class="metadata__options">
+      <span>
+        Meta Information
+        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
       </span>
-    
+      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
+      <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
+        <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
+          Edit
+        </a>
+      </span>
+    </div>
+    <div class="metadata__container">
       {{ meta_widget }}
     </div>
   </div>
