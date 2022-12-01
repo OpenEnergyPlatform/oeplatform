@@ -52,7 +52,7 @@
 
 .content .tab-content {
     overflow: hidden;
-    overflow-x: scroll;
+    overflow-x: auto;
     width: 100%;
     max-width: calc(100vw - (#{$C--padding-standard} * 2));
 
@@ -105,6 +105,7 @@
 
     .dataTables_scroll {
         @extend .border;
+        @extend .rounded;
     }
 
     .metadata {
@@ -121,6 +122,33 @@
 
         &__container {
             @extend .border;
+            @extend .rounded;
+        }
+
+        table {
+            @extend .mb-0;
+        }
+
+        table tr th,
+        table tr td {
+            @extend .px-3;
+        }
+
+        table tr:last-of-type th,
+        table tr:last-of-type td {
+            @extend .border-0;
+        }
+
+        table tr th {
+            @extend .bg-light;
+        }
+
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+        }
+
+        table tr:last-child th:first-child {
+            border-bottom-left-radius: 5px;
         }
     }
 }
