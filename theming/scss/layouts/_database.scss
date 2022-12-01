@@ -15,8 +15,20 @@
         @include flex-row;
 
         @include media-breakpoint-up(md) {
-            width: calc(#{$C--container-width} - #{$C--db-side-width} - #{$C--padding-standard});
+            width: $C--db-main-max-width;
             margin-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
         }
+    }
+}
+
+.content .tab-content {
+    @extend .border;
+    overflow: hidden;
+    overflow-x: scroll;
+    width: 100%;
+    max-width: calc(100vw - (#{$C--padding-standard} * 2));
+
+    @include media-breakpoint-up(md) { 
+        max-width: $C--db-main-max-width;
     }
 }

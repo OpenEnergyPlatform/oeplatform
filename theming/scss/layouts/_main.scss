@@ -21,7 +21,8 @@ main.main {
     
             @include media-breakpoint-up(md) {
                 @include flex-row;
-                width: $C--container-width;
+                width: 100%;
+                max-width: $C--container-width;
             }
         }
     

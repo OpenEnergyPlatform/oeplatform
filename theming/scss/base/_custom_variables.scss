@@ -1,9 +1,10 @@
+// Utilities
+$C--padding-standard: 1.5rem; // = .p-4
+$C--padding-large: calc(#{$C--padding-standard} * 2);
+
 // Layout
 $C--container-width: 82rem;
 
 // Data base
 $C--db-side-width: 21rem;
-
-// Utilities
-$C--padding-standard: 1.5rem; // = .p-4
-$C--padding-large: calc(#{$C--padding-standard} * 2);
+$C--db-main-max-width: calc(#{$C--container-width} - #{$C--db-side-width} - #{$C--padding-standard});
