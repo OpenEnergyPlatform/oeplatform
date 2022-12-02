@@ -4,6 +4,7 @@
 .main-header {
     @extend .bg-light;
     @extend .p-4;
+    margin-bottom: $C--padding-standard;
 
     &__title {
         @extend .fs-4;

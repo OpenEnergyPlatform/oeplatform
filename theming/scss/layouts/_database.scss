@@ -4,7 +4,7 @@
 .table-tabs {
     @extend .fs-7;
     @include flex-row;
-    padding-top: $C--padding-large;
+    padding-top: $C--padding-standard;
     padding-bottom: $C--padding-standard;
     
     @include media-breakpoint-up(md) {
