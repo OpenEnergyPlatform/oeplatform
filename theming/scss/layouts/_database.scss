@@ -109,6 +109,8 @@
     }
 
     .metadata {
+        overflow-x: hidden;
+
         &__options {
             @extend .pb-2;
             @include flex-row;
@@ -123,6 +125,7 @@
         &__container {
             @extend .border;
             @extend .rounded;
+            overflow-x: auto;
         }
 
         table {
