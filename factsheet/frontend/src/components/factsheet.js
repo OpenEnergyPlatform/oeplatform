@@ -340,6 +340,11 @@ function Factsheet(props) {
       { id: 'Waste and wastewater sector', name: 'Waste and wastewater sector' }
     ];
 
+    const sector_divisions = [
+      { id: 'Europian', name: 'Europian' },
+      { id: 'Germany', name: 'Germany' },
+    ];
+
     const authors = [
       { id: 'Julia Repenning',  name: 'Julia Repenning' },
       { id: 'Lukas Emele',  name: 'Lukas Emele' },
@@ -534,7 +539,7 @@ function Factsheet(props) {
               <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete optionsSet={sectors} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+              <CustomAutocomplete optionsSet={sector_divisions} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={[]}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
             <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
