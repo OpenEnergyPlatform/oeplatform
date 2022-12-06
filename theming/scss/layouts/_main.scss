@@ -34,6 +34,10 @@ main.main {
                 padding-right: $C--padding-standard;
                 width: calc(100% - #{$C--db-side-width});
             }
+
+            h2 {
+                padding-top: $C--padding-large;
+            }
         }
     
         &__side {
