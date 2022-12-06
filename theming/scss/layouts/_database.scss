@@ -108,6 +108,10 @@
         @extend .rounded;
     }
 
+    .dataTables_length {
+        @extend .mb-1;
+    }
+
     .metadata {
         overflow-x: hidden;
 
