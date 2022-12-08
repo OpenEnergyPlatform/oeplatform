@@ -11,8 +11,7 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    env:
-      unset LD_PRELOAD   
+    env:   
       LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
       SEGFAULT_SIGNALS: all
 
