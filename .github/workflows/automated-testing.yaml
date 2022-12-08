@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-20.04.5 # downgrade as ubuntu-latest is now on 22.04 this causes errors with the LD_PRELOAD and requires py3.10
+    runs-on: ubuntu-20.04 # downgrade as ubuntu-latest is now on 22.04 this causes errors with the LD_PRELOAD and requires py3.10
     env:   
       LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
       SEGFAULT_SIGNALS: all
