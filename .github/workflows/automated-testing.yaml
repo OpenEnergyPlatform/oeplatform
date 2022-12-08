@@ -12,7 +12,7 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     env:
-      LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
+      # LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
       SEGFAULT_SIGNALS: all
 
       OEP_DJANGO_USER: "postgres"
