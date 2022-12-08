@@ -189,15 +189,15 @@ var MetaEdit = function (config) {
             var description = $(descr).text(); // get description text
             if (description && label) {
                 label
-                    .attr('data-content', description)
+                    .attr('data-bs-content', description)
                     .attr('title', label.text())
-                    .attr('data-toggle', "popover")
+                    .attr('data-bs-toggle', 'popover')
                     .popover({
                         placement: 'top',
                         trigger: 'hover',
                         template: '<div class="popover"><div class="arrow"></div><div class="popover-body"></div></div>'
                     });
-                descr.addClass('d-none')
+                descr.addClass('d-none');
             }
         }
 
@@ -310,10 +310,10 @@ var MetaEdit = function (config) {
 
                 bindButtons();
 
-                convertDescriptionIntoPopover();
+                // convertDescriptionIntoPopover();
                 // check for new items in dom
                 (new MutationObserver(function (_mutationsList, _observer) {
-                    convertDescriptionIntoPopover()
+                    // convertDescriptionIntoPopover()
                 })).observe(config.form[0], { attributes: false, childList: true, subtree: true });
 
                 // all done
@@ -402,10 +402,10 @@ var MetaEdit = function (config) {
 
                 bindButtons();
 
-                convertDescriptionIntoPopover();
+                // convertDescriptionIntoPopover();
                 // check for new items in dom
                 (new MutationObserver(function (_mutationsList, _observer) {
-                    convertDescriptionIntoPopover()
+                    // convertDescriptionIntoPopover()
                 })).observe(config.form[0], { attributes: false, childList: true, subtree: true });
 
                 // all done
