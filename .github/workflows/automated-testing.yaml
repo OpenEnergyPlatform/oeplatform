@@ -10,9 +10,9 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-20.04 # downgrade as ubuntu-latest is now on 22.04 this causes errors with the LD_PRELOAD and requires py3.10
+    runs-on: ubuntu-latest
     env:   
-      LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
+      LD_PRELOAD: /lib/libSegFault.so
       SEGFAULT_SIGNALS: all
 
       OEP_DJANGO_USER: "postgres"
@@ -54,6 +54,8 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y postgresql-client
+      - name: show environments
+        run: echo LD_PRELOAD
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
