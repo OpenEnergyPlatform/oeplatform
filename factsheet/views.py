@@ -23,7 +23,9 @@ def create_factsheet(request, *args, **kwargs):
     doi = request.GET.get('doi')
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
-    scenarios_info = request.GET.get('scenarios_info')
+    scenarios_name = request.GET.get('scenarios_name')
+    scenarios_acronym = request.GET.get('scenarios_acronym')
+    scenarios_abstract = request.GET.get('scenarios_abstract')
 
     factsheet_obj = {
         'name': name,
@@ -37,7 +39,9 @@ def create_factsheet(request, *args, **kwargs):
         'doi': doi,
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
-        'scenarios_info': json.loads(scenarios_info),
+        'scenarios_name': json.loads(scenarios_name),
+        'scenarios_acronym': json.loads(scenarios_acronym),
+        'scenarios_abstract': json.loads(scenarios_abstract),
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -60,9 +64,9 @@ def update_factsheet(request, *args, **kwargs):
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
     authors = request.GET.get('authors')
-    scenarios_info = request.GET.get('scenarios_info')
-
-    print(scenarios_info)
+    scenarios_name = request.GET.get('scenarios_name')
+    scenarios_acronym = request.GET.get('scenarios_acronym')
+    scenarios_abstract = request.GET.get('scenarios_abstract')
 
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
@@ -78,12 +82,12 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['place_of_publication'] = place_of_publication
     factsheet.factsheetData['link_to_study'] = link_to_study
     factsheet.factsheetData['authors'] = authors
-    factsheet.factsheetData['scenarios_info'] = json.loads(scenarios_info)
+    factsheet.factsheetData['scenarios_name'] = json.loads(scenarios_name)
+    factsheet.factsheetData['scenarios_acronym'] = json.loads(scenarios_acronym)
+    factsheet.factsheetData['scenarios_abstract'] = json.loads(scenarios_abstract)
 
     factsheet.save()
-
-    return JsonResponse('updated', safe=False, status=status.HTTP_201_CREATED)
-
+    return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):

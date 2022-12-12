@@ -15,7 +15,7 @@ export default function CustomDatePicker(props) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={3} style={{ width: '90%' }}>
+      <Stack spacing={1} style={{ width: '90%', marginTop: '-40px' }}>
         {yearOnly ?
           <DesktopDatePicker
             label={label}

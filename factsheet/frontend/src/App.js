@@ -15,7 +15,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { Route, Routes, Link } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
 
@@ -27,6 +26,8 @@ import Factsheet from './components/factsheet.js'
 
 import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
+
+import conf from "./conf.json";
 
 const url_id = String(window.location.href).split('/').pop()
 
@@ -41,10 +42,13 @@ function App() {
   const url_id = String(window.location.href).split('/').pop();
   const getData = async () => {
     if (url_id !== '' && url_id !== 'new') {
-      const { data } = await axios.get(`http://localhost:8000/factsheet/get/`, { params: { id: url_id } });
+        const { data } = await axios.get(conf.localhost + `factsheet/get/`, { params: { id: url_id } });
         const fsd = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
         const result = eval(fsd)[0].fields.factsheetData;
+        console.log(result);
         return result;
+    } else {
+      axios.get(conf.toep + `factsheet/all/`);
     }
   };
   useEffect(() => {
@@ -55,7 +59,7 @@ function App() {
   }, []);
 
   if (url_id === '') {
-    return < Home />
+    return < Home id={url_id}/>
   } else {
     if (loading === false) {
       return <Factsheet id={url_id} fsData={factsheet}/>

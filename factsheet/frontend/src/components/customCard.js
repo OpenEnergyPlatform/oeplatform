@@ -12,9 +12,8 @@ import axios from "axios"
 export default function CustomCard(props) {
   const { fs, id, title, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
 
-
   return (
-    <Card sx={{ marginLeft: '10px', marginRight: '10px', height: '240px' }} variant="outlined">
+    <Card sx={{ marginLeft: '10px', marginRight: '10px', minHeight: 200,  display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} variant="outlined">
       <CardContent>
         <Typography gutterBottom variant="subtitle1" component="div">
           <b>{title.substring(0,50)}</b>

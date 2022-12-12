@@ -15,11 +15,13 @@ import ShareIcon from '@mui/icons-material/Share';
 import '../styles/App.css';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
+import VerticalTabs from './customVerticalTabs.js';
+import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import axios from "axios"
+import axios from 'axios';
 import { useLocation, useHistory, useNavigate } from 'react-router-dom'
 import { Route, Routes, Link } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -30,6 +32,41 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import Stack from '@mui/material/Stack';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import Fab from '@mui/material/Fab';
+import SpeedDial from '@mui/material/SpeedDial';
+import SpeedDialIcon from '@mui/material/SpeedDialIcon';
+import SpeedDialAction from '@mui/material/SpeedDialAction';
+import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
+import IconButton from '@mui/material/IconButton';
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import { useRef } from "react";
+import conf from "../conf.json";
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
 
 function Factsheet(props) {
   const location = useLocation();
@@ -56,6 +93,9 @@ function Factsheet(props) {
   const [openOverView, setOpenOverView] = useState(false);
   const [openJSON, setOpenJSON] = useState(false);
   const [openTurtle, setOpenTurtle] = useState(false);
+  const [openSavedDialog, setOpenSavedDialog] = useState(false);
+  const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
+  const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [mode, setMode] = useState("wizard");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
@@ -73,9 +113,11 @@ function Factsheet(props) {
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
 
-  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_info).length : 1);
+  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_name).length : 1);
   const [scenarioObject, setScenarioObject] = useState({});
-  const [scenariosInfo, setScenariosInfo] = useState(id !== 'new' ? fsData.scenarios_info : {});
+  const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : {});
+  const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : {});
+  const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : {});
 
   const [selectedRegion, setSelectedRegion] = useState([]);
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
@@ -96,19 +138,28 @@ function Factsheet(props) {
     setOpenJSON(true);
   };
 
-  console.log(scenariosInfo);
-  console.log(scenarios);
+  const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
+
+  console.log(scenariosName, scenariosAcronym, scenariosAbstract);
+
+  const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setScenarioTabValue(newValue);
+  }
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
-      axios.post('http://localhost:8000/factsheet/add/', null,
+      factsheetObjectHandler('scenarios_name', JSON.stringify(scenariosName));
+      factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
+      factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
+
+      axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
         factsheetObject
-      });
+      }).then(response => setOpenSavedDialog(true));
+
     } else {
-      axios.post('http://localhost:8000/factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -125,20 +176,30 @@ function Factsheet(props) {
             place_of_publication: place_of_publication,
             link_to_study: link_to_study,
             authors: JSON.stringify(selectedAuthors),
-            scenarios_info: JSON.stringify(scenariosInfo),
+            scenarios_name: JSON.stringify(scenariosName),
           }
-      });
+      }).then(response => setOpenUpdatedDialog(true));
     }
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post('http://localhost:8000/factsheet/delete/', null, { params: { id: id } });
-    navigate("/factsheet/");
-    window.location.reload();
+    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {
     setOpenJSON(false);
+  };
+
+  const handleCloseSavedDialog = () => {
+    setOpenSavedDialog(false);
+  };
+
+  const handleCloseUpdatedDialog = () => {
+    setOpenUpdatedDialog(false);
+  };
+
+  const handleCloseRemovedDialog = () => {
+    setOpenRemovedDialog(false);
   };
 
   const handleScenarioInpuDatasetName = e => {
@@ -162,11 +223,27 @@ function Factsheet(props) {
   };
 
 
-  const handleScenariosInfo = ({ target }) => {
+  const handleScenariostName = ({ target }) => {
     const { name: key, value } = target;
-    setScenariosInfo(state => ({
+    setScenariosName(state => ({
       ...state,
-      [key]: {...scenariosInfo[key], 'name': value}
+      [key.split('_')[1]]: value
+    }));
+  };
+
+  const handleScenariosAcronym = ({ target }) => {
+    const { name: key, value } = target;
+    setScenariosAcronym(state => ({
+      ...state,
+      [key.split('_')[1]]: value
+    }));
+  };
+
+  const handleScenariosAbstract = ({ target }) => {
+    const { name: key, value } = target;
+    setScenariosAbstract(state => ({
+      ...state,
+      [key.split('_')[1]]: value
     }));
   };
 
@@ -220,7 +297,6 @@ function Factsheet(props) {
     factsheetObjectHandler('link_to_study', e.target.value);
   };
 
-
   const handleDateOfPublication = e => {
     setDateOfPublication(e.target.value);
     factsheetObjectHandler('date_of_publication', e.target.value);
@@ -229,6 +305,18 @@ function Factsheet(props) {
   const handleClickOpenTurtle = () => {
     setOpenTurtle(true);
     convert2RDF();
+  };
+
+  const handleClickOpenSavedDialog = () => {
+    openSavedDialog(true);
+  };
+
+  const handleClickOpenUpdatedDialog = () => {
+    openSavedDialog(true);
+  };
+
+  const handleClickOpenRemovedDialog = () => {
+    openRemoveddDialog(true);
   };
 
   const handleCloseTurtle = () => {
@@ -291,6 +379,11 @@ function Factsheet(props) {
       { id: 'Waste and wastewater sector', name: 'Waste and wastewater sector' }
     ];
 
+    const sector_divisions = [
+      { id: 'Europian', name: 'Europian' },
+      { id: 'Germany', name: 'Germany' },
+    ];
+
     const authors = [
       { id: 'Julia Repenning',  name: 'Julia Repenning' },
       { id: 'Lukas Emele',  name: 'Lukas Emele' },
@@ -348,7 +441,6 @@ function Factsheet(props) {
     ];
 
     const scenario_interacting_region = [
-      { id: '1', name: 'Germany' },
       { id: '2', name: 'France' },
       { id: '3', name: 'Spain' },
     ];
@@ -417,6 +509,15 @@ function Factsheet(props) {
       factsheetObjectHandler('scenario_output_dataset_region', JSON.stringify(selectedScenarioOutputDatasetRegion));
     };
 
+    function a11yProps(index: number) {
+      return {
+        id: `vertical-tab-${index}`,
+        'aria-controls': `vertical-tabpanel-${index}`,
+      };
+    }
+
+
+
     const renderStudy = () => {
       return <Grid container
         direction="row"
@@ -424,22 +525,75 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={studyName} onChange={handleStudyName}/>
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={acronym} onChange={handleAcronym} />
+          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '0px' }}>
+          <CustomAutocomplete optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+        </Grid>
+        <Grid item xs={6} style={{ marginBottom: '0px' }}>
+          <CustomAutocomplete optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Short abstract" variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={institution} kind='Institution' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          <CustomAutocomplete optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='Funding source' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={contact_person} kind='Contact person' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+        <Grid
+          container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+        >
+            <Grid item xs={12} >
+              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+                Study content description:
+              </Typography>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+              <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+              <CustomAutocomplete optionsSet={sector_divisions} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={[]}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            </Grid>
+            <Grid item xs={12} style={{ marginBottom: '10px' }}>
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+              What additional keywords describe your study?
+            </Typography>
+            <div>
+              <FormGroup>
+                  <div>
+                    <FormControlLabel control={<Checkbox />} label="resilience" />
+                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox />} label="CO2 emissions" />
+                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox />} label="Greenhouse gas emissions" />
+                    <FormControlLabel control={<Checkbox />} label="Reallabor" />
+                    <FormControlLabel control={<Checkbox />} label="100% renewables" />
+                    <FormControlLabel control={<Checkbox />} label="acceptance" />
+                    <FormControlLabel control={<Checkbox />} label="sufficiency" />
+                    <FormControlLabel control={<Checkbox />} label="(changes in) demand" />
+                    <FormControlLabel control={<Checkbox />} label="degree of electrifiaction" />
+                    <FormControlLabel control={<Checkbox />} label="regionalisation" />
+                    <FormControlLabel control={<Checkbox />} label="total gross electricity generation" />
+                    <FormControlLabel control={<Checkbox />} label="total net electricity generation" />
+                    <FormControlLabel control={<Checkbox />} label="peak electricity generation" />
+                </div>
+              </FormGroup>
+            </div>
+            </Grid>
         </Grid>
         <Grid
           container
@@ -482,125 +636,66 @@ function Factsheet(props) {
             <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
           </Grid>
           <Grid item xs={6} >
-            <CustomAutocomplete optionsSet={authors} kind='Author' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
+            <CustomAutocomplete optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
           </Grid>
         </Grid>
       </Grid>
     }
 
-    const renderScenario = (i) => {
-      return <Grid container
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Name" variant="outlined" name={i} onChange={handleScenariosInfo} defaultValue={id === 'new' ? '' :scenariosInfo[i].name}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="Acronym" variant="outlined" value={scenarioAcronym} onChange={handleScenarioAcronym}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px' }} id="outlined-basic" label="Short abstract" variant="outlined" value={scenarioAbstract} onChange={handleScenarioAbstract} multiline rows={2} maxRows={10} />
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={scenario_region} kind='Region' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Interacting region' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={energy_carriers} kind='Energy carriers' handler={energyCarrierHandler} selectedElements={selectedEnergyCarriers}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={energy_transportation} kind='Energy transformation process' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
-        </Grid>
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Input dataset:
-            </Typography>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioInputDatasetName} onChange={handleScenarioInpuDatasetName}/>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioInputDatasetIRI} onChange={handleScenarioInputDatasetIRI}/>
-          </Grid>
-          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={scenario_input_dataset_region} kind='Region' handler={scenarioInputDatasetRegionHandler} selectedElements={selectedScenarioInputDatasetRegion} />
-          </Grid>
-          <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-          </Grid>
-        </Grid>
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ marginTop:'20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Output dataset:
-            </Typography>
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" value={scenarioOutputDatasetName} onChange={handleScenarioOutputDatasetName} />
-          </Grid>
-          <Grid item xs={6} >
-            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" value={scenarioOutputDatasetIRI} onChange={handleScenariooutputDatasetIRI}/>
-          </Grid>
-          <Grid item xs={6}  style={{ marginTop:'20px' }}>
-            <CustomAutocomplete optionsSet={institution} kind='Region' handler={scenarioOutputDatasetRegionHandler} selectedElements={selectedScenarioOutputDatasetRegion}/>
-          </Grid>
-          <Grid item xs={6} >
-            <CustomDatePicker label='Scenario year' style={{ marginBottom:'10px' }} yearOnly/>
-          </Grid>
-        </Grid>
-      </Grid>
-    }
+    const renderScenario = () => {
+      return  <div>
+                <div style={{ textAlign: 'left', marginBottom: '20px' }}>
+                <IconButton color="primary" aria-label="upload picture" component="label" onClick={handleAddScenario}>
+                  <AddBoxIcon />
+                </IconButton>
+                <IconButton color="primary" aria-label="upload picture" component="label">
+                  <ContentCopyIcon />
+                </IconButton>
+                <IconButton color="error" aria-label="upload picture" component="label">
+                  <DeleteOutlineIcon />
+                </IconButton>
+                </div >
+                <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'60vh', overflow: 'auto' }} >
+                  <Tabs
+                    orientation="vertical"
+                    variant="scrollable"
+                    value={scenarioTabValue}
+                    onChange={handleScenarioTabChange}
+                    aria-label="Vertical tabs example"
+                    sx={{ borderRight: 1, borderColor: 'divider' }}
+                     key={'Scenario_tabs'}
+                  >
+                  {Array(scenarios).fill().map((item, i) =>
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)} />
+                  )}
+                  </Tabs>
+                  {Array(scenarios).fill().map((item, i) =>
+                    <TabPanel value={scenarioTabValue} index={i} style={{  width: '90%', overflow: 'auto' }}  key={'Scenario_panel_' + (i + 1)} >
+                      <Scenario
+                        idx={i}
+                        handleScenariostName={handleScenariostName}
+                        handleScenariosAcronym={handleScenariosAcronym}
+                        handleScenariosAbstract={handleScenariosAbstract}
+                        scenariosName={scenariosName}
+                        scenariosAcronym={scenariosAcronym}
+                        scenariosAbstract={scenariosAbstract}
+                      />
+                    </TabPanel>
+                  )}
+                </Box>
+              </div >
+      }
 
     const items = {
       titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
       contents: [
         renderStudy(),
-        <Grid
-          container
-          direction="column"
-          justifyContent="space-between"
-          style={{ 'marginTop': '20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-        >
-          <div style={{ 'textAlign': 'right' }}>
-            <Button disableElevation={true} startIcon={<AddBoxIcon />}  style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'zIndex': '1000'  }} variant="contained" color="primary" onClick={handleAddScenario}>Add</Button>
-          </div >
-          {Array(scenarios).fill().map((item, i) =>
-              <Grid item xs={12}  style={{ 'marginTop':'20px', 'marginBottom':'20px', 'padding': '20px', 'border': '1px solid #cecece', 'backgroundColor': i % 2 === 0 ? '#ffffff':'rgb(250 250 250)' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-                  Scenario {i + 1}
-                </Typography>
-                {renderScenario(i)}
-              </Grid>
-
-          )}
-        </Grid>,
+        renderScenario(),
         <CustomAutocomplete optionsSet={sectors} kind='Models' handler={sectorsHandler} selectedElements={selectedSectors}/>,
         <CustomAutocomplete optionsSet={sectors} kind='Frameworks' handler={sectorsHandler} selectedElements={selectedSectors}/>,
         ]
     }
-
     const convert2RDF = async () => {
-
       factsheetJSON["oeo:OEO_00000505"] = [];
       selectedSectors.map(sector => {
         factsheetJSON["oeo:OEO_00000505"].push({
@@ -624,8 +719,6 @@ function Factsheet(props) {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
 
-
-
     return (
       <div>
         <Grid container
@@ -642,9 +735,7 @@ function Factsheet(props) {
             <div style={{ 'textAlign': 'right' }}>
               <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" onClick={handleRemoveFactsheet}>Remove</Button>
               <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
-              <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
-                <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
-              </Link>
+              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
               <Button disableElevation={true} startIcon={<ForwardToInboxIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle}>Submit</Button>
             </div >
           </Grid>
@@ -672,12 +763,95 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button variant="contained" onClick={handleCloseTurtle} autoFocus>
+                <Button variant="contained" onClick={handleCloseTurtle} >
                   Download
                 </Button>
-                <Button variant="contained" autoFocus onClick={handleCloseTurtle}>
+                <Button variant="contained" onClick={handleCloseTurtle}>
                   Cancel
                 </Button>
+              </DialogActions>
+            </Dialog>
+
+
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openSavedDialog}
+              onClose={handleClickOpenSavedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>New Factsheet Saved!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your new factsheet has saved in the Open Energy Platform!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} state={{ testvalue: "hello" }} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openUpdatedDialog}
+              onClose={handleClickOpenUpdatedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>Factsheet Updated!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your factsheet has updated!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              fullWidth
+              maxWidth="md"
+              open={openRemoveddDialog}
+              onClose={handleClickOpenRemovedDialog}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>Factsheet Removed!</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your factsheet has removed from the Open Energy Platform!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="outlined" >
+                  Back to main page
+                </Button>
+                </Link>
               </DialogActions>
             </Dialog>
             {mode === "wizard" &&

@@ -21,34 +21,36 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 import './styles/App.css';
-import CustomSearchInput from "./components/customSearchInput"
-
+import CustomSearchInput from "./components/customSearchInput";
+import { useLocation } from 'react-router-dom';
+import conf from "./conf.json";
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
 });
 
-function Home() {
+function Home(props) {
 
+  const { state } = useLocation()
   const [factsheets, setFactsheets] = React.useState([]);
   const [loading, setLoading] = useState(true);
 
   const searchHandler = (v) => {
     console.log(v);
   };
-  const getData = async () => {
-    const { data } = await axios.get(`http://localhost:8000/factsheet/all/`);
-    let factsheets = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
-    setFactsheets(JSON.parse(JSON.stringify(factsheets)));
-    setLoading(false)
-  };
+
   useEffect(() => {
-    getData();
-  }, []);
+    setLoading(true);
+    axios.get(conf.localhost + `factsheet/all/`).then(response => {
+      setFactsheets(response.data);
+      console.log(response.data);
+      setLoading(false);
+    });
+  }, [setFactsheets, setLoading]);
+
 
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
-      console.log('f');
       return fs.map(item =>
           (<Grid item xs={3}>
             <CustomCard
@@ -67,7 +69,7 @@ function Home() {
   if (loading === false) {
     return (
       <ApolloProvider client={client}>
-          <div >
+          <div key={props.id}>
             <Grid container spacing={2} direction="row" justifyContent="space-between">
                 <Grid item xs={10}>
                   <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'Factsheet A', label: 'Anguilla', phone: '1-264' },
@@ -84,6 +86,7 @@ function Home() {
               </Grid>
               <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'75vh', 'width':'98%', 'overflow': 'auto'  }}>
                 {renderCards(eval(factsheets))}
+                {console.log(state)}
               </Grid>
           </div>
       </ApolloProvider>
