@@ -16,11 +16,12 @@ import '../styles/App.css';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
 import VerticalTabs from './customVerticalTabs.js';
+import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import axios from "axios"
+import axios from 'axios';
 import { useLocation, useHistory, useNavigate } from 'react-router-dom'
 import { Route, Routes, Link } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -44,9 +45,28 @@ import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
-
+import { useRef } from "react";
 import conf from "../conf.json";
 
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
 
 function Factsheet(props) {
   const location = useLocation();
@@ -93,9 +113,11 @@ function Factsheet(props) {
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
 
-  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_info).length : 1);
+  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_name).length : 1);
   const [scenarioObject, setScenarioObject] = useState({});
-  const [scenariosInfo, setScenariosInfo] = useState(id !== 'new' ? fsData.scenarios_info : {});
+  const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : {});
+  const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : {});
+  const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : {});
 
   const [selectedRegion, setSelectedRegion] = useState([]);
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
@@ -118,6 +140,8 @@ function Factsheet(props) {
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
 
+  console.log(scenariosName, scenariosAcronym, scenariosAbstract);
+
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -125,15 +149,17 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      factsheetObjectHandler('scenarios_info', JSON.stringify(scenariosInfo));
+      factsheetObjectHandler('scenarios_name', JSON.stringify(scenariosName));
+      factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
+      factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
 
-      axios.post(conf.toep + 'factsheet/add/', null,
+      axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.toep + 'factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -150,14 +176,14 @@ function Factsheet(props) {
             place_of_publication: place_of_publication,
             link_to_study: link_to_study,
             authors: JSON.stringify(selectedAuthors),
-            scenarios_info: JSON.stringify(scenariosInfo),
+            scenarios_name: JSON.stringify(scenariosName),
           }
       }).then(response => setOpenUpdatedDialog(true));
     }
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {
@@ -196,11 +222,28 @@ function Factsheet(props) {
     factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
   };
 
-  const handleScenariosInfo = ({ target }) => {
+
+  const handleScenariostName = ({ target }) => {
     const { name: key, value } = target;
-    setScenariosInfo(state => ({
+    setScenariosName(state => ({
       ...state,
-      [key]: {...scenariosInfo[key], 'name': value}
+      [key.split('_')[1]]: value
+    }));
+  };
+
+  const handleScenariosAcronym = ({ target }) => {
+    const { name: key, value } = target;
+    setScenariosAcronym(state => ({
+      ...state,
+      [key.split('_')[1]]: value
+    }));
+  };
+
+  const handleScenariosAbstract = ({ target }) => {
+    const { name: key, value } = target;
+    setScenariosAbstract(state => ({
+      ...state,
+      [key.split('_')[1]]: value
     }));
   };
 
@@ -285,10 +328,6 @@ function Factsheet(props) {
   };
 
   const handleAddScenario = () => {
-    setScenariosInfo(state => ({
-      ...state,
-      [scenarios]: {...scenariosInfo[scenarios], 'name': ''}
-    }));
     setScenarios(scenarios + 1);
   };
 
@@ -477,25 +516,7 @@ function Factsheet(props) {
       };
     }
 
-    function TabPanel(props: TabPanelProps) {
-      const { children, value, index, ...other } = props;
 
-      return (
-        <div
-          role="tabpanel"
-          hidden={value !== index}
-          id={`vertical-tabpanel-${index}`}
-          aria-labelledby={`vertical-tab-${index}`}
-          {...other}
-        >
-          {value === index && (
-            <Box sx={{ p: 3 }}>
-              <Typography>{children}</Typography>
-            </Box>
-          )}
-        </div>
-      );
-    }
 
     const renderStudy = () => {
       return <Grid container
@@ -642,78 +663,23 @@ function Factsheet(props) {
                     onChange={handleScenarioTabChange}
                     aria-label="Vertical tabs example"
                     sx={{ borderRight: 1, borderColor: 'divider' }}
+                     key={'Scenario_tabs'}
                   >
                   {Array(scenarios).fill().map((item, i) =>
-                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} />
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)} />
                   )}
                   </Tabs>
                   {Array(scenarios).fill().map((item, i) =>
-                    <TabPanel value={scenarioTabValue} index={i} style={{  width: '90%', overflow: 'auto' }}>
-                    <Grid container
-                          direction="row"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField autoFocus="autoFocus" style={{  width: '90%' }} id="outlined-basic" label="What is the name of this scenario?" variant="outlined" name={i} key={'scenario_name_' + i} onChange={handleScenariosInfo} value={Object.keys(scenariosInfo).length !== 0 ? scenariosInfo[i].name : ''} />
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <TextField style={{  width: '90%' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." variant="outlined" />
-                        </Grid>
-                        <Grid item xs={12} style={{ marginBottom: '10px' }}>
-                          <TextField style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" variant="outlined"  multiline rows={4} maxRows={10} />
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={scenario_region} kind='Which spatial regions does this scenario focus on (study regions)?' handler={scenarioRegionHandler} selectedElements={selectedRegion}/>
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={scenario_interacting_region} kind='Are there other, interacting regions considered?' handler={interactingRegionHandler} selectedElements={selectedInteractingRegion}/>
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomDatePicker label='Scenario years' style={{ marginBottom:'10px' }} yearOnly disabled={true}/>
-                        </Grid>
-                        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-                          <CustomAutocomplete optionsSet={energy_transportation} kind='Keywords' handler={energyTransportationHandler} selectedElements={selectedEnergyTransportation}/>
-                        </Grid>
-                        <Grid
-                          container
-                          direction="row"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-                        >
-                          <Grid item xs={12} >
-                            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-                              Input dataset:
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined" />
-                          </Grid>
-                          <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
-                          </Grid>
-                        </Grid>
-                        <Grid
-                          container
-                          direction="row"
-                          justifyContent="space-between"
-                          alignItems="center"
-                          style={{ marginTop:'20px', 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
-                        >
-                          <Grid item xs={12} >
-                            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-                              Output dataset:
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="Name" variant="outlined"  />
-                          </Grid>
-                          <Grid item xs={6} >
-                            <TextField style={{ width: '90%' }} id="outlined-basic" label="IRI" variant="outlined" />
-                          </Grid>
-                        </Grid>
-                      </Grid>
+                    <TabPanel value={scenarioTabValue} index={i} style={{  width: '90%', overflow: 'auto' }}  key={'Scenario_panel_' + (i + 1)} >
+                      <Scenario
+                        idx={i}
+                        handleScenariostName={handleScenariostName}
+                        handleScenariosAcronym={handleScenariosAcronym}
+                        handleScenariosAbstract={handleScenariosAbstract}
+                        scenariosName={scenariosName}
+                        scenariosAcronym={scenariosAcronym}
+                        scenariosAbstract={scenariosAbstract}
+                      />
                     </TabPanel>
                   )}
                 </Box>
@@ -729,9 +695,7 @@ function Factsheet(props) {
         <CustomAutocomplete optionsSet={sectors} kind='Frameworks' handler={sectorsHandler} selectedElements={selectedSectors}/>,
         ]
     }
-
     const convert2RDF = async () => {
-
       factsheetJSON["oeo:OEO_00000505"] = [];
       selectedSectors.map(sector => {
         factsheetJSON["oeo:OEO_00000505"].push({
@@ -799,10 +763,10 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button variant="contained" onClick={handleCloseTurtle} autoFocus>
+                <Button variant="contained" onClick={handleCloseTurtle} >
                   Download
                 </Button>
-                <Button variant="contained" autoFocus onClick={handleCloseTurtle}>
+                <Button variant="contained" onClick={handleCloseTurtle}>
                   Cancel
                 </Button>
               </DialogActions>
