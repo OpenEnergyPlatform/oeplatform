@@ -1,0 +1,161 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.table-tabs {
+    @extend .fs-7;
+    @include flex-row;
+    padding-top: $C--padding-standard;
+    padding-bottom: $C--padding-standard;
+    
+    @include media-breakpoint-up(md) {
+        justify-content: center;
+    }
+
+    &__container {
+        @include flex-row;
+        width: 100%;
+        margin: 0 $C--padding-standard;
+
+        @include media-breakpoint-up(md) {
+            max-width: $C--container-width;
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+        }
+    }
+
+    .nav-tabs {
+        width: 100%;
+
+        .nav-item {
+            @extend .fw-semibold;
+            @extend .border-bottom;
+        }
+
+        .nav-link {
+            border: none;
+            border-bottom: 4px solid $white;
+        }
+
+        .nav-link.active {
+            border-bottom-color: $C--color-green;
+        }
+
+        .nav-link svg {
+            @extend .me-1;
+            fill: $primary;
+        }
+
+        .nav-link.active svg {
+            fill: $black;
+        }
+    }
+}
+
+.content .tab-content {
+    overflow: hidden;
+    overflow-x: auto;
+    width: 100%;
+    max-width: calc(100vw - (#{$C--padding-standard} * 2));
+
+    @include media-breakpoint-up(md) { 
+        max-width: $C--db-main-max-width;
+    }
+
+    .data-view {
+        @include flex-row;
+        justify-content: center;
+        align-items: center;
+
+        &__label {
+            @extend .d-inline-block;
+            @extend .pe-2;
+        }
+
+        &__tabs {
+            @extend .border-0;
+            @include flex-row;
+            justify-content: center;
+        }
+
+        &__tab {
+            @extend .bg-light;
+            @extend .border;
+
+            &:first-of-type {
+                @extend .rounded-start;
+            }
+
+            &:last-of-type {
+                @extend .rounded-end;
+            }
+        }
+
+        &__link {
+            padding: 0.25rem 0.75rem 0.35rem;
+
+            svg {
+                @extend .me-1;
+                @include translateY(-1px);
+            }
+        }
+
+        .dropdown-menu {
+            @extend .fs-7;
+        }
+    }
+
+    .dataTables_scroll {
+        @extend .border;
+        @extend .rounded;
+    }
+
+    .dataTables_length {
+        @extend .mb-1;
+    }
+
+    .metadata {
+        overflow-x: hidden;
+
+        &__options {
+            @extend .pb-2;
+            @include flex-row;
+            justify-content: flex-end;
+            align-items: center;
+
+            & > * {
+                @extend .ms-1;
+            }
+        }
+
+        &__container {
+            @extend .border;
+            @extend .rounded;
+            overflow-x: auto;
+        }
+
+        table {
+            @extend .mb-0;
+        }
+
+        table tr th,
+        table tr td {
+            @extend .px-3;
+        }
+
+        table tr:last-of-type th,
+        table tr:last-of-type td {
+            @extend .border-0;
+        }
+
+        table tr th {
+            @extend .bg-light;
+        }
+
+        table tr:first-child th:first-child {
+            border-top-left-radius: 5px;
+        }
+
+        table tr:last-child th:first-child {
+            border-bottom-left-radius: 5px;
+        }
+    }
+}

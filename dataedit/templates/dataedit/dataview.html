@@ -5,8 +5,40 @@
 
 
 {% block site-header %}
+<div class="main-header">
+  <h1 class="main-header__title">
+      <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46"/>
+      </svg>
+      Database
+  </h1>
+  <div class="main-header__wizard">
+    <a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/{{ schema }}">{{ schema }}</a> / {{ table }}
+  </div>
+</div>
 
-<h2 class="site-header"><a href="/dataedit/view/{{ schema }}">{{ schema }}</a>.{{ table }}</h2>
+<div class="table-tabs">
+  <div class="table-tabs__container">
+    <ul class="nav nav-tabs" id="tableTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="table-tab" data-bs-toggle="tab" data-bs-target="#table-tab-pane" type="button" role="tab" aria-controls="table-tab-pane" aria-selected="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grid-3x3" viewBox="0 0 16 16">
+            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13zM1.5 1a.5.5 0 0 0-.5.5V5h4V1H1.5zM5 6H1v4h4V6zm1 4h4V6H6v4zm-1 1H1v3.5a.5.5 0 0 0 .5.5H5v-4zm1 0v4h4v-4H6zm5 0v4h3.5a.5.5 0 0 0 .5-.5V11h-4zm0-1h4V6h-4v4zm0-5h4V1.5a.5.5 0 0 0-.5-.5H11v4zm-1 0V1H6v4h4z"/>
+          </svg>
+          Data
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="metadata-tab" data-bs-toggle="tab" data-bs-target="#metadata-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          </svg>
+          Meta information
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
 {% endblock site-header %}
 
 {% block data_content %}
@@ -14,108 +46,136 @@
 {% include 'messages.html' %}
 </div>
 
-<ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link {% if current_view.type == " table" %}active{% endif %}"
-      href="/dataedit/view/{{ schema }}/{{ table }}">Table</a>
-  </li>
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
-      href="#" role="button" aria-haspopup="true" aria-expanded="false">Graphs</a>
-    <div class="dropdown-menu">
-      {% for view in views %}
-      {% if view.type == "graph" %}
-      <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-      {% endif %}
-      {% endfor %}
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
-    </div>
-  </li>
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
-      href="#" role="button" aria-haspopup="true" aria-expanded="false">Maps</a>
-    <div class="dropdown-menu">
-      {% for view in views %}
-      {% if view.type == "map" %}
-      <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
-      {% endif %}
-      {% endfor %}
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
-      <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
-    </div>
-  </li>
-</ul>
-
-<div>
-  <div class="datatable">
-    <table class="display" id="datatable" style="width:100%">
-      <thead>
-        <tr></tr>
-      </thead>
-    </table>
-
-    <div class="panel-group">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
-          </h4>
-        </div>
-        <div id="collapseBuilder" class="panel-collapse collapse">
-          <div class="panel-body">
-            <div id="builder" style="width: 100%"></div>
-            <button id="btn-set" class="btn btn-success set-json" bs-target="basic">Set rules</button>
-            <button id="btn-download-view" class="btn btn-success set-json" data-bs-target="basic">Download View</button>
+<div class="tab-content" id="tableTabsContent">
+  <div class="tab-pane fade show active" id="table-tab-pane" role="tabpanel" aria-labelledby="table-tab" tabindex="0">
+    <div class="data-view">
+      <span class="data-view__label">View</span>
+      <ul class="nav nav-tabs data-view__tabs">
+        <li class="nav-item data-view__tab">
+          <a class="nav-link data-view__link {% if current_view.type == " table" %}active{% endif %}"
+            href="/dataedit/view/{{ schema }}/{{ table }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-layout-text-window-reverse" viewBox="0 0 16 16">
+              <path d="M13 6.5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5zm0 3a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 .5-.5zm-.5 2.5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1h5z"/>
+              <path d="M14 0a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12zM2 1a1 1 0 0 0-1 1v1h14V2a1 1 0 0 0-1-1H2zM1 4v10a1 1 0 0 0 1 1h2V4H1zm4 0v11h9a1 1 0 0 0 1-1V4H5z"/>
+            </svg>
+            Table
+          </a>
+        </li>
+        <li class="nav-item dropdown data-view__tab">
+          <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == " graph" %}active{% endif %}" data-bs-toggle="dropdown"
+            href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M0 0h1v15h15v1H0V0Zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07Z"/>
+            </svg>
+            Graphs
+          </a>
+          <div class="dropdown-menu">
+            {% for view in views %}
+            {% if view.type == "graph" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+            {% endif %}
+            {% endfor %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/graph/new">Add Graph View</a>
           </div>
+        </li>
+        <li class="nav-item dropdown data-view__tab">
+          <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == " map" %}active{% endif %}" data-bs-toggle="dropdown"
+            href="#" role="button" aria-haspopup="true" aria-expanded="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+              <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/>
+              <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+            </svg>
+            Maps
+          </a>
+          <div class="dropdown-menu">
+            {% for view in views %}
+            {% if view.type == "map" %}
+            <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+            {% endif %}
+            {% endfor %}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/geom/new">Add gis view</a>
+            <a class="dropdown-item" href="/dataedit/view/{{ schema }}/{{ table }}/map/latlon/new">Add lat/lon view</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+    
+    <div>
+      <div class="datatable">
+        <table class="display" id="datatable" style="width:100%">
+          <thead>
+            <tr>
+              <!-- Local test -->
+              <td>DEBKGGND00000Y95DEBKGGND00000Y95DEBKGGND00000Y95DEBKGGND00000Y95DEBKGGND00000Y95DEBKGGND00000Y95</td><td>DEBKGGND00000Y95</td><td>DEBKGGND00000Y95</td><td>DEBKGGND00000Y95</td><td>DEBKGGND00000Y95</td><td>DEBKGGND00000Y95</td>
+            </tr>
+          </thead>
+        </table>
+    
+        <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
+              </h4>
+            </div>
+            <div id="collapseBuilder" class="panel-collapse collapse">
+              <div class="panel-body">
+                <div id="builder" style="width: 100%"></div>
+                <button id="btn-set" class="btn btn-success set-json" bs-target="basic">Set rules</button>
+                <button id="btn-download-view" class="btn btn-success set-json" data-bs-target="basic">Download View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <div>
+    
+        </div>
+        {% if current_view.type == "map" %}
+        <div style='height: 800px; width: 100%;' id="map"></div>
+        {% endif %}
+        {% if current_view.type == "graph" %}
+        <div id="datagraph"></div>
+        {% endif %}
+        <div id="loading-indicator" class="sk-fading-circle">
+          <div class="sk-circle1 sk-circle"></div>
+          <div class="sk-circle2 sk-circle"></div>
+          <div class="sk-circle3 sk-circle"></div>
+          <div class="sk-circle4 sk-circle"></div>
+          <div class="sk-circle5 sk-circle"></div>
+          <div class="sk-circle6 sk-circle"></div>
+          <div class="sk-circle7 sk-circle"></div>
+          <div class="sk-circle8 sk-circle"></div>
+          <div class="sk-circle9 sk-circle"></div>
+          <div class="sk-circle10 sk-circle"></div>
+          <div class="sk-circle11 sk-circle"></div>
+          <div class="sk-circle12 sk-circle"></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div>
-
+  <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
+    <div class="metadata__options">
+      <span>
+        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
+          <i class="fas fa-arrow-right"></i>
+          Metadata specification
+        </a>
+      </span>
+      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
+      <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
+        <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
+          Edit
+        </a>
+      </span>
     </div>
-    {% if current_view.type == "map" %}
-    <div style='height: 800px; width: 100%;' id="map"></div>
-    {% endif %}
-    {% if current_view.type == "graph" %}
-    <div id="datagraph"></div>
-    {% endif %}
-    <div id="loading-indicator" class="sk-fading-circle">
-      <div class="sk-circle1 sk-circle"></div>
-      <div class="sk-circle2 sk-circle"></div>
-      <div class="sk-circle3 sk-circle"></div>
-      <div class="sk-circle4 sk-circle"></div>
-      <div class="sk-circle5 sk-circle"></div>
-      <div class="sk-circle6 sk-circle"></div>
-      <div class="sk-circle7 sk-circle"></div>
-      <div class="sk-circle8 sk-circle"></div>
-      <div class="sk-circle9 sk-circle"></div>
-      <div class="sk-circle10 sk-circle"></div>
-      <div class="sk-circle11 sk-circle"></div>
-      <div class="sk-circle12 sk-circle"></div>
+    <div class="metadata__container">
+      {{ meta_widget }}
     </div>
   </div>
-</div>
-
-<div>
-  <br>
-  <br>
-  <h4>
-    Meta Information<a
-      href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank"><i
-        class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i></a>
-  </h4>
-  <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip"
-    title="Download metadata in JSON format">Download JSON</button>
-  <span class="mb-2" {% if not can_add %} data-bs-toggle="tooltip"
-    title="You need write permissions on this table to edit metadata" {% endif %}>
-    <a href="{{table}}/meta_edit" type="button"
-      class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">Edit</a>
-  </span>
-
-  {{ meta_widget }}
 </div>
 {% endblock %}
 
