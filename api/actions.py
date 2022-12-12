@@ -38,7 +38,6 @@ from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
 from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
-
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
 
@@ -108,9 +107,9 @@ def assert_permission(user, table, permission, schema=None):
 
 def assert_add_tag_permission(user, table, permission, schema):
     """
-    Tags can be added to tables that are in any schema. However, 
-    it is necessary to check whether the user has write permission 
-    to the table, since not every user should be able to add tags 
+    Tags can be added to tables that are in any schema. However,
+    it is necessary to check whether the user has write permission
+    to the table, since not every user should be able to add tags
     to every table.
 
     Args:
@@ -121,7 +120,7 @@ def assert_add_tag_permission(user, table, permission, schema):
 
     Raises:
         PermissionDenied: _description_
-    
+
     """
     # if not request.user.is_anonymous:
     #         level = request.user.get_table_permission_level(table)
@@ -866,6 +865,10 @@ def table_create(schema, table, column_definitions, constraints_definitions):
                 ccolumns = [constraint["constraint_parameter"]]
 
             if primary_key_col_names:
+                # if table level PK constraint is set in addition
+                # to column level PK, both must be the same (#1110)
+                if set(ccolumns) == set(primary_key_col_names):
+                    continue
                 raise APIError("Multiple definitions of primary key")
             primary_key_col_names = ccolumns
 
@@ -2293,7 +2296,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the table comment in oedb table if sqlalchemy curser is provided
     # ---------------------------------------
 
-    # TODO: The following 2 lines seems to duplicate with the lines below the if block 
+    # TODO: The following 2 lines seems to duplicate with the lines below the if block
     oedb_table_obj = _get_table(schema=schema, table=table)
     oedb_table_obj.comment = metadata_str
     if cursor is not None:

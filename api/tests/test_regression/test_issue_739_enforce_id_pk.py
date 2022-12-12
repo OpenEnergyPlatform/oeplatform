@@ -108,3 +108,18 @@ class Test_issue_739_enforce_id_pk(APITestCase):
             }
         )
         self.assertEqual(res.status_code, 400)
+
+    def test_ok_on_double_defined_pk(self):
+        """sqlalchemy sets column attribute primary_key=True
+        in addition to primary, which should work. (#1110)
+        """
+        res = self.create_table(
+            {
+                "columns": [
+                    {"name": "id", "data_type": "int", "primary_key": True},
+                    {"name": "value", "data_type": "int"},
+                ],
+                "constraints": [{"type": "primary_key", "columns": ["id"]}],
+            }
+        )
+        self.assertEqual(res.status_code, 201)
