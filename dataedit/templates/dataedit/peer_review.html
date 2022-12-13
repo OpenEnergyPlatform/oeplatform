@@ -39,6 +39,7 @@
   </li>
 </ul>
 
+
 <div class="tab-content" id="myTabContent">
 
   <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
@@ -100,14 +101,14 @@
 <div class="flex-reviewer" id="review-window">
     <div id="review-field-name">Field Name: </div>
     <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-        <button type="button" class="btn btn-success" id="ok-button">Ok</button>
-        <button type="button" class="btn btn-warning" id="suggestion-button">Suggestion</button>
-        <button type="button" class="btn btn-sm btn-danger" id="rejected-button">Rejected</button>
+        <button type="button" class="btn btn-success" id="ok-button" onclick="okFunction('{{item.firstkey}}', '{{ item.value }}')">Ok</button>
+        <button type="button" class="btn btn-warning" id="suggestion-button" onclick="suggestionFunction('{{item.firstkey}}', '{{ item.value }}')">Suggestion</button>
+        <button type="button" class="btn btn-sm btn-danger" id="rejected-button" onclick="rejectedFunction('{{item.firstkey}}', '{{ item.value }}')">Rejected</button>
     </div>
 
     <div class="mb-3" id="field-comment">
-      <label for="commentarea" class="form-label">Add Your Comment</label>
-      <textarea class="form-control" id="commentarea" rows="2"></textarea>
+      <label for="commentarea" class="form-label" >Add Your Comment</label>
+      <textarea class="form-control" id="commentarea" rows="2" onchange="saveComment('{{item.firstkey}}', '{{ item.value }}')"></textarea>
     </div>
 
     <div class="mb-3" id="field-value">
@@ -144,72 +145,110 @@
         PeerReview(config);
 
 
-    document.getElementById('field_name').addEventListener('click', click_field);
-    var click_field = function (fieldKey, fieldValue) {
-        const selectedName = document.querySelector("#review-field-name");
-        const selectedValue = document.querySelector("#valuearea");
-        selectedName.textContent = fieldKey;
-        selectedValue.value = fieldValue;
-        document.getElementById("commentarea").value = "";
-        console.log(selectedValue)
-    }
-
-
-    // Funktion für OK-Button
-    document.getElementById('ok-button').addEventListener('click', okFunction)
-    var okFunction = function(fieldKey, fieldValue) {
-        var review_result = {
-            "kategory": null,
-            "key": fieldKey,
-            "state": "ok",
-            "loop": null
-        }
-    return review_result
-    }
-
-    // Funktion für SUGGESTION-Button
-    document.getElementById('suggestion-button').addEventListener('click', suggestionFunction)
-    var suggestionFunction = function(fieldKey, fieldValue) {
-        var review_result = {
-            "kategory": "click/onchange",
-            "key": fieldKey,
-            "state": "suggestion",
-            "loop": [
-                {
-                    "timestamp": "2022-09-30",
-                    "reviewer": config.xxx,
-                    "comment": "kommt mit Click",
-                    "value_suggestions": "kommt mit Click",
-                    "accepted": null
-                }
-            ]
+        document.getElementById('field_name').addEventListener('click', category_identifier);
+        var category_identifier = function (categoryKey) {
+            const selectedCategory = document.querySelector("#general-tab").innerHTML;
+            return (selectedCategory)
         }
 
-    // It is mandatory to add a comment and optional to suggest a value
-    return review_result
-    }
 
-    // Funktion für REJECTED-Button
-    document.getElementById('rejected-button').addEventListener('click', rejectedFunction)
-    var rejectedFunction = function(fieldKey, fieldValue) {
-        var review_result = {
-            "kategory": "click/onchange",
-            "key": fieldKey,
-            "state": "rejected",
-            "loop": [
-                {
-                    "timestamp": "2022-09-30",
-                    "reviewer": config.xxx,
-                    "comment": "kommt mit Click",
-                    "value_suggestions": "kommt mit Click",
-                    "accepted": null
-                }
-            ]
+        document.getElementById('field_name').addEventListener('click', click_field);
+        var click_field = function (fieldKey, fieldValue) {
+            const selectedName = document.querySelector("#review-field-name");
+            const selectedValue = document.querySelector("#valuearea");
+            selectedName.textContent = fieldKey;
+            selectedValue.value = fieldValue;
+            document.getElementById("commentarea").value = "";
         }
 
-    // It is mandatory to add a comment and optional to suggest a value
-    return review_result
-    }
+
+        document.getElementById('commentarea').addEventListener('change', saveComment);
+        var saveComment = function(fieldKey, fieldValue) {
+            var x = document.getElementById("commentarea");
+
+            return (x.value)
+        }
+
+
+        document.getElementById('valuearea').addEventListener('change', saveValue);
+        var saveValue = function(fieldKey, fieldValue) {
+            var x = document.getElementById("valuearea");
+
+            return (x.value)
+        }
+
+
+        // Funktion für OK-Button
+        document.getElementById('ok-button').addEventListener('click', okFunction)
+        var okFunction = function(fieldKey, fieldValue) {
+            var category = category_identifier();
+
+            var review_result = {
+                "category": category,
+                "key": fieldKey,
+                "state": "ok",
+                "loop": null
+            }
+            console.log("ok submitted for " + fieldKey);
+
+            return review_result
+        }
+
+        // Function für SUGGESTION-Button
+        document.getElementById('suggestion-button').addEventListener('click', suggestionFunction)
+        var suggestionFunction = function(fieldKey, fieldValue) {
+            let date = new Date();
+            var category = category_identifier();
+            var comment = saveComment();
+            var value_suggestion = saveValue();
+
+
+            var review_result = {
+                "category": category,
+                "key": fieldKey,
+                "state": "suggestion",
+                "loop": [
+                    {
+                        "timestamp": date,
+                        "reviewer": "oep_user",
+                        "comment": comment,
+                        "value_suggestion": value_suggestion,
+                        "accepted": null
+                    }
+                ]
+            }
+            console.log("suggestion submitted" );
+
+            return review_result
+        }
+
+        // Function für REJECTED-Button
+        document.getElementById('rejected-button').addEventListener('click', rejectedFunction)
+        var rejectedFunction = function(fieldKey, fieldValue) {
+            var fieldKey = fieldKey;
+            let date = new Date();
+            var category = category_identifier();
+            var comment = saveComment();
+            var value_suggestion = saveValue();
+
+            var review_result = {
+                "category": category,
+                "key": fieldKey,
+                "state": "rejected",
+                "loop": [
+                    {
+                        "timestamp": date,
+                        "reviewer": "oep_user",
+                        "comment": comment,
+                        "value_suggestion": value_suggestion,
+                        "accepted": null
+                    }
+                ]
+            }
+            console.log(review_result);
+
+            return review_result
+        }
     </script>
 
 
