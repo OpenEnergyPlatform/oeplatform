@@ -4,22 +4,7 @@ var PeerReview = function (config) {
         "table": config.table,
         "date_started": null,
         "date_finished": null,
-        "reviews": [
-            {
-                "kategory": null,
-                "key": null,
-                "state": null,
-                "loop": [
-                    {
-                        "timestamp": null,
-                        "reviewer": null,
-                        "comment": null,
-                        "value_suggestions": null,
-                        "accepted": null
-                    }
-                ]
-            }
-        ],
+        "reviews": [],
         "accepted": null,
         "granted_batch": null,
         "metaMetadata": {
@@ -111,6 +96,7 @@ var PeerReview = function (config) {
         config.form = $('#peer_review-form');
 
         bindButtons();
+
 
 
 
