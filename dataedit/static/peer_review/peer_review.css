@@ -1,0 +1,21 @@
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f1f1f1;
+}
+
+.flex-container > div {
+  background-color: DodgerBlue;
+  color: white;
+  width: 750px;
+  margin: 10px;
+  text-align: left;
+  line-height: 35px;
+  font-size: 20px;
+}
+
+.flex-reviewer {
+  display: flex;
+  flex-direction: column;
+  background-color: #f1f1f1;
+}
