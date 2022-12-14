@@ -62,10 +62,13 @@ export default function CustomAutocomplete(parameters) {
           'marginBottom': '20px',
           '& > :not(:last-child)': { marginRight: 1 },
           '& > *': { marginBottom: 1 },
+          border: '1px solid #cecece',
+          padding: '20px',
+          overflow: 'scroll',
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.id} onDelete={onDelete(v.id)} color="primary" sx={{ 'marginBottom': '2px' }}/>
+          <Chip key={v.id} label={v.id} onDelete={onDelete(v.id)} variant="outlined" sx={{ 'marginBottom': '2px' }}/>
         ))}
       </Box>
     </Box>

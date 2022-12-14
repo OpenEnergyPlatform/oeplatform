@@ -568,16 +568,16 @@ function Factsheet(props) {
           <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '0px' }}>
-          <CustomAutocomplete optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          <CustomAutocomplete manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '0px' }}>
-          <CustomAutocomplete optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete manyItems optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
           <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+          <CustomAutocomplete manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
         </Grid>
@@ -594,16 +594,16 @@ function Factsheet(props) {
               </Typography>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
+              <CustomAutocomplete manyItems optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete optionsSet={sector_divisions} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={[]}/>
+              <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={[]}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            <CustomAutocomplete manyItems optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            <CustomAutocomplete manyItems optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={12} style={{ marginBottom: '10px' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
@@ -673,7 +673,7 @@ function Factsheet(props) {
             <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
           </Grid>
           <Grid item xs={6} >
-            <CustomAutocomplete optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
+            <CustomAutocomplete manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
           </Grid>
         </Grid>
       </Grid>
@@ -682,7 +682,7 @@ function Factsheet(props) {
     const renderScenario = () => {
       return  <div>
                 <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                <IconButton color="primary" aria-label="upload picture" component="label" onClick={handleAddScenario}>
+                <IconButton variant="outlined" color="primary" aria-label="upload picture" component="label" onClick={handleAddScenario}>
                   <AddBoxIcon />
                 </IconButton>
                 <IconButton color="primary" aria-label="upload picture" component="label">
@@ -703,11 +703,11 @@ function Factsheet(props) {
                      key={'Scenario_tabs'}
                   >
                   {Array(scenarios).fill().map((item, i) =>
-                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)} />
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece' }}  key={'Scenario_panel_' + (i + 1)}/>
                   )}
                   </Tabs>
                   {Array(scenarios).fill().map((item, i) =>
-                    <TabPanel value={scenarioTabValue} index={i} style={{  width: '90%', overflow: 'auto' }}  key={'Scenario_panel_' + (i + 1)} >
+                    <TabPanel value={scenarioTabValue} index={i} style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece' }}  key={'Scenario_panel_' + (i + 1)} >
                       <Scenario
                         idx={i}
                         handleScenariostName={handleScenariostName}
