@@ -179,6 +179,8 @@ function Factsheet(props) {
             scenarios_abstract: JSON.stringify(scenariosAbstract),
             scenarios_region: JSON.stringify(selectedRegion),
             scenarios_interacting_region: JSON.stringify(selectedInteractingRegion),
+            scenarios_years: JSON.stringify(selectedScenariosYears),
+            scenarios_keywords: JSON.stringify(selectedScenariosKeywords),
           }
       }).then(response => setOpenUpdatedDialog(true));
     }
@@ -729,6 +731,8 @@ function Factsheet(props) {
                         scenarioskeywords={scenario_keywords}
                         scenariosKeywordsHandler={scenariosKeywordsHandler}
                         scenariosSelectedkeywords={selectedScenariosKeywords[i] !== undefined ? selectedScenariosKeywords[i] :[]}
+                        scenariosInputDatasets={[]}
+                        scenariosOutputDatasets={[]}
                       />
                     </TabPanel>
                   )}
