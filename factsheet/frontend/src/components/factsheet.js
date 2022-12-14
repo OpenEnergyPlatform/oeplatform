@@ -37,9 +37,6 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Fab from '@mui/material/Fab';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
 import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
@@ -119,8 +116,11 @@ function Factsheet(props) {
   const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : {});
   const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : {});
 
-  const [selectedRegion, setSelectedRegion] = useState([]);
-  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState([]);
+  const [selectedRegion, setSelectedRegion] = useState(id !== 'new' ? fsData.scenarios_region : {});
+  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : {});
+  const [selectedScenariosYears, setSelectedScenariosYears] = useState(id !== 'new' ? fsData.scenarios_years : {});
+  const [selectedScenariosKeywords, setSelectedScenariosKeywords] = useState(id !== 'new' ? fsData.scenarios_keywords : {});
+
   const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
   const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
@@ -139,8 +139,6 @@ function Factsheet(props) {
   };
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
-
-  console.log(scenariosName, scenariosAcronym, scenariosAbstract);
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
@@ -177,6 +175,10 @@ function Factsheet(props) {
             link_to_study: link_to_study,
             authors: JSON.stringify(selectedAuthors),
             scenarios_name: JSON.stringify(scenariosName),
+            scenarios_acronym: JSON.stringify(scenariosAcronym),
+            scenarios_abstract: JSON.stringify(scenariosAbstract),
+            scenarios_region: JSON.stringify(selectedRegion),
+            scenarios_interacting_region: JSON.stringify(selectedInteractingRegion),
           }
       }).then(response => setOpenUpdatedDialog(true));
     }
@@ -425,14 +427,35 @@ function Factsheet(props) {
       { id: 'Frauenhofer ISI', name: "Frauenhofer ISI"},
     ];
 
+    const scenario_years = [
+      { id: '2010', name: "2010"},
+      { id: '2015', name: "2015"},
+      { id: '2020', name: "2020"},
+      { id: '2025', name: "2025"},
+      { id: '2030', name: "2030"},
+      { id: '2035', name: "2035"},
+      { id: '2040', name: "2040"},
+      { id: '2045', name: "2045"},
+      { id: '2050', name: "2050"},
+    ];
+
+    const scenario_keywords = [
+      { id: '100% renewables', name: "100% renewables"},
+      { id: 'acceptance', name: "acceptance"},
+      { id: 'sufficiency', name: "sufficiency"},
+      { id: 'Negative Emissionen', name: "Negative Emissionen"},
+      { id: 'grid restrictions', name: "grid restrictions"},
+      { id: 'Grid / infrastructure extension', name: "Grid / infrastructure extension"},
+    ];
+
     const contact_person = [
       { id: 'Lukas Emele', name: 'Lukas Emele' },
       { id: 'Julia Repenning', name: 'Julia Repenning' },
     ];
 
     const scenario_region = [
-      { id: '1', name: 'Germany' },
-      { id: '2', name: 'France' },
+      { id: 'Germany', name: 'Germany' },
+      { id: 'France', name: 'France' },
     ];
 
     const scenario_input_dataset_region = [
@@ -441,8 +464,8 @@ function Factsheet(props) {
     ];
 
     const scenario_interacting_region = [
-      { id: '2', name: 'France' },
-      { id: '3', name: 'Spain' },
+      { id: 'France', name: 'France' },
+      { id: 'Spain', name: 'Spain' },
     ];
 
     const energy_carriers = [
@@ -479,14 +502,28 @@ function Factsheet(props) {
       factsheetObjectHandler('contact_person', JSON.stringify(contactPersonList));
     };
 
-    const scenarioRegionHandler = (regionList) => {
-      setSelectedRegion(regionList);
-      factsheetObjectHandler('scenario_region', JSON.stringify(selectedRegion));
+    const scenarioRegionHandler = (regionList, idx) => {
+      let newSelectedRegion = selectedRegion;
+      newSelectedRegion[idx] = regionList;
+      factsheetObjectHandler('scenarios_region', JSON.stringify(newSelectedRegion));
     };
 
-    const interactingRegionHandler = (interactionRegionList) => {
-      setSelectedInteractingRegion(interactionRegionList);
-      factsheetObjectHandler('scenario_interacting_region', JSON.stringify(setSelectedInteractingRegion));
+    const scenarioInteractingRegionHandler = (interactionRegionList, idx) => {
+      let newSelectedInteractionRegion = selectedInteractingRegion;
+      newSelectedInteractionRegion[idx] = interactionRegionList;
+      factsheetObjectHandler('scenarios_interacting_region', JSON.stringify(newSelectedInteractionRegion));
+    };
+
+    const scenariosYearsHandler = (scenarioYearsList, idx) => {
+      let newSelectedScenarioYears = selectedScenariosYears;
+      newSelectedScenarioYears[idx] = scenarioYearsList;
+      factsheetObjectHandler('scenarios_years', JSON.stringify(newSelectedScenarioYears));
+    };
+
+    const scenariosKeywordsHandler = (scenarioKeywordsList, idx) => {
+      let newSelectedScenarioKeywords = selectedScenariosKeywords;
+      newSelectedScenarioKeywords[idx] = scenarioKeywordsList;
+      factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenarioKeywords));
     };
 
     const energyCarrierHandler = (energyCarrierList) => {
@@ -515,8 +552,6 @@ function Factsheet(props) {
         'aria-controls': `vertical-tabpanel-${index}`,
       };
     }
-
-
 
     const renderStudy = () => {
       return <Grid container
@@ -679,6 +714,21 @@ function Factsheet(props) {
                         scenariosName={scenariosName}
                         scenariosAcronym={scenariosAcronym}
                         scenariosAbstract={scenariosAbstract}
+                        scenario_region={scenario_region}
+                        scenarioRegionHandler={scenarioRegionHandler}
+                        selectedRegion={selectedRegion[i] !== undefined ? selectedRegion[i] :[]}
+                        scenarioRegion={scenario_region}
+                        scenarioRegionHandler={scenarioRegionHandler}
+                        scenarioSelectedRegion={selectedRegion[i] !== undefined ? selectedRegion[i] :[]}
+                        scenarioInteractingRegion={scenario_interacting_region}
+                        scenarioInteractingRegionHandler={scenarioInteractingRegionHandler}
+                        scenarioSelectedInteractingRegion={selectedInteractingRegion[i] !== undefined ? selectedInteractingRegion[i] :[]}
+                        scenariosYears={scenario_years}
+                        scenariosYearsHandler={scenariosYearsHandler}
+                        scenariosSelectedYears={selectedScenariosYears[i] !== undefined ? selectedScenariosYears[i] :[]}
+                        scenarioskeywords={scenario_keywords}
+                        scenariosKeywordsHandler={scenariosKeywordsHandler}
+                        scenariosSelectedkeywords={selectedScenariosKeywords[i] !== undefined ? selectedScenariosKeywords[i] :[]}
                       />
                     </TabPanel>
                   )}

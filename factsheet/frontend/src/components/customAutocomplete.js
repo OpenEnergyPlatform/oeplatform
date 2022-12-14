@@ -12,17 +12,18 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
-  const { manyItems } = parameters
-  const [value, setValue] = useState(parameters.selectedElements);
+  const { manyItems, idx } = parameters;
+  console.log(parameters.selectedElements);
+  console.log(parameters.selectedElements);
+  const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
-
   const onDelete = (id) => () => {
     setValue((value) => value.filter((v) => v.id !== id));
   };
 
   useEffect(()=>{
-    handler(value);
+    handler(value, idx);
   })
 
   return (
@@ -49,7 +50,7 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" />
+          <TextField {...params} label={parameters.kind} placeholder="Sectors" />
         )}
       />
       <Box

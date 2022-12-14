@@ -46,6 +46,7 @@ function App() {
         const fsd = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
         const result = eval(fsd)[0].fields.factsheetData;
         console.log(result);
+        console.log(result);
         return result;
     } else {
       axios.get(conf.toep + `factsheet/all/`);

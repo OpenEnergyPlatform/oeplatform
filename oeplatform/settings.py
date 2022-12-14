@@ -72,11 +72,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-<<<<<<< HEAD
-    'corsheaders.middleware.CorsMiddleware',
-=======
     "corsheaders.middleware.CorsMiddleware",
->>>>>>> hotfix/v0.10.4
     "django.middleware.common.CommonMiddleware"
 )
 

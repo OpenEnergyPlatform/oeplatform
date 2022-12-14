@@ -26,6 +26,10 @@ def create_factsheet(request, *args, **kwargs):
     scenarios_name = request.GET.get('scenarios_name')
     scenarios_acronym = request.GET.get('scenarios_acronym')
     scenarios_abstract = request.GET.get('scenarios_abstract')
+    scenarios_region = request.GET.get('scenarios_region')
+    scenarios_interacting_region = request.GET.get('scenarios_interacting_region')
+    scenarios_years = request.GET.get('scenarios_years')
+    scenarios_keywords = request.GET.get('scenarios_keywords')
 
     factsheet_obj = {
         'name': name,
@@ -42,6 +46,10 @@ def create_factsheet(request, *args, **kwargs):
         'scenarios_name': json.loads(scenarios_name),
         'scenarios_acronym': json.loads(scenarios_acronym),
         'scenarios_abstract': json.loads(scenarios_abstract),
+        'scenarios_region': json.loads(scenarios_region),
+        'scenarios_interacting_region': json.loads(scenarios_interacting_region),
+        'scenarios_years': json.loads(scenarios_years),
+        'scenarios_keywords': json.loads(scenarios_keywords),
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -67,6 +75,10 @@ def update_factsheet(request, *args, **kwargs):
     scenarios_name = request.GET.get('scenarios_name')
     scenarios_acronym = request.GET.get('scenarios_acronym')
     scenarios_abstract = request.GET.get('scenarios_abstract')
+    scenarios_region = request.GET.get('scenarios_region')
+    scenarios_interacting_region = request.GET.get('scenarios_interacting_region')
+    scenarios_years = request.GET.get('scenarios_years')
+    scenarios_keywords = request.GET.get('scenarios_keywords')
 
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
@@ -85,6 +97,10 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['scenarios_name'] = json.loads(scenarios_name)
     factsheet.factsheetData['scenarios_acronym'] = json.loads(scenarios_acronym)
     factsheet.factsheetData['scenarios_abstract'] = json.loads(scenarios_abstract)
+    factsheet.factsheetData['scenarios_region'] = json.loads(scenarios_region)
+    factsheet.factsheetData['scenarios_interacting_region'] = json.loads(scenarios_interacting_region)
+    factsheet.factsheetData['scenarios_years'] = json.loads(scenarios_years)
+    factsheet.factsheetData['scenarios_keywords'] = json.loads(scenarios_keywords)
 
     factsheet.save()
     return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)
