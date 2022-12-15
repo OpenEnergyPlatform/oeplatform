@@ -30,6 +30,8 @@ def create_factsheet(request, *args, **kwargs):
     scenarios_interacting_region = request.GET.get('scenarios_interacting_region')
     scenarios_years = request.GET.get('scenarios_years')
     scenarios_keywords = request.GET.get('scenarios_keywords')
+    scenarios_input_datasets = request.GET.get('scenarios_input_datasets')
+    scenarios_output_datasets = request.GET.get('scenarios_output_datasets')
 
     factsheet_obj = {
         'name': name,
@@ -50,6 +52,9 @@ def create_factsheet(request, *args, **kwargs):
         'scenarios_interacting_region': json.loads(scenarios_interacting_region),
         'scenarios_years': json.loads(scenarios_years),
         'scenarios_keywords': json.loads(scenarios_keywords),
+        'scenarios_keywords': json.loads(scenarios_keywords),
+        'scenarios_input_datasets': json.loads(scenarios_input_datasets),
+        'scenarios_output_datasets': json.loads(scenarios_output_datasets),
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -79,6 +84,8 @@ def update_factsheet(request, *args, **kwargs):
     scenarios_interacting_region = request.GET.get('scenarios_interacting_region')
     scenarios_years = request.GET.get('scenarios_years')
     scenarios_keywords = request.GET.get('scenarios_keywords')
+    scenarios_input_datasets = request.GET.get('scenarios_input_datasets')
+    scenarios_output_datasets = request.GET.get('scenarios_output_datasets')
 
     factsheet = Factsheet.objects.get(id=id)
     factsheet.factsheetData['name'] = name
@@ -101,6 +108,8 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['scenarios_interacting_region'] = json.loads(scenarios_interacting_region)
     factsheet.factsheetData['scenarios_years'] = json.loads(scenarios_years)
     factsheet.factsheetData['scenarios_keywords'] = json.loads(scenarios_keywords)
+    factsheet.factsheetData['scenarios_input_datasets'] = json.loads(scenarios_input_datasets)
+    factsheet.factsheetData['scenarios_output_datasets'] = json.loads(scenarios_output_datasets)
 
     factsheet.save()
     return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)

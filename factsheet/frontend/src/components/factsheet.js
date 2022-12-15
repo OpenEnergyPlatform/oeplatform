@@ -120,6 +120,8 @@ function Factsheet(props) {
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : {});
   const [selectedScenariosYears, setSelectedScenariosYears] = useState(id !== 'new' ? fsData.scenarios_years : {});
   const [selectedScenariosKeywords, setSelectedScenariosKeywords] = useState(id !== 'new' ? fsData.scenarios_keywords : {});
+  const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : {});
+  const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : {});
 
   const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
   const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
@@ -528,6 +530,18 @@ function Factsheet(props) {
       factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenarioKeywords));
     };
 
+    const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
+      let newScenariosInputDatasets = scenariosInputDatasets;
+      newScenariosInputDatasets[idx] = scenariosInputDatasetsList;
+      factsheetObjectHandler('scenarios_input_datasets', JSON.stringify(newScenariosInputDatasets));
+    };
+
+    const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
+      let newScenariosOutputDatasets = scenariosOutputDatasets;
+      newScenariosOutputDatasets[idx] = scenariosOutputDatasetsList;
+      factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
+    };
+
     const energyCarrierHandler = (energyCarrierList) => {
       setSelectedsetEnergyCarriers(energyCarrierList);
       factsheetObjectHandler('scenario_energy_carriers', JSON.stringify(selectedEnergyCarriers));
@@ -703,7 +717,7 @@ function Factsheet(props) {
                      key={'Scenario_tabs'}
                   >
                   {Array(scenarios).fill().map((item, i) =>
-                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece' }}  key={'Scenario_panel_' + (i + 1)}/>
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }}  key={'Scenario_panel_' + (i + 1)}/>
                   )}
                   </Tabs>
                   {Array(scenarios).fill().map((item, i) =>
@@ -732,6 +746,8 @@ function Factsheet(props) {
                         scenariosKeywordsHandler={scenariosKeywordsHandler}
                         scenariosSelectedkeywords={selectedScenariosKeywords[i] !== undefined ? selectedScenariosKeywords[i] :[]}
                         scenariosInputDatasets={[]}
+                        scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
+                        scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                         scenariosOutputDatasets={[]}
                       />
                     </TabPanel>

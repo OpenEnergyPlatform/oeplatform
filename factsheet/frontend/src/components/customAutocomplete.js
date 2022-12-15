@@ -62,7 +62,7 @@ export default function CustomAutocomplete(parameters) {
           'marginBottom': '20px',
           '& > :not(:last-child)': { marginRight: 1 },
           '& > *': { marginBottom: 1 },
-          border: '1px solid #cecece',
+          border: '1px dashed #cecece',
           padding: '20px',
           overflow: 'scroll',
         }}
