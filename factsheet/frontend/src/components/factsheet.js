@@ -183,6 +183,8 @@ function Factsheet(props) {
             scenarios_interacting_region: JSON.stringify(selectedInteractingRegion),
             scenarios_years: JSON.stringify(selectedScenariosYears),
             scenarios_keywords: JSON.stringify(selectedScenariosKeywords),
+            scenarios_input_datasets: JSON.stringify(scenariosInputDatasets),
+            scenarios_output_datasets: JSON.stringify(scenariosOutputDatasets),
           }
       }).then(response => setOpenUpdatedDialog(true));
     }
@@ -531,14 +533,18 @@ function Factsheet(props) {
     };
 
     const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
+      console.log(scenariosInputDatasetsList);
       let newScenariosInputDatasets = scenariosInputDatasets;
       newScenariosInputDatasets[idx] = scenariosInputDatasetsList;
+
       factsheetObjectHandler('scenarios_input_datasets', JSON.stringify(newScenariosInputDatasets));
     };
 
     const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
+      console.log(scenariosOutputDatasetsList);
       let newScenariosOutputDatasets = scenariosOutputDatasets;
       newScenariosOutputDatasets[idx] = scenariosOutputDatasetsList;
+      console.log(newScenariosOutputDatasets);
       factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
     };
 
@@ -748,7 +754,8 @@ function Factsheet(props) {
                         scenariosInputDatasets={[]}
                         scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
-                        scenariosOutputDatasets={[]}
+                        scenariosOutputDatasets={scenariosOutputDatasets}
+                        scenariosInputDatasets={scenariosInputDatasets}
                       />
                     </TabPanel>
                   )}

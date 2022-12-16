@@ -49,7 +49,7 @@ function App() {
         console.log(result);
         return result;
     } else {
-      axios.get(conf.toep + `factsheet/all/`);
+      axios.get(conf.localhost + `factsheet/all/`);
     }
   };
   useEffect(() => {
