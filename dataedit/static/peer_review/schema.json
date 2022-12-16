@@ -6,26 +6,26 @@
     "type": "object",
     "properties": {
         "topic": {
-            "type": "string",
             "description": "Selected topic where the table will be published.",
+            "type": "string",
             "title": "Topic"
         },
         "table": {
-            "type": "string",
             "description": "A file name or database table name. Example: oep_metadata_table_example_v151",
+            "type": "string",
             "title": "Table"
         },
         "date_started": {
             "description": "A date when the review was started.",
             "type": "string",
             "title": "Date started",
-            "format": "date"
+            "format": "date-time"
         },
         "date_finished": {
             "description": "A date when the review was finished.",
             "type": "string",
             "title": "Date finished",
-            "format": "date"
+            "format": "date-time"
         },
         "metadata_version": {
             "description": "Type and version number of the metadata. Example: oemetadata_v1.5.1",
@@ -35,7 +35,7 @@
         },
         "reviews": {
             "description": "All comments and value suggestions, stored as a list.",
-            "type": "string",
+            "type": "array",
             "items": {
                 "description": "All information for a specific field are stored as a dictionary.",
                 "type": "object",
@@ -65,7 +65,8 @@
                                 "timestamp": {
                                     "description": "Date and time when the reviewer added something.",
                                     "type": "string",
-                                    "title": "Timestamp"
+                                    "title": "Timestamp",
+                                    "format": "date-time"
                                 },
                                 "reviewer": {
                                     "description": "Person who creates a comment.",
