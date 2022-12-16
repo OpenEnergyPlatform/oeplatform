@@ -101,20 +101,23 @@
 <div class="flex-reviewer" id="review-window">
     <div id="review-field-name">Field Name: </div>
     <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-        <button type="button" class="btn btn-success" id="ok-button" onclick="okFunction('{{item.firstkey}}', '{{ item.value }}')">Ok</button>
-        <button type="button" class="btn btn-warning" id="suggestion-button" onclick="suggestionFunction('{{item.firstkey}}', '{{ item.value }}')">Suggestion</button>
-        <button type="button" class="btn btn-sm btn-danger" id="rejected-button" onclick="rejectedFunction('{{item.firstkey}}', '{{ item.value }}')">Rejected</button>
+        <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectedButton('ok')">Ok</button>
+        <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectedButton('suggestion')">Suggestion</button>
+        <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectedButton('rejected')">Rejected</button>
     </div>
 
     <div class="mb-3" id="field-comment">
       <label for="commentarea" class="form-label" >Add Your Comment</label>
-      <textarea class="form-control" id="commentarea" rows="2" onchange="saveComment('{{item.firstkey}}', '{{ item.value }}')"></textarea>
+      <textarea class="form-control" id="commentarea" rows="2" ></textarea>
     </div>
 
     <div class="mb-3" id="field-value">
         <label for="valuearea" class="form-label">Add New Value</label>
-        <textarea class="form-control" id="valuearea" rows="2"></textarea>
+        <textarea class="form-control" id="valuearea" rows="2" ></textarea>
     </div>
+
+    <button type="button" class="btn btn-success" id="submit-button" style="width:25%" onclick="saveEntrances()">Save comment and new value</button>
+
 </div>
 
 <hr>
@@ -145,40 +148,112 @@
         PeerReview(config);
 
 
-        document.getElementById('field_name').addEventListener('click', category_identifier);
-        var category_identifier = function (categoryKey) {
+        // 1 Identify Category from tab
+        // document.getElementById('field_name').addEventListener('click', category_identifier);
+        var category_identifier = function () {
             const selectedCategory = document.querySelector("#general-tab").innerHTML;
-            return (selectedCategory)
+
+            return selectedCategory
         }
 
 
+        // 1 Identify field name
+        var selctedField;
         document.getElementById('field_name').addEventListener('click', click_field);
         var click_field = function (fieldKey, fieldValue) {
+            const x = fieldKey;
+            selctedField = x;
             const selectedName = document.querySelector("#review-field-name");
-            const selectedValue = document.querySelector("#valuearea");
             selectedName.textContent = fieldKey;
-            selectedValue.value = fieldValue;
+
+            return x
+        }
+
+
+        // 2 Identify selected button
+        var selctedState;
+        document.getElementById('ok-button').addEventListener('click', selectedButton);
+        var selectedButton = function(button) {
+            const state = button;
+            selctedState = state;
+
+            return state
+        }
+
+
+        // 3 Save added comment for corresponding field
+        // document.getElementById('commentarea').addEventListener('change', saveComment);
+        var saveComment = function() {
+            var z = document.getElementById('commentarea');
+
+            return z.value
+        }
+
+
+        // 3 Save added value suggestion for corresponding field
+        // document.getElementById('valuearea').addEventListener('change', saveValue);
+        var saveValue = function() {
+            var selectedValue = document.querySelector("#valuearea");
+
+            return selectedValue.value
+        }
+
+
+        // Function to save all values
+        document.getElementById('submit-button').addEventListener('click', saveEntrances);
+        var saveEntrances = function() {
+            var category = category_identifier();
+            var fieldName = selctedField;
+            var state = selctedState;
+            let date = new Date();
+            var comment = saveComment();
+            var value_suggestion = saveValue();
+
+
+            if (selctedState == "ok") {
+                var review_result = {
+                    "category": category,
+                    "key": fieldName,
+                    "state": state,
+                    "loop": null
+                }
+            }
+            else {var review_result = {
+                    "category": category,
+                    "key": fieldName,
+                    "state": state,
+                    "loop": [
+                        {
+                            "timestamp": date,
+                            "reviewer": "oep_user",
+                            "comment": comment,
+                            "value_suggestion": value_suggestion,
+                            "accepted": null
+                        }
+                    ]
+                }
+            }
             document.getElementById("commentarea").value = "";
+            document.getElementById("valuearea").value = "";
+
+
+            console.log(review_result)
         }
 
 
-        document.getElementById('commentarea').addEventListener('change', saveComment);
-        var saveComment = function(fieldKey, fieldValue) {
-            var x = document.getElementById("commentarea");
-
-            return (x.value)
-        }
 
 
-        document.getElementById('valuearea').addEventListener('change', saveValue);
-        var saveValue = function(fieldKey, fieldValue) {
-            var x = document.getElementById("valuearea");
-
-            return (x.value)
-        }
 
 
-        // Funktion für OK-Button
+
+
+
+
+
+        // ----------------------------------------------------------------------
+
+
+        // Function for OK-Button
         document.getElementById('ok-button').addEventListener('click', okFunction)
         var okFunction = function(fieldKey, fieldValue) {
             var category = category_identifier();
@@ -189,12 +264,12 @@
                 "state": "ok",
                 "loop": null
             }
-            console.log("ok submitted for " + fieldKey);
 
             return review_result
         }
 
-        // Function für SUGGESTION-Button
+
+        // Function for SUGGESTION-Button
         document.getElementById('suggestion-button').addEventListener('click', suggestionFunction)
         var suggestionFunction = function(fieldKey, fieldValue) {
             let date = new Date();
@@ -217,12 +292,12 @@
                     }
                 ]
             }
-            console.log("suggestion submitted" );
 
             return review_result
         }
 
-        // Function für REJECTED-Button
+
+        // Function for REJECTED-Button
         document.getElementById('rejected-button').addEventListener('click', rejectedFunction)
         var rejectedFunction = function(fieldKey, fieldValue) {
             var fieldKey = fieldKey;
@@ -245,7 +320,6 @@
                     }
                 ]
             }
-            console.log(review_result);
 
             return review_result
         }
