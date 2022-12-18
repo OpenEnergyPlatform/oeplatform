@@ -13,13 +13,11 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
   const { manyItems, idx } = parameters;
-  console.log(parameters.selectedElements);
-  console.log(parameters.selectedElements);
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
-  const onDelete = (id) => () => {
-    setValue((value) => value.filter((v) => v.id !== id));
+  const onDelete = (name) => () => {
+    setValue((value) => value.filter((v) => v.name !== name));
   };
 
   useEffect(()=>{
@@ -33,7 +31,7 @@ export default function CustomAutocomplete(parameters) {
         id="checkboxes-tags-demo"
         options={params}
         disableCloseOnSelect
-        getOptionLabel={(option) => option.id}
+        getOptionLabel={(option) => option.name}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
             <Checkbox
@@ -48,7 +46,7 @@ export default function CustomAutocomplete(parameters) {
         value={value}
         onChange={(e, newValue) => (setValue(newValue))}
         renderTags={() => null}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
+        isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
           <TextField {...params} label={parameters.kind} placeholder="Sectors" />
         )}
@@ -68,7 +66,7 @@ export default function CustomAutocomplete(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.id} onDelete={onDelete(v.id)} variant="outlined" sx={{ 'marginBottom': '2px' }}/>
+          <Chip key={v.id} label={v.name} onDelete={onDelete(v.name)} variant="outlined" sx={{ 'marginBottom': '2px' }}/>
         ))}
       </Box>
     </Box>

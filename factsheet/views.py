@@ -20,6 +20,11 @@ def create_factsheet(request, *args, **kwargs):
     funding_source = request.GET.get('funding_source')
     authors = request.GET.get('authors')
     contact_person = request.GET.get('contact_person')
+    sector_divisions = request.GET.get('sector_divisions')
+    sectors = request.GET.get('sectors')
+    scenario_energy_carriers = request.GET.get('scenario_energy_carriers')
+    scenario_energy_transportation_process = request.GET.get('scenario_energy_transportation_process')
+    contact_person = request.GET.get('contact_person')
     doi = request.GET.get('doi')
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
@@ -42,6 +47,10 @@ def create_factsheet(request, *args, **kwargs):
         'funding_source': funding_source,
         'authors': authors,
         'contact_person': contact_person,
+        'sector_divisions': sector_divisions,
+        'scenario_energy_transportation_process': scenario_energy_transportation_process,
+        'scenario_energy_carriers': scenario_energy_carriers,
+        'sectors': sectors,
         'doi': doi,
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
@@ -71,6 +80,10 @@ def update_factsheet(request, *args, **kwargs):
     institution = request.GET.get('institution')
     funding_source = request.GET.get('funding_source')
     contact_person = request.GET.get('contact_person')
+    sector_divisions = request.GET.get('sector_divisions')
+    sectors = request.GET.get('sectors')
+    scenario_energy_carriers = request.GET.get('scenario_energy_carriers')
+    scenario_energy_transportation_process = request.GET.get('scenario_energy_transportation_process')
     report_title = request.GET.get('report_title')
     date_of_publication = request.GET.get('date_of_publication')
     doi = request.GET.get('doi')
@@ -95,6 +108,10 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['institution'] = json.loads(institution)
     factsheet.factsheetData['funding_source'] = json.loads(funding_source)
     factsheet.factsheetData['contact_person'] = json.loads(contact_person)
+    factsheet.factsheetData['sector_divisions'] = json.loads(sector_divisions)
+    factsheet.factsheetData['sectors'] = json.loads(sectors)
+    factsheet.factsheetData['scenario_energy_carriers'] = json.loads(scenario_energy_carriers)
+    factsheet.factsheetData['scenario_energy_transportation_process'] = json.loads(scenario_energy_transportation_process)
     factsheet.factsheetData['report_title'] = report_title
     factsheet.factsheetData['date_of_publication'] = date_of_publication
     factsheet.factsheetData['doi'] = doi

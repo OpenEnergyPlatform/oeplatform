@@ -123,3 +123,30 @@
   margin-top: auto;
   text-align: right;
 }
+
+
+a:link {
+  color: #0375CE;
+  background-color: transparent;
+  text-decoration: none;
+  font-weight: bold
+}
+
+a:visited {
+  color: #0375CE;
+  background-color: transparent;
+  text-decoration: none;
+  font-weight: bold
+}
+
+a:hover {
+  color: #0375CE;
+  background-color: transparent;
+  font-weight: bold
+}
+
+a:active {
+  color: #0375CE;
+  background-color: transparent;
+  font-weight: bold
+}

@@ -44,10 +44,14 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { useRef } from "react";
 import conf from "../conf.json";
+import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { styled } from '@mui/material/styles';
+
+
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div
       role="tabpanel"
@@ -84,6 +88,7 @@ function Factsheet(props) {
     "oeo:OEO_00000505": [],
     "oeo:OEO_00000509": []
   });
+
   const [factsheetRDF, setFactsheetRDF] = useState({});
   const [factsheet, setFactsheet] = useState({});
   const [loading, setLoading] = useState(true);
@@ -99,7 +104,8 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-  const [selectedSectors, setSelectedSectors] = useState([]);
+  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
+  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
@@ -123,8 +129,8 @@ function Factsheet(props) {
   const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : {});
   const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : {});
 
-  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState([]);
-  const [selectedEnergyTransportation, setSelectedEnergyTransportation] = useState([]);
+  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.scenario_energy_carriers : []);
+  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.scenario_energy_transportation_process : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
@@ -170,6 +176,10 @@ function Factsheet(props) {
             institution: JSON.stringify(selectedInstitution),
             funding_source: JSON.stringify(selectedFundingSource),
             contact_person: JSON.stringify(selectedContactPerson),
+            sector_divisions: JSON.stringify(selectedSectorDivisions),
+            sectors: JSON.stringify(selectedSectors),
+            scenario_energy_carriers: JSON.stringify(selectedEnergyCarriers),
+            scenario_energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
             report_title: report_title,
             date_of_publication: date_of_publication,
             doi: doi,
@@ -379,18 +389,25 @@ function Factsheet(props) {
       }
     }
 
-    const sectors = [
-      { id: 'Agriculture forestry and land use sector', name: 'Agriculture forestry and land use sector' },
-      { id: 'Energy demand sector', name: 'Energy demand sector' },
-      { id: 'Energy transformation sector', name: 'Energy transformation sector' },
-      { id: 'Industry sector', name: 'Industry sector' },
-      { id: 'Waste and wastewater sector', name: 'Waste and wastewater sector' }
+    const sector_divisions = [
+      { id: 1, name: 'The Common Reporting Format (CRF)' },
+      { id: 2, name: 'European format' },
+      { id: 3, name: 'Other' },
     ];
 
-    const sector_divisions = [
-      { id: 'Europian', name: 'Europian' },
-      { id: 'Germany', name: 'Germany' },
+    const sectors = [
+      { id: 1, name: 'Agriculture forestry and land use sector', sector_divisions_id: 2 },
+      { id: 2, name: 'Energy demand sector', sector_divisions_id: 1 },
+      { id: 3, name: 'Energy transformation sector', sector_divisions_id: 2 },
+      { id: 4, name: 'Industry sector', sector_divisions_id: 1 },
+      { id: 5, name: 'Waste and wastewater sector', sector_divisions_id: 2 }
     ];
+
+    const get_sectors = () => {
+      const selectedSectorDivisionsIDs = selectedSectorDivisions.map(item => item.id);
+      const sectorsBasedOnDivisions = sectors.filter(item  => selectedSectorDivisionsIDs.includes(item.sector_divisions_id) );
+      return sectorsBasedOnDivisions;
+    }
 
     const authors = [
       { id: 'Julia Repenning',  name: 'Julia Repenning' },
@@ -475,17 +492,40 @@ function Factsheet(props) {
     ];
 
     const energy_carriers = [
-      { id: '1', name: 'Gas' },
-      { id: '3', name: 'Electricity' },
+      {id: 1, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000102',  name: 'compressed air'},
+      {id: 2, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000257',  name: 'liquid air'},
+      {id: 3, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00140080',  name: 'final energy carrier'},
+      {id: 4, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000302',  name: 'nuclear fuel'},
+      {id: 5, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000071',  name: 'biodiesel'},
+      {id: 6, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000131',  name: 'fossil diesel fuel'},
+      {id: 7, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010226',  name: 'fossil industrial waste fuel'},
+      {id: 8, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000299',  name: 'fossil municipal waste fuel'},
+      {id: 9, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010015',  name: 'fossil hydrogen'},
+      {id: 10, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000077',  name: 'blast furnace gas'},
+      {id: 11, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000093',  name: 'coke oven gas'},
+      {id: 12, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000186',  name: 'gasworks gas'},
+      {id: 13, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00000062',  name: 'associated gas'},
     ];
 
-    const energy_transportation = [
-      { id: '1', name: 'Fuel' },
+    const energy_transportation_process = [
+      {id: 1, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00240009',  name: 'combined heat and power generation'},
+      {id: 2, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00050001',  name: 'fuel-powered electricity generation'},
+      {id: 3, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010098',  name: 'marine current energy transformation'},
+      {id: 4, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010099',  name: 'marine tidal energy transformation'},
+      {id: 5, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010103',  name: 'marine wave energy transformation'},
+      {id: 6, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00020048',  name: 'photovoltaic energy transformation'},
+      {id: 7, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00010080',  name: 'solar-steam-electric process'},
+      {id: 8, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00050020 ', name: 'steam-electric process'},
     ];
 
     const sectorsHandler = (sectorsList) => {
       setSelectedSectors(sectorsList);
       factsheetObjectHandler('sectors', sectorsList);
+    };
+
+    const sectorDivisionsHandler = (sectorDivisionsList) => {
+      setSelectedSectorDivisions(sectorDivisionsList);
+      factsheetObjectHandler('sector_divisions', sectorDivisionsList);
     };
 
     const authorsHandler = (authorsList) => {
@@ -533,7 +573,6 @@ function Factsheet(props) {
     };
 
     const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
-      console.log(scenariosInputDatasetsList);
       let newScenariosInputDatasets = scenariosInputDatasets;
       newScenariosInputDatasets[idx] = scenariosInputDatasetsList;
 
@@ -541,21 +580,19 @@ function Factsheet(props) {
     };
 
     const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
-      console.log(scenariosOutputDatasetsList);
       let newScenariosOutputDatasets = scenariosOutputDatasets;
       newScenariosOutputDatasets[idx] = scenariosOutputDatasetsList;
-      console.log(newScenariosOutputDatasets);
       factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
     };
 
-    const energyCarrierHandler = (energyCarrierList) => {
-      setSelectedsetEnergyCarriers(energyCarrierList);
+    const energyCarriersHandler = (energyCarriersList) => {
+      setSelectedsetEnergyCarriers(energyCarriersList);
       factsheetObjectHandler('scenario_energy_carriers', JSON.stringify(selectedEnergyCarriers));
     };
 
-    const energyTransportationHandler = (energyTransportationList) => {
-      setSelectedEnergyTransportation(energyTransportationList);
-      factsheetObjectHandler('scenario_energy_transportation', JSON.stringify(selectedEnergyTransportation));
+    const energyTransportationProcessHandler = (energyTransportationProcessList) => {
+      setSelectedEnergyTransportationProcess(energyTransportationProcessList);
+      factsheetObjectHandler('scenario_energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
     };
 
     const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
@@ -575,6 +612,19 @@ function Factsheet(props) {
       };
     }
 
+    const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+      <Tooltip {...props} classes={{ popper: className }} />
+    ))(({ theme }) => ({
+      [`& .${tooltipClasses.tooltip}`]: {
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        color: 'black',
+        maxWidth: 520,
+        fontSize: theme.typography.pxToRem(20),
+        border: '1px solid black',
+        padding: '20px'
+      },
+    }));
+
     const renderStudy = () => {
       return <Grid container
         direction="row"
@@ -582,22 +632,160 @@ function Factsheet(props) {
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
+          <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+            }}>
+            <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
+            <div>
+              <HtmlTooltip
+                style={{ marginLeft: '10px' }}
+                placement="top"
+                title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="caption">
+                      {'A study is a project with the goal to investigate something.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+              >
+                <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+              </HtmlTooltip>
+            </div>
+          </div>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
+          <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+            }}>
+            <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
+            <div>
+              <HtmlTooltip
+                style={{ marginLeft: '10px' }}
+                placement="top"
+                title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="caption">
+                      {'A study is a project with the goal to investigate something.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+              >
+                <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+              </HtmlTooltip>
+            </div>
+          </div>
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '0px' }}>
-          <CustomAutocomplete manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+        <Grid item xs={6} >
+          <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+            }}>
+            <CustomAutocomplete manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <div style={{ marginTop: '30px' }}>
+              <HtmlTooltip
+                style={{ marginLeft: '10px' }}
+                placement="top"
+                title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="caption">
+                      {'A study is a project with the goal to investigate something.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+              >
+                <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+              </HtmlTooltip>
+            </div>
+          </div>
         </Grid>
-        <Grid item xs={6} style={{ marginBottom: '0px' }}>
+        <Grid item xs={6} >
+        <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              flexWrap: 'wrap',
+          }}>
           <CustomAutocomplete manyItems optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <div style={{ marginTop: '30px' }}>
+            <HtmlTooltip
+              style={{ marginLeft: '10px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="caption">
+                    {'A study is a project with the goal to investigate something.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                  </Typography>
+                </React.Fragment>
+              }
+            >
+              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+          </div>
+        </div>
+        </Grid>
+        <Grid item xs={6} style={{ marginTop: '0px' }}>
+          <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+            }}>
+            <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
+          <div style={{ marginTop: '20px' }}>
+            <HtmlTooltip
+              style={{ marginLeft: '10px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="caption">
+                    {'A study is a project with the goal to investigate something.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                  </Typography>
+                </React.Fragment>
+              }
+            >
+              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+          </div>
+        </div>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+          <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                flexWrap: 'wrap',
+            }}>
+              <CustomAutocomplete manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+          <div style={{ marginTop: '30px' }}>
+            <HtmlTooltip
+              style={{ marginLeft: '10px' }}
+              placement="top"
+              title={
+                <React.Fragment>
+                  <Typography color="inherit" variant="caption">
+                    {'A study is a project with the goal to investigate something.'}
+                    <br />
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                  </Typography>
+                </React.Fragment>
+              }
+            >
+              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+          </div>
+        </div>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
         </Grid>
@@ -614,16 +802,16 @@ function Factsheet(props) {
               </Typography>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete manyItems optionsSet={sectors} kind='Do you use a predefined sector division? ' handler={sectorsHandler} selectedElements={selectedSectors}/>
+              <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={[]}/>
+              <CustomAutocomplete manyItems optionsSet={get_sectors()} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete manyItems optionsSet={sectors} kind='What energy carriers are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            <CustomAutocomplete manyItems optionsSet={energy_carriers} kind='What energy carriers are considered?' handler={energyCarriersHandler} selectedElements={selectedEnergyCarriers}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete manyItems optionsSet={sectors} kind='Which energy transformation processes are considered?' handler={sectorsHandler} selectedElements={selectedSectors}/>
+            <CustomAutocomplete manyItems optionsSet={energy_transportation_process} kind='Which energy transformation processes are considered?' handler={energyTransportationProcessHandler} selectedElements={selectedEnergyTransportationProcess}/>
             </Grid>
             <Grid item xs={12} style={{ marginBottom: '10px' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
@@ -795,6 +983,9 @@ function Factsheet(props) {
     useEffect(() => {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
+
+
+
 
     return (
       <div>
