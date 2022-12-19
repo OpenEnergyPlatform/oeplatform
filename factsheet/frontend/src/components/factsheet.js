@@ -104,8 +104,10 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
+
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
+
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
@@ -589,12 +591,12 @@ function Factsheet(props) {
 
     const energyCarriersHandler = (energyCarriersList) => {
       setSelectedsetEnergyCarriers(energyCarriersList);
-      factsheetObjectHandler('scenario_energy_carriers', JSON.stringify(selectedEnergyCarriers));
+      factsheetObjectHandler('energy_carriers', JSON.stringify(selectedEnergyCarriers));
     };
 
     const energyTransportationProcessHandler = (energyTransportationProcessList) => {
       setSelectedEnergyTransportationProcess(energyTransportationProcessList);
-      factsheetObjectHandler('scenario_energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
+      factsheetObjectHandler('energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
     };
 
     const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
@@ -612,6 +614,24 @@ function Factsheet(props) {
         id: `vertical-tab-${index}`,
         'aria-controls': `vertical-tabpanel-${index}`,
       };
+    }
+
+    const handleKeywords = (event) => {
+       console.log(event.target.checked);
+       if (event.target.checked === true) {
+         if (!selectedKeywords.includes(event.target.name)) {
+           setSelectedKeywords([...selectedKeywords, event.target.name]);
+         }
+       } else {
+         const newKeywords = selectedKeywords;
+         const index = newKeywords.indexOf(event.target.name);
+         if (index > -1) {
+           newKeywords.splice(index, 1);
+           setSelectedKeywords(newKeywords);
+         }
+       }
+       console.log(selectedKeywords);
+       factsheetObjectHandler('keywords', JSON.stringify(selectedKeywords));
     }
 
     const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -685,9 +705,9 @@ function Factsheet(props) {
                 title={
                   <React.Fragment>
                     <Typography color="inherit" variant="caption">
-                      {'A study is a project with the goal to investigate something.'}
+                      {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -737,9 +757,9 @@ function Factsheet(props) {
               title={
                 <React.Fragment>
                   <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
+                    {'A funder is a sponsor that supports by giving money.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -789,9 +809,9 @@ function Factsheet(props) {
               title={
                 <React.Fragment>
                   <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
+                    {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)</a>
                   </Typography>
                 </React.Fragment>
               }
