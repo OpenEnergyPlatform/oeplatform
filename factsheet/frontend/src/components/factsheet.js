@@ -159,13 +159,13 @@ function Factsheet(props) {
       factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
       factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
 
-      axios.post(conf.localhost + 'factsheet/add/', null,
+      axios.post(conf.toep + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.localhost + 'factsheet/update/', null,
+      axios.post(conf.toep + 'factsheet/update/', null,
       {  params:
           {
             id: id,
