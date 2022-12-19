@@ -3,7 +3,7 @@ import os
 import re
 from pathlib import Path
 
-import nbconvert
+#import nbconvert
 import nbformat
 from bs4 import BeautifulSoup
 from django.conf import settings
