@@ -22,8 +22,9 @@ def create_factsheet(request, *args, **kwargs):
     contact_person = request.GET.get('contact_person')
     sector_divisions = request.GET.get('sector_divisions')
     sectors = request.GET.get('sectors')
-    scenario_energy_carriers = request.GET.get('scenario_energy_carriers')
-    scenario_energy_transportation_process = request.GET.get('scenario_energy_transportation_process')
+    energy_carriers = request.GET.get('energy_carriers')
+    energy_transportation_process = request.GET.get('energy_transportation_process')
+    study_keywords = request.GET.get('study_keywords')
     contact_person = request.GET.get('contact_person')
     doi = request.GET.get('doi')
     place_of_publication = request.GET.get('place_of_publication')
@@ -43,27 +44,27 @@ def create_factsheet(request, *args, **kwargs):
         'acronym': acronym,
         'study_name': study_name,
         'abstract': abstract,
-        'institution': json.loads(institution),
-        'funding_source': funding_source,
-        'authors': authors,
-        'contact_person': contact_person,
-        'sector_divisions': sector_divisions,
-        'scenario_energy_transportation_process': scenario_energy_transportation_process,
-        'scenario_energy_carriers': scenario_energy_carriers,
-        'sectors': sectors,
+        'institution': json.loads(institution) if institution is not None else [],
+        'funding_source': json.loads(funding_source) if funding_source  is not None else [],
+        'authors': json.loads(authors) if authors is not None else [],
+        'contact_person': json.loads(contact_person) if contact_person is not None else [],
+        'sector_divisions': json.loads(sector_divisions) if sector_divisions is not None else [],
+        'energy_transportation_process': json.loads(energy_transportation_process) if energy_transportation_process is not None else [],
+        'energy_carriers': json.loads(energy_carriers) if energy_carriers is not None else [],
+        'study_keywords': json.loads(study_keywords) if study_keywords is not None else [],
+        'sectors': json.loads(sectors) if sectors is not None else [],
         'doi': doi,
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
-        'scenarios_name': json.loads(scenarios_name),
-        'scenarios_acronym': json.loads(scenarios_acronym),
-        'scenarios_abstract': json.loads(scenarios_abstract),
-        'scenarios_region': json.loads(scenarios_region),
-        'scenarios_interacting_region': json.loads(scenarios_interacting_region),
-        'scenarios_years': json.loads(scenarios_years),
-        'scenarios_keywords': json.loads(scenarios_keywords),
-        'scenarios_keywords': json.loads(scenarios_keywords),
-        'scenarios_input_datasets': json.loads(scenarios_input_datasets),
-        'scenarios_output_datasets': json.loads(scenarios_output_datasets),
+        'scenarios_name': json.loads(scenarios_name) if scenarios_name is not None else [],
+        'scenarios_acronym': json.loads(scenarios_acronym) if scenarios_acronym is not None else [],
+        'scenarios_abstract': json.loads(scenarios_abstract) if scenarios_abstract is not None else [],
+        'scenarios_region': json.loads(scenarios_region) if scenarios_region is not None else [],
+        'scenarios_interacting_region': json.loads(scenarios_interacting_region) if scenarios_interacting_region is not None else [],
+        'scenarios_years': json.loads(scenarios_years) if scenarios_years is not None else [],
+        'scenarios_keywords': json.loads(scenarios_keywords) if scenarios_keywords is not None else [],
+        'scenarios_input_datasets': json.loads(scenarios_input_datasets) if scenarios_input_datasets is not None else [],
+        'scenarios_output_datasets': json.loads(scenarios_output_datasets) if scenarios_output_datasets is not None else [],
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -82,8 +83,9 @@ def update_factsheet(request, *args, **kwargs):
     contact_person = request.GET.get('contact_person')
     sector_divisions = request.GET.get('sector_divisions')
     sectors = request.GET.get('sectors')
-    scenario_energy_carriers = request.GET.get('scenario_energy_carriers')
-    scenario_energy_transportation_process = request.GET.get('scenario_energy_transportation_process')
+    energy_carriers = request.GET.get('energy_carriers')
+    energy_transportation_process = request.GET.get('energy_transportation_process')
+    study_keywords = request.GET.get('study_keywords')
     report_title = request.GET.get('report_title')
     date_of_publication = request.GET.get('date_of_publication')
     doi = request.GET.get('doi')
@@ -105,28 +107,29 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['study_name'] = studyName
     factsheet.factsheetData['acronym'] = acronym
     factsheet.factsheetData['abstract'] = abstract
-    factsheet.factsheetData['institution'] = json.loads(institution)
-    factsheet.factsheetData['funding_source'] = json.loads(funding_source)
-    factsheet.factsheetData['contact_person'] = json.loads(contact_person)
-    factsheet.factsheetData['sector_divisions'] = json.loads(sector_divisions)
-    factsheet.factsheetData['sectors'] = json.loads(sectors)
-    factsheet.factsheetData['scenario_energy_carriers'] = json.loads(scenario_energy_carriers)
-    factsheet.factsheetData['scenario_energy_transportation_process'] = json.loads(scenario_energy_transportation_process)
+    factsheet.factsheetData['institution'] = json.loads(institution) if institution is not None else []
+    factsheet.factsheetData['funding_source'] = json.loads(funding_source) if funding_source is not None else []
+    factsheet.factsheetData['contact_person'] = json.loads(contact_person) if contact_person is not None else []
+    factsheet.factsheetData['sector_divisions'] = json.loads(sector_divisions) if sector_divisions is not None else []
+    factsheet.factsheetData['sectors'] = json.loads(sectors) if sectors is not None else []
+    factsheet.factsheetData['energy_carriers'] = json.loads(energy_carriers) if energy_carriers is not None else []
+    factsheet.factsheetData['energy_transportation_process'] = json.loads(energy_transportation_process) if energy_transportation_process is not None else []
+    factsheet.factsheetData['study_keywords'] = json.loads(study_keywords) if study_keywords is not None else []
     factsheet.factsheetData['report_title'] = report_title
     factsheet.factsheetData['date_of_publication'] = date_of_publication
     factsheet.factsheetData['doi'] = doi
     factsheet.factsheetData['place_of_publication'] = place_of_publication
     factsheet.factsheetData['link_to_study'] = link_to_study
-    factsheet.factsheetData['authors'] = authors
-    factsheet.factsheetData['scenarios_name'] = json.loads(scenarios_name)
-    factsheet.factsheetData['scenarios_acronym'] = json.loads(scenarios_acronym)
-    factsheet.factsheetData['scenarios_abstract'] = json.loads(scenarios_abstract)
-    factsheet.factsheetData['scenarios_region'] = json.loads(scenarios_region)
-    factsheet.factsheetData['scenarios_interacting_region'] = json.loads(scenarios_interacting_region)
-    factsheet.factsheetData['scenarios_years'] = json.loads(scenarios_years)
-    factsheet.factsheetData['scenarios_keywords'] = json.loads(scenarios_keywords)
-    factsheet.factsheetData['scenarios_input_datasets'] = json.loads(scenarios_input_datasets)
-    factsheet.factsheetData['scenarios_output_datasets'] = json.loads(scenarios_output_datasets)
+    factsheet.factsheetData['authors'] = json.loads(authors) if authors is not None else []
+    factsheet.factsheetData['scenarios_name'] = json.loads(scenarios_name) if scenarios_name is not None else []
+    factsheet.factsheetData['scenarios_acronym'] = json.loads(scenarios_acronym) if scenarios_acronym is not None else []
+    factsheet.factsheetData['scenarios_abstract'] = json.loads(scenarios_abstract) if scenarios_abstract is not None else []
+    factsheet.factsheetData['scenarios_region'] = json.loads(scenarios_region) if scenarios_region is not None else []
+    factsheet.factsheetData['scenarios_interacting_region'] = json.loads(scenarios_interacting_region) if scenarios_interacting_region is not None else []
+    factsheet.factsheetData['scenarios_years'] = json.loads(scenarios_years) if scenarios_years is not None else []
+    factsheet.factsheetData['scenarios_keywords'] = json.loads(scenarios_keywords) if scenarios_keywords is not None else []
+    factsheet.factsheetData['scenarios_input_datasets'] = json.loads(scenarios_input_datasets) if scenarios_input_datasets is not None else []
+    factsheet.factsheetData['scenarios_output_datasets'] = json.loads(scenarios_output_datasets) if scenarios_output_datasets is not None else []
 
     factsheet.save()
     return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)
@@ -142,6 +145,7 @@ def factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     factsheet = Factsheet.objects.filter(id=id)
     factsheet_json = serializers.serialize('json', factsheet)
+    print(factsheet_json)
     return JsonResponse(factsheet_json, safe=False, content_type='application/json')
 
 @csrf_exempt

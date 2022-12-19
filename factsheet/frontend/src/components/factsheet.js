@@ -129,8 +129,9 @@ function Factsheet(props) {
   const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : {});
   const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : {});
 
-  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.scenario_energy_carriers : []);
-  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.scenario_energy_transportation_process : []);
+  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
+  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.energy_transportation_process : []);
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
@@ -147,7 +148,7 @@ function Factsheet(props) {
   };
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
-
+  console.log(selectedStudyKewords);
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -159,13 +160,13 @@ function Factsheet(props) {
       factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
       factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
 
-      axios.post(conf.toep + 'factsheet/add/', null,
+      axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.toep + 'factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -178,8 +179,9 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
-            scenario_energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            scenario_energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
+            energy_carriers: JSON.stringify(selectedEnergyCarriers),
+            energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
+            study_keywords: JSON.stringify(selectedStudyKewords),
             report_title: report_title,
             date_of_publication: date_of_publication,
             doi: doi,
@@ -520,12 +522,12 @@ function Factsheet(props) {
 
     const sectorsHandler = (sectorsList) => {
       setSelectedSectors(sectorsList);
-      factsheetObjectHandler('sectors', sectorsList);
+      factsheetObjectHandler('sectors', JSON.stringify(sectorsList));
     };
 
     const sectorDivisionsHandler = (sectorDivisionsList) => {
       setSelectedSectorDivisions(sectorDivisionsList);
-      factsheetObjectHandler('sector_divisions', sectorDivisionsList);
+      factsheetObjectHandler('sector_divisions', JSON.stringify(sectorDivisionsList));
     };
 
     const authorsHandler = (authorsList) => {
@@ -624,6 +626,18 @@ function Factsheet(props) {
         padding: '20px'
       },
     }));
+
+    const handleStudyKeywords = (event) => {
+      if (event.target.checked) {
+        if (!selectedStudyKewords.includes(event.target.name)) {
+          setSelectedStudyKewords([...selectedStudyKewords, event.target.name]);
+        }
+      } else {
+        const filteredStudyKeywords = selectedStudyKewords.filter(i => i !== event.target.name);
+        setSelectedStudyKewords(filteredStudyKeywords);
+      }
+      factsheetObjectHandler('study_keywords', JSON.stringify(selectedStudyKewords));
+    }
 
     const renderStudy = () => {
       return <Grid container
@@ -820,21 +834,20 @@ function Factsheet(props) {
             <div>
               <FormGroup>
                   <div>
-                    <FormControlLabel control={<Checkbox />} label="resilience" />
-                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox />} label="CO2 emissions" />
-                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox />} label="Greenhouse gas emissions" />
-                    <FormControlLabel control={<Checkbox />} label="Reallabor" />
-                    <FormControlLabel control={<Checkbox />} label="100% renewables" />
-                    <FormControlLabel control={<Checkbox />} label="acceptance" />
-                    <FormControlLabel control={<Checkbox />} label="sufficiency" />
-                    <FormControlLabel control={<Checkbox />} label="(changes in) demand" />
-                    <FormControlLabel control={<Checkbox />} label="degree of electrifiaction" />
-                    <FormControlLabel control={<Checkbox />} label="regionalisation" />
-                    <FormControlLabel control={<Checkbox />} label="total gross electricity generation" />
-                    <FormControlLabel control={<Checkbox />} label="total net electricity generation" />
-                    <FormControlLabel control={<Checkbox />} label="peak electricity generation" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("resilience")} onChange={handleStudyKeywords} label="resilience" name="resilience" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("life cycle analysis")} onChange={handleStudyKeywords} label="life cycle analysis" name="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("CO2 emissions")} onChange={handleStudyKeywords} label="CO2 emissions" name="CO2 emissions" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("Greenhouse gas emissions")} onChange={handleStudyKeywords} label="Greenhouse gas emissions" name="Greenhouse gas emissions" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("Reallabor")} onChange={handleStudyKeywords} label="Reallabor" name="Reallabor" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("100% renewables")} onChange={handleStudyKeywords} label="100% renewables" name="100% renewables" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("acceptance")} onChange={handleStudyKeywords} label="acceptance" name="acceptance" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("sufficiency")} onChange={handleStudyKeywords} label="sufficiency" name="sufficiency" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("(changes in) demand")} onChange={handleStudyKeywords} label="(changes in) demand" name="(changes in) demand" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("degree of electrifiaction")} onChange={handleStudyKeywords} label="degree of electrifiaction" name="degree of electrifiaction" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("regionalisation")} onChange={handleStudyKeywords} label="regionalisation" name="regionalisation" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("total gross electricity generation")} onChange={handleStudyKeywords} label="total gross electricity generation" name="total gross electricity generation" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("total net electricity generation")} onChange={handleStudyKeywords} label="total net electricity generation" name="total net electricity generation" />
+                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("peak electricity generation")} onChange={handleStudyKeywords} label="peak electricity generation" name="peak electricity generation"/>
                 </div>
               </FormGroup>
             </div>
