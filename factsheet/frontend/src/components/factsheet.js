@@ -104,8 +104,10 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
+
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
+
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
@@ -129,8 +131,9 @@ function Factsheet(props) {
   const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : {});
   const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : {});
 
-  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.scenario_energy_carriers : []);
-  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.scenario_energy_transportation_process : []);
+  const [selectedKeywords, setSelectedKeywords] = useState(id !== 'new' ? fsData.keywords : []);
+  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
+  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.energy_transportation_process : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
@@ -178,8 +181,9 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
-            scenario_energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            scenario_energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
+            energy_carriers: JSON.stringify(selectedEnergyCarriers),
+            energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
+            keywords: JSON.stringify(selectedKeywords),
             report_title: report_title,
             date_of_publication: date_of_publication,
             doi: doi,
@@ -520,12 +524,12 @@ function Factsheet(props) {
 
     const sectorsHandler = (sectorsList) => {
       setSelectedSectors(sectorsList);
-      factsheetObjectHandler('sectors', sectorsList);
+      factsheetObjectHandler('sectors', JSON.stringify(sectorsList));
     };
 
     const sectorDivisionsHandler = (sectorDivisionsList) => {
       setSelectedSectorDivisions(sectorDivisionsList);
-      factsheetObjectHandler('sector_divisions', sectorDivisionsList);
+      factsheetObjectHandler('sector_divisions', JSON.stringify(sectorDivisionsList));
     };
 
     const authorsHandler = (authorsList) => {
@@ -587,12 +591,12 @@ function Factsheet(props) {
 
     const energyCarriersHandler = (energyCarriersList) => {
       setSelectedsetEnergyCarriers(energyCarriersList);
-      factsheetObjectHandler('scenario_energy_carriers', JSON.stringify(selectedEnergyCarriers));
+      factsheetObjectHandler('energy_carriers', JSON.stringify(selectedEnergyCarriers));
     };
 
     const energyTransportationProcessHandler = (energyTransportationProcessList) => {
       setSelectedEnergyTransportationProcess(energyTransportationProcessList);
-      factsheetObjectHandler('scenario_energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
+      factsheetObjectHandler('energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
     };
 
     const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
@@ -610,6 +614,24 @@ function Factsheet(props) {
         id: `vertical-tab-${index}`,
         'aria-controls': `vertical-tabpanel-${index}`,
       };
+    }
+
+    const handleKeywords = (event) => {
+       console.log(event.target.checked);
+       if (event.target.checked === true) {
+         if (!selectedKeywords.includes(event.target.name)) {
+           setSelectedKeywords([...selectedKeywords, event.target.name]);
+         }
+       } else {
+         const newKeywords = selectedKeywords;
+         const index = newKeywords.indexOf(event.target.name);
+         if (index > -1) {
+           newKeywords.splice(index, 1);
+           setSelectedKeywords(newKeywords);
+         }
+       }
+       console.log(selectedKeywords);
+       factsheetObjectHandler('keywords', JSON.stringify(selectedKeywords));
     }
 
     const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -671,9 +693,9 @@ function Factsheet(props) {
                 title={
                   <React.Fragment>
                     <Typography color="inherit" variant="caption">
-                      {'A study is a project with the goal to investigate something.'}
+                      {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -723,9 +745,9 @@ function Factsheet(props) {
               title={
                 <React.Fragment>
                   <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
+                    {'A funder is a sponsor that supports by giving money.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -775,9 +797,9 @@ function Factsheet(props) {
               title={
                 <React.Fragment>
                   <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
+                    {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -820,21 +842,20 @@ function Factsheet(props) {
             <div>
               <FormGroup>
                   <div>
-                    <FormControlLabel control={<Checkbox />} label="resilience" />
-                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox />} label="CO2 emissions" />
-                    <FormControlLabel control={<Checkbox />} label="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox />} label="Greenhouse gas emissions" />
-                    <FormControlLabel control={<Checkbox />} label="Reallabor" />
-                    <FormControlLabel control={<Checkbox />} label="100% renewables" />
-                    <FormControlLabel control={<Checkbox />} label="acceptance" />
-                    <FormControlLabel control={<Checkbox />} label="sufficiency" />
-                    <FormControlLabel control={<Checkbox />} label="(changes in) demand" />
-                    <FormControlLabel control={<Checkbox />} label="degree of electrifiaction" />
-                    <FormControlLabel control={<Checkbox />} label="regionalisation" />
-                    <FormControlLabel control={<Checkbox />} label="total gross electricity generation" />
-                    <FormControlLabel control={<Checkbox />} label="total net electricity generation" />
-                    <FormControlLabel control={<Checkbox />} label="peak electricity generation" />
+                    <FormControlLabel control={<Checkbox name="resilience" onChange={handleKeywords} />} label="resilience" />
+                    <FormControlLabel control={<Checkbox name="CO2 emissions" onChange={handleKeywords}/>} label="CO2 emissions" />
+                    <FormControlLabel control={<Checkbox name="life cycle analysis" onChange={handleKeywords}/>} label="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox name="Greenhouse gas emissions" onChange={handleKeywords}/>} label="Greenhouse gas emissions" />
+                    <FormControlLabel control={<Checkbox name="Reallabor" onChange={handleKeywords}/>} label="Reallabor" />
+                    <FormControlLabel control={<Checkbox name="100% renewables" onChange={handleKeywords}/>} label="100% renewables" />
+                    <FormControlLabel control={<Checkbox name="acceptance" onChange={handleKeywords}/>} label="acceptance" />
+                    <FormControlLabel control={<Checkbox name="sufficiency" onChange={handleKeywords}/>} label="sufficiency" />
+                    <FormControlLabel control={<Checkbox name="(changes in) demand" onChange={handleKeywords}/>} label="(changes in) demand" />
+                    <FormControlLabel control={<Checkbox name="degree of electrifiaction" onChange={handleKeywords}/>} label="degree of electrifiaction" />
+                    <FormControlLabel control={<Checkbox name="regionalisation" onChange={handleKeywords}/>} label="regionalisation" />
+                    <FormControlLabel control={<Checkbox name="total gross electricity generation" onChange={handleKeywords}/>} label="total gross electricity generation" />
+                    <FormControlLabel control={<Checkbox name="total net electricity generation" onChange={handleKeywords}/>} label="total net electricity generation" />
+                    <FormControlLabel control={<Checkbox name="peak electricity generation" onChange={handleKeywords}/>} label="peak electricity generation" />
                 </div>
               </FormGroup>
             </div>
