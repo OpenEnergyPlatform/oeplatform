@@ -616,24 +616,6 @@ function Factsheet(props) {
       };
     }
 
-    const handleKeywords = (event) => {
-       console.log(event.target.checked);
-       if (event.target.checked === true) {
-         if (!selectedKeywords.includes(event.target.name)) {
-           setSelectedKeywords([...selectedKeywords, event.target.name]);
-         }
-       } else {
-         const newKeywords = selectedKeywords;
-         const index = newKeywords.indexOf(event.target.name);
-         if (index > -1) {
-           newKeywords.splice(index, 1);
-           setSelectedKeywords(newKeywords);
-         }
-       }
-       console.log(selectedKeywords);
-       factsheetObjectHandler('keywords', JSON.stringify(selectedKeywords));
-    }
-
     const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
       <Tooltip {...props} classes={{ popper: className }} />
     ))(({ theme }) => ({
