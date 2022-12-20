@@ -19,7 +19,7 @@ import VerticalTabs from './customVerticalTabs.js';
 import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
 import Typography from '@mui/material/Typography';
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import axios from 'axios';
 import { useLocation, useHistory, useNavigate } from 'react-router-dom'
@@ -35,10 +35,8 @@ import Stack from '@mui/material/Stack';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Fab from '@mui/material/Fab';
-import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
-import IconButton from '@mui/material/IconButton';
+
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -47,8 +45,6 @@ import conf from "../conf.json";
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
-
-
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -122,7 +118,7 @@ function Factsheet(props) {
   const [scenarioObject, setScenarioObject] = useState({});
   const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : {});
   const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : {});
-  const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : {});
+  const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : [ { id: 0, value: '' } ]);
 
   const [selectedRegion, setSelectedRegion] = useState(id !== 'new' ? fsData.scenarios_region : {});
   const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : {});
@@ -150,7 +146,6 @@ function Factsheet(props) {
   };
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
-  console.log(selectedStudyKewords);
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -263,10 +258,9 @@ function Factsheet(props) {
 
   const handleScenariosAbstract = ({ target }) => {
     const { name: key, value } = target;
-    setScenariosAbstract(state => ({
-      ...state,
-      [key.split('_')[1]]: value
-    }));
+    let newScenariosAbstract = [...scenariosAbstract];
+    newScenariosAbstract[key.split('_')[1]] = { id: key.split('_')[1], value:value };
+    setScenariosAbstract(newScenariosAbstract);
   };
 
   const handleScenarioAcronym = e => {
@@ -350,6 +344,12 @@ function Factsheet(props) {
   };
 
   const handleAddScenario = () => {
+    const newIndex = scenarios === 1 ? 1 : scenarios;
+
+    let newScenariosAbstract = [...scenariosAbstract];
+    newScenariosAbstract[newIndex] = { id: newIndex, value:'' };
+    setScenariosAbstract(newScenariosAbstract);
+
     setScenarios(scenarios + 1);
   };
 
@@ -550,6 +550,19 @@ function Factsheet(props) {
     const contactPersonHandler = (contactPersonList) => {
       setselectedContactPerson(contactPersonList);
       factsheetObjectHandler('contact_person', JSON.stringify(contactPersonList));
+    };
+
+
+
+    const removeScenario = (idx) => {
+
+      setScenarios(scenarios - 1);
+      const newScenariosAbstract = scenariosAbstract.filter(i => i.id !== String(idx));
+      console.log(newScenariosAbstract);
+      setScenariosAbstract(newScenariosAbstract);
+      console.log(idx);
+      console.log(scenariosAbstract);
+      
     };
 
     const scenarioRegionHandler = (regionList, idx) => {
@@ -905,15 +918,7 @@ function Factsheet(props) {
     const renderScenario = () => {
       return  <div>
                 <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                <IconButton variant="outlined" color="primary" aria-label="upload picture" component="label" onClick={handleAddScenario}>
-                  <AddBoxIcon />
-                </IconButton>
-                <IconButton color="primary" aria-label="upload picture" component="label">
-                  <ContentCopyIcon />
-                </IconButton>
-                <IconButton color="error" aria-label="upload picture" component="label">
-                  <DeleteOutlineIcon />
-                </IconButton>
+                  <Button disableElevation={true} startIcon={<AddBoxOutlinedIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="outlined" color="primary" onClick={handleAddScenario}>Add new</Button>
                 </div >
                 <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'60vh', overflow: 'auto' }} >
                   <Tabs
@@ -954,17 +959,18 @@ function Factsheet(props) {
                         scenarioskeywords={scenario_keywords}
                         scenariosKeywordsHandler={scenariosKeywordsHandler}
                         scenariosSelectedkeywords={selectedScenariosKeywords[i] !== undefined ? selectedScenariosKeywords[i] :[]}
-                        scenariosInputDatasets={[]}
                         scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                         scenariosOutputDatasets={scenariosOutputDatasets}
                         scenariosInputDatasets={scenariosInputDatasets}
+                        removeScenario={removeScenario}
                       />
                     </TabPanel>
                   )}
                 </Box>
               </div >
       }
+
 
     const items = {
       titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
