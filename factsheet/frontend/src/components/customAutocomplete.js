@@ -20,9 +20,11 @@ export default function CustomAutocomplete(parameters) {
     setValue((value) => value.filter((v) => v.name !== name));
   };
 
-  useEffect(()=>{
-    handler(value, idx);
-  })
+
+  const handleChange = (e, newValue) => {
+    setValue(newValue);
+    handler(newValue, idx);
+  }
 
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
@@ -44,7 +46,7 @@ export default function CustomAutocomplete(parameters) {
           </li>
         )}
         value={value}
-        onChange={(e, newValue) => (setValue(newValue))}
+        onChange={handleChange}
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (

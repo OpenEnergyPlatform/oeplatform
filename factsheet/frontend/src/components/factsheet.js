@@ -116,16 +116,17 @@ function Factsheet(props) {
 
   const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_name).length : 1);
   const [scenarioObject, setScenarioObject] = useState({});
-  const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : {});
-  const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : {});
+  const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : [ { id: 0, value: '' } ]);
+  const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : [ { id: 0, value: '' } ]);
   const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : [ { id: 0, value: '' } ]);
 
-  const [selectedRegion, setSelectedRegion] = useState(id !== 'new' ? fsData.scenarios_region : {});
-  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : {});
-  const [selectedScenariosYears, setSelectedScenariosYears] = useState(id !== 'new' ? fsData.scenarios_years : {});
-  const [selectedScenariosKeywords, setSelectedScenariosKeywords] = useState(id !== 'new' ? fsData.scenarios_keywords : {});
-  const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : {});
-  const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : {});
+  const [selectedRegion, setSelectedRegion] = useState(id !== 'new' ? fsData.scenarios_region : [ { id: 0, value: [] } ]);
+  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : [ { id: 0, value: [] } ]);
+  const [selectedScenariosYears, setSelectedScenariosYears] = useState(id !== 'new' ? fsData.scenarios_years : [ { id: 0, value: [] } ]);
+  const [selectedScenariosKeywords, setSelectedScenariosKeywords] = useState(id !== 'new' ? fsData.scenarios_keywords : [ { id: 0, value: [] } ]);
+
+  const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : [ { id: 0, value: [] } ]);
+  const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : [ { id: 0, value: [] } ]);
 
   const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.energy_transportation_process : []);
@@ -133,6 +134,7 @@ function Factsheet(props) {
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
+  const [removeReport, setRemoveReport] = useState(false);
   const [scenarioAbstract, setScenarioAbstract] = useState('');
   const [scenarioAcronym, setScenarioAcronym] = useState('');
   const [scenarioInputDatasetName, setScenarioInputDatasetName] = useState('');
@@ -153,9 +155,7 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      factsheetObjectHandler('scenarios_name', JSON.stringify(scenariosName));
-      factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
-      factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
+
 
       axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
@@ -239,40 +239,6 @@ function Factsheet(props) {
     factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
   };
 
-
-  const handleScenariostName = ({ target }) => {
-    const { name: key, value } = target;
-    setScenariosName(state => ({
-      ...state,
-      [key.split('_')[1]]: value
-    }));
-  };
-
-  const handleScenariosAcronym = ({ target }) => {
-    const { name: key, value } = target;
-    setScenariosAcronym(state => ({
-      ...state,
-      [key.split('_')[1]]: value
-    }));
-  };
-
-  const handleScenariosAbstract = ({ target }) => {
-    const { name: key, value } = target;
-    let newScenariosAbstract = [...scenariosAbstract];
-    newScenariosAbstract[key.split('_')[1]] = { id: key.split('_')[1], value:value };
-    setScenariosAbstract(newScenariosAbstract);
-  };
-
-  const handleScenarioAcronym = e => {
-    setScenarioAcronym(e.target.value);
-    factsheetObjectHandler('scenario_acronym', e.target.value);
-  };
-
-  const handleScenarioAbstract = e => {
-    setScenarioAbstract(e.target.value);
-    factsheetObjectHandler('scenario_abstract', e.target.value);
-  };
-
   const handleAcronym = e => {
     setAcronym(e.target.value);
     factsheetObjectHandler('acronym', e.target.value);
@@ -343,6 +309,73 @@ function Factsheet(props) {
     setOpenOverView(false);
   };
 
+  const handleScenariostName = ({ target }) => {
+    const { name: key, value } = target;
+    let newScenariosName = [...scenariosName];
+    newScenariosName[key.split('_')[1]] = { id: key.split('_')[1], value: value };
+    setScenariosName(newScenariosName);
+    factsheetObjectHandler('scenarios_name', JSON.stringify(scenariosName));
+  };
+
+  const handleScenariosAcronym = ({ target }) => {
+    const { name: key, value } = target;
+    let newScenariosAcronym = [...scenariosAcronym];
+    newScenariosAcronym[key.split('_')[1]] = { id: key.split('_')[1], value: value };
+    factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
+    setScenariosAcronym(newScenariosAcronym);
+  };
+
+
+  const handleScenariosAbstract = ({ target }) => {
+    const { name: key, value } = target;
+    let newScenariosAbstract = [...scenariosAbstract];
+    newScenariosAbstract[key.split('_')[1]] = { id: key.split('_')[1], value:value };
+    factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
+    setScenariosAbstract(newScenariosAbstract);
+  };
+
+  const scenarioRegionHandler = (regionList, idx) => {
+    const newSelectedRegion = [...selectedRegion];
+    newSelectedRegion[idx] = { id: idx, value: regionList };
+    setSelectedRegion(newSelectedRegion);
+    factsheetObjectHandler('scenarios_region', JSON.stringify(newSelectedRegion));
+  };
+
+  const scenarioInteractingRegionHandler = (interactionRegionList, idx) => {
+    const newSelectedInteractionRegion = [...selectedInteractingRegion];
+    newSelectedInteractionRegion[idx] = { id: idx, value: interactionRegionList };
+    setSelectedInteractingRegion(newSelectedInteractionRegion);
+    factsheetObjectHandler('scenarios_interacting_region', JSON.stringify(newSelectedInteractionRegion));
+  };
+
+  const scenariosYearsHandler = (scenarioYearsList, idx) => {
+    const newSelectedScenariosYears = [...selectedScenariosYears];
+    newSelectedScenariosYears[idx] = { id: idx, value: scenarioYearsList };
+    setSelectedScenariosYears(newSelectedScenariosYears);
+    factsheetObjectHandler('scenarios_years', JSON.stringify(newSelectedScenariosYears));
+  };
+
+  const scenariosKeywordsHandler = (scenarioKeywordsList, idx) => {
+    const newSelectedScenariosKeywords = [...selectedScenariosKeywords];
+    newSelectedScenariosKeywords[idx] = { id: idx, value: scenarioKeywordsList };
+    setSelectedScenariosKeywords(newSelectedScenariosKeywords);
+    factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenariosKeywords));
+  };
+
+  const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
+    const newScenariosInputDatasets = [...scenariosInputDatasets];
+    newScenariosInputDatasets[idx] = { id: idx, value: scenariosInputDatasetsList };
+    setScenariosInputDatasets(newScenariosInputDatasets);
+    factsheetObjectHandler('scenarios_input_datasets', JSON.stringify(newScenariosInputDatasets));
+  };
+
+  const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
+    const newScenariosOutputDatasets = [...scenariosOutputDatasets];
+    newScenariosOutputDatasets[idx] = { id: idx, value: scenariosOutputDatasetsList };
+    setScenariosOutputDatasets(newScenariosOutputDatasets);
+    factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
+  };
+
   const handleAddScenario = () => {
     const newIndex = scenarios === 1 ? 1 : scenarios;
 
@@ -350,8 +383,76 @@ function Factsheet(props) {
     newScenariosAbstract[newIndex] = { id: newIndex, value:'' };
     setScenariosAbstract(newScenariosAbstract);
 
+    let newScenariosName = [...scenariosName];
+    newScenariosName[newIndex] = { id: newIndex, value:'' };
+    setScenariosName(newScenariosName);
+
+    let newScenariosAcronym = [...scenariosAcronym];
+    newScenariosAcronym[newIndex] = { id: newIndex, value:'' };
+    setScenariosAcronym(newScenariosAcronym);
+
+    let newScenariosSelectedRegion = [...selectedRegion];
+    newScenariosSelectedRegion[newIndex] = [];
+    setSelectedRegion(newScenariosSelectedRegion);
+
+    let newSelectedInteractionRegion = [...selectedInteractingRegion];
+    newSelectedInteractionRegion[newIndex] = [];
+    setSelectedInteractingRegion(newScenariosSelectedRegion);
+
+    let newSelectedScenariosYears = [...selectedScenariosYears];
+    newSelectedScenariosYears[newIndex] = [];
+    setSelectedScenariosYears(newSelectedScenariosYears);
+
+    let newSelectedScenariosKeywords = [...selectedScenariosKeywords];
+    newSelectedScenariosKeywords[newIndex] = [];
+    setSelectedScenariosKeywords(newSelectedScenariosKeywords);
+
+    const newScenariosInputDatasets = [...scenariosInputDatasets];
+    newScenariosInputDatasets[newIndex] = { id: newIndex, value:[] };
+    setScenariosInputDatasets(newScenariosInputDatasets);
+
+    const newScenariosOutputDatasets = [...scenariosOutputDatasets];
+    newScenariosOutputDatasets[newIndex] = { id: newIndex, value:[] };
+    setScenariosOutputDatasets(newScenariosOutputDatasets);
+
     setScenarios(scenarios + 1);
   };
+
+  const removeScenario = (idx) => {
+    setScenarios(scenarios - 1);
+
+    const newScenariosAbstract = scenariosAbstract.filter(i => i.id !== String(idx));
+    setScenariosAbstract(newScenariosAbstract);
+
+    const newScenariosName = scenariosName.filter(i => i.id !== String(idx));
+    setScenariosName(newScenariosName);
+
+    const newScenariosAcronym = scenariosAcronym.filter(i => i.id !== String(idx));
+    setScenariosAcronym(newScenariosAcronym);
+
+    const newScenariosSelectedRegion = selectedRegion.filter(i => i.id !== idx);
+    setSelectedRegion(newScenariosSelectedRegion);
+
+    const newSelectedInteractionRegion = selectedInteractingRegion.filter(i => i.id !== idx);
+    setSelectedInteractingRegion(newSelectedInteractionRegion);
+
+    const newSelectedScenariosYears = selectedScenariosYears.filter(i => i.id !== idx);
+    setSelectedScenariosYears(newSelectedScenariosYears);
+
+    const newSelectedScenariosKeywords = selectedScenariosKeywords.filter(i => i.id !== idx);
+    setSelectedScenariosKeywords(newSelectedScenariosKeywords);
+
+    const newScenariosInputDatasets = scenariosInputDatasets.filter(i => i.id !== idx);
+    setScenariosInputDatasets(newScenariosInputDatasets);
+
+    const newScenariosOutputDatasets = scenariosOutputDatasets.filter(i => i.id !== idx);
+    setScenariosOutputDatasets(newScenariosOutputDatasets);
+
+    setRemoveReport(true);
+
+  };
+
+
 
   const handleSwap = (mode) => {
     console.log(mode);
@@ -552,55 +653,17 @@ function Factsheet(props) {
       factsheetObjectHandler('contact_person', JSON.stringify(contactPersonList));
     };
 
+    const handleClickCloseRemoveReport = () => {
+      setRemoveReport(false);
+    }
 
 
-    const removeScenario = (idx) => {
 
-      setScenarios(scenarios - 1);
-      const newScenariosAbstract = scenariosAbstract.filter(i => i.id !== String(idx));
-      console.log(newScenariosAbstract);
-      setScenariosAbstract(newScenariosAbstract);
-      console.log(idx);
-      console.log(scenariosAbstract);
-      
-    };
 
-    const scenarioRegionHandler = (regionList, idx) => {
-      let newSelectedRegion = selectedRegion;
-      newSelectedRegion[idx] = regionList;
-      factsheetObjectHandler('scenarios_region', JSON.stringify(newSelectedRegion));
-    };
 
-    const scenarioInteractingRegionHandler = (interactionRegionList, idx) => {
-      let newSelectedInteractionRegion = selectedInteractingRegion;
-      newSelectedInteractionRegion[idx] = interactionRegionList;
-      factsheetObjectHandler('scenarios_interacting_region', JSON.stringify(newSelectedInteractionRegion));
-    };
 
-    const scenariosYearsHandler = (scenarioYearsList, idx) => {
-      let newSelectedScenarioYears = selectedScenariosYears;
-      newSelectedScenarioYears[idx] = scenarioYearsList;
-      factsheetObjectHandler('scenarios_years', JSON.stringify(newSelectedScenarioYears));
-    };
 
-    const scenariosKeywordsHandler = (scenarioKeywordsList, idx) => {
-      let newSelectedScenarioKeywords = selectedScenariosKeywords;
-      newSelectedScenarioKeywords[idx] = scenarioKeywordsList;
-      factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenarioKeywords));
-    };
 
-    const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
-      let newScenariosInputDatasets = scenariosInputDatasets;
-      newScenariosInputDatasets[idx] = scenariosInputDatasetsList;
-
-      factsheetObjectHandler('scenarios_input_datasets', JSON.stringify(newScenariosInputDatasets));
-    };
-
-    const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
-      let newScenariosOutputDatasets = scenariosOutputDatasets;
-      newScenariosOutputDatasets[idx] = scenariosOutputDatasetsList;
-      factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
-    };
 
     const energyCarriersHandler = (energyCarriersList) => {
       setSelectedsetEnergyCarriers(energyCarriersList);
@@ -944,21 +1007,18 @@ function Factsheet(props) {
                         scenariosName={scenariosName}
                         scenariosAcronym={scenariosAcronym}
                         scenariosAbstract={scenariosAbstract}
-                        scenario_region={scenario_region}
-                        scenarioRegionHandler={scenarioRegionHandler}
-                        selectedRegion={selectedRegion[i] !== undefined ? selectedRegion[i] :[]}
                         scenarioRegion={scenario_region}
                         scenarioRegionHandler={scenarioRegionHandler}
-                        scenarioSelectedRegion={selectedRegion[i] !== undefined ? selectedRegion[i] :[]}
+                        scenarioSelectedRegion={selectedRegion}
                         scenarioInteractingRegion={scenario_interacting_region}
                         scenarioInteractingRegionHandler={scenarioInteractingRegionHandler}
-                        scenarioSelectedInteractingRegion={selectedInteractingRegion[i] !== undefined ? selectedInteractingRegion[i] :[]}
+                        scenarioSelectedInteractingRegion={selectedInteractingRegion}
                         scenariosYears={scenario_years}
                         scenariosYearsHandler={scenariosYearsHandler}
-                        scenariosSelectedYears={selectedScenariosYears[i] !== undefined ? selectedScenariosYears[i] :[]}
+                        scenariosSelectedYears={selectedScenariosYears}
                         scenarioskeywords={scenario_keywords}
                         scenariosKeywordsHandler={scenariosKeywordsHandler}
-                        scenariosSelectedkeywords={selectedScenariosKeywords[i] !== undefined ? selectedScenariosKeywords[i] :[]}
+                        scenariosSelectedkeywords={selectedScenariosKeywords}
                         scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                         scenariosOutputDatasets={scenariosOutputDatasets}
@@ -1057,6 +1117,31 @@ function Factsheet(props) {
                 </Button>
                 <Button variant="contained" onClick={handleCloseTurtle}>
                   Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            <Dialog
+              maxWidth="md"
+              open={removeReport}
+              onClose={handleClickCloseRemoveReport}
+              aria-labelledby="responsive-dialog-title"
+            >
+              <DialogTitle id="responsive-dialog-title">
+                <b>Remove</b>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <div>
+                    <pre>
+                      Your selected scenario is now removed from your facthseet!
+                    </pre>
+                  </div>
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button variant="contained" onClick={handleClickCloseRemoveReport} >
+                  Ok
                 </Button>
               </DialogActions>
             </Dialog>
