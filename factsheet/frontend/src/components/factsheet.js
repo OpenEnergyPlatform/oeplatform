@@ -157,13 +157,13 @@ function Factsheet(props) {
     if (id === 'new') {
 
 
-      axios.post(conf.localhost + 'factsheet/add/', null,
+      axios.post(conf.toep + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.localhost + 'factsheet/update/', null,
+      axios.post(conf.toep + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -789,9 +789,9 @@ function Factsheet(props) {
                 title={
                   <React.Fragment>
                     <Typography color="inherit" variant="caption">
-                      {'A study is a project with the goal to investigate something.'}
+                      {'An institution is an organisation that serves a social purpose.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -835,21 +835,7 @@ function Factsheet(props) {
             }}>
             <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
           <div style={{ marginTop: '20px' }}>
-            <HtmlTooltip
-              style={{ marginLeft: '10px' }}
-              placement="top"
-              title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
-                    <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
-                  </Typography>
-                </React.Fragment>
-              }
-            >
-              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
+          
           </div>
         </div>
         </Grid>
