@@ -810,10 +810,10 @@ def column_add(schema, table, column, description):
 def assert_valid_identifier_name(identifier):
     if not IDENTIFIER_PATTERN.match(identifier):
         raise APIError(
-            "Invalid name. "
-            "Names must consist of lowercase alpha-numeric words or underscores "
+            f"Unsupported table name: {identifier}\n"
+            "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
-            "and must be have a maximumlength of %s" % MAX_IDENTIFIER_LENGTH
+            f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters (current table name length: {len(identifier)})."
         )
 
 
