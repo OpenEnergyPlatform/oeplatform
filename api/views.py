@@ -460,15 +460,14 @@ class Table(APIView):
 
             err_msg = f"Unsupported column name: '{colname}'\nColumn name must consist of lowercase alpha-numeric " \
                       f"words or underscores and start with a letter. It must not start with an underscore or exceed " \
-                      f"{MAX_COL_NAME_LENGTH} characters (current length: {len(colname)})." \
+                      f"{MAX_COL_NAME_LENGTH} characters (current column name length: {len(colname)})." \
 
             if not colname.isidentifier():
-                raise APIError(err_msg)
+                raise APIError(f"{err_msg}")
             if re.search(r"[A-Z]", colname) or re.match(r"_", colname):
-                raise APIError(err_msg)
+                raise APIError(f"Column names must not contain capital letters or start with an underscore! {err_msg}")
             if len(colname) > MAX_COL_NAME_LENGTH:
-                raise APIError(err_msg)
-
+                raise APIError(f"Column name is too long! {err_msg}")
 
     @load_cursor()
     def __create_table(
