@@ -202,7 +202,7 @@ function Factsheet(props) {
       });
 
       axios.get(conf.toep + `factsheet/all/`).then(response => {
-        setOpenSavedDialog(true)
+        setOpenUpdatedDialog(true)
       });
 
     }
