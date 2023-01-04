@@ -41,7 +41,7 @@ function Home(props) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(conf.toep + `factsheet/all/`).then(response => {
+    axios.get(conf.localhost + `factsheet/all/`).then(response => {
       setFactsheets(response.data);
       setLoading(false);
     });
@@ -54,7 +54,6 @@ function Home(props) {
           (<Grid item xs={3}>
             <CustomCard
               id={item.pk}
-              title={item.fields.factsheetData.name}
               study_name={item.fields.factsheetData.study_name}
               acronym={item.fields.factsheetData.acronym}
               abstract={item.fields.factsheetData.abstract}

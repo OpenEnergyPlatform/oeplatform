@@ -36,6 +36,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
 
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -45,6 +46,7 @@ import conf from "../conf.json";
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
+import SaveIcon from '@mui/icons-material/Save';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -157,13 +159,13 @@ function Factsheet(props) {
     if (id === 'new') {
 
 
-      axios.post(conf.toep + 'factsheet/add/', null,
+      axios.post(conf.localhost + 'factsheet/add/', null,
       {  params:
         factsheetObject
       }).then(response => setOpenSavedDialog(true));
 
     } else {
-      axios.post(conf.toep + 'factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -835,7 +837,7 @@ function Factsheet(props) {
             }}>
             <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
           <div style={{ marginTop: '20px' }}>
-          
+
           </div>
         </div>
         </Grid>
@@ -966,10 +968,7 @@ function Factsheet(props) {
 
     const renderScenario = () => {
       return  <div>
-                <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                  <Button disableElevation={true} startIcon={<AddBoxOutlinedIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="outlined" color="primary" onClick={handleAddScenario}>Add new</Button>
-                </div >
-                <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'60vh', overflow: 'auto' }} >
+                <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'72vh', overflow: 'auto' }} >
                   <Tabs
                     orientation="vertical"
                     variant="scrollable"
@@ -980,8 +979,18 @@ function Factsheet(props) {
                      key={'Scenario_tabs'}
                   >
                   {Array(scenarios).fill().map((item, i) =>
-                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }}  key={'Scenario_panel_' + (i + 1)}/>
+                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }} />
                   )}
+                    <Box sx={{ 'textAlign': 'center', 'marginTop': '5px' }} >
+                      <Fab
+                        color="primary"
+                        aria-label="add"
+                        size="small"
+                        onClick={handleAddScenario}
+                        >
+                        <AddIcon  />
+                      </Fab>
+                    </Box>
                   </Tabs>
                   {Array(scenarios).fill().map((item, i) =>
                     <TabPanel value={scenarioTabValue} index={i} style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece' }}  key={'Scenario_panel_' + (i + 1)} >
@@ -1068,10 +1077,18 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
-              <Button disableElevation={true} startIcon={<DeleteOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="error" onClick={handleRemoveFactsheet}>Remove</Button>
-              <Button disableElevation={true} startIcon={<ShareIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" >Share</Button>
-              <Button disableElevation={true} startIcon={<MailOutlineIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleSaveFactsheet} >Save</Button>
-              <Button disableElevation={true} startIcon={<ForwardToInboxIcon />}   style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle}>Submit</Button>
+              <Tooltip title="Delete factsheet">
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleRemoveFactsheet}> <DeleteOutlineIcon /> </Button>
+              </Tooltip>
+              <Tooltip title="Share this factsheet">
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
+              </Tooltip>
+              <Tooltip title="Save factsheet">
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+              </Tooltip>
+              <Tooltip title="Submit this factsheet to the Open Energy Knowledge Graph">
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="success" onClick={handleClickOpenTurtle} > <ForwardToInboxIcon /> </Button>
+              </Tooltip>
             </div >
           </Grid>
           <Grid item xs={12}>
@@ -1120,7 +1137,7 @@ function Factsheet(props) {
                 <DialogContentText>
                   <div>
                     <pre>
-                      Your selected scenario is now removed from your facthseet!
+                      Your selected scenario is now removed from your factsheet!
                     </pre>
                   </div>
                 </DialogContentText>
@@ -1218,9 +1235,6 @@ function Factsheet(props) {
               <div className='wizard'>
                   <Grid container >
                     <Grid item xs={12} >
-                      <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                        <TextField style={{ width: '50%', marginBottom: '20px', }} inputProps={{min: 0, style: { textAlign: 'center', fontWeight: 'bold' }}} id="outlined-basic"  variant="standard" value={factsheetName} onChange={handleFactsheetName} />
-                      </div>
                       <CustomTabs
                         factsheetObjectHandler={factsheetObjectHandler}
                         items={items}

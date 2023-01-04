@@ -28,13 +28,13 @@ export default function ColorToggleButton(props) {
           <ToggleButton color="primary" variant="contained" size="small" value="wizard" style={{ 'textTransform': 'none' }}> <ArrowBackIcon /> </ToggleButton>
         </Link>
       </Tooltip>
-      <Tooltip title="Factsheet's edit mode!">
+      {/*<Tooltip title="Factsheet's edit mode!">
         <ToggleButton size="small" value="wizard" style={{ 'textTransform': 'none' }} disabled > <ListAltIcon /> </ToggleButton>
       </Tooltip>
       <Tooltip title="Overview!">
         <ToggleButton size="small" value="overview" style={{ 'textTransform': 'none' }} disabled> <FactCheckOutlinedIcon /> </ToggleButton>
       </Tooltip>
-      {/* <ToggleButton size="small" value="playground" style={{ 'textTransform': 'none' }}> <SchemaIcon /> </ToggleButton> */}
+      <ToggleButton size="small" value="playground" style={{ 'textTransform': 'none' }}> <SchemaIcon /> </ToggleButton> */}
     </ToggleButtonGroup>
   );
 }

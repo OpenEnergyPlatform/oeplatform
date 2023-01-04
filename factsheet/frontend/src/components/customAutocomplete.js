@@ -50,7 +50,7 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="Sectors" />
+          <TextField {...params} label={parameters.kind} placeholder="" />
         )}
       />
       <Box
