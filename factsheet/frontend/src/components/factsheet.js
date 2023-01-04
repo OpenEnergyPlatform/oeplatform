@@ -157,12 +157,14 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-
-
       axios.post(conf.toep + 'factsheet/add/', null,
       {  params:
         factsheetObject
-      }).then(response => setOpenSavedDialog(true));
+      });
+
+      axios.get(conf.toep + `factsheet/all/`).then(response => {
+        setOpenSavedDialog(true)
+      });
 
     } else {
       axios.post(conf.toep + 'factsheet/update/', null,
@@ -197,7 +199,12 @@ function Factsheet(props) {
             scenarios_input_datasets: JSON.stringify(scenariosInputDatasets),
             scenarios_output_datasets: JSON.stringify(scenariosOutputDatasets),
           }
-      }).then(response => setOpenUpdatedDialog(true));
+      });
+
+      axios.get(conf.toep + `factsheet/all/`).then(response => {
+        setOpenSavedDialog(true)
+      });
+
     }
   };
 
