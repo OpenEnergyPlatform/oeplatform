@@ -16,13 +16,13 @@
             "title": "Table"
         },
         "date_started": {
-            "description": "A date when the review was started.",
+            "description": "Date when the review was started.",
             "type": "string",
             "title": "Date started",
             "format": "date-time"
         },
         "date_finished": {
-            "description": "A date when the review was finished.",
+            "description": "Date when the review was finished.",
             "type": "string",
             "title": "Date finished",
             "format": "date-time"
