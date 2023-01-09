@@ -160,7 +160,7 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      axios.post(conf.localhost + 'factsheet/add/', null,
+      axios.post(conf.toep + 'factsheet/add/', null,
       {  params: factsheetObject,
         headers: {
           'Cache-Control': 'max-age=2',
@@ -172,11 +172,11 @@ function Factsheet(props) {
       }
     );
 
-      axios.get(conf.localhost + `factsheet/all/`).then(response => {
+      axios.get(conf.toep + `factsheet/all/`).then(response => {
         setOpenSavedDialog(true)
       });
     } else {
-      axios.post(conf.localhost + 'factsheet/update/', null,
+      axios.post(conf.toep + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -210,7 +210,7 @@ function Factsheet(props) {
           }
       });
 
-      axios.get(conf.localhost + `factsheet/all/`).then(response => {
+      axios.get(conf.toep + `factsheet/all/`).then(response => {
         setOpenUpdatedDialog(true)
       });
 
@@ -218,7 +218,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {

@@ -47,7 +47,7 @@ function App() {
         const result = eval(fsd)[0].fields.factsheetData;
         return result;
     } else {
-      axios.get(conf.localhost + `factsheet/all/`);
+      axios.get(conf.toep + `factsheet/all/`);
     }
   };
   useEffect(() => {
