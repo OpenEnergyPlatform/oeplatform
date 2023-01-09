@@ -25,7 +25,6 @@ def create_factsheet(request, *args, **kwargs):
     energy_carriers = request.GET.get('energy_carriers')
     energy_transportation_process = request.GET.get('energy_transportation_process')
     study_keywords = request.GET.get('study_keywords')
-    contact_person = request.GET.get('contact_person')
     doi = request.GET.get('doi')
     place_of_publication = request.GET.get('place_of_publication')
     link_to_study = request.GET.get('link_to_study')
