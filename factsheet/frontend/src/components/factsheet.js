@@ -735,8 +735,6 @@ function Factsheet(props) {
     const scenariosKeywordsHandler = (event) => {
       const newSelectedScenariosKeywords = [...selectedScenariosKeywords];
       const idx = event.target.name.split("_")[1];
-      console.log(idx);
-      console.log(newSelectedScenariosKeywords[idx]);
       if (newSelectedScenariosKeywords[idx] !== undefined) {
         if (event.target.checked) {
           if (!newSelectedScenariosKeywords[idx].includes(event.target.name.split("_")[0])) {
@@ -746,7 +744,6 @@ function Factsheet(props) {
           newSelectedScenariosKeywords[idx] = newSelectedScenariosKeywords[idx].filter(i => i !== event.target.name.split("_")[0]);
         }
       }
-      console.log(selectedScenariosKeywords);
 
       setSelectedScenariosKeywords(newSelectedScenariosKeywords);
       factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenariosKeywords));
@@ -985,7 +982,6 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={6} >
             <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" value={doi} onChange={handleDOI} />
-            <CustomTreeViewWithCheckBox />
           </Grid>
           <Grid item xs={6} >
             <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" value={place_of_publication} onChange={handlePlaceOfPublication} />
