@@ -173,7 +173,7 @@ def get_all_factsheets(request, *args, **kwargs):
     factsheets = Factsheet.objects.all()
     factsheets_json = serializers.serialize('json', factsheets)
 
-    response = HttpResponse()
+    response = JsonResponse(factsheets_json, safe=False, content_type='application/json')
     response['Cache-Control'] = 'no-cache'
 
     return response
