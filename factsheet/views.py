@@ -5,13 +5,18 @@ from .models import Factsheet
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
-
+import sys
 
 def factsheets_index(request, *args, **kwargs):
     return render(request, 'factsheet/index.html')
 
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
+
+
+    print('##################### create a factsheet')
+    sys.error.write('gfg......')
+
     name = request.GET.get('name')
     acronym = request.GET.get('acronym')
     study_name = request.GET.get('study_name')
@@ -68,7 +73,15 @@ def create_factsheet(request, *args, **kwargs):
 
     fs = Factsheet(factsheetData=factsheet_obj)
     fs.save()
-    return JsonResponse(factsheet_obj, status=status.HTTP_201_CREATED)
+
+
+    response =  JsonResponse(factsheet_obj, status=status.HTTP_100_CONTINUE)
+    patch_response_headers(response, cache_timeout=300)
+    response['Cache-Control'] = 'must-revalidate, max-age=20'
+
+    print('#####################')
+    print(response)
+    return response
 
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
@@ -159,4 +172,6 @@ def delete_factsheet_by_id(request, *args, **kwargs):
 def get_all_factsheets(request, *args, **kwargs):
     factsheets = Factsheet.objects.all()
     factsheets_json = serializers.serialize('json', factsheets)
-    return JsonResponse(factsheets_json, safe=False, content_type='application/json')
+    response = HttpResponse()
+    response['Cache-Control'] = 'max-age=1'
+    return response

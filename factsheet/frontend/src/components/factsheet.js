@@ -18,6 +18,9 @@ import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
 import VerticalTabs from './customVerticalTabs.js';
 import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
+
+import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
+
 import Typography from '@mui/material/Typography';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -157,16 +160,23 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      axios.post(conf.toep + 'factsheet/add/', null,
-      {  params:
-        factsheetObject
-      });
+      axios.post(conf.localhost + 'factsheet/add/', null,
+      {  params: factsheetObject,
+        headers: {
+          'Cache-Control': 'max-age=2',
+          'Access-Control-Max-Age': 22,
+          'X-Adel': 56,
+          'Pragma': 'no-cache',
+          'Expires': '10',
+        },
+      }
+    );
 
-      axios.get(conf.toep + `factsheet/all/`).then(response => {
+      axios.get(conf.localhost + `factsheet/all/`).then(response => {
         setOpenSavedDialog(true)
       });
     } else {
-      axios.post(conf.toep + 'factsheet/update/', null,
+      axios.post(conf.localhost + 'factsheet/update/', null,
       {  params:
           {
             id: id,
@@ -200,7 +210,7 @@ function Factsheet(props) {
           }
       });
 
-      axios.get(conf.toep + `factsheet/all/`).then(response => {
+      axios.get(conf.localhost + `factsheet/all/`).then(response => {
         setOpenUpdatedDialog(true)
       });
 
@@ -208,7 +218,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.localhost + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseJSON = () => {
@@ -737,7 +747,7 @@ function Factsheet(props) {
         }
       }
       console.log(selectedScenariosKeywords);
-      
+
       setSelectedScenariosKeywords(newSelectedScenariosKeywords);
       factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenariosKeywords));
     };
@@ -975,6 +985,7 @@ function Factsheet(props) {
           </Grid>
           <Grid item xs={6} >
             <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" value={doi} onChange={handleDOI} />
+            <CustomTreeViewWithCheckBox />
           </Grid>
           <Grid item xs={6} >
             <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" value={place_of_publication} onChange={handlePlaceOfPublication} />

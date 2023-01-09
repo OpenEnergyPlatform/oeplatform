@@ -42,12 +42,12 @@ function App() {
   const url_id = String(window.location.href).split('/').pop();
   const getData = async () => {
     if (url_id !== '' && url_id !== 'new') {
-        const { data } = await axios.get(conf.toep + `factsheet/get/`, { params: { id: url_id } });
+        const { data } = await axios.get(conf.localhost + `factsheet/get/`, { params: { id: url_id } });
         const fsd = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
         const result = eval(fsd)[0].fields.factsheetData;
         return result;
     } else {
-      axios.get(conf.toep + `factsheet/all/`);
+      axios.get(conf.localhost + `factsheet/all/`);
     }
   };
   useEffect(() => {

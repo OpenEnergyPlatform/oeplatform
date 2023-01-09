@@ -41,7 +41,8 @@ function Home(props) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(conf.toep + `factsheet/all/`).then(response => {
+    axios.get(conf.localhost + `factsheet/all/`).then(response => {
+      console.log(response);
       setFactsheets(response.data);
       setLoading(false);
     });
