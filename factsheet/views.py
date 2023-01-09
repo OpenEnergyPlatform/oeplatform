@@ -165,6 +165,6 @@ def get_all_factsheets(request, *args, **kwargs):
     factsheets_json = serializers.serialize('json', factsheets)
 
     response = JsonResponse(factsheets_json, safe=False, content_type='application/json')
-    patch_response_headers(response, cache_timeout=None)
+    patch_response_headers(response, cache_timeout=300)
 
     return response
