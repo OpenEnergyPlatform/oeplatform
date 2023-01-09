@@ -172,6 +172,8 @@ def delete_factsheet_by_id(request, *args, **kwargs):
 def get_all_factsheets(request, *args, **kwargs):
     factsheets = Factsheet.objects.all()
     factsheets_json = serializers.serialize('json', factsheets)
+
     response = HttpResponse()
-    response['Cache-Control'] = 'max-age=1'
+    response['Cache-Control'] = 'no-cache'
+
     return response
