@@ -7,9 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
 
-
-
-
 def factsheets_index(request, *args, **kwargs):
     return render(request, 'factsheet/index.html')
 
@@ -72,7 +69,10 @@ def create_factsheet(request, *args, **kwargs):
     fs = Factsheet(factsheetData=factsheet_obj)
     fs.save()
 
-    return JsonResponse(factsheet_obj, status=status.HTTP_201_CREATED)
+    response = JsonResponse(factsheet_obj, safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+
+    return response
 
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
@@ -135,36 +135,43 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['scenarios_output_datasets'] = json.loads(scenarios_output_datasets) if scenarios_output_datasets is not None else []
 
     factsheet.save()
-    return JsonResponse('factsheet updated!', safe=False, status=status.HTTP_201_CREATED)
+
+    response = JsonResponse('factsheet updated!', safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get('name')
     factsheet = Factsheet.objects.get(name=name)
-    return JsonResponse(factsheet, safe=False, content_type='application/json')
+    factsheet_json = serializers.serialize('json', factsheet)
+    response = JsonResponse(factsheet_json, safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     factsheet = Factsheet.objects.filter(id=id)
     factsheet_json = serializers.serialize('json', factsheet)
-    print(factsheet_json)
-    return JsonResponse(factsheet_json, safe=False, content_type='application/json')
+    response = JsonResponse(factsheet_json, safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     factsheet = Factsheet.objects.filter(id=id)
-    print(id)
     factsheet.delete()
-    return JsonResponse('deleted!', safe=False, content_type='application/json')
+    response = JsonResponse('factsheet deleted!', safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
+
 
 @csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     factsheets = Factsheet.objects.all()
     factsheets_json = serializers.serialize('json', factsheets)
-
     response = JsonResponse(factsheets_json, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
-
     return response

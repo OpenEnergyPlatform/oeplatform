@@ -50,6 +50,8 @@ import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
 import SaveIcon from '@mui/icons-material/Save';
+import uuid from "react-uuid";
+
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -119,8 +121,20 @@ function Factsheet(props) {
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
 
-  const [scenarios, setScenarios] = useState(id !== 'new' ? Object.keys(fsData.scenarios_name).length : 1);
-  const [scenarioObject, setScenarioObject] = useState({});
+  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
+    id: uuid(),
+    name: '',
+    acronym: '',
+    abstract: '',
+    regions: [],
+    interacting_region: [],
+    scenario_years: [],
+    keywords: [],
+    input_datasets: [],
+    output_datasets: [],
+  }
+]);
+  const [scenariosObject, setScenariosObject] = useState({});
   const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : [ { id: 0, value: '' } ]);
   const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : [ { id: 0, value: '' } ]);
   const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : [ { id: 0, value: '' } ]);
@@ -161,20 +175,11 @@ function Factsheet(props) {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
       axios.post(conf.toep + 'factsheet/add/', null,
-      {  params: factsheetObject,
-        headers: {
-          'Cache-Control': 'max-age=2',
-          'Access-Control-Max-Age': 22,
-          'X-Adel': 56,
-          'Pragma': 'no-cache',
-          'Expires': '10',
-        },
-      }
-    );
+      {  params: factsheetObject  }
+    ).then(response => {
+      setOpenSavedDialog(true)
+    });
 
-      axios.get(conf.toep + `factsheet/all/`).then(response => {
-        setOpenSavedDialog(true)
-      });
     } else {
       axios.post(conf.toep + 'factsheet/update/', null,
       {  params:
@@ -208,9 +213,7 @@ function Factsheet(props) {
             scenarios_input_datasets: JSON.stringify(scenariosInputDatasets),
             scenarios_output_datasets: JSON.stringify(scenariosOutputDatasets),
           }
-      });
-
-      axios.get(conf.toep + `factsheet/all/`).then(response => {
+      }).then(response => {
         setOpenUpdatedDialog(true)
       });
 
@@ -327,12 +330,17 @@ function Factsheet(props) {
     setOpenOverView(false);
   };
 
-  const handleScenariostName = ({ target }) => {
-    const { name: key, value } = target;
-    let newScenariosName = [...scenariosName];
-    newScenariosName[key.split('_')[1]] = { id: key.split('_')[1], value: value };
-    setScenariosName(newScenariosName);
-    factsheetObjectHandler('scenarios_name', JSON.stringify(scenariosName));
+
+  const handleScenariosChange = ({ target }) => {
+    const { name, value } = target;
+    const element = name.split('_')[0];
+    const id = name.split('_')[1];
+    const newScenarios = [...scenarios];
+    const obj = newScenarios.find(el => el.id === id);
+    if (obj)
+      obj[element] =  value
+    setScenarios(newScenarios);
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
   const handleScenariosAcronym = ({ target }) => {
@@ -388,86 +396,31 @@ function Factsheet(props) {
   };
 
   const handleAddScenario = () => {
-    const newIndex = scenarios === 1 ? 1 : scenarios;
-
-    let newScenariosAbstract = [...scenariosAbstract];
-    newScenariosAbstract[newIndex] = { id: newIndex, value:'' };
-    setScenariosAbstract(newScenariosAbstract);
-
-    let newScenariosName = [...scenariosName];
-    newScenariosName[newIndex] = { id: newIndex, value:'' };
-    setScenariosName(newScenariosName);
-
-    let newScenariosAcronym = [...scenariosAcronym];
-    newScenariosAcronym[newIndex] = { id: newIndex, value:'' };
-    setScenariosAcronym(newScenariosAcronym);
-
-    let newScenariosSelectedRegion = [...selectedRegion];
-    newScenariosSelectedRegion[newIndex] = [];
-    setSelectedRegion(newScenariosSelectedRegion);
-
-    let newSelectedInteractionRegion = [...selectedInteractingRegion];
-    newSelectedInteractionRegion[newIndex] = [];
-    setSelectedInteractingRegion(newScenariosSelectedRegion);
-
-    let newSelectedScenariosYears = [...selectedScenariosYears];
-    newSelectedScenariosYears[newIndex] = [];
-    setSelectedScenariosYears(newSelectedScenariosYears);
-
-    let newSelectedScenariosKeywords = [...selectedScenariosKeywords];
-    newSelectedScenariosKeywords[newIndex] = [];
-    setSelectedScenariosKeywords(newSelectedScenariosKeywords);
-
-    const newScenariosInputDatasets = [...scenariosInputDatasets];
-    newScenariosInputDatasets[newIndex] = { id: newIndex, value:[] };
-    setScenariosInputDatasets(newScenariosInputDatasets);
-
-    const newScenariosOutputDatasets = [...scenariosOutputDatasets];
-    newScenariosOutputDatasets[newIndex] = { id: newIndex, value:[] };
-    setScenariosOutputDatasets(newScenariosOutputDatasets);
-
-    setScenarios(scenarios + 1);
+    const newScenarios = [...scenarios];
+    newScenarios.push({
+        id: uuid(),
+        name: '',
+        acronym: '',
+        abstract: '',
+        regions: [],
+        interacting_region: [],
+        scenario_years: [],
+        keywords: [],
+        input_datasets: [],
+        output_datasets: [],
+      });
+    setScenarios(newScenarios);
+    console.log(scenarios);
   };
 
-  const removeScenario = (idx) => {
-    setScenarios(scenarios - 1);
-    console.log(idx);
-    console.log(scenariosAbstract);
-    console.log(scenariosAbstract);
-
-
-    const newScenariosAbstract = scenariosAbstract.filter(i => i.id !== idx);
-    setScenariosAbstract(newScenariosAbstract);
-
-    const newScenariosName = scenariosName.filter(i => i.id !== idx);
-    setScenariosName(newScenariosName);
-
-    const newScenariosAcronym = scenariosAcronym.filter(i => i.id !== idx);
-    setScenariosAcronym(newScenariosAcronym);
-
-    const newScenariosSelectedRegion = selectedRegion.filter(i => i.id !== idx);
-    setSelectedRegion(newScenariosSelectedRegion);
-
-    const newSelectedInteractionRegion = selectedInteractingRegion.filter(i => i.id !== idx);
-    setSelectedInteractingRegion(newSelectedInteractionRegion);
-
-    const newSelectedScenariosYears = selectedScenariosYears.filter(i => i.id !== idx);
-    setSelectedScenariosYears(newSelectedScenariosYears);
-
-    const newSelectedScenariosKeywords = selectedScenariosKeywords.filter(i => i.id !== idx);
-    setSelectedScenariosKeywords(newSelectedScenariosKeywords);
-
-    const newScenariosInputDatasets = scenariosInputDatasets.filter(i => i.id !== idx);
-    setScenariosInputDatasets(newScenariosInputDatasets);
-
-    const newScenariosOutputDatasets = scenariosOutputDatasets.filter(i => i.id !== idx);
-    setScenariosOutputDatasets(newScenariosOutputDatasets);
-
+  const removeScenario = (id) => {
+    console.log(id);
+    let newScenarios = [...scenarios].filter((obj => obj.id !== id));;
+    setScenarios(newScenarios);
+    console.log(scenarios);
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
     setRemoveReport(true);
-
   };
-
-
 
   const handleSwap = (mode) => {
     console.log(mode);
@@ -487,9 +440,9 @@ function Factsheet(props) {
     }
 
     const scenariosObjectHandler = (key, obj) => {
-      let newFactsheetObject = factsheetObject;
-      newFactsheetObject[key] = obj
-      setFactsheetObject(newFactsheetObject);
+      let newScenariosObject = scenariosObject;
+      newScenariosObject[key] = obj
+      setScenariosObject(newScenariosObject);
     }
 
     const renderFactsheet = (factsheetContent) => {
@@ -672,14 +625,6 @@ function Factsheet(props) {
       setRemoveReport(false);
     }
 
-
-
-
-
-
-
-
-
     const energyCarriersHandler = (energyCarriersList) => {
       setSelectedsetEnergyCarriers(energyCarriersList);
       factsheetObjectHandler('energy_carriers', JSON.stringify(selectedEnergyCarriers));
@@ -748,6 +693,7 @@ function Factsheet(props) {
       setSelectedScenariosKeywords(newSelectedScenariosKeywords);
       factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenariosKeywords));
     };
+
 
     const renderStudy = () => {
       return <Grid container
@@ -996,6 +942,7 @@ function Factsheet(props) {
       </Grid>
     }
 
+
     const renderScenario = () => {
       return  <div>
                 <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'72vh', overflow: 'auto' }} >
@@ -1006,10 +953,14 @@ function Factsheet(props) {
                     onChange={handleScenarioTabChange}
                     aria-label="Vertical tabs example"
                     sx={{ borderRight: 1, borderColor: 'divider' }}
-                     key={'Scenario_tabs'}
+                    key={'Scenario_tabs'}
                   >
-                  {Array(scenarios).fill().map((item, i) =>
-                    <Tab label={'Scenario ' + (i + 1)} {...a11yProps(i)} key={'Scenario_tab_' + (i + 1)}  style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }} />
+                  {scenarios.map((item, i) =>
+                    <Tab
+                      label={'Scenario ' + (Number(i) + Number(1)) }
+                      key={'Scenario_tab_' + item.id}
+                      style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }}
+                    />
                   )}
                     <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px' }} >
                       <Fab
@@ -1017,37 +968,25 @@ function Factsheet(props) {
                         aria-label="add"
                         size="small"
                         onClick={handleAddScenario}
-                        >
+                      >
                         <AddIcon  />
                       </Fab>
                     </Box>
                   </Tabs>
-                  {Array(scenarios).fill().map((item, i) =>
-                    <TabPanel value={scenarioTabValue} index={i} style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece' }}  key={'Scenario_panel_' + (i + 1)} >
+                  {scenarios.map((item, i) =>
+                    <TabPanel
+                      value={scenarioTabValue}
+                      index={i}
+                      style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece' }}
+                      key={'Scenario_panel_' + item.id}
+                    >
                       <Scenario
-                        idx={i}
-                        handleScenariostName={handleScenariostName}
-                        handleScenariosAcronym={handleScenariosAcronym}
-                        handleScenariosAbstract={handleScenariosAbstract}
-                        scenariosName={scenariosName}
-                        scenariosAcronym={scenariosAcronym}
-                        scenariosAbstract={scenariosAbstract}
-                        scenarioRegion={scenario_region}
-                        scenarioRegionHandler={scenarioRegionHandler}
-                        scenarioSelectedRegion={selectedRegion}
-                        scenarioInteractingRegion={scenario_interacting_region}
-                        scenarioInteractingRegionHandler={scenarioInteractingRegionHandler}
-                        scenarioSelectedInteractingRegion={selectedInteractingRegion}
-                        scenariosYears={scenario_years}
+                        data={item}
+                        handleScenariosChange={handleScenariosChange}
                         scenariosYearsHandler={scenariosYearsHandler}
-                        scenariosSelectedYears={selectedScenariosYears}
-                        scenarioskeywords={scenario_keywords}
                         scenariosKeywordsHandler={scenariosKeywordsHandler}
-                        scenariosSelectedkeywords={selectedScenariosKeywords}
                         scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
-                        scenariosOutputDatasets={scenariosOutputDatasets}
-                        scenariosInputDatasets={scenariosInputDatasets}
                         removeScenario={removeScenario}
                       />
                     </TabPanel>
@@ -1055,7 +994,6 @@ function Factsheet(props) {
                 </Box>
               </div >
       }
-
 
     const items = {
       titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
@@ -1089,9 +1027,6 @@ function Factsheet(props) {
     useEffect(() => {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
-
-
-
 
     return (
       <div>
