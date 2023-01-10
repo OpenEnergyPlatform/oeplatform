@@ -1,8 +1,8 @@
 {
-    "title": "Open Peer Review Model -  reviewVersion OEP-0.0.1",
+    "title": "Open Peer Review (OPR) Model -  reviewVersion OEP-0.0.1",
     "$schema": "xxx",
     "$id": "xxx",
-    "description": "Open Energy Platform (OEP) metadata standard: xxx",
+    "description": "Make OPR for Open Energy Platform (OEP) metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
     "type": "object",
     "properties": {
         "topic": {
@@ -15,107 +15,135 @@
             "type": "string",
             "title": "Table"
         },
-        "date_started": {
-            "description": "Date when the review was started.",
-            "type": "string",
-            "title": "Date started",
-            "format": "date-time"
-        },
-        "date_finished": {
-            "description": "Date when the review was finished.",
-            "type": "string",
-            "title": "Date finished",
-            "format": "date-time"
-        },
-        "metadata_version": {
-            "description": "Type and version number of the metadata. Example: oemetadata_v1.5.1",
-            "type": "string",
-            "title": "Metadata version",
-            "default": "oemetadata_v1.5"
-        },
-        "reviews": {
-            "description": "All comments and value suggestions, stored as a list.",
-            "type": "array",
+        "reviewList": {
+            "description": "Stores all initiated reviews.",
+            "type": "arry",
             "items": {
-                "description": "All information for a specific field are stored as a dictionary.",
+                "description": "All information within one review are stored as a dictionary.",
                 "type": "object",
                 "properties": {
-                    "category": {
-                        "description": "One of the six corresponding categories for the current field.",
+                    "version": {
+                        "description": "Defines the number of reviews it is about.",
                         "type": "string",
-                        "title": "Category"
+                        "title": "Version"
                     },
-                    "key": {
-                        "description": "Name of the current field.",
+                    "dateStarted": {
+                        "description": "A date when the review was started.",
                         "type": "string",
-                        "title": "Key"
+                        "title": "Date started",
+                        "format": "date-time"
                     },
-                    "state": {
-                        "description": "Selected button, which can either be ok, suggestion or rejected.",
+                    "dateFinished": {
+                        "description": "A date when the review was finished.",
                         "type": "string",
-                        "title": "State"
+                        "title": "Date finished",
+                        "format": "date-time"
                     },
-                    "loop": {
-                        "description": "List, which stores all comments and value suggestions for selected field.",
+                    "metadataVersion": {
+                        "description": "Type and version number of the metadata. Example: oemetadata_v1.5.1",
+                        "type": "string",
+                        "title": "Metadata version",
+                        "default": "oemetadata_v1.5"
+                    },
+                    "reviews": {
+                        "description": "All comments and value suggestions, stored as a list.",
                         "type": "array",
                         "items": {
-                            "description": "Single entrance from reviewer.",
+                            "description": "All information for a specific field are stored as a dictionary.",
                             "type": "object",
                             "properties": {
-                                "timestamp": {
-                                    "description": "Date and time when the reviewer added something.",
+                                "category": {
+                                    "description": "One of the six corresponding categories for the current field.",
                                     "type": "string",
-                                    "title": "Timestamp",
-                                    "format": "date-time"
+                                    "title": "Category"
                                 },
-                                "reviewer": {
-                                    "description": "Person who creates a comment.",
+                                "key": {
+                                    "description": "Name of the current field.",
                                     "type": "string",
-                                    "title": "Reviewer"
+                                    "title": "Key"
                                 },
-                                "comment": {
-                                    "description": "Specific entrance for the comment.",
+                                "state": {
+                                    "description": "Selected button, which can either be ok, suggestion or rejected.",
                                     "type": "string",
-                                    "title": "Comment"
+                                    "title": "State"
                                 },
-                                "value_suggestion": {
-                                    "description": "Specific entrance for value suggestion",
+                                "entry": {
+                                    "description": "Selected entry, which allows the field entries to be assigned uniquely.",
                                     "type": "string",
-                                    "title": "Value Suggestion"
+                                    "title": "Entry"
                                 },
-                                "accepted": {
-                                    "description": "Boolean, if the comment or value suggestion is accepted from the reviewer.",
-                                    "type": "boolean",
-                                    "title": "Accepted"
+                                "fieldReview": {
+                                    "description": "List, which stores all comments and value suggestions for selected field.",
+                                    "type": "array",
+                                    "items": {
+                                        "description": "Single entrance from reviewer.",
+                                        "type": "object",
+                                        "properties": {
+                                            "timestamp": {
+                                                "description": "Date and time when the reviewer added something.",
+                                                "type": "string",
+                                                "title": "Timestamp",
+                                                "format": "date-time"
+                                            },
+                                            "reviewer": {
+                                                "description": "Person who creates a comment.",
+                                                "type": "string",
+                                                "title": "Reviewer"
+                                            },
+                                            "initialValue": {
+                                                "description": "Displays the initial value.",
+                                                "type": "string",
+                                                "title": "Initial value"
+                                            },
+                                            "comment": {
+                                                "description": "Specific entrance for the comment.",
+                                                "type": "string",
+                                                "title": "Comment"
+                                            },
+                                            "valueSuggestion": {
+                                                "description": "Specific entrance for value suggestion",
+                                                "type": "string",
+                                                "title": "Value suggestion"
+                                            },
+                                            "accepted": {
+                                                "description": "Boolean, if the comment or value suggestion is accepted from the contributor.",
+                                                "type": "boolean",
+                                                "title": "Accepted"
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "title": "Field review"
+                                    },
+                                    "title": "Field review"
                                 }
                             },
                             "additionalProperties": false,
-                            "title": "Loop"
+                            "title": "Reviews"
                         },
-                        "title": "loop"
+                        "title": "Reviews"
+                    },
+                    "reviewFinished": {
+                        "description": "Boolean, if all comments or value suggestions are reviewed from contributor and if the review is finished.",
+                        "type": "boolean",
+                        "title": "Accepted"
+                    },
+                    "grantedBadge": {
+                        "description": "Final badge for the metadata.",
+                        "type": "string",
+                        "enum": [
+                            "iron",
+                            "bronze",
+                            "silver",
+                            "gold",
+                            "platinum"
+                        ],
+                        "title": "Granted Badge"
                     }
                 },
                 "additionalProperties": false,
-                "title": "Reviews"
+                "title": "Review List"
             },
-            "title": "Reviews"
-        },
-        "accepted": {
-            "description": "Boolean, if all comments or value suggestions are reviewed from contributor.",
-            "type": "boolean",
-            "title": "Accepted"
-        },
-        "granted_badge": {
-            "description": "Final badge for the metadata.",
-            "type": "string",
-            "enum": [
-                "iron",
-                "bronze",
-                "silver",
-                "gold",
-                "platinum"
-            ],
-            "title": "Granted Badge"
+            "title": "Review List"
         },
         "metaMetadata": {
             "description": "Object. Description about the reviewdata themselves, their format, version and license. These fields should always be provided.",
