@@ -1,0 +1,40 @@
+{
+    "topic": null,
+    "table": null,
+    "reviewList": [
+        {
+            "version": null,
+            "dateStarted": null,
+            "dateFinished": null,
+            "metadataVersion": "v1.5.2",
+            "reviews": [
+                {
+                    "category": null,
+                    "key": null,
+                    "state": null,
+                    "entry": null,
+                    "fieldReview": [
+                        {
+                            "timestamp": null,
+                            "reviewer": null,
+                            "initialValue": null,
+                            "comment": null,
+                            "valueSuggestion": null,
+                            "accepted": null
+                        }
+                    ]
+                }
+            ],
+            "reviewFinished": "false",
+            "grantedBadge": null
+        }
+    ],
+    "metaMetadata": {
+        "reviewVersion": "OEP-0.0.1",
+        "metadataLicense": {
+            "name": "CC0-1.0",
+            "title": "Creative Commons Zero v1.0 Universal",
+            "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+        }
+    }
+}
