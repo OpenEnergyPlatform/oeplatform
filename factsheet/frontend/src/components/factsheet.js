@@ -1028,20 +1028,20 @@ function Factsheet(props) {
             <div>
               <FormGroup>
                   <div>
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("resilience")} onChange={handleStudyKeywords} label="resilience" name="resilience" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("life cycle analysis")} onChange={handleStudyKeywords} label="life cycle analysis" name="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("CO2 emissions")} onChange={handleStudyKeywords} label="CO2 emissions" name="CO2 emissions" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("Greenhouse gas emissions")} onChange={handleStudyKeywords} label="Greenhouse gas emissions" name="Greenhouse gas emissions" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("Reallabor")} onChange={handleStudyKeywords} label="Reallabor" name="Reallabor" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("100% renewables")} onChange={handleStudyKeywords} label="100% renewables" name="100% renewables" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("acceptance")} onChange={handleStudyKeywords} label="acceptance" name="acceptance" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("sufficiency")} onChange={handleStudyKeywords} label="sufficiency" name="sufficiency" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("(changes in) demand")} onChange={handleStudyKeywords} label="(changes in) demand" name="(changes in) demand" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("degree of electrifiaction")} onChange={handleStudyKeywords} label="degree of electrifiaction" name="degree of electrifiaction" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("regionalisation")} onChange={handleStudyKeywords} label="regionalisation" name="regionalisation" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("total gross electricity generation")} onChange={handleStudyKeywords} label="total gross electricity generation" name="total gross electricity generation" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("total net electricity generation")} onChange={handleStudyKeywords} label="total net electricity generation" name="total net electricity generation" />
-                    <FormControlLabel control={<Checkbox />} checked={selectedStudyKewords.includes("peak electricity generation")} onChange={handleStudyKeywords} label="peak electricity generation" name="peak electricity generation"/>
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("resilience")} onChange={handleStudyKeywords} label="resilience" name="resilience" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("life cycle analysis")} onChange={handleStudyKeywords} label="life cycle analysis" name="life cycle analysis" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("CO2 emissions")} onChange={handleStudyKeywords} label="CO2 emissions" name="CO2 emissions" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Greenhouse gas emissions")} onChange={handleStudyKeywords} label="Greenhouse gas emissions" name="Greenhouse gas emissions" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Reallabor")} onChange={handleStudyKeywords} label="Reallabor" name="Reallabor" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("100% renewables")} onChange={handleStudyKeywords} label="100% renewables" name="100% renewables" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("acceptance")} onChange={handleStudyKeywords} label="acceptance" name="acceptance" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("sufficiency")} onChange={handleStudyKeywords} label="sufficiency" name="sufficiency" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("(changes in) demand")} onChange={handleStudyKeywords} label="(changes in) demand" name="(changes in) demand" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("degree of electrifiaction")} onChange={handleStudyKeywords} label="degree of electrifiaction" name="degree of electrifiaction" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("regionalisation")} onChange={handleStudyKeywords} label="regionalisation" name="regionalisation" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total gross electricity generation")} onChange={handleStudyKeywords} label="total gross electricity generation" name="total gross electricity generation" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total net electricity generation")} onChange={handleStudyKeywords} label="total net electricity generation" name="total net electricity generation" />
+                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("peak electricity generation")} onChange={handleStudyKeywords} label="peak electricity generation" name="peak electricity generation"/>
                 </div>
               </FormGroup>
             </div>
