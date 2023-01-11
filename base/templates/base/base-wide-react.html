@@ -22,6 +22,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}">
 
     {% block after-head %}{% endblock after-head %}
+
+    {% block style %}
+        <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}" />
+    {% endblock %}
+
 </head>
 
 <body>

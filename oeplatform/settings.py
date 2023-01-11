@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     "factsheet",
     "corsheaders",
     "bootstrap4",
+    "django_static_fontawesome",
 )
 
 MIDDLEWARE = (

@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.8.2",
     "@emotion/styled": "^11.8.1",
+    "@fortawesome/fontawesome-free": "^6.2.1",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.61",
@@ -47,7 +48,8 @@
     "create": "rm -rf ../static && npm run build",
     "build": "BUILD_PATH='../static/temp' react-scripts build && npm run build:make_dir",
     "build:make_dir": "mkdir -p ../static/factsheet/css && mkdir -p ../static/factsheet/js && npm run build:relocate",
-    "build:relocate": "mv ../static/temp/static/css ../static/factsheet/ && mv ../static/temp/static/js ../static/factsheet/ && npm run build:clean",
+    "build:relocate": "mv ../static/temp/static/css ../static/factsheet/ && mv ../static/temp/static/js ../static/factsheet/ && npm run build:rename",
+    "build:rename": "mv ../static/factsheet/js/main*.js ../static/factsheet/js/main.js && mv ../static/factsheet/css/*.css ../static/factsheet/css/main.css && npm run build:clean",
     "build:clean": "rm -rf ../static/temp",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
