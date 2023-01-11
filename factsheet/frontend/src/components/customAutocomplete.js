@@ -12,18 +12,19 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
-  const { manyItems, idx } = parameters;
+  const { manyItems, idx, name } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
-  const onDelete = (name) => () => {
-    setValue((value) => value.filter((v) => v.name !== name));
-  };
 
+  const onDelete = (name) => () => {
+    const newValue = value.filter((v) => v.name !== name);
+    setValue(newValue);
+  };
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
-    handler(newValue, idx);
+    handler(newValue, name, idx);
   }
 
   return (
@@ -60,15 +61,13 @@ export default function CustomAutocomplete(parameters) {
           'overflow': 'auto',
           'height': manyItems ? '80px' :'40px',
           'marginBottom': '20px',
-          '& > :not(:last-child)': { marginRight: 1 },
-          '& > *': { marginBottom: 1 },
           border: '1px dashed #cecece',
           padding: '20px',
           overflow: 'scroll',
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.name} onDelete={onDelete(v.name)} variant="outlined" sx={{ 'marginBottom': '2px' }}/>
+          <Chip key={v.id} label={v.name} onDelete={onDelete(v.name)} variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
       </Box>
     </Box>

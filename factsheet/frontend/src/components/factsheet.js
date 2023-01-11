@@ -107,10 +107,8 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
@@ -127,39 +125,27 @@ function Factsheet(props) {
     acronym: '',
     abstract: '',
     regions: [],
-    interacting_region: [],
+    interacting_regions: [],
     scenario_years: [],
     keywords: [],
     input_datasets: [],
     output_datasets: [],
-  }
-]);
+    }
+  ]);
   const [scenariosObject, setScenariosObject] = useState({});
-  const [scenariosName, setScenariosName] = useState(id !== 'new' ? fsData.scenarios_name : [ { id: 0, value: '' } ]);
-  const [scenariosAcronym, setScenariosAcronym] = useState(id !== 'new' ? fsData.scenarios_acronym : [ { id: 0, value: '' } ]);
-  const [scenariosAbstract, setScenariosAbstract] = useState(id !== 'new' ? fsData.scenarios_abstract : [ { id: 0, value: '' } ]);
 
-  const [selectedRegion, setSelectedRegion] = useState(id !== 'new' ? fsData.scenarios_region : [ { id: 0, value: [] } ]);
-  const [selectedInteractingRegion, setSelectedInteractingRegion] = useState(id !== 'new' ? fsData.scenarios_interacting_region : [ { id: 0, value: [] } ]);
-  const [selectedScenariosYears, setSelectedScenariosYears] = useState(id !== 'new' ? fsData.scenarios_years : [ { id: 0, value: [] } ]);
-  const [selectedScenariosKeywords, setSelectedScenariosKeywords] = useState(id !== 'new' ? fsData.scenarios_keywords : [ [] ]);
+  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
+  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? fsData.expanded_energy_carriers : []);
 
-  const [scenariosInputDatasets, setScenariosInputDatasets] = useState(id !== 'new' ? fsData.scenarios_input_datasets : [ { id: 0, value: [] } ]);
-  const [scenariosOutputDatasets, setScenariosOutputDatasets] = useState(id !== 'new' ? fsData.scenarios_output_datasets : [ { id: 0, value: [] } ]);
+  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
+  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.expanded_energy_transformation_processes : []);
 
-  const [selectedEnergyCarriers, setSelectedsetEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.energy_transportation_process : []);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
   const [removeReport, setRemoveReport] = useState(false);
-  const [scenarioAbstract, setScenarioAbstract] = useState('');
-  const [scenarioAcronym, setScenarioAcronym] = useState('');
-  const [scenarioInputDatasetName, setScenarioInputDatasetName] = useState('');
-  const [scenarioOutputDatasetName, setScenarioOutputDatasetName] = useState('');
-  const [scenarioInputDatasetIRI, setScenarioInputDatasetIRI] = useState('');
-  const [scenarioOutputDatasetIRI, setScenarioOutputDatasetIRI] = useState('');
   const navigate = useNavigate();
   const handleSaveJSON = () => {
     //props.onChange(oekg);
@@ -170,13 +156,38 @@ function Factsheet(props) {
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
-
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
+      console.log(factsheetObject);
       axios.post(conf.toep + 'factsheet/add/', null,
-      {  params: factsheetObject  }
-    ).then(response => {
+      {  params:
+          {
+            id: id,
+            study_name: studyName,
+            name: factsheetName,
+            acronym: acronym,
+            abstract: abstract,
+            institution: JSON.stringify(selectedInstitution),
+            funding_source: JSON.stringify(selectedFundingSource),
+            contact_person: JSON.stringify(selectedContactPerson),
+            sector_divisions: JSON.stringify(selectedSectorDivisions),
+            sectors: JSON.stringify(selectedSectors),
+            energy_carriers: JSON.stringify(selectedEnergyCarriers),
+            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
+            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+            energy_transformation_processes: JSON.stringify(selectedEnergyTransportationProcess),
+            expanded_energy_transportation_process: JSON.stringify(expandedEnergyTransformationProcesses),
+            study_keywords: JSON.stringify(selectedStudyKewords),
+            report_title: report_title,
+            date_of_publication: date_of_publication,
+            doi: doi,
+            place_of_publication: place_of_publication,
+            link_to_study: link_to_study,
+            authors: JSON.stringify(selectedAuthors),
+            scenarios: JSON.stringify(scenarios),
+          }
+      }).then(response => {
       setOpenSavedDialog(true)
     });
 
@@ -195,7 +206,9 @@ function Factsheet(props) {
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
             energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            energy_transportation_process: JSON.stringify(selectedEnergyTransportationProcess),
+            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+            energy_transformation_processes: JSON.stringify(selectedEnergyTransportationProcess),
+            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
             study_keywords: JSON.stringify(selectedStudyKewords),
             report_title: report_title,
             date_of_publication: date_of_publication,
@@ -203,15 +216,7 @@ function Factsheet(props) {
             place_of_publication: place_of_publication,
             link_to_study: link_to_study,
             authors: JSON.stringify(selectedAuthors),
-            scenarios_name: JSON.stringify(scenariosName),
-            scenarios_acronym: JSON.stringify(scenariosAcronym),
-            scenarios_abstract: JSON.stringify(scenariosAbstract),
-            scenarios_region: JSON.stringify(selectedRegion),
-            scenarios_interacting_region: JSON.stringify(selectedInteractingRegion),
-            scenarios_years: JSON.stringify(selectedScenariosYears),
-            scenarios_keywords: JSON.stringify(selectedScenariosKeywords),
-            scenarios_input_datasets: JSON.stringify(scenariosInputDatasets),
-            scenarios_output_datasets: JSON.stringify(scenariosOutputDatasets),
+            scenarios: JSON.stringify(scenarios),
           }
       }).then(response => {
         setOpenUpdatedDialog(true)
@@ -238,26 +243,6 @@ function Factsheet(props) {
 
   const handleCloseRemovedDialog = () => {
     setOpenRemovedDialog(false);
-  };
-
-  const handleScenarioInpuDatasetName = e => {
-    setScenarioInputDatasetName(e.target.value);
-    factsheetObjectHandler('scenario_input_dataset_name', e.target.value);
-  };
-
-  const handleScenarioInputDatasetIRI = e => {
-    setScenarioInputDatasetIRI(e.target.value);
-    factsheetObjectHandler('scenario_input_dataset_IRI', e.target.value);
-  };
-
-  const handleScenarioOutputDatasetName = e => {
-    setScenarioOutputDatasetName(e.target.value);
-    factsheetObjectHandler('scenario_output_dataset_name', e.target.value);
-  };
-
-  const handleScenariooutputDatasetIRI = e => {
-    setScenarioOutputDatasetIRI(e.target.value);
-    factsheetObjectHandler('scenario_output_dataset_IRI', e.target.value);
   };
 
   const handleAcronym = e => {
@@ -331,7 +316,7 @@ function Factsheet(props) {
   };
 
 
-  const handleScenariosChange = ({ target }) => {
+  const handleScenariosInputChange = ({ target }) => {
     const { name, value } = target;
     const element = name.split('_')[0];
     const id = name.split('_')[1];
@@ -343,56 +328,33 @@ function Factsheet(props) {
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-  const handleScenariosAcronym = ({ target }) => {
-    const { name: key, value } = target;
-    let newScenariosAcronym = [...scenariosAcronym];
-    newScenariosAcronym[key.split('_')[1]] = { id: key.split('_')[1], value: value };
-    factsheetObjectHandler('scenarios_acronym', JSON.stringify(scenariosAcronym));
-    setScenariosAcronym(newScenariosAcronym);
+  const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
+    const newScenarios = [...scenarios];
+    const obj = newScenarios.find(el => el.id === idx);
+    if (obj)
+      obj[name] = selectedList
+    setScenarios(newScenarios);
+    console.log(newScenarios);
+
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-
-  const handleScenariosAbstract = ({ target }) => {
-    const { name: key, value } = target;
-    let newScenariosAbstract = [...scenariosAbstract];
-    newScenariosAbstract[key.split('_')[1]] = { id: key.split('_')[1], value:value };
-    factsheetObjectHandler('scenarios_abstract', JSON.stringify(scenariosAbstract));
-    setScenariosAbstract(newScenariosAbstract);
+  const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
+    const newScenarios = [...scenarios];
+    const obj = newScenarios.find(el => el.id === id);
+    if (obj)
+      obj.input_datasets = scenariosInputDatasetsList
+    setScenarios(newScenarios);
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-  const scenarioRegionHandler = (regionList, idx) => {
-    const newSelectedRegion = [...selectedRegion];
-    newSelectedRegion[idx] = { id: idx, value: regionList };
-    setSelectedRegion(newSelectedRegion);
-    factsheetObjectHandler('scenarios_region', JSON.stringify(newSelectedRegion));
-  };
-
-  const scenarioInteractingRegionHandler = (interactionRegionList, idx) => {
-    const newSelectedInteractionRegion = [...selectedInteractingRegion];
-    newSelectedInteractionRegion[idx] = { id: idx, value: interactionRegionList };
-    setSelectedInteractingRegion(newSelectedInteractionRegion);
-    factsheetObjectHandler('scenarios_interacting_region', JSON.stringify(newSelectedInteractionRegion));
-  };
-
-  const scenariosYearsHandler = (scenarioYearsList, idx) => {
-    const newSelectedScenariosYears = [...selectedScenariosYears];
-    newSelectedScenariosYears[idx] = { id: idx, value: scenarioYearsList };
-    setSelectedScenariosYears(newSelectedScenariosYears);
-    factsheetObjectHandler('scenarios_years', JSON.stringify(newSelectedScenariosYears));
-  };
-
-  const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, idx) => {
-    const newScenariosInputDatasets = [...scenariosInputDatasets];
-    newScenariosInputDatasets[idx] = { id: idx, value: scenariosInputDatasetsList };
-    setScenariosInputDatasets(newScenariosInputDatasets);
-    factsheetObjectHandler('scenarios_input_datasets', JSON.stringify(newScenariosInputDatasets));
-  };
-
-  const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, idx) => {
-    const newScenariosOutputDatasets = [...scenariosOutputDatasets];
-    newScenariosOutputDatasets[idx] = { id: idx, value: scenariosOutputDatasetsList };
-    setScenariosOutputDatasets(newScenariosOutputDatasets);
-    factsheetObjectHandler('scenarios_output_datasets', JSON.stringify(newScenariosOutputDatasets));
+  const scenariosOutputDatasetsHandler = (scenariosOutputDatasetsList, id) => {
+    const newScenarios = [...scenarios];
+    const obj = newScenarios.find(el => el.id === id);
+    if (obj)
+      obj.output_datasets = scenariosOutputDatasetsList
+    setScenarios(newScenarios);
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
   const handleAddScenario = () => {
@@ -403,27 +365,23 @@ function Factsheet(props) {
         acronym: '',
         abstract: '',
         regions: [],
-        interacting_region: [],
+        interacting_regions: [],
         scenario_years: [],
         keywords: [],
         input_datasets: [],
         output_datasets: [],
       });
     setScenarios(newScenarios);
-    console.log(scenarios);
   };
 
   const removeScenario = (id) => {
-    console.log(id);
     let newScenarios = [...scenarios].filter((obj => obj.id !== id));;
     setScenarios(newScenarios);
-    console.log(scenarios);
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
     setRemoveReport(true);
   };
 
   const handleSwap = (mode) => {
-    console.log(mode);
     setMode(mode);
     if (mode === "wizard") {
 
@@ -626,8 +584,23 @@ function Factsheet(props) {
     }
 
     const energyCarriersHandler = (energyCarriersList) => {
-      setSelectedsetEnergyCarriers(energyCarriersList);
+      setSelectedEnergyCarriers(energyCarriersList);
       factsheetObjectHandler('energy_carriers', JSON.stringify(selectedEnergyCarriers));
+    };
+
+    const expandedEnergyCarriersHandler = (expandedEnergyCarriersList) => {
+      setExpandedEnergyCarriers(expandedEnergyCarriersList);
+      factsheetObjectHandler('expanded_energy_carriers', JSON.stringify(expandedEnergyCarriers));
+    };
+
+    const energyTransformationProcessesHandler = (energyProcessesList) => {
+      setSelectedEnergyTransportationProcess(energyProcessesList);
+      factsheetObjectHandler('energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
+    };
+
+    const expandedEnergyTransformationProcessesHandler = (expandedEnergyProcessesList) => {
+      setExpandedEnergyTransformationProcesses(expandedEnergyProcessesList);
+      factsheetObjectHandler('expanded_energy_transformation_processes', JSON.stringify(expandedEnergyTransformationProcesses));
     };
 
     const energyTransportationProcessHandler = (energyTransportationProcessList) => {
@@ -656,8 +629,8 @@ function Factsheet(props) {
       <Tooltip {...props} classes={{ popper: className }} />
     ))(({ theme }) => ({
       [`& .${tooltipClasses.tooltip}`]: {
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-        color: 'black',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        color: 'white',
         maxWidth: 520,
         fontSize: theme.typography.pxToRem(20),
         border: '1px solid black',
@@ -677,23 +650,200 @@ function Factsheet(props) {
       factsheetObjectHandler('study_keywords', JSON.stringify(selectedStudyKewords));
     }
 
-    const scenariosKeywordsHandler = (event) => {
-      const newSelectedScenariosKeywords = [...selectedScenariosKeywords];
-      const idx = event.target.name.split("_")[1];
-      if (newSelectedScenariosKeywords[idx] !== undefined) {
+    const scenarioKeywordsHandler = (event) => {
+      const id = event.target.name.split("_")[1];
+      const name = event.target.name.split("_")[0];
+      const newScenarios = [...scenarios];
+      const obj = newScenarios.find(el => el.id === id);
+      if (obj)
         if (event.target.checked) {
-          if (!newSelectedScenariosKeywords[idx].includes(event.target.name.split("_")[0])) {
-            newSelectedScenariosKeywords[idx] = [...newSelectedScenariosKeywords[idx], event.target.name.split("_")[0]];
+          if (!obj.keywords.includes(name)) {
+            obj.keywords = [...obj.keywords, name];
           }
         } else {
-          newSelectedScenariosKeywords[idx] = newSelectedScenariosKeywords[idx].filter(i => i !== event.target.name.split("_")[0]);
+          obj.keywords = obj.keywords.filter(i => i !== name);
         }
-      }
-
-      setSelectedScenariosKeywords(newSelectedScenariosKeywords);
-      factsheetObjectHandler('scenarios_keywords', JSON.stringify(newSelectedScenariosKeywords));
+      setScenarios(newScenarios);
+      factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
     };
 
+    const energyCarrierData = [
+      {
+        value: 'air',
+        label: 'Air',
+        children: [
+          {
+            value: 'compressed air',
+            label: 'Compressed air',
+           },
+          {
+            value: 'liquid air',
+            label: 'Liquid air',
+           }
+        ]
+      },
+      { value: 'final energy carrier',
+        label: 'Final energy carrier'
+      },
+      { value: 'fissile material entity',
+        label: 'Fissile material entity',
+        children: [
+          {
+            value: 'nuclear fuel',
+            label: 'Nuclear fuel',
+            children: [
+              { value: 'plutonium',
+                label: 'Plutonium'
+              },
+              { value: 'thorium',
+                label: 'Thorium'
+              },
+              { value: 'uranium',
+                label: 'Uranium'
+              }
+            ]
+           },
+        ]
+      },
+      { value: 'fuel',
+        label: 'Fuel',
+        children: [
+          { value: 'combustion fuel',
+            label: 'Combustion fuel',
+            children: [
+              {
+                value: 'diesel fuel',
+                label: 'Diesel fuel',
+                children: [
+                  { value: 'biodiesel',
+                    label: 'Biodiesel'
+                  },
+                  { value: 'fossil diesel fuel',
+                    label: 'Fossil diesel fuel'
+                  }
+                ]
+               },
+            ]
+          },
+          { value: 'fossil combustion fuel',
+            label: 'Fossil combustion fuel',
+            children: [
+                { value: 'fossil waste fuel',
+                  label: 'Fossil waste fuel',
+                  children: [
+                      { value: 'fossil industrial waste fuel',
+                        label: 'Fossil industrial waste fuel'
+                      },
+                      { value: 'fossil municipal waste fuel',
+                        label: 'Fossil municipal waste fuel'
+                      }
+                  ]
+                },
+                { value: 'gaseous fossil fuel',
+                  label: 'Gaseous fossil fuel',
+                  children: [
+                      { value: 'fossil hydrogen',
+                        label: 'Fossil hydrogen'
+                      },
+                      { value: 'manufactured coal based gas',
+                        label: 'Manufactured coal based gas',
+                        children: [
+                            { value: 'blast furnace gas',
+                              label: 'Blast furnace gas'
+                            },
+                            { value: 'coke oven gas',
+                              label: 'Coke oven gas'
+                            },
+                            { value: 'gasworks gas',
+                              label: 'Gasworks gas'
+                            }
+                        ]
+                      },
+                      { value: 'natural gas',
+                        label: 'Natural gas',
+                        children: [
+                            { value: 'associated gas',
+                              label: 'Associated gas'
+                            },
+                            { value: 'colliery gas',
+                              label: 'colliery gas'
+                            },
+                            { value: 'liquified natural gas',
+                              label: 'Liquified natural gas'
+                            },
+                            { value: 'non associated gas',
+                              label: 'Non associated gas'
+                            }
+                        ]
+                      }
+                  ]
+                }
+            ]
+          },
+        ]
+      },
+    ];
+
+    const energyTransformationProcesses = [
+      {
+        value: 'electricity generation process',
+        label: 'Electricity generation process',
+        children: [
+          {
+            value: 'combined heat and power generation',
+            label: 'Combined heat and power generation'
+           },
+          {
+            value: 'fuel-powered electricity generation',
+            label: 'fuel-powered electricity generation'
+          },
+          {
+            value: 'hydroelectric energy transformation',
+            label: 'Hydroelectric energy transformation'
+           }
+        ]
+      },
+      { value: 'transformative measure',
+        label: 'Transformative measure'
+      },
+      { value: 'transport',
+        label: 'Transport',
+        children: [
+          {
+            value: 'freight transport',
+            label: 'Freight transport',
+           },
+          {
+            value: 'international transport',
+            label: 'International transport',
+           },
+          {
+            value: 'passenger transport',
+            label: 'Passenger transport',
+           }
+        ]
+      },
+      { value: 'validation',
+        label: 'Validation',
+        children: [
+          { value: 'checking against empirical data',
+            label: 'Checking against empirical data',
+          },
+          { value: 'checking against measurements',
+            label: 'Checking against measurements',
+          },
+          { value: 'cross-checking against other models',
+            label: 'Cross-checking against other models',
+          }
+        ]
+      },
+      { value: 'water flow',
+        label: 'Water flow',
+      },
+      { value: 'wind',
+        label: 'Wind',
+      },
+    ];
 
     const renderStudy = () => {
       return <Grid container
@@ -864,10 +1014,12 @@ function Factsheet(props) {
               <CustomAutocomplete manyItems optionsSet={get_sectors()} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete manyItems optionsSet={energy_carriers} kind='What energy carriers are considered?' handler={energyCarriersHandler} selectedElements={selectedEnergyCarriers}/>
+              <CustomTreeViewWithCheckBox checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete manyItems optionsSet={energy_transportation_process} kind='Which energy transformation processes are considered?' handler={energyTransportationProcessHandler} selectedElements={selectedEnergyTransportationProcess}/>
+
+              <CustomTreeViewWithCheckBox checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+              toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
             </Grid>
             <Grid item xs={12} style={{ marginBottom: '10px' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
@@ -900,7 +1052,7 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%' }}
         >
           <Grid item xs={12} >
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
@@ -982,12 +1134,15 @@ function Factsheet(props) {
                     >
                       <Scenario
                         data={item}
-                        handleScenariosChange={handleScenariosChange}
-                        scenariosYearsHandler={scenariosYearsHandler}
-                        scenariosKeywordsHandler={scenariosKeywordsHandler}
+                        handleScenariosInputChange={handleScenariosInputChange}
+                        handleScenariosAutoCompleteChange={handleScenariosAutoCompleteChange}
+                        scenarioKeywordsHandler={scenarioKeywordsHandler}
                         scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                         removeScenario={removeScenario}
+                        scenarioRegion={scenario_region}
+                        scenarioInteractingRegion={scenario_interacting_region}
+                        scenarioYears={scenario_years}
                       />
                     </TabPanel>
                   )}
@@ -995,13 +1150,14 @@ function Factsheet(props) {
               </div >
       }
 
+
     const items = {
       titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
       contents: [
         renderStudy(),
         renderScenario(),
-        <CustomAutocomplete optionsSet={sectors} kind='Models' handler={sectorsHandler} selectedElements={selectedSectors}/>,
-        <CustomAutocomplete optionsSet={sectors} kind='Frameworks' handler={sectorsHandler} selectedElements={selectedSectors}/>,
+        <CustomAutocomplete optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Models' handler={() => console.log('TDB')} selectedElements={[]}/>,
+        <CustomAutocomplete optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Frameworks' handler={() => console.log('TDB')} selectedElements={[]}/>,
         ]
     }
     const convert2RDF = async () => {
@@ -1135,7 +1291,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} state={{ testvalue: "hello" }} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} state={{ testvalue: "hello" }}  style={{ textDecoration: 'none', color: 'white', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>
@@ -1162,7 +1318,7 @@ function Factsheet(props) {
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} style={{ textDecoration: 'none', color: 'white', marginRight: '10px' }}>
                 <Button variant="outlined" >
                   Back to main page
                 </Button>
