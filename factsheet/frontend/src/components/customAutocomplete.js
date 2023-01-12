@@ -64,10 +64,11 @@ export default function CustomAutocomplete(parameters) {
           border: '1px dashed #cecece',
           padding: '20px',
           overflow: 'scroll',
+          borderRadius: '5px'
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.name} onDelete={onDelete(v.name)} variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
+          <Chip key={v.id} label={v.name}  variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
       </Box>
     </Box>

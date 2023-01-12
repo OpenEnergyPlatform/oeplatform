@@ -76,21 +76,8 @@ function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
   const jsonld = require('jsonld');
-  const [factsheetJSON, setFactsheetJSON] = useState({
-    "@context": {
-      "@base": "https://openenergy-platform.org/oekg/",
-      "oeo": "https://openenergy-platform.org/ontology/oeo/",
-      "foaf": "http://xmlns.com/foaf/0.1/",
-      "dc": "http://purl.org/dc/elements/1.1/"
-    },
-    "@id": "KS-2050",
-    "@type": "oeo:OEO_00010250",
-    "foaf:name": "Klimaschutzszenario 2050",
-    "dc:description": "The project develops a vision of the future in the form of three scenarios that meet the ambitious climate protection goals of the Federal Republic of Germany when considering all sectors and uses the national potential of renewable energies",
-    "oeo:OEO_00000506": [],
-    "oeo:OEO_00000505": [],
-    "oeo:OEO_00000509": []
-  });
+
+
 
   const [factsheetRDF, setFactsheetRDF] = useState({});
   const [factsheet, setFactsheet] = useState({});
@@ -107,8 +94,45 @@ function Factsheet(props) {
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
+
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
+  const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? fsData.expanded_sectors : []);
+
+
+  const [sectors, setSectors] = useState([
+    { id: 1, value : 'CRF sector (IPCC 2006): CO2 captured', label: 'CRF sector (IPCC 2006): CO2 captured', sector_divisions_id: 1 },
+    { id: 2, value : 'CRF sector (IPCC 2006): CO2 emissions from biomass', label: 'CRF sector (IPCC 2006): CO2 emissions from biomass', sector_divisions_id: 1 },
+    { id: 3, value : 'CRF sector (IPCC 2006): CO2 transport and storage', label: 'CRF sector (IPCC 2006): CO2 transport and storage', sector_divisions_id: 1 },
+    { id: 4, value : 'CRF sector (IPCC 2006): commercial and institutional', label:'CRF sector (IPCC 2006): commercial and institutional' , sector_divisions_id: 1 },
+    { id: 5, value : 'CRF sector (IPCC 2006): cropland', label: 'CRF sector (IPCC 2006): cropland' , sector_divisions_id: 1 },
+    { id: 6, value : 'CRF sector (IPCC 2006): domestic aviation', label: 'CRF sector (IPCC 2006): domestic aviation' , sector_divisions_id: 1 },
+    { id: 7, value : 'CRF sector (IPCC 2006): domestic navigation', label: 'CRF sector (IPCC 2006): domestic navigation', sector_divisions_id: 1 },
+    { id: 8, value : 'CRF sector (IPCC 2006): electronics industry', label: 'CRF sector (IPCC 2006): electronics industry' , sector_divisions_id: 1 },
+    { id: 9, value : 'CRF sector (IPCC 2006): energy', label: 'CRF sector (IPCC 2006): energy', sector_divisions_id: 1 },
+    { id: 10, value : 'CRF sector (IPCC 2006): energy industry', label: 'CRF sector (IPCC 2006): energy industry', sector_divisions_id: 1 },
+    { id: 11, value : 'agriculture, forestry and land use sector', label: 'Agriculture, forestry and land use sector', sector_divisions_id: 3 },
+    { id: 12, value : 'energy demand sector', label: 'Energy demand sector', sector_divisions_id: 3,
+      children: [
+          { id: 13, value : 'building sector', label: 'Building sector' },
+          { id: 14, value : 'commercial sector', label: 'Commercial sector' },
+          { id: 15, value : 'heating and cooling sector', label: 'Heating and cooling sector' },
+          { id: 16, value : 'household sector', label: 'Household sector' },
+          { id: 17, value : 'transport sector', label: 'Transport sector' },
+      ]
+    },
+    { id: 18, value : 'energy transformation sector', label: 'Energy transformation sector', sector_divisions_id: 3,
+      children: [
+          { id: 19, value : 'electricity sector', label: 'Electricity sector' },
+      ]
+    },
+    { id: 20, value : 'industry sector', label: 'Industry sector', sector_divisions_id: 3 },
+    { id: 21, value : 'waste and wastewater sector', label: 'Waste and wastewater sector', sector_divisions_id: 3 }
+  ]);
+
+  const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
+
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
+
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
@@ -153,6 +177,22 @@ function Factsheet(props) {
   };
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
+
+
+  const [factsheetJSON, setFactsheetJSON] = useState({
+    "@context": {
+      "@base": "https://openenergy-platform.org/oekg/",
+      "oeo": "https://openenergy-platform.org/ontology/oeo/",
+      "foaf": "http://xmlns.com/foaf/0.1/",
+      "dc": "http://purl.org/dc/elements/1.1/"
+    },
+    "@type": "oeo:OEO_00010250",
+    "oeo:OEO_00000506": [],
+    "oeo:OEO_00000505": [],
+    "oeo:OEO_00000509": []
+  });
+
+
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -173,6 +213,7 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
+            expanded_sectors: JSON.stringify(expandedSectors),
             energy_carriers: JSON.stringify(selectedEnergyCarriers),
             expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
             expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
@@ -205,6 +246,7 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
+            expanded_sectors: JSON.stringify(expandedSectors),
             energy_carriers: JSON.stringify(selectedEnergyCarriers),
             expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
             energy_transformation_processes: JSON.stringify(selectedEnergyTransportationProcess),
@@ -422,23 +464,8 @@ function Factsheet(props) {
 
     const sector_divisions = [
       { id: 1, name: 'The Common Reporting Format (CRF)' },
-      { id: 2, name: 'European format' },
       { id: 3, name: 'Other' },
     ];
-
-    const sectors = [
-      { id: 1, name: 'Agriculture forestry and land use sector', sector_divisions_id: 2 },
-      { id: 2, name: 'Energy demand sector', sector_divisions_id: 1 },
-      { id: 3, name: 'Energy transformation sector', sector_divisions_id: 2 },
-      { id: 4, name: 'Industry sector', sector_divisions_id: 1 },
-      { id: 5, name: 'Waste and wastewater sector', sector_divisions_id: 2 }
-    ];
-
-    const get_sectors = () => {
-      const selectedSectorDivisionsIDs = selectedSectorDivisions.map(item => item.id);
-      const sectorsBasedOnDivisions = sectors.filter(item  => selectedSectorDivisionsIDs.includes(item.sector_divisions_id) );
-      return sectorsBasedOnDivisions;
-    }
 
     const authors = [
       { id: 'Julia Repenning',  name: 'Julia Repenning' },
@@ -482,15 +509,47 @@ function Factsheet(props) {
     ];
 
     const scenario_years = [
-      { id: '2010', name: "2010"},
-      { id: '2015', name: "2015"},
-      { id: '2020', name: "2020"},
-      { id: '2025', name: "2025"},
-      { id: '2030', name: "2030"},
-      { id: '2035', name: "2035"},
-      { id: '2040', name: "2040"},
-      { id: '2045', name: "2045"},
-      { id: '2050', name: "2050"},
+      { id: '2010', name: '2010'},
+      { id: '2011', name: '2011'},
+      { id: '2012', name: '2012'},
+      { id: '2013', name: '2013'},
+      { id: '2014', name: '2014'},
+      { id: '2015', name: '2015'},
+      { id: '2016', name: '2016'},
+      { id: '2017', name: '2017'},
+      { id: '2018', name: '2018'},
+      { id: '2019', name: '2019'},
+      { id: '2020', name: '2020'},
+      { id: '2021', name: '2021'},
+      { id: '2022', name: '2022'},
+      { id: '2023', name: '2023'},
+      { id: '2024', name: '2024'},
+      { id: '2025', name: '2025'},
+      { id: '2026', name: '2026'},
+      { id: '2027', name: '2027'},
+      { id: '2028', name: '2028'},
+      { id: '2029', name: '2029'},
+      { id: '2030', name: '2030'},
+      { id: '2031', name: '2031'},
+      { id: '2032', name: '2032'},
+      { id: '2033', name: '2033'},
+      { id: '2034', name: '2034'},
+      { id: '2035', name: '2035'},
+      { id: '2036', name: '2036'},
+      { id: '2037', name: '2037'},
+      { id: '2038', name: '2038'},
+      { id: '2039', name: '2039'},
+      { id: '2040', name: '2040'},
+      { id: '2041', name: '2041'},
+      { id: '2042', name: '2042'},
+      { id: '2043', name: '2043'},
+      { id: '2044', name: '2044'},
+      { id: '2045', name: '2045'},
+      { id: '2046', name: '2046'},
+      { id: '2047', name: '2047'},
+      { id: '2048', name: '2048'},
+      { id: '2049', name: '2049'},
+      { id: '2050', name: '2050'},
     ];
 
     const scenario_keywords = [
@@ -505,6 +564,13 @@ function Factsheet(props) {
     const contact_person = [
       { id: 'Lukas Emele', name: 'Lukas Emele' },
       { id: 'Julia Repenning', name: 'Julia Repenning' },
+      { id: 'Tobias Fleiter',  name: 'Tobias Fleiter' },
+      { id: 'Johannes Hartwig',  name: 'Johannes Hartwig' },
+      { id: 'Judit Kockat',  name: 'Judit Kockat' },
+      { id: 'Ben Pfluger',  name: 'Ben Pfluger' },
+      { id: 'Wolfgang Schade',  name: 'Wolfgang Schade' },
+      { id: 'Barbara Schlomann',  name: 'Barbara Schlomann' },
+      { id: 'Frank Sensfuß',  name: 'Frank Sensfuß' }
     ];
 
     const scenario_region = [
@@ -549,34 +615,27 @@ function Factsheet(props) {
       {id: 8, iri: 'http://openenergy-platform.org/ontology/oeo/OEO_00050020 ', name: 'steam-electric process'},
     ];
 
-    const sectorsHandler = (sectorsList) => {
-      setSelectedSectors(sectorsList);
-      factsheetObjectHandler('sectors', JSON.stringify(sectorsList));
-    };
-
     const sectorDivisionsHandler = (sectorDivisionsList) => {
       setSelectedSectorDivisions(sectorDivisionsList);
-      factsheetObjectHandler('sector_divisions', JSON.stringify(sectorDivisionsList));
+      const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
+      const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
+      setFilteredSectors(sectorsBasedOnDivisions);
     };
 
     const authorsHandler = (authorsList) => {
       setSelectedAuthors(authorsList);
-      factsheetObjectHandler('authors', JSON.stringify(authorsList));
     };
 
     const institutionHandler = (institutionList) => {
       setSelectedInstitution(institutionList);
-      factsheetObjectHandler('institution', JSON.stringify(institutionList));
     };
 
     const fundingSourceHandler = (fundingSourceList) => {
       setSelectedFundingSource(fundingSourceList);
-      factsheetObjectHandler('funding_source', JSON.stringify(fundingSourceList));
     };
 
     const contactPersonHandler = (contactPersonList) => {
       setselectedContactPerson(contactPersonList);
-      factsheetObjectHandler('contact_person', JSON.stringify(contactPersonList));
     };
 
     const handleClickCloseRemoveReport = () => {
@@ -585,37 +644,38 @@ function Factsheet(props) {
 
     const energyCarriersHandler = (energyCarriersList) => {
       setSelectedEnergyCarriers(energyCarriersList);
-      factsheetObjectHandler('energy_carriers', JSON.stringify(selectedEnergyCarriers));
     };
 
     const expandedEnergyCarriersHandler = (expandedEnergyCarriersList) => {
       setExpandedEnergyCarriers(expandedEnergyCarriersList);
-      factsheetObjectHandler('expanded_energy_carriers', JSON.stringify(expandedEnergyCarriers));
+    };
+
+    const selectedSectorsHandler = (sectorsList) => {
+      setSelectedSectors(sectorsList);
+    };
+
+    const expandedSectorsHandler = (expandedSectorsList) => {
+      setExpandedSectors(expandedSectorsList);
     };
 
     const energyTransformationProcessesHandler = (energyProcessesList) => {
       setSelectedEnergyTransportationProcess(energyProcessesList);
-      factsheetObjectHandler('energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
     };
 
     const expandedEnergyTransformationProcessesHandler = (expandedEnergyProcessesList) => {
       setExpandedEnergyTransformationProcesses(expandedEnergyProcessesList);
-      factsheetObjectHandler('expanded_energy_transformation_processes', JSON.stringify(expandedEnergyTransformationProcesses));
     };
 
     const energyTransportationProcessHandler = (energyTransportationProcessList) => {
       setSelectedEnergyTransportationProcess(energyTransportationProcessList);
-      factsheetObjectHandler('energy_transportation_process', JSON.stringify(selectedEnergyTransportationProcess));
     };
 
     const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
       setSelectedScenarioInputDatasetRegion(inputDatasetRegionList);
-      factsheetObjectHandler('scenario_input_dataset_region', JSON.stringify(selectedScenarioInputDatasetRegion));
     };
 
     const scenarioOutputDatasetRegionHandler = (outputDatasetRegionList) => {
       setSelectedScenarioOutputDatasetRegion(outputDatasetRegionList);
-      factsheetObjectHandler('scenario_output_dataset_region', JSON.stringify(selectedScenarioOutputDatasetRegion));
     };
 
     function a11yProps(index: number) {
@@ -867,7 +927,7 @@ function Factsheet(props) {
                     <Typography color="inherit" variant="caption">
                       {'A study is a project with the goal to investigate something.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -893,7 +953,7 @@ function Factsheet(props) {
                     <Typography color="inherit" variant="caption">
                       {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -919,7 +979,7 @@ function Factsheet(props) {
                     <Typography color="inherit" variant="caption">
                       {'An institution is an organisation that serves a social purpose.'}
                       <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)</a>
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
                     </Typography>
                   </React.Fragment>
                 }
@@ -945,7 +1005,7 @@ function Factsheet(props) {
                   <Typography color="inherit" variant="caption">
                     {'A funder is a sponsor that supports by giving money.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -983,7 +1043,7 @@ function Factsheet(props) {
                   <Typography color="inherit" variant="caption">
                     {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
                     <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)</a>
+                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -1000,25 +1060,43 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%' }}
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px' }}
         >
-            <Grid item xs={12} >
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
-                Study content description:
-              </Typography>
+              <Grid item xs={12} >
+                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+                  Study content description:
+                </Typography>
+              </Grid>
+              <Grid item xs={6} >
+                <div style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      flexWrap: 'wrap',
+                  }}>
+                  <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                  <div style={{ marginTop: '30px' }}>
+                    <HtmlTooltip
+                      style={{ marginLeft: '10px' }}
+                      placement="top"
+                      title={
+                        <React.Fragment>
+                          <Typography color="inherit" variant="caption">
+                            {'A sector division is a specific way to subdivide a system.'}
+                            <br />
+                            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
+                          </Typography>
+                        </React.Fragment>
+                      }
+                    >
+                      <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                    </HtmlTooltip>
+                    </div>
+                  </div>
+                <CustomTreeViewWithCheckBox size="360px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
-            </Grid>
-            <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomAutocomplete manyItems optionsSet={get_sectors()} kind='Which sectors are considered in the study?' handler={sectorsHandler} selectedElements={selectedSectors}/>
-            </Grid>
-            <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomTreeViewWithCheckBox checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-            </Grid>
-            <Grid item xs={6} style={{ marginBottom: '10px' }}>
-
-              <CustomTreeViewWithCheckBox checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+              <CustomTreeViewWithCheckBox size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+              <CustomTreeViewWithCheckBox size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
               toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
             </Grid>
             <Grid item xs={12} style={{ marginBottom: '10px' }}>
@@ -1052,7 +1130,7 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%' }}
+          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px' }}
         >
           <Grid item xs={12} >
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
@@ -1161,17 +1239,21 @@ function Factsheet(props) {
         ]
     }
     const convert2RDF = async () => {
+      factsheetJSON["foaf:name"] = acronym;
+      factsheetJSON["@id"] = acronym;
+      factsheetJSON["dc:description"] = abstract;
+
       factsheetJSON["oeo:OEO_00000505"] = [];
       selectedSectors.map(sector => {
         factsheetJSON["oeo:OEO_00000505"].push({
-          "@id": sector.id.replaceAll(" ", "_"),
+          "@id": sector.replaceAll(" ", "_"),
         });
       });
 
       factsheetJSON["oeo:OEO_00000509"] = [];
       selectedAuthors.map(author => {
         factsheetJSON["oeo:OEO_00000509"].push({
-          "@id": author.id.replaceAll(" ", "_"),
+          "@id": author.name.replaceAll(" ", "_"),
         });
       });
 
@@ -1191,10 +1273,20 @@ function Factsheet(props) {
         justifyContent="space-between"
         alignItems="center"
       >
-          <Grid item xs={8} >
+          <Grid item xs={4} >
           <div>
                <CustomSwap handleSwap={handleSwap} />
+               <Tooltip title="Save factsheet">
+               <Button disableElevation={true} style={{ 'textTransform': 'none', 'zIndex': '1000', height: '40px' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+               </Tooltip>
           </div >
+          </Grid>
+          <Grid item xs={4} >
+          <div  style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
+            <Typography variant="h6" gutterBottom>
+              {acronym}
+            </Typography>
+          </div>
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
@@ -1202,10 +1294,7 @@ function Factsheet(props) {
                 <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleRemoveFactsheet}> <DeleteOutlineIcon /> </Button>
               </Tooltip>
               <Tooltip title="Share this factsheet">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
-              </Tooltip>
-              <Tooltip title="Save factsheet">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRLeft': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
               </Tooltip>
               <Tooltip title="Submit this factsheet to the Open Energy Knowledge Graph">
                 <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="success" onClick={handleClickOpenTurtle} > <ForwardToInboxIcon /> </Button>

@@ -22,6 +22,7 @@ def create_factsheet(request, *args, **kwargs):
     contact_person = request.GET.get('contact_person')
     sector_divisions = request.GET.get('sector_divisions')
     sectors = request.GET.get('sectors')
+    expanded_sectors = request.GET.get('expanded_sectors')
     energy_carriers = request.GET.get('energy_carriers')
     expanded_energy_carriers = request.GET.get('expanded_energy_carriers')
     energy_transformation_processes = request.GET.get('energy_transformation_processes')
@@ -41,13 +42,14 @@ def create_factsheet(request, *args, **kwargs):
         'funding_source': json.loads(funding_source) if funding_source  is not None else [],
         'authors': json.loads(authors) if authors is not None else [],
         'contact_person': json.loads(contact_person) if contact_person is not None else [],
+        'sectors': json.loads(sectors) if sectors is not None else [],
+        'expanded_sectors': json.loads(expanded_sectors) if expanded_sectors is not None else [],
         'sector_divisions': json.loads(sector_divisions) if sector_divisions is not None else [],
         'energy_transformation_processes': json.loads(energy_transformation_processes) if energy_transformation_processes is not None else [],
         'expanded_energy_transformation_processes': json.loads(expanded_energy_transformation_processes) if expanded_energy_transformation_processes is not None else [],
         'energy_carriers': json.loads(energy_carriers) if energy_carriers is not None else [],
         'expanded_energy_carriers': json.loads(expanded_energy_carriers) if expanded_energy_carriers is not None else [],
         'study_keywords': json.loads(study_keywords) if study_keywords is not None else [],
-        'sectors': json.loads(sectors) if sectors is not None else [],
         'doi': doi,
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
@@ -74,6 +76,7 @@ def update_factsheet(request, *args, **kwargs):
     contact_person = request.GET.get('contact_person')
     sector_divisions = request.GET.get('sector_divisions')
     sectors = request.GET.get('sectors')
+    expanded_sectors = request.GET.get('expanded_sectors')
     energy_carriers = request.GET.get('energy_carriers')
     expanded_energy_carriers = request.GET.get('expanded_energy_carriers')
     energy_transformation_processes = request.GET.get('energy_transformation_processes')
@@ -98,6 +101,7 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['contact_person'] = json.loads(contact_person) if contact_person is not None else []
     factsheet.factsheetData['sector_divisions'] = json.loads(sector_divisions) if sector_divisions is not None else []
     factsheet.factsheetData['sectors'] = json.loads(sectors) if sectors is not None else []
+    factsheet.factsheetData['expanded_sectors'] = json.loads(expanded_sectors) if expanded_sectors is not None else []
     factsheet.factsheetData['energy_carriers'] = json.loads(energy_carriers) if energy_carriers is not None else []
     factsheet.factsheetData['expanded_energy_carriers'] = json.loads(expanded_energy_carriers) if expanded_energy_carriers is not None else []
     factsheet.factsheetData['energy_transformation_processes'] = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
