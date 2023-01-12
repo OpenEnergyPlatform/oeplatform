@@ -159,22 +159,26 @@
 
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
-      <span>
-        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
-          <i class="fas fa-arrow-right"></i>
-          Metadata specification
-        </a>
-      </span>
-      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
       <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
         <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
+          <i class="fas fa-pen"></i>
           Edit
+        </a>
+      </span>
+      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">
+        <i class="fas fa-arrow-down"></i>
+        JSON
+      </button>
+      <span>
+        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
+          <i class="fas fa-circle-check"></i>
+          Specification
         </a>
       </span>
     </div>
     <div class="metadata__container">
       {{ meta_widget }}
-    </div>
+    </div>  
   </div>
 </div>
 {% endblock %}
