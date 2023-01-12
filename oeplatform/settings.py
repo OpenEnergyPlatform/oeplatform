@@ -59,8 +59,7 @@ INSTALLED_APPS = (
     "graphene_django",
     "factsheet",
     "corsheaders",
-    "bootstrap4",
-    "django_static_fontawesome",
+    "bootstrap4"
 )
 
 MIDDLEWARE = (
