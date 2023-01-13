@@ -1,0 +1,45 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.tabs--full {
+    width: 100%;
+    border-radius: $border-radius-sm;
+    @extend .mb-2;
+
+    .nav.nav-tabs {
+        @extend .border-0;
+        @include flex-row;
+        border-radius: $border-radius-sm;
+    }
+
+    .nav-item {
+        @extend .bg-light;
+        flex: 1 1 0px;
+
+        &:first-of-type,
+        &:first-of-type .nav-link {
+            border-top-left-radius: $border-radius-sm;
+            border-bottom-left-radius: $border-radius-sm;
+        }
+    
+        &:last-of-type,
+        &:last-of-type .nav-link {
+            border-top-right-radius: $border-radius-sm;
+            border-bottom-right-radius: $border-radius-sm;
+        }
+    }
+
+    .nav-link {
+        @extend .border;
+        width: 100%;
+        height: 100%;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+
+        &.active {
+            @extend .bg-primary;
+            @extend .text-white;
+            @extend .border-primary;
+        }
+    }
+}

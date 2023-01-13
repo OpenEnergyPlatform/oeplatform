@@ -1,5 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/tabs' as *;
 
 .table-tabs {
     @extend .fs-7;
@@ -124,6 +125,10 @@
             & > * {
                 @extend .ms-1;
             }
+        }
+
+        &__tabs {
+            @extend .tabs--full;
         }
 
         &__container {
