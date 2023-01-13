@@ -159,22 +159,20 @@
 
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
-      <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
-        <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
+      <span {% if not can_add %} data-bs-toggle="tooltip" data-bs-title="You need write permissions on this table to edit metadata" {% endif %}>
+        <a href="{{table}}/meta_edit" type="button" class="btn btn-link btn-sm {% if not can_add %} disabled {% endif %}">
           <i class="fas fa-pen"></i>
           Edit
         </a>
       </span>
-      <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">
+      <button class="btn btn-sm btn-link" onclick="downloadMetadata();" data-bs-toggle="tooltip" data-bs-title="Download metadata in JSON format">
         <i class="fas fa-arrow-down"></i>
         JSON
       </button>
-      <span>
-        <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" title="Click to open the OEMetadata specification">
-          <i class="fas fa-circle-check"></i>
-          Specification
-        </a>
-      </span>
+      <a class="btn btn-sm btn-link" href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank" data-bs-toggle="tooltip" data-bs-title="Click to open the OEMetadata specification">
+        <i class="fas fa-list"></i>
+        Specification
+      </a>
     </div>
     <div class="metadata__tabs">
       <ul class="nav nav-tabs" id="myTab" role="tablist">

@@ -6,7 +6,6 @@
     @extend .fs-7;
     @include flex-row;
     padding-top: $C--padding-standard;
-    padding-bottom: $C--padding-standard;
     
     @include media-breakpoint-up(md) {
         justify-content: center;
@@ -65,6 +64,7 @@
         @include flex-row;
         justify-content: center;
         align-items: center;
+        padding-top: $C--padding-standard;
 
         &__label {
             @extend .d-inline-block;
@@ -117,13 +117,14 @@
         overflow-x: hidden;
 
         &__options {
-            @extend .pb-2;
+            @extend .pt-1;
             @include flex-row;
             justify-content: flex-end;
             align-items: center;
+            padding-bottom: $C--padding-standard;
 
             & > * {
-                @extend .ms-1;
+                @extend .ms-2;
             }
         }
 

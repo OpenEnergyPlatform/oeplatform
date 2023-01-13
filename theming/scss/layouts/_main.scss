@@ -3,6 +3,10 @@
 
 body {
     letter-spacing: 0.02rem;
+
+    .btn {
+        @extend .fw-semibold;
+    }
 }
 
 main.main {
