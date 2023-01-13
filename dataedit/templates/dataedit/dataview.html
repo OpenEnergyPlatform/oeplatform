@@ -175,25 +175,34 @@
       </a>
     </div>
     <div class="metadata__tabs">
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <ul class="nav nav-tabs" id="metadata_categories" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#metadata-home" type="button" role="tab" aria-controls="metadata-home" aria-selected="true">General</button>
+          <button class="nav-link active" id="metadata_general_tab" data-bs-toggle="tab" data-bs-target="#metadata_general" type="button" role="tab" aria-controls="metadata_general" aria-selected="true">General</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#metadata-spatial" type="button" role="tab" aria-controls="metadata-spatial" aria-selected="false">Spatial & temporal</button>
+          <button class="nav-link" id="metadata_spatial_tab" data-bs-toggle="tab" data-bs-target="#metadata_spatial" type="button" role="tab" aria-controls="metadata_spatial" aria-selected="true">Spatial & temporal</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="messages-tab" data-bs-toggle="tab" data-bs-target="#metadata-source" type="button" role="tab" aria-controls="metadata-source" aria-selected="false">Sources</button>
+          <button class="nav-link" id="metadata_sources_tab" data-bs-toggle="tab" data-bs-target="#metadata_sources" type="button" role="tab" aria-controls="metadata_sources" aria-selected="true">Sources</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#metadata-license" type="button" role="tab" aria-controls="metadata-license" aria-selected="false">Licenses</button>
+          <button class="nav-link" id="metadata_licenses_tab" data-bs-toggle="tab" data-bs-target="#metadata_licenses" type="button" role="tab" aria-controls="metadata_licenses" aria-selected="true">Licenses</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#metadata-provenience" type="button" role="tab" aria-controls="metadata-provenience" aria-selected="false">Provenience</button>
+          <button class="nav-link" id="metadata_provenience_tab" data-bs-toggle="tab" data-bs-target="#metadata_provenience" type="button" role="tab" aria-controls="metadata_provenience" aria-selected="true">Provenience</button>
         </li>
       </ul>
     </div>
     <div class="metadata__container">
+    <!-- Tab panes 
+    <div class="tab-content">
+      <div class="tab-pane active" id="metadata_general" role="tabpanel" aria-labelledby="metadata_general_tab" tabindex="0">...</div>
+      <div class="tab-pane" id="metadata_spatial" role="tabpanel" aria-labelledby="metadata_spatial_tab" tabindex="0">1</div>
+      <div class="tab-pane" id="metadata_sources" role="tabpanel" aria-labelledby="metadata_sources_tab" tabindex="0">2</div>
+      <div class="tab-pane" id="metadata_licenses" role="tabpanel" aria-labelledby="metadata_licenses_tab" tabindex="0">3</div>
+      <div class="tab-pane" id="metadata_provenience" role="tabpanel" aria-labelledby="metadata_provenience_tab" tabindex="0">4</div>
+    </div>
+    -->
       {{ meta_widget }}
     </div>  
   </div>
