@@ -11,19 +11,27 @@
                 {
                     "category": null,
                     "key": null,
-                    "state": null,
-                    "entry": null,
                     "fieldReview": [
                         {
-                            "timestamp": null,
-                            "reviewer": null,
-                            "initialValue": null,
+                            "timestamp": "2022-10-01",
+                            "user": "oep_reviewer",
+                            "role": "reviewer",
+                            "contributorValue": null,
                             "comment": null,
-                            "valueSuggestion": null,
-                            "accepted": null
+                            "reviewerSuggestion": null,
+                            "state": "suggestion, denied"
+                        },
+                        {
+                            "timestamp": "2022-10-01",
+                            "user": "oep_contributor",
+                            "role": "contributor",
+                            "contributorValue": null,
+                            "comment": null,
+                            "reviewerSuggestion": null,
+                            "state": "reviewAccepted,reviewDenied,newValue", 
                         }
                     ]
-                }
+                },
             ],
             "reviewFinished": "false",
             "grantedBadge": null
