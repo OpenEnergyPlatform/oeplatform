@@ -12,7 +12,8 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
-  const { manyItems, idx, name } = parameters;
+  const { manyItems, idx, name, showSelectedElements } = parameters;
+  console.log(showSelectedElements);
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
@@ -54,7 +55,7 @@ export default function CustomAutocomplete(parameters) {
           <TextField {...params} label={parameters.kind} placeholder="" />
         )}
       />
-      <Box
+      {showSelectedElements && <Box
         mt={3}
         sx={{
           'marginTop': '10px',
@@ -64,13 +65,14 @@ export default function CustomAutocomplete(parameters) {
           border: '1px dashed #cecece',
           padding: '20px',
           overflow: 'scroll',
-          borderRadius: '5px'
+          borderRadius: '5px',
+           backgroundColor:'#FCFCFC'
         }}
       >
         {value.map((v) => (
           <Chip key={v.id} label={v.name}  variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
-      </Box>
+      </Box>}
     </Box>
   );
 }

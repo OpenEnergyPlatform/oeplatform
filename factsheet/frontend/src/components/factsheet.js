@@ -580,10 +580,12 @@ function Factsheet(props) {
 
     const scenario_input_dataset_region = [
       { id: '1', name: 'Germany' },
+      { id: 'Spain', name: 'Spain' },
       { id: '2', name: 'France' },
     ];
 
     const scenario_interacting_region = [
+      { id: '1', name: 'Germany' },
       { id: 'France', name: 'France' },
       { id: 'Spain', name: 'Spain' },
     ];
@@ -616,6 +618,7 @@ function Factsheet(props) {
     ];
 
     const sectorDivisionsHandler = (sectorDivisionsList) => {
+      console.log(sectorDivisionsList);
       setSelectedSectorDivisions(sectorDivisionsList);
       const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
       const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
@@ -783,63 +786,384 @@ function Factsheet(props) {
                   }
                 ]
                },
+               { value: 'fossil combustion fuel',
+                 label: 'Fossil combustion fuel',
+                 children: [
+                     { value: 'fossil waste fuel',
+                       label: 'Fossil waste fuel',
+                       children: [
+                           { value: 'fossil industrial waste fuel',
+                             label: 'Fossil industrial waste fuel'
+                           },
+                           { value: 'fossil municipal waste fuel',
+                             label: 'Fossil municipal waste fuel'
+                           }
+                       ]
+                     },
+                     { value: 'gaseous fossil fuel',
+                       label: 'Gaseous fossil fuel',
+                       children: [
+                           { value: 'fossil hydrogen',
+                             label: 'Fossil hydrogen'
+                           },
+                           { value: 'manufactured coal based gas',
+                             label: 'Manufactured coal based gas',
+                             children: [
+                                 { value: 'blast furnace gas',
+                                   label: 'Blast furnace gas'
+                                 },
+                                 { value: 'coke oven gas',
+                                   label: 'Coke oven gas'
+                                 },
+                                 { value: 'gasworks gas',
+                                   label: 'Gasworks gas'
+                                 }
+                             ]
+                           },
+                           { value: 'natural gas',
+                             label: 'Natural gas',
+                             children: [
+                                 { value: 'associated gas',
+                                   label: 'Associated gas'
+                                 },
+                                 { value: 'colliery gas',
+                                   label: 'colliery gas'
+                                 },
+                                 { value: 'liquified natural gas',
+                                   label: 'Liquified natural gas'
+                                 },
+                                 { value: 'non associated gas',
+                                   label: 'Non associated gas'
+                                 }
+                             ]
+                           }
+                       ]
+                     },
+                     { value: 'liquid fossil fuel',
+                       label: 'Liquid fossil fuel',
+                       children: [
+                           { value: 'crude oil',
+                             label: 'Crude oil'
+                           },
+                           { value: 'gas diesel oil',
+                             label: 'Gas diesel oil',
+                             children: [
+                                 { value: 'fossil diesel fuel 2',
+                                   label: 'Fossil diesel fuel'
+                                 },
+                                 { value: 'heating oil',
+                                   label: 'Heating oil'
+                                 }
+                             ]
+                           },
+                           { value: 'gasoline',
+                             label: 'Gasoline',
+                             children: [
+                                 { value: 'aviation gasoline',
+                                   label: 'Aviation gasoline'
+                                 },
+                                 { value: 'motor gasoline',
+                                   label: 'Motor gasoline'
+                                 }
+                             ]
+                           },
+                           { value: 'kerosene',
+                             label: 'Kerosene',
+                             children: [
+                                 { value: 'jet fuel',
+                                   label: 'Jet fuel'
+                                 },
+                             ]
+                           }
+                       ]
+                     },
+                     { value: 'solid fossil fuel',
+                       label: 'Solid fossil fuel',
+                       children: [
+                           { value: 'coal',
+                             label: 'Coal',
+                             children: [
+                                 { value: 'hard coal',
+                                   label: 'Hard coal',
+                                   children: [
+                                       { value: 'anthracite',
+                                         label: 'Anthracite'
+                                       },
+                                       { value: 'coking coal',
+                                         label: 'Coking coal'
+                                       },
+                                   ]
+                                 },
+                                 { value: 'lignite',
+                                   label: 'Lignite'
+                                 },
+                                 { value: 'sub bituminous coal',
+                                   label: 'Sub bituminous coal'
+                                 },
+                             ]
+                           },
+                           { value: 'peat',
+                             label: 'Peat'
+                           },
+                       ]
+                     },
+                 ]
+               },
+               { value: 'gaseous combustion fuel',
+                 label: 'Gaseous combustion fuel',
+                 children: [
+                     { value: 'ammonia',
+                       label: 'Ammonia',
+                       children: [
+                           { value: 'synthetic ammonia',
+                             label: 'Synthetic ammonia'
+                           }
+                       ]
+                     },
+                     { value: 'gaseous fossil fuel 2',
+                       label: 'Gaseous fossil fuel',
+                       children: [
+                           { value: 'fossil hydrogen 2',
+                             label: 'fossil hydrogen'
+                           },
+                           { value: 'manufactured coal based gas 2',
+                             label: 'Manufactured coal based gas',
+                             children: [
+                                 { value: 'blast furnace gas 2',
+                                   label: 'Blast furnace gas'
+                                 },
+                                 { value: 'coke oven gas 2',
+                                   label: 'Coke oven gas'
+                                 },
+                                 { value: 'gasworks gas 2',
+                                   label: 'Gasworks gas'
+                                 }
+                             ]
+                           },
+                           { value: 'natural gas natural gas',
+                             label: 'Natural gas',
+                             children: [
+                                 { value: 'associated gas 2',
+                                   label: 'Associated gas'
+                                 },
+                                 { value: 'colliery gas 2',
+                                   label: 'Colliery gas'
+                                 },
+                                 { value: 'liquified natural gas 2',
+                                   label: 'Liquified natural gas'
+                                 },
+                                 { value: 'non associated gas 2',
+                                   label: 'Non associated gas'
+                                 }
+                             ]
+                           },
+
+                       ]
+                     },
+                     { value: 'gaseous renewable fuel',
+                       label: 'Gaseous renewable fuel',
+                       children: [
+                           { value: 'gaseous biofuel',
+                             label: 'Gaseous biofuel',
+                             children: [
+                                 { value: 'biogas',
+                                   label: 'Biogas'
+                                 },
+                                 { value: 'biomethane',
+                                   label: 'Biomethane'
+                                 }
+                             ]
+                           }
+                       ]
+                     },
+                     { value: 'gaseous synthetic fuel',
+                       label: 'Gaseous synthetic fuel',
+                       children: [
+                           { value: 'synthetic ammonia 2',
+                             label: 'Synthetic ammonia',
+                           },
+                           { value: 'synthetic hydrogen 2',
+                             label: 'Synthetic hydrogen',
+                           },
+                           { value: 'synthetic methane 2',
+                             label: 'Synthetic methane',
+                           },
+                       ]
+                     },
+                     { value: 'hydrogen',
+                       label: 'Hydrogen',
+                       children: [
+                           { value: 'fossil hydrogen 3',
+                             label: 'Fossil hydrogen',
+                           },
+                           { value: 'synthetic hydrogen',
+                             label: 'Synthetic hydrogen',
+                           },
+                       ]
+                     },
+                     { value: 'methane',
+                       label: 'Methane',
+                       children: [
+                           { value: 'synthetic methane 3',
+                             label: 'Synthetic methane',
+                           },
+                       ]
+                     },
+                     { value: 'syngas',
+                       label: 'Syngas',
+                     },
+                 ]
+               },
+               { value: 'gasoline fuel',
+                 label: 'Gasoline fuel',
+                 children: [
+                   { value: 'biogasoline',
+                     label: 'Biogasoline',
+                   },
+                   { value: 'gasoline 2',
+                     label: 'Gasoline',
+                     children: [
+                         { value: 'aviation gasoline 4',
+                           label: 'Aviation gasoline',
+                         },
+                         { value: 'motor gasoline 2',
+                           label: 'Motor gasoline',
+                         },
+                     ]
+                   },
+                 ]
+               },
+               { value: 'hydrocarbon',
+                 label: 'Hydrocarbon',
+                 children: [
+                     { value: 'methane ',
+                       label: 'Methane',
+                     },
+                 ]
+               },
+               { value: 'liquid combustion fuel',
+                 label: 'Liquid combustion fuel',
+                 children: [
+                     { value: 'ethanol',
+                       label: 'Ethanol',
+                     },
+                     { value: 'liquid fossil fuel 2',
+                       label: 'Liquid fossil fuel',
+                       children: [
+                           { value: 'crude oil 2',
+                             label: 'Crude oil'
+                           },
+                           { value: 'gas diesel oil 3',
+                             label: 'Gas diesel oil',
+                             children: [
+                                 { value: 'fossil diesel fuel 3',
+                                   label: 'Fossil diesel fuel'
+                                 },
+                                 { value: 'heating oil 2',
+                                   label: 'Heating oil'
+                                 }
+                             ]
+                           },
+                           { value: 'gasoline 3',
+                             label: 'Gasoline',
+                             children: [
+                                 { value: 'aviation gasoline 3',
+                                   label: 'Aviation gasoline'
+                                 },
+                                 { value: 'motor gasoline 3',
+                                   label: 'Motor gasoline'
+                                 }
+                             ]
+                           },
+                           { value: 'kerosene 3',
+                             label: 'Kerosene',
+                             children: [
+                                 { value: 'jet fuel 3',
+                                   label: 'Jet fuel'
+                                 },
+                             ]
+                           }
+                       ]
+                     },
+                     { value: 'liquid renewable fuel',
+                       label: 'Liquid renewable fuel',
+                       children: [
+                           { value: 'biofuel',
+                             label: 'Biofuel',
+                             children: [
+                                 { value: 'biogenic waste fuel',
+                                   label: 'Biogenic waste fuel',
+                                   children: [
+                                       { value: 'biogenic industrial waste fuel',
+                                         label: 'Biogenic industrial waste fuel'
+                                       },
+                                       { value: 'biogenic municipal waste fuel',
+                                         label: 'Biogenic municipal waste fuel'
+                                       },
+                                   ]
+                                 },
+                                 { value: 'gaseous biofuel 2',
+                                   label: 'Gaseous biofuel',
+                                   children: [
+                                       { value: 'biogas 2',
+                                         label: 'Biogas'
+                                       },
+                                       { value: 'biomethane 2',
+                                         label: 'Biomethane'
+                                       },
+                                   ]
+                                 },
+                                 { value: 'liquid biofuel',
+                                   label: 'Liquid biofuel',
+                                   children: [
+                                       { value: 'biodiesel 2',
+                                         label: 'Biodiesel'
+                                       },
+                                       { value: 'biogasoline 2',
+                                         label: 'Biogasoline'
+                                       },
+                                   ]
+                                 },
+                                 { value: 'solid biofuel',
+                                   label: 'Solid biofuel',
+                                   children: [
+                                       { value: 'charcoal',
+                                         label: 'Charcoal'
+                                       },
+                                       { value: 'wood',
+                                         label: 'Wood'
+                                       },
+                                   ]
+                                 },
+                             ]
+                           },
+                           { value: 'gaseous renewable fuel 2',
+                             label: 'Gaseous renewable fuel',
+                             children: [
+                                 { value: 'gaseous biofuel 3',
+                                   label: 'Gaseous biofuel',
+                                   children: [
+                                       { value: 'biogas 3',
+                                         label: 'Biogas'
+                                       },
+                                       { value: 'biomethane 3',
+                                         label: 'Biomethane'
+                                       },
+                                   ]
+                                 }
+                             ]
+                           },
+                       ]
+                     },
+                     { value: 'liquid synthetic fuel',
+                       label: 'Liquid synthetic fuel',
+
+                     },
+                 ]
+               },
             ]
           },
-          { value: 'fossil combustion fuel',
-            label: 'Fossil combustion fuel',
-            children: [
-                { value: 'fossil waste fuel',
-                  label: 'Fossil waste fuel',
-                  children: [
-                      { value: 'fossil industrial waste fuel',
-                        label: 'Fossil industrial waste fuel'
-                      },
-                      { value: 'fossil municipal waste fuel',
-                        label: 'Fossil municipal waste fuel'
-                      }
-                  ]
-                },
-                { value: 'gaseous fossil fuel',
-                  label: 'Gaseous fossil fuel',
-                  children: [
-                      { value: 'fossil hydrogen',
-                        label: 'Fossil hydrogen'
-                      },
-                      { value: 'manufactured coal based gas',
-                        label: 'Manufactured coal based gas',
-                        children: [
-                            { value: 'blast furnace gas',
-                              label: 'Blast furnace gas'
-                            },
-                            { value: 'coke oven gas',
-                              label: 'Coke oven gas'
-                            },
-                            { value: 'gasworks gas',
-                              label: 'Gasworks gas'
-                            }
-                        ]
-                      },
-                      { value: 'natural gas',
-                        label: 'Natural gas',
-                        children: [
-                            { value: 'associated gas',
-                              label: 'Associated gas'
-                            },
-                            { value: 'colliery gas',
-                              label: 'colliery gas'
-                            },
-                            { value: 'liquified natural gas',
-                              label: 'Liquified natural gas'
-                            },
-                            { value: 'non associated gas',
-                              label: 'Non associated gas'
-                            }
-                        ]
-                      }
-                  ]
-                }
-            ]
-          },
+
         ]
       },
     ];
@@ -859,49 +1183,168 @@ function Factsheet(props) {
           },
           {
             value: 'hydroelectric energy transformation',
-            label: 'Hydroelectric energy transformation'
+            label: 'Hydroelectric energy transformation',
+            children: [
+              {
+                value: 'marine current energy transformation',
+                label: 'Marine current energy transformation'
+               },
+              {
+                value: 'marine tidal energy transformation',
+                label: 'Marine tidal energy transformation'
+              },
+              {
+                value: 'marine wave energy transformation',
+                label: 'Marine wave energy transformation'
+               }
+            ]
+          },
+           {
+             value: 'photovoltaic energy transformation',
+             label: 'Photovoltaic energy transformation'
+           },
+           {
+             value: 'solar-steam-electric process',
+             label: 'Solar-steam-electric process'
+           },
+           {
+             value: 'steam-electric process',
+             label: 'Steam-electric process'
+           },
+           {
+             value: 'wind energy transformation',
+             label: 'Wind energy transformation'
            }
         ]
       },
-      { value: 'transformative measure',
-        label: 'Transformative measure'
-      },
-      { value: 'transport',
-        label: 'Transport',
+      { value: 'energy transfer',
+        label: 'Energy transfer',
         children: [
           {
-            value: 'freight transport',
-            label: 'Freight transport',
-           },
-          {
-            value: 'international transport',
-            label: 'International transport',
-           },
-          {
-            value: 'passenger transport',
-            label: 'Passenger transport',
-           }
-        ]
-      },
-      { value: 'validation',
-        label: 'Validation',
-        children: [
-          { value: 'checking against empirical data',
-            label: 'Checking against empirical data',
-          },
-          { value: 'checking against measurements',
-            label: 'Checking against measurements',
-          },
-          { value: 'cross-checking against other models',
-            label: 'Cross-checking against other models',
+            value: 'heat transfer',
+            label: 'Heat transfer',
+            children: [
+              {
+                value: 'ambient thermal energy transfer',
+                label: 'Ambient thermal energy transfer'
+              },
+              {
+                value: 'geothermal heat transfer',
+                label: 'Geothermal heat transfer'
+              },
+              {
+                value: 'grid-bound heating',
+                label: 'Grid-bound heating',
+                children: [
+                  {
+                    value: 'district heating',
+                    label: 'District heating'
+                  },
+                  {
+                    value: 'industrial grid-bound heating',
+                    label: 'Industrial grid-bound heating'
+                  }
+                ]
+              },
+              {
+                value: 'marine thermal energy transfer',
+                label: 'Marine thermal energy transfer'
+              }
+            ]
           }
         ]
       },
-      { value: 'water flow',
-        label: 'Water flow',
+      { value: 'heat generation process',
+        label: 'Heat generation process',
+        children: [
+          { value: 'combined heat and power generation 2',
+            label: 'Combined heat and power generation',
+          },
+          { value: 'combustion thermal energy transformation',
+            label: 'Combustion thermal energy transformation',
+          },
+          { value: 'heat transfer 2',
+            label: 'Heat transfer',
+            children: [
+              { value: 'ambient thermal energy transfer 2',
+                label: 'Ambient thermal energy transfer',
+              },
+              { value: 'geothermal heat transfer 2',
+                label: 'Geothermal heat transfer',
+              },
+              { value: 'grid-bound heating 2',
+                label: 'Grid-bound heating',
+                children: [
+                  { value: 'district heating 2',
+                    label: 'District heating',
+                  },
+                  { value: 'industrial grid-bound heating 2',
+                    label: 'Industrial grid-bound heating',
+                  }
+                ]
+              },
+              { value: 'marine thermal energy transfer 2',
+                label: 'Marine thermal energy transfer',
+              },
+            ]
+          },
+          { value: 'nuclear energy transformation',
+            label: 'Nuclear energy transformation',
+          },
+          { value: 'solar thermal energy transformation',
+            label: 'Solar thermal energy transformation',
+          },
+        ]
       },
-      { value: 'wind',
-        label: 'Wind',
+      { value: 'hydro energy transformation 2',
+        label: 'Hydro energy transformation',
+        children: [
+          { value: 'hydroelectric energy transformation 2',
+            label: 'hydroelectric energy transformation',
+            children: [
+              { value: 'marine current energy transformation 2',
+                label: 'Marine current energy transformation',
+              },
+              { value: 'marine tidal energy transformation 2',
+                label: 'Marine tidal energy transformation',
+              },
+              { value: 'marine wave energy transformation 2',
+                label: 'Marine wave energy transformation',
+              },
+            ]
+          },
+        ]
+      },
+      { value: 'power-to-gas process',
+        label: 'Power-to-gas process',
+        children: [
+          { value: 'power-to-ammonia process',
+            label: 'Power-to-ammonia process',
+          },
+          { value: 'power-to-methane process',
+            label: 'Power-to-methane process',
+          },
+        ]
+      },
+      { value: 'solar energy transformation',
+        label: 'Solar energy transformation',
+        children: [
+          { value: 'photovoltaic energy transformation 2',
+            label: 'Photovoltaic energy transformation',
+          },
+          { value: 'solar chemical energy transformation',
+            label: 'Solar chemical energy transformation',
+          },
+          { value: 'solar thermal energy transformation 2',
+            label: 'Solar thermal energy transformation',
+          },
+          { value: 'Solar-steam-electric process',
+            label: 'Solar-steam-electric process',
+          },
+        ]
+      },
+      { value: 'water electrolysis process',
+        label: 'Water electrolysis process',
       },
     ];
 
@@ -917,7 +1360,7 @@ function Factsheet(props) {
                 alignItems: 'center',
                 flexWrap: 'wrap',
             }}>
-            <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
+            <TextField style={{  width: '90%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
             <div>
               <HtmlTooltip
                 style={{ marginLeft: '10px' }}
@@ -943,7 +1386,7 @@ function Factsheet(props) {
                 alignItems: 'center',
                 flexWrap: 'wrap',
             }}>
-            <TextField style={{  width: '90%' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
+            <TextField style={{  width: '90%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
             <div>
               <HtmlTooltip
                 style={{ marginLeft: '10px' }}
@@ -969,7 +1412,7 @@ function Factsheet(props) {
                 alignItems: 'flex-start',
                 flexWrap: 'wrap',
             }}>
-            <CustomAutocomplete manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <CustomAutocomplete showSelectedElements={true} manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
             <div style={{ marginTop: '30px' }}>
               <HtmlTooltip
                 style={{ marginLeft: '10px' }}
@@ -995,7 +1438,7 @@ function Factsheet(props) {
               alignItems: 'flex-start',
               flexWrap: 'wrap',
           }}>
-          <CustomAutocomplete manyItems optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+          <CustomAutocomplete showSelectedElements={true} manyItems optionsSet={funding_source} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
           <div style={{ marginTop: '30px' }}>
             <HtmlTooltip
               style={{ marginLeft: '10px' }}
@@ -1021,7 +1464,7 @@ function Factsheet(props) {
                 alignItems: 'flex-start',
                 flexWrap: 'wrap',
             }}>
-            <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
+            <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
           <div style={{ marginTop: '20px' }}>
 
           </div>
@@ -1033,7 +1476,7 @@ function Factsheet(props) {
                 alignItems: 'flex-start',
                 flexWrap: 'wrap',
             }}>
-              <CustomAutocomplete manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+              <CustomAutocomplete showSelectedElements={true}  manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
           <div style={{ marginTop: '30px' }}>
             <HtmlTooltip
               style={{ marginLeft: '10px' }}
@@ -1060,10 +1503,10 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px' }}
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '100%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
         >
               <Grid item xs={12} >
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px' }}>
                   Study content description:
                 </Typography>
               </Grid>
@@ -1073,7 +1516,7 @@ function Factsheet(props) {
                       alignItems: 'flex-start',
                       flexWrap: 'wrap',
                   }}>
-                  <CustomAutocomplete manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                  <CustomAutocomplete showSelectedElements={false} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
                   <div style={{ marginTop: '30px' }}>
                     <HtmlTooltip
                       style={{ marginLeft: '10px' }}
@@ -1092,45 +1535,44 @@ function Factsheet(props) {
                     </HtmlTooltip>
                     </div>
                   </div>
-                <CustomTreeViewWithCheckBox size="360px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+                <CustomTreeViewWithCheckBox size="220px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+                  What additional keywords describe your study?
+                </Typography>
+                <div>
+                  <FormGroup>
+                      <div>
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("resilience")} onChange={handleStudyKeywords} label="resilience" name="resilience" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("life cycle analysis")} onChange={handleStudyKeywords} label="life cycle analysis" name="life cycle analysis" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("CO2 emissions")} onChange={handleStudyKeywords} label="CO2 emissions" name="CO2 emissions" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Greenhouse gas emissions")} onChange={handleStudyKeywords} label="Greenhouse gas emissions" name="Greenhouse gas emissions" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Reallabor")} onChange={handleStudyKeywords} label="Reallabor" name="Reallabor" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("100% renewables")} onChange={handleStudyKeywords} label="100% renewables" name="100% renewables" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("acceptance")} onChange={handleStudyKeywords} label="acceptance" name="acceptance" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("sufficiency")} onChange={handleStudyKeywords} label="sufficiency" name="sufficiency" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("(changes in) demand")} onChange={handleStudyKeywords} label="(changes in) demand" name="(changes in) demand" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("degree of electrifiaction")} onChange={handleStudyKeywords} label="degree of electrifiaction" name="degree of electrifiaction" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("regionalisation")} onChange={handleStudyKeywords} label="regionalisation" name="regionalisation" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total gross electricity generation")} onChange={handleStudyKeywords} label="total gross electricity generation" name="total gross electricity generation" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total net electricity generation")} onChange={handleStudyKeywords} label="total net electricity generation" name="total net electricity generation" />
+                        <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("peak electricity generation")} onChange={handleStudyKeywords} label="peak electricity generation" name="peak electricity generation"/>
+                    </div>
+                  </FormGroup>
+                </div>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomTreeViewWithCheckBox size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-              <CustomTreeViewWithCheckBox size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+              <CustomTreeViewWithCheckBox size="205px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+              <CustomTreeViewWithCheckBox size="205px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
               toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
             </Grid>
-            <Grid item xs={12} style={{ marginBottom: '10px' }}>
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
-              What additional keywords describe your study?
-            </Typography>
-            <div>
-              <FormGroup>
-                  <div>
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("resilience")} onChange={handleStudyKeywords} label="resilience" name="resilience" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("life cycle analysis")} onChange={handleStudyKeywords} label="life cycle analysis" name="life cycle analysis" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("CO2 emissions")} onChange={handleStudyKeywords} label="CO2 emissions" name="CO2 emissions" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Greenhouse gas emissions")} onChange={handleStudyKeywords} label="Greenhouse gas emissions" name="Greenhouse gas emissions" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("Reallabor")} onChange={handleStudyKeywords} label="Reallabor" name="Reallabor" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("100% renewables")} onChange={handleStudyKeywords} label="100% renewables" name="100% renewables" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("acceptance")} onChange={handleStudyKeywords} label="acceptance" name="acceptance" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("sufficiency")} onChange={handleStudyKeywords} label="sufficiency" name="sufficiency" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("(changes in) demand")} onChange={handleStudyKeywords} label="(changes in) demand" name="(changes in) demand" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("degree of electrifiaction")} onChange={handleStudyKeywords} label="degree of electrifiaction" name="degree of electrifiaction" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("regionalisation")} onChange={handleStudyKeywords} label="regionalisation" name="regionalisation" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total gross electricity generation")} onChange={handleStudyKeywords} label="total gross electricity generation" name="total gross electricity generation" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("total net electricity generation")} onChange={handleStudyKeywords} label="total net electricity generation" name="total net electricity generation" />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes("peak electricity generation")} onChange={handleStudyKeywords} label="peak electricity generation" name="peak electricity generation"/>
-                </div>
-              </FormGroup>
-            </div>
-            </Grid>
+
         </Grid>
         <Grid
           container
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px' }}
+          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
         >
           <Grid item xs={12} >
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
@@ -1166,7 +1608,7 @@ function Factsheet(props) {
             <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
           </Grid>
           <Grid item xs={6} >
-            <CustomAutocomplete manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
+            <CustomAutocomplete showSelectedElements={true}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
           </Grid>
         </Grid>
       </Grid>
@@ -1189,10 +1631,10 @@ function Factsheet(props) {
                     <Tab
                       label={'Scenario ' + (Number(i) + Number(1)) }
                       key={'Scenario_tab_' + item.id}
-                      style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px' }}
+                      style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC' }}
                     />
                   )}
-                    <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px' }} >
+                    <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
                       <Fab
                         color="primary"
                         aria-label="add"
@@ -1235,8 +1677,8 @@ function Factsheet(props) {
       contents: [
         renderStudy(),
         renderScenario(),
-        <CustomAutocomplete optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Models' handler={() => console.log('TDB')} selectedElements={[]}/>,
-        <CustomAutocomplete optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Frameworks' handler={() => console.log('TDB')} selectedElements={[]}/>,
+        <CustomAutocomplete showSelectedElements={true} optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Models' handler={() => console.log('TDB')} selectedElements={[]}/>,
+        <CustomAutocomplete showSelectedElements={true}  optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Frameworks' handler={() => console.log('TDB')} selectedElements={[]}/>,
         ]
     }
     const convert2RDF = async () => {
