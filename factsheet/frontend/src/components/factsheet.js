@@ -54,7 +54,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 
 import Alert from '@mui/material/Alert';
-
+import AlertTitle from '@mui/material/AlertTitle';
 
 
 function TabPanel(props: TabPanelProps) {
@@ -1737,7 +1737,7 @@ function Factsheet(props) {
           <div>
                <CustomSwap handleSwap={handleSwap} />
                <Tooltip title="Save factsheet">
-               <Button disableElevation={true} style={{ 'textTransform': 'none', 'zIndex': '1000', height: '40px' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+               <Button disableElevation={true} style={{ 'textTransform': 'none', 'zIndex': '1000', height: '40px' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
                </Tooltip>
           </div >
           </Grid>
@@ -1757,7 +1757,7 @@ function Factsheet(props) {
                 <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRLeft': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
               </Tooltip>
               <Tooltip title="Submit this factsheet to the Open Energy Knowledge Graph">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="success" onClick={handleClickOpenTurtle} > <ForwardToInboxIcon /> </Button>
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle} > <ForwardToInboxIcon /> </Button>
               </Tooltip>
             </div >
           </Grid>
@@ -1767,8 +1767,9 @@ function Factsheet(props) {
               autoHideDuration={6000}
               onClose={handleSaveMessageClose}
             >
-              <Alert onClose={handleSaveMessageClose} severity="success" sx={{ width: '100%' }}>
-                Factsheet saved!
+              <Alert variant="filled" onClose={handleSaveMessageClose} severity="success" sx={{ width: '100%' }}>
+                <AlertTitle>New message</AlertTitle>
+                Factsheet saved <strong>successfully!</strong>
               </Alert>
             </Snackbar>
             <Snackbar
@@ -1776,8 +1777,9 @@ function Factsheet(props) {
               autoHideDuration={6000}
               onClose={handleUpdateMessageClose}
             >
-              <Alert onClose={handleUpdateMessageClose} severity="success" sx={{ width: '100%' }}>
-                Factsheet updated!
+              <Alert variant="filled" onClose={handleUpdateMessageClose} severity="success" sx={{ width: '100%' }}>
+                <AlertTitle>New message</AlertTitle>
+                Factsheet updated <strong>successfully!</strong>
               </Alert>
             </Snackbar>
             <Dialog
