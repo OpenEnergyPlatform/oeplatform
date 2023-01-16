@@ -1839,23 +1839,24 @@ class PeerReview(LoginRequiredMixin, View):
 
         if isinstance(val, dict):
             for k in val.keys():
-                lines += self.get_dotted_form(val[k], old + "." + str(k))
+                lines += self.get_dotted_form(val[k], old + "$ßß" + str(k))
         elif isinstance(val, list):
             if not val:
-                lines += ["{}.{}".format(old, str(val))]
+                lines += ["{}$ßß{}".format(old, str(val))]
             else:
                 for i, k in enumerate(val):
-                    lines += self.get_dotted_form(k, old + "." + str(i))
+                    lines += self.get_dotted_form(k, old + "$ßß" + str(i))
         else:
-            lines += ["{}.{}".format(old, str(val))]
+            lines += ["{}$ßß{}".format(old, str(val))]
 
-        return [line.lstrip('.') for line in lines]
+        return [line.lstrip('$ßß') for line in lines]
 
     def removeVal(self, val):
         key_list = []
         for i in val:
-            field = i.rpartition('.')[0]
-            value = i.split(".")[-1]
+            field = i.rpartition('$ßß')[0]
+            field = field.replace("$ßß", ".")
+            value = i.split("$ßß")[-1]
             result = {"field": field, "value": value}
             key_list.append(result)
         return key_list
