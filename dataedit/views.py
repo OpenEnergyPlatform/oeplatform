@@ -46,7 +46,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table
+from dataedit.models import Table, PeerReview
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
@@ -1988,6 +1988,7 @@ class PeerReview(LoginRequiredMixin, View):
 
         return resource_key_list
 
+    """
     def comment_key(self, list_of_key: list, value, list_count=None):
         if list_count is None:
             iterate_entrances = 0
@@ -2013,6 +2014,7 @@ class PeerReview(LoginRequiredMixin, View):
 
         else:
             print("--- Next field ---")
+    """
 
     def get(self, request, schema, table):
         columns = get_column_description(schema, table)
@@ -2047,3 +2049,12 @@ class PeerReview(LoginRequiredMixin, View):
                         }
 
         return render(request, 'dataedit/peer_review.html', context=context_meta)
+
+    def post(self, request, schema, table):
+        #table_obj = PeerReview.load(schema=schema, table=table)
+        review = {"test": "Test"}
+
+        PeerReview(schema="hihi", table="hi", in_progress=False, review=review)
+        PeerReview.save()
+
+
