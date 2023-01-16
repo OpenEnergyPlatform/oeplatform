@@ -1219,6 +1219,7 @@ function Factsheet(props) {
                         scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                         removeScenario={removeScenario}
                         scenarioRegion={scenario_region}
+                        scenarioSelectedRegions={scenario_region}
                         scenarioInteractingRegion={scenario_interacting_region}
                         scenarioYears={scenario_years}
                       />
