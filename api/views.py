@@ -52,6 +52,8 @@ from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
+MAX_COL_NAME_LENGTH = 50
+
 WHERE_EXPRESSION = re.compile(
     r"^(?P<first>[\w\d_\.]+)\s*(?P<operator>"
     + r"|".join(parser.sql_operators)
@@ -453,7 +455,6 @@ class Table(APIView):
 
     def validate_column_names(self, column_definitions):
         """Raise APIError if any column name is invalid"""
-        MAX_COL_NAME_LENGTH = 50
 
         for c in column_definitions:
             colname = c["name"]
