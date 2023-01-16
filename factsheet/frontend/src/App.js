@@ -15,9 +15,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import LinearProgress from '@mui/material/LinearProgress';
-import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import LinearProgress from '@mui/material/LinearProgress';
+
 import axios from "axios"
 
 import CustomCard from './components/customCard.js'
@@ -61,15 +61,7 @@ function App() {
     if (loading === false) {
       return <Factsheet id={url_id} fsData={factsheet}/>
     } else {
-      return <Box sx={{ width: '100%' }}>
-              <Backdrop open={loading} sx={{ backgroundColor:'white' }} >
-                <CircularProgress sx={{ margin: '5px' }} />
-                <div>
-                  Please wait ...
-                </div>
-
-              </Backdrop>
-             </Box>
+      return <LinearProgress />
     }
   }
 }
