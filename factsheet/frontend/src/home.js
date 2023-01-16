@@ -18,6 +18,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import LinearProgress from '@mui/material/LinearProgress';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
 import './styles/App.css';
@@ -42,7 +45,6 @@ function Home(props) {
   useEffect(() => {
     setLoading(true);
     axios.get(conf.toep + `factsheet/all/`).then(response => {
-      console.log(response);
       setFactsheets(response.data);
       setLoading(false);
     });
@@ -64,6 +66,8 @@ function Home(props) {
           )
       }
   }
+
+
 
   if (loading === false) {
     return (
@@ -93,7 +97,13 @@ function Home(props) {
   }
   else {
     return <Box sx={{ width: '100%' }}>
-            <LinearProgress />
+            <Backdrop open={loading} sx={{ backgroundColor:'white' }} >
+              <CircularProgress sx={{ margin: '5px' }} />
+              <div>
+                Please wait ...
+              </div>
+
+            </Backdrop>
            </Box>
   }
 }

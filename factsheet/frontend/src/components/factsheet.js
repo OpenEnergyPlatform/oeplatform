@@ -20,6 +20,7 @@ import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
 
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
+import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
 
 import Typography from '@mui/material/Typography';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
@@ -51,6 +52,9 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { styled } from '@mui/material/styles';
 import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
+
+import Alert from '@mui/material/Alert';
+
 
 
 function TabPanel(props: TabPanelProps) {
@@ -199,7 +203,6 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      console.log(factsheetObject);
       axios.post(conf.toep + 'factsheet/add/', null,
       {  params:
           {
@@ -1709,6 +1712,20 @@ function Factsheet(props) {
       convert2RDF().then((nquads) => setFactsheetRDF(nquads));
     }, []);
 
+    const handleSaveMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+      if (reason === 'clickaway') {
+        return;
+        }
+        setOpenSavedDialog(false);
+    };
+    const handleUpdateMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+      if (reason === 'clickaway') {
+        return;
+        }
+        setOpenUpdatedDialog(false);
+    };
+
+
     return (
       <div>
         <Grid container
@@ -1745,6 +1762,24 @@ function Factsheet(props) {
             </div >
           </Grid>
           <Grid item xs={12}>
+            <Snackbar
+              open={openSavedDialog}
+              autoHideDuration={6000}
+              onClose={handleSaveMessageClose}
+            >
+              <Alert onClose={handleSaveMessageClose} severity="success" sx={{ width: '100%' }}>
+                Factsheet saved!
+              </Alert>
+            </Snackbar>
+            <Snackbar
+              open={openUpdatedDialog}
+              autoHideDuration={6000}
+              onClose={handleUpdateMessageClose}
+            >
+              <Alert onClose={handleUpdateMessageClose} severity="success" sx={{ width: '100%' }}>
+                Factsheet updated!
+              </Alert>
+            </Snackbar>
             <Dialog
               fullWidth
               maxWidth="xl"
@@ -1799,62 +1834,6 @@ function Factsheet(props) {
                 <Button variant="contained" onClick={handleClickCloseRemoveReport} >
                   Ok
                 </Button>
-              </DialogActions>
-            </Dialog>
-
-
-            <Dialog
-              fullWidth
-              maxWidth="md"
-              open={openSavedDialog}
-              onClose={handleClickOpenSavedDialog}
-              aria-labelledby="responsive-dialog-title"
-            >
-              <DialogTitle id="responsive-dialog-title">
-                <b>New Factsheet Saved!</b>
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  <div>
-                    <pre>
-                      Your new factsheet has saved in the Open Energy Platform!
-                    </pre>
-                  </div>
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} state={{ testvalue: "hello" }}  style={{ textDecoration: 'none', color: 'white', marginRight: '10px' }}>
-                <Button variant="outlined" >
-                  Back to main page
-                </Button>
-                </Link>
-              </DialogActions>
-            </Dialog>
-            <Dialog
-              fullWidth
-              maxWidth="md"
-              open={openUpdatedDialog}
-              onClose={handleClickOpenUpdatedDialog}
-              aria-labelledby="responsive-dialog-title"
-            >
-              <DialogTitle id="responsive-dialog-title">
-                <b>Factsheet Updated!</b>
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  <div>
-                    <pre>
-                      Your factsheet has updated!
-                    </pre>
-                  </div>
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} style={{ textDecoration: 'none', color: 'white', marginRight: '10px' }}>
-                <Button variant="outlined" >
-                  Back to main page
-                </Button>
-                </Link>
               </DialogActions>
             </Dialog>
             <Dialog
