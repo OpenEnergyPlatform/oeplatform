@@ -1,0 +1,36 @@
+@use 'index' as *;
+
+// Flex
+@mixin flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+@mixin flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+// Translate
+@mixin translateY($translateY-value) {
+    transform: translateY($translateY-value);
+    -webkit-transform: translateY($translateY-value);
+    -moz-transform: translateY($translateY-value);
+    -ms-transform: translateY($translateY-value);
+    -o-transform: translateY($translateY-value);
+  }
+  
+  @mixin translateX($translateX-value) {
+    transform: translateX($translateX-value);
+    -webkit-transform: translateX($translateX-value);
+    -moz-transform: translateX($translateX-value);
+    -ms-transform: translateX($translateX-value);
+    -o-transform: translateX($translateX-value);
+  }
+  
+  // User-select
+  @mixin user-select-none {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
