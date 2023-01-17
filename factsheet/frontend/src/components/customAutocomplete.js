@@ -7,13 +7,16 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { withStyles } from "@material-ui/core/styles";
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
   const { manyItems, idx, name, showSelectedElements } = parameters;
-  console.log(showSelectedElements);
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
   const handler = parameters.handler;
@@ -27,6 +30,19 @@ export default function CustomAutocomplete(parameters) {
     setValue(newValue);
     handler(newValue, name, idx);
   }
+
+  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      maxWidth: 520,
+      fontSize: theme.typography.pxToRem(20),
+      border: '1px solid black',
+      padding: '20px'
+    },
+  }));
 
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
@@ -44,6 +60,21 @@ export default function CustomAutocomplete(parameters) {
               style={{ marginRight: 8 }}
               checked={ selected }
             />
+            <HtmlTooltip
+            style={{ marginRight: '5px' }}
+            placement="top"
+            title={
+              <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                Description of <b>{option.name}</b> : TDB ...
+              <br />
+              <a href={2}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+              </Typography>
+              </React.Fragment>
+            }
+            >
+            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
             {option.name}
           </li>
         )}

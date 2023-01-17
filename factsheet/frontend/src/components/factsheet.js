@@ -102,35 +102,114 @@ function Factsheet(props) {
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? fsData.expanded_sectors : []);
 
+  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      maxWidth: 520,
+      fontSize: theme.typography.pxToRem(20),
+      border: '1px solid black',
+      padding: '20px'
+    },
+  }));
+
+  const wrapInTooltip = (name, description, link) => <span> <HtmlTooltip
+              placement="top"
+              title={
+                <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  Description of <b>{name}</b> from Open Energy Ontology (OEO): TDB ...
+                <br />
+                <a href={link}>More info from Open Enrgy Knowledge Graph (OEKG)...</a>
+                </Typography>
+                </React.Fragment>
+              }
+              >
+              <HelpOutlineIcon sx={{ fontSize: '24px', color: '#bdbdbd', marginLeft: '-10px' }}/>
+          </HtmlTooltip>
+          <span
+            style={{ marginLeft: '5px', marginTop: '-20px' }}
+          >
+          {name}
+          </span>
+        </span>
 
   const [sectors, setSectors] = useState([
-    { id: 1, value : 'CRF sector (IPCC 2006): CO2 captured', label: 'CRF sector (IPCC 2006): CO2 captured', sector_divisions_id: 1 },
-    { id: 2, value : 'CRF sector (IPCC 2006): CO2 emissions from biomass', label: 'CRF sector (IPCC 2006): CO2 emissions from biomass', sector_divisions_id: 1 },
-    { id: 3, value : 'CRF sector (IPCC 2006): CO2 transport and storage', label: 'CRF sector (IPCC 2006): CO2 transport and storage', sector_divisions_id: 1 },
-    { id: 4, value : 'CRF sector (IPCC 2006): commercial and institutional', label:'CRF sector (IPCC 2006): commercial and institutional' , sector_divisions_id: 1 },
-    { id: 5, value : 'CRF sector (IPCC 2006): cropland', label: 'CRF sector (IPCC 2006): cropland' , sector_divisions_id: 1 },
-    { id: 6, value : 'CRF sector (IPCC 2006): domestic aviation', label: 'CRF sector (IPCC 2006): domestic aviation' , sector_divisions_id: 1 },
-    { id: 7, value : 'CRF sector (IPCC 2006): domestic navigation', label: 'CRF sector (IPCC 2006): domestic navigation', sector_divisions_id: 1 },
-    { id: 8, value : 'CRF sector (IPCC 2006): electronics industry', label: 'CRF sector (IPCC 2006): electronics industry' , sector_divisions_id: 1 },
-    { id: 9, value : 'CRF sector (IPCC 2006): energy', label: 'CRF sector (IPCC 2006): energy', sector_divisions_id: 1 },
-    { id: 10, value : 'CRF sector (IPCC 2006): energy industry', label: 'CRF sector (IPCC 2006): energy industry', sector_divisions_id: 1 },
-    { id: 11, value : 'agriculture, forestry and land use sector', label: 'Agriculture, forestry and land use sector', sector_divisions_id: 3 },
-    { id: 12, value : 'energy demand sector', label: 'Energy demand sector', sector_divisions_id: 3,
+    { id: 1, value : 'CRF sector (IPCC 2006): agricultural soils', label : wrapInTooltip('CRF sector (IPCC 2006): agricultural soils', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 2, value : 'CRF sector (IPCC 2006): agriculture', label : wrapInTooltip('CRF sector (IPCC 2006): agriculture', 'description', 'link'),  sector_divisions_id: 2 },
+    { id: 3, value : 'CRF sector (IPCC 2006): agriculture - other', label : wrapInTooltip('CRF sector (IPCC 2006): agriculture - other', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 4, value : 'CRF sector (IPCC 2006): agriculture, forestry and fishing', label : wrapInTooltip('CRF sector (IPCC 2006): agriculture, forestry and fishing', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 5, value : 'CRF sector (IPCC 2006): biological treatment of solid waste', label : wrapInTooltip('CRF sector (IPCC 2006): biological treatment of solid waste', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 6, value : 'CRF sector (IPCC 2006): cement production', label : wrapInTooltip('CRF sector (IPCC 2006): cement production', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 7, value : 'CRF sector (IPCC 2006): chemical industry', label : wrapInTooltip('CRF sector (IPCC 2006): chemical industry', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 8, value : 'CRF sector (IPCC 2006): enteric fermentation', label : wrapInTooltip('CRF sector (IPCC 2006): enteric fermentation', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 9, value : 'CRF sector (IPCC 2006): field burning of agricultural residues', label : wrapInTooltip('CRF sector (IPCC 2006): field burning of agricultural residues', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 10, value : 'CRF sector (IPCC 2006): forest land', label : wrapInTooltip('CRF sector (IPCC 2006): forest land', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 11, value : 'CRF sector (IPCC 2006): fuel combustion', label : wrapInTooltip('CRF sector (IPCC 2006): fuel combustion', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 12, value : 'CRF sector (IPCC 2006): fuel combustion - other', label : wrapInTooltip('CRF sector (IPCC 2006): fuel combustion - other', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 13, value : 'CRF sector (IPCC 2006): fuel combustion - other sectors', label : wrapInTooltip('CRF sector (IPCC 2006): fuel combustion - other sectors', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 14, value : 'CRF sector (IPCC 2006): fugitive emissions from fuels', label : wrapInTooltip('CRF sector (IPCC 2006): fugitive emissions from fuels', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 15, value : 'CRF sector (IPCC 2006): grassland', label : wrapInTooltip('CRF sector (IPCC 2006): grassland', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 16, value : 'CRF sector (IPCC 2006): harvested wood products', label : wrapInTooltip('CRF sector (IPCC 2006): harvested wood products', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 17, value : 'CRF sector (IPCC 2006): incineration and open burning of waste', label : wrapInTooltip('CRF sector (IPCC 2006): incineration and open burning of waste', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 18, value : 'CRF sector (IPCC 2006): indirect CO2', label : wrapInTooltip('CRF sector (IPCC 2006): indirect CO2', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 19, value : 'CRF sector (IPCC 2006): industrial processes and product use', label : wrapInTooltip('CRF sector (IPCC 2006): industrial processes and product use', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 20, value : 'CRF sector (IPCC 2006): industrial processes and product use - other', label : wrapInTooltip('CRF sector (IPCC 2006): industrial processes and product use - other', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 21, value : 'CRF sector (IPCC 2006): international aviation', label : wrapInTooltip('CRF sector (IPCC 2006): international aviation', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 22, value : 'CRF sector (IPCC 2006): international bunkers', label : wrapInTooltip('CRF sector (IPCC 2006): international bunkers', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 23, value : 'CRF sector (IPCC 2006): international bunkers and multilateral operations', label : wrapInTooltip('CRF sector (IPCC 2006): international bunkers and multilateral operations', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 24, value : 'CRF sector (IPCC 2006): iron and steel production', label : wrapInTooltip('CRF sector (IPCC 2006): iron and steel production', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 25, value : 'CRF sector (IPCC 2006): land use, land-use change and forestry', label : wrapInTooltip('CRF sector (IPCC 2006): land use, land-use change and forestry', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 26, value : 'CRF sector (IPCC 2006): land use, land-use change and forestry - other', label : wrapInTooltip('CRF sector (IPCC 2006): land use, land-use change and forestry - other', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 27, value : 'CRF sector (IPCC 2006): liming', label : wrapInTooltip('CRF sector (IPCC 2006): liming', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 28, value : 'CRF sector (IPCC 2006): manufacture of solid fuels and other energy industries', label : wrapInTooltip('CRF sector (IPCC 2006): manufacture of solid fuels and other energy industries', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 29, value : 'CRF sector (IPCC 2006): manufacturing industries and construction', label : wrapInTooltip('CRF sector (IPCC 2006): manufacturing industries and construction', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 30, value : 'CRF sector (IPCC 2006): manure management', label : wrapInTooltip('CRF sector (IPCC 2006): manure management', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 31, value : 'CRF sector (IPCC 2006): maritime navigation', label : wrapInTooltip('CRF sector (IPCC 2006): maritime navigation', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 32, value : 'CRF sector (IPCC 2006): metal industry', label : wrapInTooltip('CRF sector (IPCC 2006): metal industry', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 33, value : 'CRF sector (IPCC 2006): mineral industry', label : wrapInTooltip('CRF sector (IPCC 2006): mineral industry', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 34, value : 'CRF sector (IPCC 2006): multilateral operations', label : wrapInTooltip('CRF sector (IPCC 2006): multilateral operations', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 35, value : 'CRF sector (IPCC 2006): non-energy products from fuels and solvent use', label : wrapInTooltip('CRF sector (IPCC 2006): non-energy products from fuels and solvent use', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 36, value : 'CRF sector (IPCC 2006): CO2 captured', label: wrapInTooltip('CRF sector (IPCC 2006): CO2 captured', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 37, value : 'CRF sector (IPCC 2006): CO2 emissions from biomass', label: wrapInTooltip('CRF sector (IPCC 2006): CO2 emissions from biomass', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 38, value : 'CRF sector (IPCC 2006): CO2 transport and storage', label: wrapInTooltip('CRF sector (IPCC 2006): CO2 transport and storage', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 39, value : 'CRF sector (IPCC 2006): commercial and institutional', label:wrapInTooltip('CRF sector (IPCC 2006): commercial and institutional', 'description', 'link') , sector_divisions_id: 2 },
+    { id: 40, value : 'CRF sector (IPCC 2006): cropland', label: wrapInTooltip('CRF sector (IPCC 2006): cropland', 'description', 'link') , sector_divisions_id: 2 },
+    { id: 41, value : 'CRF sector (IPCC 2006): domestic aviation', label: wrapInTooltip('CRF sector (IPCC 2006): domestic aviation', 'description', 'link') , sector_divisions_id: 2 },
+    { id: 42, value : 'CRF sector (IPCC 2006): domestic navigation', label: wrapInTooltip('CRF sector (IPCC 2006): domestic navigation', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 43, value : 'CRF sector (IPCC 2006): electronics industry', label: wrapInTooltip('CRF sector (IPCC 2006): electronics industry', 'description', 'link') , sector_divisions_id: 2 },
+    { id: 44, value : 'CRF sector (IPCC 2006): energy', label: wrapInTooltip('CRF sector (IPCC 2006): energy', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 45, value : 'CRF sector (IPCC 2006): energy industry', label: wrapInTooltip('CRF sector (IPCC 2006): energy industry', 'description', 'link'), sector_divisions_id: 2 },
+    { id: 46, value : 'agriculture, forestry and land use sector', label: wrapInTooltip('Agriculture, forestry and land use sector', 'description', 'link'), sector_divisions_id: 11 },
+    { id: 47, value : 'energy demand sector', label: wrapInTooltip('Energy demand sector', 'description', 'link'), sector_divisions_id: 11,
       children: [
-          { id: 13, value : 'building sector', label: 'Building sector' },
-          { id: 14, value : 'commercial sector', label: 'Commercial sector' },
-          { id: 15, value : 'heating and cooling sector', label: 'Heating and cooling sector' },
-          { id: 16, value : 'household sector', label: 'Household sector' },
-          { id: 17, value : 'transport sector', label: 'Transport sector' },
+          { id: 48, value : 'building sector', label: wrapInTooltip('Building sector', 'description', 'link') },
+          { id: 49, value : 'commercial sector', label: wrapInTooltip('Commercial sector', 'description', 'link') },
+          { id: 50, value : 'heating and cooling sector', label: wrapInTooltip('Heating and cooling sector', 'description', 'link') },
+          { id: 51, value : 'household sector', label: wrapInTooltip('Household sector', 'description', 'link') },
+          { id: 52, value : 'transport sector', label: wrapInTooltip('Transport sector', 'description', 'link') },
       ]
     },
-    { id: 18, value : 'energy transformation sector', label: 'Energy transformation sector', sector_divisions_id: 3,
+    { id: 53, value : 'energy transformation sector', label: wrapInTooltip('Energy transformation sector', 'description', 'link'), sector_divisions_id: 11,
       children: [
-          { id: 19, value : 'electricity sector', label: 'Electricity sector' },
+          { id: 54, value : 'electricity sector', label: wrapInTooltip('Electricity sector', 'description', 'link') },
       ]
     },
-    { id: 20, value : 'industry sector', label: 'Industry sector', sector_divisions_id: 3 },
-    { id: 21, value : 'waste and wastewater sector', label: 'Waste and wastewater sector', sector_divisions_id: 3 }
+    { id: 55, value : 'industry sector', label: wrapInTooltip('Industry sector', 'description', 'link'), sector_divisions_id: 11 },
+    { id: 56, value : 'EU emission sector: effort sharing', label: wrapInTooltip('EU emission sector: effort sharing', 'description', 'link'), sector_divisions_id: 3 },
+    { id: 57, value : 'EU emission sector: ETS', label: wrapInTooltip('EU emission sector: ETS', 'description', 'link'), sector_divisions_id: 3 },
+    { id: 58, value : 'EU emission sector: ETS aviation', label: wrapInTooltip('EU emission sector: ETS aviation', 'description', 'link'), sector_divisions_id: 3 },
+    { id: 59, value : 'EU emission sector: ETS stationary', label: wrapInTooltip('EU emission sector: ETS stationary', 'description', 'link'), sector_divisions_id: 3 },
+    { id: 60, value : 'EU emission sector: LULUCF', label: wrapInTooltip('EU emission sector: LULUCF', 'description', 'link'), sector_divisions_id: 3 },
+    { id: 61, value : 'KSG sector agriculture', label: wrapInTooltip('KSG sector agriculture', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 62, value : 'KSG sector buildings', label: wrapInTooltip('KSG sector buildings', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 63, value : 'KSG sector energy industry', label: wrapInTooltip('KSG sector energy industry', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 64, value : 'KSG sector industry', label: wrapInTooltip('KSG sector industry', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 65, value : 'KSG sector land use, land-use change and forestry', label: wrapInTooltip('KSG sector land use, land-use change and forestry', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 66, value : 'KSG sector transport', label: wrapInTooltip('KSG sector transport', 'description', 'link'), sector_divisions_id: 7 },
+    { id: 67, value : 'KSG sector waste management and other', label: wrapInTooltip('KSG sector waste management and other', 'description', 'link'), sector_divisions_id: 7 },
   ]);
 
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
@@ -182,6 +261,19 @@ function Factsheet(props) {
 
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
 
+  const sector_divisions = [
+    { id: 1, name: 'CRF sectors (IPCC 1996)' },
+    { id: 2, name: 'CRF sectors (IPCC 2006)' },
+    { id: 3, name: 'EU emission sector division' },
+    { id: 4, name: 'Eurostat energy balances' },
+    { id: 5, name: 'German energy balances' },
+    { id: 6, name: 'GovReg sector division' },
+    { id: 7, name: 'KSG' },
+    { id: 8, name: 'MMR' },
+    { id: 9, name: 'Nace_ sectors' },
+    { id: 10, name: 'Renewable_ energy_ directive_ sectors' },
+    { id: 11, name: 'Other' },
+  ];
 
   const [factsheetJSON, setFactsheetJSON] = useState({
     "@context": {
@@ -273,6 +365,8 @@ function Factsheet(props) {
   const handleRemoveFactsheet = () => {
     axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
+
+
 
   const handleCloseJSON = () => {
     setOpenJSON(false);
@@ -465,10 +559,7 @@ function Factsheet(props) {
       }
     }
 
-    const sector_divisions = [
-      { id: 1, name: 'The Common Reporting Format (CRF)' },
-      { id: 3, name: 'Other' },
-    ];
+
 
     const authors = [
       { id: 'Julia Repenning',  name: 'Julia Repenning' },
@@ -690,19 +781,6 @@ function Factsheet(props) {
         'aria-controls': `vertical-tabpanel-${index}`,
       };
     }
-
-    const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
-      <Tooltip {...props} classes={{ popper: className }} />
-    ))(({ theme }) => ({
-      [`& .${tooltipClasses.tooltip}`]: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        maxWidth: 520,
-        fontSize: theme.typography.pxToRem(20),
-        border: '1px solid black',
-        padding: '20px'
-      },
-    }));
 
     const handleStudyKeywords = (event) => {
       if (event.target.checked) {
