@@ -2,7 +2,7 @@ var peerReview = function (config) {
     var state = {
         "topic": null,
         "table": config.table,
-        "reviewList": []
+        "reviewList": [],
         "metaMetadata": {
             "reviewVersion": "OEP-0.0.1",
             "metadataLicense": {
@@ -64,7 +64,7 @@ var peerReview = function (config) {
 
     function bindButtons() {
         // submit
-        $('#peer_review-submit').bind('click', function submit peerReview() {
+        $('#peer_review-submit').bind('click', function submitPeerReview() {
             $('#peer_review-submitting').removeClass('d-none');
             var json = config.editor.getValue();
             json = fixData(json);
