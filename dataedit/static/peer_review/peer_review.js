@@ -1,14 +1,9 @@
-var PeerReview = function (config) {
+var peerReview = function (config) {
     var state = {
         "topic": null,
         "table": config.table,
-        "date_started": null,
-        "date_finished": null,
-        "reviews": [],
-        "accepted": null,
-        "granted_batch": null,
+        "reviewList": []
         "metaMetadata": {
-            "metadata_version": "v1.5.2",
             "reviewVersion": "OEP-0.0.1",
             "metadataLicense": {
                 "name": "CC0-1.0",
@@ -16,7 +11,7 @@ var PeerReview = function (config) {
                 "path": "https://creativecommons.org/publicdomain/zero/1.0/"
             }
         }
-    };
+    }
 
     /*
     TODO: consolidate functions (same as in wizard and other places)
@@ -69,7 +64,7 @@ var PeerReview = function (config) {
 
     function bindButtons() {
         // submit
-        $('#peer_review-submit').bind('click', function submitPeerReview() {
+        $('#peer_review-submit').bind('click', function submit peerReview() {
             $('#peer_review-submitting').removeClass('d-none');
             var json = config.editor.getValue();
             json = fixData(json);
@@ -100,10 +95,8 @@ var PeerReview = function (config) {
 
 
 
-
     })();
 
     return config;
 
 }
-
