@@ -161,7 +161,7 @@
     <script src="/static/peer_review/peer_review.js"></script>
     <script>
         var config = JSON.parse("{{ config|escapejs }}");
-        PeerReview(config);
+        peerReview(config);
 
 
         // 1 Identify Category from tab
@@ -239,6 +239,7 @@
                     "category": category,
                     "key": fieldName,
                     "state": state,
+                    "entry":null,
                     "loop": null
                 }
             }
@@ -246,7 +247,7 @@
                     "category": category,
                     "key": fieldName,
                     "state": state,
-                    "loop": [
+                    "fieldReview": [
                         {
                             "timestamp": date,
                             "reviewer": "oep_user",
