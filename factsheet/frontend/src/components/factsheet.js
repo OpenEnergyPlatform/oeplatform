@@ -21,7 +21,7 @@ import CustomDatePicker from './customDatePicker.js'
 
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
-
+import ErrorIcon from '@mui/icons-material/Error';
 import Typography from '@mui/material/Typography';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -55,6 +55,8 @@ import uuid from "react-uuid";
 
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import modelsList from './models_list.json';
+import frameworksList from './frameworks_list.json';
 
 
 function TabPanel(props: TabPanelProps) {
@@ -247,10 +249,12 @@ function Factsheet(props) {
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.expanded_energy_transformation_processes : []);
 
-  const [selectedEnergyTransportationProcess, setSelectedEnergyTransportationProcess] = useState(id !== 'new' ? fsData.energy_transportation_process : []);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
+
+  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
+  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
 
   const [removeReport, setRemoveReport] = useState(false);
   const navigate = useNavigate();
@@ -295,66 +299,65 @@ function Factsheet(props) {
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
-      axios.post(conf.toep + 'factsheet/add/', null,
-      {  params:
-          {
-            id: id,
-            study_name: studyName,
-            name: factsheetName,
-            acronym: acronym,
-            abstract: abstract,
-            institution: JSON.stringify(selectedInstitution),
-            funding_source: JSON.stringify(selectedFundingSource),
-            contact_person: JSON.stringify(selectedContactPerson),
-            sector_divisions: JSON.stringify(selectedSectorDivisions),
-            sectors: JSON.stringify(selectedSectors),
-            expanded_sectors: JSON.stringify(expandedSectors),
-            energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
-            energy_transformation_processes: JSON.stringify(selectedEnergyTransportationProcess),
-            expanded_energy_transportation_process: JSON.stringify(expandedEnergyTransformationProcesses),
-            study_keywords: JSON.stringify(selectedStudyKewords),
-            report_title: report_title,
-            date_of_publication: date_of_publication,
-            doi: doi,
-            place_of_publication: place_of_publication,
-            link_to_study: link_to_study,
-            authors: JSON.stringify(selectedAuthors),
-            scenarios: JSON.stringify(scenarios),
-          }
+      axios.post(conf.toep + 'factsheet/add/',
+      {
+        id: id,
+        study_name: studyName,
+        name: factsheetName,
+        acronym: acronym,
+        abstract: abstract,
+        institution: JSON.stringify(selectedInstitution),
+        funding_source: JSON.stringify(selectedFundingSource),
+        contact_person: JSON.stringify(selectedContactPerson),
+        sector_divisions: JSON.stringify(selectedSectorDivisions),
+        sectors: JSON.stringify(selectedSectors),
+        expanded_sectors: JSON.stringify(expandedSectors),
+        energy_carriers: JSON.stringify(selectedEnergyCarriers),
+        expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
+        expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+        energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
+        study_keywords: JSON.stringify(selectedStudyKewords),
+        report_title: report_title,
+        date_of_publication: date_of_publication,
+        doi: doi,
+        place_of_publication: place_of_publication,
+        link_to_study: link_to_study,
+        authors: JSON.stringify(selectedAuthors),
+        scenarios: JSON.stringify(scenarios),
+        models: JSON.stringify(selectedModels),
+        frameworks: JSON.stringify(selectedFrameworks),
       }).then(response => {
       setOpenSavedDialog(true)
     });
 
     } else {
-      axios.post(conf.toep + 'factsheet/update/', null,
-      {  params:
-          {
-            id: id,
-            study_name: studyName,
-            name: factsheetName,
-            acronym: acronym,
-            abstract: abstract,
-            institution: JSON.stringify(selectedInstitution),
-            funding_source: JSON.stringify(selectedFundingSource),
-            contact_person: JSON.stringify(selectedContactPerson),
-            sector_divisions: JSON.stringify(selectedSectorDivisions),
-            sectors: JSON.stringify(selectedSectors),
-            expanded_sectors: JSON.stringify(expandedSectors),
-            energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
-            energy_transformation_processes: JSON.stringify(selectedEnergyTransportationProcess),
-            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-            study_keywords: JSON.stringify(selectedStudyKewords),
-            report_title: report_title,
-            date_of_publication: date_of_publication,
-            doi: doi,
-            place_of_publication: place_of_publication,
-            link_to_study: link_to_study,
-            authors: JSON.stringify(selectedAuthors),
-            scenarios: JSON.stringify(scenarios),
-          }
+      axios.post(conf.toep + 'factsheet/update/',
+      {
+        id: id,
+        study_name: studyName,
+        name: factsheetName,
+        acronym: acronym,
+        abstract: abstract,
+        institution: JSON.stringify(selectedInstitution),
+        funding_source: JSON.stringify(selectedFundingSource),
+        contact_person: JSON.stringify(selectedContactPerson),
+        sector_divisions: JSON.stringify(selectedSectorDivisions),
+        sectors: JSON.stringify(selectedSectors),
+        expanded_sectors: JSON.stringify(expandedSectors),
+        energy_carriers: JSON.stringify(selectedEnergyCarriers),
+        expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
+        expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+        study_keywords: JSON.stringify(selectedStudyKewords),
+        report_title: report_title,
+        date_of_publication: date_of_publication,
+        doi: doi,
+        place_of_publication: place_of_publication,
+        link_to_study: link_to_study,
+        authors: JSON.stringify(selectedAuthors),
+        scenarios: JSON.stringify(scenarios),
+        models: JSON.stringify(selectedModels),
+        frameworks: JSON.stringify(selectedFrameworks),
+        energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
       }).then(response => {
         setOpenUpdatedDialog(true)
       });
@@ -363,6 +366,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
+
     axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
@@ -443,7 +447,11 @@ function Factsheet(props) {
   };
 
   const handleClickOpenRemovedDialog = () => {
-    openRemoveddDialog(true);
+    setOpenRemovedDialog(true);
+  };
+
+  const handleClickCloseRemovedDialog = () => {
+    setOpenRemovedDialog(false);
   };
 
   const handleCloseTurtle = () => {
@@ -723,6 +731,14 @@ function Factsheet(props) {
       setSelectedAuthors(authorsList);
     };
 
+    const modelsHandler = (modelsList) => {
+      setSelectedModels(modelsList);
+    };
+
+    const frameworksHandler = (frameworksList) => {
+      setSelectedFrameworks(frameworksList);
+    };
+
     const institutionHandler = (institutionList) => {
       setSelectedInstitution(institutionList);
     };
@@ -756,15 +772,11 @@ function Factsheet(props) {
     };
 
     const energyTransformationProcessesHandler = (energyProcessesList) => {
-      setSelectedEnergyTransportationProcess(energyProcessesList);
+      setSelectedEnergyTransformationProcesses(energyProcessesList);
     };
 
     const expandedEnergyTransformationProcessesHandler = (expandedEnergyProcessesList) => {
       setExpandedEnergyTransformationProcesses(expandedEnergyProcessesList);
-    };
-
-    const energyTransportationProcessHandler = (energyTransportationProcessList) => {
-      setSelectedEnergyTransportationProcess(energyTransportationProcessList);
     };
 
     const scenarioInputDatasetRegionHandler = (inputDatasetRegionList) => {
@@ -1584,7 +1596,7 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '100%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
+          style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '95%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
         >
               <Grid item xs={12} >
                 <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px' }}>
@@ -1653,7 +1665,7 @@ function Factsheet(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '97%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
+          style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '95%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
         >
           <Grid item xs={12} >
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
@@ -1754,12 +1766,22 @@ function Factsheet(props) {
 
 
     const items = {
-      titles: ['Study', 'Scenarios', 'Models', 'Frameworks'],
+      titles: ['Study', 'Scenarios', 'Models and Frameworks'],
       contents: [
         renderStudy(),
         renderScenario(),
-        <CustomAutocomplete showSelectedElements={true} optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Models' handler={() => console.log('TDB')} selectedElements={[]}/>,
-        <CustomAutocomplete showSelectedElements={true}  optionsSet={[{ label: 'TDB', id: 'TDB'}]} kind='Frameworks' handler={() => console.log('TDB')} selectedElements={[]}/>,
+        <Grid container
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete manyItems showSelectedElements={true} optionsSet={modelsList} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+          </Grid>
+          <Grid item xs={6} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete manyItems showSelectedElements={true}  optionsSet={frameworksList} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+          </Grid>
+        </Grid>,
         ]
     }
     const convert2RDF = async () => {
@@ -1829,7 +1851,7 @@ function Factsheet(props) {
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
               <Tooltip title="Delete factsheet">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleRemoveFactsheet}> <DeleteOutlineIcon /> </Button>
+                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
               </Tooltip>
               <Tooltip title="Share this factsheet">
                 <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRLeft': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
@@ -1916,6 +1938,7 @@ function Factsheet(props) {
                 </Button>
               </DialogActions>
             </Dialog>
+
             <Dialog
               fullWidth
               maxWidth="md"
@@ -1924,25 +1947,30 @@ function Factsheet(props) {
               aria-labelledby="responsive-dialog-title"
             >
               <DialogTitle id="responsive-dialog-title">
-                <b>Factsheet Removed!</b>
+                <b>Warning!</b>
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
                   <div>
                     <pre>
-                      Your factsheet has removed from the Open Energy Platform!
+                     Are you sure about removing the <b>{acronym}</b> from Open Energy Platform?
                     </pre>
                   </div>
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Link to={`factsheet/`} onClick={() => this.reloadRoute()} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
-                <Button variant="outlined" >
-                  Back to main page
+                <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+                  this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
+                <Button variant="contained" color="error" >
+                  Yes
                 </Button>
                 </Link>
+                <Button variant="contained" onClick={handleClickCloseRemovedDialog}  >
+                Cancel
+                </Button>
               </DialogActions>
             </Dialog>
+
             {mode === "wizard" &&
               <div className='wizard'>
                   <Grid container >

@@ -17,20 +17,14 @@ import Button from '@mui/material/Button';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
-
 import axios from "axios"
-
 import CustomCard from './components/customCard.js'
 import Home from './home.js'
 import Factsheet from './components/factsheet.js'
-
 import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
-
 import conf from "./conf.json";
-
 const url_id = String(window.location.href).split('/').pop()
-
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
 });

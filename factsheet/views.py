@@ -12,26 +12,34 @@ def factsheets_index(request, *args, **kwargs):
 
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
-    name = request.GET.get('name')
-    acronym = request.GET.get('acronym')
-    study_name = request.GET.get('study_name')
-    abstract = request.GET.get('abstract')
-    institution = request.GET.get('institution')
-    funding_source = request.GET.get('funding_source')
-    authors = request.GET.get('authors')
-    contact_person = request.GET.get('contact_person')
-    sector_divisions = request.GET.get('sector_divisions')
-    sectors = request.GET.get('sectors')
-    expanded_sectors = request.GET.get('expanded_sectors')
-    energy_carriers = request.GET.get('energy_carriers')
-    expanded_energy_carriers = request.GET.get('expanded_energy_carriers')
-    energy_transformation_processes = request.GET.get('energy_transformation_processes')
-    expanded_energy_transformation_processes = request.GET.get('expanded_energy_transformation_processes')
-    study_keywords = request.GET.get('study_keywords')
-    doi = request.GET.get('doi')
-    place_of_publication = request.GET.get('place_of_publication')
-    link_to_study = request.GET.get('link_to_study')
-    scenarios = request.GET.get('scenarios')
+    request_body = json.loads(request.body)
+
+    print(request_body)
+
+    name = request_body['name']
+    acronym = request_body['acronym']
+    study_name = request_body['study_name']
+    abstract = request_body['abstract']
+    institution = request_body['institution']
+    funding_source = request_body['funding_source']
+    authors = request_body['authors']
+    contact_person = request_body['contact_person']
+    sector_divisions = request_body['sector_divisions']
+    sectors = request_body['sectors']
+    expanded_sectors = request_body['expanded_sectors']
+    energy_carriers = request_body['energy_carriers']
+    expanded_energy_carriers = request_body['expanded_energy_carriers']
+    energy_transformation_processes = request_body['energy_transformation_processes']
+    expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    study_keywords = request_body['study_keywords']
+    doi = request_body['doi']
+    place_of_publication = request_body['place_of_publication']
+    link_to_study = request_body['link_to_study']
+    scenarios = request_body['scenarios']
+    models = request_body['models']
+    frameworks = request_body['frameworks']
+    date_of_publication = request_body['date_of_publication']
+    report_title = request_body['date_of_publication']
 
     factsheet_obj = {
         'name': name,
@@ -54,6 +62,10 @@ def create_factsheet(request, *args, **kwargs):
         'place_of_publication': place_of_publication,
         'link_to_study': link_to_study,
         'scenarios': json.loads(scenarios) if scenarios is not None else [],
+        'models': json.loads(models) if models is not None else [],
+        'frameworks': json.loads(frameworks) if frameworks is not None else [],
+        'date_of_publication': date_of_publication,
+        'report_title': report_title,
         }
 
     fs = Factsheet(factsheetData=factsheet_obj)
@@ -66,29 +78,35 @@ def create_factsheet(request, *args, **kwargs):
 
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
-    id = request.GET.get('id')
-    name = request.GET.get('name')
-    studyName = request.GET.get('study_name')
-    acronym = request.GET.get('acronym')
-    abstract = request.GET.get('abstract')
-    institution = request.GET.get('institution')
-    funding_source = request.GET.get('funding_source')
-    contact_person = request.GET.get('contact_person')
-    sector_divisions = request.GET.get('sector_divisions')
-    sectors = request.GET.get('sectors')
-    expanded_sectors = request.GET.get('expanded_sectors')
-    energy_carriers = request.GET.get('energy_carriers')
-    expanded_energy_carriers = request.GET.get('expanded_energy_carriers')
-    energy_transformation_processes = request.GET.get('energy_transformation_processes')
-    expanded_energy_transformation_processes = request.GET.get('expanded_energy_transformation_processes')
-    study_keywords = request.GET.get('study_keywords')
-    report_title = request.GET.get('report_title')
-    date_of_publication = request.GET.get('date_of_publication')
-    doi = request.GET.get('doi')
-    place_of_publication = request.GET.get('place_of_publication')
-    link_to_study = request.GET.get('link_to_study')
-    authors = request.GET.get('authors')
-    scenarios = request.GET.get('scenarios')
+    request_body = json.loads(request.body)
+
+    print(request_body)
+
+    id = request_body['id']
+    name = request_body['name']
+    studyName = request_body['study_name']
+    acronym = request_body['acronym']
+    abstract = request_body['abstract']
+    institution = request_body['institution']
+    funding_source = request_body['funding_source']
+    contact_person = request_body['contact_person']
+    sector_divisions = request_body['sector_divisions']
+    sectors = request_body['sectors']
+    expanded_sectors = request_body['expanded_sectors']
+    energy_carriers = request_body['energy_carriers']
+    expanded_energy_carriers = request_body['expanded_energy_carriers']
+    energy_transformation_processes = request_body['energy_transformation_processes']
+    expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    study_keywords = request_body['study_keywords']
+    report_title = request_body['report_title']
+    date_of_publication = request_body['date_of_publication']
+    doi = request_body['doi']
+    place_of_publication = request_body['place_of_publication']
+    link_to_study = request_body['link_to_study']
+    authors = request_body['authors']
+    scenarios = request_body['scenarios']
+    models = request_body['models']
+    frameworks = request_body['frameworks']
 
 
     factsheet = Factsheet.objects.get(id=id)
@@ -114,6 +132,8 @@ def update_factsheet(request, *args, **kwargs):
     factsheet.factsheetData['link_to_study'] = link_to_study
     factsheet.factsheetData['authors'] = json.loads(authors) if authors is not None else []
     factsheet.factsheetData['scenarios'] = json.loads(scenarios) if scenarios is not None else []
+    factsheet.factsheetData['models'] = json.loads(models) if models is not None else []
+    factsheet.factsheetData['frameworks'] = json.loads(frameworks) if frameworks is not None else []
 
     factsheet.save()
 

@@ -91,7 +91,7 @@ export default function CustomAutocomplete(parameters) {
         sx={{
           'marginTop': '10px',
           'overflow': 'auto',
-          'height': manyItems ? '80px' :'40px',
+          'height': manyItems ? '100px' :'40px',
           'marginBottom': '20px',
           border: '1px dashed #cecece',
           padding: '20px',
