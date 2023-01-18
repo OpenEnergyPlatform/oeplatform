@@ -105,6 +105,6 @@ urlpatterns = [
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(qual=pgsql_qualifier),
-        views.PeerReview.as_view(), name="peer_review"
+        views.PeerReviewView.as_view(), name="peer_review"
     )
 ]
