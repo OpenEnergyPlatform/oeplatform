@@ -165,7 +165,7 @@
 
 
         // 1 Identify Category from tab
-        var selctedCategory;
+        var selectedCategory;
         document.getElementById('general').addEventListener('click', category_identifier);
         var category_identifier = function (inhtml) {
 
@@ -173,7 +173,7 @@
             const x = inhtml;
             console.log(x)
             const y = document.querySelector(inhtml).innerHTML;
-            selctedCategory = x;
+            selectedCategory = x;
 
 
 
@@ -182,11 +182,11 @@
 
 
         // 1 Identify field name
-        var selctedField;
+        var selectedField;
         document.getElementById('field_name').addEventListener('click', click_field);
         var click_field = function (fieldKey, fieldValue) {
             const x = fieldKey;
-            selctedField = x;
+            selectedField = x;
             const selectedName = document.querySelector("#review-field-name");
             selectedName.textContent = fieldKey;
 
@@ -195,11 +195,11 @@
 
 
         // 2 Identify selected button
-        var selctedState;
+        var selectedState;
         document.getElementById('ok-button').addEventListener('click', selectedButton);
         var selectedButton = function(button) {
             const state = button;
-            selctedState = state;
+            selectedState = state;
 
             return state
         }
@@ -227,14 +227,14 @@
         document.getElementById('submit-button').addEventListener('click', saveEntrances);
         var saveEntrances = function() {
             var category = category_identifier();
-            var fieldName = selctedField;
-            var state = selctedState;
+            var fieldName = selectedField;
+            var state = selectedState;
             let date = new Date();
             var comment = saveComment();
             var value_suggestion = saveValue();
 
 
-            if (selctedState == "ok") {
+            if (selectedState == "ok") {
                 var review_result = {
                     "category": category,
                     "key": fieldName,
