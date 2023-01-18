@@ -1829,7 +1829,7 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
         )
 
 
-class PeerReview(LoginRequiredMixin, View):
+class PeerReviewView(LoginRequiredMixin, View):
     def load_json(self, schema, table):
         metadata = load_metadata_from_db(schema, table)
         return metadata
@@ -1935,12 +1935,9 @@ class PeerReview(LoginRequiredMixin, View):
 
         return render(request, 'dataedit/peer_review.html', context=context_meta)
 
-    # def post(self, request, schema, table):
-    #     #table_obj = PeerReview.load(schema=schema, table=table)
-    #    review = {"test": "Test"}
+    def post(self, request, schema, table):
+        table_obj = PeerReview.load(schema=schema, table=table)
+        review = {"test": "Test"}
 
-    #     PeerReview(schema="hihi", table="hi", in_progress=False, review=review)
-    #     PeerReview.save()
-
-
-
+        PeerReview(schema="hihi", table="hi", in_progress=False, review=review).save()
+        # PeerReview.save()
