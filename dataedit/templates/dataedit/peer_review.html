@@ -159,12 +159,11 @@
 
 {% block after-body-bottom-js %}
     <script src="/static/peer_review/peer_review.js"></script>
+    <script src="/static/peer_review/review_frame.js"></script>
     <script>
         var config = JSON.parse("{{ config|escapejs }}");
         //var a = "{{meta.source}}";
-        //alert(JSON.stringify(a.field, null, 4));
         peerReview(config);
-
 
         // 1 Identify Category from tab
         var selectedCategory;
@@ -185,10 +184,12 @@
 
         // 1 Identify field name
         var selectedField;
+        var selectedFieldValue;
         //document.getElementById('field_name').addEventListener('click', click_field);
         var click_field = function (fieldKey, fieldValue) {
             const x = fieldKey;
             selectedField = x;
+            selectedFieldValue=fieldValue;
             const selectedName = document.querySelector("#review-field-name");
             selectedName.textContent = fieldKey;
 
@@ -202,7 +203,34 @@
         var selectedButton = function(button) {
             const state = button;
             selectedState = state;
-
+	        // Fill local Storage variable with content of user input upon Button click
+            // Create list for review fields if it doesn't exist yet
+            if(Object.keys(current_review["reviews"]).length === 0 
+                && current_review["reviews"].constructor === Object){
+                    current_review["reviews"] = [];
+            }
+            if(selectedField){
+                //TODO check if object with selectedField already exists (using for loop)
+                //TODO turn into function updateReviewVariable()
+                var element = document.querySelector('[aria-selected="true"]');
+                var category = (element.getAttribute("data-bs-target"));
+                current_review["reviews"].push(
+                    {
+                        "category": category,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": null, //TODO put actual timestamp
+                            "user": "oep_reviewer", //TODO put actual username
+                            "role": "reviewer",
+                            "contributorValue": selectedFieldValue,
+                            "comment": document.getElementById("commentarea").value,
+                            "reviewerSuggestion": document.getElementById("valuearea").value,
+                            "state": selectedState,
+                        }
+                    }
+                );
+            }
+            alert(JSON.stringify(current_review, null, 4));
             return state
         }
 
