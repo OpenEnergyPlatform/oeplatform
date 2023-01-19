@@ -19,3 +19,15 @@
   flex-direction: column;
   background-color: #f1f1f1;
 }
+
+.flex-container > div.field-ok {
+  background-color: #198754;
+}
+
+.flex-container > div.field-suggestion {
+  background-color: #ffc107;
+}
+
+.flex-container > div.field-rejected {
+  background-color: #dc3545;
+}

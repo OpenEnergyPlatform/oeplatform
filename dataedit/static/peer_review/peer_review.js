@@ -192,6 +192,14 @@ function saveEntrances() {
         },
     );
   }
+
+  // Color ok/suggestion/rejected
+  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  $(field_id).removeClass('field-ok');
+  $(field_id).removeClass('field-suggestion');
+  $(field_id).removeClass('field-rejected');
+  $(field_id).addClass(`field-${selectedState}`);
+
   // alert(JSON.stringify(current_review, null, 4));
   document.getElementById("summary").innerHTML = (
     JSON.stringify(current_review, null, 4)
