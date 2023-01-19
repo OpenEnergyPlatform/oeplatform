@@ -223,6 +223,10 @@ function checkReviewComplete() {
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id;
+    // TODO: remove resources, once they are working correct
+    if (["resource", "summary"].includes(category_name)) {
+      continue;
+    }
     if (!(category_name in fields_reviewed)) {
       return;
     }
