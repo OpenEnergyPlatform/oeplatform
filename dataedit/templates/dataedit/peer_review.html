@@ -113,9 +113,9 @@
             <h2 id="review-field-name"></h2>
             <hr>
             <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-                <button type="button" class="btn btn-success" id="ok-button" value="ok">Ok</button>
-                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion">Suggestion</button>
-                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected">Rejected</button>
+                <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Ok</button>
+                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggestion</button>
+                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Rejected</button>
             </div>
 
             <div class="mb-3" id="field-value">
@@ -158,10 +158,8 @@
 
 
 {% block after-body-bottom-js %}
-    <script>
-        var config = JSON.parse("{{ config|escapejs }}");
-        //var a = "{{meta.source}}";
-    </script>
-    <script src="/static/peer_review/peer_review.js"></script>
-    <script src="/static/peer_review/review_frame.js"></script>
+  <script>
+    var config = JSON.parse("{{ config|escapejs }}");
+  </script>
+  <script src="/static/peer_review/peer_review.js"></script>
 {% endblock after-body-bottom-js %}
