@@ -196,6 +196,39 @@ function saveEntrances() {
   document.getElementById("summary").innerHTML = (
     JSON.stringify(current_review, null, 4)
   );
+  checkReviewComplete();
 };
+
+/**
+ * Checks if all fields are reviewed and activates submit button if ready
+ */
+function checkReviewComplete() {
+  var fields_reviewed = {};
+  for (const review of current_review.reviews) {
+    const category_name = review.category.slice(1);
+    if (!(category_name in fields_reviewed)) {
+      fields_reviewed[category_name] = [];
+    }
+    fields_reviewed[category_name].push(review.key);
+  }
+
+  const categories = document.querySelectorAll(".tab-pane");
+  for (const category of categories) {
+    const category_name = category.id;
+    if (!(category_name in fields_reviewed)) {
+      return;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (field of category_fields) {
+      const field_name = field.id.slice(6);
+      if (!fields_reviewed[category_name].includes(field_name)) {
+        return;
+      }
+    }
+  }
+
+  // All fields reviewed!
+  $('#submit_summary').removeClass('disabled');
+}
 
 peerReview(config);
