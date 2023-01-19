@@ -1,8 +1,19 @@
 @use '../../variables' as *;
 
 @forward '../../bootstrap/scss/bootstrap.scss' with(
+    $gray-100: $gray-100,
+    $black: $black,
     $primary: $primary,
     $secondary: $secondary,
+    $body-color: $body-color,
+    $font-size-base: $font-size-base,
+    $h1-font-size: $h1-font-size,
+    $h2-font-size: $h2-font-size,
+    $h3-font-size: $h3-font-size,
+    $h4-font-size: $h4-font-size,
+    $h5-font-size: $h5-font-size,
+    $h6-font-size: $h6-font-size,
+    $font-sizes: $font-sizes,
     $card-border-radius: $card-border-radius,
     $input-border-radius: $input-border-radius,
     $input-border-radius-lg: $input-border-radius-lg,
