@@ -45,11 +45,11 @@
 
           <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
             <div class="flex-container">
-              {% for item in meta.general %}<div id="field_{{item.firstkey}}" onclick="click_field('{{item.firstkey}}', '{{ item.value }}');">
+              {% for item in meta.general %}<div id="field_{{item.field}}" onclick="click_field('{{item.field}}', '{{ item.value }}');">
                 <p>{% if item.field is Null %}
-                  {{item.firstkey}}:  {{ item.value }}
+                  {{item.field}}:  {{ item.value }}
                  {% else %}
-                  {{ item.firstkey}} and {{ item.field }} : {{ item.value }}
+                  {{ item.field}} : {{ item.value }}
                  {% endif %}
               </p>
 
@@ -191,7 +191,7 @@
             selectedField = x;
             selectedFieldValue=fieldValue;
             const selectedName = document.querySelector("#review-field-name");
-            selectedName.textContent = fieldKey;
+            selectedName.textContent = fieldKey + ' ' + fieldValue;
 
             return x
         }
@@ -205,7 +205,7 @@
             selectedState = state;
 	        // Fill local Storage variable with content of user input upon Button click
             // Create list for review fields if it doesn't exist yet
-            if(Object.keys(current_review["reviews"]).length === 0 
+            if(Object.keys(current_review["reviews"]).length === 0
                 && current_review["reviews"].constructor === Object){
                     current_review["reviews"] = [];
             }
