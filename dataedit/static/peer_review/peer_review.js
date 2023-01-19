@@ -27,7 +27,7 @@ var current_review = {
 $('#submit-button').bind('click', saveEntrances);
 
 // Submit review
-$('#peer_review-submit').bind('click', submitPeerReview);
+$('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 
@@ -122,9 +122,7 @@ function peerReview(config) {
  */
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  var json = config.editor.getValue();
-  json = fixData(json);
-  json = JSON.stringify(json);
+  json = JSON.stringify(current_review);
   sendJson("POST", config.url_api_meta, json).then(function() {
     window.location = config.url_view_table;
   }).catch(function(err) {
@@ -192,10 +190,55 @@ function saveEntrances() {
         },
     );
   }
+
+  // Color ok/suggestion/rejected
+  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  $(field_id).removeClass('field-ok');
+  $(field_id).removeClass('field-suggestion');
+  $(field_id).removeClass('field-rejected');
+  $(field_id).addClass(`field-${selectedState}`);
+
   // alert(JSON.stringify(current_review, null, 4));
   document.getElementById("summary").innerHTML = (
     JSON.stringify(current_review, null, 4)
   );
+  checkReviewComplete();
 };
+
+/**
+ * Checks if all fields are reviewed and activates submit button if ready
+ */
+function checkReviewComplete() {
+  var fields_reviewed = {};
+  for (const review of current_review.reviews) {
+    const category_name = review.category.slice(1);
+    if (!(category_name in fields_reviewed)) {
+      fields_reviewed[category_name] = [];
+    }
+    fields_reviewed[category_name].push(review.key);
+  }
+
+  const categories = document.querySelectorAll(".tab-pane");
+  for (const category of categories) {
+    const category_name = category.id;
+    // TODO: remove resources, once they are working correct
+    if (["resource", "summary"].includes(category_name)) {
+      continue;
+    }
+    if (!(category_name in fields_reviewed)) {
+      return;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (field of category_fields) {
+      const field_name = field.id.slice(6);
+      if (!fields_reviewed[category_name].includes(field_name)) {
+        return;
+      }
+    }
+  }
+
+  // All fields reviewed!
+  $('#submit_summary').removeClass('disabled');
+}
 
 peerReview(config);
