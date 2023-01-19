@@ -27,7 +27,7 @@ var current_review = {
 $('#submit-button').bind('click', saveEntrances);
 
 // Submit review
-$('#peer_review-submit').bind('click', submitPeerReview);
+$('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 
@@ -122,9 +122,7 @@ function peerReview(config) {
  */
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  var json = config.editor.getValue();
-  json = fixData(json);
-  json = JSON.stringify(json);
+  json = JSON.stringify(current_review);
   sendJson("POST", config.url_api_meta, json).then(function() {
     window.location = config.url_view_table;
   }).catch(function(err) {
