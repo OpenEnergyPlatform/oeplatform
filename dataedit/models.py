@@ -89,7 +89,7 @@ class PeerReview(models.Model):
     @classmethod
     def load(cls, schema, table):
         table_obj = PeerReview.objects.get(
-            name=table, schema=schema
+            table=table, schema=schema
         )
         return table_obj
 

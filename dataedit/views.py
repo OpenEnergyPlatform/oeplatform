@@ -1924,20 +1924,26 @@ class PeerReviewView(LoginRequiredMixin, View):
                             {"cancle_url": get_cancle_state(self.request),
                              "can_add": can_add,
                              "url_api_meta": reverse(
-                                "api_table_meta", kwargs={"schema": schema, "table": table}
+                                "peer_review", kwargs={"schema": schema, "table": table}
                                 ),
                              "table": table,
                              }),
                         "meta": metadata,
                         }
 
-        print(metadata)
+        # print(context_meta)
 
         return render(request, 'dataedit/peer_review.html', context=context_meta)
 
     def post(self, request, schema, table):
-        table_obj = PeerReview.load(schema=schema, table=table)
-        review = {"test": "Test"}
+        context = {}
+        print(request)
+        #try:
+        table_obj = PeerReview(schema=schema, table=table, in_progress=True, review=request.POST.get("data"))
+        # except Exception as e:
+        #    context.update(({"error": f"{e}"}))
 
-        PeerReview(schema="hihi", table="hi", in_progress=False, review=review).save()
+        table_obj.save()
         # PeerReview.save()
+        return render(request, 'dataedit/peer_review.html', context=context)
+
