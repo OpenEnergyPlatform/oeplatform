@@ -113,9 +113,9 @@
             <h2 id="review-field-name"></h2>
             <hr>
             <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-                <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectedButton('ok')">Ok</button>
-                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectedButton('suggestion')">Suggestion</button>
-                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectedButton('rejected')">Rejected</button>
+                <button type="button" class="btn btn-success" id="ok-button" value="ok">Ok</button>
+                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion">Suggestion</button>
+                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected">Rejected</button>
             </div>
 
             <div class="mb-3" id="field-value">
@@ -199,10 +199,46 @@
 
         // 2 Identify selected button
         var selectedState;
-        document.getElementById('ok-button').addEventListener('click', selectedButton);
-        var selectedButton = function(button) {
+document.getElementById('ok-button').addEventListener('click', function(){
+            selectedState = "ok";
+            selectedButton();
+        });
+document.getElementById('suggestion-button').addEventListener('click', function(){
+            selectedState = "suggestion";
+            selectedButton();
+        });
+document.getElementById('rejected-button').addEventListener('click', function(){
+            selectedState = "rejected";
+            selectedButton();
+        });
+
+
+function selectedButton() {
+    console.log(selectedState);
+}
+
+        // 3 Save added comment for corresponding field
+        // document.getElementById('commentarea').addEventListener('change', saveComment);
+        var saveComment = function() {
+            var z = document.getElementById('commentarea');
+            return z.value
+        }
+
+
+        // 3 Save added value suggestion for corresponding field
+        // document.getElementById('valuearea').addEventListener('change', saveValue);
+        var saveValue = function() {
+            var selectedValue = document.querySelector("#valuearea");
+
+            return selectedValue.value
+        }
+
+
+        // Function to save all values
+        document.getElementById('submit-button').addEventListener('click', saveEntrances);
+          var saveEntrances = function(button) {
             const state = button;
-            selectedState = state;
+            //selectedState = state;
 	        // Fill local Storage variable with content of user input upon Button click
             // Create list for review fields if it doesn't exist yet
             if(Object.keys(current_review["reviews"]).length === 0
@@ -232,31 +268,10 @@
             }
             //alert(JSON.stringify(current_review, null, 4));
             document.getElementById("summary").innerHTML = (JSON.stringify(current_review, null, 4))
-            return state
-        }
 
+          }
 
-        // 3 Save added comment for corresponding field
-        // document.getElementById('commentarea').addEventListener('change', saveComment);
-        var saveComment = function() {
-            var z = document.getElementById('commentarea');
-
-            return z.value
-        }
-
-
-        // 3 Save added value suggestion for corresponding field
-        // document.getElementById('valuearea').addEventListener('change', saveValue);
-        var saveValue = function() {
-            var selectedValue = document.querySelector("#valuearea");
-
-            return selectedValue.value
-        }
-
-
-        // Function to save all values
-        document.getElementById('submit-button').addEventListener('click', saveEntrances);
-        var saveEntrances = function() {
+/*        var saveEntrances = function() {
             var category = category_identifier();
             var fieldName = selectedField;
             var state = selectedState;
@@ -296,7 +311,7 @@
             console.log(review_result)
             return review_result
         }
-
+*/
 
 
 
