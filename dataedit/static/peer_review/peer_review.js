@@ -124,7 +124,7 @@ function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
   json = JSON.stringify(current_review);
   sendJson("POST", config.url_api_meta, json).then(function() {
-    window.location = config.url_view_table;
+    window.location = config.url_api_meta;
   }).catch(function(err) {
     // TODO evaluate error, show user message
     $('#peer_review-submitting').addClass('d-none');
