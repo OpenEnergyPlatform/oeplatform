@@ -9,7 +9,7 @@ var current_review = {
   "dateFinished": null,
   "metadataVersion": "v1.5.2",
   "reviews": [],
-  "reviewFinished": "false",
+  "reviewFinished": false,
   "grantedBadge": null,
   "metaMetadata": {
     "reviewVersion": "OEP-0.0.1",
