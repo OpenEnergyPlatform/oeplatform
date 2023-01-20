@@ -39,7 +39,7 @@ def create_factsheet(request, *args, **kwargs):
     models = request_body['models']
     frameworks = request_body['frameworks']
     date_of_publication = request_body['date_of_publication']
-    report_title = request_body['date_of_publication']
+    report_title = request_body['report_title']
 
     factsheet_obj = {
         'name': name,
