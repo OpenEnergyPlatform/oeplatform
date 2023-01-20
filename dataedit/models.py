@@ -82,7 +82,7 @@ class Filter(models.Model):
 class PeerReview(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    in_progress = BooleanField(null=False)
+    is_finished = BooleanField(null=False)
     review = JSONField(null=True)
 
     # laden
