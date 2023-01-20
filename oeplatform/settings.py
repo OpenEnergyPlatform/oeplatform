@@ -55,7 +55,11 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "tutorials",
     "django_better_admin_arrayfield",
-    "oeo_viewer"
+    "oeo_viewer",
+    "graphene_django",
+    "factsheet",
+    "corsheaders",
+    "bootstrap4"
 )
 
 MIDDLEWARE = (
@@ -68,6 +72,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware"
 )
 
