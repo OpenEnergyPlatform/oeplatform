@@ -123,8 +123,8 @@ function peerReview(config) {
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
   json = JSON.stringify(current_review);
-  sendJson("POST", config.url_api_meta, json).then(function() {
-    window.location = config.url_api_meta;
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
   }).catch(function(err) {
     // TODO evaluate error, show user message
     $('#peer_review-submitting').addClass('d-none');
@@ -136,7 +136,7 @@ function submitPeerReview() {
  * Cancels peer review and forwards to cancel url
  */
 function cancelPeerReview() {
-  window.location = config.cancel_url;
+  window.location = config.url_table;
 }
 
 /**
