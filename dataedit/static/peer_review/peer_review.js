@@ -161,7 +161,7 @@ function selectState(state) { // eslint-disable-line no-unused-vars
 
 
 /**
-  * Saves field review to current review list
+ * Saves field review to current review list
  */
 function saveEntrances() {
   // Create list for review fields if it doesn't exist yet
@@ -170,10 +170,35 @@ function saveEntrances() {
     current_review["reviews"] = [];
   }
   if (selectedField) {
-    // TODO check if object with selectedField already exists (using for loop)
-    // TODO turn into function updateReviewVariable()
+      var unique_entry = true;
+      var dummy_review = current_review;
+      dummy_review["reviews"].forEach(function ( value, idx ){
+          // if field is present already, update field
+          if (value["key"] === selectedField){
+              unique_entry = false;
+              var element = document.querySelector('[aria-selected="true"]');
+              var category = (element.getAttribute("data-bs-target"));
+              Object.assign(current_review["reviews"][idx],
+                  {
+                      "category": category,
+                      "key": selectedField,
+                      "fieldReview": {
+                          "timestamp": null, // TODO put actual timestamp
+                            "user": "oep_reviewer", // TODO put actual username
+                            "role": "reviewer",
+                            "contributorValue": selectedFieldValue,
+                            "comment": document.getElementById("commentarea").value,
+                            "reviewerSuggestion": document.getElementById("valuearea").value,
+                            "state": selectedState,
+                      },
+                  },
+              )
+          }
+      });
     var element = document.querySelector('[aria-selected="true"]');
     var category = (element.getAttribute("data-bs-target"));
+    // if field hasn't been written before, add it
+    if (unique_entry){
     current_review["reviews"].push(
         {
           "category": category,
@@ -188,7 +213,7 @@ function saveEntrances() {
             "state": selectedState,
           },
         },
-    );
+    )};
   }
 
   // Color ok/suggestion/rejected
