@@ -5,12 +5,17 @@ var selectedState;
 var current_review = {
   "topic": null,
   "table": null,
-  "dateStarted": null,
-  "dateFinished": null,
-  "metadataVersion": "v1.5.2",
-  "reviews": [],
-  "reviewFinished": false,
-  "grantedBadge": null,
+  "reviewList": [
+    {
+        "version": null,
+        "dateStarted": null,
+        "dateFinished": null,
+        "metadataVersion": "v1.5.2",
+        "reviews": [],
+        "reviewFinished": false,
+        "grantedBadge": null,
+    }
+  ],
   "metaMetadata": {
     "reviewVersion": "OEP-0.0.1",
     "metadataLicense": {
@@ -146,7 +151,7 @@ function cancelPeerReview() {
  */
 function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-vars,max-len
   selectedField = fieldKey;
-  selectedFieldValue=fieldValue;
+  selectedFieldValue = fieldValue;
   const selectedName = document.querySelector("#review-field-name");
   selectedName.textContent = fieldKey + ' ' + fieldValue;
 };
@@ -206,7 +211,7 @@ function saveEntrances() {
           "fieldReview": {
             "timestamp": null, // TODO put actual timestamp
             "user": "oep_reviewer", // TODO put actual username
-            "role": "reviewer",
+            "role": "reviewer", // TODO identify if it's whether contributor or reviewer
             "contributorValue": selectedFieldValue,
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
