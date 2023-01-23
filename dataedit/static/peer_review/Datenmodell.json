@@ -13,27 +13,18 @@
                     "key": null,
                     "fieldReview": [
                         {
-                            "timestamp": "2022-10-01",
-                            "user": "oep_reviewer",
-                            "role": "reviewer",
+                            "timestamp": null,
+                            "user": null,
+                            "role": null,
                             "contributorValue": null,
                             "comment": null,
                             "reviewerSuggestion": null,
-                            "state": "suggestion, denied"
-                        },
-                        {
-                            "timestamp": "2022-10-01",
-                            "user": "oep_contributor",
-                            "role": "contributor",
-                            "contributorValue": null,
-                            "comment": null,
-                            "reviewerSuggestion": null,
-                            "state": "reviewAccepted,reviewDenied,newValue", 
+                            "state": null
                         }
                     ]
-                },
+                }
             ],
-            "reviewFinished": "false",
+            "reviewFinished": false,
             "grantedBadge": null
         }
     ],
