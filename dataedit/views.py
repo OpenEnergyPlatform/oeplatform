@@ -1875,25 +1875,25 @@ class PeerReviewView(LoginRequiredMixin, View):
         resource_key_list = []
 
         for i in val:
-            for fieldKey, fieldValue in i.items():
-                if fieldValue.split(".")[0] == "spatial":
-                    spatial_key_list.append(i)
-                elif fieldValue.split(".")[0] == "temporal":
-                    temporal_key_list.append(i)
-                elif fieldValue.split(".")[0] == "sources":
-                    source_key_list.append(i)
-                elif fieldValue.split(".")[0] == "licenses":
-                    license_key_list.append(i)
-                elif fieldValue.split(".")[0] == "contributors":
-                    contributor_key_list.append(i)
-                elif fieldValue.split(".")[0] == "resources":
-                    resource_key_list.append(i)
-                elif fieldValue.split(".")[0] == "name" or fieldValue.split(".")[0] == "title" or fieldValue.split(".")[
-                    0] == "id" \
-                        or fieldValue.split(".")[0] == "description" or fieldValue.split(".")[0] == "language" \
-                        or fieldValue.split(".")[0] == "subject" or fieldValue.split(".")[0] == "keywords" \
-                        or fieldValue.split(".")[0] == "publicationDate" or fieldValue.split(".")[0] == "context":
-                    gen_key_list.append(i)
+            fieldKey = list(i.values())[0]
+            if fieldKey.split(".")[0] == "spatial":
+                spatial_key_list.append(i)
+            elif fieldKey.split(".")[0] == "temporal":
+                temporal_key_list.append(i)
+            elif fieldKey.split(".")[0] == "sources":
+                source_key_list.append(i)
+            elif fieldKey.split(".")[0] == "licenses":
+                license_key_list.append(i)
+            elif fieldKey.split(".")[0] == "contributors":
+                contributor_key_list.append(i)
+            elif fieldKey.split(".")[0] == "resources":
+                resource_key_list.append(i)
+            elif fieldKey.split(".")[0] == "name" or fieldKey.split(".")[0] == "title" or fieldKey.split(".")[
+                0] == "id" \
+                    or fieldKey.split(".")[0] == "description" or fieldKey.split(".")[0] == "language" \
+                    or fieldKey.split(".")[0] == "subject" or fieldKey.split(".")[0] == "keywords" \
+                    or fieldKey.split(".")[0] == "publicationDate" or fieldKey.split(".")[0] == "context":
+                gen_key_list.append(i)
 
         meta = {"general": gen_key_list,
                 "spatial": spatial_key_list,
@@ -1932,8 +1932,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                              }),
                         "meta": metadata,
                         }
-
-        # print(context_meta)
 
         return render(request, 'dataedit/peer_review.html', context=context_meta)
 
