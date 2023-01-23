@@ -49,7 +49,7 @@
                 <p>{% if item.field is Null %}
                   {{item.field}}:  {{ item.value }}
                  {% else %}
-                  {{ item.field}} : {{ item.value }}
+                  {{ item.field}}: {{ item.value }}
                  {% endif %}
               </p>
 
@@ -64,10 +64,10 @@
             {% for item in meta.spatial %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');"><p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
               <p>TEMPORAL</p>
             {% for item in meta.temporal %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
-              <p>{% if item.thirdkey is Null %}
+              <p>{% if item.field is Null %}
                   {{item.field}}:  {{ item.value }}
                  {% else %}
-                  {{item.field}} and {{ item.thirdkey }} : {{ item.value }}
+                  {{item.field}}: {{ item.value }}
                  {% endif %}
               </p></div>  {% endfor %}
               </div>
@@ -76,10 +76,10 @@
           <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="flex-container">
               {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
-              <p>{% if item.thirdkey is Null %}
+              <p>{% if item.field is Null %}
                   {{ item.field }} : {{ item.value }}
                  {% else %}
-                  {{ item.field}} and {{ item.thirdkey }} : {{ item.value }}
+                  {{ item.field }}: {{ item.value }}
                  {% endif %}
               </p></div> {% endfor %}
               </div>
@@ -100,7 +100,12 @@
               </div>
           </div>
 
-          <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">{{meta.resource}}</div>
+          <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
+            <div class="flex-container">
+              {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
+                  <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              </div>
+          </div>
           <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">Add Summary content here</div>
 
         </div>
