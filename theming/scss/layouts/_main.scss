@@ -1,0 +1,51 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+body {
+    letter-spacing: 0.02rem;
+}
+
+main.main {
+    padding-bottom: $C--padding-large;
+    
+    .content {
+        @extend .fs-7;
+        @include flex-row;
+        padding: 0 $C--padding-standard;
+    
+        @include media-breakpoint-up(md) {
+            justify-content: center;
+        }
+    
+        &__container {
+            @include flex-column;
+    
+            @include media-breakpoint-up(md) {
+                @include flex-row;
+                width: 100%;
+                max-width: $C--container-width;
+            }
+        }
+    
+        &__main {
+            width: 100%;
+    
+            @include media-breakpoint-up(md) {
+                padding-right: $C--padding-standard;
+                width: calc(100% - #{$C--db-side-width});
+            }
+
+            h2 {
+                padding-top: $C--padding-large;
+            }
+        }
+    
+        &__side {
+            width: 100%;
+    
+            @include media-breakpoint-up(md) {
+                width: $C--db-side-width;
+            }
+        }
+    }
+}

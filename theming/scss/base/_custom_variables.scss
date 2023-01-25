@@ -1,3 +1,12 @@
-$custom-select-border-radius: 0;
-$custom-file-border-radius: 0;
-$custom-range-track-border-radius: 0rem;
+// Utilities
+$C--color-green: #21A179;
+
+$C--padding-standard: 1.5rem; // = .p-4
+$C--padding-large: calc(#{$C--padding-standard} * 2);
+
+// Layout
+$C--container-width: 82rem;
+
+// Data base
+$C--db-side-width: 21rem;
+$C--db-main-max-width: calc(#{$C--container-width} - #{$C--db-side-width} - #{$C--padding-standard});

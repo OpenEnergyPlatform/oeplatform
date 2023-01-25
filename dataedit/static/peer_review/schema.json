@@ -1,0 +1,194 @@
+{
+    "title": "Open Peer Review (OPR) Model -  reviewVersion OEP-0.0.1",
+    "$schema": "xxx",
+    "$id": "xxx",
+    "description": "Make OPR for Open Energy Platform (OEP) metadata standard: https://github.com/OpenEnergyPlatform/oemetadata",
+    "type": "object",
+    "properties": {
+        "topic": {
+            "description": "Selected topic where the table will be published.",
+            "type": "string",
+            "title": "Topic"
+        },
+        "table": {
+            "description": "A file name or database table name. Example: oep_metadata_table_example_v151",
+            "type": "string",
+            "title": "Table"
+        },
+        "reviewList": {
+            "description": "Stores all initiated reviews.",
+            "type": "arry",
+            "items": {
+                "description": "All information within one review are stored as a dictionary.",
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "description": "Defines the number of reviews it is about.",
+                        "type": "string",
+                        "title": "Version"
+                    },
+                    "dateStarted": {
+                        "description": "A date when the review was started.",
+                        "type": "string",
+                        "title": "Date started",
+                        "format": "date-time"
+                    },
+                    "dateFinished": {
+                        "description": "A date when the review was finished.",
+                        "type": "string",
+                        "title": "Date finished",
+                        "format": "date-time"
+                    },
+                    "metadataVersion": {
+                        "description": "Type and version number of the metadata. Example: oemetadata_v1.5.1",
+                        "type": "string",
+                        "title": "Metadata version",
+                        "default": "oemetadata_v1.5"
+                    },
+                    "reviews": {
+                        "description": "All comments and value suggestions, stored as a list.",
+                        "type": "array",
+                        "items": {
+                            "description": "All information for a specific field are stored as a dictionary.",
+                            "type": "object",
+                            "properties": {
+                                "category": {
+                                    "description": "One of the six corresponding categories for the current field.",
+                                    "type": "string",
+                                    "title": "Category"
+                                },
+                                "key": {
+                                    "description": "Name of the current field.",
+                                    "type": "string",
+                                    "title": "Key"
+                                },
+                                "state": {
+                                    "description": "Selected button, which can either be ok, suggestion or rejected.",
+                                    "type": "string",
+                                    "title": "State"
+                                },
+                                "entry": {
+                                    "description": "Selected entry, which allows the field entries to be assigned uniquely.",
+                                    "type": "string",
+                                    "title": "Entry"
+                                },
+                                "fieldReview": {
+                                    "description": "List, which stores all comments and value suggestions for selected field.",
+                                    "type": "array",
+                                    "items": {
+                                        "description": "Single entrance from reviewer.",
+                                        "type": "object",
+                                        "properties": {
+                                            "timestamp": {
+                                                "description": "Date and time when the reviewer added something.",
+                                                "type": "string",
+                                                "title": "Timestamp",
+                                                "format": "date-time"
+                                            },
+                                            "reviewer": {
+                                                "description": "Person who creates a comment.",
+                                                "type": "string",
+                                                "title": "Reviewer"
+                                            },
+                                            "initialValue": {
+                                                "description": "Displays the initial value.",
+                                                "type": "string",
+                                                "title": "Initial value"
+                                            },
+                                            "comment": {
+                                                "description": "Specific entrance for the comment.",
+                                                "type": "string",
+                                                "title": "Comment"
+                                            },
+                                            "valueSuggestion": {
+                                                "description": "Specific entrance for value suggestion",
+                                                "type": "string",
+                                                "title": "Value suggestion"
+                                            },
+                                            "accepted": {
+                                                "description": "Boolean, if the comment or value suggestion is accepted from the contributor.",
+                                                "type": "boolean",
+                                                "title": "Accepted"
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "title": "Field review"
+                                    },
+                                    "title": "Field review"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "title": "Reviews"
+                        },
+                        "title": "Reviews"
+                    },
+                    "reviewFinished": {
+                        "description": "Boolean, if all comments or value suggestions are reviewed from contributor and if the review is finished.",
+                        "type": "boolean",
+                        "title": "Accepted"
+                    },
+                    "grantedBadge": {
+                        "description": "Final badge for the metadata.",
+                        "type": "string",
+                        "enum": [
+                            "iron",
+                            "bronze",
+                            "silver",
+                            "gold",
+                            "platinum"
+                        ],
+                        "title": "Granted Badge"
+                    }
+                },
+                "additionalProperties": false,
+                "title": "Review List"
+            },
+            "title": "Review List"
+        },
+        "metaMetadata": {
+            "description": "Object. Description about the reviewdata themselves, their format, version and license. These fields should always be provided.",
+            "type": "object",
+            "properties": {
+                "reviewVersion": {
+                    "description": "Type and version number of the reviewdata. ",
+                    "type": "string",
+                    "title": "Review Version",
+                    "default": "OEP-0.0.1"
+                },
+                "metadataLicense": {
+                    "description": "Object describing the license of the provided metadata.",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "SPDX identifier. Example: CC0-1.0",
+                            "type": "string",
+                            "title": "Name",
+                            "default": "CC0-1.0"
+                        },
+                        "title": {
+                            "description": "Official (human readable) license title. Example: Creative Commons Zero v1.0 Universal",
+                            "type": "string",
+                            "title": "Title",
+                            "default": "Creative Commons Zero v1.0 Universal"
+                        },
+                        "path": {
+                            "description": "Url or path string, that is a fully qualified HTTP address. Example: https://creativecommons.org/publicdomain/zero/1.0/",
+                            "type": "string",
+                            "title": "Path",
+                            "default": "https://creativecommons.org/publicdomain/zero/1.0/"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "title": "Metadata license"
+                }
+            },
+            "additionalProperties": false,
+            "title": "Meta metadata",
+            "options": {
+                "disable_edit_json": "True",
+                "hidden": "True"
+            }
+        }
+    },
+    "additionalProperties": false
+}
