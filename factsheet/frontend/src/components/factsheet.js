@@ -570,44 +570,31 @@ function Factsheet(props) {
 
 
     const authors = [
-      { id: 'Julia Repenning',  name: 'Julia Repenning' },
-      { id: 'Lukas Emele',  name: 'Lukas Emele' },
-      { id: 'Ruth Blanck',  name: 'Ruth Blanck' },
-      { id: 'Hannes Böttcher',  name: 'Hannes Böttcher' },
-      { id: 'Günter Dehoust',  name: 'Günter Dehoust' },
-      { id: 'Hannah Förster',  name: 'Hannah Förster' },
+      { id: 'Karen C. Wood',  name: 'Karen C. Wood' },
+      { id: 'Russell K. Tookes',  name: 'Russell K. Tookes' },
+      { id: 'Amy W. Fry',  name: 'Amy W. Fry' },
+      { id: 'Christin Weiss',  name: 'Christin Weiss' },
+      { id: 'Leonie Koch',  name: 'Leonie Koch' },
+      { id: 'Peter Shuster',  name: 'Peter Shuster' },
       { id: 'Benjamin Greiner',  name: 'Benjamin Greiner' },
-      { id: 'Ralph Harthan',  name: 'Ralph Harthan' },
-      { id: 'Klaus Henneberg',  name: 'Klaus Henneberg' },
-      { id: 'Hauke Hermann',  name: 'Hauke Hermann' },
-      { id: 'Wolfram Jörß',  name: 'Wolfram Jörß' },
-      { id: 'Charlotte Loreck',  name: 'Charlotte Loreck' },
-      { id: 'Sylive Ludig',  name: 'Sylive Ludig' },
-      { id: 'Felix Chri. Matthes',  name: 'Felix Chri. Matthes' },
-      { id: 'Margarethe Scheffler',  name: 'Margarethe Scheffler' },
-      { id: 'Katja Schumachen',  name: 'Katja Schumachen' },
-      { id: 'Kirsten Wiegmann',  name: 'Kirsten Wiegmann' },
-      { id: 'Carina Zell-Ziegler',  name: 'Carina Zell-Ziegler' },
-      { id: 'Sibylle Braungardt',  name: 'Sibylle Braungardt' },
-      { id: 'Wolfgang Eichhammer',  name: 'Wolfgang Eichhammer' },
-      { id: 'Rainer Elsland',  name: 'Rainer Elsland' },
-      { id: 'Tobias Fleiter',  name: 'Tobias Fleiter' },
-      { id: 'Johannes Hartwig',  name: 'Johannes Hartwig' },
-      { id: 'Judit Kockat',  name: 'Judit Kockat' },
-      { id: 'Ben Pfluger',  name: 'Ben Pfluger' },
-      { id: 'Wolfgang Schade',  name: 'Wolfgang Schade' },
-      { id: 'Barbara Schlomann',  name: 'Barbara Schlomann' },
-      { id: 'Frank Sensfuß',  name: 'Frank Sensfuß' },
-      { id: 'Hans-Joachim Ziesing',  name: 'Hans-Joachim Ziesing' }
+      { id: 'Mathias Schmid',  name: 'Mathias Schmid' },
+      { id: 'Sarah Decker',  name: 'Sarah Decker' },
+      { id: 'Anne Maurer',  name: 'Anne Maurer' },
+      { id: 'Lucas Sanger',  name: 'Lucas Sanger' },
+      { id: 'Dirk Fuerst',  name: 'Dirk Fuerst' },
+      { id: 'Alexander Fisher',  name: 'Alexander Fisher' },
     ];
 
     const funding_source = [
-      { id: 'Bundesministerium für Umwelt, Naturschutz, Bau und Reaktorsicherheit', name:'Bundesministerium für Umwelt, Naturschutz, Bau und Reaktorsicherheit' },
+      { id: 'Rainbow Records', name:'Rainbow Records' },
+      { id: 'Steak and Ale', name:'Steak and Ale' },
+      { id: 'Excella', name:'Excella' },
     ];
 
     const institution = [
-      { id: 'Öko-Institut', name: "Öko-Institut"},
-      { id: 'Frauenhofer ISI', name: "Frauenhofer ISI"},
+      { id: 'Buena Vista Garden Maintenance', name: "Buena Vista Garden Maintenance"},
+      { id: 'Magik Lamp', name: "Magik Lamp"},
+      { id: 'Zephyr Investments', name: "Zephyr Investments"},
     ];
 
     const scenario_years = [
@@ -664,15 +651,19 @@ function Factsheet(props) {
     ];
 
     const contact_person = [
-      { id: 'Lukas Emele', name: 'Lukas Emele' },
-      { id: 'Julia Repenning', name: 'Julia Repenning' },
-      { id: 'Tobias Fleiter',  name: 'Tobias Fleiter' },
-      { id: 'Johannes Hartwig',  name: 'Johannes Hartwig' },
-      { id: 'Judit Kockat',  name: 'Judit Kockat' },
-      { id: 'Ben Pfluger',  name: 'Ben Pfluger' },
-      { id: 'Wolfgang Schade',  name: 'Wolfgang Schade' },
-      { id: 'Barbara Schlomann',  name: 'Barbara Schlomann' },
-      { id: 'Frank Sensfuß',  name: 'Frank Sensfuß' }
+      { id: 'Karen C. Wood',  name: 'Karen C. Wood' },
+      { id: 'Russell K. Tookes',  name: 'Russell K. Tookes' },
+      { id: 'Amy W. Fry',  name: 'Amy W. Fry' },
+      { id: 'Christin Weiss',  name: 'Christin Weiss' },
+      { id: 'Leonie Koch',  name: 'Leonie Koch' },
+      { id: 'Peter Shuster',  name: 'Peter Shuster' },
+      { id: 'Benjamin Greiner',  name: 'Benjamin Greiner' },
+      { id: 'Mathias Schmid',  name: 'Mathias Schmid' },
+      { id: 'Sarah Decker',  name: 'Sarah Decker' },
+      { id: 'Anne Maurer',  name: 'Anne Maurer' },
+      { id: 'Lucas Sanger',  name: 'Lucas Sanger' },
+      { id: 'Dirk Fuerst',  name: 'Dirk Fuerst' },
+      { id: 'Alexander Fisher',  name: 'Alexander Fisher' },
     ];
 
     const scenario_region = [
