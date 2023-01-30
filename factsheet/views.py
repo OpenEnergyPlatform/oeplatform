@@ -7,14 +7,50 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from django.utils.cache import patch_response_headers
 
+
+import requests
+import rdflib
+from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode
+from rdflib.plugins.stores import sparqlstore
+from rdflib.namespace import XSD, Namespace
+from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
+
+def clean_name(name):
+  return name.rstrip().lstrip().replace("-","_").replace(" ","_").replace("%","").replace("Ö","Oe").replace("ö","oe").replace("/","_").replace(":","_").replace("(","_").replace(")","_").replace("ü","ue")
+
 def factsheets_index(request, *args, **kwargs):
     return render(request, 'factsheet/index.html')
 
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
-    request_body = json.loads(request.body)
+    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+    OEO_KG = Namespace("http://openenergy-platform.org/oekg/")
+    OBO = Namespace("http://purl.obolibrary.org/obo/")
+    DC = Namespace("http://purl.org/dc/terms/")
+    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
+    NPG = Namespace("http://ns.nature.com/terms/")
+    SCHEMA = Namespace("https://schema.org/")
+    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+    DBO = Namespace("http://dbpedia.org/ontology/")
 
-    print(request_body)
+    query_endpoint = 'http://localhost:3030/ds/query'
+    update_endpoint = 'http://localhost:3030/ds/update'
+    store = sparqlstore.SPARQLUpdateStore()
+    store.open((query_endpoint, update_endpoint))
+    g = Graph(store, identifier=default)
+
+    g.bind("OEO", OEO)
+    g.bind("OEO_KG", OEO_KG)
+    g.bind("OBO", OBO)
+    g.bind("DC", DC)
+    g.bind("RDFS", RDFS)
+    g.bind("NPG", NPG)
+    g.bind("SCHEMA", SCHEMA)
+    g.bind("OEKG", OEKG)
+    g.bind("DBO", DBO)
+
+
+    request_body = json.loads(request.body)
 
     name = request_body['name']
     acronym = request_body['acronym']
@@ -74,14 +110,58 @@ def create_factsheet(request, *args, **kwargs):
     response = JsonResponse(factsheet_obj, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
 
+    study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(acronym) )
+    g.add(( study_URI, RDF.type, OEO.OEO_00000364 ))
+    g.add(( study_URI, DC.abstract, Literal(abstract) ))
+
+    institutions = json.loads(institution) if institution is not None else []
+    for item in institutions:
+        institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+        g.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
+        g.add(( institution_URI, DC.title, institution_URI ))
+        g.add(( study_URI, OEO.OEO_00000510, institution_URI ))
+
+    funding_sources = json.loads(funding_source) if funding_source is not None else []
+    for item in funding_sources:
+        funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+        g.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
+        g.add(( funding_source_URI, DC.title, funding_source_URI ))
+        g.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
+
     return response
 
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
+    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+    OEO_KG = Namespace("http://openenergy-platform.org/oekg/")
+    OBO = Namespace("http://purl.obolibrary.org/obo/")
+    DC = Namespace("http://purl.org/dc/terms/")
+    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
+    NPG = Namespace("http://ns.nature.com/terms/")
+    SCHEMA = Namespace("https://schema.org/")
+    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+    DBO = Namespace("http://dbpedia.org/ontology/")
+
+    query_endpoint = 'http://localhost:3030/ds/query'
+    update_endpoint = 'http://localhost:3030/ds/update'
+    store = sparqlstore.SPARQLUpdateStore()
+    store.open((query_endpoint, update_endpoint))
+    g = Graph(store, identifier=default)
+
+    g.bind("OEO", OEO)
+    g.bind("OEO_KG", OEO_KG)
+    g.bind("OBO", OBO)
+    g.bind("DC", DC)
+    g.bind("RDFS", RDFS)
+    g.bind("NPG", NPG)
+    g.bind("SCHEMA", SCHEMA)
+    g.bind("OEKG", OEKG)
+    g.bind("DBO", DBO)
+
     request_body = json.loads(request.body)
 
-    print(request_body)
 
+    fsData = request_body['fsData']
     id = request_body['id']
     name = request_body['name']
     studyName = request_body['study_name']
@@ -137,8 +217,46 @@ def update_factsheet(request, *args, **kwargs):
 
     factsheet.save()
 
+    print(fsData)
     response = JsonResponse('factsheet updated!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
+
+    old_Study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(fsData["acronym"]) )
+    print(old_Study_URI)
+    study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(acronym) )
+
+    for s, p, o in g.triples((old_Study_URI, RDF.type, OEO.OEO_00000364)):
+        g.remove((s, p, o))
+    g.add(( study_URI, RDF.type, OEO.OEO_00000364 ))
+
+
+    for s, p, o in g.triples((old_Study_URI, OEO.OEO_00000510, None)):
+        g.remove((s, p, o))
+
+    institutions = json.loads(institution) if institution is not None else []
+    for item in institutions:
+        institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+        g.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
+        g.add(( institution_URI, DC.title, institution_URI ))
+        g.add(( study_URI, OEO.OEO_00000510, institution_URI ))
+
+    for s, p, o in g.triples((old_Study_URI, OEO.RO_0002234, None)):
+        g.remove((s, OEO.RO_0002234, o))
+
+    funding_sources = json.loads(funding_source) if funding_source is not None else []
+    for item in funding_sources:
+        funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+        g.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
+        g.add(( funding_source_URI, DC.title, funding_source_URI ))
+        g.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
+
+    abstract_URI =  URIRef("http://purl.org/dc/terms/abstract")
+    for s, p, o in g.triples((old_Study_URI, abstract_URI, None)):
+        g.remove((s, abstract_URI, o))
+
+    g.add(( study_URI, DC.abstract, Literal(abstract) ))
+
+
     return response
 
 @csrf_exempt

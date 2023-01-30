@@ -333,6 +333,7 @@ function Factsheet(props) {
     } else {
       axios.post(conf.toep + 'factsheet/update/',
       {
+        fsData: fsData,
         id: id,
         study_name: studyName,
         name: factsheetName,
