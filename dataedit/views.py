@@ -1921,10 +1921,12 @@ class PeerReviewView(LoginRequiredMixin, View):
         metadata = self.sort_in_category(schema, table)
 
         context_meta = {"config": json.dumps(
-                            {"cancle_url": get_cancle_state(self.request),
-                             "can_add": can_add,
-                             "url_api_meta": reverse(
+                            {"can_add": can_add,
+                             "url_peer_review": reverse(
                                 "peer_review", kwargs={"schema": schema, "table": table}
+                                ),
+                             "url_table": reverse(
+                                "view", kwargs={"schema": schema, "table": table}
                                 ),
                              "table": table,
                              }),
@@ -1937,13 +1939,11 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def post(self, request, schema, table):
         context = {}
-        print(request)
-        #try:
-        table_obj = PeerReview(schema=schema, table=table, in_progress=True, review=request.POST.get("data"))
-        # except Exception as e:
-        #    context.update(({"error": f"{e}"}))
+        if request.method == "POST":
+            review_data = json.loads(request.body)
+            print(review_data)
+            review_state = review_data.get("reviewFinished")
+            table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
+            table_obj.save()
 
-        table_obj.save()
-        # PeerReview.save()
         return render(request, 'dataedit/peer_review.html', context=context)
-
