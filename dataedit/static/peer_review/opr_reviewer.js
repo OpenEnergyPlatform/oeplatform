@@ -149,6 +149,8 @@ function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-va
   selectedFieldValue=fieldValue;
   const selectedName = document.querySelector("#review-field-name");
   selectedName.textContent = fieldKey + ' ' + fieldValue;
+  document.getElementById("valuearea").value = "";
+  document.getElementById("commentarea").value = "";
 };
 
 /**
