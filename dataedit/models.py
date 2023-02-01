@@ -83,6 +83,7 @@ class PeerReview(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
     is_finished = BooleanField(null=False)
+    dateStarted = DateTimeField(max_length=1000, null=False, default=timezone.now)
     review = JSONField(null=True)
 
     # laden
@@ -92,6 +93,3 @@ class PeerReview(models.Model):
             table=table, schema=schema
         )
         return table_obj
-
-
-
