@@ -1907,6 +1907,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return meta
 
     def get(self, request, schema, table):
+        review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
         can_add = False
         table_obj = Table.load(schema, table)
@@ -1932,16 +1933,16 @@ class PeerReviewView(LoginRequiredMixin, View):
                              }),
                         "meta": metadata,
                         }
+        # print(context_meta)
 
-        return render(request, 'dataedit/peer_review.html', context=context_meta)
+        return render(request, 'dataedit/opr_review.html', context=context_meta)
 
     def post(self, request, schema, table):
         context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
-            print(review_data)
             review_state = review_data.get("reviewFinished")
             table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
             table_obj.save()
 
-        return render(request, 'dataedit/peer_review.html', context=context)
+        return render(request, 'dataedit/opr_review.html', context=context)
