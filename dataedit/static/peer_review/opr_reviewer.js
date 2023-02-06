@@ -24,7 +24,7 @@ var current_review = {
 // BINDS
 
 // Submit field review
-$('#submit-button').bind('click', saveEntrances);
+$('#submitButton').bind('click', saveEntrances);
 // Submit review
 $('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
@@ -34,8 +34,10 @@ $('#ok-button').bind('click', hideReviewerOptions);
 $('#ok-button').bind('click', saveEntrances);
 // Suggestion Field View Change
 $('#suggestion-button').bind('click', showReviewerOptions);
+$('#suggestion-button').bind('click', updateSubmitButtonColor);
 // Reject Field View Change
 $('#rejected-button').bind('click', showReviewerOptions);
+$('#rejected-button').bind('click', updateSubmitButtonColor);
 
 /**
  * Returns name from cookies
@@ -242,11 +244,7 @@ function saveEntrances() {
   }
 
   // Color ok/suggestion/rejected
-  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
-  $(field_id).removeClass('field-ok');
-  $(field_id).removeClass('field-suggestion');
-  $(field_id).removeClass('field-rejected');
-  $(field_id).addClass(`field-${selectedState}`);
+  updateFieldColor();
 
   // alert(JSON.stringify(current_review, null, 4));
   document.getElementById("summary").innerHTML = (
@@ -303,6 +301,33 @@ function showReviewerOptions(){
  */
 function hideReviewerOptions(){
     $("#reviewer_remarks").addClass('d-none');
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateFieldColor(){
+  // Color ok/suggestion/rejected
+  field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  $(field_id).removeClass('field-ok');
+  $(field_id).removeClass('field-suggestion');
+  $(field_id).removeClass('field-rejected');
+  $(field_id).addClass(`field-${selectedState}`);
+}
+
+/**
+ * Colors Field based on Reviewer input
+ */
+function updateSubmitButtonColor(){
+  // Color Save comment / new value
+  $(submitButton).removeClass('btn-warning');
+  $(submitButton).removeClass('btn-danger');
+  if (selectedState == "suggestion"){
+    $(submitButton).addClass('btn-warning');
+  }
+  else {
+    $(submitButton).addClass('btn-danger');
+  }
 }
 
 peerReview(config);
