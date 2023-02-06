@@ -119,23 +119,20 @@
             <hr>
             <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
                 <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Ok</button>
-                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Suggestion</button>
-                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Rejected</button>
+                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggestion</button>
+                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Rejected</button>
             </div>
-            <div class="collapse" id="collapseExample">
-                <div class="mb-3" id="field-value">
-                    <label for="valuearea" class="form-label">Your value suggestion</label>
-                    <textarea class="form-control" id="valuearea" rows="2" ></textarea>
-                </div>
-
+            <div class="d-none" id="reviewer_remarks">
+              <div class="mb-3" id="field-value">
+                  <label for="valuearea" class="form-label">Your value suggestion</label>
+                  <textarea class="form-control" id="valuearea" rows="2" ></textarea>
+              </div>
                 <div class="mb-3" id="field-comment">
                   <label for="commentarea" class="form-label" ></label>
                   <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
                 </div>
-
-                <button type="button" class="btn btn-success" id="submit-button" style="width:50%" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Save comment/new value</button>
+                <button type="button" class="btn btn-success" id="submit-button" style="width:50%">Save comment/new value</button>
             </div>
-
         </div>
     </div>
 </div>

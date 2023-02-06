@@ -25,12 +25,16 @@ var current_review = {
 
 // Submit field review
 $('#submit-button').bind('click', saveEntrances);
-
 // Submit review
 $('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
-
+// OK Field View Change
+$('#ok-button').bind('click', hideReviewerOptions);
+// Suggestion Field View Change
+$('#suggestion-button').bind('click', showReviewerOptions);
+// Reject Field View Change
+$('#rejected-button').bind('click', showReviewerOptions);
 
 /**
  * Returns name from cookies
@@ -266,6 +270,20 @@ function checkReviewComplete() {
 
   // All fields reviewed!
   $('#submit_summary').removeClass('disabled');
+}
+
+/**
+ * Shows reviewer Comment and Suggestion Input options
+ */
+function showReviewerOptions(){
+    $("#reviewer_remarks").removeClass('d-none');
+}
+
+/**
+ * Hides reviewer Comment and Suggestion Input options
+ */
+function hideReviewerOptions(){
+    $("#reviewer_remarks").addClass('d-none');
 }
 
 peerReview(config);
