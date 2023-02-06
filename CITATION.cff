@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+authors:
+  - family-names: "Hülk"
+    given-names: "Ludwig"
+    alias: "@Ludee"
+    website: "https://github.com/Ludee"
+    affiliation: "Reiner Lemoine Institut"
+    orcid: "https://orcid.org/0000-0003-4655-2321"
+  - family-names: "Glauer"
+    given-names: "Martin"
+    alias: "@MGlauer"
+    website: "https://github.com/MGlauer"
+    affiliation: "Otto-von-Guericke-University Magdeburg"
+    orcid: "https://orcid.org/0000-0001-6772-1943"
+  - family-names: "Huber"
+    given-names: "Jonas"
+    alias: "@jh-RLI"
+    website: "https://github.com/jh-RLI"
+    affiliation: "Reiner Lemoine Institut"
+    orcid: "https://orcid.org/0000-0002-6234-0751"
+  - family-names: "Winger"
+    given-names: "Christian"
+    alias: "@wingechr"
+    website: "https://github.com/wingechr"
+    affiliation: "Öko-Institut"
+    orcid: "https://orcid.org/0000-0001-5752-5471"
+title: "Open Energy Family - Open Energy Platform (OEP)"
+type: software
+license: AGPL-3.0-or-later
+version: 0.11.1
+doi: 
+date-released: 2022-12-12
+url: "https://github.com/OpenEnergyPlatform/oeplatform/"
