@@ -31,6 +31,7 @@ $('#submit_summary').bind('click', submitPeerReview);
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
 $('#ok-button').bind('click', hideReviewerOptions);
+$('#ok-button').bind('click', saveEntrances);
 // Suggestion Field View Change
 $('#suggestion-button').bind('click', showReviewerOptions);
 // Reject Field View Change
@@ -184,6 +185,23 @@ function saveEntrances() {
               unique_entry = false;
               var element = document.querySelector('[aria-selected="true"]');
               var category = (element.getAttribute("data-bs-target"));
+              if (selectedState == "ok") {
+              Object.assign(current_review["reviews"][idx],
+                  {
+                      "category": category,
+                      "key": selectedField,
+                      "fieldReview": {
+                          "timestamp": null, // TODO put actual timestamp
+                            "user": "oep_reviewer", // TODO put actual username
+                            "role": "reviewer",
+                            "contributorValue": selectedFieldValue,
+                            "comment": "",
+                            "reviewerSuggestion": "",
+                            "state": selectedState,
+                      },
+                  },
+              )
+              } else {
               Object.assign(current_review["reviews"][idx],
                   {
                       "category": category,
@@ -199,6 +217,7 @@ function saveEntrances() {
                       },
                   },
               )
+            }
           }
       });
     var element = document.querySelector('[aria-selected="true"]');
