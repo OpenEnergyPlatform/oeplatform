@@ -1946,3 +1946,46 @@ class PeerReviewView(LoginRequiredMixin, View):
             table_obj.save()
 
         return render(request, 'dataedit/opr_review.html', context=context)
+
+
+class ORPContributor(PeerReviewView):
+    def get(self, request, schema, table):
+        review_state = PeerReview.is_finished
+        columns = get_column_description(schema, table)
+        can_add = False
+        table_obj = Table.load(schema, table)
+        if not request.user.is_anonymous:
+            level = request.user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
+
+        url_table_id = request.build_absolute_uri(
+            reverse("view", kwargs={"schema": schema, "table": table})
+        )
+
+        metadata = self.sort_in_category(schema, table)
+
+        context_meta = {"config": json.dumps(
+                            {"can_add": can_add,
+                             "url_peer_review": reverse(
+                                "peer_review", kwargs={"schema": schema, "table": table}
+                                ),
+                             "url_table": reverse(
+                                "view", kwargs={"schema": schema, "table": table}
+                                ),
+                             "table": table,
+                             }),
+                        "meta": metadata,
+                        }
+        # print(context_meta)
+
+        return render(request, 'dataedit/opr_contributor.html', context=context_meta)
+
+    def post(self, request, schema, table):
+        context = {}
+        if request.method == "POST":
+            review_data = json.loads(request.body)
+            review_state = review_data.get("reviewFinished")
+            table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
+            table_obj.save()
+
+        return render(request, 'dataedit/opr_contributor.html', context=context)
