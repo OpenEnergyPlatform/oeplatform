@@ -41,6 +41,7 @@ $('#rejected-button').bind('click', updateSubmitButtonColor);
 // Clear Input fields when new tab is selected
 // nav items are selected via their class
 $('.nav-link').click(clearInputFields);
+// field items selector
 
 /**
  * Returns name from cookies
@@ -160,11 +161,53 @@ function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-va
   const selectedName = document.querySelector("#review-field-name");
   selectedName.textContent = fieldKey + ' ' + fieldValue;
   clearInputFields();
+  //makeFieldList();
 };
 
+/**
+ * Creates List of all fields from html elements
+ */
+function makeFieldList(){
+  var fieldElements = [];
+  $( ".field" ).each(function() { fieldElements.push(this.id) } ) ;
+  //alert(fieldElements[14]);
+  return fieldElements;
+}
+
+/**
+ * Clears User Input fields
+ */
 function clearInputFields(){
   document.getElementById("valuearea").value = "";
   document.getElementById("commentarea").value = "";
+}
+
+/**
+ * Selects the HTML field element after the current one and clicks it
+ */
+function selectNextField() {
+  var fieldList = makeFieldList();
+  var next = fieldList.indexOf('field_' + selectedField) + 1
+  selectField(fieldList, next);
+}
+
+/**
+ * Selects the HTML field element previous to the current one and clicks it
+ */
+function selectPreviousField(){
+  var fieldList = makeFieldList();
+  var prev = fieldList.indexOf('field_' + selectedField) - 1
+  selectField(fieldList, prev);
+}
+
+/**
+ * Clicks a Field after checking it exists
+ */
+function selectField(fieldList, field){
+  if (field >= 0 && field <= fieldList.length){
+    var element = fieldList[field];
+    document.getElementById(element).click();
+  }
 }
 
 /**
@@ -252,6 +295,7 @@ function saveEntrances() {
 
   // Color ok/suggestion/rejected
   updateFieldColor();
+  selectNextField();
 
   // alert(JSON.stringify(current_review, null, 4));
   document.getElementById("summary").innerHTML = (
