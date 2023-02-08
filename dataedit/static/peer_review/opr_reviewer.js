@@ -38,6 +38,9 @@ $('#suggestion-button').bind('click', updateSubmitButtonColor);
 // Reject Field View Change
 $('#rejected-button').bind('click', showReviewerOptions);
 $('#rejected-button').bind('click', updateSubmitButtonColor);
+// Clear Input fields when new tab is selected
+// nav items are selected via their class
+$('.nav-link').click(clearInputFields);
 
 /**
  * Returns name from cookies
@@ -156,9 +159,13 @@ function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-va
   selectedFieldValue=fieldValue;
   const selectedName = document.querySelector("#review-field-name");
   selectedName.textContent = fieldKey + ' ' + fieldValue;
+  clearInputFields();
+};
+
+function clearInputFields(){
   document.getElementById("valuearea").value = "";
   document.getElementById("commentarea").value = "";
-};
+}
 
 /**
  * Saves selected state
