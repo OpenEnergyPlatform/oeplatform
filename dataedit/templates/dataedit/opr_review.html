@@ -106,10 +106,38 @@
                   <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
               </div>
           </div>
-          <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">Add Summary content here</div>
-
+          <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+            <ul class="nav nav-tabs sticky-top" id="summarySubTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="#missingReviewSummaryTab" data-bs-toggle="tab" data-bs-target="#missingReviewSummaryTab" type="button" role="tab" aria-controls="missingReviewSummaryTab" aria-selected="true">Review missing</button>
+              </li>
+                <li class="nav-item" role="presentation">
+                <button class="nav-link" id="#rejectedSummaryTab" data-bs-toggle="tab" data-bs-target="#rejectedSummaryTab" type="button" role="tab" aria-controls="rejectedSummaryTab" aria-selected="false">Rejected</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="#suggestionsSummaryTab" data-bs-toggle="tab" data-bs-target="#suggestionsSummaryTab" type="button" role="tab" aria-controls="suggestionsSummaryTab" aria-selected="true">Suggestions</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="#acceptedSummaryTab" data-bs-toggle="tab" data-bs-target="#acceptedSummaryTab" type="button" role="tab" aria-controls="acceptedSummaryTab" aria-selected="true">Accepted</button>
+              </li>
+            </ul>
+          </div>
+          <div class="tab-content">
+            <div id="missingReviewSummaryTab" role="tabpanel" class="tab-pane fade">
+              <i> Show missing review fields here.</i>
+            </div>
+            <div id="rejectedSummaryTab" role="tabpanel" class="tab-pane fade">
+              <i> Show rejected fields here.</i>
+            </div>
+            <div id="suggestionsSummaryTab" role="tabpanel" class="tab-pane fade">
+              <i> Show suggestion fields here.</i>
+            </div>
+            <div id="acceptedSummaryTab" role="tabpanel" class="tab-pane fade">
+              <i> Show accepted fields here.</i>
+            </div>
+          </div>
+            </div>
         </div>
-    </div>
 
     <div class="col-md-4">
         <div class="flex-reviewer sticky-top" id="review-window">
