@@ -142,7 +142,7 @@ def create_factsheet(request, *args, **kwargs):
         g.add((study_URI, OEO.OEO_0000050, contact_person_URI))
 
     _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
-    for item in sector_divisions:
+    for item in _sector_divisions:
         sector_divisions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
         g.add((sector_divisions_URI, RDF.type, OEO.OEO_00000368))
         g.add((sector_divisions_URI, DC.name, Literal(clean_name(item['name']))))
