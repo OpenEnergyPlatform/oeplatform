@@ -225,8 +225,6 @@ def update_factsheet(request, *args, **kwargs):
     g.bind("DBO", DBO)
 
     request_body = json.loads(request.body)
-
-
     fsData = request_body['fsData']
     id = request_body['id']
     name = request_body['name']
