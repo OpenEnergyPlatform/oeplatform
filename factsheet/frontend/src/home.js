@@ -42,7 +42,6 @@ function Home(props) {
   useEffect(() => {
     setLoading(true);
     axios.get(conf.toep + `factsheet/all/`).then(response => {
-      console.log(response);
       setFactsheets(response.data);
       setLoading(false);
     });
@@ -54,10 +53,10 @@ function Home(props) {
       return fs.map(item =>
           (<Grid item xs={3}>
             <CustomCard
-              id={item.pk}
-              study_name={item.fields.factsheetData.study_name}
-              acronym={item.fields.factsheetData.acronym}
-              abstract={item.fields.factsheetData.abstract}
+              id={item.acronym}
+              study_name={item.study_name}
+              acronym={item.acronym}
+              abstract={item.abstract}
               fs={item}
             />
           </Grid>)

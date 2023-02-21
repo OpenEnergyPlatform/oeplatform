@@ -7,34 +7,35 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import Tooltip from '@mui/material/Tooltip';
 import { Route, Routes, Link } from 'react-router-dom';
+import DiamondIcon from '@mui/icons-material/Diamond';
+
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 export default function ColorToggleButton(props) {
-  const [alignment, setAlignment] = React.useState('web');
 
-  const handleChange = (event, newAlignment) => {
-    setAlignment(newAlignment);
-    props.handleSwap(newAlignment);
+  const handleChange = (event, mode) => {
+    props.handleSwap(mode);
   };
 
   return (
-    <ToggleButtonGroup
-      value={alignment}
-      onChange={handleChange}
-      exclusive
-      style={{ 'marginTop': '10px', 'marginLeft': '10px'}}>
-    >
-      <Tooltip title="Back to main factsheet page!">
-        <Link to={`factsheet/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', marginRight:'5px' }}  >
-          <ToggleButton color="primary" variant="contained" size="small" value="wizard" style={{ 'textTransform': 'none' }}> <ArrowBackIcon /> </ToggleButton>
-        </Link>
-      </Tooltip>
-      {/*<Tooltip title="Factsheet's edit mode!">
-        <ToggleButton size="small" value="wizard" style={{ 'textTransform': 'none' }} disabled > <ListAltIcon /> </ToggleButton>
-      </Tooltip>
-      <Tooltip title="Overview!">
-        <ToggleButton size="small" value="overview" style={{ 'textTransform': 'none' }} disabled> <FactCheckOutlinedIcon /> </ToggleButton>
-      </Tooltip>
-      <ToggleButton size="small" value="playground" style={{ 'textTransform': 'none' }}> <SchemaIcon /> </ToggleButton> */}
-    </ToggleButtonGroup>
+    <ButtonGroup variant="contained" aria-label="outlined primary button group" style={{ 'marginLeft': '10px', 'marginTop': '10px' }}>
+        <Tooltip title="Factsheet's edit mode!">
+          <Button size="small" value="wizard" style={{ 'textTransform': 'none' }} >
+            <Link to={`factsheet/`} onClick={() => this.forceUpdate} >
+              <ArrowBackIcon  style={{ 'marginTop': '7px' }} > </ArrowBackIcon>
+            </Link>  
+          </Button>
+        </Tooltip>
+        <Tooltip title="Factsheet's edit mode!">
+          <Button size="small" value="wizard" style={{ 'textTransform': 'none' }} onClick={(e) => handleChange(e, 'edit')} > <ListAltIcon /> </Button>
+        </Tooltip>
+        <Tooltip title="Overview!">
+          <Button size="small" name="overview" style={{ 'textTransform': 'none' }} onClick={(e) => handleChange(e, 'overview')} > <FactCheckOutlinedIcon /> </Button>
+        </Tooltip>
+        <Tooltip title="Analysis">
+          <Button size="small" value="playground" style={{ 'textTransform': 'none' }} > <DiamondIcon /> </Button>
+        </Tooltip>
+    </ButtonGroup>
   );
 }

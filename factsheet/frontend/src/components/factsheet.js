@@ -18,7 +18,7 @@ import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
 import VerticalTabs from './customVerticalTabs.js';
 import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
-
+import Chip from '@mui/material/Chip';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -82,8 +82,7 @@ function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
   const jsonld = require('jsonld');
-
-
+  console.log(fsData);
 
   const [factsheetRDF, setFactsheetRDF] = useState({});
   const [factsheet, setFactsheet] = useState({});
@@ -93,16 +92,16 @@ function Factsheet(props) {
   const [openTurtle, setOpenTurtle] = useState(false);
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
+  const [openExistDialog, setOpenExistDialog] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
-  const [mode, setMode] = useState("wizard");
+  const [mode, setMode] = useState("edit");
   const [factsheetObject, setFactsheetObject] = useState({});
-  const [factsheetName, setFactsheetName] = useState(id !== 'new' ? fsData.name : '');
+  const [factsheetName, setFactsheetName] = useState(id !== 'new' ? '' : '');
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-
-  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
-  const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? fsData.expanded_sectors : []);
+  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? [] : []);
+  const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -215,20 +214,18 @@ function Factsheet(props) {
   ]);
 
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
-
-  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-
-  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
+  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? [] : []);
+  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? [] : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
-  const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_source : []);
-  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : []);
-  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '2022-04-07');
-  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
-  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
-  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
-
-  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
+  const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
+  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? [] : []);
+  const [report_title, setReportTitle] = useState(id !== 'new' ? '' : '');
+  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '04-07-2022');
+  
+  const [doi, setDOI] = useState(id !== 'new' ? '' : '');
+  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? '' : '');
+  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? '' : '');
+  const [scenarios, setScenarios] = useState(id !== 'new' ? [] : [{
     id: uuid(),
     name: '',
     acronym: '',
@@ -242,19 +239,18 @@ function Factsheet(props) {
     }
   ]);
   const [scenariosObject, setScenariosObject] = useState({});
+  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? [] : []);
+  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
 
-  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
-  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? fsData.expanded_energy_carriers : []);
+  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
+  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
 
-  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
-  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.expanded_energy_transformation_processes : []);
-
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
   const [selectedScenarioInputDatasetRegion, setSelectedScenarioInputDatasetRegion] = useState([]);
   const [selectedScenarioOutputDatasetRegion, setSelectedScenarioOutputDatasetRegion] = useState([]);
 
-  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
-  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
+  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? [] : []);
+  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? [] : []);
 
   const [removeReport, setRemoveReport] = useState(false);
   const navigate = useNavigate();
@@ -293,6 +289,8 @@ function Factsheet(props) {
   });
 
 
+  console.log(date_of_publication);
+
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -327,7 +325,12 @@ function Factsheet(props) {
         models: JSON.stringify(selectedModels),
         frameworks: JSON.stringify(selectedFrameworks),
       }).then(response => {
-      setOpenSavedDialog(true)
+      console.log('response');
+      console.log(response);
+      if (response.data === 'Factsheet saved')
+        setOpenSavedDialog(true);
+      else if (response.data === 'Factsheet exists')
+        setOpenExistDialog(true);
     });
 
     } else {
@@ -379,6 +382,10 @@ function Factsheet(props) {
 
   const handleCloseSavedDialog = () => {
     setOpenSavedDialog(false);
+  };
+
+  const handleCloseExistDialog = () => {
+    setOpenExistDialog(false);
   };
 
   const handleCloseUpdatedDialog = () => {
@@ -531,7 +538,7 @@ function Factsheet(props) {
 
   const handleSwap = (mode) => {
     setMode(mode);
-    if (mode === "wizard") {
+    if (mode === "edit") {
 
     }
     else if (mode === "overview") {
@@ -551,24 +558,9 @@ function Factsheet(props) {
       setScenariosObject(newScenariosObject);
     }
 
-    const renderFactsheet = (factsheetContent) => {
-      if (Object.keys(factsheetContent).length !== 0) {
-        return Object.keys(factsheetContent).map((item) => (
-          <div style={{ marginTop: '30px', marginLeft: '50px', marginBottom: '10px' }}>
-             <b> {item.charAt(0).toUpperCase() + item.slice(1)} </b>
-             {
-               factsheetContent[item].map((v) => (
-                   <div style={{ marginLeft: '25px' }}>
-                    <span> {v.name} </span>
-                   </div>
-             ))
-           }
-          </div>
-        ))
-      }
-    }
-
-
+    const renderFactsheet = () => {
+      return <div>'studyName'</div>
+    } 
 
     const authors = [
       { id: 'Karen C. Wood',  name: 'Karen C. Wood' },
@@ -1601,7 +1593,7 @@ function Factsheet(props) {
                       alignItems: 'flex-start',
                       flexWrap: 'wrap',
                   }}>
-                  <CustomAutocomplete showSelectedElements={false} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                  <CustomAutocomplete showSelectedElements={true} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
                   <div style={{ marginTop: '30px' }}>
                     <HtmlTooltip
                       style={{ marginLeft: '10px' }}
@@ -1646,8 +1638,8 @@ function Factsheet(props) {
                 </div>
             </Grid>
             <Grid item xs={6} style={{ marginBottom: '10px' }}>
-              <CustomTreeViewWithCheckBox size="205px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-              <CustomTreeViewWithCheckBox size="205px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+              <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+              <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
               toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
             </Grid>
 
@@ -1828,28 +1820,25 @@ function Factsheet(props) {
           <Grid item xs={4} >
           <div>
                <CustomSwap handleSwap={handleSwap} />
-               <Tooltip title="Save factsheet">
-               <Button disableElevation={true} style={{ 'textTransform': 'none', 'zIndex': '1000', height: '40px' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
-               </Tooltip>
           </div >
           </Grid>
           <Grid item xs={4} >
           <div  style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
             <Typography variant="h6" gutterBottom>
-              {acronym}
+              <b>{acronym}</b>
             </Typography>
           </div>
           </Grid>
           <Grid item xs={4} >
             <div style={{ 'textAlign': 'right' }}>
+              <Tooltip title="Save factsheet">
+                <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Fab>
+               </Tooltip>
+              {/* <Tooltip title="Share this factsheet">
+                <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Fab>
+              </Tooltip> */}
               <Tooltip title="Delete factsheet">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
-              </Tooltip>
-              <Tooltip title="Share this factsheet">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRLeft': '5px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
-              </Tooltip>
-              <Tooltip title="Submit this factsheet to the Open Energy Knowledge Graph">
-                <Button disableElevation={true} style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginLeft': '5px', 'marginRight': '10px','zIndex': '1000'  }} variant="contained" color="primary" onClick={handleClickOpenTurtle} > <ForwardToInboxIcon /> </Button>
+                <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Fab>
               </Tooltip>
             </div >
           </Grid>
@@ -1872,6 +1861,16 @@ function Factsheet(props) {
               <Alert variant="filled" onClose={handleUpdateMessageClose} severity="success" sx={{ width: '100%' }}>
                 <AlertTitle>New message</AlertTitle>
                 Factsheet updated <strong>successfully!</strong>
+              </Alert>
+            </Snackbar>
+            <Snackbar
+              open={openExistDialog}
+              autoHideDuration={6000}
+              onClose={handleCloseExistDialog}
+            >
+              <Alert variant="filled" onClose={handleCloseExistDialog} severity="error" sx={{ width: '100%' }}>
+                <AlertTitle>Duplicate</AlertTitle>
+                Another factsheet with this acronym exists. Please choose another acronym!
               </Alert>
             </Snackbar>
             <Dialog
@@ -1963,7 +1962,7 @@ function Factsheet(props) {
               </DialogActions>
             </Dialog>
 
-            {mode === "wizard" &&
+            {mode === "edit" &&
               <div className='wizard'>
                   <Grid container >
                     <Grid item xs={12} >
@@ -1976,17 +1975,134 @@ function Factsheet(props) {
               </div>
             }
             {mode === "overview" &&
-              <div className='wizard'>
-                  <Grid container >
-                    <Grid item xs={12}>
-                      <div style={{ "textAlign": "center", "fontSize": "25px" }}>
-                        <b> {factsheetName} </b>
-                      </div>
-                      <div>
-                        {renderFactsheet(factsheetObject)}
-                      </div>
-                    </Grid>
-                  </Grid>
+              <div style={{
+                'marginTop': '10px',
+                'overflow': 'auto',
+                'marginBottom': '20px',
+                'marginLeft': '10px',
+                'marginRight': '10px',
+                border: '1px dashed #cecece',
+                padding: '20px',
+                overflow: 'scroll',
+                borderRadius: '5px',
+                backgroundColor:'#FCFCFC',
+                display: "flex"
+              }}>
+                    <Box
+                      sx={{
+                        'marginTop': '10px',
+                        'overflow': 'auto',
+                        'marginBottom': '20px',
+                        'marginLeft': '10px',
+                        'marginRight': '10px',
+                        'overflow': 'scroll',
+                        'width': '45%'
+                      }}
+                    >
+                      <Typography variant="body1" gutterBottom component="div">
+                        Study name:
+                        <b> {studyName}</b>
+                      </Typography>
+                      <Typography variant="body1" gutterBottom component="div">
+                        Acronym:
+                        <b> {acronym}</b>
+                      </Typography>
+                      <Typography variant="body1" gutterBottom component="div">
+                        Contact person(s):
+                          {selectedContactPerson.map((v, i) => (
+                          <span><b> {v.name}</b> {i + 1 !== selectedContactPerson.length && ',' } </span>  
+                        ))}
+                      </Typography>
+                      <Typography variant="body1" gutterBottom component="div">
+                        Abstract:
+                        <b> {abstract}</b>
+                      </Typography>
+                      <Typography variant="body1" gutterBottom component="div">
+                        Study report information:
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                        Title:
+                        <b> {report_title}</b>
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                        DOI:
+                        <b> {doi}</b>
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                        Link:
+                        <b> {link_to_study}</b>
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                        Date of publication:
+                        <b> {date_of_publication != undefined && date_of_publication.toString()}</b>
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                        Place of publication:
+                        <b> {place_of_publication}</b>
+                      </Typography>
+                      <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
+                          Authors:   
+                          {authors.map((v, i) => (
+                            <span><b> {v.name}</b> {i + 1 !== authors.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                    </Box>  
+                    <Box
+                       sx={{
+                        'marginTop': '10px',
+                        'overflow': 'auto',
+                        'marginLeft': '10px',
+                        'marginRight': '10px',
+                        'overflow': 'scroll',
+                        'width': '45%'
+                      }}
+                    >
+
+                    
+                     <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Institutions:
+                          {selectedInstitution.map((v, i) => (
+                          <span> <b>{v.name}</b> {i + 1 !== selectedInstitution.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                     <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Funding sources:   
+                          {selectedFundingSource.map((v, i) => (
+                            <span><b> {v.name}</b> {i + 1 !== selectedFundingSource.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Sector divisions:   
+                          {selectedSectorDivisions.map((v, i) => (
+                            <span><b> {v.name}</b> {i + 1 !== selectedSectorDivisions.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Sectors:   
+                          {selectedSectors.map((v, i) => (
+                            <span><b> {v}</b> {i + 1 !== selectedSectors.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Energy carriers:   
+                          {selectedEnergyCarriers.map((v, i) => (
+                            <span><b> {v}</b> {i + 1 !== selectedEnergyCarriers.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Energy Transformation Processes:   
+                          {selectedEnergyTransformationProcesses.map((v, i) => (
+                            <span><b> {v}</b> {i + 1 !== selectedEnergyTransformationProcesses.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
+                          Keywords:   
+                          {selectedStudyKewords.map((v, i) => (
+                            <span><b> {v}</b> {i + 1 !== selectedStudyKewords.length && ',' } </span>  
+                          ))}
+                      </Typography>
+                      
+                  </Box>
               </div>
             }
         </Grid>

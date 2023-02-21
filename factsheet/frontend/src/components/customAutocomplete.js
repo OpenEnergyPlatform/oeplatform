@@ -21,6 +21,7 @@ export default function CustomAutocomplete(parameters) {
   const params = parameters.optionsSet;
   const handler = parameters.handler;
 
+  console.log(value);
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);

@@ -37,9 +37,7 @@ function App() {
   const getData = async () => {
     if (url_id !== '' && url_id !== 'new') {
         const { data } = await axios.get(conf.toep + `factsheet/get/`, { params: { id: url_id } });
-        const fsd = data.replaceAll('\\', '').replaceAll('"[', '[').replaceAll(']"', ']');
-        const result = eval(fsd)[0].fields.factsheetData;
-        return result;
+        return data;
     }
   };
   useEffect(() => {
