@@ -15,6 +15,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import '../styles/App.css';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithAddNew from './customAutocompleteWithAddNew.js';
+import CustomAutocompleteWithAddNewItems from './customAutocompleteWithAddNewItems.js';
 import VerticalTabs from './customVerticalTabs.js';
 import Scenario from './scenario.js';
 import CustomDatePicker from './customDatePicker.js'
@@ -82,8 +83,6 @@ function Factsheet(props) {
   const location = useLocation();
   const { id, fsData } = props;
   const jsonld = require('jsonld');
-  console.log(fsData);
-
   const [factsheetRDF, setFactsheetRDF] = useState({});
   const [factsheet, setFactsheet] = useState({});
   const [loading, setLoading] = useState(true);
@@ -287,9 +286,6 @@ function Factsheet(props) {
     "oeo:OEO_00000505": [],
     "oeo:OEO_00000509": []
   });
-
-
-  console.log(date_of_publication);
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
@@ -590,6 +586,10 @@ function Factsheet(props) {
       { id: 'Zephyr Investments', name: "Zephyr Investments"},
     ];
 
+    const HandleAddNewInstitution = (newElement) => {
+      institution.push(newElement);
+    } 
+
     const scenario_years = [
       { id: '2010', name: '2010'},
       { id: '2011', name: '2011'},
@@ -724,6 +724,8 @@ function Factsheet(props) {
     };
 
     const institutionHandler = (institutionList) => {
+      console.log(institutionList);
+      console.log(institution);
       setSelectedInstitution(institutionList);
     };
 
@@ -1489,7 +1491,7 @@ function Factsheet(props) {
                 alignItems: 'flex-start',
                 flexWrap: 'wrap',
             }}>
-            <CustomAutocomplete showSelectedElements={true} manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <CustomAutocomplete type="Institution" showSelectedElements={true} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
             <div style={{ marginTop: '30px' }}>
               <HtmlTooltip
                 style={{ marginLeft: '10px' }}

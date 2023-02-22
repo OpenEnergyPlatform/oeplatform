@@ -7,14 +7,20 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
+import Checkbox from '@mui/material/Checkbox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import Box from '@mui/material/Box';
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const filter = createFilterOptions();
 
 export default function FreeSoloCreateOptionDialog(parameters) {
   const [open, toggleOpen] = React.useState(false);
-
-  const [value, setValue] = useState(parameters.selectedElements);
-  const para = parameters.optionsSet;
+  const { manyItems, idx, name, showSelectedElements } = parameters;
+  const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
+  const params = parameters.optionsSet;
   const handler = parameters.handler;
 
 
@@ -51,10 +57,24 @@ export default function FreeSoloCreateOptionDialog(parameters) {
   };
 
   return (
-    <React.Fragment>
+    <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
+        options={params}
+        disableCloseOnSelect
         value={value}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={ selected }
+            />
+            {option.name}
+          </li>
+        )}
         onChange={(event, newValue) => {
+          console.log(newValue);
           if (typeof newValue === 'string') {
             // timeout to avoid instant validation of the dialog's form.
             setTimeout(() => {
@@ -87,7 +107,6 @@ export default function FreeSoloCreateOptionDialog(parameters) {
           return filtered;
         }}
         id="free-solo-dialog-demo"
-        options={para}
         getOptionLabel={(option) => {
           // e.g value selected with enter, right from the input
           if (typeof option === 'string') {
@@ -101,8 +120,6 @@ export default function FreeSoloCreateOptionDialog(parameters) {
         selectOnFocus
         clearOnBlur
         handleHomeEndKeys
-        renderOption={(props, option) => <li {...props}>{option.name}</li>}
-        sx={{ width: 300 }}
         freeSolo
         renderInput={(params) => <TextField {...params} label="Add new entity" />}
       />
@@ -149,6 +166,6 @@ export default function FreeSoloCreateOptionDialog(parameters) {
           </DialogActions>
         </form>
       </Dialog>
-    </React.Fragment>
+    </Box>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { withStyles } from "@material-ui/core/styles";
@@ -12,26 +12,80 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
+
+const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
-  const { manyItems, idx, name, showSelectedElements } = parameters;
+  const { manyItems, idx, name, type, showSelectedElements, addNewHandler } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
-  const handler = parameters.handler;
 
-  console.log(value);
+  const handler = parameters.handler;
+  const [open, toggleOpen] = React.useState(false);
+  const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
+  
+  const [dialogValue, setDialogValue] = React.useState({
+    id: '',
+    name: '',
+  });
+  const theme = useTheme();
+
+  const handleAddedMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+      }
+      setOpenAddedDialog(false);
+  };
+
+
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);
   };
 
-  const handleChange = (e, newValue) => {
-    setValue(newValue);
-    handler(newValue, name, idx);
-  }
+  const handleClose = () => {
+    setDialogValue({
+      id: '',
+      name: '',
+    });
+    toggleOpen(false);
+  };
 
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setValue({
+      id: dialogValue.id,
+      name: parseInt(dialogValue.name, 10),
+    });
+    handleClose();
+  };
+
+  const handleChange = (e, newValue) => {
+    console.log(newValue);
+    if (newValue.length !== 0 && newValue[newValue.length - 1].inputValue) {
+      toggleOpen(true);
+      setDialogValue({
+        id: newValue[newValue.length - 1].inputValue,
+        name: newValue[newValue.length - 1].inputValue,
+      });
+    } else {
+      setValue(newValue);
+    }
+  }
+  
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -45,6 +99,21 @@ export default function CustomAutocomplete(parameters) {
     },
   }));
 
+  const handleName = e => {
+    setDialogValue({
+      id: e.target.value,
+      name: e.target.value,
+    });
+  };
+
+
+  const handleAddNew = e => {
+    addNewHandler(dialogValue);
+    toggleOpen(false);
+    setOpenAddedDialog(true);
+  };
+  
+
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
@@ -55,13 +124,13 @@ export default function CustomAutocomplete(parameters) {
         getOptionLabel={(option) => option.name}
         renderOption={(props, option, { selected }) => (
           <li {...props}>
-            <Checkbox
+             {!option.inputValue &&<Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
               style={{ marginRight: 8 }}
               checked={ selected }
-            />
-            <HtmlTooltip
+            />}
+            {!option.inputValue && <HtmlTooltip
             style={{ marginRight: '5px' }}
             placement="top"
             title={
@@ -75,7 +144,7 @@ export default function CustomAutocomplete(parameters) {
             }
             >
             <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
+            </HtmlTooltip>}
             {option.name}
           </li>
         )}
@@ -86,7 +155,73 @@ export default function CustomAutocomplete(parameters) {
         renderInput={(params) => (
           <TextField {...params} label={parameters.kind} placeholder="" />
         )}
+        filterOptions={(options, params) => {
+          const filtered = filter(options, params);
+
+          if (params.inputValue !== '') {
+            filtered.push({
+              inputValue: params.inputValue,
+              name: `Add "${params.inputValue}"`,
+            });
+          }
+
+          return filtered;
+        }}
       />
+      <Dialog open={open} onClose={handleClose}  >
+        <form onSubmit={handleSubmit}>
+          <DialogTitle>Add a new entity to Open Energy Knowledge Graph (OEKG)</DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{
+              'marginTop': '20px',
+              'marginBottom': '20px',
+              }}>
+              You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b> 
+            </DialogContentText>
+            <TextField
+             sx={{
+              'marginTop': '20px',
+              }}
+              id="name"
+              value={dialogValue.name}
+              onChange={handleName}
+              label="Name"
+              fullWidth
+            />
+            <TextField
+             sx={{
+              'marginTop': '20px',
+              }}
+              label={'URL (Optional)'}
+              fullWidth
+            />
+            <TextField
+              sx={{
+                'marginTop': '20px',
+              }}
+              multiline
+              rows={4}
+              maxRows={8}
+              label={'Short description (Optional)'}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button variant="contained" onClick={handleClose}>Cancel</Button>
+            <Button variant="contained" onClick={handleAddNew}>Add</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+      <Snackbar
+              open={openAddedDialog}
+              autoHideDuration={6000}
+              onClose={handleAddedMessageClose}
+            >
+              <Alert variant="filled" onClose={handleAddedMessageClose} severity="success" sx={{ width: '100%' }}>
+                <AlertTitle>New message</AlertTitle>
+                A new <strong>{type}</strong> added to OEKG. You can now add <strong>{dialogValue.name}</strong> to your factsheet!
+              </Alert>
+            </Snackbar>
       {showSelectedElements && <Box
         mt={3}
         sx={{
