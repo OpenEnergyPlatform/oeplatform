@@ -15,6 +15,33 @@ from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
+
+query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+
+store = sparqlstore.SPARQLUpdateStore()
+store.open((query_endpoint, update_endpoint))
+g = Graph(store, identifier=default)
+
+OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
+OBO = Namespace("http://purl.obolibrary.org/obo/")
+DC = Namespace("http://purl.org/dc/terms/")
+RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
+NPG = Namespace("http://ns.nature.com/terms/")
+SCHEMA = Namespace("https://schema.org/")
+OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
+DBO = Namespace("http://dbpedia.org/ontology/")
+
+g.bind("OEO", OEO)
+g.bind("OBO", OBO)
+g.bind("DC", DC)
+g.bind("RDFS", RDFS)
+g.bind("NPG", NPG)
+g.bind("SCHEMA", SCHEMA)
+g.bind("OEKG", OEKG)
+g.bind("DBO", DBO)
+
+
 def clean_name(name):
   return name.rstrip().lstrip().replace("-","_").replace(" ","_").replace("%","").replace("Ö","Oe").replace("ö","oe").replace("/","_").replace(":","_").replace("(","_").replace(")","_").replace("ü","ue")
 
@@ -26,35 +53,6 @@ def factsheets_index(request, *args, **kwargs):
 
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
-    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
-    OBO = Namespace("http://purl.obolibrary.org/obo/")
-    DC = Namespace("http://purl.org/dc/terms/")
-    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    NPG = Namespace("http://ns.nature.com/terms/")
-    SCHEMA = Namespace("https://schema.org/")
-    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
-    DBO = Namespace("http://dbpedia.org/ontology/")
-
-    #query_endpoint = 'http://localhost:3030/ds/query'
-    #update_endpoint = 'http://localhost:3030/ds/update'
-
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
-
-    g.bind("OEO", OEO)
-    g.bind("OBO", OBO)
-    g.bind("DC", DC)
-    g.bind("RDFS", RDFS)
-    g.bind("NPG", NPG)
-    g.bind("SCHEMA", SCHEMA)
-    g.bind("OEKG", OEKG)
-    g.bind("DBO", DBO)
-
-
     request_body = json.loads(request.body)
     name = request_body['name']
     acronym = request_body['acronym']
@@ -81,34 +79,6 @@ def create_factsheet(request, *args, **kwargs):
     date_of_publication = request_body['date_of_publication']
     report_title = request_body['report_title']
 
-    """ factsheet_obj = {
-        'name': name,
-        'acronym': acronym,
-        'study_name': study_name,
-        'abstract': abstract,
-        'institution': json.loads(institution) if institution is not None else [],
-        'funding_source': json.loads(funding_source) if funding_source  is not None else [],
-        'authors': json.loads(authors) if authors is not None else [],
-        'contact_person': json.loads(contact_person) if contact_person is not None else [],
-        'sectors': json.loads(sectors) if sectors is not None else [],
-        'expanded_sectors': json.loads(expanded_sectors) if expanded_sectors is not None else [],
-        'sector_divisions': json.loads(sector_divisions) if sector_divisions is not None else [],
-        'energy_transformation_processes': json.loads(energy_transformation_processes) if energy_transformation_processes is not None else [],
-        'expanded_energy_transformation_processes': json.loads(expanded_energy_transformation_processes) if expanded_energy_transformation_processes is not None else [],
-        'energy_carriers': json.loads(energy_carriers) if energy_carriers is not None else [],
-        'expanded_energy_carriers': json.loads(expanded_energy_carriers) if expanded_energy_carriers is not None else [],
-        'study_keywords': json.loads(study_keywords) if study_keywords is not None else [],
-        'doi': doi,
-        'place_of_publication': place_of_publication,
-        'link_to_study': link_to_study,
-        'scenarios': json.loads(scenarios) if scenarios is not None else [],
-        'models': json.loads(models) if models is not None else [],
-        'frameworks': json.loads(frameworks) if frameworks is not None else [],
-        'date_of_publication': date_of_publication,
-        'report_title': report_title,
-        } """
-
-    
     if (None, DC.acronym, Literal(clean_name(acronym)) ) in g:
         response = JsonResponse('Factsheet exists', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
@@ -191,41 +161,12 @@ def create_factsheet(request, *args, **kwargs):
             g.add((author_URI, DC.name, Literal(clean_name(item['name']))))
             g.add((study_URI, OEO.OEO_00000506, author_URI))
 
-
         response = JsonResponse('Factsheet saved', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
         return response
 
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
-    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
-    OBO = Namespace("http://purl.obolibrary.org/obo/")
-    DC = Namespace("http://purl.org/dc/terms/")
-    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    NPG = Namespace("http://ns.nature.com/terms/")
-    SCHEMA = Namespace("https://schema.org/")
-    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
-    DBO = Namespace("http://dbpedia.org/ontology/")
-
-    #query_endpoint = 'http://localhost:3030/ds/query'
-    #update_endpoint = 'http://localhost:3030/ds/update'
-
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
-
-    g.bind("OEO", OEO)
-    g.bind("OBO", OBO)
-    g.bind("DC", DC)
-    g.bind("RDFS", RDFS)
-    g.bind("NPG", NPG)
-    g.bind("SCHEMA", SCHEMA)
-    g.bind("OEKG", OEKG)
-    g.bind("DBO", DBO)
-
     request_body = json.loads(request.body)
     fsData = request_body['fsData']
     id = request_body['id']
@@ -254,39 +195,6 @@ def update_factsheet(request, *args, **kwargs):
     models = request_body['models']
     frameworks = request_body['frameworks']
 
-    """  
-    factsheet = Factsheet.objects.get(id=id)
-
-    factsheet.factsheetData['name'] = name
-    factsheet.factsheetData['study_name'] = studyName
-    factsheet.factsheetData['acronym'] = acronym
-    factsheet.factsheetData['abstract'] = abstract
-    factsheet.factsheetData['institution'] = json.loads(institution) if institution is not None else []
-    factsheet.factsheetData['funding_source'] = json.loads(funding_source) if funding_source is not None else []
-    factsheet.factsheetData['contact_person'] = json.loads(contact_person) if contact_person is not None else []
-    factsheet.factsheetData['sector_divisions'] = json.loads(sector_divisions) if sector_divisions is not None else []
-    factsheet.factsheetData['sectors'] = json.loads(sectors) if sectors is not None else []
-    factsheet.factsheetData['expanded_sectors'] = json.loads(expanded_sectors) if expanded_sectors is not None else []
-    factsheet.factsheetData['energy_carriers'] = json.loads(energy_carriers) if energy_carriers is not None else []
-    factsheet.factsheetData['expanded_energy_carriers'] = json.loads(expanded_energy_carriers) if expanded_energy_carriers is not None else []
-    factsheet.factsheetData['energy_transformation_processes'] = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
-    factsheet.factsheetData['expanded_energy_transformation_processes'] = json.loads(expanded_energy_transformation_processes) if expanded_energy_transformation_processes is not None else []
-    factsheet.factsheetData['study_keywords'] = json.loads(study_keywords) if study_keywords is not None else []
-    factsheet.factsheetData['report_title'] = report_title
-    factsheet.factsheetData['date_of_publication'] = date_of_publication
-    factsheet.factsheetData['doi'] = doi
-    factsheet.factsheetData['place_of_publication'] = place_of_publication
-    factsheet.factsheetData['link_to_study'] = link_to_study
-    factsheet.factsheetData['authors'] = json.loads(authors) if authors is not None else []
-    factsheet.factsheetData['scenarios'] = json.loads(scenarios) if scenarios is not None else []
-    factsheet.factsheetData['models'] = json.loads(models) if models is not None else []
-    factsheet.factsheetData['frameworks'] = json.loads(frameworks) if frameworks is not None else []
-
-    factsheet.save() """
-
-    response = JsonResponse('factsheet updated!', safe=False, content_type='application/json')
-    patch_response_headers(response, cache_timeout=1)
-
     old_Study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(fsData["acronym"]))
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(acronym))
 
@@ -308,7 +216,7 @@ def update_factsheet(request, *args, **kwargs):
     for item in institutions:
         institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
         g.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
-        g.add(( institution_URI, DC.title, institution_URI ))
+        g.add(( institution_URI, RDFS.label, Literal(clean_name(item['name'])) ))
         g.add(( study_URI, OEO.OEO_00000510, institution_URI ))
 
     for s, p, o in g.triples((old_Study_URI, OEO.RO_0002234, None)):
@@ -404,6 +312,9 @@ def update_factsheet(request, *args, **kwargs):
         g.add((author_URI, DC.name, Literal(clean_name(item['name']))))
         g.add((study_URI, OEO.OEO_00000506, author_URI))
 
+    response = JsonResponse('factsheet updated!', safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+
     return response
 
 @csrf_exempt
@@ -417,27 +328,8 @@ def factsheet_by_name(request, *args, **kwargs):
 
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
-    """ id = request.GET.get('id')
-    factsheet = Factsheet.objects.filter(id=id)
-    factsheet_json = serializers.serialize('json', factsheet)
-    response = JsonResponse(factsheet_json, safe=False, content_type='application/json')
-    patch_response_headers(response, cache_timeout=1)
-    return response """
-
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
-
     id = request.GET.get('id')
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(id))
-
-    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
-    DC = Namespace("http://purl.org/dc/terms/")
-    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
 
     factsheet = {}
     for s, p, o in g.triples(( study_URI, RDFS.label, None )):
@@ -467,46 +359,60 @@ def factsheet_by_id(request, *args, **kwargs):
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
-    factsheet = Factsheet.objects.filter(id=id)
-    factsheet.delete()
-    response = JsonResponse('factsheet deleted!', safe=False, content_type='application/json')
+    study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(id))
+    g.remove((study_URI, None, None)) 
+    response = JsonResponse('factsheet removed!', safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
+
+@csrf_exempt
+def get_entities_by_type(request, *args, **kwargs):
+    entity_type = request.GET.get('entity_type')
+    entity_URI = URIRef("http://openenergy-platform.org/ontology/oeo/" + entity_type )
+
+    entities = []
+    for s, p, o in g.triples(( None, RDF.type, entity_URI )):
+        entities.append(s.split('/')[-1])
+
+    response = JsonResponse(entities, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
     return response
 
 
 @csrf_exempt
-def get_all_factsheets(request, *args, **kwargs):
-    """  factsheets = Factsheet.objects.all()
-    factsheets_json = serializers.serialize('json', factsheets)
-    response = JsonResponse(factsheets_json, safe=False, content_type='application/json')
+def add_entities(request, *args, **kwargs):
+    request_body = json.loads(request.body)
+    entity_type = request_body['entity_type']
+    entity_label = request_body['entity_label']
+    entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_label )
+
+    g.add((entity_URI, RDF.type, OEO[entity_type]))
+    g.add((entity_URI, RDFS.label, Literal(clean_name(entity_label))))
+
+    response = JsonResponse('A new entity added!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
-    return response """
+    return response
 
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+@csrf_exempt
+def delete_entities(request, *args, **kwargs):
+    # request_body = json.loads(request.body)
+    # entity_type = request_body['entity_type']
+    # entity_label = request_body['entity_label']
 
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
+    entity_type = request.GET.get('entity_type')
+    entity_label = request.GET.get('entity_label')
 
-    OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
-    OBO = Namespace("http://purl.obolibrary.org/obo/")
-    DC = Namespace("http://purl.org/dc/terms/")
-    RDFS = Namespace("http://www.w3.org/2000/01/rdf-schema#")
-    NPG = Namespace("http://ns.nature.com/terms/")
-    SCHEMA = Namespace("https://schema.org/")
-    OEKG = Namespace("http://openenergy-platform.org/ontology/oekg/")
-    DBO = Namespace("http://dbpedia.org/ontology/")
+    entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type )
+    entity_Label = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_label )
 
-    g.bind("OEO", OEO)
-    g.bind("OBO", OBO)
-    g.bind("DC", DC)
-    g.bind("RDFS", RDFS)
-    g.bind("NPG", NPG)
-    g.bind("SCHEMA", SCHEMA)
-    g.bind("OEKG", OEKG)
-    g.bind("DBO", DBO)
- 
+    g.remove((entity_Label, None, None)) 
+    g.remove((None, None, entity_Label)) 
+    response = JsonResponse('entity removed!', safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
+
+@csrf_exempt
+def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
     for s1, p1, o1 in g.triples(( None, RDF.type, OEO.OEO_00000364 )):
         element = {}
@@ -519,39 +425,20 @@ def get_all_factsheets(request, *args, **kwargs):
 
     response = JsonResponse(all_factsheets, safe=False, content_type='application/json') 
     patch_response_headers(response, cache_timeout=1)
-
     return response
 
 @csrf_exempt
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
-
     all_factsheets_as_turtle = g.serialize(format="ttl")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
-
-    
     patch_response_headers(response, cache_timeout=1)
 
     return response
 
 @csrf_exempt
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
-    query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-    update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
-
-    store = sparqlstore.SPARQLUpdateStore()
-    store.open((query_endpoint, update_endpoint))
-    g = Graph(store, identifier=default)
-
     all_factsheets_as_turtle = g.serialize(format="json-ld")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
-
-    
     patch_response_headers(response, cache_timeout=1)
 
     return response

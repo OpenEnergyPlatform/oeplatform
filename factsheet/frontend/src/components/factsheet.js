@@ -102,6 +102,8 @@ function Factsheet(props) {
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? [] : []);
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
 
+  const [institutions, setInstitutions] = useState([]);
+  
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -252,6 +254,9 @@ function Factsheet(props) {
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? [] : []);
 
   const [removeReport, setRemoveReport] = useState(false);
+  const [addedEntity, setAddedEntity] = useState(false);
+
+  const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
   const navigate = useNavigate();
   const handleSaveJSON = () => {
     //props.onChange(oekg);
@@ -466,6 +471,13 @@ function Factsheet(props) {
     setOpenOverView(false);
   };
 
+  const handleAddedMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+      }
+      setOpenAddedDialog(false);
+  };
+
 
   const handleScenariosInputChange = ({ target }) => {
     const { name, value } = target;
@@ -485,8 +497,6 @@ function Factsheet(props) {
     if (obj)
       obj[name] = selectedList
     setScenarios(newScenarios);
-    console.log(newScenarios);
-
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
@@ -580,6 +590,19 @@ function Factsheet(props) {
       { id: 'Excella', name:'Excella' },
     ];
 
+    const getInstitution = async () => {
+      const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000238' } });
+      return data;
+    };
+
+    useEffect(() => {
+      getInstitution().then((data) => {
+       const tmp = [];
+        data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+        setInstitutions(tmp);
+       });
+    }, []);
+
     const institution = [
       { id: 'Buena Vista Garden Maintenance', name: "Buena Vista Garden Maintenance"},
       { id: 'Magik Lamp', name: "Magik Lamp"},
@@ -588,6 +611,22 @@ function Factsheet(props) {
 
     const HandleAddNewInstitution = (newElement) => {
       institution.push(newElement);
+      axios.post(conf.toep + 'factsheet/add_entities/',
+      {
+        entity_type: 'OEO_00000238',
+        entity_label: newElement.name,
+      }).then(response => {
+      if (response.data === 'A new entity added!')
+        setOpenAddedDialog(true);
+        setAddedEntity(['Institution', newElement.name ]);
+
+        getInstitution().then((data) => {
+          const tmp = [];
+           data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+           setInstitutions(tmp);
+          });
+          
+      });
     } 
 
     const scenario_years = [
@@ -724,8 +763,6 @@ function Factsheet(props) {
     };
 
     const institutionHandler = (institutionList) => {
-      console.log(institutionList);
-      console.log(institution);
       setSelectedInstitution(institutionList);
     };
 
@@ -1491,7 +1528,7 @@ function Factsheet(props) {
                 alignItems: 'flex-start',
                 flexWrap: 'wrap',
             }}>
-            <CustomAutocomplete type="Institution" showSelectedElements={true} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institution} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+            <CustomAutocomplete type="Institution" showSelectedElements={true} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
             <div style={{ marginTop: '30px' }}>
               <HtmlTooltip
                 style={{ marginLeft: '10px' }}
@@ -1873,6 +1910,17 @@ function Factsheet(props) {
               <Alert variant="filled" onClose={handleCloseExistDialog} severity="error" sx={{ width: '100%' }}>
                 <AlertTitle>Duplicate</AlertTitle>
                 Another factsheet with this acronym exists. Please choose another acronym!
+              </Alert>
+            </Snackbar>
+            <Snackbar
+              open={openAddedDialog}
+              autoHideDuration={6000}
+              onClose={handleAddedMessageClose}
+            >
+              <Alert variant="filled" onClose={handleAddedMessageClose} severity="info" sx={{ width: '100%' }}>
+                <AlertTitle>A new entity added to the OEKG</AlertTitle>
+                Type: <strong>{addedEntity[0]}  </strong>
+                Name: <strong>{addedEntity[1]}</strong>
               </Alert>
             </Snackbar>
             <Dialog

@@ -32,25 +32,16 @@ export default function CustomAutocomplete(parameters) {
   const { manyItems, idx, name, type, showSelectedElements, addNewHandler } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const params = parameters.optionsSet;
-
   const handler = parameters.handler;
   const [open, toggleOpen] = React.useState(false);
-  const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
-  
+
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
     name: '',
   });
   const theme = useTheme();
 
-  const handleAddedMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-      }
-      setOpenAddedDialog(false);
-  };
-
-
+ 
   const onDelete = (name) => () => {
     const newValue = value.filter((v) => v.name !== name);
     setValue(newValue);
@@ -74,7 +65,6 @@ export default function CustomAutocomplete(parameters) {
   };
 
   const handleChange = (e, newValue) => {
-    console.log(newValue);
     if (newValue.length !== 0 && newValue[newValue.length - 1].inputValue) {
       toggleOpen(true);
       setDialogValue({
@@ -84,8 +74,9 @@ export default function CustomAutocomplete(parameters) {
     } else {
       setValue(newValue);
     }
+    handler(newValue);
   }
-  
+
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -106,20 +97,17 @@ export default function CustomAutocomplete(parameters) {
     });
   };
 
-
   const handleAddNew = e => {
     addNewHandler(dialogValue);
     toggleOpen(false);
-    setOpenAddedDialog(true);
   };
   
-
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
         multiple
         id="checkboxes-tags-demo"
-        options={params}
+        options={parameters.optionsSet}
         disableCloseOnSelect
         getOptionLabel={(option) => option.name}
         renderOption={(props, option, { selected }) => (
@@ -164,7 +152,6 @@ export default function CustomAutocomplete(parameters) {
               name: `Add "${params.inputValue}"`,
             });
           }
-
           return filtered;
         }}
       />
@@ -212,16 +199,6 @@ export default function CustomAutocomplete(parameters) {
           </DialogActions>
         </form>
       </Dialog>
-      <Snackbar
-              open={openAddedDialog}
-              autoHideDuration={6000}
-              onClose={handleAddedMessageClose}
-            >
-              <Alert variant="filled" onClose={handleAddedMessageClose} severity="success" sx={{ width: '100%' }}>
-                <AlertTitle>New message</AlertTitle>
-                A new <strong>{type}</strong> added to OEKG. You can now add <strong>{dialogValue.name}</strong> to your factsheet!
-              </Alert>
-            </Snackbar>
       {showSelectedElements && <Box
         mt={3}
         sx={{

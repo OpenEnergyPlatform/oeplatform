@@ -44,7 +44,7 @@ function App() {
     getData().then((data) => {
       setFactsheet(data);
       setLoading(false);
-  });;
+  });
   }, []);
 
   if (url_id === '') {
