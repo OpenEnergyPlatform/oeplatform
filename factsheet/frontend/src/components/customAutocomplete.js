@@ -57,10 +57,6 @@ export default function CustomAutocomplete(parameters) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setValue({
-      id: dialogValue.id,
-      name: parseInt(dialogValue.name, 10),
-    });
     handleClose();
   };
 
