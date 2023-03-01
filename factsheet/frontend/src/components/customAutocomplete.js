@@ -34,7 +34,8 @@ export default function CustomAutocomplete(parameters) {
   const params = parameters.optionsSet;
   const handler = parameters.handler;
   const [open, toggleOpen] = React.useState(false);
-
+  
+  console.log(parameters.selectedElements);
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
     name: '',

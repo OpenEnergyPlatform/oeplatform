@@ -45,8 +45,8 @@ import {sectors_json} from '../data/sectors.js';
 import sector_divisions from '../data/sector_divisions.json';
 import {energy_transformation_processes_json} from '../data/energy_transformation_processes.js';
 import {energy_carriers_json} from '../data/energy_carriers.js';
-import contact_person from '../data/contact_person.json';
-import authors from '../data/authors.json'
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import authors from '../data/authors.json';
 
 import '../styles/App.css';
 
@@ -70,10 +70,9 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function Factsheet(props) {
+  const navigate = useNavigate();
+
   const { id, fsData } = props;
-  const jsonld = require('jsonld');
-  const [factsheetRDF, setFactsheetRDF] = useState({});
-  const [openTurtle, setOpenTurtle] = useState(false);
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -88,6 +87,7 @@ function Factsheet(props) {
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
   const [institutions, setInstitutions] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
+  const [contactPersons, setContactPersons] = useState([]);
   
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -126,11 +126,11 @@ function Factsheet(props) {
   
   const [sectors, setSectors] = useState(sectors_json);
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
-  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? [] : []);
+  const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? [] : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
-  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? [] : []);
+  const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
   const [report_title, setReportTitle] = useState(id !== 'new' ? '' : '');
   const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? '04-07-2022' : '04-07-2022');
   const [doi, setDOI] = useState(id !== 'new' ? '' : '');
@@ -150,7 +150,7 @@ function Factsheet(props) {
     }
   ]);
   const [scenariosObject, setScenariosObject] = useState({});
-  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? [] : []);
+  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
@@ -198,10 +198,15 @@ function Factsheet(props) {
       }).then(response => {
       console.log('response');
       console.log(response);
-      if (response.data === 'Factsheet saved')
+      if (response.data === 'Factsheet saved') {
+        navigate('/factsheet/fs/' + acronym);
+        window.location.reload(false);
         setOpenSavedDialog(true);
-      else if (response.data === 'Factsheet exists')
+        
+      }
+      else if (response.data === 'Factsheet exists') {
         setOpenExistDialog(true);
+      }
     });
 
     } else {
@@ -321,11 +326,6 @@ function Factsheet(props) {
     setOpenRemovedDialog(false);
   };
 
-  const handleCloseTurtle = () => {
-    setOpenTurtle(false);
-  };
-
-
   const handleAddedMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -426,6 +426,11 @@ function Factsheet(props) {
     return data;
   };
 
+  const getContactPersons = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000107' } });
+    return data;
+  };
+
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
@@ -442,6 +447,17 @@ function Factsheet(props) {
       });
   }, []);
 
+  useEffect(() => {
+    getContactPersons().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+      setContactPersons(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+}, [selectedInstitution]);
+
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
@@ -449,15 +465,26 @@ function Factsheet(props) {
       entity_label: newElement.name,
     }).then(response => {
     if (response.data === 'A new entity added!')
-      setOpenAddedDialog(true);
-      setAddedEntity(['Institution', newElement.name ]);
+      axios.post(conf.toep + 'factsheet/add_a_fact/',
+      {
+        subject: acronym,
+        predicate: 'OEO_00000510',
+        object: newElement.name
+      }).then(response => {
+        setOpenAddedDialog(true);
+        setAddedEntity(['Institution', newElement.name ]);
+        let new_selectedInstitution = selectedInstitution;
+        new_selectedInstitution.push( { 'id': newElement.name, 'name': newElement.name});
+        setSelectedInstitution(new_selectedInstitution);
 
-      getInstitution().then((data) => {
-        const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
-          setInstitutions(tmp);
-        });
-        
+        console.log(selectedInstitution);
+        window.location.reload(false);
+        getInstitution().then((data) => {
+          const tmp = [];
+            data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+            setInstitutions(tmp);
+          });
+      });
     });
   } 
 
@@ -471,7 +498,7 @@ function Factsheet(props) {
       setOpenAddedDialog(true);
       setAddedEntity(['Funding source', newElement.name ]);
 
-      getFundingSources().then((data) => {
+      getFundingSources('OEO_00000107').then((data) => {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
           setFundingSources(tmp);
@@ -480,6 +507,24 @@ function Factsheet(props) {
     });
   } 
 
+  const HandleAddNewContactPerson = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OEO_00000107',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Contact person', newElement.name ]);
+
+      getContactPersons().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          setContactPersons(tmp);
+        });
+        
+    });
+  } 
   
 
 const scenario_region = [
@@ -520,7 +565,9 @@ const scenario_region = [
   };
 
   const institutionHandler = (institutionList) => {
-    setSelectedInstitution(institutionList);
+    console.log(institutionList);
+    const filteredInstitutionList = institutionList.filter(item => (!item.hasOwnProperty('inputValue')) );
+    setSelectedInstitution(filteredInstitutionList);
   };
 
   const fundingSourceHandler = (fundingSourceList) => {
@@ -726,7 +773,7 @@ const scenario_region = [
               alignItems: 'flex-start',
               flexWrap: 'wrap',
           }}>
-            <CustomAutocomplete showSelectedElements={true}  manyItems optionsSet={contact_person} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+            <CustomAutocomplete type="Contact person" showSelectedElements={true} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         <div style={{ marginTop: '30px' }}>
           <HtmlTooltip
             style={{ marginLeft: '10px' }}
