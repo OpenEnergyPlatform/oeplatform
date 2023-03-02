@@ -37,7 +37,6 @@ export default function FreeSoloCreateOptionDialog(parameters) {
       id: '',
       name: '',
     });
-
     toggleOpen(false);
   };
 
@@ -52,7 +51,6 @@ export default function FreeSoloCreateOptionDialog(parameters) {
       id: dialogValue.id,
       name: parseInt(dialogValue.name, 10),
     });
-
     handleClose();
   };
 

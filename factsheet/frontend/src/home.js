@@ -84,7 +84,6 @@ function Home(props) {
               </Grid>
               <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'75vh', 'width':'98%', 'overflow': 'auto'  }}>
                 {renderCards(eval(factsheets))}
-                {console.log(state)}
               </Grid>
           </div>
       </ApolloProvider>
