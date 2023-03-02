@@ -16,8 +16,11 @@ from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -96,7 +99,7 @@ def create_factsheet(request, *args, **kwargs):
             institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             g.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
             g.add(( institution_URI, DC.title, Literal(clean_name(item['name']) )))
-            g.add(( study_URI, OEKG["conducted_by"], institution_URI ))
+            g.add(( study_URI, OEO.OEO_00000510, institution_URI ))
 
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
@@ -443,7 +446,7 @@ def delete_entities(request, *args, **kwargs):
     # entity_type = request_body['entity_type']
     # entity_label = request_body['entity_label']
 
-    #g.remove((None, None, None)) 
+    g.remove((None, None, None)) 
 
     entity_type = request.GET.get('entity_type')
     entity_label = request.GET.get('entity_label')

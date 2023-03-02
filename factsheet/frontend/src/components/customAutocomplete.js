@@ -49,10 +49,8 @@ export default function CustomAutocomplete(parameters) {
   };
 
   const handleClose = () => {
-    setDialogValue({
-      id: '',
-      name: '',
-    });
+    const updauedVlue = value.filter(item => item.name !== dialogValue.name);
+    setValue(updauedVlue);
     toggleOpen(false);
   };
 
@@ -68,6 +66,10 @@ export default function CustomAutocomplete(parameters) {
         id: newValue[newValue.length - 1].inputValue,
         name: newValue[newValue.length - 1].inputValue,
       });
+      const newElement = { 'id': newValue[newValue.length - 1].inputValue , 'name': newValue[newValue.length - 1].inputValue };
+      const updauedVlue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
+      updauedVlue.push(newElement);
+      setValue(updauedVlue);
     } else {
       setValue(newValue);
     }
@@ -162,7 +164,7 @@ export default function CustomAutocomplete(parameters) {
               }}>
               You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b> 
             </DialogContentText>
-            <TextField
+            {/* <TextField
              sx={{
               'marginTop': '20px',
               }}
@@ -171,7 +173,7 @@ export default function CustomAutocomplete(parameters) {
               onChange={handleName}
               label="Name"
               fullWidth
-            />
+            /> */}
             <TextField
              sx={{
               'marginTop': '20px',

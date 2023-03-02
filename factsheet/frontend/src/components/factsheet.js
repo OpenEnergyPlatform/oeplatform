@@ -464,27 +464,15 @@ function Factsheet(props) {
       entity_type: 'OEO_00000238',
       entity_label: newElement.name,
     }).then(response => {
-    if (response.data === 'A new entity added!')
-      axios.post(conf.toep + 'factsheet/add_a_fact/',
-      {
-        subject: acronym,
-        predicate: 'OEO_00000510',
-        object: newElement.name
-      }).then(response => {
-        setOpenAddedDialog(true);
-        setAddedEntity(['Institution', newElement.name ]);
-        let new_selectedInstitution = selectedInstitution;
-        new_selectedInstitution.push( { 'id': newElement.name, 'name': newElement.name});
-        setSelectedInstitution(new_selectedInstitution);
-
-        console.log(selectedInstitution);
-        window.location.reload(false);
-        getInstitution().then((data) => {
-          const tmp = [];
-            data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
-            setInstitutions(tmp);
-          });
-      });
+    if (response.data === 'A new entity added!') {
+      setOpenAddedDialog(true);
+      setAddedEntity(['Institution', newElement.name ]);
+      getInstitution().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          setInstitutions(tmp);
+        });
+    }
     });
   } 
 
@@ -565,9 +553,7 @@ const scenario_region = [
   };
 
   const institutionHandler = (institutionList) => {
-    console.log(institutionList);
-    const filteredInstitutionList = institutionList.filter(item => (!item.hasOwnProperty('inputValue')) );
-    setSelectedInstitution(filteredInstitutionList);
+    setSelectedInstitution(institutionList);
   };
 
   const fundingSourceHandler = (fundingSourceList) => {
