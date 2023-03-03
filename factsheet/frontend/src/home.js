@@ -24,6 +24,8 @@ import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput";
 import { useLocation } from 'react-router-dom';
 import conf from "./conf.json";
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
@@ -38,6 +40,24 @@ function Home(props) {
   const searchHandler = (v) => {
     console.log(v);
   };
+
+  const theme = createTheme({
+    status: {
+      danger: '#e53e3e',
+    },
+    palette: {
+      primary: {
+        main: '#04678F',
+        darker: '#053e85',
+        contrastText: '#fff',
+      },
+      neutral: {
+        main: '#198BB9',
+        darker: '#053e85',
+        contrastText: '#fff',
+      },
+    },
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -69,17 +89,26 @@ function Home(props) {
       <ApolloProvider client={client}>
           <div key={props.id}>
             <Grid container spacing={2} direction="row" justifyContent="space-between">
-                <Grid item xs={10}>
+                <Grid item xs={9}>
                   <CustomSearchInput searchHandler={searchHandler} data={[{ name: 'Factsheet A', label: 'Anguilla', phone: '1-264' },
                   { name: 'Factsheet B', label: 'Albania', phone: '355' },
-                  { name: 'Factsheet C', label: 'Armenia', phone: '374' }]}/>
+                  { name: 'Factsheet C', label: 'Armenia', phone: '374' }]}
+                 
+                  />
                 </Grid>
-                <Grid item xs={2}>
-                      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
-                        <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'marginBottom' : '10px', 'marginRight' : '20px','height': '55px', 'zIndex': '1000', 'float': 'right' }} variant="contained" color="primary" >
-                          Add a new Factsheet
+                <Grid item xs={3}>
+                    <ThemeProvider theme={theme}>
+                      <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                        <Button disableElevation={true} startIcon={<CompareArrowsIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'marginRight' : '20px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="neutral" >
+                          Compare selected
                         </Button>
                       </Link>
+                      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                        <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="primary" >
+                          Add a new factsheet
+                        </Button>
+                      </Link>
+                    </ThemeProvider>
                 </Grid>
               </Grid>
               <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'75vh', 'width':'98%', 'overflow': 'auto'  }}>

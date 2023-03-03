@@ -6,6 +6,7 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Route, Routes, Link } from 'react-router-dom';
+import Checkbox from '@mui/material/Checkbox';
 
 import axios from "axios"
 
@@ -31,6 +32,7 @@ export default function CustomCard(props) {
             More...
           </Button>
         </Link>
+        <Checkbox  />
       </CardActions>
     </Card>
   );

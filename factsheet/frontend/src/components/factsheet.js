@@ -1000,13 +1000,13 @@ const scenario_region = [
         <Grid item xs={4} >
           <div style={{ 'textAlign': 'right' }}>
             <Tooltip title="Save factsheet">
-              <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Fab>
+              <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
               </Tooltip>
             {/* <Tooltip title="Share this factsheet">
               <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Fab>
             </Tooltip> */}
             <Tooltip title="Delete factsheet">
-              <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Fab>
+              <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
             </Tooltip>
           </div >
         </Grid>
