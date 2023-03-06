@@ -20,9 +20,9 @@ from oeplatform.settings import ONTOLOGY_FOLDER
 
 
 
-versions = os.listdir(f"{ONTOLOGY_FOLDER}{'oeo'}")
+versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-path = f"{ONTOLOGY_FOLDER}{'oeo'}/{version}"
+path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
 file = "oeo-full.owl"
 Ontology_URI = os.path.join(path, file)
 oeo = Graph()
