@@ -23,6 +23,7 @@ import { useTheme } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
+import EditIcon from '@mui/icons-material/Edit';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -34,8 +35,10 @@ export default function CustomAutocomplete(parameters) {
   const params = parameters.optionsSet;
   const handler = parameters.handler;
   const [open, toggleOpen] = React.useState(false);
+  const [openEdit, toggleOpenEdit] = React.useState(false);
+  const [editLabel, setEditLabel] = React.useState('');
+  const [updatedLabel, setUpdatedLabel] = React.useState('');
   
-  console.log(parameters.selectedElements);
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
     name: '',
@@ -66,15 +69,22 @@ export default function CustomAutocomplete(parameters) {
         id: newValue[newValue.length - 1].inputValue,
         name: newValue[newValue.length - 1].inputValue,
       });
-      const newElement = { 'id': newValue[newValue.length - 1].inputValue , 'name': newValue[newValue.length - 1].inputValue };
-      const updauedVlue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
-      updauedVlue.push(newElement);
-      setValue(updauedVlue);
+     
     } else {
       setValue(newValue);
     }
     handler(newValue);
   }
+
+  const handleDelete = (e, vc) => {
+    console.log(vc);
+    setEditLabel(vc);
+    toggleOpenEdit(true);
+  };
+
+  const handleCloseEdit = () => {
+    toggleOpenEdit(false);
+  };
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -96,11 +106,22 @@ export default function CustomAutocomplete(parameters) {
     });
   };
 
+  const handleUpdatedLabel = e => {
+    setUpdatedLabel(e.target.value);
+    console.log(editLabel);
+    console.log(updatedLabel);
+  };
+  
+
   const handleAddNew = e => {
+    console.log(dialogValue);
+    const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
+    updauedValue.push(dialogValue);
+    setValue(updauedValue);
+
     addNewHandler(dialogValue);
     toggleOpen(false);
   };
-  
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
@@ -164,16 +185,16 @@ export default function CustomAutocomplete(parameters) {
               }}>
               You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b> 
             </DialogContentText>
-            {/* <TextField
+            <TextField
              sx={{
               'marginTop': '20px',
               }}
               id="name"
               value={dialogValue.name}
               onChange={handleName}
-              label="Name"
+              label="Label"
               fullWidth
-            /> */}
+            />
             <TextField
              sx={{
               'marginTop': '20px',
@@ -198,6 +219,48 @@ export default function CustomAutocomplete(parameters) {
           </DialogActions>
         </form>
       </Dialog>
+      <Dialog open={openEdit} onClose={handleCloseEdit}  >
+        <DialogTitle>Edit an entity in Open Energy Knowledge Graph (OEKG) </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{
+            'marginTop': '20px',
+            'marginBottom': '20px',
+            }}>
+            You are about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b> 
+          </DialogContentText>
+          <TextField
+            sx={{
+            'marginTop': '20px',
+            }}
+            id="name"
+            value={updatedLabel}
+            onChange={handleUpdatedLabel}
+            label="New label"
+            fullWidth
+          />
+          <TextField
+            sx={{
+            'marginTop': '20px',
+            }}
+            label={'URL (Optional)'}
+            fullWidth
+          />
+          <TextField
+            sx={{
+              'marginTop': '20px',
+            }}
+            multiline
+            rows={4}
+            maxRows={8}
+            label={'Short description (Optional)'}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={handleCloseEdit}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddNew}>Add</Button>
+        </DialogActions>
+      </Dialog>
       {showSelectedElements && <Box
         mt={3}
         sx={{
@@ -213,7 +276,7 @@ export default function CustomAutocomplete(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.name}  variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
+          <Chip key={v.id} label={v.name}  deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
       </Box>}
     </Box>

@@ -15,6 +15,19 @@ from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
+import os
+from oeplatform.settings import ONTOLOGY_FOLDER
+
+
+
+versions = os.listdir(f"{ONTOLOGY_FOLDER}{'oeo'}")
+version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
+path = f"{ONTOLOGY_FOLDER}{'oeo'}/{version}"
+file = "oeo-full.owl"
+Ontology_URI = os.path.join(path, file)
+oeo = Graph()
+oeo.parse(Ontology_URI)
+
 
 query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
@@ -486,6 +499,94 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_turtle = g.serialize(format="json-ld")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+
+    return response
+
+
+@csrf_exempt
+def populate_factsheets_elements(request, *args, **kwargs):
+    elements = {}
+
+    energy_transformation_processes = []
+    for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
+        sl = oeo.value(s, RDFS.label)
+        parent = {
+            'value': sl,
+            'label': sl
+        }
+        children = []
+        for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
+            sl1 = oeo.value(s1, RDFS.label)
+            
+            children2 = []
+            for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
+                sl2 = oeo.value(s2, RDFS.label)
+
+                children2.append({
+                    'value': sl2,
+                    'label': sl2
+                })
+
+            if children2 != []:
+                children.append({
+                'value': sl1,
+                'label': sl1,
+                'children': children2
+                })
+            else:
+                children.append({
+                'value': sl1,
+                'label': sl1
+                })
+
+        if children != []:
+            parent['children'] = children
+
+        energy_transformation_processes.append(parent)
+        elements['energy_transformation_processes'] = energy_transformation_processes
+
+
+    energy_carriers = []
+    for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020039 )):
+        sl = oeo.value(s, RDFS.label)
+        parent = {
+            'value': sl,
+            'label': sl
+        }
+        children = []
+        for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
+            sl1 = oeo.value(s1, RDFS.label)
+            
+            children2 = []
+            for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
+                sl2 = oeo.value(s2, RDFS.label)
+
+                children2.append({
+                    'value': sl2,
+                    'label': sl2
+                })
+
+            if children2 != []:
+                children.append({
+                'value': sl1,
+                'label': sl1,
+                'children': children2
+                })
+            else:
+                children.append({
+                'value': sl1,
+                'label': sl1
+                })
+
+        if children != []:
+            parent['children'] = children
+
+        energy_carriers.append(parent)
+        elements['energy_carriers'] = energy_carriers
+
+
+    response = JsonResponse(elements, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
 
     return response

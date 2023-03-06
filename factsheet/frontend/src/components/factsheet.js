@@ -43,7 +43,7 @@ import study_keywords from '../data/study_keywords.json';
 import scenario_years from '../data/scenario_years.json';
 import {sectors_json} from '../data/sectors.js';
 import sector_divisions from '../data/sector_divisions.json';
-import {energy_transformation_processes_json} from '../data/energy_transformation_processes.js';
+
 import {energy_carriers_json} from '../data/energy_carriers.js';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import authors from '../data/authors.json';
@@ -77,7 +77,7 @@ function Factsheet(props) {
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
-  const [mode, setMode] = useState("edit");
+  const [mode, setMode] = useState("overview");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? '' : '');
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
@@ -162,9 +162,26 @@ function Factsheet(props) {
   const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
 
+  const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
+
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
+
+  const populateFactsheetElements = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/populate_factsheets_elements/`);
+    
+    return data;
+  };
+
+  useEffect(() => {
+    populateFactsheetElements().then((data) => {
+      const energy_transformation_processes_json = data.energy_transformation_processes;
+      setEnergyTransformationProcesses(data.energy_transformation_processes);
+      });
+  }, []);
+  
+
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (id === 'new') {
@@ -629,7 +646,6 @@ const scenario_region = [
   };
 
   const energyCarrierData = energy_carriers_json;
-  const energyTransformationProcesses = energy_transformation_processes_json;
 
   const renderStudy = () => {
     return <Grid container
@@ -1048,8 +1064,11 @@ const scenario_region = [
           >
             <Alert variant="filled" onClose={handleAddedMessageClose} severity="info" sx={{ width: '100%' }}>
               <AlertTitle>A new entity added to the OEKG</AlertTitle>
-              Type: <strong>{addedEntity[0]}  </strong>
-              Name: <strong>{addedEntity[1]}</strong>
+              <p>
+                Type: <strong>{addedEntity[0]}  </strong>
+                Name: <strong>{addedEntity[1]} </strong>
+              </p>
+              <p>It will be added to your factsheet upon saving!</p>
             </Alert>
           </Snackbar>
           <Dialog
