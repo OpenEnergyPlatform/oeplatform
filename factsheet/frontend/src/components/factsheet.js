@@ -77,10 +77,11 @@ function Factsheet(props) {
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
-  const [mode, setMode] = useState("overview");
+  const [mode, setMode] = useState(id === "new" ? "edit" : "overview");
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? '' : '');
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
+  const [prevAcronym, setPrevAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? [] : []);
@@ -88,7 +89,9 @@ function Factsheet(props) {
   const [institutions, setInstitutions] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [contactPersons, setContactPersons] = useState([]);
+  const [isCreated, setIsCreated] = useState(false);
   
+
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -127,7 +130,7 @@ function Factsheet(props) {
   const [sectors, setSectors] = useState(sectors_json);
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
-  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? [] : []);
+  const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
@@ -184,7 +187,7 @@ function Factsheet(props) {
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
-    if (id === 'new') {
+    if (id === 'new' && !isCreated) {
       axios.post(conf.toep + 'factsheet/add/',
       {
         id: id,
@@ -213,13 +216,11 @@ function Factsheet(props) {
         models: JSON.stringify(selectedModels),
         frameworks: JSON.stringify(selectedFrameworks),
       }).then(response => {
-      console.log('response');
-      console.log(response);
       if (response.data === 'Factsheet saved') {
         navigate('/factsheet/fs/' + acronym);
-        window.location.reload(false);
+        setIsCreated(true);
         setOpenSavedDialog(true);
-        
+        setPrevAcronym(acronym);
       }
       else if (response.data === 'Factsheet exists') {
         setOpenExistDialog(true);
@@ -227,37 +228,46 @@ function Factsheet(props) {
     });
 
     } else {
-      axios.post(conf.toep + 'factsheet/update/',
-      {
-        fsData: fsData,
-        id: id,
-        study_name: studyName,
-        name: factsheetName,
-        acronym: acronym,
-        abstract: abstract,
-        institution: JSON.stringify(selectedInstitution),
-        funding_source: JSON.stringify(selectedFundingSource),
-        contact_person: JSON.stringify(selectedContactPerson),
-        sector_divisions: JSON.stringify(selectedSectorDivisions),
-        sectors: JSON.stringify(selectedSectors),
-        expanded_sectors: JSON.stringify(expandedSectors),
-        energy_carriers: JSON.stringify(selectedEnergyCarriers),
-        expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-        expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
-        study_keywords: JSON.stringify(selectedStudyKewords),
-        report_title: report_title,
-        date_of_publication: date_of_publication,
-        doi: doi,
-        place_of_publication: place_of_publication,
-        link_to_study: link_to_study,
-        authors: JSON.stringify(selectedAuthors),
-        scenarios: JSON.stringify(scenarios),
-        models: JSON.stringify(selectedModels),
-        frameworks: JSON.stringify(selectedFrameworks),
-        energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
-      }).then(response => {
-        setOpenUpdatedDialog(true)
+      axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
+        axios.post(conf.toep + 'factsheet/update/',
+        {
+          fsData: res.data,
+          id: id,
+          study_name: studyName,
+          name: factsheetName,
+          acronym: acronym,
+          abstract: abstract,
+          institution: JSON.stringify(selectedInstitution),
+          funding_source: JSON.stringify(selectedFundingSource),
+          contact_person: JSON.stringify(selectedContactPerson),
+          sector_divisions: JSON.stringify(selectedSectorDivisions),
+          sectors: JSON.stringify(selectedSectors),
+          expanded_sectors: JSON.stringify(expandedSectors),
+          energy_carriers: JSON.stringify(selectedEnergyCarriers),
+          expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
+          expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+          study_keywords: JSON.stringify(selectedStudyKewords),
+          report_title: report_title,
+          date_of_publication: date_of_publication,
+          doi: doi,
+          place_of_publication: place_of_publication,
+          link_to_study: link_to_study,
+          authors: JSON.stringify(selectedAuthors),
+          scenarios: JSON.stringify(scenarios),
+          models: JSON.stringify(selectedModels),
+          frameworks: JSON.stringify(selectedFrameworks),
+          energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
+        }).then(response => {
+          if (response.data === "factsheet updated!") {
+            setPrevAcronym(acronym);
+            setOpenUpdatedDialog(true);
+          }
+          else if (response.data === 'Factsheet exists') {
+            setOpenExistDialog(true);
+          }
+        });
       });
+      
 
     }
   };
@@ -1068,7 +1078,7 @@ const scenario_region = [
                 Type: <strong>{addedEntity[0]}  </strong>
                 Name: <strong>{addedEntity[1]} </strong>
               </p>
-              <p>It will be added to your factsheet upon saving!</p>
+              <p>It will be assigned to your factsheet upon saving!</p>
             </Alert>
           </Snackbar>
           <Dialog
@@ -1208,7 +1218,7 @@ const scenario_region = [
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
                         Authors:   
-                        {authors.map((v, i) => (
+                        {selectedAuthors.map((v, i) => (
                           <span><b> {v.name}</b> {i + 1 !== authors.length && ',' } </span>  
                         ))}
                     </Typography>
