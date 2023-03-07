@@ -73,8 +73,14 @@ export default function CustomAutocomplete(parameters) {
     } else {
       setValue(newValue);
     }
-    handler(newValue);
+    const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
+    updauedValue.push({
+      id: newValue[newValue.length - 1].inputValue,
+      name: newValue[newValue.length - 1].inputValue,
+    });
+    handler(updauedValue);
   }
+
 
   const handleDelete = (e, vc) => {
     console.log(vc);
@@ -118,8 +124,9 @@ export default function CustomAutocomplete(parameters) {
     const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
     updauedValue.push(dialogValue);
     setValue(updauedValue);
-
+    console.log(value);
     addNewHandler(dialogValue);
+    console.log(value);
     toggleOpen(false);
   };
   return (

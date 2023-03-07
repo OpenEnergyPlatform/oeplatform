@@ -228,6 +228,7 @@ function Factsheet(props) {
     });
 
     } else {
+      console.log(selectedInstitution);
       axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
         axios.post(conf.toep + 'factsheet/update/',
         {
@@ -482,9 +483,6 @@ function Factsheet(props) {
       });
   }, []);
 
-  useEffect(() => {
-}, [selectedInstitution]);
-
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
@@ -512,8 +510,7 @@ function Factsheet(props) {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Funding source', newElement.name ]);
-
-      getFundingSources('OEO_00000107').then((data) => {
+      getFundingSources().then((data) => {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
           setFundingSources(tmp);
