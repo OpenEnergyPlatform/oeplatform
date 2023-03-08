@@ -78,28 +78,32 @@
             "title": "Language"
         },
         "subject": {
-            "description": "Reference the topic of the resource in ontology terms",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "description": "The class label of the OEO terms.",
-                    "example": "energy",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Platinum",
-                    "title": "Name"
-                },
-                "path": {
-                    "description": "The URI of the class.",
-                    "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000150",
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "badge": "Platinum",
-                    "title": "Path"
+            "description": "References the topic of the resource in ontology terms as a list",
+            "type": "array",
+            "items": {
+                "description":"A subject object to reference to the ontology. There can be several such objects. Each has all name-value-pairs.",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The class label of the OEO terms.",
+                        "example": "energy",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "badge": "Platinum",
+                        "title": "Name"
+                    },
+                    "path": {
+                        "description": "The URI of the class.",
+                        "example": "https://openenergy-platform.org/ontology/oeo/OEO_00000150",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "badge": "Platinum",
+                        "title": "Path"
+                    }
                 }
             },
             "additionalProperties": false,
