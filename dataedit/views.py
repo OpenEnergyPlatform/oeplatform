@@ -1834,37 +1834,32 @@ class PeerReviewView(LoginRequiredMixin, View):
         metadata = load_metadata_from_db(schema, table)
         return metadata
 
-    def get_dotted_form(self, val, old=""):
-        lines = []
+    def load_json_schema(self):
+        with open('dataedit/static/peer_review/schema.json') as f:
+            json_schema = json.load(f)
+        return(json_schema)
 
+    def parse_keys(self, val, old=""):
+        lines = []
         if isinstance(val, dict):
             for k in val.keys():
-                lines += self.get_dotted_form(val[k], old + "$ßß" + str(k))
+                lines += self.parse_keys(val[k], old + "." + str(k))
         elif isinstance(val, list):
             if not val:
-                lines += ["{}$ßß{}".format(old, str(val))]
+                lines += [{ "field": old[1:], "value" : str(val)}] # handles empty list
+                #pass
             else:
                 for i, k in enumerate(val):
-                    lines += self.get_dotted_form(k, old + "$ßß" + str(i))
+                    lines += self.parse_keys(k, old + "."+ str(i)) # handles user value
         else:
-            lines += ["{}$ßß{}".format(old, str(val))]
-
-        return [line.lstrip('$ßß') for line in lines]
-
-    def removeVal(self, val):
-        key_list = []
-        for i in val:
-            field = i.rpartition('$ßß')[0]
-            field = field.replace("$ßß", ".")
-            value = i.split("$ßß")[-1]
-            result = {"field": field, "value": value}
-            key_list.append(result)
-        return key_list
+            lines += [{ "field": old[1:], "value" : str(val)}]
+        return(lines)
 
     def sort_in_category(self, schema, table):
         metadata = self.load_json(schema, table)
-        dotted_list = self.get_dotted_form(metadata)
-        val = self.removeVal(dotted_list)
+        meta_schema = self.load_json_schema()
+
+        val = self.parse_keys(metadata)
 
         gen_key_list = []
         spatial_key_list = []
@@ -1873,6 +1868,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         license_key_list = []
         contributor_key_list = []
         resource_key_list = []
+
 
         for i in val:
             fieldKey = list(i.values())[0]
