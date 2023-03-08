@@ -476,7 +476,7 @@ function Factsheet(props) {
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
       setInstitutions(tmp);
       });
   }, []);
@@ -485,7 +485,7 @@ function Factsheet(props) {
   useEffect(() => {
     getFundingSources().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
       setFundingSources(tmp);
       });
   }, []);
@@ -493,7 +493,7 @@ function Factsheet(props) {
   useEffect(() => {
     getContactPersons().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
       setContactPersons(tmp);
       });
   }, []);
@@ -509,7 +509,7 @@ function Factsheet(props) {
       setAddedEntity(['Institution', newElement.name ]);
       getInstitution().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setInstitutions(tmp);
         });
     }
@@ -528,7 +528,7 @@ function Factsheet(props) {
       setEditedEntity(['Institution', oldElement, newElement ]);
       getInstitution().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setInstitutions(tmp);
         });
     }
@@ -546,10 +546,28 @@ function Factsheet(props) {
       setAddedEntity(['Funding source', newElement.name ]);
       getFundingSources().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setFundingSources(tmp);
         });
-        
+    });
+  } 
+
+  const HandleEditFundingSource = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO_00090001',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Funding source', oldElement, newElement ]);
+      getFundingSources().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setFundingSources(tmp);
+        });
+    }
     });
   } 
 
@@ -565,10 +583,28 @@ function Factsheet(props) {
 
       getContactPersons().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setContactPersons(tmp);
         });
-        
+    });
+  } 
+
+  const HandleEditContactPerson = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO_00000107',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Contact person', oldElement, newElement ]);
+      getContactPersons().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setContactPersons(tmp);
+        });
+    }
     });
   } 
   
@@ -779,7 +815,7 @@ const scenario_region = [
             alignItems: 'flex-start',
             flexWrap: 'wrap',
         }}>
-        <CustomAutocomplete type="Funding source" showSelectedElements={true} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+        <CustomAutocomplete type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
         <div style={{ marginTop: '30px' }}>
           <HtmlTooltip
             style={{ marginLeft: '10px' }}
@@ -817,7 +853,7 @@ const scenario_region = [
               alignItems: 'flex-start',
               flexWrap: 'wrap',
           }}>
-            <CustomAutocomplete type="Contact person" showSelectedElements={true} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+            <CustomAutocomplete type="Contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
         <div style={{ marginTop: '30px' }}>
           <HtmlTooltip
             style={{ marginLeft: '10px' }}

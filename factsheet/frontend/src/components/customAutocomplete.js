@@ -112,6 +112,7 @@ export default function CustomAutocomplete(parameters) {
     setValue(updauedValue);
     addNewHandler(dialogValue);
     toggleOpen(false);
+    handler(updauedValue);
   };
 
   const handleEdit = e => {

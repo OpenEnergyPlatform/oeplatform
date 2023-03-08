@@ -77,6 +77,7 @@ function Home(props) {
               study_name={item.study_name}
               acronym={item.acronym}
               abstract={item.abstract}
+              institution={item.institution}
               fs={item}
             />
           </Grid>)

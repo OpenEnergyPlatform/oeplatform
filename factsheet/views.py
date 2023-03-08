@@ -17,7 +17,7 @@ from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 import os
 from oeplatform.settings import ONTOLOGY_FOLDER
-
+from datetime import date
 
 
 versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
@@ -102,80 +102,79 @@ def create_factsheet(request, *args, **kwargs):
     else:
         study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(acronym) )
         oekg.add(( study_URI, RDF.type, OEO.OEO_00000364 ))
-        oekg.add((study_URI, RDFS.label, Literal(clean_name(acronym))))
-        oekg.add((study_URI, DC.acronym, Literal(clean_name(acronym))))
-        oekg.add((study_URI, OEKG["full_name"], Literal(clean_name(study_name))))
+        oekg.add((study_URI, RDFS.label, Literal(acronym)))
+        oekg.add((study_URI, DC.acronym, Literal(acronym)))
+        oekg.add((study_URI, OEKG["full_name"], Literal(study_name)))
         oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
             institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
-            oekg.add(( institution_URI, DC.title, Literal(clean_name(item['name']) )))
+            oekg.add(( institution_URI, DC.title, Literal(item['name']) ))
             oekg.add(( study_URI, OEO.OEO_00000510, institution_URI ))
 
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
-            print(item)
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
-            oekg.add(( funding_source_URI, DC.title,  Literal(clean_name(item['name']) )))
+            oekg.add(( funding_source_URI, DC.title,  Literal(item['name'])))
             oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
 
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
             contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((contact_person_URI, RDF.type, OEO.OEO_00000107))
-            oekg.add((contact_person_URI, RDFS.label, Literal(clean_name(item['name']))))
+            oekg.add((contact_person_URI, RDFS.label, Literal(item['name'])))
             oekg.add((study_URI, OEO.OEO_0000050, contact_person_URI))
 
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
             sector_divisions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((sector_divisions_URI, RDF.type, OEO.OEO_00000368))
-            oekg.add((sector_divisions_URI, RDFS.label, Literal(clean_name(item['name']))))
-            oekg.add((study_URI, OEO["based_on_sector_division"], contact_person_URI))
+            oekg.add((sector_divisions_URI, RDFS.label, Literal(item['name'])))
+            oekg.add((study_URI, OEO["based_on_sector_division"], sector_divisions_URI))
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
             sector_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((sector_URI, RDF.type, OEO.OEO_00000367))
-            oekg.add((sector_URI, RDFS.label, Literal(clean_name(item))))
+            oekg.add((sector_URI, RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_sector"], sector_URI))
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
             energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(clean_name(item))))
+            oekg.add((energy_carriers_URI, RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
             energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(clean_name(item))))
+            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
             model_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((model_URI, RDF.type, OEO.OEO_00000274))
-            oekg.add((model_URI, RDFS.label, Literal(clean_name(item['name']))))
+            oekg.add((model_URI, RDFS.label, Literal(item['name'])))
             oekg.add((study_URI, OEO["has_participant"], model_URI))
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             framework_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((framework_URI, RDF.type, OEO.OEO_00000172))
-            oekg.add((framework_URI, RDFS.label, Literal(clean_name(item['name']))))
+            oekg.add((framework_URI, RDFS.label, Literal(item['name'])))
             oekg.add((study_URI, OEO["has_participant"], framework_URI))
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
             author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((author_URI, RDF.type, OEO.OEO_00000064))
-            oekg.add((author_URI, RDFS.label, Literal(clean_name(item['name']))))
+            oekg.add((author_URI, RDFS.label, Literal(item['name'])))
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
         response = JsonResponse('Factsheet saved', safe=False, content_type='application/json')
@@ -234,8 +233,9 @@ def update_factsheet(request, *args, **kwargs):
             for s, p, o in oekg.triples(( old_Study_URI, None, None )):
                 oekg.remove((s, p, o))
 
-            oekg.add((study_URI, RDFS.label, Literal(clean_name(acronym))))
-            oekg.add((study_URI, OEKG["full_name"], Literal(clean_name(studyName))))
+            oekg.add((study_URI, RDF.type, OEO.OEO_00000364 ))
+            oekg.add((study_URI, RDFS.label, Literal(acronym)))
+            oekg.add((study_URI, OEKG["full_name"], Literal(studyName)))
 
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
             oekg.remove((s, p, o))
@@ -243,7 +243,7 @@ def update_factsheet(request, *args, **kwargs):
         for item in institutions:
             institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( institution_URI, RDF.type, OEO.OEO_00000238 ))
-            oekg.add(( institution_URI, RDFS.label, Literal(clean_name(item['name'])) ))
+            oekg.add(( institution_URI, RDFS.label, Literal(item['name'])) )
             oekg.add(( study_URI, OEO.OEO_00000510, institution_URI ))
 
         for s, p, o in oekg.triples((study_URI, OEO.RO_0002234, None)):
@@ -252,33 +252,29 @@ def update_factsheet(request, *args, **kwargs):
         for item in funding_sources:
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
-            oekg.add(( funding_source_URI, DC.title, funding_source_URI ))
+            oekg.add(( funding_source_URI, RDFS.label, Literal(item['name']) ))
             oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
 
-
-        abstract_URI =  URIRef("http://purl.org/dc/terms/abstract")
-        for s, p, o in oekg.triples((old_Study_URI, abstract_URI, None)):
+        for s, p, o in oekg.triples((study_URI, DC.abstract, None)):
             oekg.remove((s, p, o))
         oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
 
-        for s, p, o in oekg.triples((old_Study_URI, OEO.OEO_0000050, None)):
+        for s, p, o in oekg.triples((study_URI, OEO.OEO_0000050, None)):
             oekg.remove((s, p, o))
-
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
             contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((contact_person_URI, RDF.type, OEO.OEO_00000107))
-            oekg.add((contact_person_URI, RDFS.label, Literal(clean_name(item['name']))))
-            oekg.add((study_URI, OEO.OEO_0000050, contact_person_URI))
+            oekg.add((contact_person_URI, RDFS.label, Literal(item['name'])))
+            oekg.add((study_URI, OEO.OEO_00000508, contact_person_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["based_on_sector_division"], None)):
             oekg.remove((s, p, o))
-
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
             sector_divisions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add((sector_divisions_URI, RDF.type, OEO.OEO_00000368))
-            oekg.add((sector_divisions_URI, RDFS.label, Literal(clean_name(item['name']))))
+            oekg.add((sector_divisions_URI, RDFS.label, Literal(item['name'])))
             oekg.add((study_URI, OEO["based_on_sector_division"], sector_divisions_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["covers_sector"], None)):
@@ -288,7 +284,7 @@ def update_factsheet(request, *args, **kwargs):
         for item in _sectors:
             sector_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((sector_URI, RDF.type, OEO.OEO_00000367))
-            oekg.add((sector_URI,RDFS.label, Literal(clean_name(item))))
+            oekg.add((sector_URI,RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_sector"], sector_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["covers_energy_carrier"], None)):
@@ -298,7 +294,7 @@ def update_factsheet(request, *args, **kwargs):
         for item in _energy_carriers:
             energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(clean_name(item))))
+            oekg.add((energy_carriers_URI, RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["covers_transformation_processes"], None)):
@@ -309,7 +305,7 @@ def update_factsheet(request, *args, **kwargs):
         for item in _energy_transformation_processes:
             energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
             oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(clean_name(item))))
+            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item)))
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["has_participant"], None)):
@@ -380,7 +376,7 @@ def factsheet_by_id(request, *args, **kwargs):
             factsheet['institution'].append({ 'id': clean_name(label), 'name': clean_name(label) })
 
     factsheet['contact_person'] = []
-    for s, p, o in oekg.triples(( study_URI, OEO.OEO_0000050, None )):
+    for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000508, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
             factsheet['contact_person'].append({ 'id': clean_name(label), 'name': clean_name(label) })
@@ -389,19 +385,19 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples(( study_URI, OEO["based_on_sector_division"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['sector_divisions'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['sector_divisions'].append({ 'id': label, 'name': label })
 
     factsheet['sectors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_sector"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['sectors'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['sectors'].append({ 'id': label, 'name': label })
 
     factsheet['energy_carriers'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_carriers'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['energy_carriers'].append({ 'id': label, 'name': label })
 
     factsheet['authors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
@@ -447,7 +443,7 @@ def add_entities(request, *args, **kwargs):
     entity_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(entity_label) )
 
     oekg.add((entity_URI, RDF.type, OEO[entity_type]))
-    oekg.add((entity_URI, RDFS.label, Literal(clean_name(entity_label))))
+    oekg.add((entity_URI, RDFS.label, Literal(entity_label)))
 
     response = JsonResponse('A new entity added!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
@@ -497,20 +493,23 @@ def update_an_entity(request, *args, **kwargs):
     entity_label =  request_body['entity_label']
     new_entity_label =  request_body['new_entity_label']
 
-    print(entity_type)
-    print(entity_label)
     entity_type_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type )
-    entity_Label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_label )
+    entity_Label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(entity_label) )
     new_entity_label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label))
 
     oekg.add((new_entity_label_URI, RDF.type, OEO[entity_type]))
-    oekg.add((new_entity_label_URI, RDFS.label, Literal(clean_name(new_entity_label))))
+    oekg.add((new_entity_label_URI, RDFS.label, Literal(new_entity_label)))
+
+    entity_edit_history = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label) + "/edit_history")
+    oekg.add((entity_edit_history, RDFS.label, Literal(new_entity_label)))
+    oekg.add((entity_edit_history, RDF.type, OEKG["edit_history"]))
+    oekg.add((entity_edit_history, OEKG["prev"], Literal(entity_label) ))
+    oekg.add((entity_edit_history, OEKG["next"], Literal(new_entity_label) ))
+    oekg.add((entity_edit_history, OEKG["date"], Literal(date.today()) ))
 
     for s, p, o in oekg.triples((None, None, entity_Label_URI)):
         oekg.add((s, p, new_entity_label_URI))
         oekg.remove((s, p, o))
-
-    
     oekg.remove((entity_Label_URI, None, None)) 
 
     response = JsonResponse('entity updated!', safe=False, content_type='application/json')
@@ -521,10 +520,17 @@ def update_an_entity(request, *args, **kwargs):
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
     for s, p, o in oekg.triples(( None, RDF.type, OEO.OEO_00000364 )):
+        print(s)
         element = {}
         element['acronym'] =  oekg.value(s, RDFS.label) 
         element['study_name'] = oekg.value(s, OEKG.full_name) 
         element['abstract'] = oekg.value(s, DC.abstract) 
+        study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(oekg.value(s, RDFS.label) ))
+        element['institution'] = []
+        for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000510, None )):
+            label = oekg.value(o, RDFS.label)
+            if label != None:
+                element['institution'].append(label)
         all_factsheets.append(element)
 
     response = JsonResponse(all_factsheets, safe=False, content_type='application/json') 
