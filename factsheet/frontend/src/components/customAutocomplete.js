@@ -30,10 +30,8 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocomplete(parameters) {
-  const { manyItems, idx, name, type, showSelectedElements, addNewHandler } = parameters;
+  const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
-  const params = parameters.optionsSet;
-  const handler = parameters.handler;
   const [open, toggleOpen] = React.useState(false);
   const [openEdit, toggleOpenEdit] = React.useState(false);
   const [editLabel, setEditLabel] = React.useState('');
@@ -69,21 +67,13 @@ export default function CustomAutocomplete(parameters) {
         id: newValue[newValue.length - 1].inputValue,
         name: newValue[newValue.length - 1].inputValue,
       });
-     
     } else {
       setValue(newValue);
+      handler(newValue);
     }
-    const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
-    updauedValue.push({
-      id: newValue[newValue.length - 1].inputValue,
-      name: newValue[newValue.length - 1].inputValue,
-    });
-    handler(updauedValue);
   }
 
-
   const handleDelete = (e, vc) => {
-    console.log(vc);
     setEditLabel(vc);
     toggleOpenEdit(true);
   };
@@ -114,21 +104,25 @@ export default function CustomAutocomplete(parameters) {
 
   const handleUpdatedLabel = e => {
     setUpdatedLabel(e.target.value);
-    console.log(editLabel);
-    console.log(updatedLabel);
   };
   
-
   const handleAddNew = e => {
-    console.log(dialogValue);
     const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
     updauedValue.push(dialogValue);
     setValue(updauedValue);
-    console.log(value);
     addNewHandler(dialogValue);
-    console.log(value);
     toggleOpen(false);
   };
+
+  const handleEdit = e => {
+    editHandler(editLabel, updatedLabel);
+    setUpdatedLabel('');
+    toggleOpenEdit(false);
+    const objIndex = value.findIndex((obj => obj.id == editLabel));
+    value[objIndex].id = updatedLabel;
+    value[objIndex].name = updatedLabel;
+  }
+
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
@@ -265,7 +259,7 @@ export default function CustomAutocomplete(parameters) {
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={handleCloseEdit}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddNew}>Add</Button>
+          <Button variant="contained" onClick={handleEdit}>Save</Button>
         </DialogActions>
       </Dialog>
       {showSelectedElements && <Box

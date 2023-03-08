@@ -47,6 +47,9 @@ function App() {
   });
   }, []);
 
+  console.log(factsheet);
+  
+
   if (url_id === '') {
     return < Home id={url_id}/>
   } else {

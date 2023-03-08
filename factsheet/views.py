@@ -116,6 +116,7 @@ def create_factsheet(request, *args, **kwargs):
 
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
+            print(item)
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
             oekg.add(( funding_source_URI, DC.title,  Literal(clean_name(item['name']) )))
@@ -229,20 +230,15 @@ def update_factsheet(request, *args, **kwargs):
         old_Study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(fsData["acronym"]))
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(acronym))
 
-        for s, p, o in oekg.triples(( old_Study_URI, None, None )):
+        if old_Study_URI != study_URI:
+            for s, p, o in oekg.triples(( old_Study_URI, None, None )):
+                oekg.remove((s, p, o))
+
+            oekg.add((study_URI, RDFS.label, Literal(clean_name(acronym))))
+            oekg.add((study_URI, OEKG["full_name"], Literal(clean_name(studyName))))
+
+        for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
             oekg.remove((s, p, o))
-            oekg.add((study_URI, p, o))
-
-        oekg.remove((study_URI, RDFS.label, None))
-        oekg.add((study_URI, RDFS.label, Literal(clean_name(acronym))))
-
-        for s, p, o in oekg.triples((old_Study_URI, OEO.OEO_00000510, None)):
-            oekg.remove((s, p, o))
-
-        for s, p, o in oekg.triples((old_Study_URI, OEKG["full_name"], None)):
-            oekg.remove((s, p, o))
-        oekg.add((study_URI, OEKG["full_name"], Literal(clean_name(studyName))))
-
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
             institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
@@ -250,15 +246,15 @@ def update_factsheet(request, *args, **kwargs):
             oekg.add(( institution_URI, RDFS.label, Literal(clean_name(item['name'])) ))
             oekg.add(( study_URI, OEO.OEO_00000510, institution_URI ))
 
-        for s, p, o in oekg.triples((old_Study_URI, OEO.RO_0002234, None)):
-            oekg.remove((s, OEO.RO_0002234, o))
-
+        for s, p, o in oekg.triples((study_URI, OEO.RO_0002234, None)):
+            oekg.remove((s, p, o))
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
             oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
             oekg.add(( funding_source_URI, DC.title, funding_source_URI ))
             oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
+
 
         abstract_URI =  URIRef("http://purl.org/dc/terms/abstract")
         for s, p, o in oekg.triples((old_Study_URI, abstract_URI, None)):
@@ -496,10 +492,13 @@ def delete_entities(request, *args, **kwargs):
 
 @csrf_exempt
 def update_an_entity(request, *args, **kwargs):
-    entity_type = request.GET.get('entity_type')
-    entity_label = request.GET.get('entity_label')
-    new_entity_label = request.GET.get('new_entity_label')
+    request_body = json.loads(request.body)
+    entity_type =  request_body['entity_type']
+    entity_label =  request_body['entity_label']
+    new_entity_label =  request_body['new_entity_label']
 
+    print(entity_type)
+    print(entity_label)
     entity_type_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type )
     entity_Label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_label )
     new_entity_label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label))

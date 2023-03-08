@@ -163,9 +163,13 @@ function Factsheet(props) {
   const [removeReport, setRemoveReport] = useState(false);
   const [addedEntity, setAddedEntity] = useState(false);
   const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
+  const [openEditDialog, setOpenEditDialog] = React.useState(false);
+  const [editedEntity, setEditedEntity] = useState(false);
+  
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
 
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
+
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
@@ -228,6 +232,7 @@ function Factsheet(props) {
     });
 
     } else {
+      console.log(selectedFundingSource);
       console.log(selectedInstitution);
       axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
         axios.post(conf.toep + 'factsheet/update/',
@@ -361,6 +366,15 @@ function Factsheet(props) {
       setOpenAddedDialog(false);
   };
 
+  const handleEditMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+      }
+      setOpenEditDialog(false);
+  };
+
+  
+
   const handleScenariosInputChange = ({ target }) => {
     const { name, value } = target;
     const element = name.split('_')[0];
@@ -467,6 +481,7 @@ function Factsheet(props) {
       });
   }, []);
 
+
   useEffect(() => {
     getFundingSources().then((data) => {
       const tmp = [];
@@ -492,6 +507,25 @@ function Factsheet(props) {
     if (response.data === 'A new entity added!') {
       setOpenAddedDialog(true);
       setAddedEntity(['Institution', newElement.name ]);
+      getInstitution().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
+          setInstitutions(tmp);
+        });
+    }
+    });
+  } 
+
+  const HandleEditInstitution = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO_00000238',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Institution', oldElement, newElement ]);
       getInstitution().then((data) => {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item.replaceAll('_', ' '), 'name': item.replaceAll('_', ' ') }) )
@@ -581,6 +615,7 @@ const scenario_region = [
   };
 
   const fundingSourceHandler = (fundingSourceList) => {
+    console.log(fundingSourceList);
     setSelectedFundingSource(fundingSourceList);
   };
 
@@ -718,7 +753,7 @@ const scenario_region = [
               alignItems: 'flex-start',
               flexWrap: 'wrap',
           }}>
-          <CustomAutocomplete type="Institution" showSelectedElements={true} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+          <CustomAutocomplete type="Institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
           <div style={{ marginTop: '30px' }}>
             <HtmlTooltip
               style={{ marginLeft: '10px' }}
@@ -1076,6 +1111,20 @@ const scenario_region = [
                 Name: <strong>{addedEntity[1]} </strong>
               </p>
               <p>It will be assigned to your factsheet upon saving!</p>
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={openEditDialog}
+            autoHideDuration={6000}
+            onClose={handleEditMessageClose}
+          >
+            <Alert variant="filled" onClose={handleEditMessageClose} severity="info" sx={{ width: '100%' }}>
+              <AlertTitle>An entity has been edited in OEKG</AlertTitle>
+              <p>
+                Type: <strong>{editedEntity[0]}  </strong>
+                Old label: <strong>{editedEntity[1]} </strong>
+                New label: <strong>{editedEntity[2]} </strong>
+              </p>
             </Alert>
           </Snackbar>
           <Dialog
