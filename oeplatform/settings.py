@@ -55,13 +55,10 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
-<<<<<<< HEAD
-=======
     "graphene_django",
     "factsheet",
     "corsheaders",
     "bootstrap4"
->>>>>>> feature/new_factsheets
 )
 
 MIDDLEWARE = (
@@ -74,12 +71,7 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-<<<<<<< HEAD
-    "django.middleware.common.CommonMiddleware",
-=======
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware"
->>>>>>> feature/new_factsheets
 )
 
 ROOT_URLCONF = "oeplatform.urls"
