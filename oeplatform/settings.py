@@ -74,6 +74,10 @@ ROOT_URLCONF = "oeplatform.urls"
 
 
 def external_urls_context_processor(request):
+    """Define hard coded external urls here.
+    Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
+    Also, you may want to add an icon indicating external links, e.g.
+    """
     return {
         "EXTERNAL_URLS": {
             "tutorials_index": "https://openenergyplatform.github.io/tutorial/",
