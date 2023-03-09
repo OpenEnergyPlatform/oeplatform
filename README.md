@@ -173,15 +173,6 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
 
-#### 4. Tutorials
-
-##### 4.1 Rendering Jupyter Notebooks
-
-Tutorials needs an additional step to display the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
-This basically recursivly clones the submodule, which is linked within `/examples`.
-
-    python manage.py notebooks download
-
 ### Deploy locally
 
 You can run your local copy of the OEP website with
