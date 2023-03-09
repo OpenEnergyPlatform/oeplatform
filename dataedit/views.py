@@ -24,6 +24,10 @@ from django.views.generic import View
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
+from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
+from omi.oem_structures.oem_v15 import OEPMetadata
+
+
 import api.parser
 from api.actions import describe_columns
 
@@ -42,7 +46,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table
+from dataedit.models import Table, PeerReview
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
@@ -178,7 +182,7 @@ def change_requests(schema, table):
             for key in list(change):
                 value = change[key]
                 if key not in keyword_whitelist and (
-                    value is None or value == old[key]
+                        value is None or value == old[key]
                 ):
                     old.pop(key)
                     change.pop(key)
@@ -194,8 +198,8 @@ def change_requests(schema, table):
         value = api_constraints[i]
         id = value.get("id")
         if (
-            value.get("reference_table") is None
-            or value.get("reference_column") is None
+                value.get("reference_table") is None
+                or value.get("reference_column") is None
         ):
             value.pop("reference_table")
             value.pop("reference_column")
@@ -456,6 +460,7 @@ def listtables(request, schema_name):
             request.GET.getlist("tags"),
         )
     )
+
     for tag_id in searched_tag_ids:
         increment_usage_count(tag_id)
 
@@ -605,26 +610,26 @@ def create_dump(schema, table, fname):
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = [
-        "pg_dump",
-        "-O",
-        "-x",
-        "-w",
-        "-Fc",
-        "--quote-all-identifiers",
-        "-U",
-        sec.dbuser,
-        "-h",
-        sec.dbhost,
-        "-p",
-        str(sec.dbport),
-        "-d",
-        sec.dbname,
-        "-f",
-        sec.MEDIA_ROOT
-        + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
-        + fname
-        + ".dump",
-    ] + reduce(
+            "pg_dump",
+            "-O",
+            "-x",
+            "-w",
+            "-Fc",
+            "--quote-all-identifiers",
+            "-U",
+            sec.dbuser,
+            "-h",
+            sec.dbhost,
+            "-p",
+            str(sec.dbport),
+            "-d",
+            sec.dbname,
+            "-f",
+            sec.MEDIA_ROOT
+            + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
+            + fname
+            + ".dump",
+        ] + reduce(
         add,
         (["-n", s, "-t", s + "." + t] for s, t in get_dependencies(schema, table)),
         [],
@@ -687,7 +692,7 @@ def tag_editor(request, id=""):
             Session = sessionmaker()
             session = Session(bind=engine)
             assigned = (
-                session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
+                    session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
             )
 
             return render(
@@ -800,7 +805,7 @@ def view_save(request, schema, table):
         for item in request.POST.items():
             item_name, item_value = item
             if item_name.startswith("y-axis-") and item_value == "on":
-                y_axis_list.append(item_name["y-axis-".__len__() :])
+                y_axis_list.append(item_name["y-axis-".__len__():])
         post_options = {"x_axis": post_x_axis, "y_axis": y_axis_list}
     elif post_type == "map":
         # add location column info to options
@@ -1142,9 +1147,9 @@ class PermissionView(View):
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
         if (
-            request.user.is_anonymous
-            or request.user.get_table_permission_level(table_obj)
-            < login_models.ADMIN_PERM
+                request.user.is_anonymous
+                or request.user.get_table_permission_level(table_obj)
+                < login_models.ADMIN_PERM
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
@@ -1360,7 +1365,7 @@ def get_tag_keywords_synchronized_metadata(
         metadata_new (_type_, optional): _description_. Defaults to None.
         tag_ids_new (_type_, optional): _description_. Defaults to None.
     """
-
+    
     session = create_oedb_session()
 
     metadata = load_metadata_from_db(schema=schema, table=table)
@@ -1499,7 +1504,7 @@ def update_table_tags(request):
     )
 
     ids = {
-        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
+        int(field[len("tag_"):]) for field in request.POST if field.startswith("tag_")
     }
 
     # update tags in db and harmonize metadata
@@ -1572,10 +1577,10 @@ def get_all_tags(schema=None, table=None):
                 Tag.usage_tracked_since.label("usage_tracked_since"),
                 TableTags.table_name,
             )
-            .filter(TableTags.tag == Tag.id)
-            .filter(TableTags.table_name == table)
-            .filter(TableTags.schema_name == schema)
-            .order_by("name")
+                .filter(TableTags.tag == Tag.id)
+                .filter(TableTags.table_name == table)
+                .filter(TableTags.schema_name == schema)
+                .order_by("name")
         )
         session.commit()
     finally:
@@ -1822,3 +1827,123 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
             "dataedit/meta_edit.html",
             context=context_dict,
         )
+
+
+class PeerReviewView(LoginRequiredMixin, View):
+    def load_json(self, schema, table):
+        metadata = load_metadata_from_db(schema, table)
+        return metadata
+
+    def get_dotted_form(self, val, old=""):
+        lines = []
+
+        if isinstance(val, dict):
+            for k in val.keys():
+                lines += self.get_dotted_form(val[k], old + "$ßß" + str(k))
+        elif isinstance(val, list):
+            if not val:
+                lines += ["{}$ßß{}".format(old, str(val))]
+            else:
+                for i, k in enumerate(val):
+                    lines += self.get_dotted_form(k, old + "$ßß" + str(i))
+        else:
+            lines += ["{}$ßß{}".format(old, str(val))]
+
+        return [line.lstrip('$ßß') for line in lines]
+
+    def removeVal(self, val):
+        key_list = []
+        for i in val:
+            field = i.rpartition('$ßß')[0]
+            field = field.replace("$ßß", ".")
+            value = i.split("$ßß")[-1]
+            result = {"field": field, "value": value}
+            key_list.append(result)
+        return key_list
+
+    def sort_in_category(self, schema, table):
+        metadata = self.load_json(schema, table)
+        dotted_list = self.get_dotted_form(metadata)
+        val = self.removeVal(dotted_list)
+
+        gen_key_list = []
+        spatial_key_list = []
+        temporal_key_list = []
+        source_key_list = []
+        license_key_list = []
+        contributor_key_list = []
+        resource_key_list = []
+
+        for i in val:
+            for fieldKey, fieldValue in i.items():
+                if fieldValue.split(".")[0] == "spatial":
+                    spatial_key_list.append(i)
+                elif fieldValue.split(".")[0] == "temporal":
+                    temporal_key_list.append(i)
+                elif fieldValue.split(".")[0] == "sources":
+                    source_key_list.append(i)
+                elif fieldValue.split(".")[0] == "licenses":
+                    license_key_list.append(i)
+                elif fieldValue.split(".")[0] == "contributors":
+                    contributor_key_list.append(i)
+                elif fieldValue.split(".")[0] == "resources":
+                    resource_key_list.append(i)
+                elif fieldValue.split(".")[0] == "name" or fieldValue.split(".")[0] == "title" or fieldValue.split(".")[
+                    0] == "id" \
+                        or fieldValue.split(".")[0] == "description" or fieldValue.split(".")[0] == "language" \
+                        or fieldValue.split(".")[0] == "subject" or fieldValue.split(".")[0] == "keywords" \
+                        or fieldValue.split(".")[0] == "publicationDate" or fieldValue.split(".")[0] == "context":
+                    gen_key_list.append(i)
+
+        meta = {"general": gen_key_list,
+                "spatial": spatial_key_list,
+                "temporal": temporal_key_list,
+                "source": source_key_list,
+                "license": license_key_list,
+                "contributor": contributor_key_list,
+                "resource": resource_key_list
+                }
+
+        return meta
+
+    def get(self, request, schema, table):
+        columns = get_column_description(schema, table)
+        can_add = False
+        table_obj = Table.load(schema, table)
+        if not request.user.is_anonymous:
+            level = request.user.get_table_permission_level(table_obj)
+            can_add = level >= login_models.WRITE_PERM
+
+        url_table_id = request.build_absolute_uri(
+            reverse("view", kwargs={"schema": schema, "table": table})
+        )
+
+        metadata = self.sort_in_category(schema, table)
+
+        context_meta = {"config": json.dumps(
+                            {"can_add": can_add,
+                             "url_peer_review": reverse(
+                                "peer_review", kwargs={"schema": schema, "table": table}
+                                ),
+                             "url_table": reverse(
+                                "view", kwargs={"schema": schema, "table": table}
+                                ),
+                             "table": table,
+                             }),
+                        "meta": metadata,
+                        }
+
+        # print(context_meta)
+
+        return render(request, 'dataedit/peer_review.html', context=context_meta)
+
+    def post(self, request, schema, table):
+        context = {}
+        if request.method == "POST":
+            review_data = json.loads(request.body)
+            print(review_data)
+            review_state = review_data.get("reviewFinished")
+            table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
+            table_obj.save()
+
+        return render(request, 'dataedit/peer_review.html', context=context)

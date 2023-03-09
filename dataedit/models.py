@@ -77,3 +77,21 @@ class Filter(models.Model):
     type = CharField(max_length=10, null=False, choices=FILTER_TYPES)
     value = JSONField(null=False)
     view = ForeignKey(View, on_delete=models.CASCADE, related_name="filter")
+
+
+class PeerReview(models.Model):
+    table = CharField(max_length=1000, null=False)
+    schema = CharField(max_length=1000, null=False)
+    is_finished = BooleanField(null=False)
+    review = JSONField(null=True)
+
+    # laden
+    @classmethod
+    def load(cls, schema, table):
+        table_obj = PeerReview.objects.get(
+            table=table, schema=schema
+        )
+        return table_obj
+
+
+
