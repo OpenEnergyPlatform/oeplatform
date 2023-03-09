@@ -53,9 +53,8 @@ INSTALLED_APPS = (
     "captcha",
     "django.contrib.postgres",
     "fontawesome_5",
-    "tutorials",
     "django_better_admin_arrayfield",
-    "oeo_viewer"
+    "oeo_viewer",
 )
 
 MIDDLEWARE = (
@@ -68,10 +67,26 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-    "django.middleware.common.CommonMiddleware"
+    "django.middleware.common.CommonMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
+
+
+def external_urls_context_processor(request):
+    """Define hard coded external urls here.
+    Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
+    Also, you may want to add an icon indicating external links, e.g.
+    """
+    return {
+        "EXTERNAL_URLS": {
+            "tutorials_index": "https://openenergyplatform.github.io/tutorial/",
+            "tutorials_faq": "https://openenergyplatform.github.io/tutorial/faq/",
+            "tutorials_api1": "https://openenergyplatform.github.io/tutorial/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
+            "tutorials_licenses": "https://openenergyplatform.github.io/tutorial/tutorials/other/tutorial_open-data-licenses/",  # noqa E501
+        },
+    }
+
 
 TEMPLATES = [
     {
@@ -84,19 +99,15 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "oeplatform.settings.external_urls_context_processor",
             ]
         },
     }
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
-GRAPHENE = {
-    'SCHEMA': 'factsheet.schema.schema'
-}
+GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
 WSGI_APPLICATION = "oeplatform.wsgi.application"
 

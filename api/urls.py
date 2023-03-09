@@ -163,7 +163,6 @@ urlpatterns = [
         r"^v0/advanced/do_recover_twophase",
         views.create_ajax_handler(actions.do_recover_twophase),
     ),
-    url(r"^v0/image/upload", views.ImageUpload.as_view()),
     url(r"usrprop/", views.get_users),
     url(r"grpprop/", views.get_groups),
     url("oeo-search", views.oeo_search),
