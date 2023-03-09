@@ -40,7 +40,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`
    - Update `VERSION` with lastest version number
-1. Deploy release branch on TEOP.
+1. Deploy release branch on TOEP.
    - Test the changes
    - Create a hotfix and merge changes into the release branch
 1. merge release branch into `master` and `develop`

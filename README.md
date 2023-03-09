@@ -32,11 +32,7 @@ Move to the cloned repository
 
 If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
 
-1. conda env create –n oep-website
-2. activate oep-website
-3. conda config –add channels conda-forge
-4. conda install shapely
-5. pip install –r requirements.txt
+    conda env create -f environment.yml
 
 You can also use Python to create the environment
 
@@ -176,15 +172,6 @@ The oeo-viewer is a visualization tool for our OEO ontology and it is under deve
     npm run build
 
 After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
-
-#### 4. Tutorials
-
-##### 4.1 Rendering Jupyter Notebooks
-
-Tutorials needs an additional step to display the existing Jupyter notebooks in another [repository](https://github.com/OpenEnergyPlatform/examples).
-This basically recursivly clones the submodule, which is linked within `/examples`.
-
-    python manage.py notebooks download
 
 ### Deploy locally
 

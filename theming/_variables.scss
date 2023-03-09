@@ -1,6 +1,29 @@
 
+$gray-100: #F1F5F8;
+$black: #293B46;
 $primary: #1F567D;
-$secondary: #BFD7EA;
+$secondary: #293B46;
+$body-color: $black;
+$font-size-base:              1rem;
+$h1-font-size:                $font-size-base * 2;
+$h2-font-size:                $font-size-base * 1.5;
+$h3-font-size:                $font-size-base * 1.25;
+$h4-font-size:                $font-size-base * 1.25;
+$h5-font-size:                $font-size-base;
+$h6-font-size:                $font-size-base;
+$font-sizes: (
+  1: $h1-font-size,
+  2: $h2-font-size,
+  3: $h3-font-size,
+  4: $h4-font-size,
+  5: $h5-font-size,
+  6: $h6-font-size
+);
+$custom-font-sizes: (
+  "7": 0.875rem,
+  "8": 0.75rem
+);
+$font-sizes: map-merge($font-sizes, $custom-font-sizes);
 $card-border-radius: 0;
 $input-border-radius: 0;
 $input-border-radius-lg: 0;

@@ -1,0 +1,22 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.main-header {
+    @extend .bg-light;
+    @extend .p-4;
+    margin-bottom: $C--padding-standard;
+
+    &__title {
+        @extend .fs-4;
+        @extend .text-black;
+        @extend .fw-light;
+
+        svg {
+            @include translateY(-3px);
+        }
+    }
+
+    &__wizard {
+        @extend .fw-semibold;
+    }
+}
