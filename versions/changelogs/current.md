@@ -6,6 +6,6 @@
 
 ### Features
 
-- removed tutorial app and file upload
+- removed tutorial app and file upload (#1164)
 
 ### Bugs
