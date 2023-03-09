@@ -101,12 +101,12 @@ function Home(props) {
                     <ThemeProvider theme={theme}>
                       <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                         <Button disableElevation={true} startIcon={<CompareArrowsIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'marginRight' : '20px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="neutral" >
-                          Compare selected
+                          Compare 
                         </Button>
                       </Link>
                       <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                         <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="primary" >
-                          Add a new factsheet
+                          Add a new 
                         </Button>
                       </Link>
                     </ThemeProvider>

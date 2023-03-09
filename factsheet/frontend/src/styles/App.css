@@ -125,28 +125,28 @@
 }
 
 
-a:link {
+/* a:link {
   color: #ffffff;
-  background-color: transparent;
+  background-color: #eeeeee;
   text-decoration: none;
   font-weight: bold
 }
 
 a:visited {
   color: #ffffff;
-  background-color: transparent;
+  background-color: #eeeeee;
   text-decoration: none;
   font-weight: bold
 }
 
 a:hover {
   color: #ffffff;
-  background-color: transparent;
+  background-color: #eeeeee;
   font-weight: bold
 }
 
 a:active {
   color: #ffffff;
-  background-color: transparent;
+  background-color: #eeeeee;
   font-weight: bold
-}
+} */

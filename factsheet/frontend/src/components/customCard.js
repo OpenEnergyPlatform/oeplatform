@@ -15,7 +15,7 @@ export default function CustomCard(props) {
   const { fs, id, study_name, acronym, abstract, institution, create_new, create_new_button  } = props;
 
   return (
-    <Card sx={{ marginLeft: '10px', marginRight: '10px', minHeight: 100,  display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} variant="outlined">
+    <Card sx={{ marginLeft: '10px', marginRight: '10px', minHeight: 200,  maxHeight: 200, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} variant="outlined">
       <CardContent>
         <Typography gutterBottom variant="subtitle1" component="div">
           <b>{acronym.substring(0,50)}</b>
@@ -24,7 +24,7 @@ export default function CustomCard(props) {
           <b> Study name: </b> {study_name.substring(0,50)}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ 'marginTop': '5px' }}>
-          <b> Abstract: </b> {abstract.substring(0,40) + '...'}
+          <b> Abstract: </b> {abstract.substring(0,30) + '...'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ 'marginTop': '5px' }}>
           <b> Institution: </b> {institution.map(item => <Chip label={item} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '5px' }} size="small" />)}

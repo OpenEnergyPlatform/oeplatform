@@ -33,9 +33,9 @@ export default function ColorToggleButton(props) {
         <Tooltip title="Factsheet's edit mode!">
           <Button size="small" value="wizard" style={{ 'textTransform': 'none' }} onClick={(e) => handleChange(e, 'edit')} > <ListAltIcon /> </Button>
         </Tooltip>
-        <Tooltip title="Analysis">
+        {/* <Tooltip title="Analysis">
           <Button size="small" value="playground" style={{ 'textTransform': 'none' }} > <DiamondIcon /> </Button>
-        </Tooltip>
+        </Tooltip> */}
     </ButtonGroup>
   );
 }

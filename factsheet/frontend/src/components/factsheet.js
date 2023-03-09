@@ -46,7 +46,8 @@ import sector_divisions from '../data/sector_divisions.json';
 
 import {energy_carriers_json} from '../data/energy_carriers.js';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import authors from '../data/authors.json';
+
+import Chip from '@mui/material/Chip';
 
 import '../styles/App.css';
 
@@ -84,13 +85,14 @@ function Factsheet(props) {
   const [prevAcronym, setPrevAcronym] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
-  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? [] : []);
+  const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
   const [institutions, setInstitutions] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [contactPersons, setContactPersons] = useState([]);
   const [isCreated, setIsCreated] = useState(false);
-  
+  console.log(selectedSectors);
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -134,11 +136,11 @@ function Factsheet(props) {
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
-  const [report_title, setReportTitle] = useState(id !== 'new' ? '' : '');
-  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? '04-07-2022' : '04-07-2022');
-  const [doi, setDOI] = useState(id !== 'new' ? '' : '');
-  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? '' : '');
-  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? '' : '');
+  const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
+  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '04-07-2022');
+  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
+  const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
+  const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
   const [scenarios, setScenarios] = useState(id !== 'new' ? [] : [{
     id: uuid(),
     name: '',
@@ -155,7 +157,7 @@ function Factsheet(props) {
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
-  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
+  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? [] : []);
@@ -212,7 +214,7 @@ function Factsheet(props) {
         study_keywords: JSON.stringify(selectedStudyKewords),
         report_title: report_title,
         date_of_publication: date_of_publication,
-        doi: doi,
+        report_doi: doi,
         place_of_publication: place_of_publication,
         link_to_study: link_to_study,
         authors: JSON.stringify(selectedAuthors),
@@ -232,8 +234,6 @@ function Factsheet(props) {
     });
 
     } else {
-      console.log(selectedFundingSource);
-      console.log(selectedInstitution);
       axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
         axios.post(conf.toep + 'factsheet/update/',
         {
@@ -255,7 +255,7 @@ function Factsheet(props) {
           study_keywords: JSON.stringify(selectedStudyKewords),
           report_title: report_title,
           date_of_publication: date_of_publication,
-          doi: doi,
+          report_doi: doi,
           place_of_publication: place_of_publication,
           link_to_study: link_to_study,
           authors: JSON.stringify(selectedAuthors),
@@ -473,6 +473,11 @@ function Factsheet(props) {
     return data;
   };
 
+  const getAuthors = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000064' } });
+    return data;
+  };
+
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
@@ -495,6 +500,14 @@ function Factsheet(props) {
       const tmp = [];
       data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
       setContactPersons(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAuthors().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setAuthors(tmp);
       });
   }, []);
 
@@ -599,14 +612,53 @@ function Factsheet(props) {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Contact person', oldElement, newElement ]);
-      getContactPersons().then((data) => {
+      getAuthors().then((data) => {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
-          setContactPersons(tmp);
+          setAuthors(tmp);
         });
     }
     });
   } 
+
+  const HandleAddNewAuthor = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OEO_00000064',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Author', newElement.name ]);
+
+      getAuthors().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setAuthors(tmp);
+        });
+    });
+  }
+  
+
+  const HandleEditAuthors = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO_00000064',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Author', oldElement, newElement ]);
+      getAuthors().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setAuthors(tmp);
+        });
+    }
+    });
+  }
+  
   
 
 const scenario_region = [
@@ -912,6 +964,7 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
+
               <CustomTreeViewWithCheckBox size="220px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
                 What additional keywords describe your study?
@@ -974,7 +1027,7 @@ const scenario_region = [
           <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
         </Grid>
         <Grid item xs={6} >
-          <CustomAutocomplete showSelectedElements={true}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors} manyItems />
+          <CustomAutocomplete type="Author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
         </Grid>
       </Grid>
     </Grid>
@@ -1254,107 +1307,99 @@ const scenario_region = [
                       'marginLeft': '10px',
                       'marginRight': '10px',
                       'overflow': 'scroll',
-                      'width': '45%'
+                      'width': '95%'
                     }}
                   >
-                    <Typography variant="body1" gutterBottom component="div">
-                      Study name:
-                      <b> {studyName}</b>
+                    <Typography variant="h6" gutterBottom component="div">
+                      <b> {acronym} </b>
                     </Typography>
-                    <Typography variant="body1" gutterBottom component="div">
-                      Acronym:
-                      <b> {acronym}</b>
+                    <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Study name: </b>
+                      {studyName}
                     </Typography>
-                    <Typography variant="body1" gutterBottom component="div">
-                      Contact person(s):
+                    {/* <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Acronym: </b>
+                     {acronym}
+                    </Typography> */}
+                    <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Contact person(s): </b>
                         {selectedContactPerson.map((v, i) => (
-                        <span><b> {v.name}</b> {i + 1 !== selectedContactPerson.length && ',' } </span>  
+                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                     </Typography>
-                    <Typography variant="body1" gutterBottom component="div">
-                      Abstract:
-                      <b> {abstract}</b>
+                    <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Abstract: </b>
+                       {abstract}
                     </Typography>
-                    <Typography variant="body1" gutterBottom component="div">
-                      Study report information:
+                    <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Study report information: </b>
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                      Title:
-                      <b> {report_title}</b>
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>Title: </b>
+                      {report_title}
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                      DOI:
-                      <b> {doi}</b>
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>DOI: </b>
+                       {doi}
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                      Link:
-                      <b> {link_to_study}</b>
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>Link: </b>
+                      {link_to_study}
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                      Date of publication:
-                      <b> {date_of_publication != undefined && date_of_publication.toString()}</b>
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>Date of publication: </b>
+                       {date_of_publication != undefined && date_of_publication.toString()}
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                      Place of publication:
-                      <b> {place_of_publication}</b>
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>Place of publication: </b>
+                       {place_of_publication}
                     </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="body1" gutterBottom component="div">
-                        Authors:   
+                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                    <b>Authors:  </b>  
                         {selectedAuthors.map((v, i) => (
-                          <span><b> {v.name}</b> {i + 1 !== authors.length && ',' } </span>  
+                           <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                         ))}
                     </Typography>
-                  </Box>  
-                  <Box
-                      sx={{
-                      'marginTop': '10px',
-                      'overflow': 'auto',
-                      'marginLeft': '10px',
-                      'marginRight': '10px',
-                      'overflow': 'scroll',
-                      'width': '45%'
-                    }}
-                  >
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Institutions:
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Institutions: </b>
                       {selectedInstitution.map((v, i) => (
-                      <span> <b>{v.name}</b> {i + 1 !== selectedInstitution.length && ',' } </span>  
+                      <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Funding sources:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Funding sources:  </b>  
                       {selectedFundingSource.map((v, i) => (
-                        <span><b> {v.name}</b> {i + 1 !== selectedFundingSource.length && ',' } </span>  
+                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Sector divisions:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Sector divisions: </b>
                       {selectedSectorDivisions.map((v, i) => (
-                        <span><b> {v.name}</b> {i + 1 !== selectedSectorDivisions.length && ',' } </span>  
+                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Sectors:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Sectors: </b>
                       {selectedSectors.map((v, i) => (
-                        <span><b> {v}</b> {i + 1 !== selectedSectors.length && ',' } </span>  
+                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Energy carriers:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Energy carriers: </b>   
                       {selectedEnergyCarriers.map((v, i) => (
-                        <span><b> {v}</b> {i + 1 !== selectedEnergyCarriers.length && ',' } </span>  
+                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Energy Transformation Processes:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Energy Transformation Processes: </b>   
                       {selectedEnergyTransformationProcesses.map((v, i) => (
-                        <span><b> {v}</b> {i + 1 !== selectedEnergyTransformationProcesses.length && ',' } </span>  
+                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="body1" gutterBottom component="div">
-                      Keywords:   
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                  <b>Keywords: </b>  
                       {selectedStudyKewords.map((v, i) => (
-                        <span><b> {v}</b> {i + 1 !== selectedStudyKewords.length && ',' } </span>  
+                       <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                 </Box>

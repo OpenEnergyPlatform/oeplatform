@@ -106,6 +106,12 @@ def create_factsheet(request, *args, **kwargs):
         oekg.add((study_URI, DC.acronym, Literal(acronym)))
         oekg.add((study_URI, OEKG["full_name"], Literal(study_name)))
         oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
+        oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
+        oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication) ))
+        oekg.add(( study_URI, OEKG["place_of_publication"], Literal(place_of_publication) ))
+        oekg.add(( study_URI, OEKG["link_to_study"], Literal(link_to_study) ))
+        oekg.add(( study_URI, OEKG["doi"], Literal(doi) ))
+
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
@@ -184,6 +190,7 @@ def create_factsheet(request, *args, **kwargs):
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
+    print(request_body)
     fsData = request_body['fsData']
     id = request_body['id']
     name = request_body['name']
@@ -203,7 +210,7 @@ def update_factsheet(request, *args, **kwargs):
     study_keywords = request_body['study_keywords']
     report_title = request_body['report_title']
     date_of_publication = request_body['date_of_publication']
-    doi = request_body['doi']
+    report_doi = request_body['report_doi']
     place_of_publication = request_body['place_of_publication']
     link_to_study = request_body['link_to_study']
     authors = request_body['authors']
@@ -236,6 +243,12 @@ def update_factsheet(request, *args, **kwargs):
             oekg.add((study_URI, RDF.type, OEO.OEO_00000364 ))
             oekg.add((study_URI, RDFS.label, Literal(acronym)))
             oekg.add((study_URI, OEKG["full_name"], Literal(studyName)))
+            oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
+            oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication) ))
+            oekg.add(( study_URI, OEKG["place_of_publication"], Literal(place_of_publication) ))
+            oekg.add(( study_URI, OEKG["link_to_study"], Literal(link_to_study) ))
+            oekg.add(( study_URI, OEKG["doi"], Literal(doi) ))
+            print(doi)
 
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000510, None)):
             oekg.remove((s, p, o))
@@ -363,6 +376,21 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples(( study_URI, DC.abstract, None )):
         factsheet['abstract'] = o
 
+    for s, p, o in oekg.triples(( study_URI, OEKG["report_title"] , None )):
+        factsheet['report_title'] = o
+
+    for s, p, o in oekg.triples(( study_URI, OEKG["date_of_publication"] , None )):
+        factsheet['date_of_publication'] = o
+
+    for s, p, o in oekg.triples(( study_URI, OEKG["place_of_publication"] , None )):
+        factsheet['place_of_publication'] = o
+
+    for s, p, o in oekg.triples(( study_URI, OEKG["link_to_study"] , None )):
+        factsheet['link_to_study'] = o
+    
+    for s, p, o in oekg.triples(( study_URI, OEKG["doi"] , None )):
+        factsheet['doi'] = o
+
     factsheet['funding_sources'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.RO_0002234, None )):
         label = oekg.value(o, RDFS.label)
@@ -391,19 +419,25 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples(( study_URI, OEO["covers_sector"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['sectors'].append({ 'id': label, 'name': label })
+            factsheet['sectors'].append(label)
 
     factsheet['energy_carriers'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_carriers'].append({ 'id': label, 'name': label })
+            factsheet['energy_carriers'].append(label)
 
-    factsheet['authors'] = []
-    for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
+    factsheet['energy_transformation_processes'] = []
+    for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_carriers'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['energy_transformation_processes'].append(label)
+
+    factsheet['authors'] = []
+    for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000506, None )):
+        label = oekg.value(o, RDFS.label)
+        if label != None:
+            factsheet['authors'].append({ 'id': label, 'name': label })
 
     response = JsonResponse(factsheet, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)

@@ -53,8 +53,7 @@ export default function CustomSearchInput(props) {
       renderOption={(option) => option.name}
       freeSolo
       renderInput={(params) => (
-        <TextField style={{ 'marginLeft' : '10px', 'margiBottom' : '10px', 'width': '100%', 'zIndex': '1000', 
-                           }}
+        <TextField style={{ 'marginLeft' : '10px', 'margiBottom' : '10px', 'width': '100%' }}
                    color="primary"
                    {...params}
                    label="Search..."
