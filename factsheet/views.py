@@ -29,11 +29,11 @@ oeo = Graph()
 oeo.parse(Ontology_URI)
 
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -554,7 +554,6 @@ def update_an_entity(request, *args, **kwargs):
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
     for s, p, o in oekg.triples(( None, RDF.type, OEO.OEO_00000364 )):
-        print(s)
         element = {}
         element['acronym'] =  oekg.value(s, RDFS.label) 
         element['study_name'] = oekg.value(s, OEKG.full_name) 
