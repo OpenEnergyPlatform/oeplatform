@@ -1,6 +1,7 @@
 from dataedit.management.commands.clear_sandbox import (
     SANDBOX_SCHEMA,
     clear_sandbox,
+    get_sandbox_meta_table_names_oedb,
     get_sandbox_table_names_oedb,
     get_sandbox_tables_django,
 )
@@ -25,6 +26,7 @@ class TestCommandClearSandbox(APITestCase):
         # check that sandbox is not empty
         self.assertTrue(len(get_sandbox_tables_django()) > 0)
         self.assertTrue(len(get_sandbox_table_names_oedb()) > 0)
+        self.assertTrue(len(get_sandbox_meta_table_names_oedb()) > 0)
 
         # run the management command
         clear_sandbox()
@@ -32,3 +34,4 @@ class TestCommandClearSandbox(APITestCase):
         # check that sandbox is empty
         self.assertTrue(len(get_sandbox_tables_django()) == 0)
         self.assertTrue(len(get_sandbox_table_names_oedb()) == 0)
+        self.assertTrue(len(get_sandbox_meta_table_names_oedb()) == 0)
