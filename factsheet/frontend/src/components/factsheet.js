@@ -92,6 +92,10 @@ function Factsheet(props) {
   const [fundingSources, setFundingSources] = useState([]);
   const [contactPersons, setContactPersons] = useState([]);
   const [isCreated, setIsCreated] = useState(false);
+  const [scenarioRegions, setScenarioRegions] = useState([]);
+  const [scenarioInteractingRegions, setScenarioInteractingRegions] = useState([]);
+  const [scenarioYears, setScenarioYears] = useState([]);
+  
   console.log(selectedSectors);
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -138,10 +142,10 @@ function Factsheet(props) {
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
   const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
   const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '04-07-2022');
-  const [doi, setDOI] = useState(id !== 'new' ? fsData.doi : '');
+  const [doi, setDOI] = useState(id !== 'new' ? fsData.report_doi : '');
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
-  const [scenarios, setScenarios] = useState(id !== 'new' ? [] : [{
+  const [scenarios, setScenarios] = useState(id !== 'new' ? fsData.scenarios : [{
     id: uuid(),
     name: '',
     acronym: '',
@@ -154,6 +158,7 @@ function Factsheet(props) {
     output_datasets: [],
     }
   ]);
+  console.log(scenarios);
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
@@ -169,7 +174,6 @@ function Factsheet(props) {
   const [editedEntity, setEditedEntity] = useState(false);
   
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
-
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
 
 
@@ -320,6 +324,7 @@ function Factsheet(props) {
 
   const handleDOI = e => {
     setDOI(e.target.value);
+    console.log(e.target.value);
     factsheetObjectHandler('doi', e.target.value);
   };
 
@@ -379,6 +384,7 @@ function Factsheet(props) {
     const { name, value } = target;
     const element = name.split('_')[0];
     const id = name.split('_')[1];
+    console.log(name, value);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === id);
     if (obj)
@@ -388,13 +394,20 @@ function Factsheet(props) {
   };
 
   const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
+    console.log(selectedList);
+    console.log(name);
+    console.log(idx);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
       obj[name] = selectedList
     setScenarios(newScenarios);
+    console.log(newScenarios);
+    console.log(selectedList);
+
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
+
 
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
@@ -459,22 +472,37 @@ function Factsheet(props) {
   } 
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
   const getContactPersons = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000107' } });
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    return data;
+  };
+
+  const getScenarioRegions = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
+    return data;
+  };
+
+  const getScenarioInteractingRegions = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020036' } });
+    return data;
+  };
+
+  const getScenarioYears = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
@@ -511,10 +539,35 @@ function Factsheet(props) {
       });
   }, []);
 
+  useEffect(() => {
+    getScenarioRegions().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setScenarioRegions(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getScenarioInteractingRegions().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setScenarioInteractingRegions(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getScenarioYears().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setScenarioYears(tmp);
+      });
+  }, []);
+
+
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OEO_00000238',
+      entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
     }).then(response => {
     if (response.data === 'A new entity added!') {
@@ -532,7 +585,7 @@ function Factsheet(props) {
   const HandleEditInstitution = (oldElement, newElement) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
-      entity_type: 'OEO_00000238',
+      entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
       new_entity_label: newElement
     }).then(response => {
@@ -551,7 +604,7 @@ function Factsheet(props) {
   const HandleAddNewFundingSource = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OEO_00090001',
+      entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
     }).then(response => {
     if (response.data === 'A new entity added!')
@@ -568,7 +621,7 @@ function Factsheet(props) {
   const HandleEditFundingSource = (oldElement, newElement) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
-      entity_type: 'OEO_00090001',
+      entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
       new_entity_label: newElement
     }).then(response => {
@@ -587,7 +640,7 @@ function Factsheet(props) {
   const HandleAddNewContactPerson = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OEO_00000107',
+      entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
     }).then(response => {
     if (response.data === 'A new entity added!')
@@ -605,7 +658,7 @@ function Factsheet(props) {
   const HandleEditContactPerson = (oldElement, newElement) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
-      entity_type: 'OEO_00000107',
+      entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
       new_entity_label: newElement
     }).then(response => {
@@ -624,7 +677,7 @@ function Factsheet(props) {
   const HandleAddNewAuthor = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OEO_00000064',
+      entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
     }).then(response => {
     if (response.data === 'A new entity added!')
@@ -638,12 +691,11 @@ function Factsheet(props) {
         });
     });
   }
-  
 
   const HandleEditAuthors = (oldElement, newElement) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
-      entity_type: 'OEO_00000064',
+      entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
       new_entity_label: newElement
     }).then(response => {
@@ -658,8 +710,119 @@ function Factsheet(props) {
     }
     });
   }
+
+  const HandleAddNewRegion = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OBO.BFO_0000006',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Spatial region', newElement.name ]);
+
+      getScenarioRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioRegions(tmp);
+        });
+    });
+  }
+
+  const HandleEditRegion = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OBO.BFO_0000006',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Spatial region', oldElement, newElement ]);
+      getScenarioRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioRegions(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNewInteractingRegion = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OBO.OEO_00020036',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Interacting region', newElement.name ]);
+
+      getScenarioInteractingRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioInteractingRegions(tmp);
+        });
+    });
+  }
+
   
   
+  const HandleEditInteractingRegion = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OBO.OEO_00020036',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Interacting region', oldElement, newElement ]);
+      getScenarioInteractingRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioInteractingRegions(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNNewScenarioYears = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OBO.OEO_00020097',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Scenario year', newElement.name ]);
+
+      getScenarioYears().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioYears(tmp);
+        });
+    });
+  }
+
+  const HandleEditScenarioYears = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OBO.OEO_00020097',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Scenario year', oldElement, newElement ]);
+      getScenarioYears().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioYears(tmp);
+        });
+    }
+    });
+  }
 
 const scenario_region = [
     { id: 'Germany', name: 'Germany' },
@@ -679,7 +842,8 @@ const scenario_region = [
   ];
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
-    console.log(sectorDivisionsList);
+  
+
     setSelectedSectorDivisions(sectorDivisionsList);
     const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
     const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
@@ -1048,9 +1212,9 @@ const scenario_region = [
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.name !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
-                    style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC' }}
+                    style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
                   />
                 )}
                   <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1079,10 +1243,15 @@ const scenario_region = [
                       scenariosInputDatasetsHandler={scenariosInputDatasetsHandler}
                       scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                       removeScenario={removeScenario}
-                      scenarioRegion={scenario_region}
-                      scenarioSelectedRegions={scenario_region}
-                      scenarioInteractingRegion={scenario_interacting_region}
-                      scenarioYears={scenario_years}
+                      scenarioRegion={scenarioRegions}
+                      scenarioInteractingRegion={scenarioInteractingRegions}
+                      scenarioYears={scenarioYears}
+                      HandleEditRegion={HandleEditRegion}
+                      HandleAddNewRegion={HandleAddNewRegion}
+                      HandleEditInteractingRegion={HandleEditInteractingRegion}
+                      HandleAddNewInteractingRegion={HandleAddNewInteractingRegion}
+                      HandleEditScenarioYear={HandleEditScenarioYears}
+                      HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
                     />
                   </TabPanel>
                 )}
@@ -1399,6 +1568,12 @@ const scenario_region = [
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Keywords: </b>  
                       {selectedStudyKewords.map((v, i) => (
+                       <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                      ))}
+                  </Typography>
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                      <b>Scenarios: </b>  
+                      {scenarios.map((v, i) => (
                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
