@@ -93,6 +93,9 @@ function Factsheet(props) {
   const [contactPersons, setContactPersons] = useState([]);
   const [isCreated, setIsCreated] = useState(false);
   const [scenarioRegions, setScenarioRegions] = useState([]);
+  const [scenarioInteractingRegions, setScenarioInteractingRegions] = useState([]);
+  const [scenarioYears, setScenarioYears] = useState([]);
+  
   console.log(selectedSectors);
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
@@ -392,8 +395,8 @@ function Factsheet(props) {
 
   const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
     console.log(selectedList);
+    console.log(name);
     console.log(idx);
-
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
@@ -493,6 +496,16 @@ function Factsheet(props) {
     return data;
   };
 
+  const getScenarioInteractingRegions = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020036' } });
+    return data;
+  };
+
+  const getScenarioYears = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    return data;
+  };
+
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
@@ -533,6 +546,23 @@ function Factsheet(props) {
       setScenarioRegions(tmp);
       });
   }, []);
+
+  useEffect(() => {
+    getScenarioInteractingRegions().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setScenarioInteractingRegions(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getScenarioYears().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setScenarioYears(tmp);
+      });
+  }, []);
+
 
   const HandleAddNewInstitution = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
@@ -698,7 +728,7 @@ function Factsheet(props) {
         });
     });
   }
-  
+
   const HandleEditRegion = (oldElement, newElement) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
@@ -713,6 +743,82 @@ function Factsheet(props) {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setScenarioRegions(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNewInteractingRegion = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OBO.OEO_00020036',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Interacting region', newElement.name ]);
+
+      getScenarioInteractingRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioInteractingRegions(tmp);
+        });
+    });
+  }
+
+  
+  
+  const HandleEditInteractingRegion = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OBO.OEO_00020036',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Interacting region', oldElement, newElement ]);
+      getScenarioInteractingRegions().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioInteractingRegions(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNNewScenarioYears = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OBO.OEO_00020097',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Scenario year', newElement.name ]);
+
+      getScenarioYears().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioYears(tmp);
+        });
+    });
+  }
+
+  const HandleEditScenarioYears = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OBO.OEO_00020097',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Scenario year', oldElement, newElement ]);
+      getScenarioYears().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setScenarioYears(tmp);
         });
     }
     });
@@ -736,7 +842,8 @@ const scenario_region = [
   ];
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
-    console.log(sectorDivisionsList);
+  
+
     setSelectedSectorDivisions(sectorDivisionsList);
     const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
     const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
@@ -1105,9 +1212,9 @@ const scenario_region = [
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.name !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
-                    style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC' }}
+                    style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
                   />
                 )}
                   <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1137,11 +1244,14 @@ const scenario_region = [
                       scenariosOutputDatasetsHandler={scenariosOutputDatasetsHandler}
                       removeScenario={removeScenario}
                       scenarioRegion={scenarioRegions}
-                      scenarioSelectedRegions={scenario_region}
-                      scenarioInteractingRegion={scenario_interacting_region}
-                      scenarioYears={scenario_years}
+                      scenarioInteractingRegion={scenarioInteractingRegions}
+                      scenarioYears={scenarioYears}
                       HandleEditRegion={HandleEditRegion}
                       HandleAddNewRegion={HandleAddNewRegion}
+                      HandleEditInteractingRegion={HandleEditInteractingRegion}
+                      HandleAddNewInteractingRegion={HandleAddNewInteractingRegion}
+                      HandleEditScenarioYear={HandleEditScenarioYears}
+                      HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
                     />
                   </TabPanel>
                 )}
@@ -1458,6 +1568,12 @@ const scenario_region = [
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Keywords: </b>  
                       {selectedStudyKewords.map((v, i) => (
+                       <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                      ))}
+                  </Typography>
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                      <b>Scenarios: </b>  
+                      {scenarios.map((v, i) => (
                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
