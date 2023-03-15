@@ -73,19 +73,21 @@ MIDDLEWARE = (
 ROOT_URLCONF = "oeplatform.urls"
 
 
+EXTERNAL_URLS = {
+    "tutorials_index": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/",
+    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+}
+
+
 def external_urls_context_processor(request):
     """Define hard coded external urls here.
     Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
     Also, you may want to add an icon indicating external links, e.g.
     """
-    return {
-        "EXTERNAL_URLS": {
-            "tutorials_index": "https://openenergyplatform.github.io/tutorial/",
-            "tutorials_faq": "https://openenergyplatform.github.io/tutorial/faq/",
-            "tutorials_api1": "https://openenergyplatform.github.io/tutorial/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
-            "tutorials_licenses": "https://openenergyplatform.github.io/tutorial/tutorials/other/tutorial_open-data-licenses/",  # noqa E501
-        },
-    }
+    return {"EXTERNAL_URLS": EXTERNAL_URLS}
 
 
 TEMPLATES = [
