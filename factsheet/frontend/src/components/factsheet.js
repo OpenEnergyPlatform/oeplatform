@@ -37,13 +37,13 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import models from './models_list.json';
-import frameworks from './frameworks_list.json';
+// import models_json from './models_list.json';
+// import frameworks_json from './frameworks_list.json';
 import study_keywords from '../data/study_keywords.json';
 import scenario_years from '../data/scenario_years.json';
 import {sectors_json} from '../data/sectors.js';
 import sector_divisions from '../data/sector_divisions.json';
-
+import ShareIcon from '@mui/icons-material/Share';
 import {energy_carriers_json} from '../data/energy_carriers.js';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
@@ -77,6 +77,7 @@ function Factsheet(props) {
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
+  const [emptyAcronym, setEmptyAcronym] = useState(false);
   const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
   const [mode, setMode] = useState(id === "new" ? "edit" : "overview");
   const [factsheetObject, setFactsheetObject] = useState({});
@@ -95,8 +96,9 @@ function Factsheet(props) {
   const [scenarioRegions, setScenarioRegions] = useState([]);
   const [scenarioInteractingRegions, setScenarioInteractingRegions] = useState([]);
   const [scenarioYears, setScenarioYears] = useState([]);
+  const [models, setModels] = useState([]);
+  const [frameworks, setFrameworks] = useState([]);
   
-  console.log(selectedSectors);
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -141,7 +143,7 @@ function Factsheet(props) {
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person : []);
   const [report_title, setReportTitle] = useState(id !== 'new' ? fsData.report_title : '');
-  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '04-07-2022');
+  const [date_of_publication, setDateOfPublication] = useState(id !== 'new' ? fsData.date_of_publication : '01-01-1900');
   const [doi, setDOI] = useState(id !== 'new' ? fsData.report_doi : '');
   const [place_of_publication, setPlaceOfPublication] = useState(id !== 'new' ? fsData.place_of_publication : '');
   const [link_to_study, setLinkToStudy] = useState(id !== 'new' ? fsData.link_to_study : '');
@@ -197,51 +199,10 @@ function Factsheet(props) {
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
-    if (id === 'new' && !isCreated) {
-      axios.post(conf.toep + 'factsheet/add/',
-      {
-        id: id,
-        study_name: studyName,
-        name: factsheetName,
-        acronym: acronym,
-        abstract: abstract,
-        institution: JSON.stringify(selectedInstitution),
-        funding_source: JSON.stringify(selectedFundingSource),
-        contact_person: JSON.stringify(selectedContactPerson),
-        sector_divisions: JSON.stringify(selectedSectorDivisions),
-        sectors: JSON.stringify(selectedSectors),
-        expanded_sectors: JSON.stringify(expandedSectors),
-        energy_carriers: JSON.stringify(selectedEnergyCarriers),
-        expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-        expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
-        energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
-        study_keywords: JSON.stringify(selectedStudyKewords),
-        report_title: report_title,
-        date_of_publication: date_of_publication,
-        report_doi: doi,
-        place_of_publication: place_of_publication,
-        link_to_study: link_to_study,
-        authors: JSON.stringify(selectedAuthors),
-        scenarios: JSON.stringify(scenarios),
-        models: JSON.stringify(selectedModels),
-        frameworks: JSON.stringify(selectedFrameworks),
-      }).then(response => {
-      if (response.data === 'Factsheet saved') {
-        navigate('/factsheet/fs/' + acronym);
-        setIsCreated(true);
-        setOpenSavedDialog(true);
-        setPrevAcronym(acronym);
-      }
-      else if (response.data === 'Factsheet exists') {
-        setOpenExistDialog(true);
-      }
-    });
-
-    } else {
-      axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
-        axios.post(conf.toep + 'factsheet/update/',
+    if (acronym !== '') {
+      if (id === 'new' && !isCreated) {
+        axios.post(conf.toep + 'factsheet/add/',
         {
-          fsData: res.data,
           id: id,
           study_name: studyName,
           name: factsheetName,
@@ -256,6 +217,7 @@ function Factsheet(props) {
           energy_carriers: JSON.stringify(selectedEnergyCarriers),
           expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
           expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+          energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
           study_keywords: JSON.stringify(selectedStudyKewords),
           report_title: report_title,
           date_of_publication: date_of_publication,
@@ -266,19 +228,62 @@ function Factsheet(props) {
           scenarios: JSON.stringify(scenarios),
           models: JSON.stringify(selectedModels),
           frameworks: JSON.stringify(selectedFrameworks),
-          energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
         }).then(response => {
-          if (response.data === "factsheet updated!") {
-            setPrevAcronym(acronym);
-            setOpenUpdatedDialog(true);
-          }
-          else if (response.data === 'Factsheet exists') {
-            setOpenExistDialog(true);
-          }
-        });
+        if (response.data === 'Factsheet saved') {
+          navigate('/factsheet/fs/' + acronym);
+          setIsCreated(true);
+          setOpenSavedDialog(true);
+          setPrevAcronym(acronym);
+        }
+        else if (response.data === 'Factsheet exists') {
+          setOpenExistDialog(true);
+        }
       });
-      
-
+  
+      } else {
+        axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
+          axios.post(conf.toep + 'factsheet/update/',
+          {
+            fsData: res.data,
+            id: id,
+            study_name: studyName,
+            name: factsheetName,
+            acronym: acronym,
+            abstract: abstract,
+            institution: JSON.stringify(selectedInstitution),
+            funding_source: JSON.stringify(selectedFundingSource),
+            contact_person: JSON.stringify(selectedContactPerson),
+            sector_divisions: JSON.stringify(selectedSectorDivisions),
+            sectors: JSON.stringify(selectedSectors),
+            expanded_sectors: JSON.stringify(expandedSectors),
+            energy_carriers: JSON.stringify(selectedEnergyCarriers),
+            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
+            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
+            study_keywords: JSON.stringify(selectedStudyKewords),
+            report_title: report_title,
+            date_of_publication: date_of_publication,
+            report_doi: doi,
+            place_of_publication: place_of_publication,
+            link_to_study: link_to_study,
+            authors: JSON.stringify(selectedAuthors),
+            scenarios: JSON.stringify(scenarios),
+            models: JSON.stringify(selectedModels),
+            frameworks: JSON.stringify(selectedFrameworks),
+            energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
+          }).then(response => {
+            if (response.data === "factsheet updated!") {
+              setPrevAcronym(acronym);
+              setOpenUpdatedDialog(true);
+            }
+            else if (response.data === 'Factsheet exists') {
+              setOpenExistDialog(true);
+            }
+          });
+        });
+      }
+     
+    } else {
+      setEmptyAcronym(true);
     }
   };
 
@@ -293,7 +298,7 @@ function Factsheet(props) {
   const handleCloseExistDialog = () => {
     setOpenExistDialog(false);
   };
-
+  
   const handleCloseUpdatedDialog = () => {
     setOpenUpdatedDialog(false);
   };
@@ -304,6 +309,7 @@ function Factsheet(props) {
 
   const handleAcronym = e => {
     setAcronym(e.target.value);
+    setEmptyAcronym(false);
     factsheetObjectHandler('acronym', e.target.value);
   };
 
@@ -506,6 +512,16 @@ function Factsheet(props) {
     return data;
   };
 
+  const getModels = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
+    return data;
+  };
+
+  const getFrameworks = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
+    return data;
+  };
+
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
@@ -560,6 +576,22 @@ function Factsheet(props) {
       const tmp = [];
       data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
       setScenarioYears(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getModels().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setModels(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getFrameworks().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      setFrameworks(tmp);
       });
   }, []);
 
@@ -819,6 +851,80 @@ function Factsheet(props) {
         const tmp = [];
           data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
           setScenarioYears(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNewModel = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OEO.OEO_00000274',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Model', newElement.name ]);
+
+      getModels().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setModels(tmp);
+        });
+    });
+  }
+
+  const HandleEditModels = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO.OEO_00000274',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Model', oldElement, newElement ]);
+      getModels().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setModels(tmp);
+        });
+    }
+    });
+  }
+
+  const HandleAddNewFramework = (newElement) => {
+    axios.post(conf.toep + 'factsheet/add_entities/',
+    {
+      entity_type: 'OEO.OEO_00000172',
+      entity_label: newElement.name,
+    }).then(response => {
+    if (response.data === 'A new entity added!')
+      setOpenAddedDialog(true);
+      setAddedEntity(['Framework', newElement.name ]);
+
+      getFrameworks().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setFrameworks(tmp);
+        });
+    });
+  }
+
+  const HandleEditFramework = (oldElement, newElement) => {
+    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    {
+      entity_type: 'OEO.OEO_00000172',
+      entity_label: oldElement,
+      new_entity_label: newElement
+    }).then(response => {
+    if (response.data === 'entity updated!') {
+      setOpenEditDialog(true);
+      setEditedEntity(['Framework', oldElement, newElement ]);
+      getFrameworks().then((data) => {
+        const tmp = [];
+          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          setFrameworks(tmp);
         });
     }
     });
@@ -1271,10 +1377,10 @@ const scenario_region = [
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete manyItems showSelectedElements={true} optionsSet={models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+          <CustomAutocomplete type="Model" editHandler={HandleEditModels}  addNewHandler={HandleAddNewModel}  manyItems showSelectedElements={true} optionsSet={models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete manyItems showSelectedElements={true}  optionsSet={frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+          <CustomAutocomplete type="Frameworks" editHandler={HandleEditFramework}  addNewHandler={HandleAddNewFramework} manyItems showSelectedElements={true}  optionsSet={frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
         </Grid>
       </Grid>,
       ]
@@ -1319,11 +1425,12 @@ const scenario_region = [
               <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
               </Tooltip>
             {/* <Tooltip title="Share this factsheet">
-              <Fab disableElevation={true} size="medium" style={{ 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Fab>
+              <Button  disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
             </Tooltip> */}
             <Tooltip title="Delete factsheet">
               <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
             </Tooltip>
+            
           </div >
         </Grid>
         <Grid item xs={12}>
@@ -1353,8 +1460,17 @@ const scenario_region = [
             onClose={handleCloseExistDialog}
           >
             <Alert variant="filled" onClose={handleCloseExistDialog} severity="error" sx={{ width: '100%' }}>
-              <AlertTitle>Duplicate</AlertTitle>
+              <AlertTitle>Duplicate!</AlertTitle>
               Another factsheet with this acronym exists. Please choose another acronym!
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={emptyAcronym}
+            autoHideDuration={600}
+          >
+            <Alert variant="filled" severity="error" sx={{ width: '100%' }}>
+              <AlertTitle>Empty acronym!</AlertTitle>
+              Please enter the acronym for this factsheet!
             </Alert>
           </Snackbar>
           <Snackbar
@@ -1476,7 +1592,8 @@ const scenario_region = [
                       'marginLeft': '10px',
                       'marginRight': '10px',
                       'overflow': 'scroll',
-                      'width': '95%'
+                      'width': '95%',
+                      'height':'65vh'
                     }}
                   >
                     <Typography variant="h6" gutterBottom component="div">
@@ -1517,7 +1634,7 @@ const scenario_region = [
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Date of publication: </b>
-                       {date_of_publication != undefined && date_of_publication.toString()}
+                       {date_of_publication != '01-01-1900' && date_of_publication.toString()}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Place of publication: </b>
@@ -1573,7 +1690,54 @@ const scenario_region = [
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                       <b>Scenarios: </b>  
-                      {scenarios.map((v, i) => (
+                      {scenarios.map((v, i) => { return <div> 
+                        {v.acronym !== '' && <Chip label={v.acronym} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />}
+                        <Typography sx={{ 'marginLeft': '20px', 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Name: </b>  
+                          {v.name}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Abstract: </b>  
+                          {v.abstract}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Keywords:</b>  
+                          {v.keywords.map( (e) =>  <Chip label={e} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Years:</b>  
+                          {v.scenario_years.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Regions:</b>  
+                          {v.regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Interacting regions:</b>  
+                          {v.interacting_regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Input datasets:</b>  
+                          {v.input_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                        <b>Output datasets:</b>  
+                          {v.output_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                        </Typography>
+                       
+                      </div>  
+                      }
+                      )}
+                  </Typography>
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                      <b>Models: </b>  
+                      {selectedModels.map((v, i) => (
+                       <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                      ))}
+                  </Typography>
+                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                      <b>Frameworks: </b>  
+                      {selectedFrameworks.map((v, i) => (
                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>

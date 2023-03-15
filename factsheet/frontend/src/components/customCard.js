@@ -36,7 +36,7 @@ export default function CustomCard(props) {
             More...
           </Button>
         </Link>
-        <Checkbox  />
+        <Checkbox disabled />
       </CardActions>
     </Card>
   );
