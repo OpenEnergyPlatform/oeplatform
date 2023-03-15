@@ -29,11 +29,11 @@ oeo = Graph()
 oeo.parse(Ontology_URI)
 
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = 'http://localhost:3030/ds/query'
-update_endpoint = 'http://localhost:3030/ds/update'
+#query_endpoint = 'http://localhost:3030/ds/query'
+#update_endpoint = 'http://localhost:3030/ds/update'
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -618,6 +618,16 @@ def factsheet_by_id(request, *args, **kwargs):
         if label != None:
             factsheet['authors'].append({ 'id': label, 'name': label })
 
+    factsheet['models'] = []
+    factsheet['frameworks'] = []
+    for s, p, o in oekg.triples(( study_URI, OBO.RO_0000057, None )):
+        o_label = oekg.value(o, RDFS.label)
+        o_type = oekg.value(o, RDF.type)
+        if (o_type == OEO.OEO_00000172):
+            factsheet['frameworks'].append({'id': o_label, 'name': o_label})
+        if (o_type == OEO.OEO_00000274):
+            factsheet['models'].append({'id': o_label, 'name': o_label})
+
     factsheet['scenarios'] = []
     for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
         scenario = {}
@@ -776,19 +786,27 @@ def update_an_entity(request, *args, **kwargs):
     entity_label =  request_body['entity_label']
     new_entity_label =  request_body['new_entity_label']
 
-    entity_type_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + entity_type )
+    vocab = entity_type.split('.')[0]
+    classId = entity_type.split('.')[1]
+    prefix = ''
+    if vocab == 'OEO':
+        prefix = "http://openenergy-platform.org/ontology/oeo/"
+    if vocab == 'OBO':
+        prefix = "http://purl.obolibrary.org/obo/"
+
+    entity_type_URI = URIRef(prefix + classId)
     entity_Label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(entity_label) )
     new_entity_label_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label))
 
-    oekg.add((new_entity_label_URI, RDF.type, OEO[entity_type]))
+    oekg.add((new_entity_label_URI, RDF.type, entity_type_URI))
     oekg.add((new_entity_label_URI, RDFS.label, Literal(new_entity_label)))
 
-    entity_edit_history = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label) + "/edit_history")
+    """  entity_edit_history = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(new_entity_label) + "/edit_history")
     oekg.add((entity_edit_history, RDFS.label, Literal(new_entity_label)))
     oekg.add((entity_edit_history, RDF.type, OEKG["edit_history"]))
     oekg.add((entity_edit_history, OEKG["prev"], Literal(entity_label) ))
     oekg.add((entity_edit_history, OEKG["next"], Literal(new_entity_label) ))
-    oekg.add((entity_edit_history, OEKG["date"], Literal(date.today()) ))
+    oekg.add((entity_edit_history, OEKG["date"], Literal(date.today()) )) """
 
     for s, p, o in oekg.triples((None, None, entity_Label_URI)):
         oekg.add((s, p, new_entity_label_URI))
