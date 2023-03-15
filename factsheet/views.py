@@ -618,6 +618,17 @@ def factsheet_by_id(request, *args, **kwargs):
         if label != None:
             factsheet['authors'].append({ 'id': label, 'name': label })
 
+    factsheet['models'] = []
+    factsheet['frameworks'] = []
+    for s, p, o in oekg.triples(( study_URI, OBO.RO_0000057, None )):
+        o_label = oekg.value(o, RDFS.label)
+        o_type = oekg.value(o, RDF.type)
+        print(o_type)
+        if (o_type == OEO.OEO_00000172):
+            factsheet['models'].append({'id': o_label, 'name': o_label})
+        if (o_type == OEO.OEO_00000274):
+            factsheet['frameworks'].append({'id': o_label, 'name': o_label})
+
     factsheet['scenarios'] = []
     for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
         scenario = {}

@@ -37,8 +37,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import modelsList from './models_list.json';
-import frameworksList from './frameworks_list.json';
+import models from './models_list.json';
+import frameworks from './frameworks_list.json';
 import study_keywords from '../data/study_keywords.json';
 import scenario_years from '../data/scenario_years.json';
 import {sectors_json} from '../data/sectors.js';
@@ -165,8 +165,8 @@ function Factsheet(props) {
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
-  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? [] : []);
-  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? [] : []);
+  const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
+  const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
   const [removeReport, setRemoveReport] = useState(false);
   const [addedEntity, setAddedEntity] = useState(false);
   const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
@@ -1212,7 +1212,7 @@ const scenario_region = [
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.name !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
                   />
@@ -1271,10 +1271,10 @@ const scenario_region = [
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete manyItems showSelectedElements={true} optionsSet={modelsList} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+          <CustomAutocomplete manyItems showSelectedElements={true} optionsSet={models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete manyItems showSelectedElements={true}  optionsSet={frameworksList} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+          <CustomAutocomplete manyItems showSelectedElements={true}  optionsSet={frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
         </Grid>
       </Grid>,
       ]
