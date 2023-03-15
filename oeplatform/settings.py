@@ -74,10 +74,11 @@ ROOT_URLCONF = "oeplatform.urls"
 
 
 EXTERNAL_URLS = {
-    "tutorials_index": "https://openenergyplatform.github.io/tutorial/",
-    "tutorials_faq": "https://openenergyplatform.github.io/tutorial/faq/",
-    "tutorials_api1": "https://openenergyplatform.github.io/tutorial/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/tutorial/tutorials/other/tutorial_open-data-licenses/",  # noqa E501
+    "tutorials_index": "https://openenergyplatform.github.io/academy/",
+    "tutorials_faq": "https://openenergyplatform.github.io/academy/",
+    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
 }
 
 
