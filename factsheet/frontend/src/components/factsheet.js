@@ -160,7 +160,6 @@ function Factsheet(props) {
     output_datasets: [],
     }
   ]);
-  console.log(scenarios);
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
@@ -179,7 +178,6 @@ function Factsheet(props) {
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
   const [energyCarriers, setEnergyCarries] = React.useState([]);
 
-
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
   }
@@ -192,16 +190,12 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
+      console.log(data);
       setEnergyTransformationProcesses(data.energy_transformation_processes);
-      });
-  }, []);
-  
-  useEffect(() => {
-    populateFactsheetElements().then((data) => {
       setEnergyCarries(data.energy_carriers);
       });
   }, []);
-
+  
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (acronym !== '') {
@@ -1239,8 +1233,7 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-
-              <CustomTreeViewWithCheckBox size="270px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <CustomTreeViewWithCheckBox showFilter={false} size="270px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'50px', marginBottom:'5px' }}>
                 What additional keywords describe your study?
               </Typography>
@@ -1255,11 +1248,10 @@ const scenario_region = [
               </div>
           </Grid>
           <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomTreeViewWithCheckBox size="230px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-            <CustomTreeViewWithCheckBox size="230px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+            <CustomTreeViewWithCheckBox showFilter={true} size="230px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+            <CustomTreeViewWithCheckBox showFilter={true} size="230px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
             toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
           </Grid>
-
       </Grid>
       <Grid
         container
