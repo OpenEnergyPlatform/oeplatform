@@ -1240,11 +1240,11 @@ const scenario_region = [
                   </div>
                 </div>
 
-              <CustomTreeViewWithCheckBox size="220px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+              <CustomTreeViewWithCheckBox size="270px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'50px', marginBottom:'5px' }}>
                 What additional keywords describe your study?
               </Typography>
-              <div>
+              <div style={{ marginTop: "20px" }}>
                 <FormGroup>
                     <div>
                       {
@@ -1255,8 +1255,8 @@ const scenario_region = [
               </div>
           </Grid>
           <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-            <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+            <CustomTreeViewWithCheckBox size="230px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+            <CustomTreeViewWithCheckBox size="230px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
             toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
           </Grid>
 
@@ -1678,13 +1678,13 @@ const scenario_region = [
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Energy carriers: </b>   
                       {selectedEnergyCarriers.map((v, i) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Chip label={v.split("****")[0]} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Energy Transformation Processes: </b>   
                       {selectedEnergyTransformationProcesses.map((v, i) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Chip label={v.split("****")[0]} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">

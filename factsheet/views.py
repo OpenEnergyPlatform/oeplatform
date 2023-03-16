@@ -23,8 +23,11 @@ from datetime import date
 versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
-file = "oeo-full.owl"
+file = "reasoned-oeo-full.owl"
 Ontology_URI = os.path.join(path, file)
+
+
+print(Ontology_URI)
 oeo = Graph()
 oeo.parse(Ontology_URI)
 
@@ -204,16 +207,16 @@ def create_factsheet(request, *args, **kwargs):
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
-            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
+            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item.split("****")[0]))
             oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(item)))
+            oekg.add((energy_carriers_URI, RDFS.label, Literal(item.split("****")[0])))
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
+            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item.split("****")[0]))
             oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item)))
+            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item.split("****")[0])))
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         _models = json.loads(models) if models is not None else []
@@ -477,9 +480,9 @@ def update_factsheet(request, *args, **kwargs):
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
-            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
+            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item.split("****")[0]))
             oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(item)))
+            oekg.add((energy_carriers_URI, RDFS.label, Literal(item.split("****")[0])))
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["covers_transformation_processes"], None)):
@@ -488,9 +491,9 @@ def update_factsheet(request, *args, **kwargs):
         _energy_transformation_processes = json.loads(
             energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item))
+            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item.split("****")[0]))
             oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item)))
+            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item.split("****")[0])))
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OBO.RO_0000057, None)):
@@ -863,7 +866,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
         sl = oeo.value(s, RDFS.label)
         parent = {
-            'value': sl,
+            'value': sl + "****" + str(uuid.uuid1()),
             'label': sl
         }
         children = []
@@ -875,19 +878,19 @@ def populate_factsheets_elements(request, *args, **kwargs):
                 sl2 = oeo.value(s2, RDFS.label)
 
                 children2.append({
-                    'value': sl2,
+                    'value': sl2 + "****" + str(uuid.uuid1()),
                     'label': sl2
                 })
 
             if children2 != []:
                 children.append({
-                'value': sl1,
+                'value': sl1 + "****" + str(uuid.uuid1()),
                 'label': sl1,
                 'children': children2
                 })
             else:
                 children.append({
-                'value': sl1,
+                'value': sl1 + "****" + str(uuid.uuid1()),
                 'label': sl1
                 })
 
@@ -902,7 +905,7 @@ def populate_factsheets_elements(request, *args, **kwargs):
     for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020039 )):
         sl = oeo.value(s, RDFS.label)
         parent = {
-            'value': sl,
+            'value': sl + "****" + str(uuid.uuid1()),
             'label': sl
         }
         children = []
@@ -914,19 +917,19 @@ def populate_factsheets_elements(request, *args, **kwargs):
                 sl2 = oeo.value(s2, RDFS.label)
 
                 children2.append({
-                    'value': sl2,
+                    'value': sl2 + "****" + str(uuid.uuid1()),
                     'label': sl2
                 })
 
             if children2 != []:
                 children.append({
-                'value': sl1,
+                'value': sl1 + "****" + str(uuid.uuid1()),
                 'label': sl1,
                 'children': children2
                 })
             else:
                 children.append({
-                'value': sl1,
+                'value': sl1 + "****" + str(uuid.uuid1()),
                 'label': sl1
                 })
 
