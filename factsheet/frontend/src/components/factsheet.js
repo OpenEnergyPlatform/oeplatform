@@ -177,6 +177,7 @@ function Factsheet(props) {
   
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
+  const [energyCarriers, setEnergyCarries] = React.useState([]);
 
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -191,11 +192,15 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      const energy_transformation_processes_json = data.energy_transformation_processes;
       setEnergyTransformationProcesses(data.energy_transformation_processes);
       });
   }, []);
   
+  useEffect(() => {
+    populateFactsheetElements().then((data) => {
+      setEnergyCarries(data.energy_carriers);
+      });
+  }, []);
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
@@ -1045,7 +1050,7 @@ const scenario_region = [
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-  const energyCarrierData = energy_carriers_json;
+  
 
   const renderStudy = () => {
     return <Grid container
@@ -1250,7 +1255,7 @@ const scenario_region = [
               </div>
           </Grid>
           <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarrierData} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+            <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
             <CustomTreeViewWithCheckBox size="270px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
             toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
           </Grid>
