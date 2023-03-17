@@ -10,7 +10,7 @@ from django.utils.cache import patch_response_headers
 import uuid
 import requests
 import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, Bag
+from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode
 from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
