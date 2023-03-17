@@ -116,7 +116,7 @@ def is_date_path(path):
         return False
 
 
-def fix_date(val):
+def fix_date(val, path=None):
     """fix date strings."""
 
     if not isinstance(val, str):
@@ -135,19 +135,22 @@ def fix_date(val):
     elif re.match(r"^[0-9]{2}\.[0-9]{2}\.[0-9]{4}$", val):  # german date
         d, m, y = re.match(r"^([0-9]{2})\.([0-9]{2})\.([0-9]{4})$", val).groups()
         return f"{y}-{m}-{d}"
-    elif re.match(
-        r"^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$", val
-    ):  # iso date, but . instead of -
+    elif re.match(r"^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$", val):
+        # iso date, but . instead of -
         y, m, d = re.match(r"^([0-9]{4})\.([0-9]{2})\.([0-9]{2})$", val).groups()
         return f"{y}-{m}-{d}"
+    elif re.match(r"^[0-9]{4}-[0-9]{2}-?$", val):
+        # missing day
+        y, m = re.match(r"^([0-9]{4})-([0-9]{2})-?$", val).groups()
+        return f"{y}-{m}-01"
     else:
         try:  # see if it goes through omi parsing
             val_d = parse_date_or_none(val)
             val_s = compile_date_or_none(val_d)
             return val_s or ""  # always return str
         except Exception:
-            logging.warning(f"Not a date: {val}")
-    return ""  # always return str
+            logging.warning(f"Not a date: {val} ({path})")
+            return ""  # always return str
 
 
 def fix_key(k):
@@ -436,7 +439,7 @@ def fix_metadata(metadata, table_name):
     # fix all dates
     for k, v in metadata.items():
         if is_date_path(k):
-            metadata[k] = fix_date(v)
+            metadata[k] = fix_date(v, k)
 
     metadata = unflatten(metadata)
 
@@ -462,8 +465,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         logging.basicConfig(
-            format="[%(asctime)s %(levelname)7s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
+            format="[%(levelname)7s] %(message)s",
             level=logging.INFO,
         )
 
@@ -480,9 +482,11 @@ class Command(BaseCommand):
             schema_name = t.schema.name
 
             whitelisted = schema_name in schema_whitelist
+
+            logging.info("")  # empty line
             logging.info(f"{schema_name}.{table_name} (whitelist={whitelisted})")
 
-            # load metadata from comment string
+            # load metadata
             metadata_orig = get_table_metadata(schema_name, table_name)
 
             if not metadata_orig:
@@ -532,5 +536,7 @@ class Command(BaseCommand):
             metadata_fixed = fix_metadata(metadata_orig, table_name)
 
             with engine.connect() as con:
-                cursor = con.connection.cursor()
-                set_table_metadata(table_name, schema_name, metadata_fixed, cursor)
+                with con:
+                    cursor = con.connection.cursor()
+                    set_table_metadata(table_name, schema_name, metadata_fixed, cursor)
+                    con.connection.commit()
