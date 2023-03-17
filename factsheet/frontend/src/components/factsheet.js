@@ -1259,8 +1259,8 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="270px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'50px', marginBottom:'5px' }}>
+              <CustomTreeViewWithCheckBox showFilter={false} size="280px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'60px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
               </Typography>
               <div style={{ marginTop: "20px" }}>
@@ -1274,8 +1274,8 @@ const scenario_region = [
               </div>
           </Grid>
           <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomTreeViewWithCheckBox showFilter={true} size="230px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-            <CustomTreeViewWithCheckBox showFilter={true} size="230px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+            <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+            <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
             toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
           </Grid>
       </Grid>
