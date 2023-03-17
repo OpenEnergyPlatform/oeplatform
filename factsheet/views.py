@@ -812,8 +812,6 @@ def update_an_entity(request, *args, **kwargs):
     oekg.add((entity_IRI, RDFS.label, Literal(new_entity_label)))
     oekg.remove((entity_IRI, RDFS.label, Literal(entity_label)))
 
-    b = Bag(oekg, BNode(), [Literal("One"), Literal("Two"), Literal("Three")])
-
     response = JsonResponse('entity updated!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
     return response
