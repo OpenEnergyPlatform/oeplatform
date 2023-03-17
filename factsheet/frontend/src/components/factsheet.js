@@ -165,7 +165,7 @@ function Factsheet(props) {
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -173,7 +173,6 @@ function Factsheet(props) {
   const [openAddedDialog, setOpenAddedDialog] = React.useState(false);
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editedEntity, setEditedEntity] = useState(false);
-  
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
   const [energyCarriers, setEnergyCarries] = React.useState([]);
@@ -184,18 +183,18 @@ function Factsheet(props) {
 
   const populateFactsheetElements = async () => {
     const { data } = await axios.get(conf.toep + `factsheet/populate_factsheets_elements/`);
-    
     return data;
   };
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      console.log(data);
       setEnergyTransformationProcesses(data.energy_transformation_processes);
       setEnergyCarries(data.energy_carriers);
       });
   }, []);
   
+  
+
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (acronym !== '') {
@@ -383,13 +382,10 @@ function Factsheet(props) {
       setOpenEditDialog(false);
   };
 
-  
-
   const handleScenariosInputChange = ({ target }) => {
     const { name, value } = target;
     const element = name.split('_')[0];
     const id = name.split('_')[1];
-    console.log(name, value);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === id);
     if (obj)
@@ -399,16 +395,11 @@ function Factsheet(props) {
   };
 
   const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
-    console.log(selectedList);
-    console.log(name);
-    console.log(idx);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
       obj[name] = selectedList
     setScenarios(newScenarios);
-    console.log(newScenarios);
-    console.log(selectedList);
 
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
@@ -524,16 +515,15 @@ function Factsheet(props) {
   useEffect(() => {
     getInstitution().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) );
       setInstitutions(tmp);
       });
   }, []);
 
-
   useEffect(() => {
     getFundingSources().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setFundingSources(tmp);
       });
   }, []);
@@ -541,7 +531,7 @@ function Factsheet(props) {
   useEffect(() => {
     getContactPersons().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setContactPersons(tmp);
       });
   }, []);
@@ -549,7 +539,7 @@ function Factsheet(props) {
   useEffect(() => {
     getAuthors().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setAuthors(tmp);
       });
   }, []);
@@ -557,7 +547,7 @@ function Factsheet(props) {
   useEffect(() => {
     getScenarioRegions().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setScenarioRegions(tmp);
       });
   }, []);
@@ -565,7 +555,7 @@ function Factsheet(props) {
   useEffect(() => {
     getScenarioInteractingRegions().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setScenarioInteractingRegions(tmp);
       });
   }, []);
@@ -573,7 +563,7 @@ function Factsheet(props) {
   useEffect(() => {
     getScenarioYears().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setScenarioYears(tmp);
       });
   }, []);
@@ -581,7 +571,7 @@ function Factsheet(props) {
   useEffect(() => {
     getModels().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setModels(tmp);
       });
   }, []);
@@ -589,7 +579,7 @@ function Factsheet(props) {
   useEffect(() => {
     getFrameworks().then((data) => {
       const tmp = [];
-      data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
       setFrameworks(tmp);
       });
   }, []);
@@ -600,32 +590,35 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!') {
       setOpenAddedDialog(true);
       setAddedEntity(['Institution', newElement.name ]);
       getInstitution().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setInstitutions(tmp);
         });
     }
     });
   } 
 
-  const HandleEditInstitution = (oldElement, newElement) => {
+
+  const HandleEditInstitution = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Institution', oldElement, newElement ]);
       getInstitution().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setInstitutions(tmp);
         });
     }
@@ -637,31 +630,33 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
       setAddedEntity(['Funding source', newElement.name ]);
       getFundingSources().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setFundingSources(tmp);
         });
     });
   } 
 
-  const HandleEditFundingSource = (oldElement, newElement) => {
+  const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Funding source', oldElement, newElement ]);
       getFundingSources().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setFundingSources(tmp);
         });
     }
@@ -673,6 +668,7 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -680,25 +676,26 @@ function Factsheet(props) {
 
       getContactPersons().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setContactPersons(tmp);
         });
     });
   } 
 
-  const HandleEditContactPerson = (oldElement, newElement) => {
+  const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Contact person', oldElement, newElement ]);
       getAuthors().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setAuthors(tmp);
         });
     }
@@ -710,6 +707,7 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -717,25 +715,26 @@ function Factsheet(props) {
 
       getAuthors().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setAuthors(tmp);
         });
     });
   }
 
-  const HandleEditAuthors = (oldElement, newElement) => {
+  const HandleEditAuthors = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Author', oldElement, newElement ]);
       getAuthors().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setAuthors(tmp);
         });
     }
@@ -747,6 +746,7 @@ function Factsheet(props) {
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -754,25 +754,26 @@ function Factsheet(props) {
 
       getScenarioRegions().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioRegions(tmp);
         });
     });
   }
 
-  const HandleEditRegion = (oldElement, newElement) => {
+  const HandleEditRegion = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Spatial region', oldElement, newElement ]);
       getScenarioRegions().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioRegions(tmp);
         });
     }
@@ -784,6 +785,7 @@ function Factsheet(props) {
     {
       entity_type: 'OBO.OEO_00020036',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -791,27 +793,26 @@ function Factsheet(props) {
 
       getScenarioInteractingRegions().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioInteractingRegions(tmp);
         });
     });
   }
-
   
-  
-  const HandleEditInteractingRegion = (oldElement, newElement) => {
+  const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020036',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Interacting region', oldElement, newElement ]);
       getScenarioInteractingRegions().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioInteractingRegions(tmp);
         });
     }
@@ -823,6 +824,7 @@ function Factsheet(props) {
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -830,25 +832,26 @@ function Factsheet(props) {
 
       getScenarioYears().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioYears(tmp);
         });
     });
   }
 
-  const HandleEditScenarioYears = (oldElement, newElement) => {
+  const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Scenario year', oldElement, newElement ]);
       getScenarioYears().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setScenarioYears(tmp);
         });
     }
@@ -860,6 +863,7 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -867,25 +871,26 @@ function Factsheet(props) {
 
       getModels().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setModels(tmp);
         });
     });
   }
 
-  const HandleEditModels = (oldElement, newElement) => {
+  const HandleEditModels = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Model', oldElement, newElement ]);
       getModels().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setModels(tmp);
         });
     }
@@ -897,6 +902,7 @@ function Factsheet(props) {
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
+      entity_iri: newElement.iri
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
@@ -904,25 +910,26 @@ function Factsheet(props) {
 
       getFrameworks().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setFrameworks(tmp);
         });
     });
   }
 
-  const HandleEditFramework = (oldElement, newElement) => {
+  const HandleEditFramework = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: oldElement,
-      new_entity_label: newElement
+      new_entity_label: newElement,
+      entity_iri: editIRI
     }).then(response => {
     if (response.data === 'entity updated!') {
       setOpenEditDialog(true);
       setEditedEntity(['Framework', oldElement, newElement ]);
       getFrameworks().then((data) => {
         const tmp = [];
-          data.map( (item) => tmp.push({ 'id': item, 'name': item }) )
+          data.map( (item) => tmp.push(item) )
           setFrameworks(tmp);
         });
     }
@@ -968,6 +975,7 @@ const scenario_region = [
   };
 
   const institutionHandler = (institutionList) => {
+    console.log(institutionList);
     setSelectedInstitution(institutionList);
   };
 
@@ -984,24 +992,44 @@ const scenario_region = [
     setRemoveReport(false);
   }
 
-  const energyCarriersHandler = (energyCarriersList) => {
-    setSelectedEnergyCarriers(energyCarriersList);
+  const findNestedObj = (entireObj, keyToFind, valToFind) => {
+    let foundObj;
+    JSON.stringify(entireObj, (_, nestedValue) => {
+      if (nestedValue && nestedValue[keyToFind] === valToFind) {
+        foundObj = nestedValue;
+      }
+      return nestedValue;
+    });
+    return foundObj;
+  };
+
+  const energyCarriersHandler = (energyCarriersList, nodes) => {
+    const zipped = []
+    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label}));
+    setSelectedEnergyCarriers(zipped);
+
   };
 
   const expandedEnergyCarriersHandler = (expandedEnergyCarriersList) => {
     setExpandedEnergyCarriers(expandedEnergyCarriersList);
   };
 
-  const selectedSectorsHandler = (sectorsList) => {
-    setSelectedSectors(sectorsList);
+  const sectorsHandler = (sectorsList) => {
+    const zipped = []
+    sectorsList.map((v) => zipped.push({ "value": v, "label": v }));
+    setSelectedSectors(zipped);
   };
 
   const expandedSectorsHandler = (expandedSectorsList) => {
-    setExpandedSectors(expandedSectorsList);
+    const zipped = []
+    expandedSectorsList.map((v) => zipped.push({ "value": v, "label": v }));
+    setExpandedSectors(zipped);
   };
 
-  const energyTransformationProcessesHandler = (energyProcessesList) => {
-    setSelectedEnergyTransformationProcesses(energyProcessesList);
+  const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
+    const zipped = []
+    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label}));
+    setSelectedEnergyTransformationProcesses(zipped);
   };
 
   const expandedEnergyTransformationProcessesHandler = (expandedEnergyProcessesList) => {
@@ -1043,8 +1071,6 @@ const scenario_region = [
     setScenarios(newScenarios);
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
-
-  
 
   const renderStudy = () => {
     return <Grid container
@@ -1233,7 +1259,7 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="270px" checked={selectedSectors} expanded={expandedSectors} handler={selectedSectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <CustomTreeViewWithCheckBox showFilter={false} size="270px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'50px', marginBottom:'5px' }}>
                 What additional keywords describe your study?
               </Typography>
@@ -1664,19 +1690,19 @@ const scenario_region = [
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Sectors: </b>
                       {selectedSectors.map((v, i) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Energy carriers: </b>   
                       {selectedEnergyCarriers.map((v, i) => (
-                        <Chip label={v.split("****")[0]} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
                   <b>Energy Transformation Processes: </b>   
                       {selectedEnergyTransformationProcesses.map((v, i) => (
-                        <Chip label={v.split("****")[0]} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                       ))}
                   </Typography>
                   <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
@@ -1746,5 +1772,6 @@ const scenario_region = [
   </div>
   );
 }
+
 
 export default Factsheet;

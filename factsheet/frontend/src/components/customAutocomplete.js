@@ -24,6 +24,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
 import EditIcon from '@mui/icons-material/Edit';
+import uuid from "react-uuid";
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
@@ -35,6 +36,7 @@ export default function CustomAutocomplete(parameters) {
   const [open, toggleOpen] = React.useState(false);
   const [openEdit, toggleOpenEdit] = React.useState(false);
   const [editLabel, setEditLabel] = React.useState('');
+  const [editIRI, setEditIRI] = React.useState('');
   const [updatedLabel, setUpdatedLabel] = React.useState('');
   
   const [dialogValue, setDialogValue] = React.useState({
@@ -73,7 +75,8 @@ export default function CustomAutocomplete(parameters) {
     }
   }
 
-  const handleDelete = (e, vc) => {
+  const handleDelete = (e, vc, vi) => {
+    setEditIRI(vi);
     setEditLabel(vc);
     toggleOpenEdit(true);
   };
@@ -108,22 +111,24 @@ export default function CustomAutocomplete(parameters) {
   
   const handleAddNew = e => {
     const updauedValue = value.filter(item => (!item.hasOwnProperty('inputValue')) );
-    updauedValue.push(dialogValue);
+    const updatedDialogeValue = { "iri": uuid(), "id": dialogValue.id, "name": dialogValue.id };
+    updauedValue.push(updatedDialogeValue);
     setValue(updauedValue);
-    addNewHandler(dialogValue);
+    addNewHandler(updatedDialogeValue);
     toggleOpen(false);
     handler(updauedValue);
   };
 
+  
   const handleEdit = e => {
-    editHandler(editLabel, updatedLabel);
+    editHandler(editLabel, updatedLabel, editIRI);
     setUpdatedLabel('');
     toggleOpenEdit(false);
     const objIndex = value.findIndex((obj => obj.id == editLabel));
     value[objIndex].id = updatedLabel;
     value[objIndex].name = updatedLabel;
   }
-
+  console.log(parameters.optionsSet);
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
@@ -278,7 +283,7 @@ export default function CustomAutocomplete(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.name}  deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
+          <Chip key={v.id} label={v.name}  deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
       </Box>}
     </Box>
