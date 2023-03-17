@@ -605,6 +605,7 @@ function Factsheet(props) {
 
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
+    console.log(editIRI);
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
@@ -643,6 +644,7 @@ function Factsheet(props) {
   } 
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
+    console.log(editIRI)
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',

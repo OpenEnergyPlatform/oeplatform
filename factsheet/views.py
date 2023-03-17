@@ -556,19 +556,20 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples(( study_URI, OEO.RO_0002234, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['funding_sources'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['funding_sources'].append({ "iri": str(o).split("/")[-1], "id": label, "name": label })
+   
         
     factsheet['institution'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000510, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['institution'].append({ "iri": str(o).split("/")[-1], "id": clean_name(label), "name": clean_name(label) })
+            factsheet['institution'].append({ "iri": str(o).split("/")[-1], "id": label, "name": label })
 
     factsheet['contact_person'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000508, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['contact_person'].append({ 'id': clean_name(label), 'name': clean_name(label) })
+            factsheet['contact_person'].append({ "iri": str(o).split("/")[-1], "id": label, "name": label })
 
     factsheet['sector_divisions'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["based_on_sector_division"], None )):
@@ -601,7 +602,7 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000506, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
-            factsheet['authors'].append({ 'id': label, 'name': label })
+            factsheet['authors'].append({ "iri": str(o).split("/")[-1], "id": label, "name": label })
 
     factsheet['study_keywords'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000522, None )):
@@ -615,9 +616,9 @@ def factsheet_by_id(request, *args, **kwargs):
         o_label = oekg.value(o, RDFS.label)
         o_type = oekg.value(o, RDF.type)
         if (o_type == OEO.OEO_00000172):
-            factsheet['frameworks'].append({'id': o_label, 'name': o_label})
+            factsheet['frameworks'].append({ "iri": str(o).split("/")[-1], "id": o_label, "name": o_label })
         if (o_type == OEO.OEO_00000274):
-            factsheet['models'].append({'id': o_label, 'name': o_label})
+            factsheet['models'].append({ "iri": str(o).split("/")[-1], "id": o_label, "name": o_label })
 
     factsheet['scenarios'] = []
     for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
