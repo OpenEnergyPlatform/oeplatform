@@ -27,23 +27,23 @@ ADMIN_PERM = 12
 
 
 class OEPUserManager(UserManager):
-    def create_user(self, name, email, affiliation=None):
+    def create_user(self, name, email, affiliation=None, profile_img=None):
         if not email:
             raise ValueError("An email address must be entered")
         if not name:
             raise ValueError("A name must be entered")
 
         user = self.model(
-            name=name, email=self.normalize_email(email), affiliation=affiliation
+            name=name, email=self.normalize_email(email), affiliation=affiliation, profile_img=profile_img,
         )
 
         user.save(using=self._db)
         user.send_activation_mail()
         return user
 
-    def create_superuser(self, name, email, affiliation):
+    def create_superuser(self, name, email, affiliation, profile_img):
 
-        user = self.create_user(name, email, affiliation=affiliation)
+        user = self.create_user(name, email, affiliation=affiliation, profile_img=profile_img)
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -127,6 +127,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
     name = models.CharField(max_length=50, unique=True)
     affiliation = models.CharField(max_length=50, blank=True)
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
+    profile_img = models.ImageField(null=True, blank=True)
 
     did_agree = models.BooleanField(default=False)
 

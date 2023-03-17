@@ -3,7 +3,7 @@
 <h3>
     Create new user
 </h3>
-<form action="" method="post">{% csrf_token %}
+<form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
     {% for field in form %}
     <div class="mb-3">
         {{ field.label_tag }}
@@ -16,6 +16,7 @@
     </div>
 
     {% endfor %}
+
     <div>
         You can change your password here: <a href="../password_change"> here </a>
     </div>

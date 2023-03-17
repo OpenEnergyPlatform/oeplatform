@@ -1,16 +1,20 @@
 from django import forms
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import FormView, View
 from django.views.generic.edit import UpdateView
 
 import login.models as models
-
+from django.shortcuts import render, get_object_or_404
+from django.views import View
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
+from django.core.handlers.wsgi import WSGIRequest as request
 
 
 class ProfileView(View):
@@ -22,6 +26,8 @@ class ProfileView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
+        current_site = Site.objects.get_current()
+
         from rest_framework.authtoken.models import Token
 
         for user in OepUser.objects.all():
@@ -31,7 +37,7 @@ class ProfileView(View):
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
         return render(
-            request, "login/profile.html", {"profile_user": user, "token": token}
+            request, "login/profile.html", {"profile_user": user, "token": token, "domain": current_site}
         )
 
 
@@ -236,7 +242,7 @@ class EditUserView(View):
     def post(self, request, user_id):
         if not request.user.id == int(user_id):
             raise PermissionDenied
-        form = EditUserForm(request.POST, instance=request.user)
+        form = EditUserForm(instance=request.user, files=request.FILES or None, data=request.POST or None)
         if form.is_valid():
             form.save()
             return redirect("/user/profile/{id}".format(id=request.user.id))
