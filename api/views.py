@@ -250,7 +250,7 @@ class Sequence(APIView):
 class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
-        metadata = actions._get_table_metadata(schema, table)
+        metadata = actions.get_table_metadata(schema, table)
         return JsonResponse(metadata)
 
     @api_exception

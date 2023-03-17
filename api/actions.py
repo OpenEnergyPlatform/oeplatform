@@ -1096,7 +1096,7 @@ def _get_table(schema, table):
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
-def _get_table_metadata(schema, table):
+def get_table_metadata(schema, table):
     table_obj = _get_table(schema=schema, table=table)
     comment = table_obj.comment
     return json.loads(comment) if comment else {}
