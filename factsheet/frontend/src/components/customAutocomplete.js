@@ -128,7 +128,6 @@ export default function CustomAutocomplete(parameters) {
     value[objIndex].id = updatedLabel;
     value[objIndex].name = updatedLabel;
   }
-  console.log(parameters.optionsSet);
   return (
     <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete

@@ -328,7 +328,6 @@ function Factsheet(props) {
 
   const handleDOI = e => {
     setDOI(e.target.value);
-    console.log(e.target.value);
     factsheetObjectHandler('doi', e.target.value);
   };
 
@@ -975,12 +974,10 @@ const scenario_region = [
   };
 
   const institutionHandler = (institutionList) => {
-    console.log(institutionList);
     setSelectedInstitution(institutionList);
   };
 
   const fundingSourceHandler = (fundingSourceList) => {
-    console.log(fundingSourceList);
     setSelectedFundingSource(fundingSourceList);
   };
 
