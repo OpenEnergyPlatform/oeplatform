@@ -117,32 +117,29 @@ def create_factsheet(request, *args, **kwargs):
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
-            scenario_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario/" + clean_name(item["acronym"]))
+            scenario_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario/" + clean_name(item["acronym"])) 
             oekg.add(( study_URI, OEKG["has_scenario"], scenario_URI ))
             oekg.add(( scenario_URI, RDFS.label, Literal(item["acronym"])))
             oekg.add(( scenario_URI, OEKG["full_name"], Literal(item["name"])))
             oekg.add(( scenario_URI, DC.abstract, Literal(item["abstract"]) ))
             oekg.add(( scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]) ))
 
+            print("--------")
             if 'regions' in item:
                 for region in item['regions']:
-                    region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + clean_name(region['name']))
-                    oekg.add(( region_URI, RDF.type, OEO.BFO_0000006))
-                    oekg.add(( region_URI, RDFS.label, Literal(region['name'])))
+                    print(region['iri'])
+                    print("--------")
+                    region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
                     oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
                 
             if 'interacting_regions' in item:
                 for interacting_region in item['interacting_regions']:
-                    interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/interactin_region/" + clean_name(interacting_region['name']))
-                    oekg.add(( interacting_regions_URI, RDF.type, OEO.OEO_00020036))
-                    oekg.add(( interacting_regions_URI, RDFS.label, Literal(interacting_region['name'])))
+                    interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
                     oekg.add(( scenario_URI, OEO.OEO_00000522, interacting_regions_URI ))
             
             if 'scenario_years' in item:
                 for scenario_year in item['scenario_years']:
-                    scenario_years_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario_year/" + clean_name(scenario_year['name']))
-                    oekg.add(( scenario_years_URI, RDF.type, OEO.OEO_00020097))
-                    oekg.add(( scenario_years_URI, RDFS.label, Literal(scenario_year['name'])))
+                    scenario_years_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + scenario_year['iri'])
                     oekg.add(( scenario_URI, OEO.OEO_00000522, scenario_years_URI ))
 
             if 'keywords' in item:
@@ -177,16 +174,12 @@ def create_factsheet(request, *args, **kwargs):
 
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
-            funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
-            oekg.add(( funding_source_URI, DC.title,  Literal(item['name'])))
+            funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
 
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
-            contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((contact_person_URI, RDF.type, OEO.OEO_00000107))
-            oekg.add((contact_person_URI, RDFS.label, Literal(item['name'])))
+            contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_0000050, contact_person_URI))
 
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
@@ -221,23 +214,17 @@ def create_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
-            model_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((model_URI, RDF.type, OEO.OEO_00000274))
-            oekg.add((model_URI, RDFS.label, Literal(item['name'])))
+            model_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OBO.RO_0000057, model_URI))
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
-            framework_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((framework_URI, RDF.type, OEO.OEO_00000172))
-            oekg.add((framework_URI, RDFS.label, Literal(item['name'])))
+            framework_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OBO.RO_0000057, framework_URI))
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
-            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + clean_name(item['name']))
-            oekg.add((author_URI, RDF.type, OEO.OEO_00000064))
-            oekg.add((author_URI, RDFS.label, Literal(item['name'])))
+            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
@@ -346,21 +333,21 @@ def update_factsheet(request, *args, **kwargs):
 
             if 'regions' in item:
                 for region in item['regions']:
-                    region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + clean_name(region['name']))
+                    region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
                     oekg.add(( region_URI, RDF.type, OEO.BFO_0000006))
                     oekg.add(( region_URI, RDFS.label, Literal(region['name'])))
                     oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
                 
             if 'interacting_regions' in item:
                 for interacting_region in item['interacting_regions']:
-                    interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/interactin_region/" + clean_name(interacting_region['name']))
+                    interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
                     oekg.add(( interacting_regions_URI, RDF.type, OEO.OEO_00020036))
                     oekg.add(( interacting_regions_URI, RDFS.label, Literal(interacting_region['name'])))
                     oekg.add(( scenario_URI, OEO.OEO_00000522, interacting_regions_URI ))
             
             if 'scenario_years' in item:
                 for scenario_year in item['scenario_years']:
-                    scenario_years_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario_year/" + clean_name(scenario_year['name']))
+                    scenario_years_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + scenario_year['iri'])
                     oekg.add(( scenario_years_URI, RDF.type, OEO.OEO_00020097))
                     oekg.add(( scenario_years_URI, RDFS.label, Literal(scenario_year['name'])))
                     oekg.add(( scenario_URI, OEO.OEO_00000522, scenario_years_URI ))
@@ -435,9 +422,7 @@ def update_factsheet(request, *args, **kwargs):
             oekg.remove((s, p, o))
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
-            funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add(( funding_source_URI, RDF.type, OEO.OEO_00090001 ))
-            oekg.add(( funding_source_URI, RDFS.label, Literal(item['name']) ))
+            funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
 
         for s, p, o in oekg.triples((study_URI, DC.abstract, None)):
@@ -448,9 +433,7 @@ def update_factsheet(request, *args, **kwargs):
             oekg.remove((s, p, o))
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
-            contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((contact_person_URI, RDF.type, OEO.OEO_00000107))
-            oekg.add((contact_person_URI, RDFS.label, Literal(item['name'])))
+            contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000508, contact_person_URI))
 
         for s, p, o in oekg.triples((old_Study_URI, OEO["based_on_sector_division"], None)):
@@ -499,14 +482,14 @@ def update_factsheet(request, *args, **kwargs):
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
-            model_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+            model_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((model_URI, RDF.type, OEO.OEO_00000274))
             oekg.add((model_URI, RDFS.label, Literal(clean_name(item['name']))))
             oekg.add((study_URI, OBO.RO_0000057, model_URI))
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
-            framework_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
+            framework_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((framework_URI, RDF.type, OEO.OEO_00000172))
             oekg.add((framework_URI, RDFS.label, Literal(clean_name(item['name']))))
             oekg.add((study_URI, OBO.RO_0000057, framework_URI))
@@ -516,9 +499,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
-            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + clean_name(item['name']))
-            oekg.add((author_URI, RDF.type, OEO.OEO_00000064))
-            oekg.add((author_URI, RDFS.label, Literal(clean_name(item['name']))))
+            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
