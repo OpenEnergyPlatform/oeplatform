@@ -367,10 +367,10 @@ def fix_metadata(metadata, table_name):
         mov(m, "licenses/%s/attribution/")
     for m in find(metadata, f"^licenses/{idx}/url/$"):
         mov(m, "licenses/%s/path/")
-    for m in find(metadata, f"^licenses/{idx}/version/$"):
-        mov(m, "licenses/%s/title/")
     for m in find(metadata, f"^licenses/{idx}/id/$"):
-        mov(m, "licenses/%s/name/", drop)
+        mov(m, "licenses/%s/title/", drop)
+    for m in find(metadata, f"^licenses/{idx}/version/$"):
+        mov(m, "licenses/%s/title/", drop)
 
     for m in find(metadata, "^changes/(comment|date|mail|name)/$"):
         mov(m, "contributors/0/%s/")
