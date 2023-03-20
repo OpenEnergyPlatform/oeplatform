@@ -16,6 +16,10 @@ from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 from django.core.handlers.wsgi import WSGIRequest as request
 
+from datetime import date
+
+
+
 
 class ProfileView(View):
     def get(self, request, user_id):
@@ -26,7 +30,6 @@ class ProfileView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        current_site = Site.objects.get_current()
 
         from rest_framework.authtoken.models import Token
 
@@ -37,7 +40,8 @@ class ProfileView(View):
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
         return render(
-            request, "login/profile.html", {"profile_user": user, "token": token, "domain": current_site}
+            request, "login/profile.html", {"profile_user": user, "token": token
+                                            }
         )
 
 

@@ -13,7 +13,8 @@ class CreateUserForm(UserCreationForm):
 
     class Meta:
         model = OepUser
-        fields = ("name", "affiliation", "email", "profile_img", "password1", "password2")
+        fields = ("name", "username", "location", "affiliation", "email", "work", "linkedin", "twitter", "facebook",
+                  "profile_img", "password1", "password2")
 
     def save(self, commit=True):
         user = super(CreateUserForm, self).save(commit=commit)
@@ -38,7 +39,8 @@ class EditUserForm(UserChangeForm):
 
     class Meta:
         model = OepUser
-        fields = ("profile_img", "name", "email", "affiliation", "description", )
+        fields = ("profile_img", "name", "username", "location", "email", "work", "linkedin", "twitter", "facebook",
+                  "affiliation", "description", )
 
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)

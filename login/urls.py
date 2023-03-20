@@ -1,4 +1,6 @@
 from django.conf.urls import include, url
+from django.urls import re_path
+
 from django.contrib.auth.views import (
     PasswordResetCompleteView,
     PasswordResetConfirmView,
