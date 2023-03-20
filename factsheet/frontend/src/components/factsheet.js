@@ -83,7 +83,8 @@ function Factsheet(props) {
   const [factsheetObject, setFactsheetObject] = useState({});
   const [factsheetName, setFactsheetName] = useState(id !== 'new' ? '' : '');
   const [acronym, setAcronym] = useState(id !== 'new' ? fsData.acronym : '');
-  const [prevAcronym, setPrevAcronym] = useState(id !== 'new' ? fsData.acronym : '');
+  const [uid, setUID] = useState(id !== 'new' ? fsData.uid : '');
+  const [prevUID, setPrevUID] = useState(id !== 'new' ? fsData.acronym : '');
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
@@ -98,7 +99,8 @@ function Factsheet(props) {
   const [scenarioYears, setScenarioYears] = useState([]);
   const [models, setModels] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
-  
+
+  console.log(fsData)
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -134,7 +136,6 @@ function Factsheet(props) {
           </span>
         </span>
 
-  
   const [sectors, setSectors] = useState(sectors_json);
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
@@ -160,6 +161,7 @@ function Factsheet(props) {
     output_datasets: [],
     }
   ]);
+  console.log(fsData);
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
@@ -192,16 +194,16 @@ function Factsheet(props) {
       setEnergyCarries(data.energy_carriers);
       });
   }, []);
-  
-  
 
   const handleSaveFactsheet = () => {
     factsheetObjectHandler('name', factsheetName);
     if (acronym !== '') {
       if (id === 'new' && !isCreated) {
+        const new_uid = uuid()
         axios.post(conf.toep + 'factsheet/add/',
         {
           id: id,
+          uid: new_uid,
           study_name: studyName,
           name: factsheetName,
           acronym: acronym,
@@ -228,22 +230,23 @@ function Factsheet(props) {
           frameworks: JSON.stringify(selectedFrameworks),
         }).then(response => {
         if (response.data === 'Factsheet saved') {
-          navigate('/factsheet/fs/' + acronym);
+          navigate('/factsheet/fs/' + new_uid);
           setIsCreated(true);
           setOpenSavedDialog(true);
-          setPrevAcronym(acronym);
+          setUID(new_uid);
         }
         else if (response.data === 'Factsheet exists') {
           setOpenExistDialog(true);
         }
       });
-  
       } else {
-        axios.get(conf.toep + `factsheet/get/`, { params: { id: prevAcronym } }).then(res => {
+        console.log(uid);
+        axios.get(conf.toep + `factsheet/get/`, { params: { id: uid } }).then(res => {
           axios.post(conf.toep + 'factsheet/update/',
           {
             fsData: res.data,
             id: id,
+            uid: uid,
             study_name: studyName,
             name: factsheetName,
             acronym: acronym,
@@ -270,7 +273,7 @@ function Factsheet(props) {
             energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
           }).then(response => {
             if (response.data === "factsheet updated!") {
-              setPrevAcronym(acronym);
+              setUID(uid);
               setOpenUpdatedDialog(true);
             }
             else if (response.data === 'Factsheet exists') {
@@ -1623,7 +1626,7 @@ const scenario_region = [
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom component="div">
                     <b>Study name: </b>
-                      {studyName}
+                      {studyName !== undefined && studyName}
                     </Typography>
                     {/* <Typography variant="subtitle2" gutterBottom component="div">
                     <b>Acronym: </b>
@@ -1637,30 +1640,30 @@ const scenario_region = [
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom component="div">
                     <b>Abstract: </b>
-                       {abstract}
+                       {abstract !== undefined && abstract}
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom component="div">
                     <b>Study report information: </b>
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Title: </b>
-                      {report_title}
+                      {report_title !== undefined && report_title}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>DOI: </b>
-                       {doi}
+                       {doi !== undefined && doi}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Link: </b>
-                      {link_to_study}
+                      {link_to_study !== undefined && link_to_study}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Date of publication: </b>
-                       {date_of_publication != '01-01-1900' && date_of_publication.toString()}
+                       {date_of_publication !== undefined && date_of_publication.toString()}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Place of publication: </b>
-                       {place_of_publication}
+                       {place_of_publication !== undefined && place_of_publication}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Authors:  </b>  

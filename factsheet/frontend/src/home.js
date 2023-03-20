@@ -74,7 +74,7 @@ function Home(props) {
       return fs.map(item =>
           (<Grid item xs={3}>
             <CustomCard
-              id={item.acronym}
+              id={item.uid}
               study_name={item.study_name}
               acronym={item.acronym}
               abstract={item.abstract}
