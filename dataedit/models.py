@@ -12,10 +12,12 @@ from django.db.models import (
 )
 from django.utils import timezone
 
+
 # Create your models here.
 
 
 class TableRevision(models.Model):
+    user = ForeignKey('login.myuser', on_delete=models.CASCADE, null=True, related_name='table_revisions')
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
     date = DateTimeField(max_length=1000, null=False, default=timezone.now)
@@ -39,6 +41,7 @@ class Schema(Tagable):
 
 class Table(Tagable):
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
+    user = models.ForeignKey('login.myuser', on_delete=models.CASCADE, null=True)
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
     # due to oem string (json) parsing like when reading the oem form comment on table

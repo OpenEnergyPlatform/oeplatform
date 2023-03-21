@@ -44,20 +44,18 @@ urlpatterns = [
     ),
     url("^", include("django.contrib.auth.urls")),
     url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
-    url(
-        r"^profile/password_change$",
-        views.OEPPasswordChangeView.as_view(),
-        name="input",
-    ),
-    url(
-        r"^profile/(?P<user_id>[\d]+)/edit$", views.EditUserView.as_view(), name="input"
-    ),
+    url(r"^profile/(?P<user_id>[\d]+)/tables$", views.ProfileView.as_view(), name="input"),
+    url(r"^profile/(?P<user_id>[\d]+)/review$", views.ReviewsView.as_view(), name="reviews"),
+    url(r"^profile/(?P<user_id>[\d]+)/settings$", views.SettingsView.as_view(), name="settings"),
+    url(r"^profile/(?P<user_id>[\d]+)/password_change$", views.OEPPasswordChangeView.as_view(), name="input",
+        ),
     url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
     url(
         r"^groups/new/$",
         views.GroupCreate.as_view(),
         name="input",
     ),
+    url(r"^profile/(?P<user_id>[\d]+)/edit$", views.EditUserView.as_view(), name="edit"),
     url(
         r"^groups/(?P<group_id>[\w\d_\s]+)/edit$",
         views.GroupCreate.as_view(),

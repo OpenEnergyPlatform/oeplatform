@@ -7,59 +7,28 @@
         $("#" + divId).toggle();
     }
 </script>
-<table class="table">
+    <br>
+    {% if profile_user %}
+        <a href="{{profile_user.id}}/tables">Tables</a>
+    {% endif%}
+    {% if profile_user %}
+        <a href="{{profile_user.id}}/review">Reviews</a>
+    {% endif%}
+    {% if request.user.is_authenticated and profile_user == request.user %}
+<a href="{% url 'settings' profile_user.id %}">Settings</a>
+    {% endif%}
 
-    <tr>
-        <th style="width:20%"> Affiliation: </th>
-        <td>
-            {% if profile_user.affiliation %}
-                {{ profile_user.affiliation }}
-            {% elif profile_user == request.user %}
-                <a href="{{profile_user.id}}/edit">Add your affiliation</a>
-            {% else %}
-                -
-            {% endif %}
-        </td>
-    </tr>
-    <tr>
-        <th> Description: </th>
-        <td> {% if profile_user.description %}
-                {{ profile_user.description }}
-            {% elif profile_user == request.user %}
-                <a href="{{profile_user.id}}/edit">Add a description</a>
-            {% else %}
-                -
-            {% endif %} </td>
-    </tr>
-</table>
-{% if profile_user == request.user %}
-<h2>Your Security Information</h2>
-<table class="table">
 
-        <tr>
-            <th style="width:20%"> E-Mail: </th>
-            <td> {{ profile_user.email }} </td>
-        </tr>
-        <tr>
-            <th> API-Token: </th>
-            <td>
-                <a id="toggler" href="#" onclick="toggler('token');">Show token</a>
-                <div style="display:none" id="token">
-                {% if token %}
-                     {{ token }}
-                {% endif %}
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <th> Password </th>
-            <td>
-                <a href="password_change">Change your password</a>
-            </td>
-        </tr>
-</table>
-{% endif %}
+    {% for table in tables %}
+        <a href="/view/{{ table.schema.name }}/{{ table.name }}">{{ table.name }}</a>
+		<li>{{ table.schema }}</li>
+		<li>{{ table.created }}</li>
+	{% empty %}
+		<li>No tables found for this user.</li>
+	{% endfor %}
 {% endblock %}
+
+
 {% block main-right-sidebar-content %}
     <br>
     <div>
@@ -74,7 +43,7 @@
     <td> {% if profile_user.username %}
                 {{ profile_user.username }}
             {% else %}
-                <a href="{{profile_user.id}}/edit">Add username</a>
+                <p>Username</p>
             {% endif %} </td>
     <br>
     <br>
@@ -83,14 +52,14 @@
     <td> {% if profile_user.work %}
                 {{ profile_user.work }}
             {% else %}
-                <a href="{{profile_user.id}}/edit">Add profession</a>
+                <p>Profession</p>
             {% endif %} </td>
     <br>
     <td> {% if profile_user.location %}
                 {{ profile_user.location }}
             {% else %}
-                <a href="{{profile_user.id}}/edit">Add location </a>
-            {% endif %} </td>
+    <p>Location</p>
+    {% endif %} </td>
     <br>
     <td> {% if profile_user == request.user %}
             <th style="width:20%"> E-Mail: </th>
@@ -107,26 +76,15 @@
     <td> {% if profile_user.facebook %}
         <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
             {% else %}
-                <a href="{{profile_user.id}}/edit">Add Facebook page</a>
+                <p> Facebook</p>
             {% endif %} </td>
     <br>
     <td> {% if profile_user.twitter %}
         <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
             {% else %}
-                <a href="{{profile_user.id}}/edit">Add Twitter page</a>
+                <p> Twitter</p>
             {% endif %} </td>
     <br>
+    <hr>
 
-    {% if request.user.is_authenticated and request.user == user%}
-        <hr>
-        <h3>Manage Profile</h3>
-        <div style="overflow: hidden;">
-            <a href="{{ request.user.id }}/edit" class="btn btn-secondary">Edit</a>
-        </div>
-        <hr>
-        <h3>Manage Groups</h3>
-        <div style="overflow: hidden;">
-            <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
-        </div>
-    {% endif %}
 {% endblock %}

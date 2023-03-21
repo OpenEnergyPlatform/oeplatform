@@ -11,6 +11,8 @@ from django.views.generic.edit import UpdateView
 import login.models as models
 from django.shortcuts import render, get_object_or_404
 from django.views import View
+
+from dataedit.models import TableRevision, Table
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
@@ -19,9 +21,29 @@ from django.core.handlers.wsgi import WSGIRequest as request
 from datetime import date
 
 
-
-
 class ProfileView(View):
+    def get(self, request, user_id):
+        """
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
+        user = get_object_or_404(OepUser, pk=user_id)
+        tables = Table.objects.filter(user=user)
+        print(tables)
+
+        return render(
+            request, "login/profile.html", {"tables": tables, "profile_user": user})
+
+
+class ReviewsView(View):
+    def get(self, request, user_id):
+        return render(request, "login/user_review.html")
+
+
+class SettingsView(View):
     def get(self, request, user_id):
         """
         Load the user identified by user_id and is OAuth-token.
@@ -40,9 +62,7 @@ class ProfileView(View):
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
         return render(
-            request, "login/profile.html", {"profile_user": user, "token": token
-                                            }
-        )
+            request, "login/user_settings.html", {"profile_user": user, "token": token})
 
 
 class GroupManagement(View, LoginRequiredMixin):
