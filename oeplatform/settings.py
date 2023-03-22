@@ -30,6 +30,7 @@ except ImportError:
 
 INSTALLED_APPS = (
     "django.contrib.admin",
+    "django.contrib.sites.models.Site",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
