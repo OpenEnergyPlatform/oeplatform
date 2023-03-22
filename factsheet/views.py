@@ -19,17 +19,25 @@ import os
 from oeplatform.settings import ONTOLOGY_FOLDER
 from datetime import date
 
+import sys
+
 
 versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
 file = "reasoned-oeo-full.owl"
+#file = "oeo-full.owl"
 Ontology_URI = os.path.join(path, file)
 
 
-print(Ontology_URI)
+sys.path.append(path)
+from owlready2 import get_ontology
+
+
 oeo = Graph()
 oeo.parse(Ontology_URI)
+
+oeo_owl = get_ontology(Ontology_URI).load()
 
 
 query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
@@ -114,9 +122,9 @@ def create_factsheet(request, *args, **kwargs):
             oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
         if report_title != '':
             oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
-        if date_of_publication != '01-01-1900':
+        if date_of_publication != '01-01-1900' and date_of_publication != '':
             oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication) ))
-        if place_of_publication != '01-01-1900' and place_of_publication != '':
+        if place_of_publication:
             oekg.add(( study_URI, OEKG["place_of_publication"], Literal(place_of_publication) ))
         if link_to_study != '':
             oekg.add(( study_URI, OEKG["link_to_study"], Literal(link_to_study) ))
@@ -192,32 +200,22 @@ def create_factsheet(request, *args, **kwargs):
 
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
-            sector_divisions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((sector_divisions_URI, RDF.type, OEO.OEO_00000368))
-            oekg.add((sector_divisions_URI, RDFS.label, Literal(item['name'])))
+            sector_divisions_URI = URIRef(item['class'])
             oekg.add((study_URI, OEO["based_on_sector_division"], sector_divisions_URI))
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
-            sector_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((sector_URI, RDF.type, OEO.OEO_00000367))
-            oekg.add((sector_URI, RDFS.label, Literal(item["label"])))
+            sector_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO.OEO_00000505, sector_URI))
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
-            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(item["label"])))
-            oekg.add((energy_carriers_URI, OEKG["path_value"], Literal(item["value"])))
+            energy_carriers_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item["label"])))
-            oekg.add((energy_transformation_processes_URI, OEKG["path_value"], Literal(item["value"])))
+            energy_transformation_processes_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         _models = json.loads(models) if models is not None else []
@@ -232,7 +230,7 @@ def create_factsheet(request, *args, **kwargs):
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
-            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + item['iri'])
+            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
@@ -439,9 +437,7 @@ def update_factsheet(request, *args, **kwargs):
             oekg.remove((s, p, o))
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
-            sector_divisions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item['name']))
-            oekg.add((sector_divisions_URI, RDF.type, OEO.OEO_00000368))
-            oekg.add((sector_divisions_URI, RDFS.label, Literal(item['name'])))
+            sector_divisions_URI = URIRef(item['class'])
             oekg.add((study_URI, OEO["based_on_sector_division"], sector_divisions_URI))
 
         for s, p, o in oekg.triples((study_URI, OEO.OEO_00000505, None)):
@@ -449,9 +445,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
-            sector_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((sector_URI, RDF.type, OEO.OEO_00000367))
-            oekg.add((sector_URI,RDFS.label, Literal(item["label"])))
+            sector_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO.OEO_00000505, sector_URI))
 
         for s, p, o in oekg.triples((study_URI, OEO["covers_energy_carrier"], None)):
@@ -459,10 +453,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
-            energy_carriers_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((energy_carriers_URI, RDF.type, OEO.OEO_00020039))
-            oekg.add((energy_carriers_URI, RDFS.label, Literal(item["label"])))
-            oekg.add((energy_carriers_URI, OEKG["path_value"], Literal(item["value"])))
+            energy_carriers_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
         for s, p, o in oekg.triples((study_URI, OEO["covers_transformation_processes"], None)):
@@ -470,10 +461,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(item["label"]))
-            oekg.add((energy_transformation_processes_URI, RDF.type, OEO.OEO_00020003))
-            oekg.add((energy_transformation_processes_URI, RDFS.label, Literal(item["label"])))
-            oekg.add((energy_transformation_processes_URI, OEKG["path_value"], Literal(item["value"])))
+            energy_transformation_processes_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
         for s, p, o in oekg.triples((study_URI, OBO.RO_0000057, None)):
@@ -498,7 +486,7 @@ def update_factsheet(request, *args, **kwargs):
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
-            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/authors/" + item['iri'])
+            author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
@@ -531,7 +519,7 @@ def factsheet_by_id(request, *args, **kwargs):
     study_name = ''
     abstract = ''
     report_title = ''
-    date_of_publication = ''
+    date_of_publication = '01-01-1900'
     place_of_publication = ''
     link_to_study = ''
     report_doi = ''
@@ -602,18 +590,16 @@ def factsheet_by_id(request, *args, **kwargs):
 
     factsheet['energy_carriers'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
-        label = oekg.value(o, RDFS.label)
-        path_value = oekg.value(o, OEKG["path_value"])
+        label = oeo.value(o, RDFS.label)
+        class_label = oeo.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_carriers'].append({ "value": path_value, "label":label })
+            factsheet['energy_carriers'].append({ "value": label, "label":label, "class": o })
 
     factsheet['energy_transformation_processes'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )):
-        label = oekg.value(o, RDFS.label)
-        path_value = oekg.value(o, OEKG["path_value"])
-       
+        label = oeo.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_transformation_processes'].append({ "value": path_value, "label":label })
+            factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o })
 
     factsheet['authors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000506, None )):
@@ -857,116 +843,148 @@ def get_all_factsheets_as_json_ld(request, *args, **kwargs):
 
     return response
 
+def get_all_sub_classes(cls, visited=None):
+    if visited is None:
+        visited = set()
+
+    visited.add(cls.label.first())
+
+    dict = {"value": cls.label.first(), "label": cls.label.first(), "class": cls.iri}
+    childCount = len(list(cls.subclasses()))
+    subclasses = cls.subclasses()
+
+    if childCount > 0:
+      dict["children"] = [get_all_sub_classes(subclass, visited) for subclass in subclasses if subclass.label.first() not in visited ]
+    return dict
+
 
 @csrf_exempt
 def populate_factsheets_elements(request, *args, **kwargs):
+
+    energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039")
+    energy_carriers = get_all_sub_classes(energy_carrier_class)
+
+    energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003")
+    energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class)
+    
     elements = {}
+    elements['energy_carriers'] = [energy_carriers]
+    elements['energy_transformation_processes'] = [energy_transformation_processes]
 
-    energy_transformation_processes = []
-    for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
-        sl = oeo.value(s, RDFS.label)
-        parent = {
-            'value': str(sl),
-            'label': sl
-        }
-        children = []
-        for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
-            sl1 = oeo.value(s1, RDFS.label)
-            children2 = []
-            for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
-                sl2 = oeo.value(s2, RDFS.label)
-                children3 = []
-                for s3, p, o in oeo.triples(( None, RDFS.subClassOf, s2 )):
-                    sl3 = oeo.value(s3, RDFS.label)
-                    children3.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2) + "^^" + str(sl3),
-                        'label': sl3
-                    })
+    # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
+    #     sl = oeo.value(s, RDFS.label)
+    #     parent = {
+    #         'value': str(sl),
+    #         'label': sl,
+    #         'class': s
+    #     }
+    #     children = []
+    #     for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
+    #         sl1 = oeo.value(s1, RDFS.label)
+    #         children2 = []
+    #         for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
+    #             sl2 = oeo.value(s2, RDFS.label)
+    #             children3 = []
+    #             for s3, p, o in oeo.triples(( None, RDFS.subClassOf, s2 )):
+    #                 sl3 = oeo.value(s3, RDFS.label)
+    #                 children3.append({
+    #                     'value': str(sl) + str(sl1) + str(sl2) + str(sl3),
+    #                     'label': sl3,
+    #                     'class': s3
+    #                 })
 
-                if children3 != []:
-                    children2.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
-                        'label': sl2,
-                        'children': children3
-                    })
-                else:
-                    children2.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
-                        'label': sl2,
-                    })
-
-
-            if children2 != []:
-                children.append({
-                'value': str(sl) + "^^" + str(sl1),
-                'label': sl1,
-                'children': children2
-                })
-            else:
-                children.append({
-                'value': str(sl) + "^^" + str(sl1),
-                'label': sl1
-                })
+    #             if children3 != []:
+    #                 children2.append({
+    #                     'value': str(sl) + str(sl1) + str(sl2),
+    #                     'label': sl2,
+    #                     'class': s2,
+    #                     'children': children3
+    #                 })
+    #             else:
+    #                 children2.append({
+    #                     'value': str(sl) + str(sl1) + str(sl2),
+    #                     'class': s2,
+    #                     'label': sl2,
+    #                 })
 
 
-        if children != []:
-            parent['children'] = children
-
-        energy_transformation_processes.append(parent)
-    elements['energy_transformation_processes'] = energy_transformation_processes
-
-    energy_carriers = []
-    for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020039 )):
-        sl = oeo.value(s, RDFS.label)
-        parent = {
-            'value': str(sl),
-            'label': sl
-        }
-        children = []
-        for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
-            sl1 = oeo.value(s1, RDFS.label)
-            children2 = []
-            for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
-                sl2 = oeo.value(s2, RDFS.label)
-                children3 = []
-                for s3, p, o in oeo.triples(( None, RDFS.subClassOf, s2 )):
-                    sl3 = oeo.value(s3, RDFS.label)
-                    children3.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2) + "^^" + str(sl3),
-                        'label': sl3
-                    })
-
-                if children3 != []:
-                    children2.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
-                        'label': sl2,
-                        'children': children3
-                    })
-                else:
-                    children2.append({
-                        'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
-                        'label': sl2,
-                    })
+    #         if children2 != []:
+    #             children.append({
+    #             'value': str(sl) + str(sl1),
+    #             'label': sl1,
+    #             'class': s1,
+    #             'children': children2
+    #             })
+    #         else:
+    #             children.append({
+    #             'value': str(sl) + str(sl1),
+    #             'class': s1,
+    #             'label': sl1
+    #             })
 
 
-            if children2 != []:
-                children.append({
-                'value': str(sl) + "^^" + str(sl1),
-                'label': sl1,
-                'children': children2
-                })
-            else:
-                children.append({
-                'value': str(sl) + "^^" + str(sl1),
-                'label': sl1
-                })
+    #     if children != []:
+    #         parent['children'] = children
+
+    #     energy_transformation_processes.append(parent)
+
+    
+
+    # energy_carriers = []
+    # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020039 )):
+    #     sl = oeo.value(s, RDFS.label)
+    #     parent = {
+    #         'value': str(sl),
+    #         'label': sl,
+    #         'class': s
+    #     }
+    #     children = []
+    #     for s1, p, o in oeo.triples(( None, RDFS.subClassOf, s )):
+    #         sl1 = oeo.value(s1, RDFS.label)
+    #         children2 = []
+    #         for s2, p, o in oeo.triples(( None, RDFS.subClassOf, s1 )):
+    #             sl2 = oeo.value(s2, RDFS.label)
+    #             children3 = []
+    #             for s3, p, o in oeo.triples(( None, RDFS.subClassOf, s2 )):
+    #                 sl3 = oeo.value(s3, RDFS.label)
+    #                 children3.append({
+    #                     'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2) + "^^" + str(sl3),
+    #                     'label': sl3,
+    #                     'class': s3
+    #                 })
+
+    #             if children3 != []:
+    #                 children2.append({
+    #                     'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
+    #                     'label': sl2,
+    #                     'class': s2,
+    #                     'children': children3
+    #                 })
+    #             else:
+    #                 children2.append({
+    #                     'value': str(sl) + "^^" + str(sl1) + "^^" + str(sl2),
+    #                     'label': sl2,
+    #                 })
 
 
-        if children != []:
-            parent['children'] = children
+    #         if children2 != []:
+    #             children.append({
+    #             'value': str(sl) + "^^" + str(sl1),
+    #             'label': sl1,
+    #             'class': s1,
+    #             'children': children2
+    #             })
+    #         else:
+    #             children.append({
+    #             'value': str(sl) + "^^" + str(sl1),
+    #             'class': s1,
+    #             'label': sl1
+    #             })
 
-        energy_carriers.append(parent)
-    elements['energy_carriers'] = energy_carriers
+    #     if children != []:
+    #         parent['children'] = children
+
+    #     energy_carriers.append(parent)
 
 
     response = JsonResponse(elements, safe=False, content_type='application/json')

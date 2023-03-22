@@ -10,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import CustomSwap from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import Scenario from './scenario.js';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
 import Snackbar from '@mui/material/Snackbar';
@@ -43,9 +44,10 @@ import study_keywords from '../data/study_keywords.json';
 import scenario_years from '../data/scenario_years.json';
 import {sectors_json} from '../data/sectors.js';
 import sector_divisions from '../data/sector_divisions.json';
-import ShareIcon from '@mui/icons-material/Share';
-import {energy_carriers_json} from '../data/energy_carriers.js';
 import { Route, Routes, useNavigate } from 'react-router-dom';
+
+import energyTransformations from '../data/energyTransformations';
+
 
 import Chip from '@mui/material/Chip';
 
@@ -99,8 +101,6 @@ function Factsheet(props) {
   const [scenarioYears, setScenarioYears] = useState([]);
   const [models, setModels] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
-
-  console.log(fsData)
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -161,12 +161,11 @@ function Factsheet(props) {
     output_datasets: [],
     }
   ]);
-  console.log(fsData);
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
-  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState(id !== 'new' ? [] : []);
+  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState([]);
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
-  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState(id !== 'new' ? [] : []);
+  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState([]);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
@@ -188,10 +187,33 @@ function Factsheet(props) {
     return data;
   };
 
+  const getNodeIds = (nodes) => {
+    let ids = [];
+  
+    nodes?.forEach(({ value, children }) => {
+      ids = [...ids, value, ...getNodeIds(children)];
+    });
+  
+    return ids;
+  };
+
   useEffect(() => {
     populateFactsheetElements().then((data) => {
       setEnergyTransformationProcesses(data.energy_transformation_processes);
       setEnergyCarries(data.energy_carriers);
+
+      let energy_carriers_ids = [];
+      data.energy_carriers.forEach(({ value, children }) => {
+        energy_carriers_ids = [...energy_carriers_ids, value, ...getNodeIds(children)];
+      });
+      setExpandedEnergyCarriers(energy_carriers_ids);
+
+      let energy_transformation_processes_ids = [];
+      data.energy_transformation_processes.forEach(({ value, children }) => {
+        energy_transformation_processes_ids = [...energy_transformation_processes_ids, value, ...getNodeIds(children)];
+      });
+      setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
+
       });
   }, []);
 
@@ -405,7 +427,6 @@ function Factsheet(props) {
 
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
-
 
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
@@ -1007,18 +1028,19 @@ const scenario_region = [
 
   const energyCarriersHandler = (energyCarriersList, nodes) => {
     const zipped = []
-    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label}));
+    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
     setSelectedEnergyCarriers(zipped);
-
   };
+
 
   const expandedEnergyCarriersHandler = (expandedEnergyCarriersList) => {
     setExpandedEnergyCarriers(expandedEnergyCarriersList);
   };
 
-  const sectorsHandler = (sectorsList) => {
+  const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-    sectorsList.map((v) => zipped.push({ "value": v, "label": v }));
+    sectorsList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
+    console.log(zipped);
     setSelectedSectors(zipped);
   };
 
@@ -1030,7 +1052,7 @@ const scenario_region = [
 
   const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
     const zipped = []
-    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label}));
+    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
     setSelectedEnergyTransformationProcesses(zipped);
   };
 
@@ -1242,7 +1264,7 @@ const scenario_region = [
                     alignItems: 'flex-start',
                     flexWrap: 'wrap',
                 }}>
-                <CustomAutocomplete showSelectedElements={true} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
                 <div style={{ marginTop: '30px' }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1261,11 +1283,11 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="280px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'60px', marginBottom:'10px' }}>
+              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
               </Typography>
-              <div style={{ marginTop: "20px" }}>
+              <div style={{ marginTop: "10px" }}>
                 <FormGroup>
                     <div>
                       {
@@ -1659,7 +1681,7 @@ const scenario_region = [
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Date of publication: </b>
-                       {date_of_publication !== undefined && date_of_publication.toString()}
+                       {date_of_publication !== '01-01-1900' && date_of_publication.toString()}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                     <b>Place of publication: </b>

@@ -282,9 +282,10 @@ export default function CustomAutocomplete(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip key={v.id} label={v.name}  deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
+          <Chip size='small' key={v.id} label={v.name} deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
         ))}
       </Box>}
     </Box>
   );
+  
 }
