@@ -397,6 +397,9 @@ def fix_metadata(metadata, table_name):
     for m in find(metadata, f"^toDo/{idx}/$"):
         mov(m, "description/", merge)
 
+    for m in find(metadata, f"^name/{idx}/$"):
+        mov(m, "name/", drop)
+
     for m in find(metadata, "^temporal/timeseries/([^/0-9]+)/$"):
         mov(m, "temporal/timeseries/0/%s/")
     for m in find(metadata, "^temporal/(start|end|resolution)/$"):
