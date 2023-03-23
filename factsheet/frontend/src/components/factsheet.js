@@ -982,14 +982,12 @@ const scenario_region = [
   ];
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
-  
     console.log(sectorDivisionsList);
+    
     setSelectedSectorDivisions(sectorDivisionsList);
-    const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
-    console.log(sectors);
-    const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
-    console.log(sectorsBasedOnDivisions);
-    setFilteredSectors(sectorsBasedOnDivisions);
+    //const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
+    //const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
+    //setFilteredSectors(sectorsBasedOnDivisions);
   };
 
   const authorsHandler = (authorsList) => {

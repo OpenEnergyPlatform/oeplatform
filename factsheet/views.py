@@ -430,6 +430,7 @@ def update_factsheet(request, *args, **kwargs):
 
         for s, p, o in oekg.triples((study_URI, OEO["based_on_sector_division"], None)):
             oekg.remove((s, p, o))
+
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
             sector_divisions_URI = URIRef(item['class'])
@@ -565,16 +566,16 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet['sector_divisions'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["based_on_sector_division"], None )):
         label = oeo.value(o, RDFS.label)
-        class_iri = oeo.value(o, RDF.type)
+        class_iri = o
         if label != None:
-            factsheet['sector_divisions'].append({ 'id': label, 'name': label, 'class': class_iri })
+            factsheet['sector_divisions'].append({ 'value': label, 'name': label, 'class': class_iri })
 
     factsheet['sectors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000505, None )):
         label = oeo.value(o, RDFS.label)
-        class_iri = oeo.value(o, RDF.type)
+        class_iri = o
         if label != None:
-            factsheet['sectors'].append({ "value": label, "label":label, 'class': class_iri })
+            factsheet['sectors'].append({  "value": label, "label":label, 'class': class_iri })
 
     factsheet['energy_carriers'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
@@ -634,9 +635,6 @@ def factsheet_by_id(request, *args, **kwargs):
         for s1, p1, o1 in oekg.triples(( o, OEO.OEO_00000522, None )):
             o1_type = oekg.value(o1, RDF.type)
             o1_label = oekg.value(o1, RDFS.label)
-            print(o)
-            print(o1)
-            print(s1)
             if (o1_type == OBO.BFO_0000006):
                 scenario['regions'].append({  "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
             if (o1_type == OEO.OEO_00020036):
@@ -660,13 +658,11 @@ def factsheet_by_id(request, *args, **kwargs):
             o3_idx = oekg.value(o3, OEO['has_id'])
 
             scenario['output_datasets'].append({ "key": o3_key, "idx": o3_idx, "value": { "label": o3_label, "iri": o3_iri} })
-
         
         for s4, p4, o4 in oekg.triples(( o, OEO.OEO_00020224, None )):
             scenario['scenario_years'].append({'id': o4, 'name': o4})
 
         factsheet['scenarios'].append(scenario)
-            
 
     response = JsonResponse(factsheet, safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
