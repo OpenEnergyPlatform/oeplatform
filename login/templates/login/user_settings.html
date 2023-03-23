@@ -37,6 +37,12 @@
                 <a href="password_change">Change your password</a>
             </td>
         </tr>
+        <tr>
+            <th> Account </th>
+            <td>
+                <a href="{% url 'account-delete' request.user.id %}">Delete your account</a>
+            </td>
+        </tr>
 </table>
     {% if request.user.is_authenticated and request.user == user%}
         <hr>

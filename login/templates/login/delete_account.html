@@ -19,13 +19,12 @@
     {% endif%}
 
 
-    {% for table in tables %}
-        <a href="/view/{{ table.schema.name }}/{{ table.name }}">{{ table.name }}</a>
-		<li>{{ table.schema }}</li>
-		<li>{{ table.created }}</li>
-	{% empty %}
-		<li>No tables found for this user.</li>
-	{% endfor %}
+    <h1>Delete Account</h1>
+  <p>Are you sure you want to delete your account?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+  </form>
 {% endblock %}
 
 

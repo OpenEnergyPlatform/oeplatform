@@ -1,10 +1,10 @@
-django>=3.2.4,<4.0
+django==3.2
 matplotlib>=2.0
 urllib3>=1.20
 scipy>=0.18.1
 django-widget_tweaks>=1.4.1
 sqlalchemy>=1.3.0,<1.4
-Pillow
+Pillow~=9.4.0
 bibtexparser>=0.6.2
 django-colorfield>=0.1.12
 requests>=2.13.0
@@ -14,16 +14,25 @@ webcolors>=1.7
 djangorestframework>=3.5.4
 django-axes
 shapely>=1.5.17
-markdown2
-alembic
-django-simple-captcha
+markdown2~=2.4.8
+alembic~=1.10.2
+django-simple-captcha~=0.5.17
 django-bootstrap5
 django-fontawesome-5
 omi>=0.1.2
 zipstream-new
 rdflib>=6.0
 django_better_admin_arrayfield
-sparqlwrapper
+sparqlwrapper~=2.0.0
 Pygments<=2.11.2 # latest version fails to convert fenced code blocks
 pre-commit # only for dev
 uritemplate # allows python manage.py generateschema
+numpy~=1.24.2
+GeoAlchemy2~=0.6.3
+python-dateutil~=2.8.2
+pip~=23.0.1
+attrs~=22.2.0
+wheel~=0.38.4
+cryptography~=39.0.2
+keyring~=23.13.1
+setuptools~=67.3.3

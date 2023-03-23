@@ -1,12 +1,14 @@
 from django import forms
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import FormView, View
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 
 import login.models as models
 from django.shortcuts import render, get_object_or_404
@@ -16,9 +18,8 @@ from dataedit.models import TableRevision, Table
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
-from django.core.handlers.wsgi import WSGIRequest as request
 
-from datetime import date
+from django.contrib import messages
 
 
 class ProfileView(View):
@@ -310,6 +311,16 @@ class DetachView(LoginRequiredMixin, View):
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = "login/generic_form.html"
     success_url = "/"
+
+
+class AccountDeleteView(LoginRequiredMixin, DeleteView):
+    model = OepUser
+    template_name = 'login/delete_account.html'
+    success_url = reverse_lazy('logout')
+
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        return render(request, 'login/delete_account.html', {"profile_user": user})
 
 
 class ActivationNoteView(FormView):
