@@ -516,7 +516,11 @@ class Command(BaseCommand):
             logging.info(f"{schema_name}.{table_name} (whitelist={whitelisted})")
 
             # load metadata
-            metadata_orig = get_table_metadata(schema_name, table_name)
+            try:
+                metadata_orig = get_table_metadata(schema_name, table_name)
+            except Exception:
+                logging.error(f"no table in oedb: {schema_name}.{table_name}")
+                metadata_orig = None
 
             if not metadata_orig:
                 logging.info("empty metadata")
