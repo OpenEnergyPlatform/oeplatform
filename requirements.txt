@@ -27,5 +27,4 @@ sparqlwrapper
 Pygments<=2.11.2 # latest version fails to convert fenced code blocks
 pre-commit # only for dev
 uritemplate # allows python manage.py generateschema
-inflection
 jsonschema

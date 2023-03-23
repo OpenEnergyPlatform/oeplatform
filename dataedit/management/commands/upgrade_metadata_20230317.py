@@ -13,7 +13,6 @@ import re
 
 import jsonschema.validators
 from django.core.management.base import BaseCommand
-from inflection import camelize
 from omi.dialects.oep import OEP_V_1_5_Dialect
 from omi.dialects.oep.compiler import compile_date_or_none
 from omi.dialects.oep.parser import parse_date_or_none
@@ -157,19 +156,46 @@ def fix_key(k):
     """fix old key names"""
     k = k.strip()
     k = k.replace(" ", "_")
+    k = k.lower()
     if k == "":
         return k
-    k = camelize(k, uppercase_first_letter=False)
-    if k == "uRL":
-        k = "url"
-    elif k == "licence":
-        k = "license"
-    elif k == "extend":
-        k = "extent"
-    elif k == "discription":
-        k = "description"
-    elif k == "fromat":
-        k = "format"
+
+    k = {
+        "reference_date": "referenceDate",
+        "licence": "license",
+        "extend": "extent",
+        "discription": "description",
+        "fromat": "format",
+        "metadata_version": "metadataVersion",
+        "original_file": "originalFile",
+        "date_of_collection": "dateOfCollection",
+        "metadatalicense": "metadataLicense",
+        "metadataversion": "metadataVersion",
+        "metametadata": "metaMetadata",
+        "spatial_resolution": "spatialResolution",
+        "sourcecode": "sourceCode",
+        "fundingagency": "fundingAgency",
+        "grantno": "grantNo",
+        "foreignkeys": "foreignKeys",
+        "primarykey": "primaryKey",
+        "decimalseparator": "decimalSeparator",
+        "publicationdate": "publicationDate",
+        "referencedate": "referenceDate",
+        "fundingagencylogo": "fundingAgencyLogo",
+        "publisherlogo": "publisherLogo",
+        "aggregationtype": "aggregationType",
+        "table_fields": "tableFields",
+        "regional_level": "regionalLevel",
+        "instructions_for_proper_use": "instructionsForProperUse",
+        "todo": "toDo",
+        "description_german": "descriptionGerman",
+        "isabout": "isAbout",
+        "meta_version": "metaVersion",
+        "valuereference": "valueReference",
+        "value_reference": "valueReference",
+        "is_about": "isAbout",
+    }.get(k, k)
+
     return k
 
 
