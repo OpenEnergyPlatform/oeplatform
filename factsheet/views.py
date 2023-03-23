@@ -754,7 +754,7 @@ def delete_entities(request, *args, **kwargs):
     # entity_type = request_body['entity_type']
     # entity_label = request_body['entity_label']
 
-    oekg.remove((None, None, None)) 
+    #oekg.remove((None, None, None)) 
 
     entity_type = request.GET.get('entity_type')
     entity_label = request.GET.get('entity_label')
