@@ -1394,6 +1394,7 @@ def get_tag_keywords_synchronized_metadata(
                 .first()
             )
             if tag is None:
+                name = name[:40] # max len
                 tag = Tag(name=name)
                 session.add(tag)
                 session.flush()

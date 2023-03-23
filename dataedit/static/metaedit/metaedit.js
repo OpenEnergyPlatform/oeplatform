@@ -114,7 +114,7 @@ var MetaEdit = function (config) {
 
 
         // MUST have ID
-        json["id"] = json["id"] || config["url_table_id"];
+        json["id"] = config["url_table_id"];
 
         // MUST have one resource with name == id == tablename
         json["resources"] = json["resources"] || [{}];
