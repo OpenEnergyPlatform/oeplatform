@@ -12,7 +12,7 @@ import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import Scenario from './scenario.js';
-import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js'
+import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -38,12 +38,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-// import models_json from './models_list.json';
-// import frameworks_json from './frameworks_list.json';
+import models_json from './models_list.json';
+import frameworks_json from './frameworks_list.json';
 import study_keywords from '../data/study_keywords.json';
 import scenario_years from '../data/scenario_years.json';
-import {sectors_json} from '../data/sectors.js';
-import sector_divisions from '../data/sector_divisions.json';
+import sectors_json from   '../data/sectors.json';
+import sector_divisions_json from '../data/sector_divisions.json';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
 import energyTransformations from '../data/energyTransformations';
@@ -52,6 +52,7 @@ import energyTransformations from '../data/energyTransformations';
 import Chip from '@mui/material/Chip';
 
 import '../styles/App.css';
+
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -73,6 +74,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function Factsheet(props) {
+  
   const navigate = useNavigate();
 
   const { id, fsData } = props;
@@ -136,8 +138,9 @@ function Factsheet(props) {
           </span>
         </span>
 
+
   const [sectors, setSectors] = useState(sectors_json);
-  const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? sectors : []);
+  const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution : []);
@@ -516,7 +519,7 @@ function Factsheet(props) {
   };
 
   const getScenarioInteractingRegions = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020036' } });
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
     return data;
   };
 
@@ -769,7 +772,7 @@ function Factsheet(props) {
   const HandleAddNewRegion = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OBO.BFO_0000006',
+      entity_type: 'OBO.BFO_0000006', 
       entity_label: newElement.name,
       entity_iri: newElement.iri
     }).then(response => {
@@ -808,7 +811,7 @@ function Factsheet(props) {
   const HandleAddNewInteractingRegion = (newElement) => {
     axios.post(conf.toep + 'factsheet/add_entities/',
     {
-      entity_type: 'OBO.OEO_00020036',
+      entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
       entity_iri: newElement.iri
     }).then(response => {
@@ -827,7 +830,7 @@ function Factsheet(props) {
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
     axios.post(conf.toep + 'factsheet/update_an_entity/',
     {
-      entity_type: 'OBO.OEO_00020036',
+      entity_type: 'OEO.OEO_00020036',
       entity_label: oldElement,
       new_entity_label: newElement,
       entity_iri: editIRI
@@ -980,10 +983,12 @@ const scenario_region = [
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
   
-
+    console.log(sectorDivisionsList);
     setSelectedSectorDivisions(sectorDivisionsList);
     const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
+    console.log(sectors);
     const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
+    console.log(sectorsBasedOnDivisions);
     setFilteredSectors(sectorsBasedOnDivisions);
   };
 
@@ -1264,7 +1269,7 @@ const scenario_region = [
                     alignItems: 'flex-start',
                     flexWrap: 'wrap',
                 }}>
-                <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions_json} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
                 <div style={{ marginTop: '30px' }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1283,7 +1288,7 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={sectors_json} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
               </Typography>
@@ -1398,7 +1403,7 @@ const scenario_region = [
                       removeScenario={removeScenario}
                       scenarioRegion={scenarioRegions}
                       scenarioInteractingRegion={scenarioInteractingRegions}
-                      scenarioYears={scenarioYears}
+                      scenarioYears={scenario_years}
                       HandleEditRegion={HandleEditRegion}
                       HandleAddNewRegion={HandleAddNewRegion}
                       HandleEditInteractingRegion={HandleEditInteractingRegion}
@@ -1424,10 +1429,10 @@ const scenario_region = [
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete type="Model" editHandler={HandleEditModels}  addNewHandler={HandleAddNewModel}  manyItems showSelectedElements={true} optionsSet={models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+          <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={models_json} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocomplete type="Frameworks" editHandler={HandleEditFramework}  addNewHandler={HandleAddNewFramework} manyItems showSelectedElements={true}  optionsSet={frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+          <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={frameworks_json} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
         </Grid>
       </Grid>,
       ]
