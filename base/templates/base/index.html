@@ -1,11 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 
-{% block main-right-sidebar-content %}
-    <h2>Changes in version {{ version }}</h2>
-    {{ changes|safe }}
-{% endblock %}
-
 {% block after-head %}
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/index-style.css' %}">
@@ -70,9 +65,9 @@
                             <div class= "panel-description">
                                 <h2> Academy </h2>
                                 <p class="alternative">
-                                    The Open Energy Academy (OEA) provides courses as well as dedicated tutorials 
-                                    covering important topics around the Open Energy Family (OEF) tools 
-                                    and the Open Energy Platform (OEP). 
+                                    The Open Energy Academy (OEA) provides courses as well as dedicated tutorials
+                                    covering important topics around the Open Energy Family (OEF) tools
+                                    and the Open Energy Platform (OEP).
                                     You will also find short answers to urgent questions.
                                 </p>
                             </div>
