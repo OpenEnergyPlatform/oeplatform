@@ -46,11 +46,11 @@ urlpatterns = [
     ),
     url("^", include("django.contrib.auth.urls")),
     url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
-    url(r"^profile/(?P<user_id>[\d]+)/tables$", views.ProfileView.as_view(), name="input"),
+    url(r"^profile/(?P<user_id>[\d]+)/tables$", views.ProfileView.as_view(), name="tables"),
     url(r"^profile/(?P<user_id>[\d]+)/review$", views.ReviewsView.as_view(), name="reviews"),
     url(r"^profile/(?P<user_id>[\d]+)/settings$", views.SettingsView.as_view(), name="settings"),
     url(r"^profile/(?P<user_id>[\d]+)/password_change$", views.OEPPasswordChangeView.as_view(), name="input"),
-    url(r"^profile/(?P<pk>[\d]+)/delete_acc$", AccountDeleteView.as_view(), name="account-delete",
+    url(r"^profile/(?P<user_id>[\d]+)/delete_acc$", AccountDeleteView.as_view(), name="account-delete",
         ),
     url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
     url(

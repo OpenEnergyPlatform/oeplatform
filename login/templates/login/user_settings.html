@@ -9,13 +9,13 @@
 </script>
     <br>
     {% if profile_user %}
-        <a href="{{profile_user.id}}/tables">Tables</a>
+        <a href="{% url 'tables' profile_user.id %}">Tables</a>
     {% endif%}
     {% if profile_user %}
-        <a href="{{profile_user.id}}/review">Reviews</a>
+        <a href="{% url 'reviews' profile_user.id %}">Reviews</a>
     {% endif%}
     {% if request.user.is_authenticated and profile_user == request.user %}
-        <a href="{{profile_user.id}}/settings">Settings</a>
+        <a href="{% url 'settings' profile_user.id %}">Settings</a>
     {% endif%}
 {% if profile_user == request.user %}
 <h2>Your Security Information</h2>

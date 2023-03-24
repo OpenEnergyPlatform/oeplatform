@@ -41,7 +41,16 @@ class ProfileView(View):
 
 class ReviewsView(View):
     def get(self, request, user_id):
-        return render(request, "login/user_review.html")
+        """
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
+        user = get_object_or_404(OepUser, pk=user_id)
+        return render(
+            request, "login/user_review.html", {"profile_user": user})
 
 
 class SettingsView(View):

@@ -9,13 +9,13 @@
 </script>
     <br>
     {% if profile_user %}
-        <a href="{{profile_user.id}}/tables">Tables</a>
+        <a href="#">Tables</a>
     {% endif%}
     {% if profile_user %}
-        <a href="{{profile_user.id}}/review">Reviews</a>
+        <a href="{% url 'reviews' profile_user.id %}">Reviews</a>
     {% endif%}
     {% if request.user.is_authenticated and profile_user == request.user %}
-<a href="{% url 'settings' profile_user.id %}">Settings</a>
+    <a href="{% url 'settings' profile_user.id %}">Settings</a>
     {% endif%}
 
 
@@ -54,11 +54,10 @@
             {% else %}
                 <p>Profession</p>
             {% endif %} </td>
-    <br>
     <td> {% if profile_user.location %}
                 {{ profile_user.location }}
             {% else %}
-    <p>Location</p>
+            <p>Location</p>
     {% endif %} </td>
     <br>
     <td> {% if profile_user.email %}
@@ -76,13 +75,13 @@
     <td> {% if profile_user.facebook %}
         <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
             {% else %}
-                <p> Facebook</p>
+                Facebook
             {% endif %} </td>
     <br>
     <td> {% if profile_user.twitter %}
         <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
             {% else %}
-                <p> Twitter</p>
+                Twitter
             {% endif %} </td>
     <br>
     <hr>
