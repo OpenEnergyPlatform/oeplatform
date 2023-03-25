@@ -32,9 +32,18 @@ class ProfileView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        tables = Table.objects.filter(user=user)
-        print(tables)
+        
+        # get all tables and optimize query
+        tables = Table.objects.all().select_related()
+        # get all tables the user got write perm on
+        user_tables = [table for table in tables if user.get_table_permission_level(table) >= models.WRITE_PERM] # WRITE_PERM = 4
+        # prepare for data for template
+        tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 
+        # get name of schema form FK object
+        for table in tables:
+            table["schema"] = table["schema"].name
+            
         return render(
             request, "login/profile.html", {"tables": tables, "profile_user": user})
 
