@@ -1096,6 +1096,12 @@ def _get_table(schema, table):
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
 
 
+def get_table_metadata(schema, table):
+    table_obj = _get_table(schema=schema, table=table)
+    comment = table_obj.comment
+    return json.loads(comment) if comment else {}
+
+
 def __internal_select(query, context):
     # engine = _get_engine()
     context2 = dict(user=context.get("user"))
