@@ -24,8 +24,9 @@
     <br>
 
     {% for table in tables %}
-        <a href="/view/{{ table.schema.name }}/{{ table.name }}">{{ table.name }}</a>
-		<li>{{ table.schema }}</li>
+        <!-- fix the url -->
+        <a href="/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a> 
+		<li>{{ table.schema }} - {{ table.name }}</li>
 		<li>{{ table.created }}</li>
 	{% empty %}
 		<li>No tables found for this user.</li>
