@@ -7,44 +7,24 @@ from decimal import Decimal
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
-import sqlalchemy as sqla
-import zipstream
-import time
-from decimal import Decimal
-
-import geoalchemy2  # Although this import seems unused is has to be here
-import login.models as login_models
-import psycopg2
 import requests
 import sqlalchemy as sqla
 import zipstream
-from dataedit.models import Schema as DBSchema
-from dataedit.models import Table as DBTable
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import FileSystemStorage
-from django.core.validators import validate_image_file_extension
 from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
 from rest_framework import status
-from rest_framework.exceptions import ParseError
-from rest_framework.parsers import MultiPartParser
-from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.views import APIView
 
 import api.parser
+import login.models as login_models
 from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from api.models import UploadedImages
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
@@ -270,9 +250,8 @@ class Sequence(APIView):
 class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
-        table_obj = actions._get_table(schema=schema, table=table)
-        comment = table_obj.comment
-        return JsonResponse(json.loads(comment) if comment else {})
+        metadata = actions.get_table_metadata(schema, table)
+        return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
@@ -459,14 +438,21 @@ class Table(APIView):
         for c in column_definitions:
             colname = c["name"]
 
-            err_msg = f"Unsupported column name: '{colname}'\nColumn name must consist of lowercase alpha-numeric " \
-                      f"words or underscores and start with a letter. It must not start with an underscore or exceed " \
-                      f"{MAX_COL_NAME_LENGTH} characters (current column name length: {len(colname)})." \
-
+            err_msg = (
+                f"Unsupported column name: '{colname}'\n"
+                "Column name must consist of lowercase alpha-numeric "
+                f"words or underscores and start with a letter. "
+                "It must not start with an underscore or exceed "
+                f"{MAX_COL_NAME_LENGTH} characters "
+                f"(current column name length: {len(colname)})."
+            )
             if not colname.isidentifier():
                 raise APIError(f"{err_msg}")
             if re.search(r"[A-Z]", colname) or re.match(r"_", colname):
-                raise APIError(f"Column names must not contain capital letters or start with an underscore! {err_msg}")
+                raise APIError(
+                    "Column names must not contain capital letters "
+                    f"or start with an underscore! {err_msg}"
+                )
             if len(colname) > MAX_COL_NAME_LENGTH:
                 raise APIError(f"Column name is too long! {err_msg}")
 
@@ -1151,40 +1137,6 @@ def get_groups(request):
         Q(name__trigram_similar=string) | Q(name__istartswith=string)
     )
     return JsonResponse([user.name for user in users], safe=False)
-
-
-class ImageUpload(APIView):
-    """
-    Image File upload view handel post requests to "v0/image/upload".
-
-    :param
-    :return Response contains path to image.
-    """
-
-    parser_classes = (MultiPartParser,)
-
-    # TODO: PUT might be better in this case?
-    def post(self, request):
-        if request.method == "POST":
-
-            f = request.data["image"]
-            # attempt to validate image format
-            try:
-                from PIL import Image
-
-                img = Image.open(f)
-                img.verify()
-
-                upload = UploadedImages(image=f)
-                upload.save()
-                # relative path
-                img_rel_url = upload.image.url
-                process_url = img_rel_url.strip("/")
-
-                return JsonResponse({"data": {"filePath": process_url}})
-
-            except Exception:
-                raise ParseError("Unsupported image type")
 
 
 def oeo_search(request):

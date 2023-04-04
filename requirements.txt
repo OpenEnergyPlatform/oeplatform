@@ -25,8 +25,6 @@ rdflib>=6.0
 django_better_admin_arrayfield
 sparqlwrapper
 Pygments<=2.11.2 # latest version fails to convert fenced code blocks
-nbconvert>=6.4.5
-ipython # needed for IPython3Lexer for nbconvert
-beautifulsoup4 # for markdown raw html cleanup
 pre-commit # only for dev
 uritemplate # allows python manage.py generateschema
+jsonschema
