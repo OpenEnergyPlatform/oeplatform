@@ -25,7 +25,7 @@
 
     {% for table in tables %}
         <!-- fix the url -->
-        <a href="/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a> 
+        <a href="/dataedit/view/{{ table.schema }}/{{ table.name }}">{{ table.name }}</a> 
 		<li>{{ table.schema }} - {{ table.name }}</li>
 		<li>{{ table.created }}</li>
 	{% empty %}
