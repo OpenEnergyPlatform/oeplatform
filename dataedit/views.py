@@ -1835,7 +1835,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return metadata
 
     def load_json_schema(self):
-        with open('dataedit/static/peer_review/schema.json') as f:
+        with open('dataedit/static/peer_review/schema.json', encoding="utf-8") as f:
             json_schema = json.load(f)
         return(json_schema)
 
