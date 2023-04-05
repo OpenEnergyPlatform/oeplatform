@@ -36,7 +36,8 @@ class ProfileView(View):
         # get all tables and optimize query
         tables = Table.objects.all().select_related()
         # get all tables the user got write perm on
-        user_tables = [table for table in tables if user.get_table_permission_level(table) >= models.WRITE_PERM] # WRITE_PERM = 4
+        user_tables = [table for table in tables if user.get_table_permission_level(table) >= models.WRITE_PERM] #
+        # WRITE_PERM = 4
         # prepare for data for template
         tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 

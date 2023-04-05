@@ -178,7 +178,7 @@ def change_requests(schema, table):
             for key in list(change):
                 value = change[key]
                 if key not in keyword_whitelist and (
-                    value is None or value == old[key]
+                        value is None or value == old[key]
                 ):
                     old.pop(key)
                     change.pop(key)
@@ -194,8 +194,8 @@ def change_requests(schema, table):
         value = api_constraints[i]
         id = value.get("id")
         if (
-            value.get("reference_table") is None
-            or value.get("reference_column") is None
+                value.get("reference_table") is None
+                or value.get("reference_column") is None
         ):
             value.pop("reference_table")
             value.pop("reference_column")
@@ -256,20 +256,30 @@ def listschemas(request):
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
     description = {
-        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",  # noqa
-        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",  # noqa
-        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",  # noqa
+        "boundaries": "Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.",
+        # noqa
+        "climate": "Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.",
+        # noqa
+        "economy": "Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.",
+        # noqa
         "demand": "Data on demand. Demand can relate to commodities but also to services.",  # noqa
         "grid": "Energy transmission infrastructure. examples: power lines, substation, pipelines",  # noqa
         "supply": "Data on supply. Supply can relate to commodities but also to services.",  # noqa
-        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",  # noqa
+        "environment": "environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape",
+        # noqa
         "society": "Demographic data such as population statistics and projections, fertility, mortality etc.",  # noqa
-        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",  # noqa
-        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",  # noqa
-        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",  # noqa
-        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",  # noqa
-        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",  # noqa
-        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
+        "model_draft": "Unfinished data of any kind. Note: there is no version control and data is still volatile.",
+        # noqa
+        "scenario": "Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.",
+        # noqa
+        "reference": "Contains sources, literature and auxiliary/helper tables that can help you with your work.",
+        # noqa
+        "emission": "Data on emissions. Examples: total greenhouse gas emissions, CO2-emissions, energy-related CO2-emissions, methane emissions, air pollutants etc.",
+        # noqa
+        "openstreetmap": "OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.",
+        # noqa
+        "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",
+        # noqa
     }
 
     schemas = [
@@ -432,7 +442,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
 
         for schema_name, table_name in tag_query:
             filter_tables = filter_tables | (
-                Q(schema__name=schema_name) & Q(name=table_name)
+                    Q(schema__name=schema_name) & Q(name=table_name)
             )
 
         filters.append(filter_tables)
@@ -605,26 +615,26 @@ def create_dump(schema, table, fname):
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = [
-        "pg_dump",
-        "-O",
-        "-x",
-        "-w",
-        "-Fc",
-        "--quote-all-identifiers",
-        "-U",
-        sec.dbuser,
-        "-h",
-        sec.dbhost,
-        "-p",
-        str(sec.dbport),
-        "-d",
-        sec.dbname,
-        "-f",
-        sec.MEDIA_ROOT
-        + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
-        + fname
-        + ".dump",
-    ] + reduce(
+            "pg_dump",
+            "-O",
+            "-x",
+            "-w",
+            "-Fc",
+            "--quote-all-identifiers",
+            "-U",
+            sec.dbuser,
+            "-h",
+            sec.dbhost,
+            "-p",
+            str(sec.dbport),
+            "-d",
+            sec.dbname,
+            "-f",
+            sec.MEDIA_ROOT
+            + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
+            + fname
+            + ".dump",
+        ] + reduce(
         add,
         (["-n", s, "-t", s + "." + t] for s, t in get_dependencies(schema, table)),
         [],
@@ -659,7 +669,6 @@ def show_revision(request, schema, table, date):
 
 @login_required
 def tag_overview(request):
-
     # if rename or adding of tag fails: display error message
     context = {
         "errorMsg": "Tag name is not valid"
@@ -687,7 +696,7 @@ def tag_editor(request, id=""):
             Session = sessionmaker()
             session = Session(bind=engine)
             assigned = (
-                session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
+                    session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
             )
 
             return render(
@@ -709,7 +718,6 @@ def tag_editor(request, id=""):
 
 @login_required
 def change_tag(request):
-
     status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
@@ -800,7 +808,7 @@ def view_save(request, schema, table):
         for item in request.POST.items():
             item_name, item_value = item
             if item_name.startswith("y-axis-") and item_value == "on":
-                y_axis_list.append(item_name["y-axis-".__len__() :])
+                y_axis_list.append(item_name["y-axis-".__len__():])
         post_options = {"x_axis": post_x_axis, "y_axis": y_axis_list}
     elif post_type == "map":
         # add location column info to options
@@ -994,19 +1002,18 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
-        # TODO change this load metadata from SQL comment on table to load from table.oemetadata(JSONB) field to avoid performance issues
-        # the metadata are stored in the table's comment
+        # TODO change this load metadata from SQL comment on table to load from table.oemetadata(JSONB) field to
+        #  avoid performance issues the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
-        
+
         # setup oemetadata string order according to oem v1.5.1
         from dataedit.metadata import TEMPLATE_V1_5
-        
+
         def iter_oem_key_order(metadata: dict):
             oem_151_key_order = [key for key in TEMPLATE_V1_5.keys()]
             for key in oem_151_key_order:
                 yield key, metadata.get(key)
 
-        
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
 
         # the key order of the metadata matters
@@ -1142,9 +1149,9 @@ class PermissionView(View):
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
         if (
-            request.user.is_anonymous
-            or request.user.get_table_permission_level(table_obj)
-            < login_models.ADMIN_PERM
+                request.user.is_anonymous
+                or request.user.get_table_permission_level(table_obj)
+                < login_models.ADMIN_PERM
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
@@ -1349,7 +1356,7 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
 
 
 def get_tag_keywords_synchronized_metadata(
-    table, schema, keywords_new=None, tag_ids_new=None
+        table, schema, keywords_new=None, tag_ids_new=None
 ):
     """synchronize tags and keywords, either by new metadata OR by set of tag ids
     (from UI)
@@ -1394,7 +1401,7 @@ def get_tag_keywords_synchronized_metadata(
                 .first()
             )
             if tag is None:
-                name = name[:40] # max len
+                name = name[:40]  # max len
                 tag = Tag(name=name)
                 session.add(tag)
                 session.flush()
@@ -1454,7 +1461,7 @@ def get_tag_keywords_synchronized_metadata(
 
     # determine which tag ids must be added
     add_table_tag_ids = (keyword_tag_ids_old | keyword_new_tag_ids | tag_ids_new) - (
-        tag_ids_old | remove_table_tag_ids
+            tag_ids_old | remove_table_tag_ids
     )
     for tid in add_table_tag_ids:
         if tid is None:
@@ -1500,7 +1507,7 @@ def update_table_tags(request):
     )
 
     ids = {
-        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
+        int(field[len("tag_"):]) for field in request.POST if field.startswith("tag_")
     }
 
     # update tags in db and harmonize metadata
@@ -1517,14 +1524,14 @@ def update_table_tags(request):
 
     messasge = messages.success(
         request,
-        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
+        'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',
+        # noqa
     )
 
     return render(request, "dataedit/dataview.html", {"messages": messasge})
 
 
 def redirect_after_table_tags_updated(request):
-
     update_table_tags(request)
 
     return redirect(request.META["HTTP_REFERER"])
@@ -1665,7 +1672,7 @@ def get_column_description(schema, table):
         elif dt == "interval":
             precisions = [column_def["interval_precision"]]
         elif re.match(".*int", dt) and re.match(
-            "nextval", column_def.get("column_default") or ""
+                "nextval", column_def.get("column_default") or ""
         ):
             # dt = dt.replace('int', 'serial')
             pass
@@ -1701,7 +1708,7 @@ def get_column_description(schema, table):
     # order by ordinal_position
     columns = []
     for name, col in sorted(
-        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+            _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
     ):
         columns.append(
             {
@@ -1812,7 +1819,6 @@ class MetaEditView(LoginRequiredMixin, View):
 
 class StandaloneMetaEditView(LoginRequiredMixin, View):
     def get(self, request):
-
         context_dict = {
             "config": json.dumps(
                 {"cancle_url": get_cancle_state(self.request), "standalone": True}

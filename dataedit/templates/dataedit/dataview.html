@@ -225,6 +225,11 @@ for row in result.json():
 </div>
 <hr>
 
+<h4>Delete Table</h4>
+<div class="btn-group btn-group-sm" role="group" aria-label="Actions">
+  <button class="btn btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#wizard-confirm-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+</div>
+<hr>
 {% endblock main-right-sidebar-content-additional %}
 
 {% block after-head %}
@@ -238,6 +243,19 @@ for row in result.json():
 {% endblock after-head %}
 
 {% block after-body-bottom-js %}
+    <div id="wizard-confirm-delete" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                Do you want to delete the table (including data and metadata)?
+            </div>
+            <div class="modal-body">
+                <button class="btn btn-sm btn-dark mr-2" id="wizard-confirm-delete-delete">delete</button>
+                <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
 <script src="{% static 'dataedit/wkx.min.js' %}"></script>
 <script src="{% static 'dataedit/proj4.min.js' %}"></script><!-- src: https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js -->
@@ -245,6 +263,7 @@ for row in result.json():
 <script src="{% static 'dataedit/backend.js' %}"></script>
 <script src="{% static 'dataedit/plotly-latest.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 <script src="{% static 'dataedit/json5.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
+<script src="/static/wizard/wizard.js"></script>
 
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="{% static 'dataedit/leaflet.min.js' %}"></script><!-- src: https://unpkg.com/leaflet@1.3.1/dist/leaflet.js -->
@@ -267,8 +286,8 @@ for row in result.json():
       // create data url
       var json = JSON.stringify(json, null, 1);
       console.log(json);
-      blob = new Blob([json], { type: "application/json" }),
-        dataUrl = URL.createObjectURL(blob);
+      blob = new Blob([json], { type: "application/json" });
+      dataUrl = URL.createObjectURL(blob);
       // create link
       var a = document.createElement("a");
       document.body.appendChild(a);
@@ -282,9 +301,38 @@ for row in result.json():
       a.parentNode.removeChild(a);
     })
   };
+  $(document).ready(function() {
+  // Add click event handler to the delete button
+  $("#wizard-confirm-delete-delete").on("click", function() {
+    $.ajax({
+      url: "/api/v0/schema/" + schema + "/tables/" + table,
+      type: "DELETE",
+      headers: {
+        "X-CSRFToken": csrftoken
+      },
+      success: function(response) {
+        // Redirect to the home page after successful deletion
+        window.location.href = "/";
+      },
+      error: function(response) {
+        // Show error message
+        alert("Failed to delete the table.");
+        $("#wizard-confirm-delete").modal("hide");
+      }
+    });
+  });
 
+  // Add click event handler to the cancel button
+  $("#wizard-confirm-delete-cancel").on("click", function() {
+    $("#wizard-confirm-delete").modal("hide");
+  });
+});
   $(function () {
     $('[data-bs-toggle="tooltip"]').tooltip()
   })
+
+
+
+
 </script>
 {% endblock after-body-bottom-js %}
