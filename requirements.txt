@@ -36,3 +36,5 @@ wheel~=0.38.4
 cryptography~=39.0.2
 keyring~=23.13.1
 setuptools~=67.3.3
+jsonschema
+

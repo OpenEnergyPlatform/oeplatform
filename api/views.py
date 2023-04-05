@@ -250,9 +250,8 @@ class Sequence(APIView):
 class Metadata(APIView):
     @api_exception
     def get(self, request, schema, table):
-        table_obj = actions._get_table(schema=schema, table=table)
-        comment = table_obj.comment
-        return JsonResponse(json.loads(comment) if comment else {})
+        metadata = actions.get_table_metadata(schema, table)
+        return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
