@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from functools import lru_cache
 
 import markdown2
 from django.core.mail import send_mail
@@ -21,11 +22,24 @@ from base.forms import ContactForm
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
-class Welcome(View):
-    def get(self, request):
-        os.path.dirname(os.path.realpath(__file__))
-        version_expr = r"^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$"
-        markdowner = markdown2.Markdown()
+@lru_cache(maxsize=None)
+def read_version_changes():
+    """read version and changes from changelog markdown
+
+    We use cache so it can stay in process memory and we dont have to read files
+    in every request. this only changes on a new release anyway, in which case
+    the process is restarted.
+
+    Returns:
+       dict: {"version": (major, minor, patch), "changes": changes}
+    """
+    os.path.dirname(os.path.realpath(__file__))
+    version_expr = r"^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$"
+    markdowner = markdown2.Markdown()
+    import logging
+
+    logging.error("READING")
+    try:
         with open(os.path.join(SITE_ROOT, "..", "VERSION")) as version_file:
             match = re.match(version_expr, version_file.read())
             major, minor, patch = match.groups()
@@ -39,11 +53,16 @@ class Welcome(View):
             changes = markdowner.convert(
                 "\n".join(line for line in change_file.readlines())
             )
-        return render(
-            request,
-            "base/index.html",
-            {"version": "%s.%s.%s" % (major, minor, patch), "changes": changes},
-        )
+    except Exception:
+        # probably because change_file is missing
+        major, minor, patch, changes = "", "", "", ""
+    return {"version": (major, minor, patch), "changes": changes}
+
+
+class Welcome(View):
+    def get(self, request):
+        context = read_version_changes()
+        return render(request, "base/index.html", context)
 
 
 def get_logs(request):
