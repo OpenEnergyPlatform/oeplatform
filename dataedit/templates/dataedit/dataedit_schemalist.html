@@ -1,4 +1,4 @@
-{% extends "dataedit/filter.html" %}
+{% extends "dataedit/base_fullwidth.html" %}
 {% block title %} - Schemas{% endblock %}
 
 {% block site-header %}
@@ -16,8 +16,15 @@
 {% endblock site-header %}
 
 {% block data_content %}
-<h3>Topics</h3>
-<table id="schemas" class="table table-hover table-bordered">
+<div class="controls-container controls-container--horizontal">
+    <form>
+        <div class="controls-container__input">
+            <label for="filterInputText" class="form-label">Filters</label>
+            <input type="text" class="form-control" id="filterInputText">
+          </div>
+    </form>
+</div>
+<!-- <table id="schemas" class="table table-hover table-bordered">
     <thead>
         <tr class="table-primary">
             <th>Name</th>
@@ -35,5 +42,7 @@
         {% endfor %}
 
     </tbody>
-</table>
+</table> -->
+
+
 {% endblock %}

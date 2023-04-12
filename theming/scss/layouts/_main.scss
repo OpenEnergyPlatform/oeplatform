@@ -39,6 +39,10 @@ main.main {
                 padding-top: $C--padding-large;
             }
         }
+
+        &__fullwidth {
+            width: 100%;
+        }
     
         &__side {
             width: 100%;
