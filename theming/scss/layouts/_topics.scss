@@ -64,6 +64,10 @@
 
         &__text {
             @extend .card-text;
+
+            &--large {
+                @extend .fs-6;
+            }
         }
 
         &__btn {
