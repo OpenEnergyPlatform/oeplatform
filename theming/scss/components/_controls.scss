@@ -4,6 +4,10 @@
 .controls-container {
     &--horizontal {
         @include flex-row;
+
+        @include media-breakpoint-down(lg) {
+            @include flex-column;
+        }
     }
 
     &__filters {
@@ -34,5 +38,11 @@
         @extend .justify-content-end;
         @extend .align-items-end;
         width: calc((#{$C--container-width} - (#{$C--padding-standard} * 2)) / 3);
+
+        @include media-breakpoint-down(lg) {
+            @include flex-column;
+            width: 100%;
+            padding-top: 0.5rem;
+        }
     }
 }
