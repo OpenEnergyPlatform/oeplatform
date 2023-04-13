@@ -1,0 +1,38 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.controls-container {
+    &--horizontal {
+        @include flex-row;
+    }
+
+    &__filters {
+        padding-right: $C--padding-standard;
+        flex: 1;
+
+        form {
+            @include flex-row;
+            @extend .align-items-end;
+        }
+    }
+
+    &__input {
+        @extend .pe-1;
+        flex: 1;
+    }
+
+    &__tags {
+        flex: 1;
+    }
+
+    &__reset {
+        @include flex-row;
+    }
+
+    &__views {
+        @include flex-row;
+        @extend .justify-content-end;
+        @extend .align-items-end;
+        width: calc((#{$C--container-width} - (#{$C--padding-standard} * 2)) / 3);
+    }
+}
