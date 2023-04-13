@@ -1,0 +1,80 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.topics {
+    @extend .container-fluid;
+
+    &__row {
+        @extend .row;
+        @extend .pt-4;
+    }
+
+    &__col {
+        @extend .col;
+        @extend .px-0;
+    }
+
+    .topic-card {
+        @extend .card;
+
+        &__header {
+            @extend .card-header;
+        }
+
+        &__header-top {
+            @include flex-row;
+            @extend .justify-content-between;
+            @extend .align-items-end;
+            @extend .pb-2;
+        }
+
+        &__title {
+            @extend .fs-6;
+            @extend .fw-semibold;
+        }
+
+        &__table-nb {
+            @extend .fs-8;
+            @extend .fw-semibold;
+        }
+
+        &__header-btm {
+            @extend .pb-1;
+        }
+
+        &__tag {
+            @extend .rounded-pill;
+            @extend .bg-primary;
+            @extend .text-white;
+            padding: 3px 1rem;
+        }
+
+        &__body {
+            @extend .card-body;
+
+            &--large {
+                @include flex-row;
+                @extend .justify-content-between;
+
+                @include media-breakpoint-down(lg) {
+                    flex-direction: column;
+                }
+            }
+        }
+
+        &__text {
+            @extend .card-text;
+        }
+
+        &__btn {
+            @include flex-row;
+            @extend .justify-content-end;
+            @extend .align-items-end;
+            width: calc((#{$C--container-width} - (#{$C--padding-standard} * 2)) / 3);
+
+            @include media-breakpoint-down(lg) {
+                width: 100%;
+            }
+        }
+    }
+}
