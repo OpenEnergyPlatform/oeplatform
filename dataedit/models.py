@@ -43,6 +43,7 @@ class Table(Tagable):
     # Add field to store oemetadata related to the table and avoide performance issues
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
+    is_reviewed = BooleanField(default=False, null=False)
 
     @classmethod
     def load(cls, schema, table):
@@ -51,6 +52,10 @@ class Table(Tagable):
         )
 
         return table_obj
+
+    def set_is_reviewed(self):
+        self.is_reviewed = True
+        self.save()
 
     class Meta:
         unique_together = (("schema", "name"),)
@@ -82,8 +87,10 @@ class Filter(models.Model):
 class PeerReview(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    is_finished = BooleanField(null=False)
-    dateStarted = DateTimeField(max_length=1000, null=False, default=timezone.now)
+    reviewer = ForeignKey('login.myuser', on_delete=models.CASCADE, related_name='reviewed_by', null=True)
+    contributor = ForeignKey('login.myuser', on_delete=models.CASCADE, related_name='review_received', null=True)
+    is_finished = BooleanField(null=False, default=False)
+    date_started = DateTimeField(max_length=1000, null=False, default=timezone.now)
     review = JSONField(null=True)
 
     # laden
