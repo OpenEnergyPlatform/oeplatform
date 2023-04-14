@@ -1,0 +1,8 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.btn {
+    &__icon {
+        @extend .me-1;
+    }
+}
