@@ -30,12 +30,10 @@ from omi.oem_structures.oem_v15 import OEPMetadata
 
 import api.parser
 from api.actions import describe_columns
-
+import logging
 try:
     import oeplatform.securitysettings as sec
 except Exception:
-    import logging
-
     logging.error("No securitysettings found. Triggerd in dataedit/views.py")
 
 from django.contrib import messages
@@ -1903,13 +1901,13 @@ class PeerReviewView(LoginRequiredMixin, View):
         return meta
 
     def get(self, request, schema, table):
-        review_state = PeerReview.is_finished
+        # review_state = self.is_finished
         columns = get_column_description(schema, table)
         can_add = False
         table_obj = Table.load(schema, table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
-            can_add = level >= login_models.WRITE_PERM
+            can_add = (level >= login_models.WRITE_PERM)
 
         url_table_id = request.build_absolute_uri(
             reverse("view", kwargs={"schema": schema, "table": table})
@@ -1929,17 +1927,28 @@ class PeerReviewView(LoginRequiredMixin, View):
                              }),
                         "meta": metadata,
                         }
-        # print(context_meta)
 
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
     def post(self, request, schema, table):
+        """
+        Handel reviews submitted by the reviewer. 
+        - Save Reviews in the PeerReview table
+        - Update the revied finished attribute in the all Tables table if review is finished
+        """
         context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
-            review_state = review_data.get("reviewFinished")
-            table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
+            review_finised = review_data.get("reviewFinished")
+            print(review_finised)
+            table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user)
             table_obj.save()
+        
+        #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
+        if review_finised is True:  
+            review_table = Table.load(schema=schema, table=table)
+            review_table.set_is_reviewed()
+            # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
 
         return render(request, 'dataedit/opr_review.html', context=context)
 
