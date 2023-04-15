@@ -1930,20 +1930,41 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
+    def get_contributor(self, schema, table):
+        """
+        Get the contributor for the table a review is started on. 
+        """
+        current_table = Table.load(schema=schema, table=table)
+        table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        return table_holder
+    
+    @staticmethod
+    def check_reviewer_and_contributor_not_the_same(contributor, reviewer):
+        print(contributor, reviewer)
+        if contributor is reviewer:
+            result = False
+        else: 
+            result = True
+
+        return result
+  
+
     def post(self, request, schema, table):
         """
         Handel reviews submitted by the reviewer. 
         - Save Reviews in the PeerReview table
-        - Update the revied finished attribute in the all Tables table if review is finished
+        - Update the review finished attribute in the dataedit.Tables table indicating table can be moved from model draft topic
         """
         context = {}
+        
         if request.method == "POST":
             review_data = json.loads(request.body)
             review_finised = review_data.get("reviewFinished")
-            print(review_finised)
-            table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user)
-            table_obj.save()
-        
+            # TODO: Send notification to user that he cant review tables he is the table holder.
+            if self.check_reviewer_and_contributor_not_the_same(contributor=self.get_contributor(schema, table).id, reviewer=request.user.id):
+                table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=self.get_contributor(schema, table))
+                table_obj.save()
+            
         #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
         if review_finised is True:  
             review_table = Table.load(schema=schema, table=table)
