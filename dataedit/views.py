@@ -1937,17 +1937,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         current_table = Table.load(schema=schema, table=table)
         table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
         return table_holder
-    
-    @staticmethod
-    def check_reviewer_and_contributor_not_the_same(contributor, reviewer):
-        print(contributor, reviewer)
-        if contributor is reviewer:
-            result = False
-        else: 
-            result = True
-
-        return result
-  
+      
 
     def post(self, request, schema, table):
         """
@@ -1961,7 +1951,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_data = json.loads(request.body)
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
-            if self.check_reviewer_and_contributor_not_the_same(contributor=self.get_contributor(schema, table).id, reviewer=request.user.id):
+            if self.get_contributor(schema, table).id is not request.user.id:
                 table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=self.get_contributor(schema, table))
                 table_obj.save()
             
