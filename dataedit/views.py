@@ -1951,8 +1951,9 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_data = json.loads(request.body)
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
-            if self.get_contributor(schema, table).id is not request.user.id:
-                table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=self.get_contributor(schema, table))
+            contributor = self.get_contributor(schema, table)
+            if contributor.id is not request.user.id:
+                table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
                 table_obj.save()
             
         #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
