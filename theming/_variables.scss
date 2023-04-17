@@ -1,9 +1,87 @@
 
-$gray-100: #F1F5F8;
-$black: #293B46;
-$primary: #2972A6;
-$secondary: #1F567D;
-$body-color: $black;
+//// Color system
+// Gray
+$gray-100: #F6F9FB;
+$gray-200: #E3EAEF;
+$gray-300: #C3D1DB;
+$gray-400: #A2B3BE;
+$gray-500: #708696;
+$gray-600: #4B6678;
+$gray-700: #294456;
+$gray-800: #112F44;
+$gray-900: #001C30;
+// Blue
+$blue-100: #E5EFF6;
+$blue-200: #C1D9EB;
+$blue-300: #92BEDD;
+$blue-400: #5295C6;
+$blue-500: #2972A6;
+$blue-600: #236695;
+$blue-700: #1F567D;
+$blue-800: #1E445F;
+$blue-900: #122C3E;
+$blue: $blue-500;
+// Green
+$green-100: #EBFFF9;
+$green-200: #BDF8E5;
+$green-300: #73DDBC;
+$green-400: #4AC29D;
+$green-500: #21A179;
+$green-600: #13825F;
+$green-700: #09684A;
+$green-800: #06543B;
+$green-900: #013D2A;
+$green: $green-500;
+// Yellow
+$yellow-100: #FFFBEA;
+$yellow-200: #FBEEAE;
+$yellow-300: #F9E171;
+$yellow-400: #F8D637;
+$yellow-500: #F0C808;
+$yellow-600: #D0AE07;
+$yellow-700: #947B02;
+$yellow-800: #5F4F03;
+$yellow-900: #3D3200;
+$yellow: $yellow-500;
+// Red
+$red-100: #FFEBED;
+$red-200: #FAC7CD;
+$red-300: #F09EA9;
+$red-400: #E5707F;
+$red-500: #CD4759;
+$red-600: #AB2134;
+$red-700: #860E1E;
+$red-800: #640B17;
+$red-900: #3E0109;
+$red: $red-500;
+// Purple
+$purple-100: #FBEBFF;
+$purple-200: #EEC0FA;
+$purple-300: #DD92EF;
+$purple-400: #CF6BE8;
+$purple-500: #B83FD7;
+$purple-600: #9920B7;
+$purple-700: #700E88;
+$purple-800: #49065A;
+$purple-900: #32013E;
+$purple: $purple-500;
+// Cyan
+$cyan-100: #E9F6FE;
+$cyan-200: #BAE1F6;
+$cyan-300: #8BC8EA;
+$cyan-400: #67B7E3;
+$cyan-500: #3FA0D7;
+$cyan-600: #2080B6;
+$cyan-700: #0D547C;
+$cyan-800: #074061;
+$cyan-900: #02273D;
+$cyan: $cyan-500;
+// Others
+$black: $gray-900;
+$secondary: $blue-700;
+$body-color: $gray-700;
+
+//// Typography
 $font-size-base:              1rem;
 $h1-font-size:                $font-size-base * 2;
 $h2-font-size:                $font-size-base * 1.5;
@@ -24,6 +102,8 @@ $custom-font-sizes: (
   "8": 0.75rem
 );
 $font-sizes: map-merge($font-sizes, $custom-font-sizes);
+
+//// Others
 $card-border-radius: 0;
 $input-border-radius: 0;
 $input-border-radius-lg: 0;
