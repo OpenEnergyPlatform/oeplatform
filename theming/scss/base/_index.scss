@@ -42,7 +42,9 @@
     $btn-font-weight: $btn-font-weight,
     $border-radius: $border-radius,
     $border-radius-lg: $border-radius,
-    $border-radius-sm: $border-radius-sm
+    $border-radius-sm: $border-radius-sm,
+    $card-border-color: $card-border-color,
+    $card-cap-padding-y: $card-cap-padding-y
 );
 
 @forward 'custom_variables';

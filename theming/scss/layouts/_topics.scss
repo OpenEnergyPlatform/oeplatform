@@ -19,6 +19,7 @@
 
         &__header {
             @extend .card-header;
+            @extend .bg-light;
         }
 
         &__header-top {
@@ -31,6 +32,10 @@
         &__title {
             @extend .fs-6;
             @extend .fw-semibold;
+
+            &-icon {
+                @extend .me-1;
+            }
         }
 
         &__table-nb {
@@ -44,8 +49,8 @@
 
         &__tag {
             @extend .rounded-pill;
-            @extend .bg-primary;
             @extend .text-white;
+            background-color: #4B6678;
             padding: 3px 1rem;
         }
 
