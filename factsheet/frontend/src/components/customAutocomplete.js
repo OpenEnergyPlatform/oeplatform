@@ -188,61 +188,67 @@ export default function CustomAutocomplete(parameters) {
       
       <Dialog open={open} onClose={handleClose}  >
         <form onSubmit={handleSubmit}>
-          <DialogTitle>Add a new entity to Open Energy Knowledge Graph (OEKG)</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{
               'marginTop': '20px',
               'marginBottom': '20px',
               }}>
-              You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i></b> 
+              You are about to add <b><i>{dialogValue.name}</i></b> as a new <b><i>{type}</i> </b> in Open Energy Knowledge Graph (OEKG)
             </DialogContentText>
             <TextField
-             sx={{
-              'marginTop': '20px',
-              }}
-              id="name"
-              value={dialogValue.name}
-              onChange={handleName}
-              label="Label"
-              fullWidth
+              size="small"
+              variant='standard'
+              sx={{
+                'marginTop': '20px',
+                }}
+                id="name"
+                value={dialogValue.name}
+                onChange={handleName}
+                label="Label"
+                fullWidth
             />
             <TextField
-             sx={{
-              'marginTop': '20px',
-              }}
-              label={'URL (Optional)'}
-              fullWidth
+              size="small"
+              variant='standard'
+              sx={{
+                'marginTop': '20px',
+                }}
+                label={'URL (Optional)'}
+                fullWidth
             />
             <TextField
               sx={{
                 'marginTop': '20px',
               }}
+              size="small"
+              variant='standard'
               multiline
-              rows={4}
-              maxRows={8}
+              rows={1}
+              maxRows={4}
               label={'Short description (Optional)'}
               fullWidth
             />
           </DialogContent>
           <DialogActions>
-            <Button variant="contained" onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" onClick={handleAddNew}>Add</Button>
+            <Button size="small" variant="contained" onClick={handleClose}>Cancel</Button>
+            <Button size="small" variant="contained" onClick={handleAddNew}>Add</Button>
           </DialogActions>
         </form>
       </Dialog>
       <Dialog open={openEdit} onClose={handleCloseEdit}  >
-        <DialogTitle>Edit an entity in Open Energy Knowledge Graph (OEKG) </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{
             'marginTop': '20px',
             'marginBottom': '20px',
             }}>
-            You are about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b> 
+            You are about to edit <b><i>{editLabel}</i></b> as a new <b><i>{type}</i></b>  in Open Energy Knowledge Graph (OEKG)
           </DialogContentText>
           <TextField
             sx={{
             'marginTop': '20px',
             }}
+            size="small"
+            variant='standard'
             id="name"
             value={updatedLabel}
             onChange={handleUpdatedLabel}
@@ -253,6 +259,8 @@ export default function CustomAutocomplete(parameters) {
             sx={{
             'marginTop': '20px',
             }}
+            size="small"
+            variant='standard'
             label={'URL (Optional)'}
             fullWidth
           />
@@ -261,15 +269,17 @@ export default function CustomAutocomplete(parameters) {
               'marginTop': '20px',
             }}
             multiline
-            rows={4}
-            maxRows={8}
+            size="small"
+            variant='standard'
+            rows={1}
+            maxRows={4}
             label={'Short description (Optional)'}
             fullWidth
           />
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleCloseEdit}>Cancel</Button>
-          <Button variant="contained" onClick={handleEdit}>Save</Button>
+          <Button size="small" variant="contained" onClick={handleCloseEdit}>Cancel</Button>
+          <Button size="small" variant="contained" onClick={handleEdit}>Save</Button>
         </DialogActions>
       </Dialog>
       {showSelectedElements && <Box

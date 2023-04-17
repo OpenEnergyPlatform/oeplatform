@@ -440,13 +440,12 @@ function Factsheet(props) {
   };
 
   const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
+    console.log(selectedList, name, idx);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
       obj[name] = selectedList
     setScenarios(newScenarios);
-
-    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
@@ -1451,9 +1450,12 @@ const handleUpdateMessageClose = (event: React.SyntheticEvent | Event, reason?: 
 };
 
 function getSteps() {
-  return ['Study information',
-  'Enter Education Details',
-  'Enter Address'];
+  return ['Basic information',
+  'Study details',
+  'Scenarios',
+  'Models',
+  'Frameworks'
+  ];
   }
 
 function getStepContent(step: number) {
@@ -1492,8 +1494,8 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <CustomAutocomplete type="Institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
-                <div style={{ marginLeft: '10px', marginTop: '-100px'  }}>
+                <CustomAutocomplete type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+                <div style={{ marginLeft: '10px', marginTop: '-10px'  }}>
                 <HtmlTooltip
                   title={
                     <Typography color="inherit" variant="caption">
@@ -1505,7 +1507,7 @@ function getStepContent(step: number) {
                   <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                 </HtmlTooltip>
                 </div>
-                <CustomAutocomplete type="Contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+                <CustomAutocomplete type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
                 <div style={{ marginTop: '0px'  }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1525,7 +1527,7 @@ function getStepContent(step: number) {
                 </div>
                 <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%' }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
                 <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
-                <CustomAutocomplete type="Author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
+                <CustomAutocomplete type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
 
           );
@@ -1535,8 +1537,16 @@ function getStepContent(step: number) {
           );
     case 2:
           return (
-              <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+            renderScenario()
           );
+    case 3:
+      return (
+          <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+      );
+    case 4:
+      return (
+          <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+      );
     default:
     return 'Unknown step';
   }
@@ -1703,8 +1713,8 @@ function getStepContent(step: number) {
           {mode === "edit" &&
             <div className='wizard'>
                 <Grid container >
-                  <Grid item xs={4} />
-                  <Grid item xs={5} style={{  paddingTop: '40px' }}>
+                  <Grid item xs={2} />
+                  <Grid item xs={8} style={{  paddingTop: '40px' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
@@ -1722,6 +1732,7 @@ function getStepContent(step: number) {
                               disabled={activeStep === 0}
                               onClick={handleBack}
                               variant="outlined"
+                              size="small"
                           >
                             Back
                           </Button>
@@ -1730,6 +1741,7 @@ function getStepContent(step: number) {
                             variant="contained"
                             color="primary"
                             onClick={handleNext}
+                            size="small"
                           >
                             {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                           </Button>
@@ -1740,7 +1752,7 @@ function getStepContent(step: number) {
                       ))}
                     </Stepper>
                   </Grid>
-                  <Grid item xs={3} />
+                  <Grid item xs={2} />
                 </Grid>
             </div>
           }
@@ -1756,9 +1768,11 @@ function getStepContent(step: number) {
               padding: '20px',
               overflow: 'scroll',
               borderRadius: '5px',
-              backgroundColor:'#FCFCFC',
+              backgroundColor:'#f3f3f361',
               display: "flex"
-            }}>
+            }}
+            class="bgimg"
+            >
                   <Box
                     sx={{
                       'marginTop': '10px',

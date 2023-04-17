@@ -423,7 +423,7 @@ def update_factsheet(request, *args, **kwargs):
         if abstract != '':
             oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
 
-        for s, p, o in oekg.triples((study_URI, OEO.OEO_0000050, None)):
+        for s, p, o in oekg.triples((study_URI, OEO.OEO_00000508, None)):
             oekg.remove((s, p, o))
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:

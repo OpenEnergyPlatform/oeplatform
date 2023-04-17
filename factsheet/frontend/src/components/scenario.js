@@ -306,23 +306,23 @@ export default function Scenario(props) {
               <DeleteOutlineIcon />
             </Fab>
           </Grid>
-          <Grid item xs={6} style={{ marginBottom: '30px' }}>
-            <TextField style={{  width: '90%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of this scenario?" variant="outlined" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
+          <Grid item xs={12} style={{ marginBottom: '30px' }}>
+            <TextField size="small" variant='standard' style={{  width: '80%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of this scenario?" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
           </Grid>
-          <Grid item xs={6} style={{ marginBottom: '30px' }}>
-            <TextField style={{  width: '90%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." variant="outlined" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
+          <Grid item xs={12} style={{ marginBottom: '30px' }}>
+            <TextField size="small" variant='standard' style={{  width: '80%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
           </Grid>
-          <Grid item xs={6} style={{ marginTop: '-20px' }}>
-            <TextField style={{ width: '90%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" variant="outlined"  multiline rows={6} maxRows={10} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <Grid item xs={12} style={{ marginTop: '-20px' }}>
+            <TextField size="small" variant='standard' style={{ width: '80%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={6} maxRows={10} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
           </Grid>
-          <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete type="Spatial region" editHandler={HandleEditRegion} addNewHandler={HandleAddNewRegion}  showSelectedElements={true} selectedElements={data.regions} manyItems optionsSet={scenarioRegion} kind='Which spatial regions does this scenario focus on (study regions)?' handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)} />
+          <Grid item xs={12} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete type="spatial region" editHandler={HandleEditRegion} addNewHandler={HandleAddNewRegion}  showSelectedElements={true} selectedElements={data.regions} manyItems optionsSet={scenarioRegion} kind='Which spatial regions does this scenario focus on (study regions)?' handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)} />
           </Grid>
-          <Grid item xs={6} style={{ marginBottom: '10px' }}>
-           <CustomAutocomplete type="Interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='Are there other, interacting regions considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
+          <Grid item xs={126} style={{ marginBottom: '10px' }}>
+           <CustomAutocomplete type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='Are there other, interacting regions considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
           </Grid>
-          <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete type="Scenario year"  editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
+          <Grid item xs={12} style={{ marginBottom: '10px' }}>
+            <CustomAutocomplete type="scenario year"  editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
           </Grid>
           <Grid item xs={12} style={{ marginBottom: '30px', 'padding': '20px', 'border': '1px dashed #cecece', width: '100%', borderRadius: '5px',  backgroundColor:'#FCFCFC' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
@@ -341,7 +341,6 @@ export default function Scenario(props) {
                </FormGroup>
              </div>
          </Grid>
-
           <Grid
             container
             direction="row"
