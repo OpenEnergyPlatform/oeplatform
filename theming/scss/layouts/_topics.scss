@@ -49,9 +49,13 @@
 
         &__tag {
             @extend .rounded-pill;
-            @extend .text-white;
-            background-color: $gray-600;
+            background-color: $gray-200;
             padding: 3px 1rem;
+
+            &--highlight {
+                @extend .text-white;
+                background-color: $gray-600;
+            }
         }
 
         &__body {
@@ -69,6 +73,7 @@
 
         &__text {
             @extend .card-text;
+            @extend .w-100;
 
             &--large {
                 @extend .fs-6;
