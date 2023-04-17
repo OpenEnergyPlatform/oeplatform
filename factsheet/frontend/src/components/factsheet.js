@@ -10,9 +10,9 @@ import TextField from '@mui/material/TextField';
 import CustomSwap from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
-import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
+// import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import Scenario from './scenario.js';
-import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
+// import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -38,16 +38,18 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import models_json from './models_list.json';
-import frameworks_json from './frameworks_list.json';
-import study_keywords from '../data/study_keywords.json';
-import scenario_years from '../data/scenario_years.json';
-import sectors_json from   '../data/sectors.json';
-import sector_divisions_json from '../data/sector_divisions.json';
+// import study_keywords from '../data/study_keywords.json';
+// import scenario_years from '../data/scenario_years.json';
+// import sectors_json from   '../data/sectors.json';
+// import energyTransformations from '../data/energyTransformations';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import StepContent from '@mui/material/StepContent';
+
+
 import { Route, Routes, useNavigate } from 'react-router-dom';
-
-import energyTransformations from '../data/energyTransformations';
-
 
 import Chip from '@mui/material/Chip';
 
@@ -77,6 +79,9 @@ function Factsheet(props) {
   
   const navigate = useNavigate();
 
+  const [activeStep, setActiveStep] = React.useState(0);
+  const steps = getSteps();
+
   const { id, fsData } = props;
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
@@ -103,6 +108,18 @@ function Factsheet(props) {
   const [scenarioYears, setScenarioYears] = useState([]);
   const [models, setModels] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+  
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+  
+  const handleReset = () => {
+    setActiveStep(0);
+  };
 
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
@@ -139,7 +156,9 @@ function Factsheet(props) {
         </span>
 
 
-  const [sectors, setSectors] = useState(sectors_json);
+ // const [sectors, setSectors] = useState(sectors_json);
+
+  const [sectors, setSectors] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
@@ -169,7 +188,8 @@ function Factsheet(props) {
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState([]);
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState([]);
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  // const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -196,7 +216,6 @@ function Factsheet(props) {
     nodes?.forEach(({ value, children }) => {
       ids = [...ids, value, ...getNodeIds(children)];
     });
-  
     return ids;
   };
 
@@ -204,7 +223,6 @@ function Factsheet(props) {
     populateFactsheetElements().then((data) => {
       setEnergyTransformationProcesses(data.energy_transformation_processes);
       setEnergyCarries(data.energy_carriers);
-
       let energy_carriers_ids = [];
       data.energy_carriers.forEach(({ value, children }) => {
         energy_carriers_ids = [...energy_carriers_ids, value, ...getNodeIds(children)];
@@ -964,23 +982,6 @@ function Factsheet(props) {
     });
   }
 
-const scenario_region = [
-    { id: 'Germany', name: 'Germany' },
-    { id: 'France', name: 'France' },
-  ];
-
-  const scenario_input_dataset_region = [
-    { id: '1', name: 'Germany' },
-    { id: 'Spain', name: 'Spain' },
-    { id: '2', name: 'France' },
-  ];
-
-  const scenario_interacting_region = [
-    { id: '1', name: 'Germany' },
-    { id: 'France', name: 'France' },
-    { id: 'Spain', name: 'Spain' },
-  ];
-
   const sectorDivisionsHandler = (sectorDivisionsList) => {
     console.log(sectorDivisionsList);
     
@@ -1267,7 +1268,7 @@ const scenario_region = [
                     alignItems: 'flex-start',
                     flexWrap: 'wrap',
                 }}>
-                <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions_json} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+                {/* <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions_json} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/> */}
                 <div style={{ marginTop: '30px' }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1286,7 +1287,7 @@ const scenario_region = [
                   </HtmlTooltip>
                   </div>
                 </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={sectors_json} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+              {/* <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={sectors_json} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} /> */}
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
               </Typography>
@@ -1294,15 +1295,15 @@ const scenario_region = [
                 <FormGroup>
                     <div>
                       {
-                        study_keywords.map((item) => <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes(item.name)} onChange={handleStudyKeywords} label={item.name} name={item.name} />)
+                        selectedStudyKewords.map((item) => <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes(item.name)} onChange={handleStudyKeywords} label={item.name} name={item.name} />)
                       }
                   </div>
                 </FormGroup>
               </div>
           </Grid>
           <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
-            <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}
+            {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} /> */}
+            {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"} */}
             toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
           </Grid>
       </Grid>
@@ -1401,7 +1402,7 @@ const scenario_region = [
                       removeScenario={removeScenario}
                       scenarioRegion={scenarioRegions}
                       scenarioInteractingRegion={scenarioInteractingRegions}
-                      scenarioYears={scenario_years}
+                      scenarioYears={'scenario_years'}
                       HandleEditRegion={HandleEditRegion}
                       HandleAddNewRegion={HandleAddNewRegion}
                       HandleEditInteractingRegion={HandleEditInteractingRegion}
@@ -1427,28 +1428,119 @@ const scenario_region = [
         alignItems="center"
       >
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={models_json} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+          {/* <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={models_json} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/> */}
         </Grid>
         <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={frameworks_json} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+          {/* <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={frameworks_json} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/> */}
         </Grid>
       </Grid>,
       ]
   }
 
-  const handleSaveMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-      }
-      setOpenSavedDialog(false);
-  };
-  const handleUpdateMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-      }
-      setOpenUpdatedDialog(false);
-  };
+const handleSaveMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+  if (reason === 'clickaway') {
+    return;
+    }
+    setOpenSavedDialog(false);
+};
+const handleUpdateMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+  if (reason === 'clickaway') {
+    return;
+    }
+    setOpenUpdatedDialog(false);
+};
 
+function getSteps() {
+  return ['Study information',
+  'Enter Education Details',
+  'Enter Address'];
+  }
+
+function getStepContent(step: number) {
+  switch (step) {
+    case 0:
+          return (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                padding: '10px',
+              }}>
+                <TextField size="small" style={{  width: '80%',  marginTop: '10px' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+                <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
+                  <HtmlTooltip
+                    title={
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'} <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    }
+                  >
+                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </div>
+                <TextField  size="small"  style={{  width: '80%', marginTop: '30px' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+                <div style={{ marginLeft: '10px', marginTop: '50px'}}>
+                  <HtmlTooltip
+                    title={
+                      <Typography color="inherit" variant="caption">
+                        {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'} <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    }
+                  >
+                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </div>
+                <CustomAutocomplete type="Institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+                <div style={{ marginLeft: '10px', marginTop: '-100px'  }}>
+                <HtmlTooltip
+                  title={
+                    <Typography color="inherit" variant="caption">
+                      {'An institution is an organisation that serves a social purpose.'}<br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
+                    </Typography>
+                  }
+                >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                </HtmlTooltip>
+                </div>
+                <CustomAutocomplete type="Contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+                <div style={{ marginTop: '0px'  }}>
+                  <HtmlTooltip
+                    style={{ marginLeft: '10px' }}
+                    placement="top"
+                    title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="caption">
+                          {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                  >
+                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </div>
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%' }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
+                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+                <CustomAutocomplete type="Author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
+              </div>
+
+          );
+    case 1:
+          return (
+              <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+          );
+    case 2:
+          return (
+              <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+          );
+    default:
+    return 'Unknown step';
+  }
+  }
 
   return (
     <div>
@@ -1611,15 +1703,48 @@ const scenario_region = [
           {mode === "edit" &&
             <div className='wizard'>
                 <Grid container >
-                  <Grid item xs={12} >
-                    <CustomTabs
+                  <Grid item xs={4} />
+                  <Grid item xs={5} style={{  paddingTop: '40px' }}>
+                    {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
-                    />
+                    /> */}
+                    <Stepper activeStep={activeStep} orientation="vertical">
+                      {steps.map((label, index) => (
+                      <Step key={label}>
+                        <StepLabel><b>{label}</b></StepLabel>
+                        <StepContent>
+                        <Typography>{getStepContent(index)}</Typography>
+                        <div >
+                          <div>
+                          <Button
+                              style={{ marginTop: '10px', marginRight: '5px' }}
+                              disabled={activeStep === 0}
+                              onClick={handleBack}
+                              variant="outlined"
+                          >
+                            Back
+                          </Button>
+                          <Button
+                            style={{ marginTop: '10px' }}
+                            variant="contained"
+                            color="primary"
+                            onClick={handleNext}
+                          >
+                            {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                          </Button>
+                          </div>
+                        </div>
+                        </StepContent>
+                      </Step>
+                      ))}
+                    </Stepper>
                   </Grid>
+                  <Grid item xs={3} />
                 </Grid>
             </div>
           }
+
           {mode === "overview" &&
             <div style={{
               'marginTop': '10px',

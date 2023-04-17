@@ -40,11 +40,11 @@ oeo.parse(Ontology_URI)
 oeo_owl = get_ontology(Ontology_URI).load()
 
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -139,6 +139,7 @@ def create_factsheet(request, *args, **kwargs):
                 oekg.add(( scenario_URI, RDFS.label, Literal(item["acronym"])))
                 if item["name"] != '':
                     oekg.add(( scenario_URI, OEKG["has_full_name"], Literal(item["name"])))
+                    oekg.add(( scenario_URI, RDF.type, OEO.OEO_00000365))
                 if item["abstract"] != '':
                     oekg.add(( scenario_URI, DC.abstract, Literal(item["abstract"]) ))
 
@@ -190,7 +191,7 @@ def create_factsheet(request, *args, **kwargs):
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
-            oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
+            oekg.add(( study_URI, OEO.OEO_00000509, funding_source_URI ))
 
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
@@ -302,6 +303,7 @@ def update_factsheet(request, *args, **kwargs):
                 #     prev_scenario_id = prev_scenario[0]['id']
                 # else:
                 oekg.add(( scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]) ))
+                oekg.add(( scenario_URI, RDF.type, OEO.OEO_00000365 ))
 
                 for s, p, o in oekg.triples(( scenario_URI, RDFS.label, None )):
                     oekg.remove((s, p, o))
@@ -414,7 +416,7 @@ def update_factsheet(request, *args, **kwargs):
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
-            oekg.add(( study_URI, OEO.RO_0002234, funding_source_URI ))
+            oekg.add(( study_URI, OEO.OEO_00000509, funding_source_URI ))
 
         for s, p, o in oekg.triples((study_URI, DC.abstract, None)):
             oekg.remove((s, p, o))

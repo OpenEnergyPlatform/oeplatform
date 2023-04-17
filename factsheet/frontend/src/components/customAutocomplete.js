@@ -132,8 +132,9 @@ export default function CustomAutocomplete(parameters) {
  
 
   return (
-    <Box style={{ width: '90%', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: '80%', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
+        size="small" 
         multiple
         id="checkboxes-tags-demo"
         options={parameters.optionsSet}
@@ -170,7 +171,7 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" />
+          <TextField {...params} label={parameters.kind} placeholder="" variant="standard"/>
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
@@ -184,6 +185,7 @@ export default function CustomAutocomplete(parameters) {
           return filtered;
         }}
       />
+      
       <Dialog open={open} onClose={handleClose}  >
         <form onSubmit={handleSubmit}>
           <DialogTitle>Add a new entity to Open Energy Knowledge Graph (OEKG)</DialogTitle>
@@ -275,17 +277,15 @@ export default function CustomAutocomplete(parameters) {
         sx={{
           'marginTop': '10px',
           'overflow': 'auto',
-          'height': manyItems ? '100px' :'40px',
-          'marginBottom': '20px',
-          border: '1px dashed #cecece',
-          padding: '20px',
-          overflow: 'scroll',
-          borderRadius: '5px',
-           backgroundColor:'#FCFCFC'
+          'height': '100%',
+          // 'border': '1px dashed #cecece',
+          'overflow': 'scroll',
+          'borderRadius': '5px',
+          // 'backgroundColor':'#FCFCFC'
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.name} deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '2px', 'marginTop': '10px', 'marginLeft': '5px' }}/>
+          <Chip size='small' key={v.id}  label={v.name} deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
         ))}
       </Box>}
     </Box>

@@ -100,12 +100,12 @@ function Home(props) {
                 </Grid>
                 <Grid item xs={3}>
                     <ThemeProvider theme={theme}>
-                      <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                      <Link to={`factsheet/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                         <Button disabled disableElevation={true} startIcon={<CompareArrowsIcon />} style={{ 'textTransform': 'none', 'margin': '10px', 'marginRight' : '20px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="neutral" >
                           Compare 
                         </Button>
                       </Link>
-                      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                      <Link to={`factsheet/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                         <Button disableElevation={true} startIcon={<AddBoxIcon />} style={{ 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000', 'float': 'right',  }} size="large" variant="contained" color="primary" >
                           Add a new 
                         </Button>

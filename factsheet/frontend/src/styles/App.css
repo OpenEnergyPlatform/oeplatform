@@ -125,28 +125,24 @@
 }
 
 
-/* a:link {
-  color: #ffffff;
-  background-color: #eeeeee;
+a:link {
+  color: #92def7;
   text-decoration: none;
   font-weight: bold
 }
 
 a:visited {
-  color: #ffffff;
-  background-color: #eeeeee;
+  color: #92def7;
   text-decoration: none;
   font-weight: bold
 }
 
 a:hover {
-  color: #ffffff;
-  background-color: #eeeeee;
+  color: #92def7;
   font-weight: bold
 }
 
 a:active {
-  color: #ffffff;
-  background-color: #eeeeee;
+  color: #92def7;
   font-weight: bold
-} */
+}

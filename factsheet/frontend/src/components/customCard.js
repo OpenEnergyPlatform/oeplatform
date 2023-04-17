@@ -31,7 +31,7 @@ export default function CustomCard(props) {
         </Typography>
       </CardContent>
       <CardActions class="actions">
-        <Link to={`factsheet/fs/${id}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
+        <Link to={`factsheet/${id}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
           <Button disableElevation={true} variant="text" color="primary" size="small" >
             More...
           </Button>
