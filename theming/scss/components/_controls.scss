@@ -3,6 +3,7 @@
 
 .controls-container {
     &--horizontal {
+        @extend .pb-4;
         @include flex-row;
 
         @include media-breakpoint-down(lg) {
