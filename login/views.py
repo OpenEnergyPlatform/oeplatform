@@ -15,7 +15,7 @@ from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
 
-class ProfileView(View):
+class TablesView(View):
     def get(self, request, user_id):
         """
         Load the user identified by user_id and is OAuth-token.
@@ -42,7 +42,7 @@ class ProfileView(View):
             table["schema"] = table["schema"].name
 
         return render(
-            request, "login/profile.html", {"tables": tables, "profile_user": user}
+            request, "login/user_tables.html", {"tables": tables, "profile_user": user}
         )
 
 

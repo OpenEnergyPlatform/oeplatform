@@ -9,14 +9,14 @@
 </script>
     <br>
     <br>
+    {% if request.user.is_authenticated and profile_user == request.user %}
+    <a href="{% url 'settings' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Settings</a>
+    {% endif%}
     {% if profile_user %}
         <a href="{% url 'tables' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Tables</a>
     {% endif%}
     {% if profile_user %}
         <a href="{% url 'reviews' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Reviews</a>
-    {% endif%}
-    {% if request.user.is_authenticated and profile_user == request.user %}
-    <a href="{% url 'settings' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Settings</a>
     {% endif%}
     <hr>
     <br>

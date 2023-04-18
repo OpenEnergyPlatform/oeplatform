@@ -44,10 +44,14 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     url("^", include("django.contrib.auth.urls")),
-    url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
+    url(
+        r"^profile/(?P<user_id>[\d]+)$",
+        views.SettingsView.as_view(),
+        name="profile_settings",
+    ),
     url(
         r"^profile/(?P<user_id>[\d]+)/tables$",
-        views.ProfileView.as_view(),
+        views.TablesView.as_view(),
         name="tables",
     ),
     url(
