@@ -61,7 +61,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          # pip install tox
+          pip install tox
       - name: Add schemas for testing
         env:
           PGPASSWORD: postgres
@@ -81,7 +81,9 @@ jobs:
       - name: Start OEP
         run: python manage.py runserver 8000 &
 
-      #- name: Run tox
-      #  run: tox -v
       - name: Run tests
-        run: python manage.py test
+        run: python manage.py test --no-input
+
+      - name: Run tox
+        run: tox -v
+      
