@@ -44,7 +44,7 @@ jobs:
     # production still uses python3.6
     strategy:
       matrix:
-        python-version: ['3.6', '3.10']
+        python-version: ['3.6', '3.9']
     steps:
       - uses: actions/checkout@v2
         with:
