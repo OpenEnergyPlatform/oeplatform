@@ -83,9 +83,7 @@ jobs:
       #  run: python manage.py runserver 8000 &
 
       - name: Run tests
-        run: |
-          python info.py
-          python manage.py test --no-input
+        run: python manage.py test --no-input
 
       - name: Run tox
         run: tox -v
