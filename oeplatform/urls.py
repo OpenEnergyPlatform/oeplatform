@@ -18,7 +18,7 @@ from django.conf.urls.static import static
 
 from oeplatform import settings
 
-from .views import ImagesView
+from .views import redirect_tutorial
 
 handler500 = "base.views.handler500"
 handler404 = "base.views.handler404"
@@ -30,10 +30,6 @@ urlpatterns = [
     url(r"^factsheets/", include("modelview.urls")),
     url(r"^dataedit/", include("dataedit.urls")),
     url(r"^ontology/", include("ontology.urls")),
-    url(r"^tutorials/", include("tutorials.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
-    url(
-        r"^tutorials/[/\w_\d]*/images/(?P<f>[\w_\d]+(\.[\w_\d]+)?)$",
-        ImagesView.as_view(),
-    ),
+    url(r"^tutorials/.*", redirect_tutorial),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

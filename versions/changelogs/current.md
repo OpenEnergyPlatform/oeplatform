@@ -1,5 +1,6 @@
 ### Changes
-- Start implement new data/metadata view layout (#1124)
+
+- updated metadata editor (json-editor) to latest version, using bootstrap5 (#1198)
 
 ### Features
 

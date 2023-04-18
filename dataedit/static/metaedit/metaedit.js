@@ -114,7 +114,7 @@ var MetaEdit = function (config) {
 
 
         // MUST have ID
-        json["id"] = json["id"] || config["url_table_id"];
+        json["id"] = config["url_table_id"];
 
         // MUST have one resource with name == id == tablename
         json["resources"] = json["resources"] || [{}];
@@ -280,7 +280,7 @@ var MetaEdit = function (config) {
                 options = {
                     startval: config.initialData,
                     schema: config.schema,
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap5',
                     iconlib: 'fontawesome5',
                     mode: 'form',
                     compact: true,
@@ -373,7 +373,7 @@ var MetaEdit = function (config) {
 
                 standalone_options = {
                     schema: config.schema,
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap5',
                     iconlib: 'fontawesome5',
                     mode: 'form',
                     compact: true,

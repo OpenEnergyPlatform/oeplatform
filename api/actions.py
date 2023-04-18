@@ -810,10 +810,10 @@ def column_add(schema, table, column, description):
 def assert_valid_identifier_name(identifier):
     if not IDENTIFIER_PATTERN.match(identifier):
         raise APIError(
-            "Invalid name. "
-            "Names must consist of lowercase alpha-numeric words or underscores "
+            f"Unsupported table name: {identifier}\n"
+            "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
-            "and must be have a maximumlength of %s" % MAX_IDENTIFIER_LENGTH
+            f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters (current table name length: {len(identifier)})."
         )
 
 
@@ -1094,6 +1094,12 @@ def _get_table(schema, table):
     metadata = MetaData(bind=_get_engine())
 
     return Table(table, metadata, autoload=True, autoload_with=engine, schema=schema)
+
+
+def get_table_metadata(schema, table):
+    table_obj = _get_table(schema=schema, table=table)
+    comment = table_obj.comment
+    return json.loads(comment) if comment else {}
 
 
 def __internal_select(query, context):

@@ -1,11 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 
-{% block main-right-sidebar-content %}
-    <h2>Changes in version {{ version }}</h2>
-    {{ changes|safe }}
-{% endblock %}
-
 {% block after-head %}
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/index-style.css' %}">
@@ -65,28 +60,22 @@
                         <a role="button" class="btn btn-secondary " href="/ontology"> Ontology </a>
                     </div>
                     <div class="index-tile index-tile-colored index-tile-color-4">
-                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg" alt="Tutorials">
-                        {% comment %} <a role="button" class="btn btn-secondary" href="https://oep-data-interface.readthedocs.io/en/latest/">Tutorials</a> {% endcomment %}
+                        <img src="/static/img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg" alt="Academy">
                         <div class="inner-index-tile">
                             <div class= "panel-description">
-                                <h2> Tutorials </h2>
+                                <h2> Academy </h2>
                                 <p class="alternative">
-                                    There is something you'd like to do on the platform, but you don't know how? Check out the tutorials! They are available for all levels, and in the form of texts, videos and markdowns.
+                                    The Open Energy Academy (OEA) provides courses as well as dedicated tutorials
+                                    covering important topics around the Open Energy Family (OEF) tools
+                                    and the Open Energy Platform (OEP).
+                                    You will also find short answers to urgent questions.
                                 </p>
                             </div>
                         </div>
-                        <a role="button" class="btn btn-secondary " href="{% url 'list_tutorials'%}">Tutorials</a>
+                        <a role="button" class="btn btn-secondary " href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
                     </div>
                 </div>
             </div>
-            {% comment %} <div class="index-tutorial">
-                <h4>Tutorials</h4>
-                <span class="alternative">
-                    There is something you'd like to do on the platform, but you don't know how?<br/>
-                    Check out the tutorials! They are available for all levels, and in the form of texts, videos and markdowns.<br/>
-                </span>
-                <a role="button" class="btn btn-default btn-sm" href="{% url 'list_tutorials'%}">See tutorials</a>
-            </div> {% endcomment %}
         </div>
 
         <div class="index-about-container-background">
@@ -97,7 +86,7 @@
                     <span class="alternative">
                         Learn how to download and publish open data on the OEP using the API.
                     </span>
-                    <a role="button" class="btn btn-secondary btn-sm" href="https://openenergy-platform.org/tutorials/jupyter/OEP_API_tutorial_part1/">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm" href="{{ EXTERNAL_URLS.tutorials_api1 }}">Learn more</a>
                 </div>
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-openscience.svg" alt="">
@@ -105,7 +94,7 @@
                     <span class="alternative">
                         Good scientific practice needs open licenses for software, data and content.
                     </span>
-                    <a role="button" class="btn btn-secondary btn-sm" href="https://openenergy-platform.org/tutorials/jupyter/tutorial_open-data-licenses/">Learn more</a>
+                    <a role="button" class="btn btn-secondary btn-sm" href="{{ EXTERNAL_URLS.tutorials_licenses }}">Learn more</a>
                 </div>
                 <div class="index-about-column">
                     <img src="/static/img/welcome/about-community.svg" alt="">
