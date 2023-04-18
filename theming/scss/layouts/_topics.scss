@@ -104,7 +104,7 @@
             @include flex-row;
             @extend .justify-content-end;
             @extend .align-items-end;
-            width: calc((#{$C--container-width} - (#{$C--padding-standard} * 2)) / 3);
+            width: 66%;
 
             @include media-breakpoint-down(lg) {
                 width: 100%;
