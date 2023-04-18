@@ -41,10 +41,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    # We run this for python version 3.7.
+    # production still uses python3.6
     strategy:
       matrix:
-        python-version: ['3.8', '3.9']
+        python-version: ['3.6', '3.10']
     steps:
       - uses: actions/checkout@v2
         with:
