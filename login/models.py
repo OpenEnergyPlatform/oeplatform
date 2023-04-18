@@ -1,5 +1,4 @@
 import itertools
-from datetime import date
 
 import requests
 from django.conf import settings
@@ -9,6 +8,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+
 import dataedit.models as datamodels
 
 try:
@@ -27,28 +27,70 @@ ADMIN_PERM = 12
 
 
 class OEPUserManager(UserManager):
-    def create_user(self, name, email, affiliation=None, profile_img=None, registration_date=None, username=None,
-                    linkedin=None, facebook=None, twitter=None, location=None, work=None):
+    def create_user(
+        self,
+        name,
+        email,
+        affiliation=None,
+        profile_img=None,
+        registration_date=None,
+        username=None,
+        linkedin=None,
+        facebook=None,
+        twitter=None,
+        location=None,
+        work=None,
+    ):
         if not email:
             raise ValueError("An email address must be entered")
         if not name:
             raise ValueError("A name must be entered")
 
         user = self.model(
-            name=name, email=self.normalize_email(email), affiliation=affiliation, profile_img=profile_img,
-            registration_date=registration_date, username=username,
-            linkedin=linkedin, facebook=facebook, twitter=twitter, location=location, work=work)
+            name=name,
+            email=self.normalize_email(email),
+            affiliation=affiliation,
+            profile_img=profile_img,
+            registration_date=registration_date,
+            username=username,
+            linkedin=linkedin,
+            facebook=facebook,
+            twitter=twitter,
+            location=location,
+            work=work,
+        )
 
         user.save(using=self._db)
         user.send_activation_mail()
         return user
 
-    def create_superuser(self, name, email, affiliation, profile_img, registration_date, username,
-                         linkedin, facebook, twitter, location, work):
-
-        user = self.create_user(name, email, affiliation=affiliation, profile_img=profile_img,
-                                registration_date=registration_date, username=username,
-                                linkedin=linkedin, facebook=facebook, twitter=twitter, location=location, work=work)
+    def create_superuser(
+        self,
+        name,
+        email,
+        affiliation,
+        profile_img,
+        registration_date,
+        username,
+        linkedin,
+        facebook,
+        twitter,
+        location,
+        work,
+    ):
+        user = self.create_user(
+            name,
+            email,
+            affiliation=affiliation,
+            profile_img=profile_img,
+            registration_date=registration_date,
+            username=username,
+            linkedin=linkedin,
+            facebook=facebook,
+            twitter=twitter,
+            location=location,
+            work=work,
+        )
         user.is_admin = True
         user.save(using=self._db)
         return user

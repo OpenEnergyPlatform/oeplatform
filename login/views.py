@@ -1,25 +1,18 @@
 from django import forms
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
-from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
-from django.views.generic.edit import UpdateView, DeleteView
+from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from django.shortcuts import render, get_object_or_404
-from django.views import View
+from dataedit.models import Table
 
-from dataedit.models import TableRevision, Table
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
-
-from django.contrib import messages
 
 
 class ProfileView(View):
@@ -32,20 +25,25 @@ class ProfileView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        
+
         # get all tables and optimize query
         tables = Table.objects.all().select_related()
         # get all tables the user got write perm on
-        user_tables = [table for table in tables if user.get_table_permission_level(table) >= models.WRITE_PERM] # WRITE_PERM = 4
+        user_tables = [
+            table
+            for table in tables
+            if user.get_table_permission_level(table) >= models.WRITE_PERM
+        ]  # WRITE_PERM = 4
         # prepare for data for template
         tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 
         # get name of schema form FK object
         for table in tables:
             table["schema"] = table["schema"].name
-            
+
         return render(
-            request, "login/profile.html", {"tables": tables, "profile_user": user})
+            request, "login/profile.html", {"tables": tables, "profile_user": user}
+        )
 
 
 class ReviewsView(View):
@@ -58,8 +56,7 @@ class ReviewsView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        return render(
-            request, "login/user_review.html", {"profile_user": user})
+        return render(request, "login/user_review.html", {"profile_user": user})
 
 
 class SettingsView(View):
@@ -81,7 +78,8 @@ class SettingsView(View):
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
         return render(
-            request, "login/user_settings.html", {"profile_user": user, "token": token})
+            request, "login/user_settings.html", {"profile_user": user, "token": token}
+        )
 
 
 class GroupManagement(View, LoginRequiredMixin):
@@ -285,7 +283,11 @@ class EditUserView(View):
     def post(self, request, user_id):
         if not request.user.id == int(user_id):
             raise PermissionDenied
-        form = EditUserForm(instance=request.user, files=request.FILES or None, data=request.POST or None)
+        form = EditUserForm(
+            instance=request.user,
+            files=request.FILES or None,
+            data=request.POST or None,
+        )
         if form.is_valid():
             form.save()
             return redirect("/user/profile/{id}".format(id=request.user.id))
@@ -333,12 +335,12 @@ class OEPPasswordChangeView(PasswordChangeView):
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
     model = OepUser
-    template_name = 'login/delete_account.html'
-    success_url = reverse_lazy('logout')
+    template_name = "login/delete_account.html"
+    success_url = reverse_lazy("logout")
 
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        return render(request, 'login/delete_account.html', {"profile_user": user})
+        return render(request, "login/delete_account.html", {"profile_user": user})
 
 
 class ActivationNoteView(FormView):
