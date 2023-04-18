@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       # LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
       # SEGFAULT_SIGNALS: all
