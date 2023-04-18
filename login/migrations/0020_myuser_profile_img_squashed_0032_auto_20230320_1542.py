@@ -5,6 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    replaces = [
+        ("login", "0020_myuser_profile_img"),
+        ("login", "0021_alter_myuser_profile_img"),
+        ("login", "0022_alter_myuser_profile_img"),
+        ("login", "0023_alter_myuser_profile_img"),
+        ("login", "0024_alter_myuser_profile_img"),
+        ("login", "0025_alter_myuser_profile_img"),
+        ("login", "0026_alter_myuser_profile_img"),
+        ("login", "0027_alter_myuser_profile_img"),
+        ("login", "0028_alter_myuser_profile_img"),
+        ("login", "0029_alter_myuser_profile_img"),
+        ("login", "0030_alter_myuser_profile_img"),
+        ("login", "0031_myuser_registration_date"),
+        ("login", "0032_auto_20230320_1542"),
+    ]
+
     dependencies = [
         ("login", "0019_auto_20201103_2037"),
     ]
