@@ -109,6 +109,7 @@ export default function Scenario(props) {
     const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
     const [value, setValue] = React.useState(0);
 
+
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
       setValue(newValue);
     };
@@ -191,6 +192,9 @@ export default function Scenario(props) {
       removeScenario(data.id);
       forceUpdate();
     }
+
+    console.log(data);
+
 
     const mapping = 
           "@prefix rr: <http://www.w3.org/ns/r2rml#>. \n \
@@ -307,13 +311,13 @@ export default function Scenario(props) {
             </Fab>
           </Grid>
           <Grid item xs={12} style={{ marginBottom: '30px' }}>
-            <TextField size="small" variant='standard' style={{  width: '80%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of this scenario?" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
+            <TextField size="small" variant='standard' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of this scenario?" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
           </Grid>
           <Grid item xs={12} style={{ marginBottom: '30px' }}>
-            <TextField size="small" variant='standard' style={{  width: '80%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
+            <TextField size="small" variant='standard' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
           </Grid>
-          <Grid item xs={12} style={{ marginTop: '-20px' }}>
-            <TextField size="small" variant='standard' style={{ width: '80%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={6} maxRows={10} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <Grid item xs={12} style={{ marginTop: '0px' }}>
+            <TextField size="small" variant='standard' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
           </Grid>
           <Grid item xs={12} style={{ marginBottom: '10px' }}>
             <CustomAutocomplete type="spatial region" editHandler={HandleEditRegion} addNewHandler={HandleAddNewRegion}  showSelectedElements={true} selectedElements={data.regions} manyItems optionsSet={scenarioRegion} kind='Which spatial regions does this scenario focus on (study regions)?' handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)} />
@@ -321,10 +325,10 @@ export default function Scenario(props) {
           <Grid item xs={126} style={{ marginBottom: '10px' }}>
            <CustomAutocomplete type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='Are there other, interacting regions considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
           </Grid>
-          <Grid item xs={12} style={{ marginBottom: '10px' }}>
-            <CustomAutocomplete type="scenario year"  editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
+          <Grid item xs={12} style={{ marginBottom: '30px' }}>
+            <CustomAutocomplete type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
           </Grid>
-          <Grid item xs={12} style={{ marginBottom: '30px', 'padding': '20px', 'border': '1px dashed #cecece', width: '100%', borderRadius: '5px',  backgroundColor:'#FCFCFC' }}>
+          <Grid item xs={12} style={{ marginBottom: '30px', 'padding': '20px', width: '100%', border: '1px solid #cecece', width: '100%', borderRadius: '2px', backgroundColor:'#FCFCFC' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
               What additional keywords describe your scenario?
             </Typography>
@@ -346,10 +350,8 @@ export default function Scenario(props) {
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            style={{ marginTop: '20px', 'padding': '20px', 'border': '1px dashed #cecece', width: '100%', borderRadius: '5px',  backgroundColor:'#FCFCFC' }}
+            style={{ marginTop: '10px', 'padding': '20px', 'width': '100%', 'border':'1px solid #cecece', 'borderRadius': '2px', 'backgroundColor':'#FCFCFC' }}
           >
-
-
           <Grid item xs={12} >
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
               Input dataset(s):
@@ -362,9 +364,11 @@ export default function Scenario(props) {
                   disableCloseOnSelect
                   options={options_db_names}
                   sx={{ width: '100%' }}
-                  renderInput={(params) => <TextField {...params} label="Name" />}
+                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='standard' />}
                   onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
                   value={item.value.label}
+                  size="small"
+                  variant='standard'
                 />
               </Grid>
               <Grid item xs={1} style={{ marginTop: '5px', textAlign: 'center' }}>
@@ -377,7 +381,7 @@ export default function Scenario(props) {
                   disableCloseOnSelect
                   options={options_db_iris}
                   sx={{ width: '95%' }}
-                  renderInput={(params) => <TextField {...params} label="IRI" />}
+                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='standard' />}
                   onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
                   value={ item.value.iri}
                 />
@@ -388,13 +392,14 @@ export default function Scenario(props) {
                   aria-label="add"
                   size="small"
                   onClick={() => removeInputDataset(item.key, data.index)}
+                  sx={{ transform: 'scale(0.8)' }}
                 >
                   <DeleteOutlineIcon />
                 </Fab>
                 <Fab
                   color="success"
                   size="small"
-                  sx={{ 'marginLeft': '5px' }}
+                  sx={{ transform: 'scale(0.8)' }}
                   onClick={handleClickOpenRemovedDialog}
                   // disabled
                 >
@@ -409,7 +414,6 @@ export default function Scenario(props) {
           aria-label="add"
           size="small"
           onClick={() => addInputDatasetItem(uuid())}
-          
           >
           <AddIcon />
           </Fab>
@@ -421,7 +425,7 @@ export default function Scenario(props) {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ marginTop: '10px', padding: '20px', border: '1px dashed #cecece', width: '100%', borderRadius: '5px',  backgroundColor:'#FCFCFC' }}
+          style={{ marginTop: '30px', padding: '20px', border: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }}
         >
 
           <Grid item xs={12} >
@@ -437,7 +441,7 @@ export default function Scenario(props) {
                   disableCloseOnSelect
                   options={options_db_names}
                   sx={{ width: '100%' }}
-                  renderInput={(params) => <TextField {...params} label="Name" />}
+                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='standard'/>}
                   onChange={(event, value) => updateOutputDatasetName(value, item.key, index)}
                   value={item.value.label}
                 />
@@ -452,7 +456,7 @@ export default function Scenario(props) {
                   disableCloseOnSelect
                   options={options_db_iris}
                   sx={{ width: '95%' }}
-                  renderInput={(params) => <TextField {...params} label="IRI" />}
+                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='standard'/>}
                   onChange={(event, value) => updateOutputDatasetIRI(value, item.key, index)}
                   value={item.value.iri}
                 />
@@ -463,13 +467,14 @@ export default function Scenario(props) {
                   aria-label="add"
                   size="small"
                   onClick={() => removeOutputDataset(item.key, data.index)}
+                  sx={{  transform: 'scale(0.8)' }}
                 >
                   <DeleteOutlineIcon />
                 </Fab>
                 <Fab
                   color="success"
                   size="small"
-                  sx={{ 'marginLeft': '5px' }}
+                  sx={{ transform: 'scale(0.8)' }}
                   // disabled
                 >
                   <EmojiObjectsIcon />

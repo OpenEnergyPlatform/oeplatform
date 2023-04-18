@@ -47,7 +47,8 @@ import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
-
+import CircularProgress from '@mui/material/CircularProgress';
+import Badge from '@mui/material/Badge';
 
 import { Route, Routes, useNavigate } from 'react-router-dom';
 
@@ -1401,7 +1402,7 @@ function Factsheet(props) {
                       removeScenario={removeScenario}
                       scenarioRegion={scenarioRegions}
                       scenarioInteractingRegion={scenarioInteractingRegions}
-                      scenarioYears={'scenario_years'}
+                      scenarioYears={scenarioYears}
                       HandleEditRegion={HandleEditRegion}
                       HandleAddNewRegion={HandleAddNewRegion}
                       HandleEditInteractingRegion={HandleEditInteractingRegion}
@@ -1467,8 +1468,9 @@ function getStepContent(step: number) {
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 padding: '10px',
+                width: '60%'
               }}>
-                <TextField size="small" style={{  width: '80%',  marginTop: '10px' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+                <TextField size="small" style={{  width: '95%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
                 <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
                   <HtmlTooltip
                     title={
@@ -1481,8 +1483,8 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField  size="small"  style={{  width: '80%', marginTop: '30px' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
-                <div style={{ marginLeft: '10px', marginTop: '50px'}}>
+                <TextField  size="small"  style={{  width: '95%', marginTop: '30px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+                <div style={{ marginLeft: '10px', marginTop: '40px'}}>
                   <HtmlTooltip
                     title={
                       <Typography color="inherit" variant="caption">
@@ -1495,7 +1497,7 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </div>
                 <CustomAutocomplete type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
-                <div style={{ marginLeft: '10px', marginTop: '-10px'  }}>
+                <div style={{ marginLeft: '10px', marginTop: '20px'  }}>
                 <HtmlTooltip
                   title={
                     <Typography color="inherit" variant="caption">
@@ -1508,7 +1510,7 @@ function getStepContent(step: number) {
                 </HtmlTooltip>
                 </div>
                 <CustomAutocomplete type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-                <div style={{ marginTop: '0px'  }}>
+                <div style={{ marginTop: '20px'  }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
                     placement="top"
@@ -1525,8 +1527,8 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%' }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
-                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '95%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
+                <TextField size="small" variant="standard" style={{ width: '95%', marginTop:'20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
                 <CustomAutocomplete type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
 
@@ -1713,8 +1715,8 @@ function getStepContent(step: number) {
           {mode === "edit" &&
             <div className='wizard'>
                 <Grid container >
-                  <Grid item xs={2} />
-                  <Grid item xs={8} style={{  paddingTop: '40px' }}>
+                  <Grid item xs={1} />
+                  <Grid item xs={8} style={{ marginTop: '40px', padding: '40px', border: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
@@ -1752,7 +1754,70 @@ function getStepContent(step: number) {
                       ))}
                     </Stepper>
                   </Grid>
-                  <Grid item xs={2} />
+                  <Grid item xs={2} style={{ marginTop: '40px', padding: '40px', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }} >
+                    <div style={{ marginTop: '10%' }}>
+                      <div>
+                        <Box sx={{  marginLeft: '20%', position: 'relative', display: 'inline-flex' }}>
+                          <CircularProgress variant="determinate" value="40" size="6rem" />
+                          <Box
+                            sx={{
+                              top: 0,
+                              left: 0,
+                              bottom: 0,
+                              right: 0,
+                              position: 'absolute',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Typography variant="h6" component="div" color="text.secondary">
+                              {`${Math.round(40)}%`}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </div>
+                      <div style={{  marginLeft: '21%', position: 'relative', display: 'inline-flex' }}>
+                        <Typography variant="subtitle2" component="div" color="text.secondary">
+                          To be completed!
+                        </Typography>
+                      </div>
+                      <div style={{ marginTop: '10%', marginLeft: '10%' }}>
+                        <Typography variant="subtitle2" component="div" color="text.secondary">
+                          Your factsheet should contain information about the study and the scenarios used in it. As you add more information to your factsheet, other studies and scenarios that are similar to those you've already described will appear below.
+                        </Typography>
+                      </div>
+                      <div style={{ marginTop: '10%', marginLeft: '1%', paddingTop: '10px'}}>
+                        <Badge color="primary" badgeContent={3} 
+                               anchorOrigin={{
+                                vertical: 'top',
+                                horizontal: 'right',
+                              }}>
+                          <Typography variant="subtitle2" component="div" color="text.secondary" style={{ paddingRight: '10px' }}>
+                            Found similarities, so far:
+                          </Typography>
+                        </Badge>
+                        
+                      </div>
+                    <div style={{ marginTop: '5%', marginLeft: '1%', paddingTop: '10px'}}>
+                      <Chip
+                          label="Study 1"
+                          color="primary" variant="contained" 
+                          style={{ marginLeft: '5px' }}
+                      />
+                      <Chip
+                          label="Scenario 2"
+                          color="primary" variant="outlined" 
+                          style={{ marginLeft: '5px' }}
+                      />
+                      <Chip
+                          label="Scenario 7"
+                          color="primary" variant="outlined" 
+                          style={{ marginLeft: '5px', marginTop: '5px' }}
+                      />
+                    </div>
+                    </div>
+                  </Grid>
                 </Grid>
             </div>
           }

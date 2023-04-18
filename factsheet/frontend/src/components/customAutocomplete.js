@@ -38,6 +38,7 @@ export default function CustomAutocomplete(parameters) {
   const [editLabel, setEditLabel] = React.useState('');
   const [editIRI, setEditIRI] = React.useState('');
   const [updatedLabel, setUpdatedLabel] = React.useState('');
+
   
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
@@ -132,7 +133,7 @@ export default function CustomAutocomplete(parameters) {
  
 
   return (
-    <Box style={{ width: '80%', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: '95%',  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
         size="small" 
         multiple
