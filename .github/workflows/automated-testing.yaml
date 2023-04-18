@@ -84,7 +84,7 @@ jobs:
 
       - name: Run tests
         run: |
-          env
+          python info.py
           python manage.py test --no-input
 
       - name: Run tox
