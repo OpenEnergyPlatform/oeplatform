@@ -20,6 +20,11 @@
             @extend .align-items-end;
         }
 
+        #tags {
+            width: 18rem;
+            max-width: 18rem;
+        }
+
         #tags button {
             border-radius: 0!important;
         }
