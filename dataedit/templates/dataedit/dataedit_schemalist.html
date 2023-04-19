@@ -1,5 +1,5 @@
-{% extends "dataedit/base_fullwidth.html" %}
-{% block title %} - Schemas{% endblock %}
+{% extends "dataedit/filter.html" %}
+{% block title %} - Topics {% endblock %}
 
 {% block site-header %}
     <div class="main-header">
@@ -16,45 +16,13 @@
 {% endblock site-header %}
 
 {% block data_content %}
-<div class="controls-container controls-container--horizontal">
-    <div class="controls-container__filters">
-        <form>
-            <div class="controls-container__input">
-                <label for="filterInputText" class="form-label">Filters</label>
-                <input type="text" class="form-control" id="filterInputText" placeholder="Search text..." >
-            </div>
-            <select class="form-select controls-container__tags" aria-label="Default select example">
-                <option selected>Open this select menu</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-            </select>
-            <button type="button" class="btn btn-link controls-container__reset">
-                <span class="btn__icon">
-                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="m14,9c0,3.31-2.69,6-6,6s-6-2.69-6-6h1c0,2.76,2.24,5,5,5s5-2.24,5-5-2.24-5-5-5h-3.6l1.48,2.22-.83.55-2.19-3.28L5.12.22l.82.57-1.53,2.22h3.58c3.31,0,6,2.69,6,6Z"/>
-                    </svg>
-                </span>
-                <span class="btn__text">Reset</span>
-            </button>
-        </form>
-    </div>
-    <div class="controls-container__views">
-        <button type="button" class="btn btn-outline-primary">
-            <span class="btn__icon">
-                <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m16,1v1H0v-1h16ZM0,8h16v-1H0v1Zm0,6h16v-1H0v1Z"/>
-                </svg>
-            </span>
-            <span class="btn__text">View tables</span>
-        </button>
-    </div>
-</div>
 <div class="topics">
+    {% for schema, description, tables in schemas %}
+    {% if schema == "model_draft" %}
     <div class="topics__row">
         <div class="topics__col">
             <div class="topic-card">
-                <div class="topic-card__header">
+                <div class="topic-card__header" onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
                     <div class="topic-card__header-top">
                         <div class="topic-card__title topic-card__title--large">
                             <span class="topic-card__title-icon">
@@ -62,9 +30,9 @@
                                     <path d="m12.94,5.97v-3.01S8.01.17,8.01.17L3.06,2.95v3.02S.25,7.54.25,7.54v5.59s4.94,2.79,4.94,2.79l2.81-1.58,2.8,1.58,4.95-2.78v-5.59s-2.8-1.58-2.8-1.58ZM4.06,3.54l3.95-2.22,3.94,2.22v1.86s-1.13-.64-1.13-.64l-2.81,1.58-2.8-1.58-1.14.64v-1.87Zm2.8,7.15l1.13.64,1.14-.64v1.87s-1.13.64-1.13.64l-1.14-.65v-1.86Zm1.14-.51l-1.13-.64v-1.41s1.13-.64,1.13-.64l1.14.65v1.4s-1.14.64-1.14.64Zm-3.94-3.63l1.14-.64,1.78,1-1.11.63v1.44s-1.81-1.02-1.81-1.02v-1.4Zm4.96.36l1.79-1.01,1.13.64v1.41s-1.8,1.01-1.8,1.01v-1.42s-1.12-.63-1.12-.63Zm-3.83,7.85l-3.94-2.22v-4.42s1.81-1.01,1.81-1.01v1.42s2.81,1.58,2.81,1.58v3.01s1.12.63,1.12.63l-1.79,1.01Zm9.56-2.22l-3.95,2.22-1.78-1,1.11-.63v-3.02s2.81-1.57,2.81-1.57v-1.44s1.81,1.02,1.81,1.02v4.42Z"/>
                                 </svg>
                             </span>
-                            <span class="topic-card__title-text">model_draft</span>
+                            <span class="topic-card__title-text">{{schema}}</span>
                         </div>
-                        <div class="topic-card__table-nb">738 tables</div>
+                        <div class="topic-card__table-nb">{{tables}} tables</div>
                     </div>
                     <div class="topic-card__header-btm">
                         <span class="topic-card__tag topic-card__tag--highlight">various data</span>
@@ -74,10 +42,10 @@
                 </div>
                 <div class="topic-card__body topic-card__body--large">
                     <div class="topic-card__text topic-card__text--large">
-                        <p>Unfinished data of any kind. Note: there is no version control and data is still volatile.</p>
+                        <p>{{description}}</p>
                     </div>
                     <div class="topic-card__btn">
-                        <button type="button" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" onclick="open_wizzard()">
                             <span class="btn__icon">
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
@@ -90,10 +58,14 @@
             </div>
         </div>
     </div>
+    {% endif %}
+    {% endfor %}
+    {% for schema, description, tables in schemas %}
+    {% if schema == "scenario" %}
     <div class="topics__row">
         <div class="topics__col">
             <div class="topic-card">
-                <div class="topic-card__header">
+                <div class="topic-card__header" onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
                     <div class="topic-card__header-top">
                         <div class="topic-card__title topic-card__title--large">
                             <span class="topic-card__title-icon">
@@ -101,9 +73,9 @@
                                     <path d="m3,16h-1V0h1v16ZM3,1h11V0H3v1Zm10,15h1V1h-1v15Zm1-1H3v1h11v-1Zm-3-6h-6v1h6v-1Zm0-3h-6v1h6v-1Zm0-3h-6v1h6v-1Zm0,9h-6v1h6v-1Z"/>
                                 </svg>
                             </span>
-                            <span class="topic-card__title-text">scenario</span>
+                            <span class="topic-card__title-text">{{schema}}</span>
                         </div>
-                        <div class="topic-card__table-nb">282 tables</div>
+                        <div class="topic-card__table-nb">{{tables}} tables</div>
                     </div>
                     <div class="topic-card__header-btm">
                         <span class="topic-card__tag">input</span>
@@ -112,324 +84,110 @@
                 </div>
                 <div class="topic-card__body topic-card__body--large">
                     <div class="topic-card__text">
-                        <p>Scenario data in the broadest sense. Includes input and output data from models that project scenarios into the future. Example inputs: assumptions made about future developments of key parameters such as energy prices and GDP. Example outputs: projected electricity transmission, projected greenhouse gas emissions. Note that inputs to one model could be an output of another model and the other way around.</p>
+                        <p>{{description}}</p>
                     </div>
                     <div class="topic-card__btn"></div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
+    {% endfor %}
+    
     <div class="topics__row">
+        {% for schema, description, tables in schemas %}
+        {% if schema != "model_draft" %}
+        {% if schema != "scenario" %}
         <div class="topics__col topics__col--4">
             <div class="topic-card">
-                <div class="topic-card__header">
+                <div class="topic-card__header" onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
                     <div class="topic-card__header-top">
                         <div class="topic-card__title">
                             <span class="topic-card__title-icon">
+                                {% if schema == "boundaries" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m0,0v16h16V0H0Zm15,15H1V1h14v14Zm-6.5-9h-1v-3h1v3Zm-2.5,2.5h-3v-1h3v1Zm2.5,4.5h-1v-3h1v3Zm4.5-4.5h-3v-1h3v1Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">boundaries</span>
-                        </div>
-                        <div class="topic-card__table-nb">10 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">polygons</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Data that depicts boundaries, such as geographic, administrative or political boundaries. Such data comes as polygons.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %} 
+                                {% if schema == "climate" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m11,10.73V3c0-1.65-1.35-3-3-3s-3,1.35-3,3v7.73c-.31.52-.5,1.12-.5,1.77,0,1.93,1.57,3.5,3.5,3.5s3.5-1.57,3.5-3.5c0-.65-.19-1.25-.5-1.77Zm-3,4.27c-1.38,0-2.5-1.12-2.5-2.5,0-.56.19-1.07.5-1.48V3c0-1.1.9-2,2-2s2,.9,2,2v8.02c.31.42.5.93.5,1.48,0,1.38-1.12,2.5-2.5,2.5Zm1.5-2.5c0,.83-.67,1.5-1.5,1.5s-1.5-.67-1.5-1.5c0-.65.42-1.2,1-1.41v-5.09h1v5.09c.58.21,1,.76,1,1.41Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">climate</span>
-                        </div>
-                        <div class="topic-card__table-nb">9 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">climate</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Data related to climate and weather. This includes, for example, precipitation, temperature, cloud cover and atmospheric conditions.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %} 
+                                {% if schema == "demand" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m16,15v1H0V0h1v15h15ZM6,7.71l3,3,6.35-6.35-.71-.71-5.65,5.65-3-3-3.35,3.35.71.71,2.65-2.65Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">demand</span>
-                        </div>
-                        <div class="topic-card__table-nb">5 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">commodities</span>
-                        <span class="topic-card__tag">services</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Data on demand. Demand can relate to commodities but also to services.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="topics__row">
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %} 
+                                {% if schema == "economy" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m12.67,13.66l.72.72c-1.25.86-2.76,1.37-4.39,1.37-3.4,0-6.29-2.2-7.33-5.25H0v-1h1.4c-.1-.49-.15-.99-.15-1.5s.05-1.01.15-1.5H0v-1h1.67C2.71,2.45,5.6.25,9,.25c1.63,0,3.14.51,4.39,1.37l-.72.72c-1.06-.69-2.32-1.09-3.67-1.09-2.84,0-5.27,1.76-6.26,4.25h8.26v1H2.42c-.11.48-.17.98-.17,1.5s.06,1.02.17,1.5h8.58v1H2.74c1,2.49,3.43,4.25,6.26,4.25,1.35,0,2.61-.4,3.67-1.09Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">economy</span>
-                        </div>
-                        <div class="topic-card__table-nb">1 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">prices</span>
-                        <span class="topic-card__tag">GDP</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Data related to economic activities. Examples: sectoral value added, sectoral inputs and outputs, GDP, prices of commodities etc.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %} 
+                                {% if schema == "environment" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">environment</span>
-                        </div>
-                        <div class="topic-card__table-nb">9 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">environment</span>
-                        <span class="topic-card__tag">resources</span>
-                        <span class="topic-card__tag">protection</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>environmental resources, protection and conservation. examples: environmental pollution, waste storage and treatment, environmental impact assessment, monitoring environmental risk, nature reserves, landscape.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "grid" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m7.09,15.64v-6.28H2.53L8.91.44v5.77h4.53l-6.35,9.42Zm-2.62-7.28h3.62v4.01l3.47-5.15h-3.65v-3.66l-3.44,4.8Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">grid</span>
-                        </div>
-                        <div class="topic-card__table-nb">86 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">energy</span>
-                        <span class="topic-card__tag">services</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Energy transmission infrastructure. examples: power lines, substation, pipelines</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="topics__row">
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "openstreetmap" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8,.5C4.69.5,2,3.19,2,6.5c0,4.69,5.15,9,6,9s6-4.31,6-9c0-3.31-2.69-6-6-6Zm0,13.97c-.85-.47-5-4.01-5-7.97,0-2.76,2.24-5,5-5s5,2.24,5,5c0,3.96-4.15,7.5-5,7.97Zm0-10.47c-1.38,0-2.5,1.12-2.5,2.5s1.12,2.5,2.5,2.5,2.5-1.12,2.5-2.5-1.12-2.5-2.5-2.5Zm0,4c-.83,0-1.5-.67-1.5-1.5s.67-1.5,1.5-1.5,1.5.67,1.5,1.5-.67,1.5-1.5,1.5Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">openstreetmap</span>
-                        </div>
-                        <div class="topic-card__table-nb">9 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">OMS</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>OpenStreetMap is a open project that collects and structures freely usable geodata and keeps them in a database for use by anyone. This data is available under a free license, the Open Database License.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "policy" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8.5,4h4v3.64l-2.35,4.07h5.7l-2.35-4.07V3h-5V0h-1v3H3v4.64L.65,11.71h5.7l-2.35-4.07v-3.64h3.5v11H.5v1h15v-1h-7V4Zm3.38,6.71l1.12-1.94,1.12,1.94h-2.24Zm-9.5,0l1.12-1.94,1.12,1.94h-2.24Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">policy</span>
-                        </div>
-                        <div class="topic-card__table-nb">1 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">laws</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "reference" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m2,0C.9,0,0,.9,0,2s.9,2,2,2,2-.9,2-2S3.1,0,2,0Zm0,3c-.55,0-1-.45-1-1s.45-1,1-1,1,.45,1,1-.45,1-1,1Zm0,3c-1.1,0-2,.9-2,2s.9,2,2,2,2-.9,2-2-.9-2-2-2Zm0,3c-.55,0-1-.45-1-1s.45-1,1-1,1,.45,1,1-.45,1-1,1Zm0,3c-1.1,0-2,.9-2,2s.9,2,2,2,2-.9,2-2-.9-2-2-2Zm0,3c-.55,0-1-.45-1-1s.45-1,1-1,1,.45,1,1-.45,1-1,1ZM16,1.5v1H6v-1h10ZM6,7.5h10v1H6v-1Zm0,6h10v1H6v-1Z"/>
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">references</span>
-                        </div>
-                        <div class="topic-card__table-nb">41 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">sources</span>
-                        <span class="topic-card__tag">literature</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Contains sources, literature and auxiliary/helper tables that can help you with your work.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="topics__row"> 
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "society" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m14.6,6.01c-.39-.39-.9-.61-1.51-.7.26-.41.41-.89.41-1.4,0-1.45-1.18-2.63-2.63-2.63s-2.63,1.18-2.63,2.63c0,.52.16,1,.42,1.41-.57.1-1.05.31-1.42.68-.45.45-.66,1.03-.76,1.55-.42-.28-.92-.45-1.46-.45-1.45,0-2.63,1.18-2.63,2.63,0,.52.16,1,.42,1.41-.57.1-1.05.31-1.42.68-1.05,1.05-.82,2.79-.81,2.87l.99-.14s-.17-1.33.53-2.02c.39-.39,1-.52,1.83-.42.33.15.7.25,1.09.25s.77-.09,1.1-.25h0c.87-.11,1.51.03,1.91.42.7.7.53,2.01.53,2.02l.99.14c.01-.07.25-1.81-.81-2.87-.39-.39-.9-.61-1.51-.7.26-.41.41-.89.41-1.4,0-.38-.08-.74-.23-1.07-.02-.26-.08-1.35.53-1.96.39-.39,1-.52,1.83-.42.33.15.7.25,1.09.25s.77-.09,1.1-.25h0c.87-.11,1.51.03,1.91.42.7.7.53,2.01.53,2.02l.99.14c.01-.07.25-1.81-.81-2.87Zm-9.57,5.36c-.9,0-1.63-.73-1.63-1.63s.73-1.63,1.63-1.63,1.63.73,1.63,1.63-.73,1.63-1.63,1.63Zm5.85-5.83c-.9,0-1.63-.73-1.63-1.63s.73-1.63,1.63-1.63,1.63.73,1.63,1.63-.73,1.63-1.63,1.63Z" />
                                 </svg>
-                            </span>
-                            <span class="topic-card__title-text">society</span>
-                        </div>
-                        <div class="topic-card__table-nb">4 tables</div>
-                    </div>
-                    <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">demography</span>
-                        <span class="topic-card__tag">society</span>
-                    </div>
-                </div>
-                <div class="topic-card__body">
-                    <div class="topic-card__text">
-                        <p>Demographic data such as population statistics and projections, fertility, mortality etc.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="topics__col topics__col--4">
-            <div class="topic-card">
-                <div class="topic-card__header">
-                    <div class="topic-card__header-top">
-                        <div class="topic-card__title">
-                            <span class="topic-card__title-icon">
+                                {% endif %}
+                                {% if schema == "supply" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m12,4V0h-1v4h-6V0h-1v4h-2v1h.01c.13,3.78,2.5,6.83,5.49,7.14v3.86h1v-3.86c2.99-.31,5.36-3.37,5.49-7.14h.01v-1h-2Zm-4,7.17c-2.67,0-4.86-2.74-4.99-6.17h9.97c-.13,3.43-2.31,6.17-4.99,6.17Z"/>
                                 </svg>
+                                {% endif %}
                             </span>
-                            <span class="topic-card__title-text">supply</span>
+                            <span class="topic-card__title-text">{{schema}}</span>
                         </div>
-                        <div class="topic-card__table-nb">4 tables</div>
+                        <div class="topic-card__table-nb">{{tables}} tables</div>
                     </div>
                     <div class="topic-card__header-btm">
-                        <span class="topic-card__tag">commodity</span>
-                        <span class="topic-card__tag">services</span>
+                        {% if schema == "boundaries" %}<span class="topic-card__tag">polygons</span>{% endif %} 
+                        {% if schema == "climate" %}<span class="topic-card__tag">climate</span>{% endif %} 
+                        {% if schema == "demand" %}<span class="topic-card__tag">commodities</span> <span class="topic-card__tag">services</span>{% endif %} 
+                        {% if schema == "economy" %}<span class="topic-card__tag">prices</span> <span class="topic-card__tag">GDP</span>{% endif %} 
+                        {% if schema == "environment" %}<span class="topic-card__tag">environment</span> <span class="topic-card__tag">resources</span> <span class="topic-card__tag">protection</span>{% endif %}
+                        {% if schema == "grid" %}<span class="topic-card__tag">energy</span> <span class="topic-card__tag">services</span>{% endif %}
+                        {% if schema == "openstreetmap" %}<span class="topic-card__tag">OMS</span>{% endif %}
+                        {% if schema == "policy" %}<span class="topic-card__tag">laws</span>{% endif %}
+                        {% if schema == "references" %}<span class="topic-card__tag">sources</span> <span class="topic-card__tag">literature</span>{% endif %}
+                        {% if schema == "society" %}<span class="topic-card__tag">demography</span> <span class="topic-card__tag">society</span>{% endif %}
+                        {% if schema == "supply" %}<span class="topic-card__tag">commodity</span> <span class="topic-card__tag">services</span>{% endif %}
                     </div>
                 </div>
                 <div class="topic-card__body">
                     <div class="topic-card__text">
-                        <p>Data on supply. Supply can relate to commodities but also to services.</p>
+                        <p>{{description}}</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<!-- <table id="schemas" class="table table-hover table-bordered">
-    <thead>
-        <tr class="table-primary">
-            <th>Name</th>
-            <th>Description</th>
-            <th>Tables</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for schema, description, tables in schemas %}
-            <tr onclick="window.location='/dataedit/view/{{ schema }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}'">
-                <td>{{schema}}</td>
-                <td>{{description}}</td>
-                <td>{{tables}}</td>
-            </tr>
+        {% endif %}
+        {% endif %}
         {% endfor %}
-
-    </tbody>
-</table> -->
-
-
+    </div>    
+</div>
 {% endblock %}
