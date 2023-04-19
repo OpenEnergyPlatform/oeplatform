@@ -19,6 +19,10 @@
             @include flex-row;
             @extend .align-items-end;
         }
+
+        #tags button {
+            border-radius: 0!important;
+        }
     }
 
     &__input {
