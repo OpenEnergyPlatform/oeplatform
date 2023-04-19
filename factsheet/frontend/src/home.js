@@ -26,6 +26,8 @@ import { useLocation } from 'react-router-dom';
 import conf from "./conf.json";
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import './styles/hexagons.css';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 
 const client = new ApolloClient({
   uri: 'http://localhost:8000/graphql/',
@@ -68,20 +70,18 @@ function Home(props) {
     });
   }, [setFactsheets, setLoading]);
 
-
   const renderCards = (fs) => {
     if (Object.keys(fs).length !== 0) {
       return fs.map(item =>
-          (<Grid item xs={3}>
-            <CustomCard
-              id={item.uid}
-              study_name={item.study_name}
-              acronym={item.acronym}
-              abstract={item.abstract}
-              institution={item.institution}
-              fs={item}
-            />
-          </Grid>)
+          (
+            <Link to={`factsheet/${item.uid}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
+              <div >
+                <p style={{ textAlign: 'center' }} > <Typography variant="h6" gutterBottom style={{ marginTop: '100px' }}><b> {item.acronym.substring(0,30)} </b></Typography></p>
+                <p style={{ textAlign: 'center' }} > <Typography variant="body1" gutterBottom style={{ marginTop: '0px' }}>  <span>{item.study_name != '' ? item.study_name.substring(0,30) : <p>&nbsp;</p>}</span> </Typography></p>
+              </div>
+              
+            </Link>
+          )
           )
       }
   }
@@ -113,8 +113,12 @@ function Home(props) {
                     </ThemeProvider>
                 </Grid>
               </Grid>
-              <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'75vh', 'width':'98%', 'overflow': 'auto'  }}>
-                {renderCards(eval(factsheets))}
+              <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'border': '1px solid #cecece', 'height':'80vh', 'width':'98%', 'overflow': 'auto' }}>
+                <div class="main">
+                  <div class="container">
+                    {renderCards(eval(factsheets))}
+                  </div>
+                </div>
               </Grid>
           </div>
       </ApolloProvider>

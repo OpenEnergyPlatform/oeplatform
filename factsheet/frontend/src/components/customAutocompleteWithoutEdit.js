@@ -133,7 +133,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor:'#ffffff', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
         size="small" 
         multiple
@@ -176,13 +176,6 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
-
-          if (params.inputValue !== '') {
-            filtered.push({
-              inputValue: params.inputValue,
-              name: `Add "${params.inputValue}"`,
-            });
-          }
           return filtered;
         }}
       />
@@ -296,7 +289,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         }}
       >
         {value.map((v) => (
-          <Chip size='small' key={v.id}  label={v.name} deleteIcon={<EditIcon />}  onDelete={(e) => handleDelete(e, v.name, v.iri) } variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
+          <Chip size='small' key={v.id}  label={v.name} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px' }}/>
         ))}
       </Box>}
     </Box>

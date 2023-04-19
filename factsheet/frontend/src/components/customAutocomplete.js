@@ -133,7 +133,7 @@ export default function CustomAutocomplete(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor:'#ffffff', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
       <Autocomplete
         size="small" 
         multiple

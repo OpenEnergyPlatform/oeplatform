@@ -1481,11 +1481,11 @@ function getStepContent(step: number) {
           return (
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
+                alignItems: 'stretch',
                 flexWrap: 'wrap',
                 padding: '10px',
               }}>
-                <TextField size="small" style={{  width: '80%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+                <TextField size="small" style={{  width: '40%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
                 <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
                   <HtmlTooltip
                     title={
@@ -1498,7 +1498,7 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField  size="small"  style={{  width: '80%', marginTop: '30px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+                <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
                 <div style={{ marginLeft: '10px', marginTop: '40px'}}>
                   <HtmlTooltip
                     title={
@@ -1511,8 +1511,8 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <CustomAutocomplete width="80%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
-                <div style={{ marginLeft: '10px', marginTop: '20px'  }}>
+                <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+                <div style={{ marginLeft: '10px',  marginRight: '15%', marginTop: '20px'  }}>
                 <HtmlTooltip
                   title={
                     <Typography color="inherit" variant="caption">
@@ -1524,8 +1524,8 @@ function getStepContent(step: number) {
                   <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                 </HtmlTooltip>
                 </div>
-                <CustomAutocomplete  width="80%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-                <div style={{ marginTop: '20px'  }}>
+                <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+                <div style={{ marginTop: '40px'  }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
                     placement="top"
@@ -1542,9 +1542,9 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
-                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
-                <CustomAutocomplete  width="80%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '40%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
+                <TextField size="small" variant="standard" style={{ width: '40%', marginTop:'20px', marginBottom:'20px', backgroundColor:'#FCFCFC',  marginLeft: '17%' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+                <CustomAutocomplete width="40%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
 
           );
@@ -1554,9 +1554,8 @@ function getStepContent(step: number) {
               display: 'flex',
               alignItems: 'center',
               flexWrap: 'wrap',
-              padding: '10px',
             }}>
-              <CustomAutocomplete width="80%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+              <CustomAutocomplete width="60%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
               <div style={{ marginTop: '10px' }}>
                 <HtmlTooltip
                   style={{ marginLeft: '10px' }}
@@ -1574,8 +1573,10 @@ function getStepContent(step: number) {
                   <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
                 </HtmlTooltip>
               </div>
-              <TextField size="small" variant="standard" style={{ width: '80%', MarginBottom: '10px', marginTop: '20px',  backgroundColor:'#ffffff' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
-              <CustomAutocompleteWithoutEdit width="80%"  type="sector_division" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+              <div style={{ width: '35%' }}></div>
+              <TextField size="small" variant="standard" style={{ width: '60%', MarginBottom: '10px', marginTop: '20px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+              <div style={{ width: '35%' }}></div>
+              <CustomAutocompleteWithoutEdit width="40%"  type="sector_division" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
               <div style={{ marginTop: '30px' }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1593,6 +1594,7 @@ function getStepContent(step: number) {
                     <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
+                <div style={{ width: '40%' }}></div>
                 <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
                 </Typography>
@@ -1605,9 +1607,9 @@ function getStepContent(step: number) {
                     </div>
                   </FormGroup>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '40%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3}  style={{ marginTop:'20px', width: '80%' }}>
+                  <Stack spacing={3}  style={{ marginTop:'20px', marginLeft:'15%', width: '40%' }}>
                     <DesktopDatePicker
                         label='Date of publication'
                         inputFormat="YYYY-MM-DD"
@@ -1620,9 +1622,9 @@ function getStepContent(step: number) {
                       />
                   </Stack>
                 </LocalizationProvider>
-                <TextField ssize="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
-                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
-                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+                <TextField ssize="small" variant="standard" style={{ width: '25%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
+                <TextField size="small" variant="standard" style={{ width: '25%', marginLeft:'12%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
+                <TextField size="small" variant="standard" style={{ width: '25%', marginLeft:'12%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
             </div>
           );
     case 2:
@@ -1802,8 +1804,8 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container style={{ marginTop: '10px', width: '99%', marginLeft:'10px' }}>
-                  <Grid item xs={10} style={{ padding: '40px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
+                <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
+                  <Grid item xs={10} style={{ padding: '20px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
