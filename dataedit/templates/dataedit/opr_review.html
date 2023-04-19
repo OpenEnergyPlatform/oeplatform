@@ -142,6 +142,22 @@
     <div class="col-md-4">
         <div class="flex-reviewer sticky-top" id="review-window">
             <p>Reviewer Box</p>
+            <button type="button" class="btn btn-primary" onclick="selectPreviousField()">
+              <span class="btn__icon">
+                <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                </svg>
+              </span>
+              <span class="btn__text">Back</span>
+          </button>
+          <button type="button" class="btn btn-primary" onclick="selectNextField()">
+            <span class="btn__icon">
+                <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                </svg>
+            </span>
+            <span class="btn__text">Next</span>
+        </button>
             <hr>
             <h2 id="review-field-name"></h2>
             <hr>
@@ -178,7 +194,7 @@
             </a>
         </span>
 
-        <button class="btn btn-sm btn-success mr-2 disabled" id="submit_summary">Submit summary</button>
+        <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
     </div>
 </div>
 
