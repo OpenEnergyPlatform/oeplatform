@@ -1931,7 +1931,7 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
-    def get_contributor(self, schema, table):
+    def load_contributor(self, schema, table):
         """
         Get the contributor for the table a review is started on. 
         """
@@ -1952,7 +1952,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_data = json.loads(request.body)
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
-            contributor = self.get_contributor(schema, table)
+            contributor = self.load_contributor(schema, table)
             if contributor.id is not request.user.id:
                 table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
                 table_obj.save()
