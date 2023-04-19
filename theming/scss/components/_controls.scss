@@ -13,7 +13,7 @@
 
     &__filters {
         padding-right: $C--padding-standard;
-        flex: 1;
+        flex: 2;
 
         form {
             @include flex-row;
@@ -35,16 +35,19 @@
         @extend .ms-1;
     }
 
-    &__views {
+    &__btns {
         @include flex-row;
         @extend .justify-content-end;
         @extend .align-items-end;
-        width: calc((#{$C--container-width} - (#{$C--padding-standard} * 2)) / 3);
+        flex: 1;
 
         @include media-breakpoint-down(lg) {
-            @include flex-column;
             width: 100%;
             padding-top: 0.5rem;
+        }
+
+        & > div {
+            @extend .ps-2;
         }
     }
 }

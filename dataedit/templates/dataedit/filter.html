@@ -34,14 +34,14 @@
                 <input id="search-filter" type="text" name="query" placeholder="Search text..." value="{% firstof query '' %}" class="form-control" />
             </div>
             <div id="tags">
-            <select id="tag-select" name="tags" class="form-control controls-container__tags selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
-                {% for t in all_tags %}
-                <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
-                    {{ t.name }}
-                </option>
-                {% endfor %}
-            </select>
+                <select id="tag-select" name="tags" class="form-control controls-container__tags selectpicker" multiple data-live-search="true"
+                    title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
+                    {% for t in all_tags %}
+                    <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
+                        {{ t.name }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
             <button type="button" class="btn btn-link controls-container__reset" onclick="reset_filter()">
                 <span class="btn__icon">
@@ -50,13 +50,20 @@
                     </svg>
                 </span>
                 <span class="btn__text">Reset</span>
-                <span>Create <a href="/dataedit/tags">new Tags</a></span>
             </button>
+            <a class="btn btn-link controls-container__create-tags" href="/dataedit/tags">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                    </svg>
+                </span>
+                <span class="btn__text">New Tags</span>
+            </a>
         </form>
     </div>
-    <div class="controls-container__views">
+    <div class="controls-container__btns">
         <div>
-            <a class="btn btn-success" href="{% url 'oemetabuilder' %}"> OEMetaBuilder </a>
+            <a class="btn btn-secondary" href="{% url 'oemetabuilder' %}">OEMetaBuilder</a>
             <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
                 <i class="fas fa-info-circle" title="Klick to open the OEMetadata - Key Description."></i>
             </a> 
