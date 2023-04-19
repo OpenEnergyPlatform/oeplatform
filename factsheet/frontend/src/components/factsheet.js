@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import CustomSwap from './customSwapButton.js';
 import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
-// import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import Scenario from './scenario.js';
 // import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import Snackbar from '@mui/material/Snackbar';
@@ -189,8 +189,8 @@ function Factsheet(props) {
   const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState([]);
   const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
   const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState([]);
-  // const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
-  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  // const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -201,6 +201,23 @@ function Factsheet(props) {
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
   const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
   const [energyCarriers, setEnergyCarries] = React.useState([]);
+
+  const StudyKeywords = [
+    'resilience',
+    'life cycle analysis',
+    'CO2 emissions',
+    'Greenhouse gas emissions',
+    'Reallabor',
+    '100% renewables',
+    'acceptance',
+    'sufficiency',
+    '(changes in) demand',
+    'degree of electrifiaction',
+    'regionalisation',
+    'total gross electricity generation',
+    'total net electricity generation',
+    'peak electricity generation'
+  ];
 
   const handleScenarioTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setScenarioTabValue(newValue);
@@ -1080,7 +1097,6 @@ function Factsheet(props) {
       const filteredStudyKeywords = selectedStudyKewords.filter(i => i !== event.target.name);
       setSelectedStudyKewords(filteredStudyKeywords);
     }
-    factsheetObjectHandler('study_keywords', JSON.stringify(selectedStudyKewords));
   }
 
   const scenarioKeywordsHandler = (event) => {
@@ -1389,7 +1405,7 @@ function Factsheet(props) {
                   <TabPanel
                     value={scenarioTabValue}
                     index={i}
-                    style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece' }}
+                    style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece',  backgroundColor:'#FCFCFC' }}
                     key={'Scenario_panel_' + item.id}
                   >
                     <Scenario
@@ -1468,9 +1484,8 @@ function getStepContent(step: number) {
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 padding: '10px',
-                width: '60%'
               }}>
-                <TextField size="small" style={{  width: '95%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+                <TextField size="small" style={{  width: '80%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
                 <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
                   <HtmlTooltip
                     title={
@@ -1483,7 +1498,7 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField  size="small"  style={{  width: '95%', marginTop: '30px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+                <TextField  size="small"  style={{  width: '80%', marginTop: '30px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
                 <div style={{ marginLeft: '10px', marginTop: '40px'}}>
                   <HtmlTooltip
                     title={
@@ -1496,7 +1511,7 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <CustomAutocomplete type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+                <CustomAutocomplete width="80%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
                 <div style={{ marginLeft: '10px', marginTop: '20px'  }}>
                 <HtmlTooltip
                   title={
@@ -1509,7 +1524,7 @@ function getStepContent(step: number) {
                   <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                 </HtmlTooltip>
                 </div>
-                <CustomAutocomplete type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+                <CustomAutocomplete  width="80%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
                 <div style={{ marginTop: '20px'  }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1527,15 +1542,88 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '95%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
-                <TextField size="small" variant="standard" style={{ width: '95%', marginTop:'20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
-                <CustomAutocomplete type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
+                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+                <CustomAutocomplete  width="80%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
 
           );
     case 1:
           return (
-              <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              padding: '10px',
+            }}>
+              <CustomAutocomplete width="80%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+              <div style={{ marginTop: '10px' }}>
+                <HtmlTooltip
+                  style={{ marginLeft: '10px' }}
+                  placement="top"
+                  title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A funder is a sponsor that supports by giving money.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                >
+                  <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                </HtmlTooltip>
+              </div>
+              <TextField size="small" variant="standard" style={{ width: '80%', MarginBottom: '10px', marginTop: '20px',  backgroundColor:'#ffffff' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+              <CustomAutocompleteWithoutEdit width="80%"  type="sector_division" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+              <div style={{ marginTop: '30px' }}>
+                  <HtmlTooltip
+                    style={{ marginLeft: '10px' }}
+                    placement="top"
+                    title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="caption">
+                          {'A sector division is a specific way to subdivide a system.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                  >
+                    <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </div>
+                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
+                What additional keywords describe your study?
+                </Typography>
+                <div style={{ marginTop: "10px", width: '80%' }}>
+                  <FormGroup>
+                      <div >
+                        {
+                          StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                        }
+                    </div>
+                  </FormGroup>
+                </div>
+                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '80%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <Stack spacing={3}  style={{ marginTop:'20px', width: '80%' }}>
+                    <DesktopDatePicker
+                        label='Date of publication'
+                        inputFormat="YYYY-MM-DD"
+                        value={date_of_publication}
+                        onChange={(newValue) => {
+                          setDateOfPublication(newValue);
+                          factsheetObjectHandler('date_of_publication', newValue);
+                        }}
+                        renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
+                      />
+                  </Stack>
+                </LocalizationProvider>
+                <TextField ssize="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
+                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
+                <TextField size="small" variant="standard" style={{ width: '80%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+            </div>
           );
     case 2:
           return (
@@ -1543,11 +1631,11 @@ function getStepContent(step: number) {
           );
     case 3:
       return (
-          <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+        <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={fundingSources} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
       );
     case 4:
       return (
-          <TextField style={{ width: '90%', marginBottom: '10px', marginTop: '5px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study" variant="outlined" />
+        <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={fundingSources} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
     default:
     return 'Unknown step';
@@ -1714,9 +1802,8 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container >
-                  <Grid item xs={1} />
-                  <Grid item xs={8} style={{ marginTop: '40px', padding: '40px', border: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }}>
+                <Grid container style={{ marginTop: '10px', width: '99%', marginLeft:'10px' }}>
+                  <Grid item xs={10} style={{ padding: '40px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
@@ -1730,7 +1817,7 @@ function getStepContent(step: number) {
                         <div >
                           <div>
                           <Button
-                              style={{ marginTop: '10px', marginRight: '5px' }}
+                              style={{ marginTop: '20px', marginRight: '5px' }}
                               disabled={activeStep === 0}
                               onClick={handleBack}
                               variant="outlined"
@@ -1739,7 +1826,7 @@ function getStepContent(step: number) {
                             Back
                           </Button>
                           <Button
-                            style={{ marginTop: '10px' }}
+                            style={{ marginTop: '20px' }}
                             variant="contained"
                             color="primary"
                             onClick={handleNext}
@@ -1754,11 +1841,11 @@ function getStepContent(step: number) {
                       ))}
                     </Stepper>
                   </Grid>
-                  <Grid item xs={2} style={{ marginTop: '40px', padding: '40px', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }} >
+                  <Grid item xs={2} style={{ padding: '20px', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }} >
                     <div style={{ marginTop: '10%' }}>
                       <div>
-                        <Box sx={{  marginLeft: '20%', position: 'relative', display: 'inline-flex' }}>
-                          <CircularProgress variant="determinate" value="40" size="6rem" />
+                        <Box sx={{  marginLeft: '30%', position: 'relative', display: 'inline-flex' }}>
+                          <CircularProgress variant="determinate" value="35" size="6rem" />
                           <Box
                             sx={{
                               top: 0,
@@ -1772,17 +1859,17 @@ function getStepContent(step: number) {
                             }}
                           >
                             <Typography variant="h6" component="div" color="text.secondary">
-                              {`${Math.round(40)}%`}
+                              {`${Math.round(35)}%`}
                             </Typography>
                           </Box>
                         </Box>
                       </div>
-                      <div style={{  marginLeft: '21%', position: 'relative', display: 'inline-flex' }}>
+                      <div style={{  marginLeft: '31%', position: 'relative', display: 'inline-flex' }}>
                         <Typography variant="subtitle2" component="div" color="text.secondary">
                           To be completed!
                         </Typography>
                       </div>
-                      <div style={{ marginTop: '10%', marginLeft: '10%' }}>
+                      <div style={{ marginTop: '10%', marginLeft: '5%' }}>
                         <Typography variant="subtitle2" component="div" color="text.secondary">
                           Your factsheet should contain information about the study and the scenarios used in it. As you add more information to your factsheet, other studies and scenarios that are similar to those you've already described will appear below.
                         </Typography>
@@ -1803,17 +1890,20 @@ function getStepContent(step: number) {
                       <Chip
                           label="Study 1"
                           color="primary" variant="contained" 
-                          style={{ marginLeft: '5px' }}
+                          style={{ marginLeft: '5px', marginTop: '5px' }}
+                          size="small"
                       />
                       <Chip
                           label="Scenario 2"
                           color="primary" variant="outlined" 
-                          style={{ marginLeft: '5px' }}
+                          style={{ marginLeft: '5px', marginTop: '5px' }}
+                          size="small"
                       />
                       <Chip
                           label="Scenario 7"
                           color="primary" variant="outlined" 
                           style={{ marginLeft: '5px', marginTop: '5px' }}
+                          size="small"
                       />
                     </div>
                     </div>

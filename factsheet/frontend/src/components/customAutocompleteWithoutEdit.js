@@ -30,7 +30,7 @@ const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-export default function CustomAutocomplete(parameters) {
+export default function CustomAutocompleteWithoutEdit(parameters) {
   const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler, width } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const [open, toggleOpen] = React.useState(false);

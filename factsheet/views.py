@@ -481,6 +481,8 @@ def update_factsheet(request, *args, **kwargs):
             author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
 
+        for s, p, o in oekg.triples((study_URI, OEO["has_study_keyword"], None)):
+            oekg.remove((s, p, o))
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
         for keyword in _study_keywords:
             oekg.add(( study_URI, OEO["has_study_keyword"], Literal(keyword) ))
@@ -600,7 +602,7 @@ def factsheet_by_id(request, *args, **kwargs):
 
     factsheet['study_keywords'] = []
     for s, p, o in oekg.triples(( study_URI, OEO["has_study_keyword"], None )):
-        if label != None:
+        if o != None:
             factsheet['study_keywords'].append(o)
 
     factsheet['models'] = []
