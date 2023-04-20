@@ -91,6 +91,8 @@ class PeerReview(models.Model):
     contributor = ForeignKey('login.myuser', on_delete=models.CASCADE, related_name='review_received', null=True)
     is_finished = BooleanField(null=False, default=False)
     date_started = DateTimeField(max_length=1000, null=False, default=timezone.now)
+    date_submitted = DateTimeField(max_length=1000, null=True, default=None)
+    date_finished = DateTimeField(max_length=1000, null=True, default=None)
     review = JSONField(null=True)
 
     # laden
@@ -100,3 +102,52 @@ class PeerReview(models.Model):
             table=table, schema=schema
         )
         return table_obj
+    
+    @property
+    def days_open(self):
+        delta = timezone.now() - self.date_started
+        return delta.days
+
+from enum import Enum
+
+
+class ReviewDataStatus(Enum):
+    SAVED = 'SAVED'
+    SUBMITTED = 'SUBMITTED'
+    FINISHED = 'FINISHED'
+
+
+class Reviewer(Enum):
+    CONTRIBUTOR = "contributor"
+    REVIEWER = "reviewer"
+
+
+class PeerReviewManager(models.Model):
+    REVIEWE_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
+    REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
+
+    opr = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='review_id', null=False)
+    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.CONTRIBUTOR.value)
+    status = models.CharField(choices=REVIEWE_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
+    is_open_since = DateTimeField(null=True)
+    prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None)
+    next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None)
+    
+
+    def set_next_reviewer(self):
+        if self.current_reviewer == Reviewer.REVIEWER.value:
+            self.current_reviewer = Reviewer.CONTRIBUTOR.value
+        else:
+            self.current_reviewer = Reviewer.REVIEWER.value
+        self.save()
+    
+
+    # How to chain reviews together 
+    # first_review = PeerReview.objects.create(table='some_table', schema='some_schema', reviewer=reviewer, contributor=contributor, review=some_review_data)
+    # first_review_manager = PeerReviewManager.objects.create(peer_review=first_review, is_open_since=timezone.now())
+
+    # new_review = PeerReview.objects.create(table='some_table', schema='some_schema', reviewer=reviewer, contributor=contributor, review=some_review_data)
+    # new_review_manager = PeerReviewManager.objects.create(peer_review=new_review, is_open_since=timezone.now(), previous_review=previous_review_manager)
+    # previous_review_manager.next_review = new_review_manager
+    # previous_review_manager.save()
+
