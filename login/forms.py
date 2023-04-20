@@ -49,6 +49,9 @@ class EditUserForm(UserChangeForm):
     password hash display field.
     """
 
+    # do NOT show the password field in the form
+    password = None
+
     class Meta:
         model = OepUser
         fields = (
