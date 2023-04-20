@@ -34,6 +34,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import SettingsIcon from '@mui/icons-material/Settings';
 import InsightsIcon from '@mui/icons-material/Insights';
 import MenuIcon from '@mui/icons-material/Menu';
+import  { makeStyles } from '@material-ui/core/styles';
 
 function Home(props) {
 
@@ -69,6 +70,14 @@ function Home(props) {
     },
   });
 
+  const useStyles = makeStyles({
+    drawerPaper: {
+      marginTop: "72px",
+    }
+  });
+
+  const classes = useStyles();
+
   useEffect(() => {
     setLoading(true);
     axios.get(conf.toep + `factsheet/all/`).then(response => {
@@ -81,7 +90,7 @@ function Home(props) {
     if (Object.keys(fs).length !== 0) {
       return fs.map(item =>
           (
-            <Link to={`factsheet/${item.uid}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
+            <Link to={`factsheet/fs/${item.uid}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
               <div >
                 <p style={{ textAlign: 'center' }} > <Typography variant="h6" gutterBottom style={{ marginTop: '100px' }}><b> {item.acronym.substring(0,30)} </b></Typography></p>
                 <p style={{ textAlign: 'center' }} > <Typography variant="body1" gutterBottom>  <span>{item.study_name != '' ? item.study_name.substring(0,30) : <p>&nbsp;</p>}</span> </Typography></p>
@@ -120,14 +129,14 @@ function Home(props) {
               </ListItemIcon>
               {index === 0 && <ListItemText 
                 primary={
-                  <Link to={`factsheet/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: '#005374' }} >
+                  <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: '#005374' }} >
                     <Typography variant="body1" style={{ color: '#005374' }}>
                       {text} 
                     </Typography>
                   </Link>}
               />}
               {index === 1 && <ListItemText primary={
-                <Link to={`factsheet/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                   <Typography variant="body1" style={{ color: '#005374' }}>{text} </Typography>
                 </Link>}
               />}
@@ -171,14 +180,17 @@ function Home(props) {
                           onClick={toggleDrawer('Main Menu', true)}>
                           <MenuIcon />
                         </Button>
-                    </ThemeProvider>
-                      <Drawer
+                        <Drawer
                         anchor={'left'}
                         open={state['Main Menu']}
                         onClose={toggleDrawer('Main Menu', false)}
+                        classes={{
+                          paper: classes.drawerPaper
+                        }}
                       >
                         {list('anchor')}
                       </Drawer>
+                    </ThemeProvider>
                   </div>
                   <div class="main-main">
                     <div class="container2">
