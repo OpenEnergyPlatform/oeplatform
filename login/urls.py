@@ -46,8 +46,8 @@ urlpatterns = [
     url("^", include("django.contrib.auth.urls")),
     url(
         r"^profile/(?P<user_id>[\d]+)$",
-        views.SettingsView.as_view(),
-        name="profile_settings",
+        views.TablesView.as_view(),
+        name="profile",
     ),
     url(
         r"^profile/(?P<user_id>[\d]+)/tables$",

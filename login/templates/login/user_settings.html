@@ -2,23 +2,8 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block main-content-body %}
-<script>
-    function toggler(divId) {
-        $("#" + divId).toggle();
-    }
-</script>
-    <br>
-    <br>
-    {% if request.user.is_authenticated and profile_user == request.user %}
-        <a href="{% url 'settings' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Settings</a>
-    {% endif%}
-    {% if profile_user %}
-        <a href="{% url 'tables' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Tables</a>
-    {% endif%}
-    {% if profile_user %}
-        <a href="{% url 'reviews' profile_user.id %}" style="font-size: 20px; text-decoration: none; padding: 10px; margin-right: 20px; border-bottom: 2px solid transparent;">Reviews</a>
-    {% endif%}
-    <hr>
+{% include "login/user_nav.html" %}
+
 {% if profile_user == request.user %}
 <h2>Your Security Information</h2>
 <table class="table">
