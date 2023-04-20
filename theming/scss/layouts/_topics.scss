@@ -1,0 +1,114 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.topics {
+    @extend .container-fluid;
+
+    &__row {
+        @extend .row;
+    }
+
+    &__col {
+        @extend .col-12;
+        @extend .mb-4;
+        @extend .px-0;
+
+        &--4 {
+            @extend .col-lg-4;
+            @extend .px-lg-2;
+
+            &:first-of-type {
+                @extend .ps-0;
+            }
+    
+            &:last-of-type {
+                @extend .pe-0;
+            }
+        }
+    }
+
+    .topic-card {
+        @extend .card;
+        @extend .h-100;
+
+        &__header {
+            @extend .card-header;
+            @extend .bg-light;
+        }
+
+        &__header-top {
+            @include flex-row;
+            @extend .justify-content-between;
+            @extend .align-items-end;
+            @extend .pb-2;
+        }
+
+        &__title {
+            @extend .fs-7;
+            @extend .fw-semibold;
+
+            &-icon {
+                @extend .me-1;
+            }
+
+            &.topic-card__title--large {
+                @extend .fs-6;
+            }
+        }
+
+        &__table-nb {
+            @extend .fs-8;
+            @extend .fw-semibold;
+        }
+
+        &__header-btm {
+            @extend .pb-1;
+        }
+
+        &__tag {
+            @extend .rounded-pill;
+            @extend .d-inline-block;
+            @extend .mb-1;
+            background-color: $gray-200;
+            padding: 1px 1rem;
+
+            &--highlight {
+                @extend .text-white;
+                background-color: $gray-600;
+            }
+        }
+
+        &__body {
+            @extend .card-body;
+
+            &--large {
+                @include flex-row;
+                @extend .justify-content-between;
+
+                @include media-breakpoint-down(lg) {
+                    flex-direction: column;
+                }
+            }
+        }
+
+        &__text {
+            @extend .card-text;
+            @extend .w-100;
+
+            &--large {
+                @extend .fs-6;
+            }
+        }
+
+        &__btn {
+            @include flex-row;
+            @extend .justify-content-end;
+            @extend .align-items-end;
+            width: 66%;
+
+            @include media-breakpoint-down(lg) {
+                width: 100%;
+            }
+        }
+    }
+}

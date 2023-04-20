@@ -1,4 +1,4 @@
-{% extends "dataedit/base.html" %}
+{% extends "dataedit/base_fullwidth.html" %}
 {% load static %}
 
 {% block after-head %}
@@ -6,89 +6,102 @@
     <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet" ><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
 {% endblock after-head %}
 
-{% block main-right-sidebar-filter %}
-<!-- extending the filter block to add wizard button -->
+{% block main-top-bar-filter %}
 
-<h3>Create Table</h3>
-<a class="btn btn-success" href="{% url 'wizard_create' %}">
-    Create new table
-</a> in the <a href="{% url 'input' 'model_draft' %}">model_draft</a> schema.
-<hr>
-<h3>OEMetaBuilder</h3>
-<a class="btn btn-success" href="{% url 'oemetabuilder' %}"> OEMetaBuilder </a>
-<a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
-    <i class="fas fa-info-circle" title="Klick to open the OEMetadata specification."></i>
-</a> 
-OEMetadata - Key Description
-<hr>
-<div style="display: flex;">
-    <h3>Search & filter</h3>
-    <button type="button"
-    class="btn btn-outline-light"
-    data-bs-toggle="popover"
-    data-trigger="focus"
-    title="How to use search and filter"
-    {% if not tables%}
-    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata. If you filter for multiple Tags, only schemas containing tables with all filtered Tags will be displayed. To see all schemas and tables again use the reset filter button."
-    {% else %}
-    data-bs-content="Use the Filters on Tags or try searching for text that may occur in table names or in metadata."
-    {% endif %}
-    style="margin-left: 10px;">
-        <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
-    </button>
-</div>
-<form id="form-filter" action="{{ request.path }}" method="get">
-    <h5>Text</h5>
-    <div class="searchbox_container small">
-        <input id="search-filter" type="text" name="query" placeholder="Search" value="{% firstof query '' %}" class="form-control" />
-    </div>
+<!-- TODO looks out of place -->
+<div class="controls-container controls-container--horizontal">
     {% load dataedit.taghandler %}
     {% get_tags None None None as all_tags %}
-    <h5>Tags</h5>
-    <div id="tags">
-        <div style="display: flex; flex-flow: wrap; margin-bottom: 1em;">
-            <select id="tag-select" name="tags" class="form-control selectpicker" multiple data-live-search="true"
-                title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
-                {% for t in all_tags %}
-                <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
-                    {{ t.name }}
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="padding-bottom: 15px;">
-            <!--
-            <button type="submit" class="btn btn-success">
-                Apply Filters
+    <div class="controls-container__filters">
+        <form id="form-filter" action="{{ request.path }}" method="get">
+            <div class="controls-container__input">
+                <label for="filterInputText" class="form-label">Filters</label>
+                <!-- TODO down this displayed as a button and looks bad .. but popup is nice -->
+                <button type="button"
+                class="btn btn-outline-light"
+                data-bs-toggle="popover"
+                data-trigger="focus"
+                title="How to use search and filter"
+                {% if not tables%}
+                data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata. If you filter for multiple Tags, only topics containing tables with all selected Tags will be displayed. To see all schemas and tables again use the reset filter button."
+                {% else %}
+                data-bs-content="Use the dropdown and search on Tags or try searching for text that may occur in table names and metadata."
+                {% endif %}
+                style="margin-left: 10px;">
+                    <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+                </button>
+                <!-- TODO up this displayed as a button and looks bad .. but popup is nice -->
+                <input id="search-filter" type="text" name="query" placeholder="Search text..." value="{% firstof query '' %}" class="form-control" />
+            </div>
+            <div id="tags">
+                <select id="tag-select" name="tags" class="form-control controls-container__tags selectpicker" multiple data-live-search="true"
+                    title="Click and search all Tags..." data-style="btn-outline-primary" data-width="auto" data-selected-text-format="values" data-actions-box="true" iconBase="fa">
+                    {% for t in all_tags %}
+                    <option data-content='<i class="fa fa-circle" style="color: {{t.color}};"></i> {{ t.name }}' value="{{ t.id }}" {% if t.id in tags %}selected{% endif %}>
+                        {{ t.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" class="btn btn-link controls-container__reset" onclick="reset_filter()">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m14,9c0,3.31-2.69,6-6,6s-6-2.69-6-6h1c0,2.76,2.24,5,5,5s5-2.24,5-5-2.24-5-5-5h-3.6l1.48,2.22-.83.55-2.19-3.28L5.12.22l.82.57-1.53,2.22h3.58c3.31,0,6,2.69,6,6Z"/>
+                    </svg>
+                </span>
+                <span class="btn__text">Reset</span>
             </button>
-            -->
-            <a class="btn btn-danger" href="{{ request.path }}">
-                Reset Filters
+            <a class="btn btn-link controls-container__create-tags" href="/dataedit/tags">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                    </svg>
+                </span>
+                <span class="btn__text">New Tags</span>
             </a>
+        </form>
+    </div>
+    <div class="controls-container__btns">
+        <div>
+            <a class="btn btn-secondary" href="{% url 'oemetabuilder' %}">OEMetaBuilder</a>
+            <a href="https://github.com/OpenEnergyPlatform/oemetadata/blob/master/metadata/latest/metadata_key_description.md" target="_blank">
+                <i class="fas fa-info-circle" title="Klick to open the OEMetadata - Key Description."></i>
+            </a> 
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary disabled">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m16,1v1H0v-1h16ZM0,8h16v-1H0v1Zm0,6h16v-1H0v1Z"/>
+                    </svg>
+                </span>
+                <span class="btn__text">View tables</span>
+            </button>
         </div>
     </div>
-</form>
-<hr>
-<div id="howto" class="collapse show foldable-entry-body">
-    <ul class="list-group">
-        <p class="font-weight-bold" style="margin-bottom: 0px;">Add Tags to a table:</p>
-        <li class="list-group-item">Tags can be added when viewing a table.</li>
-        <p class="font-weight-bold" style="margin-bottom: 0px; margin-top: 10px;">Create new Tags:</p>
-        <li class="list-group-item">You can create <a href="/dataedit/tags">new Tags</a>.</li>
-    </ul>
 </div>
-{% endblock main-right-sidebar-filter %}
+
+{% endblock main-top-bar-filter %}
 
 {% block after-body-bottom-js %}
 <!-- Latest compiled and minified JavaScript -->
 <script src="{% static 'js/bootstrap-select.min.js' %}"></script><!-- src: https://github.com/snapappointments/bootstrap-select/archive/v1.14.0-beta2.zip -->
 <script>
+    function reset_filter(){
+        location.href = "{{ request.path }}"
+    }
+
+    // blongs to dataedit_schemalist.hmtl
+    function open_wizzard(){
+        location.href = "{% url 'wizard_create' %}"
+    }
+
     $(function () {
         $('[data-bs-toggle="popover"]').popover()
         $('.popover-dismiss').popover({
             trigger: 'focus'
         })
-    })
+    } )
 
     /* update filter when changing selection */
     /*
@@ -110,6 +123,8 @@ OEMetadata - Key Description
             $("#form-filter").submit();
         }
     });
+
+
 
 </script>
 {% endblock after-body-bottom-js %}

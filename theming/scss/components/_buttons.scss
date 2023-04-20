@@ -1,0 +1,15 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.btn {
+    letter-spacing: 0.03rem;
+
+    &-link {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
+    }
+
+    &__icon {
+        @extend .me-1;
+    }
+}
