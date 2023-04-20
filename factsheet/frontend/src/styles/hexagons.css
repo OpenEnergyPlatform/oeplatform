@@ -1,14 +1,23 @@
 .main {
   display:flex;
-  --s: 240px;  /* size  */
+  --s: 260px;  /* size  */
   --m: 2px;    /* margin */
   --f: calc(1.732 * var(--s) + 4 * var(--m)  - 1px);
   width: 100%;
 }
 
+.main-main {
+  display:flex;
+  --s: 160px;  /* size  */
+  --m: 2px;    /* margin */
+  --f: calc(1.732 * var(--s) + 4 * var(--m)  - 1px);
+  margin-left: 80px;
+  margin-top: -40px;
+}
+
 .container {
   font-size: 0; /*disable white space between inline block element */
-  margin-left: 40px;
+  margin-left: 100px;
   margin-top: 20px;
 
 }
@@ -22,21 +31,21 @@
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
   -webkit-transition: background 300ms; /* For Safari 3.0 to 6.0 */
   transition: background 300ms; /* For modern browsers */
-  background: rgba(138, 178, 203, 0.16);
+  background: rgba(116, 137, 150, 0.721);
   margin-bottom: calc(var(--m) - var(--s)*0.2885); 
-  color: rgb(2, 2, 2) !important;
+  color: rgb(0, 0, 0) !important;
 }
 .container div:nth-child(odd) {
-  background:rgba(89, 125, 147, 0.132);
+  background:rgba(113, 150, 173, 0.31);
 }
 
 .container div:hover {
-    background: rgba(9, 75, 117, 0.888);
+    background: rgba(39, 109, 156, 0.965);
     color: rgb(255, 255, 255) !important;
     -webkit-transition: background 300ms; /* For Safari 3.0 to 6.0 */
     transition: background 300ms; /* For modern browsers */
     cursor: pointer;
-  }
+}
 
 .container::before {
   content: "";
@@ -48,5 +57,45 @@
                    #000  0 var(--f));
 }
 
+.container2 {
+  font-size: 0; /*disable white space between inline block element */
+  margin-left: 40px;
+  margin-top: 20px;
 
+}
+
+.container2 div {
+  width: var(--s);
+  margin: var(--m);
+  height: calc(var(--s)*1.1547); 
+  display: inline-block;
+  font-size:initial;
+  clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+  -webkit-transition: background 300ms; /* For Safari 3.0 to 6.0 */
+  transition: background 300ms; /* For modern browsers */
+  background: rgba(61, 102, 128, 0.776);
+  margin-bottom: calc(var(--m) - var(--s)*0.2885); 
+  color: rgb(232, 232, 232) !important;
+}
+.container2 div:nth-child(odd) {
+  background:rgba(78, 141, 180, 0.31);
+}
+
+.container2 div:hover {
+    background: rgba(255, 255, 255, 0.888);
+    color: rgb(0, 0, 0) !important;
+    -webkit-transition: background 300ms; /* For Safari 3.0 to 6.0 */
+    transition: background 300ms; /* For modern browsers */
+    cursor: pointer;
+}
+
+.container2::before {
+  content: "";
+  width: calc(var(--s)/2 + var(--m));
+  float: left;
+  height: 120%;
+  shape-outside: repeating-linear-gradient(     
+                   #0000 0 calc(var(--f) - 3px),      
+                   #000  0 var(--f));
+}
 
