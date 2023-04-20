@@ -24,12 +24,15 @@
                 <a href="password_change">Change your password</a>
             </td>
         </tr>
+        {% comment %}
+        {# TODO: implement tests before we allow user deletion  #}
         <tr>
             <th> Account </th>
             <td>
                 <a href="{% url 'account-delete' request.user.id %}">Delete your account</a>
             </td>
         </tr>
+        {% endcomment %}
 </table>
     <br>
     {% if request.user.is_authenticated and request.user == user%}

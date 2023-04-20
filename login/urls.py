@@ -9,7 +9,8 @@ from django.contrib.auth.views import (
 from django.urls import path
 
 from login import views
-from login.views import AccountDeleteView
+
+# from login.views import AccountDeleteView
 
 urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
@@ -69,11 +70,12 @@ urlpatterns = [
         views.OEPPasswordChangeView.as_view(),
         name="input",
     ),
-    url(
-        r"^profile/(?P<user_id>[\d]+)/delete_acc$",
-        AccountDeleteView.as_view(),
-        name="account-delete",
-    ),
+    # TODO: implement tests before we allow user deletion
+    # url(
+    #    r"^profile/(?P<user_id>[\d]+)/delete_acc$",
+    #    AccountDeleteView.as_view(),
+    #    name="account-delete",
+    # ),
     url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
     url(
         r"^groups/new/$",

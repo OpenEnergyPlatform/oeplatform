@@ -334,6 +334,11 @@ class OEPPasswordChangeView(PasswordChangeView):
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    TODO: implement tests before we allow user deletion
+    see: https://github.com/OpenEnergyPlatform/oeplatform/pull/1181
+    """
+
     model = OepUser
     template_name = "login/delete_account.html"
     success_url = reverse_lazy("logout")
