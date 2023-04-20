@@ -1,5 +1,4 @@
 from django.conf.urls import include, url
-from django.contrib import admin
 from django.contrib.auth.views import (
     PasswordResetCompleteView,
     PasswordResetConfirmView,
@@ -13,7 +12,6 @@ from login import views
 # from login.views import AccountDeleteView
 
 urlpatterns = [
-    path("admin/", admin.site.urls, name="admin"),
     path(
         "password_reset/",
         PasswordResetView.as_view(
