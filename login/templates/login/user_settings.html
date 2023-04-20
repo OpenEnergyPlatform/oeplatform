@@ -60,10 +60,10 @@
     </div>
     <br>
     <div><h2> {{ profile_user.name }} </h2></div>
-    <td> {% if profile_user.username %}
-                {{ profile_user.username }}
+    <td> {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
             {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add username</a>
+                <a href="{% url 'edit' request.user.id %}">Add Full Name</a>
             {% endif %} </td>
     <br>
     <br>

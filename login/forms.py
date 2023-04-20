@@ -15,10 +15,10 @@ class CreateUserForm(UserCreationForm):
         model = OepUser
         fields = (
             "name",
-            "username",
+            "email",
+            "fullname",
             "location",
             "affiliation",
-            "email",
             "work",
             "linkedin",
             "twitter",
@@ -53,10 +53,9 @@ class EditUserForm(UserChangeForm):
         model = OepUser
         fields = (
             "profile_img",
-            "name",
-            "username",
-            "location",
             "email",
+            "fullname",
+            "location",
             "work",
             "linkedin",
             "twitter",

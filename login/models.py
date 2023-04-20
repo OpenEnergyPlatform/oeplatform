@@ -34,7 +34,7 @@ class OEPUserManager(UserManager):
         affiliation=None,
         profile_img=None,
         registration_date=None,
-        username=None,
+        fullname=None,
         linkedin=None,
         facebook=None,
         twitter=None,
@@ -52,7 +52,7 @@ class OEPUserManager(UserManager):
             affiliation=affiliation,
             profile_img=profile_img,
             registration_date=registration_date,
-            username=username,
+            fullname=fullname,
             linkedin=linkedin,
             facebook=facebook,
             twitter=twitter,
@@ -71,7 +71,7 @@ class OEPUserManager(UserManager):
         affiliation,
         profile_img,
         registration_date,
-        username,
+        fullname,
         linkedin,
         facebook,
         twitter,
@@ -84,7 +84,7 @@ class OEPUserManager(UserManager):
             affiliation=affiliation,
             profile_img=profile_img,
             registration_date=registration_date,
-            username=username,
+            fullname=fullname,
             linkedin=linkedin,
             facebook=facebook,
             twitter=twitter,
@@ -171,12 +171,14 @@ class TablePermission(models.Model):
 
 
 class myuser(AbstractBaseUser, PermissionHolder):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True, verbose_name="Username")
     affiliation = models.CharField(max_length=50, blank=True)
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
     profile_img = models.ImageField(null=True, blank=True)
     registration_date = models.DateTimeField(auto_now_add=True)
-    username = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    fullname = models.CharField(
+        max_length=50, null=True, blank=True, verbose_name="Full Name"
+    )
     work = models.CharField(max_length=50, null=True, blank=True)
     facebook = models.URLField(max_length=500, blank=True, null=True)
     linkedin = models.URLField(max_length=500, blank=True, null=True)
