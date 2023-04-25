@@ -27,23 +27,70 @@ ADMIN_PERM = 12
 
 
 class OEPUserManager(UserManager):
-    def create_user(self, name, email, affiliation=None):
+    def create_user(
+        self,
+        name,
+        email,
+        affiliation=None,
+        profile_img=None,
+        registration_date=None,
+        fullname=None,
+        linkedin=None,
+        facebook=None,
+        twitter=None,
+        location=None,
+        work=None,
+    ):
         if not email:
             raise ValueError("An email address must be entered")
         if not name:
             raise ValueError("A name must be entered")
 
         user = self.model(
-            name=name, email=self.normalize_email(email), affiliation=affiliation
+            name=name,
+            email=self.normalize_email(email),
+            affiliation=affiliation,
+            profile_img=profile_img,
+            registration_date=registration_date,
+            fullname=fullname,
+            linkedin=linkedin,
+            facebook=facebook,
+            twitter=twitter,
+            location=location,
+            work=work,
         )
 
         user.save(using=self._db)
         user.send_activation_mail()
         return user
 
-    def create_superuser(self, name, email, affiliation):
-
-        user = self.create_user(name, email, affiliation=affiliation)
+    def create_superuser(
+        self,
+        name,
+        email,
+        affiliation,
+        profile_img,
+        registration_date,
+        fullname,
+        linkedin,
+        facebook,
+        twitter,
+        location,
+        work,
+    ):
+        user = self.create_user(
+            name,
+            email,
+            affiliation=affiliation,
+            profile_img=profile_img,
+            registration_date=registration_date,
+            fullname=fullname,
+            linkedin=linkedin,
+            facebook=facebook,
+            twitter=twitter,
+            location=location,
+            work=work,
+        )
         user.is_admin = True
         user.save(using=self._db)
         return user
@@ -124,9 +171,19 @@ class TablePermission(models.Model):
 
 
 class myuser(AbstractBaseUser, PermissionHolder):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True, verbose_name="Username")
     affiliation = models.CharField(max_length=50, blank=True)
     email = models.EmailField(verbose_name="email address", max_length=255, unique=True)
+    profile_img = models.ImageField(null=True, blank=True)
+    registration_date = models.DateTimeField(auto_now_add=True)
+    fullname = models.CharField(
+        max_length=50, null=True, blank=True, verbose_name="Full Name"
+    )
+    work = models.CharField(max_length=50, null=True, blank=True)
+    facebook = models.URLField(max_length=500, blank=True, null=True)
+    linkedin = models.URLField(max_length=500, blank=True, null=True)
+    twitter = models.URLField(max_length=500, blank=True, null=True)
+    location = models.CharField(max_length=50, blank=True, null=True)
 
     did_agree = models.BooleanField(default=False)
 
