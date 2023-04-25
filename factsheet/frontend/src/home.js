@@ -35,6 +35,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import InsightsIcon from '@mui/icons-material/Insights';
 import MenuIcon from '@mui/icons-material/Menu';
 import  { makeStyles } from '@material-ui/core/styles';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 function Home(props) {
 
@@ -92,9 +94,18 @@ function Home(props) {
           (
             <Link to={`factsheet/fs/${item.uid}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
               <div >
-                <p style={{ textAlign: 'center' }} > <Typography variant="h6" gutterBottom style={{ marginTop: '100px' }}><b> {item.acronym.substring(0,30)} </b></Typography></p>
-                <p style={{ textAlign: 'center' }} > <Typography variant="body1" gutterBottom>  <span>{item.study_name != '' ? item.study_name.substring(0,30) : <p>&nbsp;</p>}</span> </Typography></p>
-                <p style={{ textAlign: 'center' }} > <Typography variant="caption" gutterBottom style={{ color: '#9b9b9b' }}>  <span> 2023.04.01</span> </Typography></p>
+                <p style={{ width: '200px', height: '50px' }}> 
+                </p>
+                <p style={{ textAlign: 'center',  width: '200px', height: '100px', marginLeft: '50px' }}> 
+                <Typography variant="body1" gutterBottom >
+                  <b> {item.study_name} </b>  
+                </Typography>
+                </p>
+                <p style={{ textAlign: 'center' }} > <Typography variant="body1" gutterBottom>  <span>{item.acronym}</span> </Typography></p>
+                {/* <p style={{ textAlign: 'center' }} > <Typography variant="caption" gutterBottom style={{ color: '#9b9b9b' }}>  <span> 2023.04.01</span> </Typography></p> */}
+                <p style={{ textAlign: 'center' }} > 
+                  <Checkbox  color="default" />
+                </p>
               </div>
               
             </Link>
@@ -109,6 +120,10 @@ function Home(props) {
     }
     setState({ ...state, [anchor]: open });
   };
+
+  const handleConditionChange = (consdition) => {
+    console.log(consdition);
+  }
 
   const list = (anchor) => (
     <Box
@@ -230,15 +245,15 @@ function Home(props) {
                     <ThemeProvider theme={theme}>
                     <div>
                         <Select
-                          labelId="demo-simple-select-standard-label"
-                          id="demo-simple-select-standard"
-                          label="Age"
+                          label=""
+                          value={"Choose a condition"}
+                          onChange={handleConditionChange}
                           variant="outlined" 
                           style={{ width: '50%', 'height': '35px', marginTop:'10px', marginBottom:'20px', marginLeft: '170px' }}
                         >
-                          <MenuItem value={10}>Ten</MenuItem>
-                          <MenuItem value={20}>Twenty</MenuItem>
-                          <MenuItem value={30}>Thirty</MenuItem>
+                          <MenuItem value={10}>Region</MenuItem>
+                          <MenuItem value={20}>Scenario year</MenuItem>
+                          <MenuItem value={30}>Energy carrier</MenuItem>
                         </Select>
                         <Button disableElevation={true} style={{ 'height': '35px', 'marginLeft': '10px' }} size="large" variant="contained" color="primary"> <AddBoxIcon /> </Button>
                         <Button disableElevation={true} style={{ 'height': '35px', 'marginLeft': '10px' }} variant="contained" color="error"> <DeleteOutlineIcon /> </Button>

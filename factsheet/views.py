@@ -40,11 +40,11 @@ oeo.parse(Ontology_URI)
 oeo_owl = get_ontology(Ontology_URI).load()
 
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-query_endpoint = 'http://localhost:3030/ds/query'
-update_endpoint = 'http://localhost:3030/ds/update'
+#query_endpoint = 'http://localhost:3030/ds/query'
+#update_endpoint = 'http://localhost:3030/ds/update'
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -502,6 +502,28 @@ def factsheet_by_name(request, *args, **kwargs):
 
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
+
+
+
+    sq = """ 
+    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX oekg: <http://openenergy-platform.org/ontology/oekg/>
+    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
+    PREFIX dc: <http://purl.org/dc/terms/>
+
+    SELECT ?s ?o ?p
+    WHERE {
+    <http://openenergy-platform.org/ontology/oekg/769cff3d-d739-4760-687b-19c3f3675bd9> <http://openenergy-platform.org/ontology/oekg/report_title> ?o
+    }
+    """
+    print("------------------")
+    qr = oekg.query(sq)
+    for row in qr:
+        print(f"{row.s}")
+    print("------------------")
+
     uid = request.GET.get('id')
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
@@ -524,8 +546,10 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((  study_URI, DC.abstract, None )):
         abstract = o
 
-    for s, p, o in oekg.triples(( study_URI, OEKG["report_title"], None )):
-        report_title = o
+    print('*-*-*-*-*-*-*-*-*-*')
+    print(study_URI)
+    #for s, p, o in oekg.triples(( study_URI, OEKG["report_title"], None )):
+    report_title = ''
 
     for s, p, o in oekg.triples(( study_URI, OEKG["date_of_publication"], None )):
         date_of_publication = o
@@ -676,7 +700,8 @@ def factsheet_by_id(request, *args, **kwargs):
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
-    study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + clean_name(id))
+    study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + id)
+    print(study_URI)
     oekg.remove((study_URI, None, None)) 
     response = JsonResponse('factsheet removed!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)
@@ -841,7 +866,7 @@ def get_all_sub_classes(cls, visited=None):
 
     visited.add(cls.label.first())
 
-    dict = {"value": cls.label.first(), "label": cls.label.first(), "class": cls.iri}
+    dict = {"value": cls.label.first(), "label": cls.label.first(), "iri": cls.iri}
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
 
@@ -859,9 +884,24 @@ def populate_factsheets_elements(request, *args, **kwargs):
     energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003")
     energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class)
     
+
+    sector_divisions = ['OEO_00010056', 'OEO_00000242', 'OEO_00010304']
+
+    sector_divisions_list = []
+    sectors_list = []
+    for sd in sector_divisions:
+        sector_division_URI = URIRef("http://openenergy-platform.org/ontology/oeo/" + sd)
+        sector_division_label = oeo.value(sector_division_URI, RDFS.label)
+        sector_divisions_list.append({'class': sector_division_URI, 'label': sector_division_label, 'name': sector_division_label, 'value': sector_division_label})
+        for s, p, o in oeo.triples(( None, OEO.OEO_00000504, OEO[sd] )):
+            sector_label = oeo.value(s, RDFS.label)
+            sectors_list.append({'iri': s, 'label': sector_label, 'value': sector_label, 'sector_division': sector_division_URI})
+
     elements = {}
     elements['energy_carriers'] = [energy_carriers]
     elements['energy_transformation_processes'] = [energy_transformation_processes]
+    elements['sector_divisions'] = sector_divisions_list
+    elements['sectors'] = sectors_list
 
     # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
     #     sl = oeo.value(s, RDFS.label)

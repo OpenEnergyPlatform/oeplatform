@@ -12,7 +12,7 @@ import CustomTabs from './customTabs.js';
 import CustomAutocomplete from './customAutocomplete.js';
 import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import Scenario from './scenario.js';
-// import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
+import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -49,8 +49,13 @@ import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
-
 import { Route, Routes, useNavigate } from 'react-router-dom';
+import ShareIcon from '@mui/icons-material/Share';
+import Select from '@mui/material/Select';
+import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
+
+import oep_models from '../data/models.json';
+import oep_frameworks from '../data/frameworks.json';
 
 import Chip from '@mui/material/Chip';
 
@@ -160,6 +165,7 @@ function Factsheet(props) {
  // const [sectors, setSectors] = useState(sectors_json);
 
   const [sectors, setSectors] = useState([]);
+  const [sectorDivisions, setSectorDivisions] = useState([]);
   const [filteredSectors, setFilteredSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions : []);
   const [selectedAuthors, setSelectedAuthors] = useState(id !== 'new' ? fsData.authors : []);
@@ -241,6 +247,9 @@ function Factsheet(props) {
     populateFactsheetElements().then((data) => {
       setEnergyTransformationProcesses(data.energy_transformation_processes);
       setEnergyCarries(data.energy_carriers);
+      setSectors(data.sectors);
+      setSectorDivisions(data.sector_divisions);
+
       let energy_carriers_ids = [];
       data.energy_carriers.forEach(({ value, children }) => {
         energy_carriers_ids = [...energy_carriers_ids, value, ...getNodeIds(children)];
@@ -1000,13 +1009,11 @@ function Factsheet(props) {
   }
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
-    console.log(sectorDivisionsList);
-    
     setSelectedSectorDivisions(sectorDivisionsList);
-    //const selectedSectorDivisionsIDs = sectorDivisionsList.map(item => item.id);
-    //const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.id).includes(item.sector_divisions_id) );
-    //setFilteredSectors(sectorsBasedOnDivisions);
+    const sectorsBasedOnDivisions = sectors.filter(item  => sectorDivisionsList.map(item => item.class).includes(item.sector_division) );
+    setFilteredSectors(sectorsBasedOnDivisions);
   };
+
 
   const authorsHandler = (authorsList) => {
     setSelectedAuthors(authorsList);
@@ -1049,7 +1056,7 @@ function Factsheet(props) {
 
   const energyCarriersHandler = (energyCarriersList, nodes) => {
     const zipped = []
-    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
+    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
     setSelectedEnergyCarriers(zipped);
   };
 
@@ -1060,8 +1067,7 @@ function Factsheet(props) {
 
   const sectorsHandler = (sectorsList, nodes) => {
     const zipped = []
-    sectorsList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
-    console.log(zipped);
+    sectorsList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
     setSelectedSectors(zipped);
   };
 
@@ -1073,7 +1079,7 @@ function Factsheet(props) {
 
   const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
     const zipped = []
-    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).class}));
+    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
     setSelectedEnergyTransformationProcesses(zipped);
   };
 
@@ -1303,7 +1309,7 @@ function Factsheet(props) {
                   </HtmlTooltip>
                   </div>
                 </div>
-              {/* <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={sectors_json} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} /> */}
+              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={[]} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
                 What additional keywords describe your study?
               </Typography>
@@ -1469,9 +1475,13 @@ const handleUpdateMessageClose = (event: React.SyntheticEvent | Event, reason?: 
 function getSteps() {
   return ['Basic information',
   'Study details',
+  'Publication',
+  'Sectors',
+  'Energy carriers',
+  'Energy transformation processes',
   'Scenarios',
   'Models',
-  'Frameworks'
+  'Frameworks',
   ];
   }
 
@@ -1576,7 +1586,6 @@ function getStepContent(step: number) {
               <div style={{ width: '35%' }}></div>
               <TextField size="small" variant="standard" style={{ width: '60%', MarginBottom: '10px', marginTop: '20px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
               <div style={{ width: '35%' }}></div>
-              <CustomAutocompleteWithoutEdit width="40%"  type="sector_division" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
               <div style={{ marginTop: '30px' }}>
                   <HtmlTooltip
                     style={{ marginLeft: '10px' }}
@@ -1594,10 +1603,11 @@ function getStepContent(step: number) {
                     <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <div style={{ width: '40%' }}></div>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
-                What additional keywords describe your study?
-                </Typography>
+                <div style={{ marginTop: "10px", width: '80%' }}>
+                  <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
+                    What additional keywords describe your study?
+                  </Typography>
+                </div>
                 <div style={{ marginTop: "10px", width: '80%' }}>
                   <FormGroup>
                       <div >
@@ -1607,37 +1617,61 @@ function getStepContent(step: number) {
                     </div>
                   </FormGroup>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '40%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Stack spacing={3}  style={{ marginTop:'20px', marginLeft:'15%', width: '40%' }}>
-                    <DesktopDatePicker
-                        label='Date of publication'
-                        inputFormat="YYYY-MM-DD"
-                        value={date_of_publication}
-                        onChange={(newValue) => {
-                          setDateOfPublication(newValue);
-                          factsheetObjectHandler('date_of_publication', newValue);
-                        }}
-                        renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
-                      />
-                  </Stack>
-                </LocalizationProvider>
-                <TextField ssize="small" variant="standard" style={{ width: '25%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
-                <TextField size="small" variant="standard" style={{ width: '25%', marginLeft:'12%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
-                <TextField size="small" variant="standard" style={{ width: '25%', marginLeft:'12%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
-            </div>
+                 </div>
           );
     case 2:
+      return (
+        <div>
+            <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+            <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
+            <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
+            <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Stack spacing={3}  style={{ marginTop:'20px', width: '70%', marginBottom:'40px' }}>
+                <DesktopDatePicker
+                    label='Date of publication'
+                    inputFormat="YYYY-MM-DD"
+                    value={date_of_publication}
+                    onChange={(newValue) => {
+                      setDateOfPublication(newValue);
+                      factsheetObjectHandler('date_of_publication', newValue);
+                    }}
+                    renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
+                  />
+              </Stack>
+            </LocalizationProvider>
+        </div>
+      );
+    case 3:
+      return (
+        <div>
+            <CustomAutocompleteWithoutAddNew  width="50%" showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+            <CustomTreeViewWithCheckBox flat={true} showFilter={false} size="360px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+        </div>
+            );
+    case 4:
+      return (
+        <div>
+          <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriers} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+        </div>
+      );
+    case 5:
+      return (
+        <div>
+          <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   />
+        </div>
+      );
+    case 6:
           return (
             renderScenario()
           );
-    case 3:
+    case 7:
       return (
-        <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={fundingSources} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+        <CustomAutocompleteWithoutEdit  width="60%" type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
       );
-    case 4:
+    case 8:
       return (
-        <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={fundingSources} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+        <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
     default:
     return 'Unknown step';
@@ -1651,31 +1685,30 @@ function getStepContent(step: number) {
       justifyContent="space-between"
       alignItems="center"
     >
-        <Grid item xs={4} >
+        <Grid item xs={2} >
         <div>
               <CustomSwap handleSwap={handleSwap} />
         </div >
         </Grid>
-        <Grid item xs={4} >
-        <div  style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
+        <Grid item xs={8} >
+        <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
           <Typography variant="h6" gutterBottom>
             <b>{acronym}</b>
           </Typography>
         </div>
         </Grid>
-        <Grid item xs={4} >
-          <div style={{ 'textAlign': 'right' }}>
-            <Tooltip title="Save factsheet">
-              <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="success" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+          <Grid item xs={2} >
+            <div style={{ 'textAlign': 'right' }}>
+              {mode === 'edit' && <Tooltip title="Save factsheet">
+                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
+              </Tooltip>}
+              <Tooltip title="Share this factsheet">
+                <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" > <ShareIcon /> </Button>
               </Tooltip>
-            {/* <Tooltip title="Share this factsheet">
-              <Button  disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="secondary" > <ShareIcon /> </Button>
-            </Tooltip> */}
-            <Tooltip title="Delete factsheet">
-              <Button disableElevation={true} size="medium" style={{ 'height': '42px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="error" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
-            </Tooltip>
-            
-          </div >
+              <Tooltip title="Delete factsheet">
+                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
+              </Tooltip>
+            </div >
         </Grid>
         <Grid item xs={12}>
           <Snackbar
@@ -1805,12 +1838,12 @@ function getStepContent(step: number) {
           {mode === "edit" &&
             <div className='wizard'>
                 <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
-                  <Grid item xs={10} style={{ padding: '20px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
+                  <Grid item xs={12} style={{ padding: '20px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
                       items={items}
                     /> */}
-                    <Stepper activeStep={activeStep} orientation="vertical">
+                    <Stepper activeStep={activeStep} orientation="vertical" >
                       {steps.map((label, index) => (
                       <Step key={label}>
                         <StepLabel><b>{label}</b></StepLabel>
@@ -1843,73 +1876,6 @@ function getStepContent(step: number) {
                       ))}
                     </Stepper>
                   </Grid>
-                  <Grid item xs={2} style={{ padding: '20px', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }} >
-                    <div style={{ marginTop: '10%' }}>
-                      <div>
-                        <Box sx={{  marginLeft: '30%', position: 'relative', display: 'inline-flex' }}>
-                          <CircularProgress variant="determinate" value="35" size="6rem" />
-                          <Box
-                            sx={{
-                              top: 0,
-                              left: 0,
-                              bottom: 0,
-                              right: 0,
-                              position: 'absolute',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Typography variant="h6" component="div" color="text.secondary">
-                              {`${Math.round(35)}%`}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </div>
-                      <div style={{  marginLeft: '31%', position: 'relative', display: 'inline-flex' }}>
-                        <Typography variant="subtitle2" component="div" color="text.secondary">
-                          To be completed!
-                        </Typography>
-                      </div>
-                      <div style={{ marginTop: '10%', marginLeft: '5%' }}>
-                        <Typography variant="subtitle2" component="div" color="text.secondary">
-                          Your factsheet should contain information about the study and the scenarios used in it. As you add more information to your factsheet, other studies and scenarios that are similar to those you've already described will appear below.
-                        </Typography>
-                      </div>
-                      <div style={{ marginTop: '10%', marginLeft: '1%', paddingTop: '10px'}}>
-                        <Badge color="primary" badgeContent={3} 
-                               anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                              }}>
-                          <Typography variant="subtitle2" component="div" color="text.secondary" style={{ paddingRight: '10px' }}>
-                            Found similarities, so far:
-                          </Typography>
-                        </Badge>
-                        
-                      </div>
-                    <div style={{ marginTop: '5%', marginLeft: '1%', paddingTop: '10px'}}>
-                      <Chip
-                          label="Study 1"
-                          color="primary" variant="contained" 
-                          style={{ marginLeft: '5px', marginTop: '5px' }}
-                          size="small"
-                      />
-                      <Chip
-                          label="Scenario 2"
-                          color="primary" variant="outlined" 
-                          style={{ marginLeft: '5px', marginTop: '5px' }}
-                          size="small"
-                      />
-                      <Chip
-                          label="Scenario 7"
-                          color="primary" variant="outlined" 
-                          style={{ marginLeft: '5px', marginTop: '5px' }}
-                          size="small"
-                      />
-                    </div>
-                    </div>
-                  </Grid>
                 </Grid>
             </div>
           }
@@ -1921,12 +1887,12 @@ function getStepContent(step: number) {
               'marginBottom': '20px',
               'marginLeft': '10px',
               'marginRight': '10px',
-              border: '1px dashed #cecece',
-              padding: '20px',
-              overflow: 'scroll',
-              borderRadius: '5px',
-              backgroundColor:'#f3f3f361',
-              display: "flex"
+              'border': '1px dashed #cecece',
+              'padding': '20px',
+              'overflow': 'scroll',
+              'borderRadius': '5px',
+              'backgroundColor':'#f3f3f361',
+              'display': "flex"
             }}
             class="bgimg"
             >
@@ -1942,8 +1908,8 @@ function getStepContent(step: number) {
                       'height':'65vh'
                     }}
                   >
-                    <Typography variant="h6" gutterBottom component="div">
-                      <b> {acronym} </b>
+                    <Typography variant="subtitle2" gutterBottom component="div">
+                    <b>Acronym: </b>{acronym} 
                     </Typography>
                     <Typography variant="subtitle2" gutterBottom component="div">
                     <b>Study name: </b>
@@ -1975,11 +1941,11 @@ function getStepContent(step: number) {
                        {doi !== undefined && doi}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>Link: </b>
+                    <b> Link: </b>
                       {link_to_study !== undefined && link_to_study}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>Date of publication: </b>
+                    <b> Date of publication: </b>
                        {date_of_publication !== '01-01-1900' && date_of_publication.toString()}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
@@ -1987,7 +1953,7 @@ function getStepContent(step: number) {
                        {place_of_publication !== undefined && place_of_publication}
                     </Typography>
                     <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>Authors:  </b>  
+                    <b> Authors: </b>
                         {selectedAuthors.map((v, i) => (
                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                         ))}
@@ -2039,35 +2005,35 @@ function getStepContent(step: number) {
                       {scenarios.map((v, i) => { return <div> 
                         {v.acronym !== '' && <Chip label={v.acronym} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />}
                         <Typography sx={{ 'marginLeft': '20px', 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Name: </b>  
+                        <b>  Name:  </b>
                           {v.name}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Abstract: </b>  
+                        <b> Abstract:  </b>
                           {v.abstract}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Keywords:</b>  
+                        <b>  Keywords:</b>
                           {v.keywords.map( (e) =>  <Chip label={e} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Years:</b>  
+                        <b>   Years:</b>
                           {v.scenario_years.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Regions:</b>  
+                        <b>    Regions: </b>
                           {v.regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Interacting regions:</b>  
+                        <b>  Interacting regions:</b>
                           {v.interacting_regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Input datasets:</b>  
+                        <b>  Input datasets: </b>
                           {v.input_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                         <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>Output datasets:</b>  
+                         <b> Output datasets: </b>
                           {v.output_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                         </Typography>
                        

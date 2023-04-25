@@ -1,10 +1,9 @@
 .main {
   display:flex;
-  --s: 320px;  /* size  */
+  --s: 300px;  /* size  */
   --m: 2px;    /* margin */
   --f: calc(1.732 * var(--s) + 4 * var(--m)  - 1px);
   width: 100%;
-  margin-left: 10px;
 }
 
 .main-main {

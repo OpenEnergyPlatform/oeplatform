@@ -31,8 +31,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
-//import oedb_iris from '../data/datasets_iris.json';
-//import oedb_names from '../data/datasets_names.json';
+import oedb_iris from '../data/datasets_iris.json';
+import oedb_names from '../data/datasets_names.json';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -182,8 +182,8 @@ export default function Scenario(props) {
       };
 
 
-    const options_db_names = ['oedb_iris'];
-    const options_db_iris = ['oedb_names'];
+    const options_db_names = oedb_iris;
+    const options_db_iris = oedb_names;
 
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
@@ -316,9 +316,26 @@ export default function Scenario(props) {
           <Grid item xs={6} style={{ marginBottom: '30px' }}>
             <TextField size="small" variant='standard' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
           </Grid>
-          <Grid item xs={12} style={{ marginTop: '0px' }}>
-            <TextField size="small" variant='standard' style={{ width: '97%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <Grid item xs={6} style={{ marginTop: '0px' }}>
+            <TextField size="small" variant='standard' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
           </Grid>
+          <Grid item xs={6} style={{  width: '90%' }}>
+            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
+              What additional keywords describe your scenario?
+            </Typography>
+              <div>
+               <FormGroup>
+                  <div>
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("100% renewables")} onChange={scenarioKeywordsHandler} label="100% renewables" name={"100% renewables_" + data.id} />
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("acceptance")} onChange={scenarioKeywordsHandler} label="acceptance" name={"acceptance_" + data.id} />
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("sufficiency")} onChange={scenarioKeywordsHandler} label="sufficiency" name={"sufficiency_" + data.id} />
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("negative emissionen")} onChange={scenarioKeywordsHandler} label="negative emissionen" name={"negative emissionen_" + data.id} />
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid restrictions")} onChange={scenarioKeywordsHandler} label="grid restrictions" name={"grid restrictions_" + data.id} />
+                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid / infrastructure extension")} onChange={scenarioKeywordsHandler} label="grid / infrastructure extension" name={"grid / infrastructure extension_" + data.id} />
+                  </div> 
+               </FormGroup>
+             </div>
+         </Grid>
           <Grid item xs={5} style={{ marginTop: '15px', marginBottom: '10px' }}>
             <CustomAutocomplete  width="95%" type="spatial region" editHandler={HandleEditRegion} addNewHandler={HandleAddNewRegion}  showSelectedElements={true} selectedElements={data.regions} manyItems optionsSet={scenarioRegion} kind='Which spatial regions does this scenario focus on (study regions)?' handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)} />
           </Grid>
@@ -328,23 +345,7 @@ export default function Scenario(props) {
           <Grid item xs={3} style={{  marginTop: '15px', marginBottom: '10px' }}>
             <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
           </Grid>
-          <Grid item xs={12} style={{ marginBottom: '15px', 'padding': '20px', width: '100%', border: '1px solid #cecece', width: '100%', borderRadius: '2px', backgroundColor:'#FCFCFC' }}>
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
-              What additional keywords describe your scenario?
-            </Typography>
-              <div>
-               <FormGroup>
-                  <div>
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("100% renewables")} onChange={scenarioKeywordsHandler} label="100% renewables" name={"100% renewables_" + data.id} />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("acceptance")} onChange={scenarioKeywordsHandler} label="acceptance" name={"acceptance_" + data.id} />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("sufficiency")} onChange={scenarioKeywordsHandler} label="sufficiency" name={"sufficiency_" + data.id} />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("negative emissionen")} onChange={scenarioKeywordsHandler} label="negative emissionen" name={"negative emissionen_" + data.id} />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("grid restrictions")} onChange={scenarioKeywordsHandler} label="grid restrictions" name={"grid restrictions_" + data.id} />
-                    <FormControlLabel control={<Checkbox color="default" />} checked={data.keywords.includes("grid / infrastructure extension")} onChange={scenarioKeywordsHandler} label="grid / infrastructure extension" name={"grid / infrastructure extension_" + data.id} />
-                  </div> 
-               </FormGroup>
-             </div>
-         </Grid>
+          
           <Grid
             container
             direction="row"

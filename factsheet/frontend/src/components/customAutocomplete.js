@@ -77,6 +77,7 @@ export default function CustomAutocomplete(parameters) {
   }
 
   const handleDelete = (e, vc, vi) => {
+    setUpdatedLabel(editLabel);
     setEditIRI(vi);
     setEditLabel(vc);
     toggleOpenEdit(true);
@@ -130,7 +131,7 @@ export default function CustomAutocomplete(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
- 
+  console.log(parameters);
 
   return (
     <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
