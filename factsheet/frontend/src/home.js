@@ -7,13 +7,13 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import LinearProgress from '@mui/material/LinearProgress';
 import { Route, Routes, Link } from 'react-router-dom';
 import axios from "axios"
-import './styles/App.css';
-import CustomSearchInput from "./components/customSearchInput";
+
+import CustomTable from "./components/customTable.js";
 import { useLocation } from 'react-router-dom';
 import conf from "./conf.json";
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import './styles/hexagons.css';
+
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -37,6 +37,10 @@ import MenuIcon from '@mui/icons-material/Menu';
 import  { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import ButtonGroup from '@mui/material/ButtonGroup';
+
+
+import './styles/App.css';
 
 function Home(props) {
 
@@ -185,8 +189,8 @@ function Home(props) {
 
   if (loading === false) {
     return (
-          <div key={props.id}>
-              <Grid container spacing={2} direction="row" sx={{ 'marginTop': '10px', 'marginLeft': '1%', 'marginRight': '1%','padding': '10px', 'border': '1px solid #cecece', 'height':'410px', 'width':'98%', 'overflow': 'auto', 'backgroundColor':' #0c455cfa', 'borderRadius': '5px' }}>
+            <ThemeProvider theme={theme}>
+              {/* <Grid container spacing={2} direction="row" sx={{ 'marginTop': '10px', 'marginLeft': '1%', 'marginRight': '1%','padding': '10px', 'border': '1px solid #cecece', 'height':'410px', 'width':'98%', 'overflow': 'auto', 'backgroundColor':' #0c455cfa', 'borderRadius': '5px' }}>
                 <Grid item xs={5}>
                   <div>
                     <ThemeProvider theme={theme}>
@@ -266,15 +270,35 @@ function Home(props) {
                     </ThemeProvider>
                   </div>
                 </Grid>
-              </Grid>
-              <Grid container spacing={2} direction="row" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'height':'80vh', 'width':'98%', 'overflow': 'auto' }}>
-                <div class="main">
-                  <div class="container">
+              </Grid> */}
+              {/* <Grid container spacing={2} direction="column" sx={{ 'marginTop': '20px', 'marginLeft': '1%', 'marginRight': '1%','padding': '20px', 'height':'80vh', 'width':'98%', 'overflow': 'auto' }}>
                     {renderCards(eval(factsheets))}
-                  </div>
-                </div>
-              </Grid>
-          </div>
+                      <div>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'left',
+                          '& > *': {
+                            m: 0.3,
+                          },
+                        }}
+                      >
+                        <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: '#005374' }} >
+                            <Button variant="contained" key="Add">Add a new</Button>
+                        </Link>
+                        <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                            <Button variant="outlined" key="Compare">Compare</Button>
+                        </Link>
+                        <Button variant="outlined" key="Search">Search</Button>
+                      </Box>
+                      </div>
+                      <div>
+                      <CustomTable />
+                     </div>
+              </Grid> */}
+              <CustomTable factsheets={eval(factsheets)} />
+            </ThemeProvider>
     );
   }
   else {

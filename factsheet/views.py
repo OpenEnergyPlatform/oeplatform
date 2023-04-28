@@ -39,12 +39,12 @@ oeo.parse(Ontology_URI)
 
 oeo_owl = get_ontology(Ontology_URI).load()
 
-
 query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 #query_endpoint = 'http://localhost:3030/ds/query'
 #update_endpoint = 'http://localhost:3030/ds/update'
+
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -503,27 +503,6 @@ def factsheet_by_name(request, *args, **kwargs):
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
 
-
-
-    sq = """ 
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX oekg: <http://openenergy-platform.org/ontology/oekg/>
-    PREFIX oeo: <http://openenergy-platform.org/ontology/oeo/>
-    PREFIX dc: <http://purl.org/dc/terms/>
-
-    SELECT ?s ?o ?p
-    WHERE {
-    <http://openenergy-platform.org/ontology/oekg/769cff3d-d739-4760-687b-19c3f3675bd9> <http://openenergy-platform.org/ontology/oekg/report_title> ?o
-    }
-    """
-    print("------------------")
-    qr = oekg.query(sq)
-    for row in qr:
-        print(f"{row.s}")
-    print("------------------")
-
     uid = request.GET.get('id')
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
@@ -833,11 +812,19 @@ def get_all_factsheets(request, *args, **kwargs):
         element['study_name'] = study_name if study_name != None else '' 
         element['abstract'] = abstract if abstract != None else ''
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
-        element['institution'] = []
+        element['institutions'] = []
         for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000510, None )):
             label = oekg.value(o, RDFS.label)
             if label != None:
-                element['institution'].append(label)
+                element['institutions'].append(label)
+        element['scenarios'] = []
+        
+        element['date_of_publication'] = oekg.value(study_URI,OEKG["date_of_publication"])
+        for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
+            label = oekg.value(o, RDFS.label)
+            if label != None:
+                element['scenarios'].append(label)
+
         all_factsheets.append(element)
 
     response = JsonResponse(all_factsheets, safe=False, content_type='application/json') 
