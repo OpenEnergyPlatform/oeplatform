@@ -1915,33 +1915,37 @@ class PeerReviewView(LoginRequiredMixin, View):
         return field_descriptions
 
     def get(self, request, schema, table):
-        # review_state = self.is_finished
+        review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
+        json_schema = self.load_json_schema()
+        spatial_location_description = json_schema["properties"]["spatial"]["properties"]["location"]["description"]
         can_add = False
         table_obj = Table.load(schema, table)
+        field_descriptions = self.get_all_field_descriptions(json_schema)
+        print(field_descriptions)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
-            can_add = (level >= login_models.WRITE_PERM)
-
+            can_add = level >= login_models.WRITE_PERM
         url_table_id = request.build_absolute_uri(
             reverse("view", kwargs={"schema": schema, "table": table})
         )
-
         metadata = self.sort_in_category(schema, table)
-
         context_meta = {"config": json.dumps(
-                            {"can_add": can_add,
-                             "url_peer_review": reverse(
-                                "peer_review", kwargs={"schema": schema, "table": table}
-                                ),
-                             "url_table": reverse(
-                                "view", kwargs={"schema": schema, "table": table}
-                                ),
-                             "table": table,
-                             }),
-                        "meta": metadata,
-                        }
-
+            {"can_add": can_add,
+             "url_peer_review": reverse(
+                 "peer_review", kwargs={"schema": schema, "table": table}
+             ),
+             "url_table": reverse(
+                 "view", kwargs={"schema": schema, "table": table}
+             ),
+             "table": table,
+             }),
+            "meta": metadata,
+            "columns": json.dumps(columns),
+            "json_schema": json_schema,
+            "spatial_location_description": spatial_location_description,
+            "field_descriptions_json": json.dumps(field_descriptions),
+        }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
     def load_contributor(self, schema, table):
