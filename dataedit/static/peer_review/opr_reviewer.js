@@ -154,15 +154,25 @@ function cancelPeerReview() {
  * Identifies field name and value and refreshs side panel infos
  * @param {string} fieldKey Name of the field
  * @param {string} fieldValue Value of the field
+ * @param category
  */
-function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-vars,max-len
-  selectedField = fieldKey;
-  selectedFieldValue=fieldValue;
-  const selectedName = document.querySelector("#review-field-name");
-  selectedName.textContent = fieldKey + ' ' + fieldValue;
-  clearInputFields();
-  //makeFieldList();
-};
+function click_field(fieldKey, fieldValue, category) {
+    selectedField = fieldKey;
+    selectedFieldValue = fieldValue;
+    selectedCategory = category;
+    const selectedName = document.querySelector("#review-field-name");
+    selectedName.textContent = fieldKey + " " + fieldValue;
+    const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    console.log("Field descriptions data:", fieldDescriptionsData);
+
+    const fieldKeyWithCategory = category + '.' + fieldKey;
+    if (fieldDescriptionsData[fieldKeyWithCategory]) {
+        fieldDescriptionsElement.textContent = fieldDescriptionsData[fieldKeyWithCategory];
+    } else {
+        fieldDescriptionsElement.textContent = "Описание не найдено";
+    }
+    console.log("Category:", category, "Field key:", fieldKey, "Data:", fieldDescriptionsData[fieldKeyWithCategory]);
+}
 
 /**
  * Creates List of all fields from html elements
