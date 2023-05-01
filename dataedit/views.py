@@ -1904,12 +1904,14 @@ class PeerReviewView(LoginRequiredMixin, View):
     def get_all_field_descriptions(self, json_schema):
         field_descriptions = {}
 
-        def extract_descriptions(properties):
+        def extract_descriptions(properties, prefix=""):
             for field, value in properties.items():
                 if "description" in value:
-                    field_descriptions[field] = value["description"]
+                    key = f"{prefix}.{field}" if prefix else field
+                    field_descriptions[key] = value["description"]
                 if "properties" in value:
-                    extract_descriptions(value["properties"])
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    extract_descriptions(value["properties"], new_prefix)
 
         extract_descriptions(json_schema["properties"])
         return field_descriptions
@@ -1955,7 +1957,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         current_table = Table.load(schema=schema, table=table)
         table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
         return table_holder
-      
 
     def post(self, request, schema, table):
         """
