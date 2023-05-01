@@ -1901,6 +1901,19 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return meta
 
+    def get_all_field_descriptions(self, json_schema):
+        field_descriptions = {}
+
+        def extract_descriptions(properties):
+            for field, value in properties.items():
+                if "description" in value:
+                    field_descriptions[field] = value["description"]
+                if "properties" in value:
+                    extract_descriptions(value["properties"])
+
+        extract_descriptions(json_schema["properties"])
+        return field_descriptions
+
     def get(self, request, schema, table):
         # review_state = self.is_finished
         columns = get_column_description(schema, table)
