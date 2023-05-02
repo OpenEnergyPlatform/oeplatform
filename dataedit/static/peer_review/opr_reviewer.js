@@ -157,9 +157,7 @@ function cancelPeerReview() {
  * @param category
  */
 function click_field(fieldKey, fieldValue, category) {
-    // Удаление подстрок с цифрами и точками перед ними
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-
     selectedField = cleanedFieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
@@ -167,15 +165,29 @@ function click_field(fieldKey, fieldValue, category) {
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     console.log("Field descriptions data:", fieldDescriptionsData);
-
     if (fieldDescriptionsData[cleanedFieldKey]) {
-        fieldDescriptionsElement.textContent = fieldDescriptionsData[cleanedFieldKey];
+        let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+        let fieldInfoText = '';
+        if (fieldInfo.description) {
+            fieldInfoText += 'Description: ' + fieldInfo.description + '<br>';
+        }
+        if (fieldInfo.example) {
+            fieldInfoText += 'Example: ' + fieldInfo.example + '<br>';
+        }
+        if (fieldInfo.badge) {
+            fieldInfoText += 'Badge: ' + fieldInfo.badge + '<br>';
+        }
+        if (fieldInfo.title) {
+            fieldInfoText += 'Title: ' + fieldInfo.title + '<br>';
+        }
+        fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
     console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     clearInputFields();
 }
+
 
 
 /**
