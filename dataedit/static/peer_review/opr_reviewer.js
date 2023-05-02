@@ -157,21 +157,25 @@ function cancelPeerReview() {
  * @param category
  */
 function click_field(fieldKey, fieldValue, category) {
-    selectedField = fieldKey;
+    // Удаление подстрок с цифрами и точками перед ними
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+
+    selectedField = cleanedFieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
     const selectedName = document.querySelector("#review-field-name");
-    selectedName.textContent = fieldKey + " " + fieldValue;
+    selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     console.log("Field descriptions data:", fieldDescriptionsData);
 
-    if (fieldDescriptionsData[fieldKey]) {
-        fieldDescriptionsElement.textContent = fieldDescriptionsData[fieldKey];
+    if (fieldDescriptionsData[cleanedFieldKey]) {
+        fieldDescriptionsElement.textContent = fieldDescriptionsData[cleanedFieldKey];
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
-    console.log("Category:", category, "Field key:", fieldKey, "Data:", fieldDescriptionsData[fieldKey]);
+    console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
 }
+
 
 /**
  * Creates List of all fields from html elements
