@@ -49,25 +49,36 @@ class TablesView(View):
 class ReviewsView(View):
     def get(self, request, user_id):
         """
-        Load the reviews the user identifyes as reviewer for.
+        Load the reviews the user identifyes as reviewer and contributor for.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
 
+        # get reviewer pov reviews
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
         latest_review = peer_review_reviews.last()
         review_history = peer_review_reviews.exclude(pk=latest_review.pk)
-        
+        current_manager = PeerReviewManager.load(latest_review)
+        # Update days open value stored in peerReviewManager table
+        current_manager.update_open_since(opr = latest_review)
+        latest_review_status = current_manager.status
+        latest_review_days_open = current_manager.is_open_since
+        reviewed_context = {"latest": latest_review, "latest_status":latest_review_status, "latest_days_open": latest_review_days_open, "history": review_history}
 
+        # get contributor pov reviews
         peer_review_contributions = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
         latest_reviewd_contribution = peer_review_contributions.last()
-        reviewd_contribution_history = peer_review_contributions.exclude(pk=latest_review.pk)
+        reviewed_contribution_history = peer_review_contributions.exclude(pk=latest_review.pk)
+        current_manager = PeerReviewManager.load(latest_review)
+        # Update days open value stored in peerReviewManager table
+        current_manager.update_open_since(opr = latest_review)
+        latest_reviewd_contribution_status = current_manager.status
+        latest_reviewd_contribution_days_open = current_manager.is_open_since
+        reviewed_contributions_context = {"latest": latest_reviewd_contribution, "latest_status": latest_reviewd_contribution_status, "latest_days_open":latest_reviewd_contribution_days_open, "history": reviewed_contribution_history}
 
-        reviewed_contributions = {"latest": latest_reviewd_contribution, "history": reviewd_contribution_history}
-
-        return render(request, "login/user_review.html", {"profile_user": user, "latest_review": latest_review, "reviews": review_history, "reviewd_contributions": reviewed_contributions})
+        return render(request, "login/user_review.html", {"profile_user": user, "reviewer_reviewed": reviewed_context, "contributior_reviewed": reviewed_contributions_context})
 
 
 class SettingsView(View):
