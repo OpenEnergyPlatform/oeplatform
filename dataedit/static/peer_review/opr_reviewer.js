@@ -174,6 +174,7 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
     console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+    clearInputFields();
 }
 
 
