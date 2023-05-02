@@ -127,6 +127,10 @@ function Factsheet(props) {
     setActiveStep(0);
   };
 
+  const handleStepClick = (i) => {
+    setActiveStep(i);
+  };
+
   const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -310,7 +314,6 @@ function Factsheet(props) {
         }
       });
       } else {
-        console.log(uid);
         axios.get(conf.toep + `factsheet/get/`, { params: { id: uid } }).then(res => {
           axios.post(conf.toep + 'factsheet/update/',
           {
@@ -1845,8 +1848,8 @@ function getStepContent(step: number) {
                     /> */}
                     <Stepper activeStep={activeStep} orientation="vertical" >
                       {steps.map((label, index) => (
-                      <Step key={label}>
-                        <StepLabel><b>{label}</b></StepLabel>
+                      <Step key={label} >
+                        <StepLabel onClick={() => handleStepClick(index)}><b>{label}</b></StepLabel>
                         <StepContent>
                         <Typography>{getStepContent(index)}</Typography>
                         <div >

@@ -21,6 +21,12 @@ import { Route, Routes, Link } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
 import Chip from '@mui/material/Chip';
+import ReadMoreIcon from '@mui/icons-material/ReadMore';
+
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import Collapse from '@mui/material/Collapse';
+import IconButton from '@mui/material/IconButton';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -78,31 +84,50 @@ const headCells = [
     numeric: false,
     disablePadding: true,
     label: 'Study name',
+    align: 'left'
   },
   {
     id: 'acronym',
     numeric: true,
     disablePadding: false,
     label: 'Acronym',
+    align: 'left'
   },
   {
     id: 'date of publications',
     numeric: true,
     disablePadding: false,
     label: 'Date of publications',
+    align: 'left'
   },
   {
     id: 'institutions',
     numeric: true,
     disablePadding: false,
     label: 'Institutions',
+    align: 'left'
   },
   {
     id: 'scenarios',
     numeric: true,
     disablePadding: false,
     label: 'Scenarios',
+    align: 'left'
   },
+  {
+    id: 'more',
+    numeric: false,
+    disablePadding: true,
+    label: '',
+    align: 'left'
+  },
+  {
+    id: 'details',
+    numeric: true,
+    disablePadding: false,
+    label: '',
+    align: 'right'
+  }
 ];
 
 function EnhancedTableHead(props) {
@@ -112,6 +137,7 @@ function EnhancedTableHead(props) {
     onRequestSort(event, property);
   };
 
+  
   return (
     <TableHead>
       <TableRow>
@@ -126,7 +152,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <StyledTableCell
             key={headCell.id}
-            align={headCell.numeric ? 'left' : 'left'}
+            align={headCell.align}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -169,18 +195,19 @@ function EnhancedTableToolbar(props) {
           display: 'flex',
       }}
     >
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px'}}>Reset</Button>
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px'}}>Define critera for comparison</Button>
       <Typography
         sx={{ flex: '1 1 70%' }}
         color="inherit"
         variant="subtitle1"
         component="div"
       >
-        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ color: 'white' }}>Compare {numSelected} factsheets</Button>}
+        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white' }}>Compare {numSelected} factsheets</Button>}
       </Typography>
       <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: '#005374' }} >
         <Button variant="contained" key="Add">Add a new</Button>
       </Link>
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '10px'}}>Search</Button>
     </Toolbar>
   );
 }
@@ -196,6 +223,7 @@ export default function CustomTable(props) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [open, setOpen] = React.useState([]);
 
  
   const [rows, setRows] = React.useState(props.factsheets);
@@ -287,9 +315,10 @@ export default function CustomTable(props) {
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
+                  <React.Fragment>
                   <StyledTableRow
                     hover
-                    onClick={(event) => handleClick(event, row.study_name)}
+                   
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
@@ -299,6 +328,7 @@ export default function CustomTable(props) {
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
+                        onClick={(event) => handleClick(event, row.study_name)}
                         color="primary"
                         checked={isItemSelected}
                         inputProps={{
@@ -306,18 +336,8 @@ export default function CustomTable(props) {
                         }}
                       />
                     </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                    >
-                      <div style={{ display: 'flex'}}>
-                        <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'blue' }}  >
-                          <VisibilityIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px' }}/>
-                        </Link> 
-                        <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px', marginLeft: '15px' }}>{row.study_name}</Typography>
-                      </div>
+                    <TableCell>
+                      <Typography variant="subtitle1" gutterBottom style={{ marginTop: '10px' }}>{row.study_name}</Typography>
                     </TableCell>
                     <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
                     <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
@@ -331,8 +351,63 @@ export default function CustomTable(props) {
                           <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                         ))}
                     </TableCell>
+                    <TableCell>
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
+                      >
+                        {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: 'center' }}>
+                      <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} >
+                        <ReadMoreIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px', fontSize: '35px' }}/>
+                      </Link> 
+                    </TableCell>
                   </StyledTableRow>
-                );
+                
+                <TableRow>
+                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                      <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
+                        <Box sx={{ margin: 1 }}>
+                          <Typography variant="subtitle1" gutterBottom component="div">
+                            Details
+                          </Typography>
+                          <Table size="small" aria-label="purchases">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Publication</TableCell>
+                                <TableCell>Funding sources</TableCell>
+                                <TableCell>Models</TableCell>
+                                <TableCell>Frameworks</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <TableRow >
+                                  <TableCell component="th" scope="row">
+                                  {row.acronym}
+                                  </TableCell>
+                                  <TableCell component="th" scope="row">
+                                  {row.acronym}
+                                  </TableCell>
+                                  <TableCell component="th" scope="row">
+                                  {row.acronym}
+                                  </TableCell>
+                                  <TableCell component="th" scope="row">
+                                  {row.acronym}
+                                  </TableCell>
+                                </TableRow>
+                            </TableBody>
+                          </Table>
+                        </Box>
+                      </Collapse>
+                    </TableCell>
+                </TableRow>
+
+              </React.Fragment>
+              );
+
               })}
               {emptyRows > 0 && (
                 <TableRow
