@@ -1901,26 +1901,26 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return meta
 
-    def get_all_field_descriptions(self, json_schema):
+    def get_all_field_descriptions(self, json_schema, prefix=''):
         field_descriptions = {}
 
         def extract_descriptions(properties, prefix=""):
             for field, value in properties.items():
                 if "description" in value:
+                    field_key = f"{prefix}.{field}" if prefix else field
                     key = f"{prefix}.{field}" if prefix else field
                     field_descriptions[key] = value["description"]
                 if "properties" in value:
                     new_prefix = f"{prefix}.{field}" if prefix else field
                     extract_descriptions(value["properties"], new_prefix)
 
-        extract_descriptions(json_schema["properties"])
+        extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
 
     def get(self, request, schema, table):
         review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
         json_schema = self.load_json_schema()
-        spatial_location_description = json_schema["properties"]["spatial"]["properties"]["location"]["description"]
         can_add = False
         table_obj = Table.load(schema, table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
@@ -1945,7 +1945,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "meta": metadata,
             "columns": json.dumps(columns),
             "json_schema": json_schema,
-            "spatial_location_description": spatial_location_description,
             "field_descriptions_json": json.dumps(field_descriptions),
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
