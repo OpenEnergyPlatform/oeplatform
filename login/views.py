@@ -8,7 +8,7 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
-from dataedit.models import Table
+from dataedit.models import Table, PeerReviewManager
 
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
@@ -34,7 +34,7 @@ class TablesView(View):
             for table in tables
             if user.get_table_permission_level(table) >= models.WRITE_PERM
         ]  # WRITE_PERM = 4
-        # prepare for data for template
+        # prepare data for template
         tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 
         # get name of schema form FK object
@@ -49,14 +49,19 @@ class TablesView(View):
 class ReviewsView(View):
     def get(self, request, user_id):
         """
-        Load the user identified by user_id and is OAuth-token.
-            If latter does not exist yet, create one.
+        Load the reviews the user identifyes as reviewer for.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        return render(request, "login/user_review.html", {"profile_user": user})
+
+        peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
+        latest_review = peer_review_reviews.last()
+        review_history = peer_review_reviews.exclude(pk=latest_review.pk)
+
+
+        return render(request, "login/user_review.html", {"profile_user": user, "latest_review": latest_review, "reviews": review_history})
 
 
 class SettingsView(View):
