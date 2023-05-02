@@ -44,7 +44,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table, PeerReview
+from dataedit.models import Table, PeerReview, PeerReviewManager
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
@@ -1047,6 +1047,13 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
+
+        # maybe call the update also on this view to show the days open on page
+        opr_manager = PeerReviewManager()
+        reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
+        if reviews.last() is not None:
+            latest_review = reviews.last()
+            opr_manager.update_open_since(opr=latest_review)
 
         context_dict = {
             # Not in use?
