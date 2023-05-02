@@ -165,13 +165,12 @@ function click_field(fieldKey, fieldValue, category) {
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     console.log("Field descriptions data:", fieldDescriptionsData);
 
-    const fieldKeyWithCategory = category + '.' + fieldKey;
-    if (fieldDescriptionsData[fieldKeyWithCategory]) {
-        fieldDescriptionsElement.textContent = fieldDescriptionsData[fieldKeyWithCategory];
+    if (fieldDescriptionsData[fieldKey]) {
+        fieldDescriptionsElement.textContent = fieldDescriptionsData[fieldKey];
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
-    console.log("Category:", category, "Field key:", fieldKey, "Data:", fieldDescriptionsData[fieldKeyWithCategory]);
+    console.log("Category:", category, "Field key:", fieldKey, "Data:", fieldDescriptionsData[fieldKey]);
 }
 
 /**
