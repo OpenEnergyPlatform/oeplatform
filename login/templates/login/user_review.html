@@ -1,9 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% block main-content-body %}
-    {% include "login/user_nav.html" %}
-{% endblock %}
 
 
 {% block main-right-sidebar-content %}
@@ -63,4 +60,38 @@
     <br>
     <hr>
 
+{% endblock %}
+
+{% block main-content-body %}
+{% include "login/user_nav.html" %}
+    <div>
+        <ul>
+            {% if latest_review is not None %}
+            <li>
+                <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ latest_review.schema }} - {{ latest_review.table }}</a>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
+                   Show review history 
+                </button>
+                <div class="collapse" id="collapseReviewHistory">
+                    <div class="card card-body">
+                        <p> History </p>
+                        {% for review in reviews %}
+                        <ul>
+                            <li>
+                                {{ review }}
+                            </li>
+                        </ul>
+                        {% empty %}
+                            No reviews found for this user.
+                        {% endfor %}
+                    </div>
+                </div>
+            </li>
+            {% else %}
+            <li>
+                No reviews found for this User.
+            </li>
+            {% endif %}
+        </ul>
+    </div>
 {% endblock %}
