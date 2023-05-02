@@ -179,4 +179,80 @@ class PeerReviewManager(models.Model):
     prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None)
     next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None)
 
+    @classmethod
+    def load(cls, opr):
+        peer_review_manager = PeerReviewManager.objects.get(
+            opr=opr
+        )
+        return peer_review_manager
 
+    def save(self, *args, **kwargs):
+        # Set is_open_since field if it is None
+        if self.is_open_since is None:
+            # Get the associated PeerReview instance
+            peer_review = self.opr
+
+            # Set is_open_since based on the days_open property of the PeerReview instance
+            days_open = peer_review.days_open
+            if days_open is not None:
+                self.is_open_since = str(days_open)
+
+        # Call the parent class's save method to save the PeerReviewManager instance
+        super().save(*args, **kwargs)
+    
+    @classmethod
+    def update_open_since(cls, opr=None, *args, **kwargs):
+        if opr is not None:
+            peer_review = PeerReviewManager.objects.get(
+                opr=opr
+            )
+        else:
+            peer_review = cls.opr
+
+        days_open = peer_review.opr.days_open
+        peer_review.is_open_since = str(days_open) 
+
+        # Call the parent class's save method to save the PeerReviewManager instance
+        peer_review.save(*args, **kwargs)
+
+    def set_next_reviewer(self):
+        """
+        Set the order on which peer will be requred to perform a action to 
+        continue with the process. 
+        """
+        # TODO:check for user identifies as ...
+        if self.current_reviewer == Reviewer.REVIEWER.value:
+            self.current_reviewer = Reviewer.CONTRIBUTOR.value
+        else:
+            self.current_reviewer = Reviewer.REVIEWER.value
+        self.save()
+
+    def whos_turn(self):
+        """Get the user identifies with current role.
+        Roles are either contributor or reviewer.
+
+        Returns:
+            _type_: Userobject
+        """
+        role, result = None
+        peer_review = self.opr
+        if self.current_reviewer == Reviewer.REVIEWER.value:
+            role= Reviewer.REVIEWER.value
+            result= peer_review.reviewer
+        else:
+            role= Reviewer.CONTRIBUTOR.value
+            result= peer_review.contributor
+
+        return role, result
+    
+    @staticmethod
+    def filter_opr_by_reviewer(reviewer_user):
+        return PeerReview.objects.filter(reviewer=reviewer_user)
+    
+    @staticmethod
+    def filter_opr_by_contributor(contributor_user):
+        return PeerReview.objects.filter(contributor=contributor_user)
+    
+    @staticmethod
+    def filter_opr_by_table(schema, table):
+        return PeerReview.objects.filter(schema=schema, table=table)
