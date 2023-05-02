@@ -1907,12 +1907,15 @@ class PeerReviewView(LoginRequiredMixin, View):
         def extract_descriptions(properties, prefix=""):
             for field, value in properties.items():
                 if "description" in value:
-                    field_key = f"{prefix}.{field}" if prefix else field
                     key = f"{prefix}.{field}" if prefix else field
                     field_descriptions[key] = value["description"]
                 if "properties" in value:
                     new_prefix = f"{prefix}.{field}" if prefix else field
                     extract_descriptions(value["properties"], new_prefix)
+                if "items" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    if "properties" in value["items"]:
+                        extract_descriptions(value["items"]["properties"], new_prefix)
 
         extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
