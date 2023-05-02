@@ -59,9 +59,15 @@ class ReviewsView(View):
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
         latest_review = peer_review_reviews.last()
         review_history = peer_review_reviews.exclude(pk=latest_review.pk)
+        
 
+        peer_review_contributions = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
+        latest_reviewd_contribution = peer_review_contributions.last()
+        reviewd_contribution_history = peer_review_contributions.exclude(pk=latest_review.pk)
 
-        return render(request, "login/user_review.html", {"profile_user": user, "latest_review": latest_review, "reviews": review_history})
+        reviewed_contributions = {"latest": latest_reviewd_contribution, "history": reviewd_contribution_history}
+
+        return render(request, "login/user_review.html", {"profile_user": user, "latest_review": latest_review, "reviews": review_history, "reviewd_contributions": reviewed_contributions})
 
 
 class SettingsView(View):
