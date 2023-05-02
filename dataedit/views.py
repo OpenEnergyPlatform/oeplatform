@@ -1908,34 +1908,83 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return meta
 
+    def get_all_field_descriptions1(self, json_schema, prefix=''):
+        field_descriptions = {}
+
+        def extract_descriptions(properties, prefix=""):
+            for field, value in properties.items():
+                if "description" in value:
+                    key = f"{prefix}.{field}" if prefix else field
+                    field_descriptions[key] = value["description"]
+                if "properties" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    extract_descriptions(value["properties"], new_prefix)
+                if "items" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    if "properties" in value["items"]:
+                        extract_descriptions(value["items"]["properties"], new_prefix)
+
+        extract_descriptions(json_schema["properties"], prefix)
+        return field_descriptions
+
+    def get_all_field_descriptions(self, json_schema, prefix=''):
+        field_descriptions = {}
+
+        def extract_descriptions(properties, prefix=""):
+            for field, value in properties.items():
+                key = f"{prefix}.{field}" if prefix else field
+
+                if any(attr in value for attr in ["description", "example", "badge", "title"]):
+                    field_descriptions[key] = {}
+                    if "description" in value:
+                        field_descriptions[key]["description"] = value["description"]
+                    if "example" in value:
+                        field_descriptions[key]["example"] = value["example"]
+                    if "badge" in value:
+                        field_descriptions[key]["badge"] = value["badge"]
+                    if "title" in value:
+                        field_descriptions[key]["title"] = value["title"]
+                if "properties" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    extract_descriptions(value["properties"], new_prefix)
+                if "items" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    if "properties" in value["items"]:
+                        extract_descriptions(value["items"]["properties"], new_prefix)
+
+        extract_descriptions(json_schema["properties"], prefix)
+        return field_descriptions
+
     def get(self, request, schema, table):
-        # review_state = self.is_finished
+        review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
+        json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
+        field_descriptions = self.get_all_field_descriptions(json_schema)
+        print(field_descriptions)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
-            can_add = (level >= login_models.WRITE_PERM)
-
+            can_add = level >= login_models.WRITE_PERM
         url_table_id = request.build_absolute_uri(
             reverse("view", kwargs={"schema": schema, "table": table})
         )
-
         metadata = self.sort_in_category(schema, table)
-
         context_meta = {"config": json.dumps(
-                            {"can_add": can_add,
-                             "url_peer_review": reverse(
-                                "peer_review", kwargs={"schema": schema, "table": table}
-                                ),
-                             "url_table": reverse(
-                                "view", kwargs={"schema": schema, "table": table}
-                                ),
-                             "table": table,
-                             }),
-                        "meta": metadata,
-                        }
-
+            {"can_add": can_add,
+             "url_peer_review": reverse(
+                 "peer_review", kwargs={"schema": schema, "table": table}
+             ),
+             "url_table": reverse(
+                 "view", kwargs={"schema": schema, "table": table}
+             ),
+             "table": table,
+             }),
+            "meta": metadata,
+            "columns": json.dumps(columns),
+            "json_schema": json_schema,
+            "field_descriptions_json": json.dumps(field_descriptions),
+        }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
     def load_contributor(self, schema, table):
@@ -1945,7 +1994,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         current_table = Table.load(schema=schema, table=table)
         table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
         return table_holder
-      
 
     def post(self, request, schema, table):
         """

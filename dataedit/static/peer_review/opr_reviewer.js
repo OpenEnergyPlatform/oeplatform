@@ -154,15 +154,41 @@ function cancelPeerReview() {
  * Identifies field name and value and refreshs side panel infos
  * @param {string} fieldKey Name of the field
  * @param {string} fieldValue Value of the field
+ * @param category
  */
-function click_field(fieldKey, fieldValue) { // eslint-disable-line no-unused-vars,max-len
-  selectedField = fieldKey;
-  selectedFieldValue=fieldValue;
-  const selectedName = document.querySelector("#review-field-name");
-  selectedName.textContent = fieldKey + ' ' + fieldValue;
-  clearInputFields();
-  //makeFieldList();
-};
+function click_field(fieldKey, fieldValue, category) {
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+    selectedField = cleanedFieldKey;
+    selectedFieldValue = fieldValue;
+    selectedCategory = category;
+    const selectedName = document.querySelector("#review-field-name");
+    selectedName.textContent = cleanedFieldKey + " " + fieldValue;
+    const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    console.log("Field descriptions data:", fieldDescriptionsData);
+    if (fieldDescriptionsData[cleanedFieldKey]) {
+        let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+        let fieldInfoText = '';
+        if (fieldInfo.description) {
+            fieldInfoText += 'Description: ' + fieldInfo.description + '<br>';
+        }
+        if (fieldInfo.example) {
+            fieldInfoText += 'Example: ' + fieldInfo.example + '<br>';
+        }
+        if (fieldInfo.badge) {
+            fieldInfoText += 'Badge: ' + fieldInfo.badge + '<br>';
+        }
+        if (fieldInfo.title) {
+            fieldInfoText += 'Title: ' + fieldInfo.title + '<br>';
+        }
+        fieldDescriptionsElement.innerHTML = fieldInfoText;
+    } else {
+        fieldDescriptionsElement.textContent = "Описание не найдено";
+    }
+    console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+    clearInputFields();
+}
+
+
 
 /**
  * Creates List of all fields from html elements
