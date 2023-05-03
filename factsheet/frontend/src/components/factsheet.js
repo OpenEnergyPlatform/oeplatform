@@ -51,6 +51,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share';
+import sunburstKapsule from 'sunburst-chart';
+import fromKapsule from 'react-kapsule';
 import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
 
@@ -60,7 +62,7 @@ import oep_frameworks from '../data/frameworks.json';
 import Chip from '@mui/material/Chip';
 
 import '../styles/App.css';
-
+import '../styles/sunburst.css';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -114,6 +116,10 @@ function Factsheet(props) {
   const [scenarioYears, setScenarioYears] = useState([]);
   const [models, setModels] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
+  const [sunburstData, setSunburstData] = useState([]);
+  
+
+  const Sunburst = fromKapsule(sunburstKapsule);
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -266,7 +272,36 @@ function Factsheet(props) {
       });
       setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
 
+      const sampleData = {
+        name: "root",
+        children: [
+          {
+            name: "leafA",
+            value: 3
+          },
+          {
+            name: "nodeB",
+            children: [
+              {
+                name: "leafBA",
+                value: 5
+              },
+              {
+                name: "leafBB",
+                value: 1
+              }
+            ]
+          }
+        ]
+      }
+
+      const sampleData2 = {
+        name: "root",
+        children: data.energy_carriers[0].children
+      }
+      setSunburstData(sampleData2);
       });
+
   }, []);
 
   const handleSaveFactsheet = () => {
@@ -1375,6 +1410,7 @@ function Factsheet(props) {
         <Grid item xs={6} >
           <CustomAutocomplete type="Author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
         </Grid>
+       
       </Grid>
     </Grid>
   }
@@ -1485,8 +1521,16 @@ function getSteps() {
   'Scenarios',
   'Models',
   'Frameworks',
+  'test',
   ];
   }
+
+const handleNonFittingLabelFn = ((label, availablePx) => {
+  const numFitChars = Math.round(availablePx / 7); // ~7px per char
+  return numFitChars < 5
+    ? null
+    : `${label.slice(0, Math.round(numFitChars) - 3)}...`;
+});
 
 function getStepContent(step: number) {
   switch (step) {
@@ -1559,7 +1603,8 @@ function getStepContent(step: number) {
                 <TextField size="small" variant="standard" style={{ width: '40%', marginTop:'20px', marginBottom:'20px', backgroundColor:'#FCFCFC',  marginLeft: '17%' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
                 <CustomAutocomplete width="40%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
-
+              
+          
           );
     case 1:
           return (
@@ -1675,6 +1720,12 @@ function getStepContent(step: number) {
     case 8:
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+      );
+    case 9:
+      return (
+        <div>
+          <Sunburst width="700" data={sunburstData} handleNonFittingLabel={handleNonFittingLabelFn} size="5" />
+        </div>
       );
     default:
     return 'Unknown step';

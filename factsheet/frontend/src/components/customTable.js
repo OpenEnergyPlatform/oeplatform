@@ -195,18 +195,18 @@ function EnhancedTableToolbar(props) {
           display: 'flex',
       }}
     >
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px'}}>Reset</Button>
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px'}}>Define critera for comparison</Button>
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }}>Show all</Button>
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }}>Comparison criteria</Button>
       <Typography
         sx={{ flex: '1 1 70%' }}
         color="inherit"
         variant="subtitle1"
         component="div"
       >
-        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white' }}>Compare {numSelected} factsheets</Button>}
+        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white', textTransform: 'none'  }}>Compare {numSelected} factsheets</Button>}
       </Typography>
-      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: '#005374' }} >
-        <Button variant="contained" key="Add">Add a new</Button>
+      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+        <Button variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}>Add a new</Button>
       </Link>
     </Toolbar>
   );

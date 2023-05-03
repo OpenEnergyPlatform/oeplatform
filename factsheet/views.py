@@ -852,8 +852,8 @@ def get_all_sub_classes(cls, visited=None):
         visited = set()
 
     visited.add(cls.label.first())
-
-    dict = {"value": cls.label.first(), "label": cls.label.first(), "iri": cls.iri}
+    #"value": cls.label.first(),  "label": cls.label.first(), , "iri": cls.iri
+    dict = { "name": cls.label.first(), "value": 2, "label": cls.label.first(), "iri": cls.iri}
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
 
