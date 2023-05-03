@@ -59,26 +59,43 @@ class ReviewsView(View):
         # get reviewer pov reviews
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
         latest_review = peer_review_reviews.last()
-        review_history = peer_review_reviews.exclude(pk=latest_review.pk)
-        current_manager = PeerReviewManager.load(latest_review)
-        # Update days open value stored in peerReviewManager table
-        current_manager.update_open_since(opr = latest_review)
-        latest_review_status = current_manager.status
-        latest_review_days_open = current_manager.is_open_since
-        reviewed_context = {"latest": latest_review, "latest_status":latest_review_status, "latest_days_open": latest_review_days_open, "history": review_history}
+        if latest_review is not None:
+            review_history = peer_review_reviews.exclude(pk=latest_review.pk)
+            current_manager = PeerReviewManager.load(latest_review)
+            # Update days open value stored in peerReviewManager table
+            current_manager.update_open_since(opr = latest_review)
+            latest_review_status = current_manager.status
+            latest_review_days_open = current_manager.is_open_since
+            reviewed_context = {"latest": latest_review, "latest_status":latest_review_status, "latest_days_open": latest_review_days_open, "history": review_history}
+        else:
+            reviewed_context = None
+
+        from itertools import groupby
+        # Sort the reviews by table name
+        sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
+        # Group the reviews by table name
+        grouped_reviews = {k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)}
 
         # get contributor pov reviews
         peer_review_contributions = PeerReviewManager.filter_opr_by_reviewer(reviewer_user=user)
-        latest_reviewd_contribution = peer_review_contributions.last()
-        reviewed_contribution_history = peer_review_contributions.exclude(pk=latest_review.pk)
-        current_manager = PeerReviewManager.load(latest_review)
-        # Update days open value stored in peerReviewManager table
-        current_manager.update_open_since(opr = latest_review)
-        latest_reviewd_contribution_status = current_manager.status
-        latest_reviewd_contribution_days_open = current_manager.is_open_since
-        reviewed_contributions_context = {"latest": latest_reviewd_contribution, "latest_status": latest_reviewd_contribution_status, "latest_days_open":latest_reviewd_contribution_days_open, "history": reviewed_contribution_history}
+        latest_reviewed_contribution = peer_review_contributions.last()
+        if latest_review is not None:
+            reviewed_contribution_history = peer_review_contributions.exclude(pk=latest_review.pk)
+            current_manager = PeerReviewManager.load(latest_review)
+            # Update days open value stored in peerReviewManager table
+            current_manager.update_open_since(opr = latest_review)
+            latest_reviewed_contribution_status = current_manager.status
+            latest_reviewed_contribution_days_open = current_manager.is_open_since
+            reviewed_contributions_context = {"latest": latest_reviewed_contribution, "latest_status": latest_reviewed_contribution_status, "latest_days_open":latest_reviewed_contribution_days_open, "history": reviewed_contribution_history}
+        else:
+            reviewed_contributions_context = None
 
-        return render(request, "login/user_review.html", {"profile_user": user, "reviewer_reviewed": reviewed_context, "contributior_reviewed": reviewed_contributions_context})
+        # Sort the reviews by table name
+        sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)
+        # Group the reviews by table name
+        grouped_contributions = {k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)}
+
+        return render(request, "login/user_review.html", {"profile_user": user, "reviewer_reviewed": reviewed_context, "reviewer_reviewed_grouped":grouped_reviews, "contributior_reviewed": reviewed_contributions_context, "contributor_reviewed_grouped":grouped_contributions})
 
 
 class SettingsView(View):
