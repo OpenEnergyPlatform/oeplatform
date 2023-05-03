@@ -105,10 +105,11 @@ function sendJson(method, url, data, success, error) {
 function getErrorMsg(response) {
   try {
     var response_msg = (
-      'Upload failed: ' + JSON.parse(response.responseJSON).reason
+      'Upload failed: ' + JSON.parse(response.responseJSON).error
     );
   } catch (e) {
-    var response_msg = response.statusText;
+    console.log(response)
+    var response_msg = response.responseText;
   }
   return response_msg;
 }
