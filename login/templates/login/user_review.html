@@ -65,9 +65,10 @@
 {% block main-content-body %}
 {% include "login/user_nav.html" %}
     <div>
-        <p>Reviewer Overview</p>
+        <h2>Reviewer Overview</h2>
         <ul>
             {% if reviewer_reviewed.latest is not None %}
+            <strong>Latest Review:</strong>
             <li>
                 <a href="/dataedit/view/{{ reviewer_reviewed.latest.schema }}/{{ reviewer_reviewed.latest.table }}">{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}</a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
@@ -83,23 +84,56 @@
                             </li>
                         </ul>
                         {% empty %}
-                            No reviews found for this user.
+                            No more reviews found for this user and table.
                         {% endfor %}
                     </div>
                 </div>
             </li>
+            </ul>
+            <h3>Participated as reviewer</h3>
+            {% for table_name, reviews in reviewer_reviewed_grouped.items %}
+            <p>{{ table_name }}</p>
+            <ul>
+            {% for review in reviews %}
+            {% if forloop.first %}
+                <!-- Display the latest review separately -->
+               <strong>Latest Review for this table:</strong> {{ review }}
+                <li>
+                <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory{{table_name}}" aria-expanded="false" aria-controls="collapseReviewHistory{{table_name}}">
+                Show review history 
+                </button>
+                </li>
+            {% endif %}
+            {% endfor %}
+            <div class="collapse" id="collapseReviewHistory{{table_name}}">
+                <div class="card card-body">
+                    <p> History </p>
+                    <ul>
+                        {% for review in reviews %}
+                        <!-- Display other reviews normally -->
+                        <li>{{ review.id }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </ul>
+            {% endfor %}
             {% else %}
+        <ul>
             <li>
                 No reviews found for this User.
             </li>
-            {% endif %}
         </ul>
+            {% endif %}
+        
     </div>
 
     <div>
-        <p>Contribution Overview</p>
+        <h2>Contribution Overview</h2>
         <ul>
             {% if contributior_reviewed.latest is not None %}
+            <strong>Latest Contribution:</strong>
             <li>
                 <a href="/dataedit/view/{{ contributior_reviewed.latest.schema }}/{{ contributior_reviewed.latest.table }}">{{ contributior_reviewed.latest.schema }} - {{ contributior_reviewed.latest.table }} - Started: {{ contributior_reviewed.latest.date_started }} - Days open: {{ contributior_reviewed.latest_days_open }}  - Status: {{ contributior_reviewed.latest_status }} </a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
@@ -115,16 +149,48 @@
                             </li>
                         </ul>
                         {% empty %}
-                            No reviews found for this user.
+                            No contributions found for this user and table.
                         {% endfor %}
                     </div>
                 </div>
             </li>
-            {% else %}
-            <li>
-                No reviews found for this User.
-            </li>
-            {% endif %}
         </ul>
-    </div>
+        <h3>Participated as contributor</h3>
+        {% for table_name, reviews in contributor_reviewed_grouped.items %}
+        <p>{{ table_name }}</p>
+        <ul>
+        {% for review in reviews %}
+        {% if forloop.first %}
+            <!-- Display the latest review separately -->
+            <strong>Latest Review for this table:</strong> {{ review }}
+            <li>
+                <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContribHistory{{table_name}}" aria-expanded="false" aria-controls="collapseContribHistory{{table_name}}">
+                Show review history 
+                </button>
+            </li>
+        {% endif %}
+        {% endfor %}
+        <div class="collapse" id="collapseContribHistory{{table_name}}">
+            <div class="card card-body">
+                <p> History </p>
+                <ul>
+                    {% for review in reviews %}
+                    <!-- Display other reviews normally -->
+                    <li>{{ review.id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </ul>
+        {% endfor %}
+        {% else %}
+    <ul>
+        <li>
+            No contributions found for this User.
+        </li>
+    </ul>
+        {% endif %}
+    
+</div>
 {% endblock %}
