@@ -15,7 +15,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -1055,6 +1055,12 @@ class DataView(View):
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
 
+        contributor = PeerReviewView.load_contributor(schema=schema, table=table)
+        if contributor is not None:
+            opr_context = {"contributor": contributor}
+        else:
+            opr_context = None 
+
         context_dict = {
             # Not in use?
             # "comment_on_table": dict(metadata),
@@ -1073,6 +1079,7 @@ class DataView(View):
             "is_admin": is_admin,
             "can_add": can_add,
             "host": request.get_host(),
+            "opr": opr_context,
         }
 
         context_dict.update(current_view.options)
@@ -1987,12 +1994,16 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
-    def load_contributor(self, schema, table):
+    @staticmethod
+    def load_contributor(schema, table):
         """
         Get the contributor for the table a review is started on. 
         """
         current_table = Table.load(schema=schema, table=table)
-        table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        try:
+            table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        except AttributeError:
+            table_holder = None
         return table_holder
 
     def post(self, request, schema, table):
@@ -2008,15 +2019,18 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
             contributor = self.load_contributor(schema, table)
-            if contributor.id is not request.user.id:
-                table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
-                table_obj.save()
-            
-        #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
-        if review_finised is True:  
-            review_table = Table.load(schema=schema, table=table)
-            review_table.set_is_reviewed()
-            # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
+            if contributor is not None: 
+                    table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
+                    table_obj.save()
+            else:
+                error_msg = f"Failed to retrive any user that identifies as table holder for current table: { table } !"
+                return JsonResponse({"error": error_msg}, status=400)
+
+            #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
+            if review_finised is True:  
+                review_table = Table.load(schema=schema, table=table)
+                review_table.set_is_reviewed()
+                # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
 
         return render(request, 'dataedit/opr_review.html', context=context)
 
