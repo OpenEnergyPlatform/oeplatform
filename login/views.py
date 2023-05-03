@@ -87,8 +87,8 @@ class ReviewsView(View):
         }
 
         # get contributor pov reviews
-        peer_review_contributions = PeerReviewManager.filter_opr_by_reviewer(
-            reviewer_user=user
+        peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
+            contributor_user=user
         )
         latest_reviewed_contribution = peer_review_contributions.last()
         if latest_review is not None:
