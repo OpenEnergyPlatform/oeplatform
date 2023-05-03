@@ -39,11 +39,11 @@ oeo.parse(Ontology_URI)
 
 oeo_owl = get_ontology(Ontology_URI).load()
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
 
 store = sparqlstore.SPARQLUpdateStore()
@@ -853,9 +853,12 @@ def get_all_sub_classes(cls, visited=None):
 
     visited.add(cls.label.first())
     #"value": cls.label.first(),  "label": cls.label.first(), , "iri": cls.iri
-    dict = { "name": cls.label.first(), "value": 2, "label": cls.label.first(), "iri": cls.iri}
+   
     childCount = len(list(cls.subclasses()))
     subclasses = cls.subclasses()
+    value = 10 if childCount > 5 else 500
+
+    dict = { "name": cls.label.first(),  "label": cls.label.first(), "value": 10, "iri": cls.iri}
 
     if childCount > 0:
       dict["children"] = [get_all_sub_classes(subclass, visited) for subclass in subclasses if subclass.label.first() not in visited ]

@@ -22,6 +22,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
 import Chip from '@mui/material/Chip';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -185,7 +190,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+  const { numSelected, handleOpenQuery} = props;
 
   return (
     <Toolbar
@@ -195,15 +200,15 @@ function EnhancedTableToolbar(props) {
           display: 'flex',
       }}
     >
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }}>Show all</Button>
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }}>Comparison criteria</Button>
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} >Show all</Button>
+      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}>Comparison criteria</Button>
       <Typography
         sx={{ flex: '1 1 70%' }}
         color="inherit"
         variant="subtitle1"
         component="div"
       >
-        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white', textTransform: 'none'  }}>Compare {numSelected} factsheets</Button>}
+        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white', textTransform: 'none' }}>Compare {numSelected} factsheets</Button>}
       </Typography>
       <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
         <Button variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}>Add a new</Button>
@@ -224,6 +229,7 @@ export default function CustomTable(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState([]);
+  const [openQuery, setOpenQuery] = React.useState(false);
 
  
   const [rows, setRows] = React.useState(props.factsheets);
@@ -276,6 +282,17 @@ export default function CustomTable(props) {
     setDense(event.target.checked);
   };
 
+  const handleOpenQuery = (event) => {
+    console.log('open');
+    setOpenQuery(true);
+  };
+
+  const handleCloseQuery = (event) => {
+    console.log('close...');
+    setOpenQuery(false);
+  };
+
+
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -293,8 +310,36 @@ export default function CustomTable(props) {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Dialog
+        fullWidth
+        maxWidth="md"
+        open={openQuery}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">
+          <b>Criteria</b>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            <div>
+              <pre>
+                Open Energy Platform
+              </pre>
+            </div>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained"  >
+            Run
+          </Button>
+          <Button variant="contained" onClick={handleCloseQuery}  >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -173,6 +173,7 @@ function Factsheet(props) {
 
 
  // const [sectors, setSectors] = useState(sectors_json);
+  const myChartRef = useRef(0);
 
   const [sectors, setSectors] = useState([]);
   const [sectorDivisions, setSectorDivisions] = useState([]);
@@ -272,37 +273,14 @@ function Factsheet(props) {
       });
       setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
 
+
+      myChartRef.current = Sunburst
       const sampleData = {
         name: "root",
-        children: [
-          {
-            name: "leafA",
-            value: 3
-          },
-          {
-            name: "nodeB",
-            children: [
-              {
-                name: "leafBA",
-                value: 5
-              },
-              {
-                name: "leafBB",
-                value: 1
-              }
-            ]
-          }
-        ]
-      }
-
-      const sampleData2 = {
-        name: "root",
+        label: "Energy carrier",
         children: data.energy_carriers[0].children
       }
-      console.log(data.energy_carriers[0].children);
-      console.log(sampleData);
-      console.log(sampleData2);
-      setSunburstData(sampleData2);
+      setSunburstData(sampleData);
       });
 
   }, []);
@@ -1524,15 +1502,13 @@ function getSteps() {
   'Scenarios',
   'Models',
   'Frameworks',
-  // 'test',
+  'test',
   ];
   }
 
 const handleNonFittingLabelFn = ((label, availablePx) => {
   const numFitChars = Math.round(availablePx / 7); // ~7px per char
-  return numFitChars < 5
-    ? null
-    : `${label.slice(0, Math.round(numFitChars) - 3)}...`;
+  return `${label.slice(2, Math.round(numFitChars) - 3)}...`;
 });
 
 function getStepContent(step: number) {
@@ -1724,12 +1700,21 @@ function getStepContent(step: number) {
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
-    // case 9:
-    //   return (
-    //     <div>
-    //       <Sunburst width="700" data={sunburstData} handleNonFittingLabel={handleNonFittingLabelFn} excludeRoot={true} minSliceAngle={0.4} />
-    //     </div>
-    //   );
+    case 9:
+      return (
+        <div>
+          <Sunburst 
+            width="700" 
+            data={sunburstData} 
+            handleNonFittingLabel={handleNonFittingLabelFn}  
+            minSliceAngle={0.4} 
+            label={"label"} 
+            sort={((a, b) => a.value - b.value)}
+            excludeRoot={true}
+            radiusScaleExponent={1}
+          />
+        </div>
+      );
     default:
     return 'Unknown step';
   }
