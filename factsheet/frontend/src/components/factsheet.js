@@ -299,6 +299,9 @@ function Factsheet(props) {
         name: "root",
         children: data.energy_carriers[0].children
       }
+      console.log(data.energy_carriers[0].children);
+      console.log(sampleData);
+      console.log(sampleData2);
       setSunburstData(sampleData2);
       });
 
@@ -1521,7 +1524,7 @@ function getSteps() {
   'Scenarios',
   'Models',
   'Frameworks',
-  'test',
+  // 'test',
   ];
   }
 
@@ -1721,12 +1724,12 @@ function getStepContent(step: number) {
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
-    case 9:
-      return (
-        <div>
-          <Sunburst width="700" data={sunburstData} handleNonFittingLabel={handleNonFittingLabelFn} size="5" />
-        </div>
-      );
+    // case 9:
+    //   return (
+    //     <div>
+    //       <Sunburst width="700" data={sunburstData} handleNonFittingLabel={handleNonFittingLabelFn} excludeRoot={true} minSliceAngle={0.4} />
+    //     </div>
+    //   );
     default:
     return 'Unknown step';
   }
