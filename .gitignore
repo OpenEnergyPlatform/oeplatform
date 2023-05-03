@@ -75,7 +75,7 @@ target/
 
 # Other generated files
 venv*/
-src
+#src
 0_env/
 /envs
 /node_env
