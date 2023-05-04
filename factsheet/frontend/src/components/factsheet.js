@@ -42,7 +42,6 @@ import AlertTitle from '@mui/material/AlertTitle';
 // import scenario_years from '../data/scenario_years.json';
 // import sectors_json from   '../data/sectors.json';
 // import energyTransformations from '../data/energyTransformations';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -58,6 +57,22 @@ import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.j
 
 import oep_models from '../data/models.json';
 import oep_frameworks from '../data/frameworks.json';
+
+
+import Timeline from '@mui/lab/Timeline';
+import TimelineItem from '@mui/lab/TimelineItem';
+import TimelineSeparator from '@mui/lab/TimelineSeparator';
+import TimelineConnector from '@mui/lab/TimelineConnector';
+import TimelineContent from '@mui/lab/TimelineContent';
+import TimelineDot from '@mui/lab/TimelineDot';
+import TimelineOppositeContent, {
+  timelineOppositeContentClasses,
+} from '@mui/lab/TimelineOppositeContent';
+
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
+
 
 import Chip from '@mui/material/Chip';
 
@@ -1330,7 +1345,7 @@ function Factsheet(props) {
                 </div>
               <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={[]} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
               <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
-                What additional keywords describe your study?
+                Please select study descriptors.
               </Typography>
               <div style={{ marginTop: "10px" }}>
                 <FormGroup>
@@ -1578,8 +1593,6 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '40%',  backgroundColor:'#FCFCFC'  }} id="outlined-basic" label="Report title"  value={report_title} onChange={handleReportTitle} />
-                <TextField size="small" variant="standard" style={{ width: '40%', marginTop:'20px', marginBottom:'20px', backgroundColor:'#FCFCFC',  marginLeft: '17%' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
                 <CustomAutocomplete width="40%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
               
@@ -1632,7 +1645,7 @@ function getStepContent(step: number) {
                 </div>
                 <div style={{ marginTop: "10px", width: '80%' }}>
                   <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
-                    What additional keywords describe your study?
+                  <b>Please select study descriptors.</b>
                   </Typography>
                 </div>
                 <div style={{ marginTop: "10px", width: '80%' }}>
@@ -1679,13 +1692,13 @@ function getStepContent(step: number) {
     case 4:
       return (
         <div>
-          <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriers} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} />
+          {/* <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriers} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} /> */}
         </div>
       );
     case 5:
       return (
         <div>
-          <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   />
+          {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   /> */}
         </div>
       );
     case 6:
@@ -1734,9 +1747,7 @@ function getStepContent(step: number) {
         </Grid>
         <Grid item xs={8} >
         <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
-          <Typography variant="h6" gutterBottom>
-            <b>{acronym}</b>
-          </Typography>
+         
         </div>
         </Grid>
           <Grid item xs={2} >
@@ -1745,10 +1756,10 @@ function getStepContent(step: number) {
                 <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
               </Tooltip>}
               <Tooltip title="Share this factsheet">
-                <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" > <ShareIcon /> </Button>
+                <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" > <ShareIcon /> </Button>
               </Tooltip>
               <Tooltip title="Delete factsheet">
-                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
+                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
               </Tooltip>
             </div >
         </Grid>
@@ -1933,7 +1944,7 @@ function getStepContent(step: number) {
               'padding': '20px',
               'overflow': 'scroll',
               'borderRadius': '5px',
-              'backgroundColor':'#f3f3f361',
+              'backgroundColor':'#f3f3f380',
               'display': "flex"
             }}
             class="bgimg"
@@ -1947,154 +1958,295 @@ function getStepContent(step: number) {
                       'marginRight': '10px',
                       'overflow': 'scroll',
                       'width': '95%',
-                      'height':'65vh'
+                      'height':'65vh',
+                      'display': 'flex',
+                      'flexDirection': 'column',
+                      'alignItems': 'start',
                     }}
                   >
-                    <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Acronym: </b>{acronym} 
+                    <Box sx={{ position: 'relative', display: 'inline-flex', 'marginBottom': '10px', 'marginLeft': '170px'}}>
+                      <CircularProgress variant="determinate" value={60} size={80} />
+                        <Box
+                          sx={{
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 0,
+                            position: 'absolute',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                        <Typography variant="h5" component="div" color="text.secondary">
+                          {`${Math.round(60)}%`}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="caption" gutterBottom component="div" sx={{ 'marginLeft': '170px' }}>
+                      To be completed!
                     </Typography>
-                    <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Study name: </b>
-                      {studyName !== undefined && studyName}
+                    <Typography variant="h6" gutterBottom component="div" sx={{ 'marginTop': '10px', 'marginLeft': '150px' }}>
+                      <b> {acronym}</b>
                     </Typography>
-                    {/* <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Acronym: </b>
-                     {acronym}
-                    </Typography> */}
-                    <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Contact person(s): </b>
+
+                    <Timeline
+                      sx={{
+                        [`& .${timelineOppositeContentClasses.root}`]: {
+                          flex: 0.12,
+                        },
+                        
+                      }}
+                    >
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Basic information</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <InfoOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                        <p>
+                          <b>Study name:</b> {studyName !== undefined && studyName}
+                        </p>  
+                        <p>
+                          <b>Acronym</b> {acronym}
+                        </p>
+                        <p>
+                          <b>Institutions: </b>
+                            {selectedInstitution.map((v, i) => (
+                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                        </p>
+                        <p>  <b>Contact person(s):</b>
                         {selectedContactPerson.map((v, i) => (
-                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                    </Typography>
-                    <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Abstract: </b>
-                       {abstract !== undefined && abstract}
-                    </Typography>
-                    <Typography variant="subtitle2" gutterBottom component="div">
-                    <b>Study report information: </b>
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>Title: </b>
-                      {report_title !== undefined && report_title}
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>DOI: </b>
-                       {doi !== undefined && doi}
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b> Link: </b>
-                      {link_to_study !== undefined && link_to_study}
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b> Date of publication: </b>
-                       {date_of_publication !== '01-01-1900' && date_of_publication.toString()}
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b>Place of publication: </b>
-                       {place_of_publication !== undefined && place_of_publication}
-                    </Typography>
-                    <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                    <b> Authors: </b>
-                        {selectedAuthors.map((v, i) => (
-                           <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                        ))}
-                    </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Institutions: </b>
-                      {selectedInstitution.map((v, i) => (
-                      <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Funding sources:  </b>  
-                      {selectedFundingSource.map((v, i) => (
-                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Sector divisions: </b>
-                      {selectedSectorDivisions.map((v, i) => (
-                        <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Sectors: </b>
-                      {selectedSectors.map((v, i) => (
-                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Energy carriers: </b>   
-                      {selectedEnergyCarriers.map((v, i) => (
-                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Energy Transformation Processes: </b>   
-                      {selectedEnergyTransformationProcesses.map((v, i) => (
-                        <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                  <b>Keywords: </b>  
-                      {selectedStudyKewords.map((v, i) => (
-                       <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                      <b>Scenarios: </b>  
-                      {scenarios.map((v, i) => { return <div> 
-                        {v.acronym !== '' && <Chip label={v.acronym} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />}
-                        <Typography sx={{ 'marginLeft': '20px', 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>  Name:  </b>
-                          {v.name}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b> Abstract:  </b>
-                          {v.abstract}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>  Keywords:</b>
-                          {v.keywords.map( (e) =>  <Chip label={e} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>   Years:</b>
-                          {v.scenario_years.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>    Regions: </b>
-                          {v.regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>  Interacting regions:</b>
-                          {v.interacting_regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                        <b>  Input datasets: </b>
-                          {v.input_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                        <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                         <b> Output datasets: </b>
-                          {v.output_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                        </Typography>
-                       
-                      </div>  
-                      }
-                      )}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                      <b>Models: </b>  
-                      {selectedModels.map((v, i) => (
-                       <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
-                  <Typography sx={{ 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                      <b>Frameworks: </b>  
-                      {selectedFrameworks.map((v, i) => (
-                       <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                  </Typography>
+                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                          ))}
+                        </p>
+                      
+                        <p>
+                          <b> Authors: </b>
+                            {selectedAuthors.map((v, i) => (
+                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                        </p>
+
+                        </TimelineContent>
+                      </TimelineItem>
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Study detail</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <MenuBookOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                        <p>
+                          <b>Funding sources:  </b>  
+                          {selectedFundingSource.map((v, i) => (
+                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                          ))}
+                         </p>
+                        <p>  <b>Abstract:</b> {abstract !== undefined && abstract}  </p>
+                        <p>
+                        <b>Keywords: </b>  
+                          {selectedStudyKewords.map((v, i) => (
+                          <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                          ))}
+                        </p>
+
+
+                        </TimelineContent>
+                      </TimelineItem>
+                   
+                   <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Publication</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                        <p>
+                          <b>Report title: </b> {report_title !== undefined && report_title}
+                        </p>
+                        <p>
+                          <b>DOI: </b>
+                            {doi !== undefined && doi}
+                        </p>
+                        <p>
+                        <b> Date of publication: </b>
+                          {date_of_publication !== '01-01-1900' && date_of_publication.toString()}
+                        </p>
+                        <p>
+                        <b>Place of publication: </b>
+                          {place_of_publication !== undefined && place_of_publication}
+                        </p>
+                        <p>
+                          <b> Link to study report: </b>
+                          {link_to_study !== undefined && link_to_study}
+                        </p>
+                        </TimelineContent>
+                      </TimelineItem>
+                      
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Sectors</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                            <b>Sector divisions: </b>
+                              {selectedSectorDivisions.map((v, i) => (
+                                <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                              ))}
+                          </p>
+                          <p>
+                          <b>Sectors: </b>
+                            {selectedSectors.map((v, i) => (
+                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                          </p>
+                        </TimelineContent>
+                      </TimelineItem>
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Energy carriers</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                            <b>Energy carriers: </b>   
+                            {selectedEnergyCarriers.map((v, i) => (
+                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                          </p>
+                          <p>
+                            <b>Energy Transformation Processes: </b>   
+                            {selectedEnergyTransformationProcesses.map((v, i) => (
+                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                          </p>
+                        </TimelineContent>
+                      </TimelineItem>
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Scenarios</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                          <b>Scenarios: </b>  
+                            {scenarios.map((v, i) => { return <div> 
+                              {v.acronym !== '' && <Chip label={v.acronym} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />}
+                              <Typography sx={{ 'marginLeft': '20px', 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>  Name:  </b>
+                                {v.name}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b> Abstract:  </b>
+                                {v.abstract}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>  Keywords:</b>
+                                {v.keywords.map( (e) =>  <Chip label={e} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>   Years:</b>
+                                {v.scenario_years.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>    Regions: </b>
+                                {v.regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>  Interacting regions:</b>
+                                {v.interacting_regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b>  Input datasets: </b>
+                                {v.input_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
+                              <b> Output datasets: </b>
+                                {v.output_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              </Typography>
+                            
+                            </div>  
+                            }
+                            )}
+                          </p>
+                        </TimelineContent>
+                      </TimelineItem>
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Models</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                          <b>Models: </b>  
+                            {selectedModels.map((v, i) => (
+                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                          </p>
+                        </TimelineContent>
+                      </TimelineItem>
+
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Frameworks</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                          <b>Frameworks: </b>  
+                            {selectedFrameworks.map((v, i) => (
+                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
+                          </p>  
+                        </TimelineContent>
+                      </TimelineItem>
+
+                    </Timeline>
                 </Box>
             </div>
           }

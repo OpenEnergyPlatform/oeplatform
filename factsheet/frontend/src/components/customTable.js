@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -27,11 +27,27 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+import CustomAutocompleteWithoutEdit from './customAutocompleteWithoutEdit';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
+import axios from 'axios';
+import conf from "../conf.json";
+import SelectAllIcon from '@mui/icons-material/SelectAll';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import AddIcon from '@mui/icons-material/Add';
+import RuleIcon from '@mui/icons-material/Rule';
+import Tooltip from '@mui/material/Tooltip';
+import Stack from '@mui/material/Stack';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import TextField from '@mui/material/TextField';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Slider from '@mui/material/Slider';
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -200,19 +216,27 @@ function EnhancedTableToolbar(props) {
           display: 'flex',
       }}
     >
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} >Show all</Button>
-      <Button variant="outlined" key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}>Comparison criteria</Button>
+      <Tooltip title="Show all">
+        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }}><SelectAllIcon /></Button>
+      </Tooltip>
+      <Tooltip title="Comparison criteria">
+        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}><RuleIcon /></Button>
+      </Tooltip>
       <Typography
         sx={{ flex: '1 1 70%' }}
         color="inherit"
         variant="subtitle1"
         component="div"
       >
-        {numSelected > 1 && <Button variant="contained" key="Compare" sx={{ marginLeft: '10px', color: 'white', textTransform: 'none' }}>Compare {numSelected} factsheets</Button>}
+        {numSelected > 1 && <Tooltip title="Compare">
+          <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} variant="contained" key="Compare"><CompareArrowsIcon /></Button>
+          </Tooltip>}
       </Typography>
-      <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
-        <Button variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}>Add a new</Button>
-      </Link>
+      <Tooltip title="Add a new factsheet">
+        <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+          <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}><AddIcon/></Button>
+        </Link>
+      </Tooltip>
     </Toolbar>
   );
 }
@@ -222,17 +246,30 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function CustomTable(props) {
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('study name');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [open, setOpen] = React.useState([]);
-  const [openQuery, setOpenQuery] = React.useState(false);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('study name');
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [dense, setDense] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [open, setOpen] = useState([]);
+  const [openQuery, setOpenQuery] = useState(false);
+  const [selectedInstitution, setSelectedInstitution] = useState([]);
+  const [institutions, setInstitutions] = useState([]);
+  const [selectedAuthors, setSelectedAuthors] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [fundingSources, setFundingSources] = useState([]);
+  const [selectedFundingSource, setSelectedFundingSource] = useState([]);
+  const [startDateOfPublication, setStartDateOfPublication] = useState('01-01-2010');
+  const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-2023');
+  const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
+  const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
 
+  const handleScenarioYearChange = (event, newValue) => {
+    setScenarioYearValue(newValue);
+  };
  
-  const [rows, setRows] = React.useState(props.factsheets);
+  const [rows, setRows] = useState(props.factsheets);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -283,15 +320,79 @@ export default function CustomTable(props) {
   };
 
   const handleOpenQuery = (event) => {
-    console.log('open');
     setOpenQuery(true);
   };
 
   const handleCloseQuery = (event) => {
-    console.log('close...');
     setOpenQuery(false);
   };
 
+  const handleReset = (event) => {
+    setOpenQuery(false);
+    setSelectedAuthors([]);
+    setSelectedInstitution([]);
+  };
+
+  const handleStudyKeywords = (event) => {
+    if (event.target.checked) {
+      if (!selectedStudyKewords.includes(event.target.name)) {
+        setSelectedStudyKewords([...selectedStudyKewords, event.target.name]);
+      }
+    } else {
+      const filteredStudyKeywords = selectedStudyKewords.filter(i => i !== event.target.name);
+      setSelectedStudyKewords(filteredStudyKeywords);
+    }
+  }
+
+  const getInstitution = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    return data;
+  };
+
+  const getAuthors = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    return data;
+  };
+
+  const getFundingSources = async () => {
+    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    return data;
+  };
+
+  useEffect(() => {
+    getInstitution().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) );
+      setInstitutions(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getAuthors().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
+      setAuthors(tmp);
+      });
+  }, []);
+
+  useEffect(() => {
+    getFundingSources().then((data) => {
+      const tmp = [];
+      data.map( (item) => tmp.push({ 'iri': item.iri, 'name': item.name, 'id': item.name }) )
+      setFundingSources(tmp);
+      });
+  }, []);
+
+  const institutionHandler = (institutionList) => {
+    setSelectedInstitution(institutionList);
+  };
+  const authorsHandler = (authorsList) => {
+    setSelectedAuthors(authorsList);
+  };
+
+  const fundingSourceHandler = (fundingSourceList) => {
+    setSelectedFundingSource(fundingSourceList);
+  };
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
@@ -308,31 +409,100 @@ export default function CustomTable(props) {
     [order, orderBy, page, rowsPerPage],
   );
 
+  const StudyKeywords = [
+    'resilience',
+    'life cycle analysis',
+    'CO2 emissions',
+    'Greenhouse gas emissions',
+    'Reallabor',
+    '100% renewables',
+    'acceptance',
+    'sufficiency',
+    '(changes in) demand',
+    'degree of electrifiaction',
+    'regionalisation',
+    'total gross electricity generation',
+    'total net electricity generation',
+    'peak electricity generation'
+  ];
+
   return (
     <Box sx={{ width: '100%' }}>
       <Dialog
-        fullWidth
         maxWidth="md"
         open={openQuery}
         aria-labelledby="responsive-dialog-title"
       >
         <DialogTitle id="responsive-dialog-title">
-          <b>Criteria</b>
-        </DialogTitle>
+          <b>Please define the criteria for selecting factsheets.</b>
+        </DialogTitle >
         <DialogContent>
           <DialogContentText>
             <div>
-              <pre>
-                Open Energy Platform
-              </pre>
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="institution" showSelectedElements={true} manyItems optionsSet={institutions} kind='Which institutions are you interested in?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%" type="author" showSelectedElements={true}  manyItems optionsSet={authors} kind='Which authors are you interested in?' handler={authorsHandler} selectedElements={selectedAuthors}  />
+              <CustomAutocompleteWithoutEdit bgColor="white" width="100%"  type="Funding source" showSelectedElements={true} manyItems optionsSet={fundingSources} kind='Which funding sources are you interested in?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+              <div>Date of publication:</div>
+              <div style={{ display:'flex', marginTop: "10px"}}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <Stack spacing={3} style={{ width: '90%' }}>
+                    <DesktopDatePicker
+                        label='Start'
+                        inputFormat="MM/DD/YYYY"
+                        value={startDateOfPublication}
+                        renderInput={(params) => <TextField {...params} />}
+                        onChange={(newValue) => {
+                          setStartDateOfPublication(newValue);
+                        }}
+                      />
+                  </Stack>
+                </LocalizationProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <Stack spacing={3} style={{ width: '90%', marginLeft: '10px' }}>
+                    <DesktopDatePicker
+                        label='End'
+                        inputFormat="MM/DD/YYYY"
+                        value={endDateOfPublication}
+                        renderInput={(params) => <TextField {...params} />}
+                        onChange={(newValue) => {
+                          setEndDateOfPublication(newValue);
+                        }}
+                      />
+                  </Stack>
+              </LocalizationProvider>
+              </div>
+
+              <div style={{ marginTop: "20px" }}>
+                <div>Study descriptors:</div>
+                <FormGroup>
+                    <div >
+                      {
+                        StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                      }
+                  </div>
+                </FormGroup>
+              </div>
+
+              <div style={{ marginTop: "20px" }}>
+                <div>Scenario years:</div>
+                <Slider
+                  value={scenarioYearValue}
+                  onChange={handleScenarioYearChange}
+                  valueLabelDisplay="auto"
+                  min={2000}
+                  max={2200}
+                />
+              </div>
+             
+
             </div>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button variant="contained"  >
-            Run
+            Confirm
           </Button>
-          <Button variant="contained" onClick={handleCloseQuery}  >
+          <Button variant="outlined" onClick={handleCloseQuery}  >
             Cancel
           </Button>
         </DialogActions>

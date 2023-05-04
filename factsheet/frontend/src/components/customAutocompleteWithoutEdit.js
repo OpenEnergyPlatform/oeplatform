@@ -31,7 +31,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocompleteWithoutEdit(parameters) {
-  const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler, width } = parameters;
+  const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler, width, bgColor } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
   const [open, toggleOpen] = React.useState(false);
   const [openEdit, toggleOpenEdit] = React.useState(false);
@@ -133,7 +133,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', marginBottom: '20px'}}>
+    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '20px' :'10px', marginBottom: '20px'}}>
       <Autocomplete
         size="small" 
         multiple

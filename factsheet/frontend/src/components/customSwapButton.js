@@ -19,23 +19,25 @@ export default function ColorToggleButton(props) {
   };
 
   return (
-    <ButtonGroup variant="contained" aria-label="outlined primary button group" style={{ 'marginLeft': '10px', 'marginTop': '10px' }}>
-        <Tooltip title="Factsheet's edit mode!">
-          <Button size="small" value="wizard" style={{ 'textTransform': 'none' }} >
-            <Link to={`factsheet/`} onClick={() => this.forceUpdate} >
-              <ArrowBackIcon  style={{ 'marginTop': '7px' }} > </ArrowBackIcon>
-            </Link>  
+    <div style={{ 'marginLeft': '10px', 'display':'flex' }}>
+      <Tooltip title="Back to main page!">
+        <Link to={`factsheet/`} onClick={() => this.forceUpdate}>
+          <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }}>
+            <ArrowBackIcon />
           </Button>
-        </Tooltip>
+        </Link>  
+      </Tooltip>
+      <ButtonGroup variant="contained" aria-label="outlined primary button group" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }}>
         <Tooltip title="Overview!">
-          <Button size="small" name="overview" style={{ 'textTransform': 'none' }} onClick={(e) => handleChange(e, 'overview')} > <FactCheckOutlinedIcon /> </Button>
+          <Button size="small" name="overview"  onClick={(e) => handleChange(e, 'overview')} > <FactCheckOutlinedIcon /> </Button>
         </Tooltip>
-        <Tooltip title="Factsheet's edit mode!">
-          <Button size="small" value="wizard" style={{ 'textTransform': 'none' }} onClick={(e) => handleChange(e, 'edit')} > <ListAltIcon /> </Button>
+        <Tooltip title="Edit!">
+          <Button size="small" value="wizard"  onClick={(e) => handleChange(e, 'edit')} > <ListAltIcon /> </Button>
         </Tooltip>
-        {/* <Tooltip title="Analysis">
-          <Button size="small" value="playground" style={{ 'textTransform': 'none' }} > <DiamondIcon /> </Button>
-        </Tooltip> */}
-    </ButtonGroup>
+        <Tooltip title="Similar factsheets!">
+          <Button size="small" value="playground" > <DiamondIcon /> </Button>
+        </Tooltip>
+      </ButtonGroup>
+    </div>
   );
 }
