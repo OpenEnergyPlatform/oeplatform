@@ -99,12 +99,23 @@ class PeerReview(models.Model):
     # laden
     @classmethod
     def load(cls, schema, table):
-        table_obj = PeerReview.objects.get(
+        """
+        Load the current reviewer user. 
+        The current review is review is determened by the latest date started.
+
+        Args:
+            schema (string): Schema name
+            table (string): Table name
+
+        Returns:
+            opr (PeerReview): PeerReview object related to the latest date started. 
+        """
+        opr = PeerReview.objects.filter(
             table=table, schema=schema
-        )
-        return table_obj
+        ).order_by('-date_started').first()
+        return opr
     
-    # CAUTION unifinished work ... fix: includes all id´s and not just the related ones (reviews on same table) .. procudes false results
+    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the related ones (reviews on same table) .. procudes false results
     def get_prev_and_next_reviews(self, schema, table):
         """
         Sets the prev_review and next_review fields based on the date_created field of the PeerReview objects
@@ -136,23 +147,29 @@ class PeerReview(models.Model):
         # Call the parent class's save method to save the PeerReview instance
         super().save(*args, **kwargs)
 
-        # print(self.table, self.schema)
-        prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
+        # TODO: This causes errors if review list ist empty
+        # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
         
         # print(prev_review, next_review)
         # Create a new PeerReviewManager entry for this PeerReview
-        pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
+        # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
+        pm_new = PeerReviewManager(opr=self)
         pm_new.save() 
 
-        if prev_review is not None:
-            pm_prev = PeerReviewManager.objects.get(opr=prev_review)
-            pm_prev.next_review = next_review
-            pm_prev.save()
+        # if prev_review is not None:
+        #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
+        #     pm_prev.next_review = next_review
+        #     pm_prev.save()
 
     @property
     def days_open(self):
-        delta = timezone.now() - self.date_started
-        return delta.days
+        if self.date_started is None:
+            return None  # Review has not started yet
+        elif self.is_finished:
+            return (self.date_finished - self.date_started).days  # Review has finished
+        else:
+            print((timezone.now() - self.date_started).days)
+            return (timezone.now() - self.date_started).days  # Review is still open
 
 from enum import Enum
 
@@ -244,7 +261,7 @@ class PeerReviewManager(models.Model):
             result= peer_review.contributor
 
         return role, result
-    
+        
     @staticmethod
     def filter_opr_by_reviewer(reviewer_user):
         return PeerReview.objects.filter(reviewer=reviewer_user)
