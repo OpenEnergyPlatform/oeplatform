@@ -1989,7 +1989,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
-                 "peer_review", kwargs={"schema": schema, "table": table}
+                 "peer_review_reviewer", kwargs={"schema": schema, "table": table}
              ),
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
