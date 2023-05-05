@@ -168,7 +168,6 @@ class PeerReview(models.Model):
         elif self.is_finished:
             return (self.date_finished - self.date_started).days  # Review has finished
         else:
-            print((timezone.now() - self.date_started).days)
             return (timezone.now() - self.date_started).days  # Review is still open
 
 from enum import Enum
