@@ -728,7 +728,6 @@ def query_oekg(request, *args, **kwargs):
                 authors_exp = "OEO:OEO_00000506 ?authors ;" if authors_list != [] else ""
                 )
 
-    print(final_query);
     sparql.setReturnFormat(JSON)
     sparql.setQuery(final_query)
     results = sparql.query().convert()
