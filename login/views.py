@@ -123,7 +123,7 @@ class ReviewsView(View):
                 "profile_user": user,
                 "reviewer_reviewed": reviewed_context,
                 "reviewer_reviewed_grouped": grouped_reviews,
-                "contributior_reviewed": reviewed_contributions_context,
+                "contributor_reviewed": reviewed_contributions_context,
                 "contributor_reviewed_grouped": grouped_contributions,
             },
         )
