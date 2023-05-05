@@ -189,10 +189,31 @@
 
 
 <h4> Open-Peer-Review </h4>
+{% if not opr.reviewer %}
+    {% if user.is_authenticated and opr.contributor.id != user.id %}
+      <a class="btn btn-success btn-sm" type="button"
+      href="{{table}}/open_peer_review">
+        Start Open-Peer-Review-Process
+      </a>
+    {% else %}
+      <a class="btn btn-success btn-sm disabled" type="button"
+      href="{{table}}/open_peer_review">
+        Start Open-Peer-Review-Process
+      </a>
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if the table owner or not logged in."></i>
+    {% endif %}
+{% elif opr.reviewer.id == user.id %}
   <a class="btn btn-success btn-sm" type="button"
-     href="{{table}}/open_peer_review">
-    Start Open-Peer-Review-Process
+  href="{{table}}/open_peer_review">
+    Continue Open-Peer-Review-Process
   </a>
+{% else %}
+  <a class="btn btn-success btn-sm disabled" type="button"
+  href="{{table}}/open_peer_review">
+  Continue Open-Peer-Review-Process
+  </a>
+  <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
+{% endif %}  
 
 <h4>Tags</h4>
 
@@ -299,7 +320,7 @@ for row in result.json():
   };
 
   $(function () {
-    $('[data-bs-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip()
   })
 </script>
 {% endblock after-body-bottom-js %}
