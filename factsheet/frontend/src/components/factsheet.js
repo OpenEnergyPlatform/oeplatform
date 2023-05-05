@@ -1890,7 +1890,7 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
+                <Grid container style={{ marginTop: '10px', marginLeft:'10px', 'width': '99%' }}>
                   <Grid item xs={12} style={{ padding: '20px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
                     {/* <CustomTabs
                       factsheetObjectHandler={factsheetObjectHandler}
@@ -1940,60 +1940,52 @@ function getStepContent(step: number) {
               'marginBottom': '20px',
               'marginLeft': '10px',
               'marginRight': '10px',
-              'border': '1px dashed #cecece',
-              'padding': '20px',
-              'overflow': 'scroll',
+              'border': '1px solid #cecece',
               'borderRadius': '5px',
               'backgroundColor':'#f3f3f380',
-              'display': "flex"
+              'height':'75vh',
+              'width': '99%',
+              
             }}
             class="bgimg"
-            >
-                  <Box
-                    sx={{
-                      'marginTop': '10px',
-                      'overflow': 'auto',
-                      'marginBottom': '20px',
-                      'marginLeft': '10px',
-                      'marginRight': '10px',
-                      'overflow': 'scroll',
-                      'width': '95%',
-                      'height':'65vh',
-                      'display': 'flex',
-                      'flexDirection': 'column',
-                      'alignItems': 'start',
-                    }}
-                  >
-                    <Box sx={{ position: 'relative', display: 'inline-flex', 'marginBottom': '10px', 'marginLeft': '170px'}}>
-                      <CircularProgress variant="determinate" value={60} size={80} />
-                        <Box
-                          sx={{
-                            top: 0,
-                            left: 0,
-                            bottom: 0,
-                            right: 0,
-                            position: 'absolute',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                        <Typography variant="h5" component="div" color="text.secondary">
-                          {`${Math.round(60)}%`}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Typography variant="caption" gutterBottom component="div" sx={{ 'marginLeft': '170px' }}>
-                      To be completed!
-                    </Typography>
-                    <Typography variant="h6" gutterBottom component="div" sx={{ 'marginTop': '10px', 'marginLeft': '150px' }}>
-                      <b> {acronym}</b>
-                    </Typography>
+            >       
+                    <Box sx={{ 
+                            'width': '40%',
+                            'display': 'flex',
+                            'flexDirection': 'column',
+                            'alignItems': 'center',
+                          }}>
 
+                      <Box sx={{ position: 'relative', display: 'inline-flex', 'marginBottom': '10px', 'marginTop': '30px'}}>
+                        <CircularProgress variant="determinate" value={60} size={80} />
+                          <Box
+                            sx={{
+                              top: 0,
+                              left: 0,
+                              bottom: 0,
+                              right: 0,
+                              position: 'absolute',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                          <Typography variant="h5" component="div" color="text.secondary">
+                            {`${Math.round(60)}%`}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Typography variant="caption" gutterBottom component="div" >
+                        To be completed!
+                      </Typography>
+                      <Typography variant="h6" gutterBottom component="div">
+                        <b> {acronym}</b>
+                      </Typography>
+                    
                     <Timeline
                       sx={{
                         [`& .${timelineOppositeContentClasses.root}`]: {
-                          flex: 0.12,
+                          flex: 1,
                         },
                         
                       }}

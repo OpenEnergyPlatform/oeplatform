@@ -18,5 +18,6 @@ urlpatterns = [
     path(r"all_in_jsonld/", views.get_all_factsheets_as_json_ld),
     path(r"add_a_fact/", views.add_a_fact),
     path(r"populate_factsheets_elements/", views.populate_factsheets_elements),
-    path(r"update_an_entity/", views.update_an_entity)
+    path(r"update_an_entity/", views.update_an_entity),
+    path(r"query/", views.query_oekg)
 ]

@@ -47,7 +47,8 @@ import TextField from '@mui/material/TextField';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
-
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -206,7 +207,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery} = props;
+  const { numSelected, handleOpenQuery, handleShowAll} = props;
 
   return (
     <Toolbar
@@ -217,7 +218,7 @@ function EnhancedTableToolbar(props) {
       }}
     >
       <Tooltip title="Show all">
-        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }}><SelectAllIcon /></Button>
+        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }}><SelectAllIcon onClick={handleShowAll}/></Button>
       </Tooltip>
       <Tooltip title="Comparison criteria">
         <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}><RuleIcon /></Button>
@@ -246,6 +247,8 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function CustomTable(props) {
+  const { factsheets } = props;
+
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('study name');
   const [selected, setSelected] = useState([]);
@@ -260,16 +263,25 @@ export default function CustomTable(props) {
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
   const [selectedFundingSource, setSelectedFundingSource] = useState([]);
-  const [startDateOfPublication, setStartDateOfPublication] = useState('01-01-2010');
-  const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-2023');
+  const [startDateOfPublication, setStartDateOfPublication] = useState('01-01-1900');
+  const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-1900');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
+
+  const [filteredFactsheets, setFilteredFactsheets] = useState([]);
+
 
   const handleScenarioYearChange = (event, newValue) => {
     setScenarioYearValue(newValue);
   };
- 
-  const [rows, setRows] = useState(props.factsheets);
+  const [rows, setRows] = useState(factsheets);
+
+  const [openBackDrop, setOpenBackDrop] = useState(false);
+
+  const handleClose = () => {
+    setOpenBackDrop(false);
+  };
+
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -323,6 +335,10 @@ export default function CustomTable(props) {
     setOpenQuery(true);
   };
 
+  const handleShowAll = (event) => {
+    setRows(factsheets);
+  };
+  
   const handleCloseQuery = (event) => {
     setOpenQuery(false);
   };
@@ -393,6 +409,31 @@ export default function CustomTable(props) {
   const fundingSourceHandler = (fundingSourceList) => {
     setSelectedFundingSource(fundingSourceList);
   };
+  
+  const handleConfirmQuery = (event) => {
+    setOpenQuery(false);
+    setOpenBackDrop(true);
+    const criteria = {
+      'institutions': selectedInstitution.map(i => 'OEKG:' + i.iri),
+      'authors': selectedAuthors.map(i => 'OEKG:' + i.iri),
+      'fundingSource': selectedFundingSource.map(i => 'OEKG:' + i.iri),
+      'startDateOfPublication': startDateOfPublication,
+      'endDateOfPublication': endDateOfPublication,
+      'studyKewords': selectedStudyKewords,
+      'scenarioYearValue': scenarioYearValue,
+    }
+    axios.post(conf.toep + 'factsheet/query/',
+    {
+      'criteria': criteria,
+    }).then(response => {
+      const filteredResultList = response.data;
+      const filteredStudyAcronyms = filteredResultList.map(i => i.study_acronym).map(j => j.value);
+      const newFactsheetsList = factsheets.filter(item => filteredStudyAcronyms.includes(item.acronym));
+      setFilteredFactsheets(newFactsheetsList);
+      setOpenBackDrop(false);
+    });
+    };
+
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
@@ -426,12 +467,134 @@ export default function CustomTable(props) {
     'peak electricity generation'
   ];
 
+  const renderRows = (rs) => {
+    console.log(filteredFactsheets === []);
+    const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
+    return <TableBody>
+            {rowsToRender.map((row, index) => {
+              const isItemSelected = isSelected(row.study_name);
+              const labelId = `enhanced-table-checkbox-${index}`;
+
+              return (
+                <React.Fragment>
+                <StyledTableRow
+                  hover
+                
+                  role="checkbox"
+                  aria-checked={isItemSelected}
+                  tabIndex={-1}
+                  key={row.study_name}
+                  selected={isItemSelected}
+                  sx={{ cursor: 'pointer' }}
+                >
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      onClick={(event) => handleClick(event, row.study_name)}
+                      color="primary"
+                      checked={isItemSelected}
+                      inputProps={{
+                        'aria-labelledby': labelId,
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '10px' }}>{row.study_name}</Typography>
+                  </TableCell>
+                  <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
+                  <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
+                  <TableCell >
+                    {row.institutions.map((v) => (
+                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                    ))}
+                  </TableCell>
+                  <TableCell >
+                      {row.scenarios.map((v) => (
+                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                      ))}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      aria-label="expand row"
+                      size="small"
+                      onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
+                    >
+                      {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} >
+                      <ReadMoreIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px', fontSize: '35px' }}/>
+                    </Link> 
+                  </TableCell>
+                </StyledTableRow>
+              <TableRow>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                    <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
+                      <Box sx={{ margin: 1 }}>
+                        <Typography variant="subtitle1" gutterBottom component="div">
+                          Details
+                        </Typography>
+                        <Table size="small" aria-label="purchases">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Publication</TableCell>
+                              <TableCell>Funding sources</TableCell>
+                              <TableCell>Models</TableCell>
+                              <TableCell>Frameworks</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                              <TableRow >
+                                <TableCell component="th" scope="row">
+                                {row.acronym}
+                                </TableCell>
+                                <TableCell component="th" scope="row">
+                                {row.acronym}
+                                </TableCell>
+                                <TableCell component="th" scope="row">
+                                {row.acronym}
+                                </TableCell>
+                                <TableCell component="th" scope="row">
+                                {row.acronym}
+                                </TableCell>
+                              </TableRow>
+                          </TableBody>
+                        </Table>
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+              </TableRow>
+
+            </React.Fragment>
+            );
+
+      })}
+      {emptyRows > 0 && (
+        <TableRow
+          style={{
+            height: (dense ? 33 : 53) * emptyRows,
+          }}
+        >
+          <TableCell colSpan={6} />
+        </TableRow>
+      )}
+    </TableBody>
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackDrop}
+        onClick={handleClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Dialog
         maxWidth="md"
         open={openQuery}
         aria-labelledby="responsive-dialog-title"
+        style={{ height: '85vh', overflow: 'auto' }}
       >
         <DialogTitle id="responsive-dialog-title">
           <b>Please define the criteria for selecting factsheets.</b>
@@ -452,7 +615,7 @@ export default function CustomTable(props) {
                         value={startDateOfPublication}
                         renderInput={(params) => <TextField {...params} />}
                         onChange={(newValue) => {
-                          setStartDateOfPublication(newValue);
+                          setStartDateOfPublication(newValue.toISOString().substring(0, 10));
                         }}
                       />
                   </Stack>
@@ -465,7 +628,7 @@ export default function CustomTable(props) {
                         value={endDateOfPublication}
                         renderInput={(params) => <TextField {...params} />}
                         onChange={(newValue) => {
-                          setEndDateOfPublication(newValue);
+                          setEndDateOfPublication(newValue.toISOString().substring(0, 10));
                         }}
                       />
                   </Stack>
@@ -499,7 +662,7 @@ export default function CustomTable(props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained"  >
+          <Button variant="contained"  onClick={handleConfirmQuery} >
             Confirm
           </Button>
           <Button variant="outlined" onClick={handleCloseQuery}  >
@@ -509,7 +672,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery}/>
+        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -524,116 +687,7 @@ export default function CustomTable(props) {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.study_name);
-                const labelId = `enhanced-table-checkbox-${index}`;
-
-                return (
-                  <React.Fragment>
-                  <StyledTableRow
-                    hover
-                   
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.study_name}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        onClick={(event) => handleClick(event, row.study_name)}
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="subtitle1" gutterBottom style={{ marginTop: '10px' }}>{row.study_name}</Typography>
-                    </TableCell>
-                    <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
-                    <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
-                    <TableCell >
-                      {row.institutions.map((v) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                      ))}
-                    </TableCell>
-                    <TableCell >
-                        {row.scenarios.map((v) => (
-                          <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                        ))}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
-                      >
-                        {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                      </IconButton>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
-                      <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} >
-                        <ReadMoreIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px', fontSize: '35px' }}/>
-                      </Link> 
-                    </TableCell>
-                  </StyledTableRow>
-                
-                <TableRow>
-                  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-                      <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 1 }}>
-                          <Typography variant="subtitle1" gutterBottom component="div">
-                            Details
-                          </Typography>
-                          <Table size="small" aria-label="purchases">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Publication</TableCell>
-                                <TableCell>Funding sources</TableCell>
-                                <TableCell>Models</TableCell>
-                                <TableCell>Frameworks</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                <TableRow >
-                                  <TableCell component="th" scope="row">
-                                  {row.acronym}
-                                  </TableCell>
-                                  <TableCell component="th" scope="row">
-                                  {row.acronym}
-                                  </TableCell>
-                                  <TableCell component="th" scope="row">
-                                  {row.acronym}
-                                  </TableCell>
-                                  <TableCell component="th" scope="row">
-                                  {row.acronym}
-                                  </TableCell>
-                                </TableRow>
-                            </TableBody>
-                          </Table>
-                        </Box>
-                      </Collapse>
-                    </TableCell>
-                </TableRow>
-
-              </React.Fragment>
-              );
-
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
+            {renderRows(visibleRows)}
           </Table>
         </TableContainer>
         <TablePagination

@@ -10,7 +10,7 @@ from django.utils.cache import patch_response_headers
 import uuid
 import requests
 import rdflib
-from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode
+from rdflib import ConjunctiveGraph, Graph, Literal, RDF, URIRef, BNode, XSD
 from rdflib.plugins.stores import sparqlstore
 from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
@@ -18,9 +18,9 @@ from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 import os
 from oeplatform.settings import ONTOLOGY_FOLDER
 from datetime import date
-
+from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
-
+from owlready2 import get_ontology
 
 versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
@@ -31,7 +31,7 @@ Ontology_URI = os.path.join(path, file)
 
 
 sys.path.append(path)
-from owlready2 import get_ontology
+
 
 
 oeo = Graph()
@@ -45,6 +45,7 @@ oeo_owl = get_ontology(Ontology_URI).load()
 query_endpoint = 'http://localhost:3030/ds/query'
 update_endpoint = 'http://localhost:3030/ds/update'
 
+sparql = SPARQLWrapper(query_endpoint)
 
 store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
@@ -123,7 +124,7 @@ def create_factsheet(request, *args, **kwargs):
         if report_title != '':
             oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
         if date_of_publication != '01-01-1900' and date_of_publication != '':
-            oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication) ))
+            oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication[:10], datatype=XSD.date) ))
         if place_of_publication:
             oekg.add(( study_URI, OEKG["place_of_publication"], Literal(place_of_publication) ))
         if link_to_study != '':
@@ -387,7 +388,7 @@ def update_factsheet(request, *args, **kwargs):
         for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
             oekg.remove((s, p, o))
         if date_of_publication != '01-01-1900' and date_of_publication != '':
-            oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication) ))
+            oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication[:10], datatype=XSD.date) ))
 
         for s, p, o in oekg.triples((study_URI, OEKG["place_of_publication"], None)):
             oekg.remove((s, p, o))
@@ -500,6 +501,7 @@ def factsheet_by_name(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
 
@@ -525,8 +527,6 @@ def factsheet_by_id(request, *args, **kwargs):
     for s, p, o in oekg.triples((  study_URI, DC.abstract, None )):
         abstract = o
 
-    print('*-*-*-*-*-*-*-*-*-*')
-    print(study_URI)
     #for s, p, o in oekg.triples(( study_URI, OEKG["report_title"], None )):
     report_title = ''
 
@@ -553,7 +553,7 @@ def factsheet_by_id(request, *args, **kwargs):
     factsheet['report_doi'] = report_doi
 
     factsheet['funding_sources'] = []
-    for s, p, o in oekg.triples(( study_URI, OEO.RO_0002234, None )):
+    for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000509, None )):
         label = oekg.value(o, RDFS.label)
         if label != None:
             factsheet['funding_sources'].append({ "iri": str(o).split("/")[-1], "id": label, "name": label })
@@ -677,6 +677,66 @@ def factsheet_by_id(request, *args, **kwargs):
     return response
 
 @csrf_exempt
+def query_oekg(request, *args, **kwargs):
+    request_body = json.loads(request.body)
+    criteria = request_body['criteria']
+
+    institutes_list = criteria['institutions']
+    authors_list = criteria['authors']
+    funding_sources_list = criteria['fundingSource']
+    publication_date_start_value = criteria['startDateOfPublication']
+    publication_date_end_value = criteria['endDateOfPublication']
+    study_keywords_list = criteria['studyKewords']
+    scenario_year_start_value = criteria['scenarioYearValue'][0]
+    scenario_year_end_value = criteria['scenarioYearValue'][1]
+
+    query_structure = '''
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX OEO: <http://openenergy-platform.org/ontology/oeo/>
+        PREFIX OEKG: <http://openenergy-platform.org/ontology/oekg/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX DC: <http://purl.org/dc/terms/>
+
+        SELECT DISTINCT ?study_acronym 
+        WHERE 
+        {{
+        ?s OEO:OEO_00000510 ?institutes ;
+            {authors_exp}
+            {funding_source_exp}
+            OEKG:date_of_publication ?publication_date ;
+            OEO:has_study_keyword ?study_keywords ;;
+            DC:acronym ?study_acronym .
+
+        FILTER ((?institutes IN ({institutes}) )
+        || (?authors IN ({authors}) )
+        || (?funding_sources IN ({funding_sources}) )
+        || (?publication_date >= "{publication_date_start}"^^xsd:date && ?publication_date <= "{publication_date_end}"^^xsd:date)
+        || (?study_keywords IN ({study_keywords}) ) )
+
+        }}'''
+
+    final_query = query_structure.format(institutes = str(institutes_list).replace('[', '').replace(']', '').replace("'", ''),
+                authors = str(authors_list).replace('[', '').replace(']', '').replace("'", ''),
+                funding_sources = str(funding_sources_list).replace('[', '').replace(']', '').replace("'", ''),
+                publication_date_start = publication_date_start_value,
+                publication_date_end = publication_date_end_value,
+                study_keywords = str(study_keywords_list).replace('[', '').replace(']', ''),
+                scenario_year_start = scenario_year_start_value ,
+                scenario_year_end = scenario_year_end_value,
+                funding_source_exp = "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else "",
+                authors_exp = "OEO:OEO_00000506 ?authors ;" if authors_list != [] else ""
+                )
+
+    print(final_query);
+    sparql.setReturnFormat(JSON)
+    sparql.setQuery(final_query)
+    results = sparql.query().convert()
+
+    response = JsonResponse(results["results"]["bindings"], safe=False, content_type='application/json')
+    return response
+
+@csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + id)
@@ -754,12 +814,6 @@ def add_a_fact(request, *args, **kwargs):
 
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
-    # request_body = json.loads(request.body)
-    # entity_type = request_body['entity_type']
-    # entity_label = request_body['entity_label']
-
-    #oekg.remove((None, None, None)) 
-
     entity_type = request.GET.get('entity_type')
     entity_label = request.GET.get('entity_label')
 
