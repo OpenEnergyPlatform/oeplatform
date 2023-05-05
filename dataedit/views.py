@@ -1055,11 +1055,20 @@ class DataView(View):
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
 
+        opr_context = {}
         contributor = PeerReviewView.load_contributor(schema=schema, table=table)
         if contributor is not None:
-            opr_context = {"contributor": contributor}
+            opr_context.update({"contributor": contributor})
         else:
-            opr_context = None 
+            opr_context.update({"contributor": None})
+
+        reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
+        if contributor is not None:
+            opr_context.update({"reviewer": reviewer})
+        else:
+            opr_context.update({"reviewer": None})
+
+        print(opr_context)
 
         context_dict = {
             # Not in use?
@@ -2005,6 +2014,17 @@ class PeerReviewView(LoginRequiredMixin, View):
         except AttributeError:
             table_holder = None
         return table_holder
+    
+    @staticmethod
+    def load_reviewer(schema, table):
+        """
+        Get the contributor for the table a review is started on. 
+        """
+        current_review = PeerReview.load(schema=schema, table=table)
+        if current_review and hasattr(current_review, 'reviewer'):
+            return current_review.reviewer
+        else:
+            return None
 
     def post(self, request, schema, table):
         """
@@ -2020,8 +2040,8 @@ class PeerReviewView(LoginRequiredMixin, View):
             # TODO: Send notification to user that he cant review tables he is the table holder. 
             contributor = self.load_contributor(schema, table)
             if contributor is not None: 
-                    table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
-                    table_obj.save()
+                    table_review= PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
+                    table_review.save()
             else:
                 error_msg = f"Failed to retrive any user that identifies as table holder for current table: { table } !"
                 return JsonResponse({"error": error_msg}, status=400)
