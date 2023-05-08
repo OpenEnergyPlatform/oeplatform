@@ -32,15 +32,10 @@ Ontology_URI = os.path.join(path, file)
 
 sys.path.append(path)
 
-
-
 oeo = Graph()
 oeo.parse(Ontology_URI)
 
 oeo_owl = get_ontology(Ontology_URI).load()
-
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 query_endpoint = 'http://localhost:3030/ds/query'
 update_endpoint = 'http://localhost:3030/ds/update'
@@ -727,6 +722,8 @@ def query_oekg(request, *args, **kwargs):
                 funding_source_exp = "OEO:OEO_00000509 ?funding_sources ;" if funding_sources_list != [] else "",
                 authors_exp = "OEO:OEO_00000506 ?authors ;" if authors_list != [] else ""
                 )
+
+    print(final_query)
 
     sparql.setReturnFormat(JSON)
     sparql.setQuery(final_query)

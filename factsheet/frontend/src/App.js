@@ -24,6 +24,7 @@ import './styles/App.css';
 import CustomSearchInput from "./components/customSearchInput"
 import conf from "./conf.json";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import ComparisonBoardMain from "./components/comparisonBoardMain";
 
 const url_id = String(window.location.href).split('/').pop()
 
@@ -69,6 +70,9 @@ function App() {
     return < Home id={url_id}/>
   } else {
     if (loading === false) {
+      if (url_id === 'compare') {
+        return <ComparisonBoardMain />
+      } else 
       return <ThemeProvider theme={theme}><Factsheet id={url_id} fsData={factsheet}/></ThemeProvider>
     } else {
       return <LinearProgress />

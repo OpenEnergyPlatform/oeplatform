@@ -72,7 +72,7 @@ import TimelineOppositeContent, {
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
-
+import LinkIcon from '@mui/icons-material/Link';
 
 import Chip from '@mui/material/Chip';
 
@@ -1674,7 +1674,6 @@ function getStepContent(step: number) {
                     value={date_of_publication}
                     onChange={(newValue) => {
                       setDateOfPublication(newValue);
-                      factsheetObjectHandler('date_of_publication', newValue);
                     }}
                     renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
                   />
@@ -1950,7 +1949,7 @@ function getStepContent(step: number) {
             class="bgimg"
             >       
                     <Box sx={{ 
-                            'width': '40%',
+                            'width': '100%',
                             'display': 'flex',
                             'flexDirection': 'column',
                             'alignItems': 'center',
@@ -1985,7 +1984,7 @@ function getStepContent(step: number) {
                     <Timeline
                       sx={{
                         [`& .${timelineOppositeContentClasses.root}`]: {
-                          flex: 1,
+                          flex: 0.2,
                         },
                         
                       }}
@@ -2078,16 +2077,16 @@ function getStepContent(step: number) {
                         </p>
                         <p>
                         <b> Date of publication: </b>
-                          {date_of_publication !== '01-01-1900' && date_of_publication.toString()}
+                          {date_of_publication !== '01-01-1900' && date_of_publication.toString().substring(0, 10)}
                         </p>
                         <p>
                         <b>Place of publication: </b>
                           {place_of_publication !== undefined && place_of_publication}
                         </p>
-                        <p>
-                          <b> Link to study report: </b>
-                          {link_to_study !== undefined && link_to_study}
-                        </p>
+                        <div style={{ display: "flex" }}>
+                          <div><b> Link to study report: </b></div>
+                          <div style={{ marginTop: "-5px", marginLeft: "5px" }}><a href={link_to_study} style={{ color: "#04678F" }}> <LinkIcon fontSize="large"/> </a></div>
+                        </div>
                         </TimelineContent>
                       </TimelineItem>
                       

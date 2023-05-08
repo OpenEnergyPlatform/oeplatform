@@ -221,7 +221,7 @@ function EnhancedTableToolbar(props) {
         <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }}><SelectAllIcon onClick={handleShowAll}/></Button>
       </Tooltip>
       <Tooltip title="Comparison criteria">
-        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} key="Compare" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}><RuleIcon /></Button>
+        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} key="Query" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}><RuleIcon /></Button>
       </Tooltip>
       <Typography
         sx={{ flex: '1 1 70%' }}
@@ -230,7 +230,11 @@ function EnhancedTableToolbar(props) {
         component="div"
       >
         {numSelected > 1 && <Tooltip title="Compare">
-          <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} variant="contained" key="Compare"><CompareArrowsIcon /></Button>
+            <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+              <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} variant="contained" key="Compare">
+              <CompareArrowsIcon />
+              </Button>
+            </Link>
           </Tooltip>}
       </Typography>
       <Tooltip title="Add a new factsheet">

@@ -155,7 +155,7 @@ function Home(props) {
                   </Link>}
               />}
               {index === 1 && <ListItemText primary={
-                <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
+                <Link to={`factsheet/fs/compare/`} onClick={() => this.forceUpdate} style={{ textDecoration: 'none', color: 'white' }} >
                   <Typography variant="body1" style={{ color: '#005374' }}>{text} </Typography>
                 </Link>}
               />}
