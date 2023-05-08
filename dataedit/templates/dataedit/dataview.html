@@ -200,7 +200,7 @@
       href="{{table}}/open_peer_review">
         Start Open-Peer-Review-Process
       </a>
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if the table owner or not logged in."></i>
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
     {% endif %}
 {% elif opr.reviewer.id == user.id %}
   <a class="btn btn-success btn-sm" type="button"
@@ -212,7 +212,7 @@
   href="{{table}}/open_peer_review">
   Continue Open-Peer-Review-Process
   </a>
-  <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
+  <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
 {% endif %}  
 
 <h4>Tags</h4>
