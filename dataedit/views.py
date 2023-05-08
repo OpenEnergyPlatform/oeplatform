@@ -228,7 +228,7 @@ def change_requests(schema, table):
 def listschemas(request):
     """
     Loads all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py. Only schemas that are present in the
+    oeplatform/securitysettings.py Only schemas that are present in the
     whitelist are processed that do not start with an underscore.
 
     :param request: A HTTP-request object sent by the Django framework
@@ -1577,7 +1577,7 @@ def get_all_tags(schema=None, table=None):
                     "id": r.id,
                     "name": r.name,
                     "name_normalized": r.name_normalized,
-                    "color": "#" + format(r.color, "06X"),
+                    "color": "#" + r.color,
                     "usage_count": r.usage_count,
                     "usage_tracked_since": r.usage_tracked_since,
                 }
