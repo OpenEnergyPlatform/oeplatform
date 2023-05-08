@@ -135,7 +135,7 @@
             {% if contributor_reviewed.latest is not None %}
             <strong>Latest Contribution:</strong>
             <li>
-                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table %}">{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} </a>
+                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} </a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
                    Show review history 
                 </button>
