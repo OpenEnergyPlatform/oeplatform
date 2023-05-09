@@ -13,7 +13,20 @@ class CreateUserForm(UserCreationForm):
 
     class Meta:
         model = OepUser
-        fields = ("name", "affiliation", "email", "password1", "password2")
+        fields = (
+            "name",
+            "email",
+            "fullname",
+            "location",
+            "affiliation",
+            "work",
+            "linkedin",
+            "twitter",
+            "facebook",
+            "profile_img",
+            "password1",
+            "password2",
+        )
 
     def save(self, commit=True):
         user = super(CreateUserForm, self).save(commit=commit)
@@ -36,9 +49,23 @@ class EditUserForm(UserChangeForm):
     password hash display field.
     """
 
+    # do NOT show the password field in the form
+    password = None
+
     class Meta:
         model = OepUser
-        fields = ("name", "email", "affiliation", "description")
+        fields = (
+            "profile_img",
+            "email",
+            "fullname",
+            "location",
+            "work",
+            "linkedin",
+            "twitter",
+            "facebook",
+            "affiliation",
+            "description",
+        )
 
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)

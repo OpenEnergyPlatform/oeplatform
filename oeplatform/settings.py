@@ -29,6 +29,7 @@ except ImportError:
 # Application definition
 
 INSTALLED_APPS = (
+    "django.contrib.sites",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -58,6 +59,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -72,12 +74,12 @@ MIDDLEWARE = (
 
 ROOT_URLCONF = "oeplatform.urls"
 
-
 EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",
+    # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
 }
 
@@ -89,6 +91,8 @@ def external_urls_context_processor(request):
     """
     return {"EXTERNAL_URLS": EXTERNAL_URLS}
 
+
+SITE_ID = 1
 
 TEMPLATES = [
     {
@@ -145,7 +149,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
     )
 }
-
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.

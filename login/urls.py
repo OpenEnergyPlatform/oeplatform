@@ -9,6 +9,8 @@ from django.urls import path
 
 from login import views
 
+# from login.views import AccountDeleteView
+
 urlpatterns = [
     path(
         "password_reset/",
@@ -41,20 +43,45 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     url("^", include("django.contrib.auth.urls")),
-    url(r"^profile/(?P<user_id>[\d]+)$", views.ProfileView.as_view(), name="input"),
     url(
-        r"^profile/password_change$",
+        r"^profile/(?P<user_id>[\d]+)$",
+        views.TablesView.as_view(),
+        name="profile",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/tables$",
+        views.TablesView.as_view(),
+        name="tables",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/review$",
+        views.ReviewsView.as_view(),
+        name="reviews",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/settings$",
+        views.SettingsView.as_view(),
+        name="settings",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/password_change$",
         views.OEPPasswordChangeView.as_view(),
         name="input",
     ),
-    url(
-        r"^profile/(?P<user_id>[\d]+)/edit$", views.EditUserView.as_view(), name="input"
-    ),
+    # TODO: implement tests before we allow user deletion
+    # url(
+    #    r"^profile/(?P<user_id>[\d]+)/delete_acc$",
+    #    AccountDeleteView.as_view(),
+    #    name="account-delete",
+    # ),
     url(r"^groups/$", views.GroupManagement.as_view(), name="input"),
     url(
         r"^groups/new/$",
         views.GroupCreate.as_view(),
         name="input",
+    ),
+    url(
+        r"^profile/(?P<user_id>[\d]+)/edit$", views.EditUserView.as_view(), name="edit"
     ),
     url(
         r"^groups/(?P<group_id>[\w\d_\s]+)/edit$",
