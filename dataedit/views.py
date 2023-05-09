@@ -1979,17 +1979,19 @@ class PeerReviewView(LoginRequiredMixin, View):
         table_obj = Table.load(schema, table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
         print(field_descriptions)
+
+        # Check user permissions
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-        url_table_id = request.build_absolute_uri(
+            url_table_id = request.build_absolute_uri(
             reverse("view", kwargs={"schema": schema, "table": table})
         )
         metadata = self.sort_in_category(schema, table)
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
-                 "peer_review", kwargs={"schema": schema, "table": table}
+                 "peer_review_reviewer", kwargs={"schema": schema, "table": table}
              ),
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
@@ -2055,12 +2057,30 @@ class PeerReviewView(LoginRequiredMixin, View):
         return render(request, 'dataedit/opr_review.html', context=context)
 
 
-class ORPContributor(PeerReviewView):
-    def get(self, request, schema, table):
+class PeerRreviewContributorView(PeerReviewView):
+    def get(self, request, schema, table, review_id):
+        """
+        Handles GET requests for the PeerRreviewContributorView.
+
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+            schema (str): The schema parameter captured from the URL.
+            table (str): The table parameter captured from the URL.
+            review_id (int): The ID of the review captured from the URL.
+
+        Returns:
+            HttpResponse: The HTTP response object containing the rendered template.
+
+        Raises:
+            None
+        """
+            
         review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
         can_add = False
         table_obj = Table.load(schema, table)
+
+        # Check user permissions
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
@@ -2074,7 +2094,7 @@ class ORPContributor(PeerReviewView):
         context_meta = {"config": json.dumps(
                             {"can_add": can_add,
                              "url_peer_review": reverse(
-                                "peer_review", kwargs={"schema": schema, "table": table}
+                                "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
                                 ),
                              "url_table": reverse(
                                 "view", kwargs={"schema": schema, "table": table}

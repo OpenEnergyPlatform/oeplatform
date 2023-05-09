@@ -132,17 +132,17 @@
     <div>
         <h2>Contribution Overview</h2>
         <ul>
-            {% if contributior_reviewed.latest is not None %}
+            {% if contributor_reviewed.latest is not None %}
             <strong>Latest Contribution:</strong>
             <li>
-                <a href="/dataedit/view/{{ contributior_reviewed.latest.schema }}/{{ contributior_reviewed.latest.table }}">{{ contributior_reviewed.latest.schema }} - {{ contributior_reviewed.latest.table }} - Started: {{ contributior_reviewed.latest.date_started }} - Days open: {{ contributior_reviewed.latest_days_open }}  - Status: {{ contributior_reviewed.latest_status }} </a>
+                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} </a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
                    Show review history 
                 </button>
                 <div class="collapse" id="collapseContributionReviewHistory">
                     <div class="card card-body">
                         <p> History </p>
-                        {% for review in contributior_reviewed.history %}
+                        {% for review in contributor_reviewed.history %}
                         <ul>
                             <li>
                                 {{ review }} - {{ review.date_started }} - Status: ...
