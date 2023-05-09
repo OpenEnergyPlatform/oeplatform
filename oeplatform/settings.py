@@ -56,10 +56,8 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
-    "graphene_django",
     "factsheet",
-    "corsheaders",
-    "bootstrap4"
+    "corsheaders"
 )
 
 MIDDLEWARE = (
