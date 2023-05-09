@@ -5,6 +5,7 @@
 ### Features
 
 - Implement new topic overview page ui #1203
+- Make table names unique across schemas
 
 ### Bugs
 
