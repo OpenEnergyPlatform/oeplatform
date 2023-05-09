@@ -89,3 +89,5 @@ docker/oeplatform_data
 oep-website/oeo_viewer/client/node_modules
 
 oep-website/oeo_viewer/client/static
+
+/oeo
