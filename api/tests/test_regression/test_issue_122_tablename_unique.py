@@ -1,4 +1,5 @@
 from api import actions
+from api.actions import has_table
 from api.tests import APITestCase
 
 
@@ -20,3 +21,8 @@ class TestTableNameUnique(APITestCase):
         # create same table in another (sandbox) schema
         # should fail
         self.assertRaises(AssertionError, self.create_table, schema=self.schema_sandbox)
+
+        # also check: table should not have been created in oedb
+        self.assertFalse(
+            has_table({"table": self.test_table, "schema": self.schema_sandbox})
+        )
