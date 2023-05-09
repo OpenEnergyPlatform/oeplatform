@@ -127,7 +127,7 @@ function peerReview(config) {
     $('#peer_review-loading').removeClass('d-none');
     config.form = $('#peer_review-form');
   })();
-};
+}
 
 /**
  * Submits peer review to backend
@@ -245,6 +245,72 @@ function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
 }
 
+/**
+ * Renders fields on the Summary page, sorted by review state
+ */
+function renderSummaryPageFields() {
+  const acceptedFields = [];
+  const suggestingFields = [];
+  const rejectedFields = [];
+  const missingFields = [];
+
+  for (const review of current_review.reviews) {
+    const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
+    const fieldValue = $(field_id).text();
+    const fieldCategory = review.category.slice(1);
+
+    if (selectedState === 'ok') {
+      acceptedFields.push({ field_id, fieldValue, fieldCategory });
+    } else if (selectedState === 'suggestion') {
+      suggestingFields.push({ field_id, fieldValue, fieldCategory });
+    } else if (selectedState === 'rejected') {
+      rejectedFields.push({ field_id, fieldValue, fieldCategory });
+    }
+  }
+
+  const categories = document.querySelectorAll(".tab-pane");
+  for (const category of categories) {
+    const category_name = category.id;
+    if (["resource", "summary"].includes(category_name)) {
+      continue;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (field of category_fields) {
+      const field_name = field.id.slice(6);
+      const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
+      const fieldValue = $(field_id).text();
+      const found = current_review.reviews.some(review => review.key === field_name);
+      if (!found) {
+        missingFields.push({ field_id, fieldValue, category_name });
+      }
+    }
+  }
+  const summaryContainer = document.getElementById("summary");
+  summaryContainer.innerHTML = `
+    <h4>Accepted:</h4>
+    ${createFieldList(acceptedFields)}
+    <h4>Suggesting:</h4>
+    ${createFieldList(suggestingFields)}
+    <h4>Rejected:</h4>
+    ${createFieldList(rejectedFields)}
+    <h4>Missing:</h4>
+    ${createFieldList(missingFields)}
+  `;
+}
+
+/**
+ * Creates an HTML list of fields with their categories
+ * @param {Array} fields Array of field objects
+ * @returns {string} HTML list of fields
+ */
+function createFieldList(fields) {
+  return `
+    <ul>
+      ${fields.map(field => `<li>${field.fieldCategory}: ${field.fieldValue}</li>`).join('')}
+    </ul>
+  `;
+}
+
 
 /**
  * Saves field review to current review list
@@ -317,7 +383,7 @@ function saveEntrances() {
             "state": selectedState,
           },
         },
-    )};
+    )}
   }
 
   // Color ok/suggestion/rejected
@@ -328,8 +394,9 @@ function saveEntrances() {
   document.getElementById("summary").innerHTML = (
     JSON.stringify(current_review, null, 4)
   );
+  renderSummaryPageFields();
   checkReviewComplete();
-};
+}
 
 /**
  * Checks if all fields are reviewed and activates submit button if ready
