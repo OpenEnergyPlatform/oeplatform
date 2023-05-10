@@ -19,8 +19,12 @@ class Command(BaseCommand):
         table_objects = {(t.schema.name, t.name) for t in Table.objects.all()}
         # delete all django table objects if no table in oedb
         for schema, table in table_objects.difference(real_tables):
-            inp = input(f"delete {schema}.{table} [y|n]:")
-            if inp == "y":
+            print(schema, table)
+
+        inp = input("delete the table objects listed above? [Y|n]:")
+        if inp == "Y":
+            for schema, table in table_objects.difference(real_tables):
+                print(schema, table)
                 Table.objects.get(name=table, schema__name=schema).delete()
 
         print("---")
