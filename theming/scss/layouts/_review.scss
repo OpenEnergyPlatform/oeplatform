@@ -15,6 +15,11 @@
     &__items {
         @extend .d-flex;
         @extend .flex-column;
+
+        &-cat {
+            @extend .text-uppercase;
+            @extend .pt-2;
+        }
     }
 
     &__item {

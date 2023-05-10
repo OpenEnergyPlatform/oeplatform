@@ -75,17 +75,25 @@
             </div>
             <div class="tab-pane fade" id="spatiotemporal" role="tabpanel" aria-labelledby="spatiotemporal-tab">
               <div class="review__items">
-                <p>SPATIAL</p>
-                {% for item in meta.spatial %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
-                <p>{{item.field}}:  {{ item.value }} </p></div>  
+                <p class="review__items-cat">Spatial</p>
+                {% for item in meta.spatial %}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
+                  <p class="review__item-content">
+                    <span class="key">{{item.field}}</span>
+                    <span class="value">{{ item.value }}</span>
+                  </p>
+                </div>  
                 {% endfor %}
-                <p>TEMPORAL</p>
+                <p class="review__items-cat">Temporal</p>
                 {% for item in meta.temporal %}
-                <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
-                  <p>{% if item.field is Null %}
-                    {{item.field}}:  {{ item.value }}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
+                  <p class="review__item-content">
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
                     {% else %}
-                    {{item.field}}: {{ item.value }}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -94,32 +102,55 @@
             </div>
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="review__items">
-              {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
-              <p>{% if item.field is Null %}
-                  {{ item.field }}: {{ item.value }}
-                  {% else %}
-                  {{ item.field }}: {{ item.value }}
-                  {% endif %}
-              </p></div> 
+              {% for item in meta.source %} 
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
+                  <p class="review__item-content">
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% endif %}
+                  </p>
+                </div> 
               {% endfor %}
               </div>
             </div>
             <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
               <div class="review__items">
-              {% for item in meta.license %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
-                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              {% for item in meta.license %}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
+                  <p class="review__item-content">
+                    <span class="key">{{item.field}}</span>
+                    <span class="value">{{ item.value }}</span>
+                  </p>
+                </div>  
+              {% endfor %}
               </div>
             </div>
             <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
               <div class="review__items">
-              {% for item in meta.contributor %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
-                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              {% for item in meta.contributor %}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
+                  <p class="review__item-content">
+                    <span class="key">{{item.field}}</span>
+                    <span class="value">{{ item.value }}</span>
+                  </p>
+                </div>  
+              {% endfor %}
               </div>
             </div>
             <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
               <div class="review__items">
-                {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
-                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+                {% for item in meta.resource %}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
+                  <p class="review__item-content">
+                    <span class="key">{{item.field}}</span>
+                    <span class="value">{{ item.value }}</span>
+                  </p>
+                </div>  
+              {% endfor %}
               </div>
             </div>
             <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
