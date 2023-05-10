@@ -60,10 +60,13 @@
               <div class="review__items">
                 {% for item in meta.general %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
-                  <p class="review__item-content">{% if item.field is Null %}
-                    {{item.field}}:  {{ item.value }}
+                  <p class="review__item-content">
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
                     {% else %}
-                    {{ item.field}}: {{ item.value }}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
                     {% endif %}
                   </p>
                 </div>

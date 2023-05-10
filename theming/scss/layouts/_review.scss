@@ -41,6 +41,19 @@
             @extend .p-3;
             @extend .mb-0;
             word-break: break-all;
+
+            .key {
+                @extend .d-block;
+                @extend .fw-semibold;
+            }
+
+            .key::first-letter {
+                text-transform: uppercase;
+            }
+
+            .value {
+                @extend .d-block;
+            }
         }
     }
     
