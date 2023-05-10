@@ -89,12 +89,11 @@ const ComparisonBoardItem = () => {
                         {...provided.dragHandleProps}
                         ref={provided.innerRef}
                     >
-                        
-                        <ListItemText>
-                            <Typography variant="subtitle2" gutterBottom style={{ marginTop: '10px' }}>
-                              {index} : { item.content}
-                            </Typography>
-                        </ListItemText>
+                      <ListItemText>
+                          <Typography variant="subtitle2" gutterBottom style={{ marginTop: '10px' }}>
+                            {index} : { item.content}
+                          </Typography>
+                      </ListItemText>
                     </ListItem>
                     )}
                 </Draggable>

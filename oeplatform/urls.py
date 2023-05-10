@@ -32,4 +32,5 @@ urlpatterns = [
     url(r"^ontology/", include("ontology.urls")),
     url(r"^viewer/oeo/", include("oeo_viewer.urls")),
     url(r"^factsheet/", include("factsheet.urls")),
+    url(r"^tutorials/.*", redirect_tutorial),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
