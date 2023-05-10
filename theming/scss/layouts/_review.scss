@@ -24,6 +24,7 @@
         @extend .mb-1;
         border-left-width: 4px!important;
         border-color: $gray-200!important;
+        cursor: pointer;
 
         &.field-ok {
             border-left-color: $green-500!important;
