@@ -18,8 +18,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
-	    'USER': os.environ.get("OEP_DJANGO_USER"),
-	    'PASSWORD': os.environ.get("OEP_DB_PW"),
+	    'USER': os.environ.get("OEP_DJANGO_USER", "postgres"),
+	    'PASSWORD': os.environ.get("OEP_DB_PW", "postgres"),
 	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
 	}
 }
@@ -39,8 +39,8 @@ ANON_CONNECTION_LIMIT = 40
 # This database connection is used for the actual data interfaces (App: dataedit)
 # This should not be linked with a potential user account of the OpenEnergyDatabase !!!
 # Please refer to the step 2.2 of the README file
-dbuser = os.environ.get("LOCAL_DB_USER")
-dbpasswd = os.environ.get("LOCAL_DB_PASSWORD")
+dbuser = os.environ.get("LOCAL_DB_USER", "postgres")
+dbpasswd = os.environ.get("LOCAL_DB_PASSWORD", "postgres")
 dbport = os.environ.get("LOCAL_DB_PORT", 5432)
 dbhost = os.environ.get("LOCAL_DB_HOST", "localhost")
 dbname = os.environ.get("LOCAL_DB_NAME", "oedb")

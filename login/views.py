@@ -3,17 +3,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import FormView, View
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import DeleteView, UpdateView
 
 import login.models as models
+from dataedit.models import Table
 
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
 
-class ProfileView(View):
+class TablesView(View):
     def get(self, request, user_id):
         """
         Load the user identified by user_id and is OAuth-token.
@@ -22,6 +24,51 @@ class ProfileView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
+        user = get_object_or_404(OepUser, pk=user_id)
+
+        # get all tables and optimize query
+        tables = Table.objects.all().select_related()
+        # get all tables the user got write perm on
+        user_tables = [
+            table
+            for table in tables
+            if user.get_table_permission_level(table) >= models.WRITE_PERM
+        ]  # WRITE_PERM = 4
+        # prepare for data for template
+        tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
+
+        # get name of schema form FK object
+        for table in tables:
+            table["schema"] = table["schema"].name
+
+        return render(
+            request, "login/user_tables.html", {"tables": tables, "profile_user": user}
+        )
+
+
+class ReviewsView(View):
+    def get(self, request, user_id):
+        """
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
+        user = get_object_or_404(OepUser, pk=user_id)
+        return render(request, "login/user_review.html", {"profile_user": user})
+
+
+class SettingsView(View):
+    def get(self, request, user_id):
+        """
+        Load the user identified by user_id and is OAuth-token.
+            If latter does not exist yet, create one.
+        :param request: A HTTP-request object sent by the Django framework.
+        :param user_id: An user id
+        :return: Profile renderer
+        """
+
         from rest_framework.authtoken.models import Token
 
         for user in OepUser.objects.all():
@@ -31,7 +78,7 @@ class ProfileView(View):
         if request.user.is_authenticated:
             token = Token.objects.get(user=request.user)
         return render(
-            request, "login/profile.html", {"profile_user": user, "token": token}
+            request, "login/user_settings.html", {"profile_user": user, "token": token}
         )
 
 
@@ -236,7 +283,11 @@ class EditUserView(View):
     def post(self, request, user_id):
         if not request.user.id == int(user_id):
             raise PermissionDenied
-        form = EditUserForm(request.POST, instance=request.user)
+        form = EditUserForm(
+            instance=request.user,
+            files=request.FILES or None,
+            data=request.POST or None,
+        )
         if form.is_valid():
             form.save()
             return redirect("/user/profile/{id}".format(id=request.user.id))
@@ -280,6 +331,21 @@ class DetachView(LoginRequiredMixin, View):
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = "login/generic_form.html"
     success_url = "/"
+
+
+class AccountDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    TODO: implement tests before we allow user deletion
+    see: https://github.com/OpenEnergyPlatform/oeplatform/pull/1181
+    """
+
+    model = OepUser
+    template_name = "login/delete_account.html"
+    success_url = reverse_lazy("logout")
+
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        return render(request, "login/delete_account.html", {"profile_user": user})
 
 
 class ActivationNoteView(FormView):

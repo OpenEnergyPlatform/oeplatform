@@ -35,7 +35,13 @@
 
 .index-home h3 {
   font-weight: 600;
+  font-size: 32px;
   color: var(--primaryColor2);
+}
+
+.index-home span.subheader {
+  font-size: 24px;
+  color: var(--grey1);
 }
 
 .index-home h4 {
@@ -127,7 +133,7 @@
   max-width: 800px;
   margin: auto;
 
-  font-size: 12px;
+  font-size: 14px;
 
   color: var(--primaryColor3);
 }

@@ -53,7 +53,7 @@ class Table(Tagable):
         return table_obj
 
     class Meta:
-        unique_together = (("schema", "name"),)
+        unique_together = (("name",),)
 
 
 class View(models.Model):

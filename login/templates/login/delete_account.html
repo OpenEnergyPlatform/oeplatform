@@ -1,0 +1,89 @@
+{% extends "base/base.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% block main-content-body %}
+<script>
+    function toggler(divId) {
+        $("#" + divId).toggle();
+    }
+</script>
+    <br>
+    {% if profile_user %}
+        <a href="{{profile_user.id}}/tables">Tables</a>
+    {% endif%}
+    {% if profile_user %}
+        <a href="{{profile_user.id}}/review">Reviews</a>
+    {% endif%}
+    {% if request.user.is_authenticated and profile_user == request.user %}
+<a href="{% url 'settings' profile_user.id %}">Settings</a>
+    {% endif%}
+
+
+    <h1>Delete Account</h1>
+  <p>Are you sure you want to delete your account?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+  </form>
+{% endblock %}
+
+
+{% block main-right-sidebar-content %}
+    <br>
+    <div>
+    {% if profile_user.profile_img %}
+    <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
+{% else %}
+    <i class="far fa-user default-user-icon"></i>
+{% endif %}
+    </div>
+    <br>
+    <div><h2> {{ profile_user.name }} </h2></div>
+    <td> {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
+            {% else %}
+                <p>Full Name</p>
+            {% endif %} </td>
+    <br>
+    <br>
+    <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
+    <hr>
+    <td> {% if profile_user.work %}
+                {{ profile_user.work }}
+            {% else %}
+                <p>Profession</p>
+            {% endif %} </td>
+    <br>
+    <td> {% if profile_user.location %}
+                {{ profile_user.location }}
+            {% else %}
+    <p>Location</p>
+    {% endif %} </td>
+    <br>
+    <td> {% if profile_user.email %}
+            <th style="width:20%"> E-Mail: </th>
+            <td> {{ profile_user.email }} </td>
+            {% endif %}
+    <br>
+    <br>
+    <td> {% if profile_user.linkedin %}
+        <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+            {% else %}
+                LinkedIn
+            {% endif %} </td>
+    <br>
+    <td> {% if profile_user.facebook %}
+        <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
+            {% else %}
+                <p> Facebook</p>
+            {% endif %} </td>
+    <br>
+    <td> {% if profile_user.twitter %}
+        <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+            {% else %}
+                <p> Twitter</p>
+            {% endif %} </td>
+    <br>
+    <hr>
+
+{% endblock %}
