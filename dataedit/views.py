@@ -1924,25 +1924,6 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return meta
 
-    def get_all_field_descriptions1(self, json_schema, prefix=''):
-        field_descriptions = {}
-
-        def extract_descriptions(properties, prefix=""):
-            for field, value in properties.items():
-                if "description" in value:
-                    key = f"{prefix}.{field}" if prefix else field
-                    field_descriptions[key] = value["description"]
-                if "properties" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    extract_descriptions(value["properties"], new_prefix)
-                if "items" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    if "properties" in value["items"]:
-                        extract_descriptions(value["items"]["properties"], new_prefix)
-
-        extract_descriptions(json_schema["properties"], prefix)
-        return field_descriptions
-
     def get_all_field_descriptions(self, json_schema, prefix=''):
         field_descriptions = {}
 
