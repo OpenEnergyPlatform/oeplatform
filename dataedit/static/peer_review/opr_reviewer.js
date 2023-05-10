@@ -248,6 +248,13 @@ function selectState(state) { // eslint-disable-line no-unused-vars
 /**
  * Renders fields on the Summary page, sorted by review state
  */
+/**
+ * Renders fields on the Summary page, sorted by review state
+ */
+/**
+ * Displays fields based on selected category
+ * @param {string} category Selected category
+ */
 function renderSummaryPageFields() {
   const acceptedFields = [];
   const suggestingFields = [];
@@ -257,17 +264,19 @@ function renderSummaryPageFields() {
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
     const fieldValue = $(field_id).text();
+    const fieldState = review.fieldReview.state;
     const fieldCategory = review.category.slice(1);
 
-    if (selectedState === 'ok') {
+    if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (selectedState === 'suggestion') {
+    } else if (fieldState === 'suggestion') {
       suggestingFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (selectedState === 'rejected') {
+    } else if (fieldState === 'rejected') {
       rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
   }
 
+  // Find missing fields
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id;
@@ -285,6 +294,8 @@ function renderSummaryPageFields() {
       }
     }
   }
+
+  // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
   summaryContainer.innerHTML = `
     <h4>Accepted:</h4>
@@ -310,6 +321,9 @@ function createFieldList(fields) {
     </ul>
   `;
 }
+
+
+
 
 
 /**
