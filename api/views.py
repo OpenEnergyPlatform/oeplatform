@@ -13,6 +13,7 @@ import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.db.utils import IntegrityError
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from omi.dialects.oep.compiler import JSONCompiler
 from omi.structure import OEPMetadata
@@ -67,7 +68,6 @@ def load_cursor(named=False):
             fetch_all = "cursor_id" not in args[1].data
             triggered_close = False
             if fetch_all:
-
                 # django_restframework passes different data dictionaries depending
                 # on the request type: PUT -> Mutable, POST -> Immutable
                 # Thus, we have to replace the data dictionary by one we can mutate.
@@ -342,7 +342,6 @@ class Table(APIView):
         json_data = request.data
 
         if "column" in json_data["type"]:
-
             column_definition = api.parser.parse_scolumnd_from_columnd(
                 schema, table, json_data["name"], json_data
             )
@@ -350,7 +349,6 @@ class Table(APIView):
             return ModHttpResponse(result)
 
         elif "constraint" in json_data["type"]:
-
             # Input has nothing to do with DDL from Postgres.
             # Input is completely different.
             # Using actions.parse_sconstd_from_constd is not applicable
@@ -466,8 +464,14 @@ class Table(APIView):
         constraint_definitions,
         metadata=None,
     ):
-
         self.validate_column_names(column_definitions)
+
+        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
+        try:
+            table_object = DBTable.objects.create(name=table, schema=schema_object)
+        except IntegrityError:
+            raise APIError("Table aready exists")
+
         context = {
             "connection_id": actions.get_or_403(request.data, "connection_id"),
             "cursor_id": actions.get_or_403(request.data, "cursor_id"),
@@ -479,8 +483,6 @@ class Table(APIView):
             column_definitions,
             constraint_definitions,
         )
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
-        table_object = DBTable.objects.create(name=table, schema=schema_object)
         table_object.save()
 
         if metadata:

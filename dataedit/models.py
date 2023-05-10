@@ -12,7 +12,6 @@ from django.db.models import (
 )
 from django.utils import timezone
 
-
 # Create your models here.
 
 
@@ -54,7 +53,7 @@ class Table(Tagable):
         return table_obj
 
     class Meta:
-        unique_together = (("schema", "name"),)
+        unique_together = (("name",),)
 
 
 class View(models.Model):
