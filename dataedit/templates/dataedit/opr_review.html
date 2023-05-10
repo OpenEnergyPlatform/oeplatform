@@ -54,162 +54,158 @@
   <div class="content">
     <div class="content__container">
       <div class="review">
-          <div class="review__content">
-              <div class="tab-content" id="myTabContent">
-      
-                <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
-                  <div class="flex-container">
-                    {% for item in meta.general %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
-                      <p>{% if item.field is Null %}
-                        {{item.field}}:  {{ item.value }}
-                       {% else %}
-                        {{ item.field}}: {{ item.value }}
-                       {% endif %}
-                    </p>
-      
-                  </div>  {% endfor %}
-                  </div>
-      
+        <div class="review__content">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
+              <div class="review__items">
+                {% for item in meta.general %}
+                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
+                  <p>{% if item.field is Null %}
+                    {{item.field}}:  {{ item.value }}
+                    {% else %}
+                    {{ item.field}}: {{ item.value }}
+                    {% endif %}
+                  </p>
                 </div>
-      
-                <div class="tab-pane fade" id="spatiotemporal" role="tabpanel" aria-labelledby="spatiotemporal-tab">
-                    <div class="flex-container">
-                    <p>SPATIAL</p>
-                  {% for item in meta.spatial %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
-                      <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
-                    <p>TEMPORAL</p>
-                  {% for item in meta.temporal %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
-                    <p>{% if item.field is Null %}
-                        {{item.field}}:  {{ item.value }}
-                       {% else %}
-                        {{item.field}}: {{ item.value }}
-                       {% endif %}
-                    </p></div>  {% endfor %}
-                    </div>
-      
-                </div>
-                <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
-                    <div class="flex-container">
-                    {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
-                    <p>{% if item.field is Null %}
-                        {{ item.field }}: {{ item.value }}
-                       {% else %}
-                        {{ item.field }}: {{ item.value }}
-                       {% endif %}
-                    </p></div> {% endfor %}
-                    </div>
-      
-                </div>
-                <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
-                    <div class="flex-container">
-      
-                    {% for item in meta.license %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
-                        <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
-                    </div>
-                </div>
-      
-                <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
-                    <div class="flex-container">
-                    {% for item in meta.contributor %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
-                        <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
-                    </div>
-                </div>
-      
-                <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
-                  <div class="flex-container">
-                    {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
-                        <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
-                  <ul class="nav nav-tabs sticky-top" id="summarySubTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                      <button class="nav-link" id="#missingReviewSummaryTab" data-bs-toggle="tab" data-bs-target="#missingReviewSummaryTab" type="button" role="tab" aria-controls="missingReviewSummaryTab" aria-selected="true">Review missing</button>
-                    </li>
-                      <li class="nav-item" role="presentation">
-                      <button class="nav-link" id="#rejectedSummaryTab" data-bs-toggle="tab" data-bs-target="#rejectedSummaryTab" type="button" role="tab" aria-controls="rejectedSummaryTab" aria-selected="false">Rejected</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <button class="nav-link" id="#suggestionsSummaryTab" data-bs-toggle="tab" data-bs-target="#suggestionsSummaryTab" type="button" role="tab" aria-controls="suggestionsSummaryTab" aria-selected="true">Suggestions</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                      <button class="nav-link" id="#acceptedSummaryTab" data-bs-toggle="tab" data-bs-target="#acceptedSummaryTab" type="button" role="tab" aria-controls="acceptedSummaryTab" aria-selected="true">Accepted</button>
-                    </li>
-                  </ul>
-                </div>
-                <div class="tab-content">
-                  <div id="missingReviewSummaryTab" role="tabpanel" class="tab-pane fade">
-                    <i> Show missing review fields here.</i>
-                  </div>
-                  <div id="rejectedSummaryTab" role="tabpanel" class="tab-pane fade">
-                    <i> Show rejected fields here.</i>
-                  </div>
-                  <div id="suggestionsSummaryTab" role="tabpanel" class="tab-pane fade">
-                    <i> Show suggestion fields here.</i>
-                  </div>
-                  <div id="acceptedSummaryTab" role="tabpanel" class="tab-pane fade">
-                    <i> Show accepted fields here.</i>
-                  </div>
-                </div>
-                  </div>
+                {% endfor %}
               </div>
+            </div>
+            <div class="tab-pane fade" id="spatiotemporal" role="tabpanel" aria-labelledby="spatiotemporal-tab">
+              <div class="review__items">
+                <p>SPATIAL</p>
+                {% for item in meta.spatial %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
+                <p>{{item.field}}:  {{ item.value }} </p></div>  
+                {% endfor %}
+                <p>TEMPORAL</p>
+                {% for item in meta.temporal %}
+                <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
+                  <p>{% if item.field is Null %}
+                    {{item.field}}:  {{ item.value }}
+                    {% else %}
+                    {{item.field}}: {{ item.value }}
+                    {% endif %}
+                  </p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
+              <div class="review__items">
+              {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
+              <p>{% if item.field is Null %}
+                  {{ item.field }}: {{ item.value }}
+                  {% else %}
+                  {{ item.field }}: {{ item.value }}
+                  {% endif %}
+              </p></div> 
+              {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
+              <div class="review__items">
+              {% for item in meta.license %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
+                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
+              <div class="review__items">
+              {% for item in meta.contributor %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
+                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
+              <div class="review__items">
+                {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
+                <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
+              </div>
+            </div>
+            <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+              <ul class="nav nav-tabs sticky-top" id="summarySubTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="#missingReviewSummaryTab" data-bs-toggle="tab" data-bs-target="#missingReviewSummaryTab" type="button" role="tab" aria-controls="missingReviewSummaryTab" aria-selected="true">Review missing</button>
+                </li>
+                  <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="#rejectedSummaryTab" data-bs-toggle="tab" data-bs-target="#rejectedSummaryTab" type="button" role="tab" aria-controls="rejectedSummaryTab" aria-selected="false">Rejected</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="#suggestionsSummaryTab" data-bs-toggle="tab" data-bs-target="#suggestionsSummaryTab" type="button" role="tab" aria-controls="suggestionsSummaryTab" aria-selected="true">Suggestions</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="#acceptedSummaryTab" data-bs-toggle="tab" data-bs-target="#acceptedSummaryTab" type="button" role="tab" aria-controls="acceptedSummaryTab" aria-selected="true">Accepted</button>
+                </li>
+              </ul>
+            </div>
+            <div class="tab-content">
+              <div id="missingReviewSummaryTab" role="tabpanel" class="tab-pane fade">
+                <i> Show missing review fields here.</i>
+              </div>
+              <div id="rejectedSummaryTab" role="tabpanel" class="tab-pane fade">
+                <i> Show rejected fields here.</i>
+              </div>
+              <div id="suggestionsSummaryTab" role="tabpanel" class="tab-pane fade">
+                <i> Show suggestion fields here.</i>
+              </div>
+              <div id="acceptedSummaryTab" role="tabpanel" class="tab-pane fade">
+                <i> Show accepted fields here.</i>
+              </div>
+            </div>
+              </div>
+          </div>
       
           <div class="review__controls">
-               <div id="field-descriptions-json" style="display: none;">
-           {{ field_descriptions_json }}</div>
-      <div id="field-descriptions"></div>
-              <div class="flex-reviewer sticky-top" id="review-window">
-                  <p>Reviewer Box</p>
-                  <button type="button" class="btn btn-primary" onclick="selectPreviousField()">
-                    <span class="btn__icon">
-                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
-                      </svg>
-                    </span>
-                    <span class="btn__text">Back</span>
-                </button>
-                <button type="button" class="btn btn-primary" onclick="selectNextField()">
-                  <span class="btn__icon">
-                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                          <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
-                      </svg>
-                  </span>
-                  <span class="btn__text">Next</span>
+            <div id="field-descriptions-json" style="display: none;">
+            {{ field_descriptions_json }}</div>
+            <div id="field-descriptions"></div>
+            <div class="flex-reviewer sticky-top" id="review-window">
+              <p>Reviewer Box</p>
+              <button type="button" class="btn btn-primary" onclick="selectPreviousField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                  </svg>
+                </span>
+                <span class="btn__text">Back</span>
               </button>
-                  <hr>
-                  <h2 id="review-field-name"></h2>
-                  <hr>
-                  <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-                      <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Ok</button>
-                      <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggestion</button>
-                      <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Rejected</button>
+              <button type="button" class="btn btn-primary" onclick="selectNextField()">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                    </svg>
+                </span>
+                <span class="btn__text">Next</span>
+              </button>
+                <hr>
+                <h2 id="review-field-name"></h2>
+                <hr>
+                <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
+                  <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Ok</button>
+                  <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggestion</button>
+                  <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Rejected</button>
+                </div>
+                <div class="d-none" id="reviewer_remarks">
+                  <div class="mb-3" id="field-value">
+                    <label for="valuearea" class="form-label">Your value suggestion</label>
+                    <textarea class="form-control" id="valuearea" rows="2" ></textarea>
                   </div>
-                  <div class="d-none" id="reviewer_remarks">
-                    <div class="mb-3" id="field-value">
-                        <label for="valuearea" class="form-label">Your value suggestion</label>
-                        <textarea class="form-control" id="valuearea" rows="2" ></textarea>
+                    <div class="mb-3" id="field-comment">
+                      <label for="commentarea" class="form-label" ></label>
+                      <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
                     </div>
-                      <div class="mb-3" id="field-comment">
-                        <label for="commentarea" class="form-label" ></label>
-                        <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
-                      </div>
-                      <button type="button" class="btn btn-warning" id="submitButton" style="width:50%">Save comment/new value</button>
-                  </div>
+                    <button type="button" class="btn btn-warning" id="submitButton" style="width:50%">Save comment/new value</button>
+                </div>
               </div>
               <div class="" id="peer_review-controls">
                 <div class="col">
-                    <button class="btn btn-sm btn-primary mr-2" id="peer_review-cancel">Quit</button>
-            
-                    <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                        <a href="#peer_review-submit" class="btn btn-sm btn-warning mr-2 {% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                            <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="peer_review-submitting">
-                            </span>Save Review Progress
-                        </a>
-                    </span>
-            
-                    <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
+                  <button class="btn btn-sm btn-primary mr-2" id="peer_review-cancel">Quit</button>
+                  <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+                    <a href="#peer_review-submit" class="btn btn-sm btn-warning mr-2 {% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+                      <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="peer_review-submitting">
+                      </span>Save Review Progress
+                    </a>
+                  </span>
+                  <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
                 </div>
-            </div>
+              </div>
           </div>
       </div>
     </div>

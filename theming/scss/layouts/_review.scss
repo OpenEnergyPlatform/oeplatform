@@ -11,4 +11,42 @@
     &__controls {
         width: calc(#{$C--container-width} / 2);
     }
+
+    &__items {
+        @extend .d-flex;
+        @extend .flex-column;
+    }
+
+    &__item {
+        @extend .bg-white;
+        @extend .w-100;
+        @extend .border;
+        @extend .mb-1;
+        border-left-width: 4px!important;
+        border-color: $gray-200!important;
+
+        &.field-ok {
+            border-left-color: $green-500!important;
+        }
+
+        &.field-suggestion {
+            border-left-color: $yellow-500!important;
+        }
+
+        &.field-rejected {
+            border-left-color: $red-500!important;
+        }
+
+        p {
+            @extend .p-3;
+            @extend .mb-0;
+        }
+    }
+    
+    .flex-reviewer {
+        @extend .d-flex;
+        @extend .flex-column;
+        @extend .bg-light;
+    }
 }
+
