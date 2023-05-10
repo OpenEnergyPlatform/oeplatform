@@ -15,7 +15,7 @@ COPY . /app
 COPY ./docker/docker-entrypoint.sh /app/docker-entrypoint.sh
 
 
-RUN cp /app/oeplatform/securitysettings.py /app/oeplatform/securitysettings.py && python manage.py collectstatic --noinput && rm /app/oeplatform/securitysettings.py
+RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py && python manage.py collectstatic --noinput && rm /app/oeplatform/securitysettings.py
 
 EXPOSE 80
 
