@@ -15,7 +15,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -44,7 +44,7 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table, PeerReview
+from dataedit.models import Table, PeerReview, PeerReviewManager
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
@@ -228,7 +228,7 @@ def change_requests(schema, table):
 def listschemas(request):
     """
     Loads all schemas that are present in the external database specified in
-    oeplatform/securitysettings.py. Only schemas that are present in the
+    oeplatform/securitysettings.py Only schemas that are present in the
     whitelist are processed that do not start with an underscore.
 
     :param request: A HTTP-request object sent by the Django framework
@@ -1048,6 +1048,28 @@ class DataView(View):
 
         table_views = list(chain((default,), table_views))
 
+        # maybe call the update also on this view to show the days open on page
+        opr_manager = PeerReviewManager()
+        reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
+        if reviews.last() is not None:
+            latest_review = reviews.last()
+            opr_manager.update_open_since(opr=latest_review)
+
+        opr_context = {}
+        contributor = PeerReviewView.load_contributor(schema=schema, table=table)
+        if contributor is not None:
+            opr_context.update({"contributor": contributor})
+        else:
+            opr_context.update({"contributor": None})
+
+        reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
+        if contributor is not None:
+            opr_context.update({"reviewer": reviewer})
+        else:
+            opr_context.update({"reviewer": None})
+
+        print(opr_context)
+
         context_dict = {
             # Not in use?
             # "comment_on_table": dict(metadata),
@@ -1066,6 +1088,7 @@ class DataView(View):
             "is_admin": is_admin,
             "can_add": can_add,
             "host": request.get_host(),
+            "opr": opr_context,
         }
 
         context_dict.update(current_view.options)
@@ -1554,7 +1577,7 @@ def get_all_tags(schema=None, table=None):
                     "id": r.id,
                     "name": r.name,
                     "name_normalized": r.name_normalized,
-                    "color": "#" + format(r.color, "06X"),
+                    "color": "#" + r.color,
                     "usage_count": r.usage_count,
                     "usage_tracked_since": r.usage_tracked_since,
                 }
@@ -1901,18 +1924,49 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         return meta
 
-    def get_all_field_descriptions(self, json_schema, prefix=''):
+    def get_all_field_descriptions1(self, json_schema, prefix=''):
         field_descriptions = {}
 
         def extract_descriptions(properties, prefix=""):
             for field, value in properties.items():
                 if "description" in value:
-                    field_key = f"{prefix}.{field}" if prefix else field
                     key = f"{prefix}.{field}" if prefix else field
                     field_descriptions[key] = value["description"]
                 if "properties" in value:
                     new_prefix = f"{prefix}.{field}" if prefix else field
                     extract_descriptions(value["properties"], new_prefix)
+                if "items" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    if "properties" in value["items"]:
+                        extract_descriptions(value["items"]["properties"], new_prefix)
+
+        extract_descriptions(json_schema["properties"], prefix)
+        return field_descriptions
+
+    def get_all_field_descriptions(self, json_schema, prefix=''):
+        field_descriptions = {}
+
+        def extract_descriptions(properties, prefix=""):
+            for field, value in properties.items():
+                key = f"{prefix}.{field}" if prefix else field
+
+                if any(attr in value for attr in ["description", "example", "badge", "title"]):
+                    field_descriptions[key] = {}
+                    if "description" in value:
+                        field_descriptions[key]["description"] = value["description"]
+                    if "example" in value:
+                        field_descriptions[key]["example"] = value["example"]
+                    if "badge" in value:
+                        field_descriptions[key]["badge"] = value["badge"]
+                    if "title" in value:
+                        field_descriptions[key]["title"] = value["title"]
+                if "properties" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    extract_descriptions(value["properties"], new_prefix)
+                if "items" in value:
+                    new_prefix = f"{prefix}.{field}" if prefix else field
+                    if "properties" in value["items"]:
+                        extract_descriptions(value["items"]["properties"], new_prefix)
 
         extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
@@ -1925,17 +1979,19 @@ class PeerReviewView(LoginRequiredMixin, View):
         table_obj = Table.load(schema, table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
         print(field_descriptions)
+
+        # Check user permissions
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-        url_table_id = request.build_absolute_uri(
+            url_table_id = request.build_absolute_uri(
             reverse("view", kwargs={"schema": schema, "table": table})
         )
         metadata = self.sort_in_category(schema, table)
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
-                 "peer_review", kwargs={"schema": schema, "table": table}
+                 "peer_review_reviewer", kwargs={"schema": schema, "table": table}
              ),
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
@@ -1949,13 +2005,28 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
-    def load_contributor(self, schema, table):
+    @staticmethod
+    def load_contributor(schema, table):
         """
         Get the contributor for the table a review is started on. 
         """
         current_table = Table.load(schema=schema, table=table)
-        table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        try:
+            table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        except AttributeError:
+            table_holder = None
         return table_holder
+    
+    @staticmethod
+    def load_reviewer(schema, table):
+        """
+        Get the contributor for the table a review is started on. 
+        """
+        current_review = PeerReview.load(schema=schema, table=table)
+        if current_review and hasattr(current_review, 'reviewer'):
+            return current_review.reviewer
+        else:
+            return None
 
     def post(self, request, schema, table):
         """
@@ -1970,25 +2041,46 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
             contributor = self.load_contributor(schema, table)
-            if contributor.id is not request.user.id:
-                table_obj = PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
-                table_obj.save()
-            
-        #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
-        if review_finised is True:  
-            review_table = Table.load(schema=schema, table=table)
-            review_table.set_is_reviewed()
-            # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
+            if contributor is not None: 
+                    table_review= PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
+                    table_review.save()
+            else:
+                error_msg = f"Failed to retrive any user that identifies as table holder for current table: { table } !"
+                return JsonResponse({"error": error_msg}, status=400)
+
+            #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
+            if review_finised is True:  
+                review_table = Table.load(schema=schema, table=table)
+                review_table.set_is_reviewed()
+                # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
 
         return render(request, 'dataedit/opr_review.html', context=context)
 
 
-class ORPContributor(PeerReviewView):
-    def get(self, request, schema, table):
+class PeerRreviewContributorView(PeerReviewView):
+    def get(self, request, schema, table, review_id):
+        """
+        Handles GET requests for the PeerRreviewContributorView.
+
+        Parameters:
+            request (HttpRequest): The HTTP request object.
+            schema (str): The schema parameter captured from the URL.
+            table (str): The table parameter captured from the URL.
+            review_id (int): The ID of the review captured from the URL.
+
+        Returns:
+            HttpResponse: The HTTP response object containing the rendered template.
+
+        Raises:
+            None
+        """
+            
         review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
         can_add = False
         table_obj = Table.load(schema, table)
+
+        # Check user permissions
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
@@ -2002,7 +2094,7 @@ class ORPContributor(PeerReviewView):
         context_meta = {"config": json.dumps(
                             {"can_add": can_add,
                              "url_peer_review": reverse(
-                                "peer_review", kwargs={"schema": schema, "table": table}
+                                "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
                                 ),
                              "url_table": reverse(
                                 "view", kwargs={"schema": schema, "table": table}

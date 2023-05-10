@@ -76,7 +76,7 @@
           </div>
           <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="flex-container">
-              {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
+              {% for item in meta.source %} <div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
               <p>{% if item.field is Null %}
                   {{ item.field }}: {{ item.value }}
                  {% else %}
@@ -89,21 +89,21 @@
           <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
               <div class="flex-container">
 
-              {% for item in meta.license %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
+              {% for item in meta.license %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
                   <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
               </div>
           </div>
 
           <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
               <div class="flex-container">
-              {% for item in meta.contributor %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
+              {% for item in meta.contributor %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
                   <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
               </div>
           </div>
 
           <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
             <div class="flex-container">
-              {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}');">
+              {% for item in meta.resource %}<div id="field_{{item.field}}" class="field" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
                   <p>{{item.field}}:  {{ item.value }} </p></div>  {% endfor %}
               </div>
           </div>
@@ -139,11 +139,11 @@
           </div>
             </div>
         </div>
- <div id="field-descriptions-json" style="display: none;">
-     {{ field_descriptions_json }}</div>
-<div id="field-descriptions"></div>
 
     <div class="col-md-4">
+         <div id="field-descriptions-json" style="display: none;">
+     {{ field_descriptions_json }}</div>
+<div id="field-descriptions"></div>
         <div class="flex-reviewer sticky-top" id="review-window">
             <p>Reviewer Box</p>
             <button type="button" class="btn btn-primary" onclick="selectPreviousField()">

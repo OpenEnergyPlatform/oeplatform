@@ -95,19 +95,80 @@ class PeerReview(models.Model):
     date_submitted = DateTimeField(max_length=1000, null=True, default=None)
     date_finished = DateTimeField(max_length=1000, null=True, default=None)
     review = JSONField(null=True)
-
+    
     # laden
     @classmethod
     def load(cls, schema, table):
-        table_obj = PeerReview.objects.get(
+        """
+        Load the current reviewer user. 
+        The current review is review is determened by the latest date started.
+
+        Args:
+            schema (string): Schema name
+            table (string): Table name
+
+        Returns:
+            opr (PeerReview): PeerReview object related to the latest date started. 
+        """
+        opr = PeerReview.objects.filter(
             table=table, schema=schema
-        )
-        return table_obj
+        ).order_by('-date_started').first()
+        return opr
     
+    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the related ones (reviews on same table) .. procudes false results
+    def get_prev_and_next_reviews(self, schema, table):
+        """
+        Sets the prev_review and next_review fields based on the date_created field of the PeerReview objects
+        associated with the same data_entry.
+        """
+        # Get all the PeerReview objects associated with the same schema and table name
+        peer_reviews = PeerReview.objects.filter(table=table, schema=schema).order_by('date_started')
+        # print(f'table: {table}')
+        # print(f'peer_reviews: {peer_reviews}')
+        # print(f'peer_reviews.count(): {peer_reviews.count()}')
+
+        current_index = self.id
+        # print(current_index)
+
+        # Set the prev_review and next_review fields based on the index of the current PeerReview object
+        # TODO: Just include related index range (just reviews related to table)
+        prev_review = None
+        next_review = None
+        if current_index > 0:
+            prev_review = PeerReview.objects.get(id=current_index - 1)
+            
+        if current_index < len(peer_reviews) - 1:
+            next_review = PeerReview.objects.get(id=current_index + 1)
+
+        return prev_review, next_review
+
+    def save(self, *args, **kwargs):
+        
+        # Call the parent class's save method to save the PeerReview instance
+        super().save(*args, **kwargs)
+
+        # TODO: This causes errors if review list ist empty
+        # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
+        
+        # print(prev_review, next_review)
+        # Create a new PeerReviewManager entry for this PeerReview
+        # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
+        pm_new = PeerReviewManager(opr=self)
+        pm_new.save() 
+
+        # if prev_review is not None:
+        #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
+        #     pm_prev.next_review = next_review
+        #     pm_prev.save()
+
     @property
     def days_open(self):
-        delta = timezone.now() - self.date_started
-        return delta.days
+        if self.date_started is None:
+            return None  # Review has not started yet
+        elif self.is_finished:
+            return (self.date_finished - self.date_started).days  # Review has finished
+        else:
+            return (timezone.now() - self.date_started).days  # Review is still open
 
 from enum import Enum
 
@@ -130,25 +191,84 @@ class PeerReviewManager(models.Model):
     opr = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='review_id', null=False)
     current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.CONTRIBUTOR.value)
     status = models.CharField(choices=REVIEWE_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
-    is_open_since = DateTimeField(null=True)
+    is_open_since = models.CharField(null=True, max_length=10)
     prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None)
     next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None)
+
+    @classmethod
+    def load(cls, opr):
+        peer_review_manager = PeerReviewManager.objects.get(
+            opr=opr
+        )
+        return peer_review_manager
+
+    def save(self, *args, **kwargs):
+        # Set is_open_since field if it is None
+        if self.is_open_since is None:
+            # Get the associated PeerReview instance
+            peer_review = self.opr
+
+            # Set is_open_since based on the days_open property of the PeerReview instance
+            days_open = peer_review.days_open
+            if days_open is not None:
+                self.is_open_since = str(days_open)
+
+        # Call the parent class's save method to save the PeerReviewManager instance
+        super().save(*args, **kwargs)
     
+    @classmethod
+    def update_open_since(cls, opr=None, *args, **kwargs):
+        if opr is not None:
+            peer_review = PeerReviewManager.objects.get(
+                opr=opr
+            )
+        else:
+            peer_review = cls.opr
+
+        days_open = peer_review.opr.days_open
+        peer_review.is_open_since = str(days_open) 
+
+        # Call the parent class's save method to save the PeerReviewManager instance
+        peer_review.save(*args, **kwargs)
 
     def set_next_reviewer(self):
+        """
+        Set the order on which peer will be requred to perform a action to 
+        continue with the process. 
+        """
+        # TODO:check for user identifies as ...
         if self.current_reviewer == Reviewer.REVIEWER.value:
             self.current_reviewer = Reviewer.CONTRIBUTOR.value
         else:
             self.current_reviewer = Reviewer.REVIEWER.value
         self.save()
+
+    def whos_turn(self):
+        """Get the user identifies with current role.
+        Roles are either contributor or reviewer.
+
+        Returns:
+            _type_: Userobject
+        """
+        role, result = None
+        peer_review = self.opr
+        if self.current_reviewer == Reviewer.REVIEWER.value:
+            role= Reviewer.REVIEWER.value
+            result= peer_review.reviewer
+        else:
+            role= Reviewer.CONTRIBUTOR.value
+            result= peer_review.contributor
+
+        return role, result
+        
+    @staticmethod
+    def filter_opr_by_reviewer(reviewer_user):
+        return PeerReview.objects.filter(reviewer=reviewer_user)
     
-
-    # How to chain reviews together 
-    # first_review = PeerReview.objects.create(table='some_table', schema='some_schema', reviewer=reviewer, contributor=contributor, review=some_review_data)
-    # first_review_manager = PeerReviewManager.objects.create(peer_review=first_review, is_open_since=timezone.now())
-
-    # new_review = PeerReview.objects.create(table='some_table', schema='some_schema', reviewer=reviewer, contributor=contributor, review=some_review_data)
-    # new_review_manager = PeerReviewManager.objects.create(peer_review=new_review, is_open_since=timezone.now(), previous_review=previous_review_manager)
-    # previous_review_manager.next_review = new_review_manager
-    # previous_review_manager.save()
-
+    @staticmethod
+    def filter_opr_by_contributor(contributor_user):
+        return PeerReview.objects.filter(contributor=contributor_user)
+    
+    @staticmethod
+    def filter_opr_by_table(schema, table):
+        return PeerReview.objects.filter(schema=schema, table=table)

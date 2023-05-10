@@ -1,10 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "dataedit/base.html" %}
+{% load static %}
+{% load django_bootstrap5 %}
 
-</body>
-</html>
+{% block after-head %}
+<link href="/static/peer_review/peer_review.css" rel="stylesheet">
+{% endblock after-head %}
+
+
+{% block site-header %}
+<h2 class="site-header"><span class="spinner-border text-primary d-none" id="peer_review-loading"></span>
+    <i class="fa fa-tags d-none mr-2" id="peer_review-icon"></i>Metadata</span>
+</h2>
+{% endblock site-header %}
+
+{% block main %}
+{% endblock main %}
+
+
+{% block after-body-bottom-js %}
+  <script>
+//   const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
+//     var config = JSON.parse("{{ config|escapejs }}");
+  </script>
+  <script src="/static/peer_review/opr_contributor.js"></script>
+{% endblock after-body-bottom-js %}
