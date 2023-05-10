@@ -37,9 +37,10 @@
             border-left-color: $red-500!important;
         }
 
-        p {
+        &-content {
             @extend .p-3;
             @extend .mb-0;
+            word-break: break-all;
         }
     }
     
