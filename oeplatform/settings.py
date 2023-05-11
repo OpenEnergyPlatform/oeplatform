@@ -57,7 +57,8 @@ INSTALLED_APPS = (
     "django_better_admin_arrayfield",
     "oeo_viewer",
     "factsheet",
-    "corsheaders"
+    "corsheaders",
+    "bootstrap4"
 )
 
 MIDDLEWARE = (
