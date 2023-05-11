@@ -104,8 +104,13 @@ urlpatterns = [
         name="oemetabuilder",
     ),
     url(
-        r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(qual=pgsql_qualifier),
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/(?P<review_id>\d+)/$".format(qual=pgsql_qualifier),
         views.PeerReviewView.as_view(), name="peer_review_reviewer"
+    ),
+    url(
+        r"^view/(?P<schema>{qual})/(?P<table>{qual})/open_peer_review/$".format(qual=pgsql_qualifier),
+        views.PeerReviewView.as_view(),
+        name="peer_review_reviewe_create"
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/opr_contributor/(?P<review_id>\d+)/$".format(qual=pgsql_qualifier),
