@@ -1048,27 +1048,29 @@ class DataView(View):
 
         table_views = list(chain((default,), table_views))
 
+        opr_context = {}
         # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
+            opr_context.update({"table": latest_review.table, "schema": latest_review.schema, "opr_id": latest_review.id})
 
-        opr_context = {}
-        contributor = PeerReviewView.load_contributor(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"contributor": contributor})
+            contributor = PeerReviewView.load_contributor(schema=schema, table=table)
+            if contributor is not None:
+                opr_context.update({"contributor": contributor})
+            else:
+                opr_context.update({"contributor": None})
+
+            reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
+            if contributor is not None:
+                opr_context.update({"reviewer": reviewer})
+            else:
+                opr_context.update({"reviewer": None})
         else:
-            opr_context.update({"contributor": None})
+            opr_context.update({"table": table, "schema": schema, "opr_id": None})
 
-        reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
-        if contributor is not None:
-            opr_context.update({"reviewer": reviewer})
-        else:
-            opr_context.update({"reviewer": None})
-
-        print(opr_context)
 
         context_dict = {
             # Not in use?
@@ -1952,28 +1954,39 @@ class PeerReviewView(LoginRequiredMixin, View):
         extract_descriptions(json_schema["properties"], prefix)
         return field_descriptions
 
-    def get(self, request, schema, table):
+    def get(self, request, schema, table, review_id=None):
         review_state = PeerReview.is_finished
         columns = get_column_description(schema, table)
         json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
-        print(field_descriptions)
 
         # Check user permissions
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-            url_table_id = request.build_absolute_uri(
-            reverse("view", kwargs={"schema": schema, "table": table})
-        )
+            # url_table_id = request.build_absolute_uri(
+            #     reverse("view", kwargs={"schema": schema, "table": table})
+            # )
+            
         metadata = self.sort_in_category(schema, table)
+
+        # Generate URL for peer_review_reviewer
+        if review_id is not None:
+            url_peer_review = reverse(
+                "peer_review_reviewer",
+                kwargs={"schema": schema, "table": table, "review_id": review_id}
+            )
+        else:
+            url_peer_review = reverse(
+                "peer_review_reviewe_create",
+                kwargs={"schema": schema, "table": table}
+            )
+
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
-             "url_peer_review": reverse(
-                 "peer_review_reviewer", kwargs={"schema": schema, "table": table}
-             ),
+             "url_peer_review": url_peer_review,
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
              ),
@@ -2056,8 +2069,8 @@ class PeerRreviewContributorView(PeerReviewView):
             None
         """
             
-        review_state = PeerReview.is_finished
-        columns = get_column_description(schema, table)
+        # review_state = PeerReview.is_finished
+        # columns = get_column_description(schema, table)
         can_add = False
         table_obj = Table.load(schema, table)
 
@@ -2066,9 +2079,9 @@ class PeerRreviewContributorView(PeerReviewView):
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
-        url_table_id = request.build_absolute_uri(
-            reverse("view", kwargs={"schema": schema, "table": table})
-        )
+        # url_table_id = request.build_absolute_uri(
+        #     reverse("view", kwargs={"schema": schema, "table": table})
+        # )
 
         metadata = self.sort_in_category(schema, table)
 
@@ -2084,7 +2097,6 @@ class PeerRreviewContributorView(PeerReviewView):
                              }),
                         "meta": metadata,
                         }
-        # print(context_meta)
 
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
