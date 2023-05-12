@@ -1,8 +1,8 @@
 ### Changes
-
-- updated metadata editor (json-editor) to latest version, using bootstrap5 (#1198)
+- Update links in github pull request template (#1235)
 
 ### Features
-- Implement new topic overview page ui #1203
+
 
 ### Bugs
+
