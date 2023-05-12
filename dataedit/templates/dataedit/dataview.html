@@ -192,24 +192,24 @@
 {% if not opr.reviewer %}
     {% if user.is_authenticated and opr.contributor.id != user.id %}
       <a class="btn btn-success btn-sm" type="button"
-      href="{{table}}/open_peer_review">
+      href="{% url 'peer_review_reviewe_create' table=opr.table schema=opr.schema %}">
         Start Open-Peer-Review-Process
       </a>
     {% else %}
       <a class="btn btn-success btn-sm disabled" type="button"
-      href="{{table}}/open_peer_review">
+      href="{% url 'peer_review_reviewer' table=opr.table schema=opr.schema review_id=opr.opr_id %}">
         Start Open-Peer-Review-Process
       </a>
       <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
     {% endif %}
 {% elif opr.reviewer.id == user.id %}
   <a class="btn btn-success btn-sm" type="button"
-  href="{{table}}/open_peer_review">
+  href="{% url 'peer_review_reviewer' table=opr.table schema=opr.schema review_id=opr.opr_id %}">
     Continue Open-Peer-Review-Process
   </a>
 {% else %}
   <a class="btn btn-success btn-sm disabled" type="button"
-  href="{{table}}/open_peer_review">
+  href="">
   Continue Open-Peer-Review-Process
   </a>
   <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
