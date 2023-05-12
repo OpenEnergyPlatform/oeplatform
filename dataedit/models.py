@@ -142,23 +142,27 @@ class PeerReview(models.Model):
         return prev_review, next_review
 
     def save(self, *args, **kwargs):
+        from django.core.exceptions import ValidationError
         
-        # Call the parent class's save method to save the PeerReview instance
-        super().save(*args, **kwargs)
+        if not self.contributor == self.reviewer:
+            # Call the parent class's save method to save the PeerReview instance
+            super().save(*args, **kwargs)
 
-        # TODO: This causes errors if review list ist empty
-        # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
-        
-        # print(prev_review, next_review)
-        # Create a new PeerReviewManager entry for this PeerReview
-        # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
-        pm_new = PeerReviewManager(opr=self)
-        pm_new.save() 
+            # TODO: This causes errors if review list ist empty
+            # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
+            
+            # print(prev_review, next_review)
+            # Create a new PeerReviewManager entry for this PeerReview
+            # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
+            pm_new = PeerReviewManager(opr=self)
+            pm_new.save() 
 
-        # if prev_review is not None:
-        #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
-        #     pm_prev.next_review = next_review
-        #     pm_prev.save()
+            # if prev_review is not None:
+            #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
+            #     pm_prev.next_review = next_review
+            #     pm_prev.save()
+        else: 
+            raise ValidationError("Contributor and reviewer cannot be the same.")
 
     @property
     def days_open(self):

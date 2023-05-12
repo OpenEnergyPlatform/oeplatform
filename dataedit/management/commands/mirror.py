@@ -17,15 +17,19 @@ class Command(BaseCommand):
             if schema in schema_whitelist
         }
         table_objects = {(t.schema.name, t.name) for t in Table.objects.all()}
+
         # delete all django table objects if no table in oedb
-        for schema, table in table_objects.difference(real_tables):
+
+        delete_schema_tables = list(table_objects.difference(real_tables))
+        for schema, table in delete_schema_tables:
             print(schema, table)
 
-        inp = input("delete the table objects listed above? [Y|n]:")
-        if inp == "Y":
-            for schema, table in table_objects.difference(real_tables):
-                print(schema, table)
-                Table.objects.get(name=table, schema__name=schema).delete()
+        if delete_schema_tables:
+            inp = input("delete the table objects listed above? [Y|n]:")
+            if inp == "Y":
+                for schema, table in delete_schema_tables:
+                    print(schema, table)
+                    Table.objects.get(name=table, schema__name=schema).delete()
 
         print("---")
         # create django table objects if table in oedb and not in django
