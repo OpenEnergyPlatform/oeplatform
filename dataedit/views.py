@@ -1047,31 +1047,37 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
-
+        
+        #########################################################################
+        # Get open peer review process related metadata
+        #########################################################################
         opr_context = {}
         # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
+
+        # Get contributions
+        contributor = PeerReviewView.load_contributor(schema=schema, table=table)
+        if contributor is not None:
+            opr_context.update({"contributor": contributor})
+        else:
+            opr_context.update({"contributor": None})
+
+        # Get reviews
+        reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
+        if contributor is not None:
+            opr_context.update({"reviewer": reviewer})
+        else:
+            opr_context.update({"reviewer": None})
+
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
             opr_context.update({"table": latest_review.table, "schema": latest_review.schema, "opr_id": latest_review.id})
-
-            contributor = PeerReviewView.load_contributor(schema=schema, table=table)
-            if contributor is not None:
-                opr_context.update({"contributor": contributor})
-            else:
-                opr_context.update({"contributor": None})
-
-            reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
-            if contributor is not None:
-                opr_context.update({"reviewer": reviewer})
-            else:
-                opr_context.update({"reviewer": None})
         else:
             opr_context.update({"table": table, "schema": schema, "opr_id": None})
-
-
+        
+        #########################################################################
         context_dict = {
             # Not in use?
             # "comment_on_table": dict(metadata),
@@ -1980,7 +1986,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             )
         else:
             url_peer_review = reverse(
-                "peer_review_reviewe_create",
+                "peer_review_create",
                 kwargs={"schema": schema, "table": table}
             )
 
@@ -2022,7 +2028,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         else:
             return None
 
-    def post(self, request, schema, table):
+    def post(self, request, schema, table, review_id=None):
         """
         Handel reviews submitted by the reviewer. 
         - Save Reviews in the PeerReview table
