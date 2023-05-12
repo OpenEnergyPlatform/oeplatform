@@ -31,12 +31,14 @@
         }
 
         .nav-link {
+            color: $gray-600;
             border: none;
             border-bottom: 4px solid $white;
         }
 
         .nav-link.active {
-            border-bottom-color: $C--color-green;
+            color: $secondary;
+            border-bottom-color: $secondary;
         }
 
         .nav-link svg {
