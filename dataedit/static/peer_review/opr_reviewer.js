@@ -279,7 +279,7 @@ function renderSummaryPageFields() {
   // Find missing fields
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
-    const category_name = category.id;
+    const category_name = category.id.slice(0);
     if (["resource", "summary"].includes(category_name)) {
       continue;
     }
@@ -290,7 +290,7 @@ function renderSummaryPageFields() {
       const fieldValue = $(field_id).text();
       const found = current_review.reviews.some(review => review.key === field_name);
       if (!found) {
-        missingFields.push({ field_id, fieldValue, category_name });
+    missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
       }
     }
   }
