@@ -3,13 +3,20 @@
 
 .review {
     @extend .row;
+    @extend .w-100;
 
     &__content {
-        width: calc(#{$C--container-width} / 2);
+        @extend .col-6;
+        flex: 0 0 50%;
+        max-width: 50%;
+        //width: calc(#{$C--container-width} / 2);
     }
 
     &__controls {
-        width: calc(#{$C--container-width} / 2);
+        @extend .col-6;
+        flex: 0 0 50%;
+        max-width: 50%;
+        //width: calc(#{$C--container-width} / 2);
     }
 
     &__items {
@@ -62,6 +69,11 @@
             }
         }
     }
+
+    &__box {
+        @extend .p-4;
+        @extend .bg-light;
+    }
     
     .flex-reviewer {
         @extend .d-flex;
@@ -70,3 +82,22 @@
     }
 }
 
+.reviewer-item {
+    @extend .d-flex;
+    @extend .flex-column;
+
+    &__title {
+        @extend .fs-6;
+        @extend .text-center;
+    }
+
+    &__row {
+        @extend .d-flex;
+        @extend .flex-column;
+        @extend .pb-2;
+    }
+
+    &__key {
+        @extend .fw-semibold;
+    }
+}
