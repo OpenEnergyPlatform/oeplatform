@@ -49,6 +49,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -207,7 +208,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll} = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison} = props;
 
   return (
     <Toolbar
@@ -230,11 +231,11 @@ function EnhancedTableToolbar(props) {
         component="div"
       >
         {numSelected > 1 && <Tooltip title="Compare">
-            <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+
               <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} variant="contained" key="Compare">
-              <CompareArrowsIcon />
+              <CompareArrowsIcon onClick={handleOpenAspectsOfComparison} />
               </Button>
-            </Link>
+
           </Tooltip>}
       </Typography>
       <Tooltip title="Add a new factsheet">
@@ -261,6 +262,7 @@ export default function CustomTable(props) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState([]);
   const [openQuery, setOpenQuery] = useState(false);
+  const [openAspectsForComparison, setOpenAspectsForComparison] = useState(false);
   const [selectedInstitution, setSelectedInstitution] = useState([]);
   const [institutions, setInstitutions] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState([]);
@@ -337,6 +339,14 @@ export default function CustomTable(props) {
 
   const handleOpenQuery = (event) => {
     setOpenQuery(true);
+  };
+
+  const handleOpenAspectsOfComparison = (event) => {
+    setOpenAspectsForComparison(true);
+  };
+
+  const handleCloseAspectsForComparison = (event) => {
+    setOpenAspectsForComparison(false);
   };
 
   const handleShowAll = (event) => {
@@ -596,6 +606,53 @@ export default function CustomTable(props) {
       </Backdrop>
       <Dialog
         maxWidth="md"
+        open={openAspectsForComparison}
+        aria-labelledby="responsive-dialog-title"
+        style={{ height: '85vh', overflow: 'auto' }}
+      >
+        <DialogTitle id="responsive-dialog-title">
+          <b>Please select the relevant aspects for the comparison.</b>
+        </DialogTitle >
+        <DialogContent>
+          <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
+            Which elements of the studies do you wish to compare?
+          </Typography>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
+              <FormControlLabel control={<Checkbox />} label="Sectors" />
+              <FormControlLabel control={<Checkbox />} label="Enrgy carriers" />
+              <FormControlLabel control={<Checkbox />} label="Enrgy transformation processes" />
+              <FormControlLabel control={<Checkbox />} label="Models" />
+              <FormControlLabel control={<Checkbox />} label="Frameworks" />
+            </FormGroup>
+          <Divider />
+          <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
+            Which elements of the scenarios do you wish to compare?
+          </Typography>
+          <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
+              <FormControlLabel control={<Checkbox />} label="Years" />
+              <FormControlLabel control={<Checkbox />} label="Regions" />
+              <FormControlLabel control={<Checkbox />} label="Interacting regions" />
+              <FormControlLabel control={<Checkbox />} label="Input datasets" />
+              <FormControlLabel control={<Checkbox />} label="Ouput datasets" />
+            </FormGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" >
+            <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
+              Show comparison
+            </Link>
+          </Button>
+          <Button variant="outlined" onClick={handleCloseAspectsForComparison}  >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog
+        maxWidth="md"
         open={openQuery}
         aria-labelledby="responsive-dialog-title"
         style={{ height: '85vh', overflow: 'auto' }}
@@ -676,7 +733,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll}/>
+        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

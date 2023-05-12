@@ -54,9 +54,11 @@ function App() {
   const getData = async () => {
     if (url_id !== '' && url_id !== 'new') {
         const { data } = await axios.get(conf.toep + `factsheet/get/`, { params: { id: url_id } });
+        console.log(data);
         return data;
     }
   };
+  
   useEffect(() => {
     getData().then((data) => {
       setFactsheet(data);
@@ -64,8 +66,6 @@ function App() {
   });
   }, []);
 
-
-  
   if (url_id === '') {
     return < Home id={url_id}/>
   } else {

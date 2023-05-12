@@ -106,6 +106,8 @@ function Factsheet(props) {
   const steps = getSteps();
 
   const { id, fsData } = props;
+  console.log(fsData);
+  
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -271,10 +273,12 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      setEnergyTransformationProcesses(data.energy_transformation_processes);
+      setEnergyTransformationProcesses(data.energy_transformation_processes[0].children);
       setEnergyCarries(data.energy_carriers);
       setSectors(data.sectors);
       setSectorDivisions(data.sector_divisions);
+
+      
 
       let energy_carriers_ids = [];
       data.energy_carriers.forEach(({ value, children }) => {
@@ -287,7 +291,6 @@ function Factsheet(props) {
         energy_transformation_processes_ids = [...energy_transformation_processes_ids, value, ...getNodeIds(children)];
       });
       setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
-
 
       myChartRef.current = Sunburst
       const sampleData = {
@@ -1112,6 +1115,7 @@ function Factsheet(props) {
   };
 
   const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
+    console.log(energyProcessesList);
     const zipped = []
     energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
     setSelectedEnergyTransformationProcesses(zipped);
@@ -1697,7 +1701,7 @@ function getStepContent(step: number) {
     case 5:
       return (
         <div>
-          {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   /> */}
+          <CustomTreeViewWithCheckBox flat={false} showFilter={true} size="600px" checked={selectedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   />
         </div>
       );
     case 6:
@@ -2047,7 +2051,7 @@ function getStepContent(step: number) {
                          </p>
                         <p>  <b>Abstract:</b> {abstract !== undefined && abstract}  </p>
                         <p>
-                        <b>Keywords: </b>  
+                        <b>Descriptors: </b>  
                           {selectedStudyKewords.map((v, i) => (
                           <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                           ))}
