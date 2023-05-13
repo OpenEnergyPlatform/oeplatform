@@ -24,28 +24,28 @@
       <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/model_draft">model_draft</a> / Bundesnetzagentur - Marktstammdatenregister - Stromerzeuger (bnetza_mastr_rli_v2_2_0_biomass_clean)</span>
     </div>
   </div>
-  <div class="table-tabs">
-    <div class="table-tabs__container">
+  <div class="fullwidth-tabs">
+    <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
+          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal Keys</button>
+          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal Keys</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source Keys</button>
+          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source Keys</button>
         </li>
-          <li class="nav-item" role="presentation">
-          <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License Keys</button>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License Keys</button>
         </li>
-          <li class="nav-item" role="presentation">
-          <button class="nav-link" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor Keys</button>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor Keys</button>
         </li>
-          <li class="nav-item" role="presentation">
-          <button class="nav-link" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource Keys</button>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource Keys</button>
         </li>
-          <li class="nav-item" role="presentation">
+        <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
@@ -183,15 +183,32 @@
                 <i> Show accepted fields here.</i>
               </div>
             </div>
-              </div>
           </div>
-      
-          <div class="review__controls">
+        </div>
+        <div class="review__controls">
+          <div class="review__box">
             <div id="field-descriptions-json" style="display: none;">
-            {{ field_descriptions_json }}</div>
+              {{ field_descriptions_json }}
+            </div>
             <div id="field-descriptions"></div>
-            <div class="flex-reviewer sticky-top" id="review-window">
-              <p>Reviewer Box</p>
+            <div class="flex-reviewer" id="review-window">
+              <h2 id="review-field-name" style="display:none"></h2>
+              <div class="btn-group" id="button-class" role="group" aria-label="Review buttons">
+                <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Accept</button>
+                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggest</button>
+                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
+              </div>
+              <div class="d-none" id="reviewer_remarks">
+                <div class="mb-3" id="field-value">
+                  <label for="valuearea" class="form-label">Your value suggestion</label>
+                  <textarea class="form-control" id="valuearea" rows="2" ></textarea>
+                </div>
+                <div class="mb-3" id="field-comment">
+                  <label for="commentarea" class="form-label" ></label>
+                  <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
+                </div>
+                <button type="button" class="btn btn-warning" id="submitButton" style="width:50%">Save comment/new value</button>
+              </div>
               <button type="button" class="btn btn-primary" onclick="selectPreviousField()">
                 <span class="btn__icon">
                   <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -208,39 +225,21 @@
                 </span>
                 <span class="btn__text">Next</span>
               </button>
-                <hr>
-                <h2 id="review-field-name"></h2>
-                <hr>
-                <div class="btn-group" id="button-class" role="group" style="width:10%" aria-label="Basic mixed styles example">
-                  <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Ok</button>
-                  <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggestion</button>
-                  <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Rejected</button>
-                </div>
-                <div class="d-none" id="reviewer_remarks">
-                  <div class="mb-3" id="field-value">
-                    <label for="valuearea" class="form-label">Your value suggestion</label>
-                    <textarea class="form-control" id="valuearea" rows="2" ></textarea>
-                  </div>
-                    <div class="mb-3" id="field-comment">
-                      <label for="commentarea" class="form-label" ></label>
-                      <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
-                    </div>
-                    <button type="button" class="btn btn-warning" id="submitButton" style="width:50%">Save comment/new value</button>
-                </div>
-              </div>
-              <div class="" id="peer_review-controls">
-                <div class="col">
-                  <button class="btn btn-sm btn-primary mr-2" id="peer_review-cancel">Quit</button>
-                  <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                    <a href="#peer_review-submit" class="btn btn-sm btn-warning mr-2 {% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                      <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="peer_review-submitting">
-                      </span>Save Review Progress
-                    </a>
-                  </span>
-                  <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
-                </div>
-              </div>
+            </div>
           </div>
+          <div id="peer_review-controls">
+            <div class="col">
+              <button class="btn btn-sm btn-primary mr-2" id="peer_review-cancel">Quit</button>
+              <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+                <a href="#peer_review-submit" class="btn btn-sm btn-warning mr-2 {% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+                  <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="peer_review-submitting">
+                  </span>Save Review Progress
+                </a>
+              </span>
+              <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

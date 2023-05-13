@@ -1,0 +1,88 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+.table-tabs {
+    @extend .fs-7;
+    @include flex-row;
+    padding-top: $C--padding-standard;
+    padding-bottom: $C--padding-standard;
+    
+    @include media-breakpoint-up(md) {
+        justify-content: center;
+    }
+
+    &__container {
+        @include flex-row;
+        width: 100%;
+        margin: 0 $C--padding-standard;
+
+        @include media-breakpoint-up(md) {
+            max-width: $C--container-width;
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard});
+        }
+    }
+
+    .nav-tabs {
+        width: 100%;
+
+        .nav-item {
+            @extend .fw-semibold;
+            @extend .border-bottom;
+        }
+
+        .nav-link {
+            @extend .position-relative;
+            color: $gray-600;
+            border: none;
+            border-bottom: 4px solid $white;
+        }
+
+        .nav-link.active {
+            color: $secondary;
+            border-bottom-color: $secondary;
+        }
+
+        .nav-link svg {
+            @extend .me-1;
+            fill: $primary;
+        }
+
+        .nav-link.active svg {
+            fill: $black;
+        }
+
+        .nav-link.status::after {
+            content: "";
+            @extend .position-absolute;
+            @extend .rounded-circle;
+            @extend .bg-danger;
+            top: 10px;
+            right: 6px;
+            width: 6px;
+            height: 6px;
+        }
+
+        .nav-link.status.status--done::after {
+            @extend .bg-success;
+        }
+    }
+}
+
+.fullwidth-tabs {
+    @extend .table-tabs;
+    @extend .px-4;
+    width: 100%;
+
+    &__container {
+        @include flex-row;
+        @extend .justify-content-start;
+
+        @include media-breakpoint-up(md) {
+            padding-right: 0!important;
+        }
+
+        @include media-breakpoint-up(xxl) {
+            width: $C--container-width;
+        }
+    }
+}
