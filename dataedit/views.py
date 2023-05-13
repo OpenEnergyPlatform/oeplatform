@@ -1072,9 +1072,9 @@ class DataView(View):
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
-            opr_context.update({"table": latest_review.table, "schema": latest_review.schema, "opr_id": latest_review.id})
+            opr_context.update({"opr_id": latest_review.id})
         else:
-            opr_context.update({"table": table, "schema": schema, "opr_id": None})
+            opr_context.update({"opr_id": None})
         
         #########################################################################
         context_dict = {
@@ -1526,7 +1526,6 @@ def update_table_tags(request):
     schema, table = actions.get_table_name(
         schema=request.POST["schema"], table=request.POST["table"], restrict_schemas=False
     )
-
     # check write permission
     actions.assert_add_tag_permission(
         request.user, table, login_models.WRITE_PERM, schema=schema
@@ -1552,14 +1551,12 @@ def update_table_tags(request):
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
     )
-
-    return render(request, "dataedit/dataview.html", {"messages": messasge})
+    return render(request, "dataedit/dataview.html", {"messages": messasge, "table": table, "schema": schema})
 
 
 def redirect_after_table_tags_updated(request):
 
     update_table_tags(request)
-
     return redirect(request.META["HTTP_REFERER"])
 
 
