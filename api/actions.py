@@ -813,7 +813,8 @@ def assert_valid_identifier_name(identifier):
             f"Unsupported table name: {identifier}\n"
             "Table names must consist of lowercase alpha-numeric words or underscores "
             "and start with a letter "
-            f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters (current table name length: {len(identifier)})."
+            f"and must not exceed {MAX_IDENTIFIER_LENGTH} characters "
+            "(current table name length: {len(identifier)})."
         )
 
 
@@ -1157,7 +1158,7 @@ def __change_rows(request, context, target_table, setter, fields=None):
     if rows["data"]:
         for row in rows["data"]:
             insert = []
-            for (key, value) in list(zip(fields, row)) + meta_fields:
+            for key, value in list(zip(fields, row)) + meta_fields:
                 if not api.parser.is_pg_qual(key):
                     raise APIError("%s is not a PostgreSQL identifier" % key)
                 if key in setter:
@@ -1229,7 +1230,6 @@ def data_update(request, context=None):
 
 
 def data_insert_check(schema, table, values, context):
-
     engine = _get_engine()
     session = sessionmaker(bind=engine)()
     query = (
@@ -1479,7 +1479,6 @@ def clear_dict(d):
 
 
 def move(from_schema, table, to_schema):
-
     table = read_pgid(table)
     engine = _get_engine()
     Session = sessionmaker(engine)
@@ -1587,6 +1586,7 @@ def has_schema(request, context=None):
 
 
 def has_table(request, context=None):
+    """TODO: should check in all (whitelisted) schemas"""
     engine = _get_engine()
     schema = request.pop("schema", DEFAULT_SCHEMA)
     table = get_or_403(request, "table")
