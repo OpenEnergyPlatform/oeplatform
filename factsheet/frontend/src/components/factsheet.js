@@ -1521,7 +1521,7 @@ function getSteps() {
   'Scenarios',
   'Models',
   'Frameworks',
-  'test',
+  //'Energy_carrier',
   ];
   }
 
@@ -1716,21 +1716,21 @@ function getStepContent(step: number) {
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
-    case 9:
-      return (
-        <div>
-          <Sunburst 
-            width="700" 
-            data={sunburstData} 
-            handleNonFittingLabel={handleNonFittingLabelFn}  
-            minSliceAngle={0.4} 
-            label={"label"} 
-            sort={((a, b) => a.value - b.value)}
-            excludeRoot={true}
-            radiusScaleExponent={1}
-          />
-        </div>
-      );
+    // case 9:
+    //   return (
+    //     <div>
+    //       <Sunburst 
+    //         width="700" 
+    //         data={sunburstData} 
+    //         handleNonFittingLabel={handleNonFittingLabelFn}  
+    //         minSliceAngle={0.4} 
+    //         label={"label"} 
+    //         sort={((a, b) => a.value - b.value)}
+    //         excludeRoot={true}
+    //         radiusScaleExponent={1}
+    //       />
+    //     </div>
+    //   );
     default:
     return 'Unknown step';
   }

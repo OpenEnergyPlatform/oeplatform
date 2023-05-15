@@ -493,7 +493,6 @@ export default function CustomTable(props) {
                 <React.Fragment>
                 <StyledTableRow
                   hover
-                
                   role="checkbox"
                   aria-checked={isItemSelected}
                   tabIndex={-1}
@@ -695,7 +694,6 @@ export default function CustomTable(props) {
                   </Stack>
               </LocalizationProvider>
               </div>
-
               <div style={{ marginTop: "20px" }}>
                 <div>Study descriptors:</div>
                 <FormGroup>
@@ -717,8 +715,6 @@ export default function CustomTable(props) {
                   max={2200}
                 />
               </div>
-             
-
             </div>
           </DialogContentText>
         </DialogContent>
