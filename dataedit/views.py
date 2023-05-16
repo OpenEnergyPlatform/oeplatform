@@ -2061,12 +2061,15 @@ class PeerRreviewContributorView(PeerReviewView):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-
         metadata = self.sort_in_category(schema, table)
         json_schema = self.load_json_schema()
-
         field_descriptions = self.get_all_field_descriptions(json_schema)
-
+        review_data = peer_review.review.get('reviews', [])
+        state_dict = {}
+        for review in review_data:
+            field_key = review.get('key')
+            state = review.get('fieldReview', {}).get('state')
+            state_dict[field_key] = state
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
@@ -2080,6 +2083,7 @@ class PeerRreviewContributorView(PeerReviewView):
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
+            "state_dict": json.dumps(state_dict),
         }
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
@@ -2090,5 +2094,4 @@ class PeerRreviewContributorView(PeerReviewView):
             review_state = review_data.get("reviewFinished")
             table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
             table_obj.save()
-
         return render(request, 'dataedit/opr_contributor.html', context=context)
