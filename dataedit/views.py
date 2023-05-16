@@ -2055,51 +2055,32 @@ class PeerReviewView(LoginRequiredMixin, View):
 
 class PeerRreviewContributorView(PeerReviewView):
     def get(self, request, schema, table, review_id):
-        """
-        Handles GET requests for the PeerRreviewContributorView.
-
-        Parameters:
-            request (HttpRequest): The HTTP request object.
-            schema (str): The schema parameter captured from the URL.
-            table (str): The table parameter captured from the URL.
-            review_id (int): The ID of the review captured from the URL.
-
-        Returns:
-            HttpResponse: The HTTP response object containing the rendered template.
-
-        Raises:
-            None
-        """
-            
-        # review_state = PeerReview.is_finished
-        # columns = get_column_description(schema, table)
         can_add = False
-        table_obj = Table.load(schema, table)
-
-        # Check user permissions
+        peer_review = PeerReview.objects.get(id=review_id)
+        table_obj = Table.load(peer_review.schema, peer_review.table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 
-        # url_table_id = request.build_absolute_uri(
-        #     reverse("view", kwargs={"schema": schema, "table": table})
-        # )
-
         metadata = self.sort_in_category(schema, table)
+        json_schema = self.load_json_schema()
+
+        field_descriptions = self.get_all_field_descriptions(json_schema)
 
         context_meta = {"config": json.dumps(
-                            {"can_add": can_add,
-                             "url_peer_review": reverse(
-                                "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
-                                ),
-                             "url_table": reverse(
-                                "view", kwargs={"schema": schema, "table": table}
-                                ),
-                             "table": table,
-                             }),
-                        "meta": metadata,
-                        }
-
+            {"can_add": can_add,
+             "url_peer_review": reverse(
+                 "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
+             ),
+             "url_table": reverse(
+                 "view", kwargs={"schema": schema, "table": table}
+             ),
+             "table": table,
+             }),
+            "meta": metadata,
+            "json_schema": json_schema,
+            "field_descriptions_json": json.dumps(field_descriptions),
+        }
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
     def post(self, request, schema, table):
