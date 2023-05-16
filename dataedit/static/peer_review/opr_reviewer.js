@@ -254,7 +254,6 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  */
 /**
  * Displays fields based on selected category
- * @param {string} category Selected category
  */
 function renderSummaryPageFields() {
   const acceptedFields = [];
@@ -277,7 +276,6 @@ function renderSummaryPageFields() {
     }
   }
 
-  // Find missing fields
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id.slice(0);
@@ -322,9 +320,6 @@ function createFieldList(fields) {
     </ul>
   `;
 }
-
-
-
 
 
 /**
