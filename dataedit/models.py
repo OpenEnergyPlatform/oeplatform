@@ -195,8 +195,8 @@ class PeerReviewManager(models.Model):
     current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.CONTRIBUTOR.value)
     status = models.CharField(choices=REVIEWE_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
     is_open_since = models.CharField(null=True, max_length=10)
-    prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None)
-    next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None)
+    prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None) #TODO: add logic
+    next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None) #TODO: add logic
 
     @classmethod
     def load(cls, opr):
@@ -263,6 +263,29 @@ class PeerReviewManager(models.Model):
             result= peer_review.contributor
 
         return role, result
+    
+    @staticmethod
+    def load_contributor(schema, table):
+        """
+        Get the contributor for the table a review is started on. 
+        """
+        current_table = Table.load(schema=schema, table=table)
+        try:
+            table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+        except AttributeError:
+            table_holder = None
+        return table_holder
+    
+    @staticmethod
+    def load_reviewer(schema, table):
+        """
+        Get the reviewer for the table a review is started on. 
+        """
+        current_review = PeerReview.load(schema=schema, table=table)
+        if current_review and hasattr(current_review, 'reviewer'):
+            return current_review.reviewer
+        else:
+            return None
         
     @staticmethod
     def filter_opr_by_reviewer(reviewer_user):
@@ -275,3 +298,4 @@ class PeerReviewManager(models.Model):
     @staticmethod
     def filter_opr_by_table(schema, table):
         return PeerReview.objects.filter(schema=schema, table=table)
+    
