@@ -1986,16 +1986,17 @@ class PeerReviewView(LoginRequiredMixin, View):
                 kwargs={"schema": schema, "table": table}
             )
 
-        context_meta = {"config": json.dumps(
-            {"can_add": can_add,
-             "url_peer_review": url_peer_review,
-             "url_table": reverse(
-                 "view", kwargs={"schema": schema, "table": table}
-             ),
-             "table": table,
-             }),
+        config_data = {
+            "can_add": can_add,
+            "url_peer_review": url_peer_review,
+            "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "table": table,
+        }
+
+        context_meta = {
+            "table": table, # need this here as json.dumps breaks the emplate access like {{ config.table }} now you can use {{ table }}
+            "config": json.dumps(config_data),
             "meta": metadata,
-            "columns": json.dumps(columns),
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
         }
