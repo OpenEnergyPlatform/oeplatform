@@ -30,10 +30,10 @@
     }
 
     &__item {
-        @extend .bg-white;
         @extend .w-100;
         @extend .border;
         @extend .mb-1;
+        background-color: $white; // not as extend because of JS override
         border-left-width: 4px!important;
         border-color: $gray-200!important;
         cursor: pointer;
