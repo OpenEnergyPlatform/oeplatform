@@ -997,7 +997,6 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
-        # TODO change this load metadata from SQL comment on table to load from table.oemetadata(JSONB) field to avoid performance issues
         # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
         
@@ -1073,9 +1072,9 @@ class DataView(View):
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
-            opr_context.update({"table": latest_review.table, "schema": latest_review.schema, "opr_id": latest_review.id})
+            opr_context.update({"opr_id": latest_review.id})
         else:
-            opr_context.update({"table": table, "schema": schema, "opr_id": None})
+            opr_context.update({"opr_id": None})
         
         #########################################################################
         context_dict = {
@@ -1527,7 +1526,6 @@ def update_table_tags(request):
     schema, table = actions.get_table_name(
         schema=request.POST["schema"], table=request.POST["table"], restrict_schemas=False
     )
-
     # check write permission
     actions.assert_add_tag_permission(
         request.user, table, login_models.WRITE_PERM, schema=schema
@@ -1553,14 +1551,12 @@ def update_table_tags(request):
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
     )
-
-    return render(request, "dataedit/dataview.html", {"messages": messasge})
+    return render(request, "dataedit/dataview.html", {"messages": messasge, "table": table, "schema": schema})
 
 
 def redirect_after_table_tags_updated(request):
 
     update_table_tags(request)
-
     return redirect(request.META["HTTP_REFERER"])
 
 
@@ -2059,51 +2055,36 @@ class PeerReviewView(LoginRequiredMixin, View):
 
 class PeerRreviewContributorView(PeerReviewView):
     def get(self, request, schema, table, review_id):
-        """
-        Handles GET requests for the PeerRreviewContributorView.
-
-        Parameters:
-            request (HttpRequest): The HTTP request object.
-            schema (str): The schema parameter captured from the URL.
-            table (str): The table parameter captured from the URL.
-            review_id (int): The ID of the review captured from the URL.
-
-        Returns:
-            HttpResponse: The HTTP response object containing the rendered template.
-
-        Raises:
-            None
-        """
-            
-        # review_state = PeerReview.is_finished
-        # columns = get_column_description(schema, table)
         can_add = False
-        table_obj = Table.load(schema, table)
-
-        # Check user permissions
+        peer_review = PeerReview.objects.get(id=review_id)
+        table_obj = Table.load(peer_review.schema, peer_review.table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-
-        # url_table_id = request.build_absolute_uri(
-        #     reverse("view", kwargs={"schema": schema, "table": table})
-        # )
-
         metadata = self.sort_in_category(schema, table)
-
+        json_schema = self.load_json_schema()
+        field_descriptions = self.get_all_field_descriptions(json_schema)
+        review_data = peer_review.review.get('reviews', [])
+        state_dict = {}
+        for review in review_data:
+            field_key = review.get('key')
+            state = review.get('fieldReview', {}).get('state')
+            state_dict[field_key] = state
         context_meta = {"config": json.dumps(
-                            {"can_add": can_add,
-                             "url_peer_review": reverse(
-                                "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
-                                ),
-                             "url_table": reverse(
-                                "view", kwargs={"schema": schema, "table": table}
-                                ),
-                             "table": table,
-                             }),
-                        "meta": metadata,
-                        }
-
+            {"can_add": can_add,
+             "url_peer_review": reverse(
+                 "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
+             ),
+             "url_table": reverse(
+                 "view", kwargs={"schema": schema, "table": table}
+             ),
+             "table": table,
+             }),
+            "meta": metadata,
+            "json_schema": json_schema,
+            "field_descriptions_json": json.dumps(field_descriptions),
+            "state_dict": json.dumps(state_dict),
+        }
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
     def post(self, request, schema, table):
@@ -2113,5 +2094,4 @@ class PeerRreviewContributorView(PeerReviewView):
             review_state = review_data.get("reviewFinished")
             table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
             table_obj.save()
-
         return render(request, 'dataedit/opr_contributor.html', context=context)
