@@ -124,7 +124,7 @@
             }
 
             &:last-of-type {
-                @extend .btn-primary;
+                @extend .btn-outline-primary;
             }
         }
     }
