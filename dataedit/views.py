@@ -1986,16 +1986,17 @@ class PeerReviewView(LoginRequiredMixin, View):
                 kwargs={"schema": schema, "table": table}
             )
 
-        context_meta = {"config": json.dumps(
-            {"can_add": can_add,
-             "url_peer_review": url_peer_review,
-             "url_table": reverse(
-                 "view", kwargs={"schema": schema, "table": table}
-             ),
-             "table": table,
-             }),
+        config_data = {
+            "can_add": can_add,
+            "url_peer_review": url_peer_review,
+            "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "table": table,
+        }
+
+        context_meta = {
+            "table": table, # need this here as json.dumps breaks the emplate access like {{ config.table }} now you can use {{ table }}
+            "config": json.dumps(config_data),
             "meta": metadata,
-            "columns": json.dumps(columns),
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
         }
@@ -2066,10 +2067,19 @@ class PeerRreviewContributorView(PeerReviewView):
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = peer_review.review.get('reviews', [])
         state_dict = {}
+        categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
         for review in review_data:
             field_key = review.get('key')
             state = review.get('fieldReview', {}).get('state')
             state_dict[field_key] = state
+            reviewer_suggestion = review.get('fieldReview', {}).get('reviewerSuggestion')
+            print(reviewer_suggestion)
+            if reviewer_suggestion is not None:
+                review['value'] = reviewer_suggestion
+                for category in categories:
+                    for item in metadata[category]:
+                        if item['field'] == field_key:
+                            item['reviewer_suggestion'] = reviewer_suggestion
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
