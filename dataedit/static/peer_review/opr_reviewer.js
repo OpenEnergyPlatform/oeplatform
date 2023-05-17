@@ -181,7 +181,7 @@ function click_field(fieldKey, fieldValue, category) {
         if (fieldInfo.badge) {
             fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
         }
-        fieldInfoText += '<div class="reviewer-item__row">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
+        fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
         fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";

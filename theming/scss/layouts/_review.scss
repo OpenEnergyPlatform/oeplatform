@@ -83,6 +83,7 @@
 
     &__btns {
         @extend .row;
+        @extend .py-2;
     }
 
     &__btn {
@@ -92,6 +93,39 @@
             @extend .btn;
             @extend .btn-tertiary;
             @extend .w-100;
+        }
+    }
+
+    &__remarks {
+        @extend .pt-3;
+        @extend .pb-4;
+        @extend .border-bottom;
+    }
+
+    &__field {
+        @extend .mb-2;
+
+        &--nolabel label {
+            @extend .d-none;
+        }
+    }
+
+    &__btn-nav {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .justify-content-between;
+        @extend .pt-4;
+
+        button {
+            @extend .btn;
+            
+            &:first-of-type {
+                @extend .btn-light;
+            }
+
+            &:last-of-type {
+                @extend .btn-primary;
+            }
         }
     }
 }
@@ -109,6 +143,13 @@
         @extend .d-flex;
         @extend .flex-column;
         @extend .pb-2;
+
+        &--border {
+            @extend .border-top;
+            @extend .pt-3;
+            @extend .mt-3;
+            @extend .pb-2;
+        }
     }
 
     &__key {

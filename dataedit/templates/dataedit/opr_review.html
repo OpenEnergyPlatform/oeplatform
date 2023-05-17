@@ -204,33 +204,35 @@
                   <button type="button" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
                 </div>
               </div>
-              <div class="d-none" id="reviewer_remarks">
-                <div class="mb-3" id="field-value">
+              <div class="d-none review__remarks" id="reviewer_remarks">
+                <div class="review__field" id="field-value">
                   <label for="valuearea" class="form-label">Your value suggestion</label>
                   <textarea class="form-control" id="valuearea" rows="2" ></textarea>
                 </div>
-                <div class="mb-3" id="field-comment">
-                  <label for="commentarea" class="form-label" ></label>
+                <div class="review__field review__field--nolabel" id="field-comment">
+                  <label for="commentarea" class="form-label"></label>
                   <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
                 </div>
                 <button type="button" class="btn btn-warning" id="submitButton" style="width:50%">Save comment/new value</button>
               </div>
-              <button type="button" class="btn btn-primary" onclick="selectPreviousField()">
-                <span class="btn__icon">
-                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                    <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
-                  </svg>
-                </span>
-                <span class="btn__text">Back</span>
-              </button>
-              <button type="button" class="btn btn-primary" onclick="selectNextField()">
-                <span class="btn__icon">
+              <div class="review__btn-nav">
+                <button type="button" onclick="selectPreviousField()">
+                  <span class="btn__icon">
                     <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                       <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
                     </svg>
-                </span>
-                <span class="btn__text">Next</span>
-              </button>
+                  </span>
+                  <span class="btn__text">Back</span>
+                </button>
+                <button type="button" onclick="selectNextField()">
+                  <span class="btn__icon">
+                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z"/>
+                      </svg>
+                  </span>
+                  <span class="btn__text">Next</span>
+                </button>
+              </div>
             </div>
           </div>
           <div id="peer_review-controls">
