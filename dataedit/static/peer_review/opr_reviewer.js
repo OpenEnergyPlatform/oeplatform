@@ -165,6 +165,9 @@ function click_field(fieldKey, fieldValue, category) {
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    const reviewItem = document.querySelectorAll('.review__item');
+    let selectedDivId = 'field_' + cleanedFieldKey;
+    let selectedDiv = document.getElementById(selectedDivId);
     console.log("Field descriptions data:", fieldDescriptionsData);
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
@@ -185,6 +188,12 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
+    }
+    reviewItem.forEach(function(div) {
+      div.style.backgroundColor = '';
+    });
+    if (selectedDiv) {
+      selectedDiv.style.backgroundColor = '#F6F9FB';
     }
     console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     clearInputFields();
