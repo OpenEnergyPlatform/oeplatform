@@ -1883,10 +1883,7 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table):
         metadata = self.load_json(schema, table)
-        meta_schema = self.load_json_schema()
-
         val = self.parse_keys(metadata)
-
         gen_key_list = []
         spatial_key_list = []
         temporal_key_list = []
@@ -1958,7 +1955,6 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def get(self, request, schema, table, review_id=None):
         review_state = PeerReview.is_finished
-        columns = get_column_description(schema, table)
         json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
@@ -1968,9 +1964,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-            # url_table_id = request.build_absolute_uri(
-            #     reverse("view", kwargs={"schema": schema, "table": table})
-            # )
             
         metadata = self.sort_in_category(schema, table)
 
@@ -2017,7 +2010,7 @@ class PeerReviewView(LoginRequiredMixin, View):
     @staticmethod
     def load_reviewer(schema, table):
         """
-        Get the contributor for the table a review is started on. 
+        Get the reviewer for the table a review is started on. 
         """
         current_review = PeerReview.load(schema=schema, table=table)
         if current_review and hasattr(current_review, 'reviewer'):
