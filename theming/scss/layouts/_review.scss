@@ -80,6 +80,20 @@
         @extend .flex-column;
         @extend .bg-light;
     }
+
+    &__btns {
+        @extend .row;
+    }
+
+    &__btn {
+        @extend .col-4;
+
+        button {
+            @extend .btn;
+            @extend .btn-tertiary;
+            @extend .w-100;
+        }
+    }
 }
 
 .reviewer-item {

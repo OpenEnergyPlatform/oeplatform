@@ -193,10 +193,16 @@
             <div id="field-descriptions"></div>
             <div class="flex-reviewer" id="review-window">
               <h2 id="review-field-name" style="display:none"></h2>
-              <div class="btn-group" id="button-class" role="group" aria-label="Review buttons">
-                <button type="button" class="btn btn-success" id="ok-button" value="ok" onclick="selectState('ok');">Accept</button>
-                <button type="button" class="btn btn-warning" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggest</button>
-                <button type="button" class="btn btn-sm btn-danger" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
+              <div class="review__btns" role="group">
+                <div class="review__btn review__btn--success">
+                  <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">Accept</button>
+                </div>
+                <div class="review__btn review__btn--suggested">
+                  <button type="button" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggest</button>
+                </div>
+                <div class="review__btn review__btn--denied">
+                  <button type="button" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
+                </div>
               </div>
               <div class="d-none" id="reviewer_remarks">
                 <div class="mb-3" id="field-value">
