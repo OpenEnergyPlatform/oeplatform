@@ -108,6 +108,10 @@
         &--nolabel label {
             @extend .d-none;
         }
+
+        &-save {
+            @extend .w-100;
+        }
     }
 
     &__btn-nav {
