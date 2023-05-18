@@ -159,6 +159,19 @@
 
         }
     }
+
+    &__infos {
+        @extend .pt-3;
+
+        & > div {
+            @extend .pb-2;
+        }
+
+        &--date,
+        &--review-number {
+            @extend .fw-semibold;
+        }
+    }
 }
 
 .reviewer-item {
