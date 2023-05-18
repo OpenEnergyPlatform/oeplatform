@@ -235,16 +235,20 @@
               </div>
             </div>
           </div>
-          <div id="peer_review-controls">
-            <div class="col">
-              <button class="btn btn-sm btn-primary mr-2" id="peer_review-cancel">Quit</button>
+          <div class="review__save-btns" id="peer_review-controls">
+            <div class="review__save-btn review__save-btn--save">
               <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                <a href="#peer_review-submit" class="btn btn-sm btn-warning mr-2 {% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                  <span class="spinner-border text-light d-none mr-2 spinner-border-sm" id="peer_review-submitting">
+                <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+                  <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
                   </span>Save Review Progress
                 </a>
               </span>
-              <button class="btn btn-sm btn-success mr-2" id="submit_summary">Submit summary</button>
+            </div>
+            <div class="review__save-btn review__save-btn--summary">
+              <button id="submit_summary">Submit summary</button>
+            </div>
+            <div class="review__save-btn review__save-btn--quit">
+              <button id="peer_review-cancel">Quit</button>
             </div>
           </div>
         </div>
