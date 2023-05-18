@@ -1056,14 +1056,14 @@ class DataView(View):
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
 
         # Get contributions
-        contributor = PeerReviewView.load_contributor(schema=schema, table=table)
+        contributor = PeerReviewManager.load_contributor(schema=schema, table=table)
         if contributor is not None:
             opr_context.update({"contributor": contributor})
         else:
             opr_context.update({"contributor": None})
 
         # Get reviews
-        reviewer = PeerReviewView.load_reviewer(schema=schema, table=table)
+        reviewer = PeerReviewManager.load_reviewer(schema=schema, table=table)
         if contributor is not None:
             opr_context.update({"reviewer": reviewer})
         else:
@@ -1883,10 +1883,7 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def sort_in_category(self, schema, table):
         metadata = self.load_json(schema, table)
-        meta_schema = self.load_json_schema()
-
         val = self.parse_keys(metadata)
-
         gen_key_list = []
         spatial_key_list = []
         temporal_key_list = []
@@ -1958,7 +1955,6 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def get(self, request, schema, table, review_id=None):
         review_state = PeerReview.is_finished
-        columns = get_column_description(schema, table)
         json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
@@ -1968,9 +1964,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-            # url_table_id = request.build_absolute_uri(
-            #     reverse("view", kwargs={"schema": schema, "table": table})
-            # )
             
         metadata = self.sort_in_category(schema, table)
 
@@ -2002,29 +1995,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
-    @staticmethod
-    def load_contributor(schema, table):
-        """
-        Get the contributor for the table a review is started on. 
-        """
-        current_table = Table.load(schema=schema, table=table)
-        try:
-            table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
-        except AttributeError:
-            table_holder = None
-        return table_holder
-    
-    @staticmethod
-    def load_reviewer(schema, table):
-        """
-        Get the contributor for the table a review is started on. 
-        """
-        current_review = PeerReview.load(schema=schema, table=table)
-        if current_review and hasattr(current_review, 'reviewer'):
-            return current_review.reviewer
-        else:
-            return None
-
     def post(self, request, schema, table, review_id=None):
         """
         Handel reviews submitted by the reviewer. 
@@ -2037,7 +2007,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             review_data = json.loads(request.body)
             review_finised = review_data.get("reviewFinished")
             # TODO: Send notification to user that he cant review tables he is the table holder. 
-            contributor = self.load_contributor(schema, table)
+            contributor = PeerReviewManager.load_contributor(schema, table)
             if contributor is not None: 
                     table_review= PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
                     table_review.save()
