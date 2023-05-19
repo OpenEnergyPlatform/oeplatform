@@ -159,14 +159,14 @@ function cancelPeerReview() {
  */
 function click_field(fieldKey, fieldValue, category) {
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-    selectedField = cleanedFieldKey;
+    selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     const reviewItem = document.querySelectorAll('.review__item');
-    let selectedDivId = 'field_' + cleanedFieldKey;
+    let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
     console.log("Field descriptions data:", fieldDescriptionsData);
     if (fieldDescriptionsData[cleanedFieldKey]) {
@@ -255,9 +255,6 @@ function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
 }
 
-/**
- * Renders fields on the Summary page, sorted by review state
- */
 /**
  * Renders fields on the Summary page, sorted by review state
  */
