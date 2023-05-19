@@ -27,7 +27,7 @@
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
+        <li class="nav-item show active" role="presentation">
           <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
         </li>
         <li class="nav-item" role="presentation">
@@ -56,7 +56,7 @@
       <div class="review">
         <div class="review__content">
           <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
+            <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
               <div class="review__items">
                 {% for item in meta.general %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
