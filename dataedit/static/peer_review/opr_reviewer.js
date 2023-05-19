@@ -152,23 +152,29 @@ function cancelPeerReview() {
 }
 
 /**
- * Identifies field name and value and refreshs side panel infos
+ * Identifies field name and value sets selected stlye and refreshes 
+ * reviewer box (side panel) infos.
  * @param {string} fieldKey Name of the field
  * @param {string} fieldValue Value of the field
- * @param category
+ * @param {string} category Metadata catgeory related to the fieldKey 
  */
 function click_field(fieldKey, fieldValue, category) {
-    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+    // this seems unused but it is relevant to select next and prev field functions
     selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
+
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     const reviewItem = document.querySelectorAll('.review__item');
+
     let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
-    console.log("Field descriptions data:", fieldDescriptionsData);
+
+    // console.log("Field descriptions data:", fieldDescriptionsData);
+    // Populate the reviewer box
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
         let fieldInfoText = '<div class="reviewer-item">';
@@ -189,6 +195,8 @@ function click_field(fieldKey, fieldValue, category) {
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
+
+    // Set selected / not selected style on metadata fields
     reviewItem.forEach(function(div) {
       div.style.backgroundColor = '';
     });
