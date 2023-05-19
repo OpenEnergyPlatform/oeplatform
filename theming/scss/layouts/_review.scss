@@ -9,14 +9,16 @@
         @extend .col-6;
         flex: 0 0 50%;
         max-width: 50%;
-        //width: calc(#{$C--container-width} / 2);
     }
 
     &__controls {
         @extend .col-6;
+        @extend .position-sticky;
+        position: -webkit-sticky;
+        top: 1rem;
         flex: 0 0 50%;
         max-width: 50%;
-        //width: calc(#{$C--container-width} / 2);
+        height: fit-content;
     }
 
     &__items {
