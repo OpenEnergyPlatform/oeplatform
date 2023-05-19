@@ -249,8 +249,10 @@ function selectPreviousField(){
  * Clicks a Field after checking it exists
  */
 function selectField(fieldList, field){
-  if (field >= 0 && field <= fieldList.length){
+  if (field >= 0 && field < fieldList.length){
     var element = fieldList[field];
+    console.log(fieldList)
+    console.log(field)
     document.getElementById(element).click();
   }
 }
@@ -303,7 +305,7 @@ function renderSummaryPageFields() {
       const fieldValue = $(field_id).text();
       const found = current_review.reviews.some(review => review.key === field_name);
       if (!found) {
-    missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
+        missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
       }
     }
   }
@@ -412,14 +414,17 @@ function saveEntrances() {
 
   // Color ok/suggestion/rejected
   updateFieldColor();
-  selectNextField();
-
-  // alert(JSON.stringify(current_review, null, 4));
-  document.getElementById("summary").innerHTML = (
-    JSON.stringify(current_review, null, 4)
-  );
-  renderSummaryPageFields();
   checkReviewComplete();
+  selectNextField();
+  
+
+  // IS THIS NEEDED?
+  // alert(JSON.stringify(current_review, null, 4));
+  // document.getElementById("summary").innerHTML = (
+  //   JSON.stringify(current_review, null, 4)
+  // );
+
+  renderSummaryPageFields();
 }
 
 /**
@@ -434,10 +439,14 @@ function checkReviewComplete() {
     }
     fields_reviewed[category_name].push(review.key);
   }
+  console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
+  
   for (const category of categories) {
-    const category_name = category.id;
+    // const category_name = category.id;
+    const category_name = category.id.slice(0);
+    console.log(category_name)
     // TODO: remove resources, once they are working correct
     if (["resource", "summary"].includes(category_name)) {
       continue;
@@ -446,6 +455,7 @@ function checkReviewComplete() {
       return;
     }
     const category_fields = category.querySelectorAll(".field");
+    console.log(category_fields)
     for (field of category_fields) {
       const field_name = field.id.slice(6);
       if (!fields_reviewed[category_name].includes(field_name)) {
