@@ -36,6 +36,14 @@
           Meta information
         </button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="OPR-tab" data-bs-toggle="tab" data-bs-target="#opr-tab-pane" type="button" role="tab" aria-controls="metadata-tab-pane" aria-selected="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          </svg>
+          OPR results
+        </button>
+      </li>
     </ul>
   </div>
 </div>
@@ -181,10 +189,31 @@
 
 
 <h4> Open-Peer-Review </h4>
+{% if not opr.reviewer %} 
+    {% if user.is_authenticated and opr.contributor.id != user.id %}
+      <a class="btn btn-success btn-sm" type="button"
+      href="{% url 'peer_review_create' table=table schema=schema %}">
+        Start Open-Peer-Review-Process
+      </a>
+    {% else %}
+      <a class="btn btn-success btn-sm disabled" type="button"
+      href="{% url 'peer_review_create' table=table schema=schema %}">
+        Start Open-Peer-Review-Process
+      </a>
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
+    {% endif %}
+{% elif opr.reviewer.id == user.id and opr.contributor.id != user.id %}
   <a class="btn btn-success btn-sm" type="button"
-     href="{{table}}/open_peer_review">
-    Start Open-Peer-Review-Process
+  href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+    Continue Open-Peer-Review-Process
   </a>
+{% else %}
+  <a class="btn btn-success btn-sm disabled" type="button"
+  href="">
+  Continue Open-Peer-Review-Process
+  </a>
+  <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
+{% endif %}  
 
 <h4>Tags</h4>
 
@@ -291,7 +320,7 @@ for row in result.json():
   };
 
   $(function () {
-    $('[data-bs-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip()
   })
 </script>
 {% endblock after-body-bottom-js %}

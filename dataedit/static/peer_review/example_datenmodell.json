@@ -1,0 +1,131 @@
+{
+    "topic": "scenario",
+    "table": "model-draft.table",
+    "dateStarted": "2022-09-30",
+    "dateFinished": null,
+    "metadataVersion": "v1.5.2",
+    "reviews": [
+        {
+            "category": "General",
+            "key": "name",
+            "state": "suggestion",
+            "fieldReview": [
+                {
+                    "timestamp": "2022-09-30",
+                    "reviewer": "oep_user_name",
+                    "initialValue": "test Table",
+                    "comment": "Name does not comply with guidlines",
+                    "valueSuggestion": null,
+                    "accepted": null
+                }
+            ]
+        },
+        {
+            "category": "general.desciption[0].type",
+            "key": "description",
+            "state": "suggestion",
+            "fieldReview": [
+                {
+                    "timestamp": "2022-09-30",
+                    "reviewer": "oep_user_name",
+                    "initialValue": "blubbbb",
+                    "comment": "Please add a description in a few sentences what's within the dataset",
+                    "valueSuggestion": null,
+                    "accepted": null
+                }
+            ]
+        },
+        {
+            "category": "General",
+            "key": "publicationDate",
+            "fieldReview": [
+                {
+                    "timestamp": "2022-09-30",
+                    "user": "oep_reviewer",
+                    "role": "reviewer",
+                    "contributorValue":"29.03.2021",
+                    "comment": "Wrong format",
+                    "state": "suggestion",
+                    "reviewerSuggestion": "2021-03-29"
+                },
+                {
+                    "timestamp": "2022-10-01",
+                    "user": "oep_contributor",
+                    "role": "contributor",
+                    "contributorValue": "03/29/2021",
+                    "comment": "How about sth different entirely?",
+                    "reviewerSuggestion": "2021-03-29",
+                    "state": "reviewAccepted,reviewDenied,newValue"
+                },
+                {
+                    "timestamp": "2022-09-30",
+                    "user": "oep_reviewer",
+                    "role": "reviewer",
+                    "contributorValue": "03/29/2021",
+                    "comment": "I repreat, wrong format",
+                    "state": "suggestion",
+                    "reviewerSuggestion": "2021-03-29"
+                },
+                {
+                    "timestamp": "2022-10-01",
+                    "user": "oep_contributor",
+                    "role": "contributor",
+                    "contributorValue": "2021-03-29",
+                    "comment": "OK, changed my mind",
+                    "reviewerSuggestion": "2021-03-29",
+                    "state": "reviewAccepted" 
+                }
+            ]
+        },
+        {
+            "category": "resource",
+            "key": "name",
+            "state": "suggestion",
+            "entry": "value column (Bruttoleistug)",
+            "fieldReview": [
+                {
+                    "timestamp": "2022-09-30",
+                    "reviewer": "oep_user_name",
+                    "initialValue": "Bruttoleistug",
+                    "comment": "Rechtschreibfehler in der Spalte",
+                    "valueSuggestion": "bruttoleistung",
+                    "accepted": "yes"
+                },
+                {
+                    "timestamp": "2022-10-30",
+                    "reviewer": "oep_user_name",
+                    "initialValue": "Bruttoleistug",
+                    "comment": "Rechtschreibfehler in der Spalte",
+                    "valueSuggestion": "bruttoleistung",
+                    "accepted": "no"
+                }
+            ]
+        },
+        {
+            "category": "resource",
+            "key": "description",
+            "state": "suggestion",
+            "entry": "value column (bruttoleistung)",
+            "fieldReview": [
+                {
+                    "timestamp": "2022-09-30 HH:MM:SS",
+                    "reviewer": "oep_user_name",
+                    "initialValue": "Ist Leistung",
+                    "comment": "Bruttonennleistung der installierten Anlage",
+                    "valueSuggestion": "Bruttoleistung der installierten Anlage",
+                    "accepted": "yes"
+                }
+            ]
+        }
+    ],
+    "reviewFinished": "false",
+    "grantedBadge": null,
+    "metaMetadata": {
+        "reviewVersion": "OEP-0.0.1",
+        "metadataLicense": {
+            "name": "CC0-1.0",
+            "title": "Creative Commons Zero v1.0 Universal",
+            "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+        }
+    }
+}

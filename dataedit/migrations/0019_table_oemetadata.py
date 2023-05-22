@@ -2,12 +2,14 @@
 
 from api.actions import get_comment_table, set_table_metadata
 from api.error import APIError
-from dataedit.models import Table
+# from dataedit.models import Table
 from dataedit.views import schema_whitelist
 from django.db import migrations, models, transaction
 
 
 def migrate_metadata(apps, schema_editor):
+    # Need this ti avoide migration error if database is created from scratch
+    Table = apps.get_model("dataedit", "Table")
     with transaction.atomic():
         for table in Table.objects.all():
             if table.schema.name not in schema_whitelist:
