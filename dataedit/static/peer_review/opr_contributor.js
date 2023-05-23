@@ -30,7 +30,7 @@ $('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
-$('#ok-button').bind('click', hideReviewerOptions);
+$('#button').bind('click', hideReviewerOptions);
 $('#ok-button').bind('click', saveEntrances);
 // Suggestion Field View Change
 $('#suggestion-button').bind('click', showReviewerOptions);
@@ -151,13 +151,12 @@ function cancelPeerReview() {
   window.location = config.url_table;
 }
 
-
 /**
- * Identifies field name and value sets selected stlye and refreshes 
+ * Identifies field name and value sets selected stlye and refreshes
  * reviewer box (side panel) infos.
  * @param {string} fieldKey Name of the field
  * @param {string} fieldValue Value of the field
- * @param {string} category Metadata catgeory related to the fieldKey 
+ * @param {string} category Metadata catgeory related to the fieldKey
  */
 function click_field(fieldKey, fieldValue, category) {
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
@@ -189,7 +188,17 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
     console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
-    clearInputFields();
+    const fieldState = state_dict[fieldKey];
+
+    if (fieldState === 'ok') {
+        document.getElementById("ok-button").disabled = true;
+        document.getElementById("rejected-button").disabled = true;
+    } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        document.getElementById("ok-button").disabled = false;
+        document.getElementById("rejected-button").disabled = false;
+    }
+      clearInputFields();
+
 }
 
 function clearInputFields(){
@@ -212,10 +221,7 @@ function makeFieldList(){
 /**
  * Clears User Input fields
  */
-function clearInputFields(){
-  document.getElementById("valuearea").value = "";
-  document.getElementById("commentarea").value = "";
-}
+
 
 /**
  * Selects the HTML field element after the current one and clicks it
@@ -253,6 +259,7 @@ function selectField(fieldList, field){
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
+
 }
 
 /**
@@ -332,92 +339,41 @@ function createFieldList(fields) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  // Create list for review fields if it doesn't exist yet
-  if (Object.keys(current_review["reviews"]).length === 0 &&
-                current_review["reviews"].constructor === Object) {
+  if (Object.keys(current_review["reviews"]).length === 0 && current_review["reviews"].constructor === Object) {
     current_review["reviews"] = [];
   }
+
   if (selectedField) {
-      var unique_entry = true;
-      var dummy_review = current_review;
-      dummy_review["reviews"].forEach(function ( value, idx ){
-          // if field is present already, update field
-          if (value["key"] === selectedField){
-              unique_entry = false;
-              var element = document.querySelector('[aria-selected="true"]');
-              var category = (element.getAttribute("data-bs-target"));
-              if (selectedState == "ok") {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": "",
-                            "reviewerSuggestion": "",
-                            "state": selectedState,
-                      },
-                  },
-              )
-              } else {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": document.getElementById("commentarea").value,
-                            "reviewerSuggestion": document.getElementById("valuearea").value,
-                            "state": selectedState,
-                      },
-                  },
-              )
-            }
-          }
+    var unique_entry = true;
+    var dummy_review = current_review;
+
+    dummy_review["reviews"].forEach(function(value, idx) {
+      if (value["key"] === selectedField) {
+        unique_entry = false;
+      }
+    });
+
+    if (unique_entry) {
+      var fieldReview = {
+        "state": selectedState
+      };
+      current_review["reviews"].push({
+        "key": selectedField,
+        "fieldReview": fieldReview
       });
-    var element = document.querySelector('[aria-selected="true"]');
-    var category = (element.getAttribute("data-bs-target"));
-    // if field hasn't been written before, add it
-    if (unique_entry){
-    current_review["reviews"].push(
-        {
-          "category": category,
-          "key": selectedField,
-          "fieldReview": {
-            "timestamp": null, // TODO put actual timestamp
-            "user": "oep_reviewer", // TODO put actual username
-            "role": "reviewer",
-            "contributorValue": selectedFieldValue,
-            "comment": document.getElementById("commentarea").value,
-            "reviewerSuggestion": document.getElementById("valuearea").value,
-            "state": selectedState,
-          },
-        },
-    )}
+    }
   }
 
-  // Color ok/suggestion/rejected
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
-  
-
-  // IS THIS NEEDED?
-  // alert(JSON.stringify(current_review, null, 4));
-  // document.getElementById("summary").innerHTML = (
-  //   JSON.stringify(current_review, null, 4)
-  // );
-
   renderSummaryPageFields();
+
+
 }
 
 /**
+ *
  * Checks if all fields are reviewed and activates submit button if ready
  */
 function checkReviewComplete() {
@@ -432,7 +388,7 @@ function checkReviewComplete() {
   console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
-  
+
   for (const category of categories) {
     // const category_name = category.id;
     const category_name = category.id.slice(0);
@@ -454,7 +410,6 @@ function checkReviewComplete() {
     }
   }
 
-  // All fields reviewed!
   $('#submit_summary').removeClass('disabled');
 }
 
