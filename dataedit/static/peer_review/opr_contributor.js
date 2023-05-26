@@ -31,6 +31,7 @@ $('#submit_summary').bind('click', submitPeerReview);
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
 $('#button').bind('click', hideReviewerOptions);
+
 $('#ok-button').bind('click', saveEntrances);
 // Suggestion Field View Change
 $('#suggestion-button').bind('click', showReviewerOptions);
@@ -190,7 +191,7 @@ function click_field(fieldKey, fieldValue, category) {
     console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     const fieldState = state_dict[fieldKey];
 
-    if (fieldState === 'ok') {
+    if (fieldState === 'ok'|| !fieldState) {
         document.getElementById("ok-button").disabled = true;
         document.getElementById("rejected-button").disabled = true;
     } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
@@ -339,38 +340,43 @@ function createFieldList(fields) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (Object.keys(current_review["reviews"]).length === 0 && current_review["reviews"].constructor === Object) {
-    current_review["reviews"] = [];
+  if (!selectedField) return;
+  var reviewerSuggestionUser = "some_reviewer"; // TODO fetch the actual reviewer
+
+  if (reviewerSuggestionUser === "oep_contributor") {
+    alert("Contributor and reviewer cannot be the same.");
+    return;
   }
 
-  if (selectedField) {
-    var unique_entry = true;
-    var dummy_review = current_review;
+  var reviewIndex = current_review["reviews"].findIndex(r => r.key === selectedField);
 
-    dummy_review["reviews"].forEach(function(value, idx) {
-      if (value["key"] === selectedField) {
-        unique_entry = false;
-      }
-    });
+  var review = {
+    "category": document.querySelector('[aria-selected="true"]').getAttribute("data-bs-target"),
+    "key": selectedField,
+    "fieldReview": {
+      "timestamp": null, // TODO put actual timestamp
+      "user": "oep_contributor", // TODO put actual username
+      "role": "contributor",
+      "contributorValue": selectedFieldValue,
+      "comment": document.getElementById("commentarea").value,
+      "reviewerSuggestion": document.getElementById("valuearea").value,
+      "state": selectedState,
+    },
+  };
 
-    if (unique_entry) {
-      var fieldReview = {
-        "state": selectedState
-      };
-      current_review["reviews"].push({
-        "key": selectedField,
-        "fieldReview": fieldReview
-      });
-    }
+  if (reviewIndex > -1) {
+    current_review["reviews"][reviewIndex] = review;
+  } else {
+    current_review["reviews"].push(review);
   }
 
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
-
-
 }
+
+
 
 /**
  *
