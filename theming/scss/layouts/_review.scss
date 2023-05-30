@@ -4,6 +4,7 @@
 .review {
     @extend .row;
     @extend .w-100;
+    @extend .g-0;
 
     &__content {
         @extend .col-6;
@@ -13,6 +14,7 @@
 
     &__controls {
         @extend .col-6;
+        @extend .ps-4;
         @extend .position-sticky;
         position: -webkit-sticky;
         top: 1rem;
