@@ -7,26 +7,26 @@
 
 
 {% block main-right-sidebar-content %}
-    <br>
-    <div>
-    {% if profile_user.profile_img %}
-    <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
-{% else %}
-    <i class="far fa-user default-user-icon"></i>
-{% endif %}
-    </div>
-    <br>
-    <div><h2> {{ profile_user.name }} </h2></div>
-    <td> {% if profile_user.fullname %}
-                {{ profile_user.fullname }}
-            {% else %}
-                <p>Full Name</p>
-            {% endif %} </td>
-    <br>
-    <br>
-    <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
-    <hr>
-    {% if profile_user == request.user %}
+{% if profile_user == request.user %}
+        <br>
+        <div>
+        {% if profile_user.profile_img %}
+        <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
+    {% else %}
+        <i class="far fa-user default-user-icon"></i>
+    {% endif %}
+        </div>
+        <br>
+        <div><h2> {{ profile_user.name }} </h2></div>
+        <td> {% if profile_user.fullname %}
+                    {{ profile_user.fullname }}
+                {% else %}
+                    <p>Full Name</p>
+                {% endif %} </td>
+        <br>
+        <br>
+        <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
+        <hr>
         <td> {% if profile_user.work %}
                     {{ profile_user.work }}
                 {% else %}
@@ -64,5 +64,4 @@
         <br>
         <hr>
     {% endif %}
-
 {% endblock %}
