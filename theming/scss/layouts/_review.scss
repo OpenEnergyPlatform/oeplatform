@@ -141,33 +141,6 @@
         }
     }
 
-    &__save-btns {
-        @extend .d-flex;
-        @extend .flex-row;
-        @extend .justify-content-end;
-        @extend .py-3;
-    }
-
-    &__save-btn {
-        @extend .ps-2;
-
-        &--save a {
-            @extend .btn;
-            @extend .btn-primary;
-        }
-
-        &--summary button {
-            @extend .btn;
-            @extend .btn-outline-primary;
-        }
-
-        &--quit button {
-            @extend .btn;
-            @extend .btn-light;
-
-        }
-    }
-
     &__infos {
         @extend .pt-3;
 
