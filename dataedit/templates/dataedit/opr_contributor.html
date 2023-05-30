@@ -3,7 +3,7 @@
 {% load django_bootstrap5 %}
 
 {% block after-head %}
-<link href="/static/peer_review/peer_review.css" rel="stylesheet">
+<!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
 
 
@@ -21,13 +21,13 @@
     </h1>
     <div class="main-header__wizard">
       <span class="main-header__wizard-process">Review :</span>
-      <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/model_draft">model_draft</a> / Bundesnetzagentur - Marktstammdatenregister - Stromerzeuger (bnetza_mastr_rli_v2_2_0_biomass_clean)</span>
+      <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/model_draft">model_draft</a> / {{ table }}</span>
     </div>
   </div>
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
+        <li class="nav-item show active" role="presentation">
           <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
         </li>
         <li class="nav-item" role="presentation">
@@ -56,7 +56,7 @@
       <div class="review">
         <div class="review__content">
           <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
+            <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
               <div class="review__items">
                 {% for item in meta.general %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
@@ -205,6 +205,67 @@
             <div class="flex-reviewer" id="review-window">
               <h2 id="review-field-name" style="display:none"></h2>
             </div>
+            <div class="flex-reviewer" id="review-window">
+              <h2 id="review-field-name" style="display:none"></h2>
+              <div class="review__btns" role="group">
+                <div class="review__btn review__btn--success">
+                    <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">Accept</button>
+                </div>
+
+                <div class="review__btn review__btn--denied">
+                  <button type="button" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
+                </div>
+              </div>
+              <div class="d-none review__remarks" id="reviewer_remarks">
+                <div class="review__field" id="field-value">
+                  <label for="valuearea" class="form-label">Your value suggestion</label>
+                  <textarea class="form-control" id="valuearea" rows="2" ></textarea>
+                </div>
+                <div class="review__field review__field--nolabel" id="field-comment">
+                  <label for="commentarea" class="form-label"></label>
+                  <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
+                </div>
+                <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
+              </div>
+              <div class="review__btn-nav">
+                <button type="button" onclick="selectPreviousField()">
+                  <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                    </svg>
+                  </span>
+                  <span class="btn__text">Back</span>
+                </button>
+                <button type="button" onclick="selectNextField()">
+                  <span class="btn__icon">
+                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                      </svg>
+                  </span>
+                  <span class="btn__text">Next</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="review__save-btns" id="peer_review-controls">
+            <div class="review__save-btn review__save-btn--save">
+              <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+                <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+                  <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
+                  </span>Save Review Progress
+                </a>
+              </span>
+            </div>
+            <div class="review__save-btn review__save-btn--summary">
+              <button id="submit_summary">Submit summary</button>
+            </div>
+            <div class="review__save-btn review__save-btn--quit">
+              <button id="peer_review-cancel">Quit</button>
+            </div>
+          </div>
+          <div class="review__infos">
+            <div>Peer reviewed by <a href="#">jh-RLI</a> on <span class="review__infos--date">2022-09-19</span></div>
+            <div><span class="review__infos--review-number">0</span> sucessful reviews </div>
           </div>
         </div>
       </div>

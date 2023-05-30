@@ -152,23 +152,29 @@ function cancelPeerReview() {
 }
 
 /**
- * Identifies field name and value and refreshs side panel infos
+ * Identifies field name and value sets selected stlye and refreshes 
+ * reviewer box (side panel) infos.
  * @param {string} fieldKey Name of the field
  * @param {string} fieldValue Value of the field
- * @param category
+ * @param {string} category Metadata catgeory related to the fieldKey 
  */
 function click_field(fieldKey, fieldValue, category) {
-    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-    selectedField = cleanedFieldKey;
+    // this seems unused but it is relevant to select next and prev field functions
+    selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
+
+    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
     const reviewItem = document.querySelectorAll('.review__item');
-    let selectedDivId = 'field_' + cleanedFieldKey;
+
+    let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
-    console.log("Field descriptions data:", fieldDescriptionsData);
+
+    // console.log("Field descriptions data:", fieldDescriptionsData);
+    // Populate the reviewer box
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
         let fieldInfoText = '<div class="reviewer-item">';
@@ -189,6 +195,8 @@ function click_field(fieldKey, fieldValue, category) {
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
+
+    // Set selected / not selected style on metadata fields
     reviewItem.forEach(function(div) {
       div.style.backgroundColor = '';
     });
@@ -241,8 +249,10 @@ function selectPreviousField(){
  * Clicks a Field after checking it exists
  */
 function selectField(fieldList, field){
-  if (field >= 0 && field <= fieldList.length){
+  if (field >= 0 && field < fieldList.length){
     var element = fieldList[field];
+    console.log(fieldList)
+    console.log(field)
     document.getElementById(element).click();
   }
 }
@@ -255,9 +265,6 @@ function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
 }
 
-/**
- * Renders fields on the Summary page, sorted by review state
- */
 /**
  * Renders fields on the Summary page, sorted by review state
  */
@@ -298,7 +305,7 @@ function renderSummaryPageFields() {
       const fieldValue = $(field_id).text();
       const found = current_review.reviews.some(review => review.key === field_name);
       if (!found) {
-    missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
+        missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
       }
     }
   }
@@ -407,14 +414,17 @@ function saveEntrances() {
 
   // Color ok/suggestion/rejected
   updateFieldColor();
-  selectNextField();
-
-  // alert(JSON.stringify(current_review, null, 4));
-  document.getElementById("summary").innerHTML = (
-    JSON.stringify(current_review, null, 4)
-  );
-  renderSummaryPageFields();
   checkReviewComplete();
+  selectNextField();
+  
+
+  // IS THIS NEEDED?
+  // alert(JSON.stringify(current_review, null, 4));
+  // document.getElementById("summary").innerHTML = (
+  //   JSON.stringify(current_review, null, 4)
+  // );
+
+  renderSummaryPageFields();
 }
 
 /**
@@ -429,10 +439,14 @@ function checkReviewComplete() {
     }
     fields_reviewed[category_name].push(review.key);
   }
+  console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
+  
   for (const category of categories) {
-    const category_name = category.id;
+    // const category_name = category.id;
+    const category_name = category.id.slice(0);
+    console.log(category_name)
     // TODO: remove resources, once they are working correct
     if (["resource", "summary"].includes(category_name)) {
       continue;
@@ -441,6 +455,7 @@ function checkReviewComplete() {
       return;
     }
     const category_fields = category.querySelectorAll(".field");
+    console.log(category_fields)
     for (field of category_fields) {
       const field_name = field.id.slice(6);
       if (!fields_reviewed[category_name].includes(field_name)) {

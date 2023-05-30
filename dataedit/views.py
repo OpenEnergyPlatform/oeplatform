@@ -1954,7 +1954,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return field_descriptions
 
     def get(self, request, schema, table, review_id=None):
-        review_state = PeerReview.is_finished
+        review_state = PeerReview.is_finished #TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
@@ -1987,7 +1987,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
 
         context_meta = {
-            "table": table, # need this here as json.dumps breaks the emplate access like {{ config.table }} now you can use {{ table }}
+            "table": table, # need this here as json.dumps breaks the template syntax access like {{ config.table }} now you can use {{ table }}
             "config": json.dumps(config_data),
             "meta": metadata,
             "json_schema": json_schema,
@@ -2038,6 +2038,7 @@ class PeerRreviewContributorView(PeerReviewView):
         review_data = peer_review.review.get('reviews', [])
         state_dict = {}
         categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
+
         for review in review_data:
             field_key = review.get('key')
             state = review.get('fieldReview', {}).get('state')
@@ -2050,6 +2051,7 @@ class PeerRreviewContributorView(PeerReviewView):
                     for item in metadata[category]:
                         if item['field'] == field_key:
                             item['reviewer_suggestion'] = reviewer_suggestion
+
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
@@ -2060,6 +2062,7 @@ class PeerRreviewContributorView(PeerReviewView):
              ),
              "table": table,
              }),
+            "table": table,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
