@@ -324,7 +324,7 @@ function renderSummaryPageFields() {
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th><th scope="col">Field Category</th>';
+    header.innerHTML = '<th scope="col">Category</th><th scope="col">Field Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
@@ -332,7 +332,7 @@ function renderSummaryPageFields() {
 
     data.forEach(item => {
       let row = document.createElement('tr');
-      row.innerHTML = '<th scope="row">' + item.fieldStatus + '</th><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td><td>' + item.fieldCategory + '</td>';
+      row.innerHTML = '<th scope="row">' + item.fieldStatus + '</th><td>' + item.fieldCategory + '</td><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td>';
       tbody.appendChild(row);
     });
 
