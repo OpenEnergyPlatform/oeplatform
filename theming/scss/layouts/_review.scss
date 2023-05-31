@@ -4,19 +4,23 @@
 .review {
     @extend .row;
     @extend .w-100;
+    @extend .g-0;
 
     &__content {
         @extend .col-6;
         flex: 0 0 50%;
         max-width: 50%;
-        //width: calc(#{$C--container-width} / 2);
     }
 
     &__controls {
         @extend .col-6;
+        @extend .ps-4;
+        @extend .position-sticky;
+        position: -webkit-sticky;
+        top: 1rem;
         flex: 0 0 50%;
         max-width: 50%;
-        //width: calc(#{$C--container-width} / 2);
+        height: fit-content;
     }
 
     &__items {
@@ -71,6 +75,7 @@
     }
 
     &__box {
+        @extend .position-relative;
         @extend .p-4;
         @extend .bg-light;
     }
@@ -115,13 +120,18 @@
     }
 
     &__btn-nav {
+        @extend .position-absolute;
         @extend .d-flex;
         @extend .flex-row;
         @extend .justify-content-between;
-        @extend .pt-4;
+        @extend .p-0;
+        top: 1rem;
+        left: $C--padding-standard;
+        width: calc(100% - 2 * #{$C--padding-standard});
 
         button {
             @extend .btn;
+            @extend .px-0;
             
             &:first-of-type {
                 @extend .btn-light;
@@ -130,33 +140,6 @@
             &:last-of-type {
                 @extend .btn-outline-primary;
             }
-        }
-    }
-
-    &__save-btns {
-        @extend .d-flex;
-        @extend .flex-row;
-        @extend .justify-content-end;
-        @extend .py-3;
-    }
-
-    &__save-btn {
-        @extend .ps-2;
-
-        &--save a {
-            @extend .btn;
-            @extend .btn-primary;
-        }
-
-        &--summary button {
-            @extend .btn;
-            @extend .btn-outline-primary;
-        }
-
-        &--quit button {
-            @extend .btn;
-            @extend .btn-light;
-
         }
     }
 

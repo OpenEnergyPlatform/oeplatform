@@ -28,27 +28,43 @@
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
         <li class="nav-item show active" role="presentation">
-          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
+          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal Keys</button>
+          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source Keys</button>
+          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License Keys</button>
+          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor Keys</button>
+          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource Keys</button>
+          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource</button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
+      <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
+          <button id="submit_summary">Submit</button>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
+          <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+            <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+              <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
+              </span>Save Progress
+            </a>
+          </span>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
+          <button id="peer_review-cancel">Quit</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="content">
@@ -190,6 +206,22 @@
             <div id="field-descriptions-json" style="display: none;">
               {{ field_descriptions_json }}
             </div>
+            <div class="review__btn-nav">
+              <button type="button" onclick="selectPreviousField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                  </svg>
+                </span>
+              </button>
+              <button type="button" onclick="selectNextField()">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                    </svg>
+                </span>
+              </button>
+            </div>
             <div id="field-descriptions"></div>
             <div class="flex-reviewer" id="review-window">
               <h2 id="review-field-name" style="display:none"></h2>
@@ -215,40 +247,6 @@
                 </div>
                 <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
               </div>
-              <div class="review__btn-nav">
-                <button type="button" onclick="selectPreviousField()">
-                  <span class="btn__icon">
-                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
-                    </svg>
-                  </span>
-                  <span class="btn__text">Back</span>
-                </button>
-                <button type="button" onclick="selectNextField()">
-                  <span class="btn__icon">
-                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
-                      </svg>
-                  </span>
-                  <span class="btn__text">Next</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="review__save-btns" id="peer_review-controls">
-            <div class="review__save-btn review__save-btn--save">
-              <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                  <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
-                  </span>Save Review Progress
-                </a>
-              </span>
-            </div>
-            <div class="review__save-btn review__save-btn--summary">
-              <button id="submit_summary">Submit summary</button>
-            </div>
-            <div class="review__save-btn review__save-btn--quit">
-              <button id="peer_review-cancel">Quit</button>
             </div>
           </div>
           <div class="review__infos">

@@ -75,7 +75,8 @@
 
     &__container {
         @include flex-row;
-        @extend .justify-content-start;
+        @extend .justify-content-between;
+        @extend .border-bottom;
 
         @include media-breakpoint-up(md) {
             padding-right: 0!important;
@@ -83,6 +84,43 @@
 
         @include media-breakpoint-up(xxl) {
             width: $C--container-width;
+        }
+    }
+
+    .nav {
+        &.nav-tabs {
+            @extend .border-0;
+            @extend .w-auto;
+
+            .nav-item {
+                @extend .border-0;
+            }
+        }
+    }
+
+    &__save-btns {
+        @extend .d-flex;
+        @extend .flex-row;
+        @extend .pb-3;
+    }
+
+    &__save-btn {
+        @extend .ps-2;
+
+        &--summary button {
+            @extend .btn;
+            @extend .btn-primary;
+        }
+
+        &--save a {
+            @extend .btn;
+            @extend .btn-outline-primary;
+        }
+
+        &--quit button {
+            @extend .btn;
+            @extend .btn-light;
+
         }
     }
 }

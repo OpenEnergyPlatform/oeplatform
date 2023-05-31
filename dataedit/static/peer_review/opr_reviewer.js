@@ -312,7 +312,51 @@ function renderSummaryPageFields() {
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
-  summaryContainer.innerHTML = `
+
+  function clearSummaryTable() {
+    while(summaryContainer.firstChild) {
+      summaryContainer.firstChild.remove();
+    }
+  }
+  function generateTable(data) {
+    let table = document.createElement('table');
+    table.className = 'table';
+
+    let thead = document.createElement('thead');
+    let header = document.createElement('tr');
+    header.innerHTML = '<th scope="col">Category</th><th scope="col">Field Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th>';
+    thead.appendChild(header);
+    table.appendChild(thead);
+
+    let tbody = document.createElement('tbody');
+
+    data.forEach(item => {
+      let row = document.createElement('tr');
+      row.innerHTML = '<th scope="row">' + item.fieldStatus + '</th><td>' + item.fieldCategory + '</td><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td>';
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    return table;
+}
+
+  function updateSummaryTable() {
+    clearSummaryTable();
+    
+    let allData = [];
+    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
+    allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
+    allData.push(...suggestingFields.map(item => ({ ...item, fieldStatus: 'Suggested' })));
+    allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
+    
+    let table = generateTable(allData);
+    summaryContainer.appendChild(table);
+  }
+
+  updateSummaryTable();
+
+  /* summaryContainer.innerHTML = `
     <h4>Accepted:</h4>
     ${createFieldList(acceptedFields)}
     <h4>Suggesting:</h4>
@@ -321,7 +365,7 @@ function renderSummaryPageFields() {
     ${createFieldList(rejectedFields)}
     <h4>Missing:</h4>
     ${createFieldList(missingFields)}
-  `;
+  `; */
 }
 
 /**
