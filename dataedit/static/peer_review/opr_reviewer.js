@@ -312,7 +312,44 @@ function renderSummaryPageFields() {
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
-  summaryContainer.innerHTML = `
+
+  function clearSummaryTable() {
+    while(summaryContainer.firstChild) {
+      summaryContainer.firstChild.remove();
+    }
+  }
+  function generateTable(data) {
+    let summaryTable = document.createElement('table');
+    
+    let header = document.createElement('tr');
+    header.innerHTML = '<th>Status</th><th>Field Category</th><th>Field ID</th><th>Field Value</th>';
+    summaryTable.appendChild(header);
+
+    data.forEach(item => {
+      let row = document.createElement('tr');
+      row.innerHTML = '<td>' + item.fieldStatus + '</td><td>' + item.fieldCategory + '</td><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td>';
+      summaryTable.appendChild(row);
+    });
+
+    return summaryTable;
+  }
+
+  function updateSummaryTable() {
+    clearSummaryTable();
+    
+    let allData = [];
+    allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
+    allData.push(...suggestingFields.map(item => ({ ...item, fieldStatus: 'Suggested' })));
+    allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
+    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
+    
+    let table = generateTable(allData);
+    summaryContainer.appendChild(table);
+  }
+
+  updateSummaryTable();
+
+  /* summaryContainer.innerHTML = `
     <h4>Accepted:</h4>
     ${createFieldList(acceptedFields)}
     <h4>Suggesting:</h4>
@@ -321,7 +358,7 @@ function renderSummaryPageFields() {
     ${createFieldList(rejectedFields)}
     <h4>Missing:</h4>
     ${createFieldList(missingFields)}
-  `;
+  `; */
 }
 
 /**
