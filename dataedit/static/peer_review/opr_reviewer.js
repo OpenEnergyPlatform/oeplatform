@@ -319,29 +319,36 @@ function renderSummaryPageFields() {
     }
   }
   function generateTable(data) {
-    let summaryTable = document.createElement('table');
-    
+    let table = document.createElement('table');
+    table.className = 'table';
+
+    let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th>Status</th><th>Field Category</th><th>Field ID</th><th>Field Value</th>';
-    summaryTable.appendChild(header);
+    header.innerHTML = '<th scope="col">Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th><th scope="col">Field Category</th>';
+    thead.appendChild(header);
+    table.appendChild(thead);
+
+    let tbody = document.createElement('tbody');
 
     data.forEach(item => {
       let row = document.createElement('tr');
-      row.innerHTML = '<td>' + item.fieldStatus + '</td><td>' + item.fieldCategory + '</td><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td>';
-      summaryTable.appendChild(row);
+      row.innerHTML = '<th scope="row">' + item.fieldStatus + '</th><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td><td>' + item.fieldCategory + '</td>';
+      tbody.appendChild(row);
     });
 
-    return summaryTable;
-  }
+    table.appendChild(tbody);
+
+    return table;
+}
 
   function updateSummaryTable() {
     clearSummaryTable();
     
     let allData = [];
+    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
     allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
     allData.push(...suggestingFields.map(item => ({ ...item, fieldStatus: 'Suggested' })));
     allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
-    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
     
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
