@@ -144,17 +144,27 @@ class PeerReview(models.Model):
     def save(self, *args, **kwargs):
         from django.core.exceptions import ValidationError
         
+        review_type = kwargs.pop('review_type', None)
         if not self.contributor == self.reviewer:
             # Call the parent class's save method to save the PeerReview instance
             super().save(*args, **kwargs)
 
             # TODO: This causes errors if review list ist empty
-            # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
+            prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
             
+            print(prev_review.id, next_review)
             # print(prev_review, next_review)
             # Create a new PeerReviewManager entry for this PeerReview
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
-            pm_new = PeerReviewManager(opr=self)
+            
+            if review_type == "save":
+                # Handle save status
+                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SAVED.value)
+
+            elif review_type == "submit":
+                # Handle submit status
+                pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.SUBMITTED.value)
+
             pm_new.save() 
 
             # if prev_review is not None:
@@ -163,6 +173,14 @@ class PeerReview(models.Model):
             #     pm_prev.save()
         else: 
             raise ValidationError("Contributor and reviewer cannot be the same.")
+
+    def update(self, *args, **kwargs):
+        """
+        Update the peer review if the latest peer review is not finished yet but either saved or submitted.
+
+        """
+        super().save(*args, **kwargs)
+
 
     @property
     def days_open(self):
@@ -238,7 +256,7 @@ class PeerReviewManager(models.Model):
             days_open = peer_review.days_open
             if days_open is not None:
                 self.is_open_since = str(days_open)
-
+        # print(self.is_open_since, self.status)
         # Call the parent class's save method to save the PeerReviewManager instance
         super().save(*args, **kwargs)
     
@@ -371,4 +389,7 @@ class PeerReviewManager(models.Model):
             QuerySet: Filtered peer reviews.
         """
         return PeerReview.objects.filter(schema=schema, table=table)
+    
+    def filter_opr_by_id(opr_id):
+        return PeerReview.objects.filter(id=opr_id)
     
