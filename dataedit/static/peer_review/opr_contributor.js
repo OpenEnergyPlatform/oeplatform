@@ -152,7 +152,7 @@ function savePeerReview() {
  */
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  json = JSON.stringify(current_review);
+  json = JSON.stringify({ reviewType: 'submit', reviewData: current_review });
   sendJson("POST", config.url_peer_review, json).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
