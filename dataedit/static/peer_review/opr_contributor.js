@@ -25,8 +25,10 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
-// Submit review
+// Submit review (not visible to reviewer)
 $('#submit_summary').bind('click', submitPeerReview);
+// save the current review (not visible to reviewer)
+$('#peer_review-save').bind('click', savePeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
@@ -128,6 +130,21 @@ function peerReview(config) {
     $('#peer_review-loading').removeClass('d-none');
     config.form = $('#peer_review-form');
   })();
+}
+
+/**
+ * Save peer review to backend
+ */
+function savePeerReview() {
+  $('#peer_review-save').removeClass('d-none');
+  json = JSON.stringify({ reviewType: 'save', reviewData: current_review });
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-save').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
 }
 
 /**
