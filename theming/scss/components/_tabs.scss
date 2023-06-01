@@ -113,7 +113,8 @@
             @extend .btn-primary;
         }
 
-        &--save button {
+        &--save button,
+        &--save a {
             @extend .btn;
             @extend .btn-outline-primary;
         }

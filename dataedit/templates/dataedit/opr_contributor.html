@@ -49,6 +49,22 @@
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
+      <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
+          <button id="submit_summary">Submit</button>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
+          <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
+            <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
+              <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
+              </span>Save Review
+            </a>
+          </span>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
+          <button id="peer_review-cancel">Quit</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="content">
@@ -245,22 +261,6 @@
                   <span class="btn__text">Next</span>
                 </button>
               </div>
-            </div>
-          </div>
-          <div class="review__save-btns" id="peer_review-controls">
-            <div class="review__save-btn review__save-btn--save">
-              <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                  <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
-                  </span>Save Review Progress
-                </a>
-              </span>
-            </div>
-            <div class="review__save-btn review__save-btn--summary">
-              <button id="submit_summary">Submit summary</button>
-            </div>
-            <div class="review__save-btn review__save-btn--quit">
-              <button id="peer_review-cancel">Quit</button>
             </div>
           </div>
           <div class="review__infos">
