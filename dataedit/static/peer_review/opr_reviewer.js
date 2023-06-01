@@ -28,6 +28,8 @@ $('#submitButton').bind('click', saveEntrances);
 // Submit review
 $('#submit_summary').bind('click', submitPeerReview);
 // Cancel review
+$('#peer_review-save').bind('click', savePeerReview);
+// OK Field View Change
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
 $('#ok-button').bind('click', hideReviewerOptions);
@@ -130,11 +132,26 @@ function peerReview(config) {
 }
 
 /**
+ * Save peer review to backend
+ */
+function savePeerReview() {
+  $('#peer_review-save').removeClass('d-none');
+  json = JSON.stringify({ reviewType: 'save', reviewData: current_review });
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-save').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
+}
+
+/**
  * Submits peer review to backend
  */
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  json = JSON.stringify(current_review);
+  json = JSON.stringify({ reviewType: 'submit', reviewData: current_review });
   sendJson("POST", config.url_peer_review, json).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
