@@ -129,6 +129,7 @@ function peerReview(config) {
     $('#peer_review-loading').removeClass('d-none');
     config.form = $('#peer_review-form');
   })();
+  selectNextField();
   renderSummaryPageFields();
 }
 
