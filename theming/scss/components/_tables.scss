@@ -3,3 +3,24 @@
 table {
     border-radius: 4px!important;
 }
+
+.review-summary {
+    @extend .border;
+    @extend .rounded;
+
+    .missing {
+        @extend .position-relative;
+        @extend .ps-4;
+
+        &:before {
+            content: "";
+            @extend .position-absolute;
+            @extend .rounded-circle;
+            @extend .bg-warning;
+            width: 8px;
+            height: 8px;
+            left: 0.5rem;
+            top: 1rem;
+        }
+    }
+}

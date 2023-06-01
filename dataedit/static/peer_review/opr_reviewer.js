@@ -320,26 +320,47 @@ function renderSummaryPageFields() {
   }
   function generateTable(data) {
     let table = document.createElement('table');
-    table.className = 'table';
+    table.className = 'table review-summary';
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Category</th><th scope="col">Field Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th>';
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
     let tbody = document.createElement('tbody');
 
     data.forEach(item => {
-      let row = document.createElement('tr');
-      row.innerHTML = '<th scope="row">' + item.fieldStatus + '</th><td>' + item.fieldCategory + '</td><td>' + item.field_id + '</td><td>' + item.fieldValue + '</td>';
-      tbody.appendChild(row);
+        let row = document.createElement('tr');
+
+        let th = document.createElement('th');
+        th.scope = "row";
+        if (item.fieldStatus === "Missing") {
+            th.className = "missing";
+        }
+        th.textContent = item.fieldStatus;
+        row.appendChild(th);
+
+        let tdFieldCategory = document.createElement('td');
+        tdFieldCategory.textContent = item.fieldCategory;
+        row.appendChild(tdFieldCategory);
+
+        let tdFieldId = document.createElement('td');
+        tdFieldId.textContent = item.field_id;
+        row.appendChild(tdFieldId);
+
+        let tdFieldValue = document.createElement('td');
+        tdFieldValue.textContent = item.fieldValue;
+        row.appendChild(tdFieldValue);
+
+        tbody.appendChild(row);
     });
 
     table.appendChild(tbody);
 
     return table;
 }
+
 
   function updateSummaryTable() {
     clearSummaryTable();
