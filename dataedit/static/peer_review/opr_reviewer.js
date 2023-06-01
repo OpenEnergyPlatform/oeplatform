@@ -352,8 +352,9 @@ function renderSummaryPageFields() {
 
         let th = document.createElement('th');
         th.scope = "row";
+        th.className = "status";
         if (item.fieldStatus === "Missing") {
-            th.className = "missing";
+            th.className = "status missing";
         }
         th.textContent = item.fieldStatus;
         row.appendChild(th);

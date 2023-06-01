@@ -115,7 +115,7 @@
 
         &--save button {
             @extend .btn;
-            @extend .btn-primary;
+            @extend .btn-outline-primary;
         }
 
         &--quit button {

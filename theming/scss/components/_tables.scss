@@ -8,9 +8,28 @@ table {
     @extend .border;
     @extend .rounded;
 
-    .missing {
+    thead {
+        @extend .bg-light;
+
+        th {
+            @extend .py-3;
+            white-space: nowrap;
+        }
+    }
+
+    th,
+    td {
+        @extend .px-3;
+    }
+
+    .status {
         @extend .position-relative;
         @extend .ps-4;
+        @extend .fw-normal;
+    }
+
+    .missing {
+        @extend .fw-bold;
 
         &:before {
             content: "";
