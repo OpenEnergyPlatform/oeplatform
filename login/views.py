@@ -93,11 +93,11 @@ class ReviewsView(View):
         latest_reviewed_contribution = peer_review_contributions.last()
         if latest_reviewed_contribution is not None:
             reviewed_contribution_history = peer_review_contributions.exclude(
-                pk=latest_review.pk
+                pk=latest_reviewed_contribution.pk
             )
-            current_manager = PeerReviewManager.load(latest_review)
+            current_manager = PeerReviewManager.load(latest_reviewed_contribution)
             # Update days open value stored in peerReviewManager table
-            current_manager.update_open_since(opr=latest_review)
+            current_manager.update_open_since(opr=latest_reviewed_contribution)
             latest_reviewed_contribution_status = current_manager.status
             latest_reviewed_contribution_days_open = current_manager.is_open_since
             reviewed_contributions_context = {
