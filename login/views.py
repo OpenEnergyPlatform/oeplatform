@@ -91,7 +91,7 @@ class ReviewsView(View):
             contributor_user=user
         )
         latest_reviewed_contribution = peer_review_contributions.last()
-        if latest_review is not None:
+        if latest_reviewed_contribution is not None:
             reviewed_contribution_history = peer_review_contributions.exclude(
                 pk=latest_review.pk
             )

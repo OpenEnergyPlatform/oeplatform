@@ -54,12 +54,7 @@
           <button id="submit_summary">Submit</button>
         </div>
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
-          <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-            <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-              <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
-              </span>Save Progress
-            </a>
-          </span>
+          <button id="peer_review-save">Save Progress</button>
         </div>
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
           <button id="peer_review-cancel">Quit</button>
@@ -218,6 +213,24 @@
                   <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
                 </div>
                 <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
+              </div>
+              <div class="review__btn-nav">
+                <button type="button" onclick="selectPreviousField()">
+                  <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                    </svg>
+                  </span>
+                  <span class="btn__text">Back</span>
+                </button>
+                <button type="button" onclick="selectNextField()">
+                  <span class="btn__icon">
+                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                      </svg>
+                  </span>
+                  <span class="btn__text">Next</span>
+                </button>
               </div>
             </div>
           </div>

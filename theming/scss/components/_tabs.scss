@@ -112,9 +112,9 @@
             @extend .btn-primary;
         }
 
-        &--save a {
+        &--save button {
             @extend .btn;
-            @extend .btn-outline-primary;
+            @extend .btn-primary;
         }
 
         &--quit button {
