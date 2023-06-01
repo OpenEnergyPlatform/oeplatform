@@ -25,11 +25,11 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
-// Submit review
+// Submit review (visible to contributor)
 $('#submit_summary').bind('click', submitPeerReview);
-// Cancel review
+// save the current review (not visible to contributor)
 $('#peer_review-save').bind('click', savePeerReview);
-// OK Field View Change
+// Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
 $('#ok-button').bind('click', hideReviewerOptions);
