@@ -89,6 +89,10 @@
     &__btns {
         @extend .row;
         @extend .py-2;
+
+        &--2 .review__btn {
+            @extend .col-6;
+        }
     }
 
     &__btn {
