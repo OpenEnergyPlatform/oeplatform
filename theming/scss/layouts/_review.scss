@@ -6,21 +6,25 @@
     @extend .w-100;
     @extend .g-0;
 
+    // .expanded {
+    //   display: block !important;;
+    // }
+  
     &__content {
-        @extend .col-6;
-        flex: 0 0 50%;
-        max-width: 50%;
+      @extend .col-6;
+      flex: 0 0 50%;
+      max-width: 50%;
     }
-
+  
     &__controls {
-        @extend .col-6;
-        @extend .ps-4;
-        @extend .position-sticky;
-        position: -webkit-sticky;
-        top: 1rem;
-        flex: 0 0 50%;
-        max-width: 50%;
-        height: fit-content;
+      @extend .col-6;
+      @extend .ps-4;
+      @extend .position-sticky;
+      position: -webkit-sticky;
+      top: 1rem;
+      flex: 0 0 50%;
+      max-width: 50%;
+      height: fit-content;
     }
 
     &__items {
