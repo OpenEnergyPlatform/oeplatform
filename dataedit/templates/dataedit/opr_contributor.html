@@ -59,14 +59,10 @@
             </span>
             <span>Submit</span>
           </button>
+          <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="After the submit button is used, it may take a while until the reviewer responds and the peer review can be continued."></i>
         </div>
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
-          <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-            <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-              <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
-              </span>Save Review
-            </a>
-          </span>
+          <button id="peer_review-save">Save Progress</button>
         </div>
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
           <button id="peer_review-cancel">Quit</button>
@@ -299,14 +295,13 @@
 
 {% block after-body-bottom-js %}
   <script>
-  const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
-    var config = JSON.parse("{{ config|escapejs }}");
-    let state_dict = JSON.parse('{{ state_dict | escapejs }}');
-    for (let [key, value] of Object.entries(state_dict)) {
-  let field_id = `#field_${key}`.replaceAll(".", "\\.");
-  $(field_id).addClass(`field-${value}`);
-}
-
+    const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
+      var config = JSON.parse("{{ config|escapejs }}");
+      let state_dict = JSON.parse('{{ state_dict | escapejs }}');
+      for (let [key, value] of Object.entries(state_dict)) {
+        let field_id = `#field_${key}`.replaceAll(".", "\\.");
+        $(field_id).addClass(`field-${value}`);
+      }
   </script>
   <script src="/static/peer_review/opr_contributor.js"></script>
 {% endblock after-body-bottom-js %}

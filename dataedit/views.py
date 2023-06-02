@@ -2074,12 +2074,16 @@ class PeerRreviewContributorView(PeerReviewView):
         }
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
-    def post(self, request, review_id):
+    def post(self, request, schema, table, review_id):
         context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
+            review_post_type = review_data.get("reviewType")
+            review_datamodel = review_data.get("reviewData")
             review_state = review_data.get("reviewFinished")
-            cuurent_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
-            cuurent_opr.review = review_data.get("reviewData")
-            cuurent_opr.save()
+            current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            existing_reviews = current_opr.review.get('reviews', [])
+            combined_reviews = existing_reviews + [review_datamodel]
+            current_opr.review = {'reviews': combined_reviews}
+            current_opr.update(review_type=review_post_type)
         return render(request, 'dataedit/opr_contributor.html', context=context)

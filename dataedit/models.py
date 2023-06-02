@@ -11,6 +11,7 @@ from django.db.models import (
     JSONField,
 )
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -142,17 +143,15 @@ class PeerReview(models.Model):
         return prev_review, next_review
 
     def save(self, *args, **kwargs):
-        from django.core.exceptions import ValidationError
-        
         review_type = kwargs.pop('review_type', None)
         if not self.contributor == self.reviewer:
             # Call the parent class's save method to save the PeerReview instance
             super().save(*args, **kwargs)
 
             # TODO: This causes errors if review list ist empty
-            prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
+            # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
             
-            print(prev_review.id, next_review)
+            # print(prev_review.id, next_review)
             # print(prev_review, next_review)
             # Create a new PeerReviewManager entry for this PeerReview
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
@@ -179,7 +178,21 @@ class PeerReview(models.Model):
         Update the peer review if the latest peer review is not finished yet but either saved or submitted.
 
         """
-        super().save(*args, **kwargs)
+        review_type = kwargs.pop('review_type', None)
+        if not self.contributor == self.reviewer:
+            current_pm = PeerReviewManager.load(opr=self)
+            if review_type == "save":
+                current_pm.status = ReviewDataStatus.SAVED.value
+            elif review_type == "submit":
+                current_pm.status = ReviewDataStatus.SUBMITTED.value
+            
+            # update peere review manager related to this peer review entry
+            current_pm.save()
+            super().save(*args, **kwargs)
+        else: 
+            raise ValidationError("Contributor and reviewer cannot be the same.")
+
+            
 
 
     @property
@@ -391,5 +404,5 @@ class PeerReviewManager(models.Model):
         return PeerReview.objects.filter(schema=schema, table=table)
     
     def filter_opr_by_id(opr_id):
-        return PeerReview.objects.filter(id=opr_id)
+        return PeerReview.objects.filter(id=opr_id).first()
     
