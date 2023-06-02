@@ -184,6 +184,9 @@ function click_field(fieldKey, fieldValue, category) {
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
     const fieldDescriptionsElement = document.getElementById("field-descriptions");
+    const reviewItem = document.querySelectorAll('.review__item');
+    let selectedDivId = 'field_' + fieldKey;
+    let selectedDiv = document.getElementById(selectedDivId);
     console.log("Field descriptions data:", fieldDescriptionsData);
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
@@ -215,7 +218,18 @@ function click_field(fieldKey, fieldValue, category) {
         document.getElementById("ok-button").disabled = false;
         document.getElementById("rejected-button").disabled = false;
     }
-      clearInputFields();
+
+    // Set selected / not selected style on metadata fields
+    reviewItem.forEach(function(div) {
+      div.style.backgroundColor = '';
+    });
+    if (selectedDiv) {
+      if (!selectedDiv.classList.contains('field-ok')) {
+        selectedDiv.style.backgroundColor = '#F6F9FB';
+      }
+    }
+
+    clearInputFields();
 
 }
 
