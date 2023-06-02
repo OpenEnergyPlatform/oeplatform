@@ -290,7 +290,6 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  */
 function renderSummaryPageFields() {
   const acceptedFields = [];
-  const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
 
@@ -302,8 +301,6 @@ function renderSummaryPageFields() {
 
     if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ field_id, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
       rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
@@ -332,9 +329,7 @@ function renderSummaryPageFields() {
   summaryContainer.innerHTML = `
     <h4>Accepted:</h4>
     ${createFieldList(acceptedFields)}
-    <h4>Suggesting:</h4>
-    ${createFieldList(suggestingFields)}
-    <h4>Rejected:</h4>
+    <h4>Deny:</h4>
     ${createFieldList(rejectedFields)}
     <h4>Missing:</h4>
     ${createFieldList(missingFields)}
@@ -360,68 +355,61 @@ function createFieldList(fields) {
  */
 function saveEntrances() {
   if (Object.keys(current_review["reviews"]).length === 0 &&
-                current_review["reviews"].constructor === Object) {
+      current_review["reviews"].constructor === Object) {
     current_review["reviews"] = [];
   }
 
   if (selectedField) {
     var reviewFound = false;
-    var dummy_review = current_review;
-    dummy_review["reviews"].forEach(function ( value, idx ){
-        if (value["key"] === selectedField){
-            reviewFound = true;
-            var element = document.querySelector('[aria-selected="true"]');
-            var category = (element.getAttribute("data-bs-target"));
 
-            if (Array.isArray(value["fieldReview"])) {
-    value["fieldReview"].push({
-        "timestamp": null, // TODO put actual timestamp
-        "user": "oep_contributor", // TODO put actual username
-        "role": "contributor",
-        "contributorValue": selectedFieldValue,
-        "comment": document.getElementById("commentarea").value,
-        "reviewerSuggestion": document.getElementById("valuearea").value,
-        "contributorstate": selectedState,
-    });
-} else {
-    value["fieldReview"] = [{
-        "timestamp": null, // TODO put actual timestamp
-        "user": "oep_contributor", // TODO put actual username
-        "role": "contributor",
-        "contributorValue": selectedFieldValue,
-        "comment": document.getElementById("commentarea").value,
-        "reviewerSuggestion": document.getElementById("valuearea").value,
-        "contributorstate": selectedState,
-    }];
-}
+    for (let i = 0; i < current_review["reviews"].length; i++) {
+      if (current_review["reviews"][i]["key"] === selectedField){
+        reviewFound = true;
+        if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
+          current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
         }
-    });
-    console.log("current review:" + current_review["reviews"]);
+        var element = document.querySelector('[aria-selected="true"]');
+        var category = element.getAttribute("data-bs-target");
+        current_review["reviews"][i]["fieldReview"].push({
+          "timestamp": null, // TODO put actual timestamp
+          "user": "oep_contributor", // TODO put actual username
+          "role": "contributor",
+          "contributorValue": selectedFieldValue,
+          "comment": document.getElementById("commentarea").value,
+          "reviewerSuggestion": document.getElementById("valuearea").value,
+          "contributorstate": selectedState,
+        });
+        break;
+      }
+    }
+
     if (!reviewFound){
       var element = document.querySelector('[aria-selected="true"]');
-      var category = (element.getAttribute("data-bs-target"));
-      current_review["reviews"].push(
-        {
-          "category": category,
-          "key": selectedField,
-          "fieldReview": [
-            {
-              "timestamp": null, // TODO put actual timestamp
-              "user": "oep_contributor", // TODO put actual username
-              "role": "contributor",
-              "contributorValue": selectedFieldValue,
-              "comment": document.getElementById("commentarea").value,
-              "reviewerSuggestion": document.getElementById("valuearea").value,
-              "contributorstate": selectedState,
-            }]
-        },
-      )}
+      var category = element.getAttribute("data-bs-target");
+      current_review["reviews"].push({
+        "category": category,
+        "key": selectedField,
+        "fieldReview": [
+          {
+            "timestamp": null, // TODO put actual timestamp
+            "user": "oep_contributor", // TODO put actual username
+            "role": "contributor",
+            "contributorValue": selectedFieldValue,
+            "comment": document.getElementById("commentarea").value,
+            "reviewerSuggestion": document.getElementById("valuearea").value,
+            "contributorstate": selectedState,
+          }
+        ]
+      });
+    }
   }
+
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
 }
+
 
 
 
