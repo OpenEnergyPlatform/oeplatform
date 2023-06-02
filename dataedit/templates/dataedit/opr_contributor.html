@@ -87,12 +87,12 @@
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                    <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -107,7 +107,7 @@
                   <p class="review__item-content">
                     <span class="key">{{item.field}}</span>
                     <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                   </p>
                 </div>
                 {% endfor %}
@@ -118,11 +118,11 @@
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -137,11 +137,11 @@
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -155,7 +155,7 @@
                   <p class="review__item-content">
                     <span class="key">{{item.field}}</span>
                     <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                   </p>
                 </div>
               {% endfor %}
@@ -168,7 +168,7 @@
                   <p class="review__item-content">
                     <span class="key">{{item.field}}</span>
                     <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                   </p>
                 </div>
               {% endfor %}
@@ -181,7 +181,7 @@
                   <p class="review__item-content">
                     <span class="key">{{item.field}}</span>
                     <span class="value">{{ item.value }}</span>
-                    <span style="color: dimgrey" class="suggestion">{{ item.reviewer_suggestion }}</span>
+                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                   </p>
                 </div>
               {% endfor %}
