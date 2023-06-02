@@ -357,41 +357,70 @@ function createFieldList(fields) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (!selectedField) return;
-  var reviewerSuggestionUser = "some_reviewer"; // TODO fetch the actual reviewer
-
-  if (reviewerSuggestionUser === "oep_contributor") {
-    alert("Contributor and reviewer cannot be the same.");
-    return;
+  if (Object.keys(current_review["reviews"]).length === 0 &&
+                current_review["reviews"].constructor === Object) {
+    current_review["reviews"] = [];
   }
 
-  var reviewIndex = current_review["reviews"].findIndex(r => r.key === selectedField);
+  if (selectedField) {
+    var reviewFound = false;
+    var dummy_review = current_review;
+    dummy_review["reviews"].forEach(function ( value, idx ){
+        if (value["key"] === selectedField){
+            reviewFound = true;
+            var element = document.querySelector('[aria-selected="true"]');
+            var category = (element.getAttribute("data-bs-target"));
 
-  var review = {
-    "category": document.querySelector('[aria-selected="true"]').getAttribute("data-bs-target"),
-    "key": selectedField,
-    "fieldReview": {
-      "timestamp": null, // TODO put actual timestamp
-      "user": "oep_contributor", // TODO put actual username
-      "role": "contributor",
-      "contributorValue": selectedFieldValue,
-      "comment": document.getElementById("commentarea").value,
-      "reviewerSuggestion": document.getElementById("valuearea").value,
-      "state": selectedState,
-    },
-  };
-
-  if (reviewIndex > -1) {
-    current_review["reviews"][reviewIndex] = review;
-  } else {
-    current_review["reviews"].push(review);
+            if (Array.isArray(value["fieldReview"])) {
+    value["fieldReview"].push({
+        "timestamp": null, // TODO put actual timestamp
+        "user": "oep_contributor", // TODO put actual username
+        "role": "contributor",
+        "contributorValue": selectedFieldValue,
+        "comment": document.getElementById("commentarea").value,
+        "reviewerSuggestion": document.getElementById("valuearea").value,
+        "contributorstate": selectedState,
+    });
+} else {
+    value["fieldReview"] = [{
+        "timestamp": null, // TODO put actual timestamp
+        "user": "oep_contributor", // TODO put actual username
+        "role": "contributor",
+        "contributorValue": selectedFieldValue,
+        "comment": document.getElementById("commentarea").value,
+        "reviewerSuggestion": document.getElementById("valuearea").value,
+        "contributorstate": selectedState,
+    }];
+}
+        }
+    });
+    console.log("current review:" + current_review["reviews"]);
+    if (!reviewFound){
+      var element = document.querySelector('[aria-selected="true"]');
+      var category = (element.getAttribute("data-bs-target"));
+      current_review["reviews"].push(
+        {
+          "category": category,
+          "key": selectedField,
+          "fieldReview": [
+            {
+              "timestamp": null, // TODO put actual timestamp
+              "user": "oep_contributor", // TODO put actual username
+              "role": "contributor",
+              "contributorValue": selectedFieldValue,
+              "comment": document.getElementById("commentarea").value,
+              "reviewerSuggestion": document.getElementById("valuearea").value,
+              "contributorstate": selectedState,
+            }]
+        },
+      )}
   }
-
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
 }
+
 
 
 
