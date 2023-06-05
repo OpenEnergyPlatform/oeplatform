@@ -254,34 +254,12 @@
   </div>
 </main>
 
-
-
-
 {% endblock main %}
-
 
 {% block after-body-bottom-js %}
   <script>
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
-  
-    // document.addEventListener('DOMContentLoaded', function() {
-    //   const summaryTab = document.getElementById('summary-tab');
-    //   const reviewControls = document.querySelector('.review__controls');
-    //   // Get the review content div
-    //   const reviewContent = document.querySelector("review");
-      
-    //   // Event listener for clicking the "Summary" tab button
-    //   summaryTab.addEventListener('click', function() {
-    //     if (reviewControls) {
-    //       reviewControls.remove();
-    //     }
-        
-        
-    //     // Add the class "review__content--expanded"
-    //     reviewContent.classList.toggle("expanded")
-    //   });
-    // });
   </script>
   <script src="/static/peer_review/opr_reviewer.js"></script>
 {% endblock after-body-bottom-js %}
