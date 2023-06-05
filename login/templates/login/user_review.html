@@ -65,12 +65,14 @@
 {% block main-content-body %}
 {% include "login/user_nav.html" %}
     <div>
-        <h2>Reviewer Overview</h2>
+        <h2>Active Open Peer Reviews (Reviewer)</h2>
         <ul>
             {% if reviewer_reviewed.latest is not None %}
-            <strong>Latest Review:</strong>
+            <strong>Review with the most recent activity:</strong>
             <li>
-                <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}</a>
+                <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
+                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}
+                </a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
                    Show review history 
                 </button>
@@ -97,7 +99,7 @@
             {% for review in reviews %}
             {% if forloop.first %}
                 <!-- Display the latest review separately -->
-               <strong>Latest Review for this table:</strong> {{ review }}
+               <strong>Review with the most recent activity:</strong> {{ review }}
                 <li>
                 <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory{{table_name}}" aria-expanded="false" aria-controls="collapseReviewHistory{{table_name}}">
@@ -130,12 +132,14 @@
     </div>
 
     <div>
-        <h2>Contribution Overview</h2>
+        <h2>Active Open Peer Reviews (Contributor)</h2>
         <ul>
             {% if contributor_reviewed.latest is not None %}
-            <strong>Latest Contribution:</strong>
+            <strong>Review with the most recent activity:</strong>
             <li>
-                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} </a>
+                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">
+                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} 
+                </a>
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
                    Show review history 
                 </button>
