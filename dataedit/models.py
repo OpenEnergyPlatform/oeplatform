@@ -192,9 +192,6 @@ class PeerReview(models.Model):
         else: 
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
-            
-
-
     @property
     def days_open(self):
         if self.date_started is None:
@@ -365,7 +362,8 @@ class PeerReviewManager(models.Model):
     @staticmethod
     def filter_opr_by_reviewer(reviewer_user):
         """
-        Filter peer reviews by reviewer.
+        Filter peer reviews by reviewer, excluding those with current peer 
+        is contributor and the data status "SAVED" in the peer review manager.
 
         Args:
             reviewer_user (User): The reviewer user.
@@ -373,12 +371,18 @@ class PeerReviewManager(models.Model):
         Returns:
             QuerySet: Filtered peer reviews.
         """
-        return PeerReview.objects.filter(reviewer=reviewer_user)
+        return PeerReview.objects.filter(
+            reviewer=reviewer_user
+        ).exclude(
+            review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
+            review_id__status=ReviewDataStatus.SAVED.value
+        )
     
     @staticmethod
     def filter_opr_by_contributor(contributor_user):
         """
-        Filter peer reviews by contributor.
+        Filter peer reviews by contributor, excluding those with current peer 
+        is reviewer and the data status "SAVED" in the peer review manager.
 
         Args:
             contributor_user (User): The contributor user.
@@ -387,7 +391,12 @@ class PeerReviewManager(models.Model):
             QuerySet: Filtered peer reviews.
         """
                 
-        return PeerReview.objects.filter(contributor=contributor_user)
+        return PeerReview.objects.filter(
+            contributor=contributor_user
+        ).exclude(
+            review_id__current_reviewer=Reviewer.REVIEWER.value,
+            review_id__status=ReviewDataStatus.SAVED.value
+        )
     
     @staticmethod
     def filter_opr_by_table(schema, table):
