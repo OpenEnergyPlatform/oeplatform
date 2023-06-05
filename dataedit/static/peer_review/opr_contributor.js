@@ -510,7 +510,9 @@ function updateSubmitButtonColor(){
   }
 }
 
-// Hide and show revier controles once the user clicks the summary tab
+/**
+ * Hide and show revier controles once the user clicks the summary tab
+ */
 const summaryTab = document.getElementById('summary-tab');
 const otherTabs = [
   document.getElementById('general-tab'),
@@ -537,7 +539,9 @@ otherTabs.forEach(function(tab) {
   });
 });
 
-// Function to toggle the review controls visibility
+/**
+ * Function to toggle the review controls visibility
+ */ 
 function toggleReviewControls(show) {
   const reviewControls = document.querySelector('.review__controls');
   if (reviewControls) {
