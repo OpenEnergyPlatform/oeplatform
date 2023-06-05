@@ -7,6 +7,8 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
+from itertools import groupby
+
 import login.models as models
 from dataedit.models import Table, PeerReviewManager
 
@@ -55,8 +57,10 @@ class ReviewsView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-
+        
+        ##################################################################
         # get reviewer pov reviews
+        ##################################################################
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(
             reviewer_user=user
         )
@@ -68,16 +72,16 @@ class ReviewsView(View):
             current_manager.update_open_since(opr=latest_review)
             latest_review_status = current_manager.status
             latest_review_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
             reviewed_context = {
                 "latest": latest_review,
                 "latest_status": latest_review_status,
-                "latest_days_open": latest_review_days_open,
+                "current_reviewer": current_reviewer,
+                "latest_days_open": latest_review_days_open, 
                 "history": review_history,
             }
         else:
             reviewed_context = None
-
-        from itertools import groupby
 
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
@@ -86,7 +90,9 @@ class ReviewsView(View):
             k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
         }
 
+        ##################################################################
         # get contributor pov reviews
+        ##################################################################
         peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
             contributor_user=user
         )
