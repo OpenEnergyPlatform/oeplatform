@@ -346,7 +346,7 @@ function renderSummaryPageFields() {
 
     let thead = document.createElement('thead');
     let header = document.createElement('tr');
-    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field ID</th><th scope="col">Field Value</th>';
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
     thead.appendChild(header);
     table.appendChild(thead);
 
