@@ -510,4 +510,39 @@ function updateSubmitButtonColor(){
   }
 }
 
+// Hide and show revier controles once the user clicks the summary tab
+const summaryTab = document.getElementById('summary-tab');
+const otherTabs = [
+  document.getElementById('general-tab'),
+  document.getElementById('spatiotemporal-tab'),
+  document.getElementById('source-tab'),
+  document.getElementById('license-tab'),
+  document.getElementById('contributor-tab'),
+  document.getElementById('resource-tab')
+];
+const reviewContent = document.querySelector(".review__content");
+
+// Event listener for clicking the "Summary" tab button
+summaryTab.addEventListener('click', function() {
+  toggleReviewControls(false);
+  reviewContent.classList.toggle("tab-pane--100");
+});
+
+// Event listener for clicking the other tabs
+otherTabs.forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    console.log("tab")
+    toggleReviewControls(true);
+    reviewContent.classList.remove("tab-pane--100");
+  });
+});
+
+// Function to toggle the review controls visibility
+function toggleReviewControls(show) {
+  const reviewControls = document.querySelector('.review__controls');
+  if (reviewControls) {
+    reviewControls.style.display = show ? '' : 'none';
+  }
+}
+
 peerReview(config);
