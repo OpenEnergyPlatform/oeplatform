@@ -5,15 +5,16 @@
     @extend .row;
     @extend .w-100;
     @extend .g-0;
-
-    // .expanded {
-    //   display: block !important;;
-    // }
-  
+    
     &__content {
       @extend .col-6;
       flex: 0 0 50%;
       max-width: 50%;
+      
+      &.tab-pane--100 {
+        width: 100%;
+        max-width: 100%;
+      }
     }
   
     &__controls {

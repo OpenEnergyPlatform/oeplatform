@@ -304,7 +304,6 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  */
 function renderSummaryPageFields() {
   const acceptedFields = [];
-  const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
 
@@ -316,8 +315,6 @@ function renderSummaryPageFields() {
 
     if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ field_id, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
       rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
@@ -343,16 +340,79 @@ function renderSummaryPageFields() {
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
-  summaryContainer.innerHTML = `
-    <h4>Accepted:</h4>
-    ${createFieldList(acceptedFields)}
-    <h4>Suggesting:</h4>
-    ${createFieldList(suggestingFields)}
-    <h4>Rejected:</h4>
-    ${createFieldList(rejectedFields)}
-    <h4>Missing:</h4>
-    ${createFieldList(missingFields)}
-  `;
+
+  function clearSummaryTable() {
+    while(summaryContainer.firstChild) {
+      summaryContainer.firstChild.remove();
+    }
+  }
+  function generateTable(data) {
+    let table = document.createElement('table');
+    table.className = 'table review-summary';
+
+    let thead = document.createElement('thead');
+    let header = document.createElement('tr');
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
+    thead.appendChild(header);
+    table.appendChild(thead);
+
+    let tbody = document.createElement('tbody');
+
+    data.forEach(item => {
+        let row = document.createElement('tr');
+
+        let th = document.createElement('th');
+        th.scope = "row";
+        th.className = "status";
+        if (item.fieldStatus === "Missing") {
+            th.className = "status missing";
+        }
+        th.textContent = item.fieldStatus;
+        row.appendChild(th);
+
+        let tdFieldCategory = document.createElement('td');
+        tdFieldCategory.textContent = item.fieldCategory;
+        row.appendChild(tdFieldCategory);
+
+        let tdFieldId = document.createElement('td');
+        tdFieldId.textContent = item.field_id;
+        row.appendChild(tdFieldId);
+
+        let tdFieldValue = document.createElement('td');
+        tdFieldValue.textContent = item.fieldValue;
+        row.appendChild(tdFieldValue);
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    return table;
+}
+
+
+  function updateSummaryTable() {
+    clearSummaryTable();
+    
+    let allData = [];
+    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
+    allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
+    allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
+    
+    let table = generateTable(allData);
+    summaryContainer.appendChild(table);
+  }
+
+  updateSummaryTable();
+  // const summaryContainer = document.getElementById("summary");
+  // summaryContainer.innerHTML = `
+  //   <h4>Accepted:</h4>
+  //   ${createFieldList(acceptedFields)}
+  //   <h4>Deny:</h4>
+  //   ${createFieldList(rejectedFields)}
+  //   <h4>Missing:</h4>
+  //   ${createFieldList(missingFields)}
+  // `;
 }
 
 /**
@@ -374,68 +434,61 @@ function createFieldList(fields) {
  */
 function saveEntrances() {
   if (Object.keys(current_review["reviews"]).length === 0 &&
-                current_review["reviews"].constructor === Object) {
+      current_review["reviews"].constructor === Object) {
     current_review["reviews"] = [];
   }
 
   if (selectedField) {
     var reviewFound = false;
-    var dummy_review = current_review;
-    dummy_review["reviews"].forEach(function ( value, idx ){
-        if (value["key"] === selectedField){
-            reviewFound = true;
-            var element = document.querySelector('[aria-selected="true"]');
-            var category = (element.getAttribute("data-bs-target"));
 
-            if (Array.isArray(value["fieldReview"])) {
-    value["fieldReview"].push({
-        "timestamp": null, // TODO put actual timestamp
-        "user": "oep_contributor", // TODO put actual username
-        "role": "contributor",
-        "contributorValue": selectedFieldValue,
-        "comment": document.getElementById("commentarea").value,
-        "reviewerSuggestion": document.getElementById("valuearea").value,
-        "contributorstate": selectedState,
-    });
-} else {
-    value["fieldReview"] = [{
-        "timestamp": null, // TODO put actual timestamp
-        "user": "oep_contributor", // TODO put actual username
-        "role": "contributor",
-        "contributorValue": selectedFieldValue,
-        "comment": document.getElementById("commentarea").value,
-        "reviewerSuggestion": document.getElementById("valuearea").value,
-        "contributorstate": selectedState,
-    }];
-}
+    for (let i = 0; i < current_review["reviews"].length; i++) {
+      if (current_review["reviews"][i]["key"] === selectedField){
+        reviewFound = true;
+        if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
+          current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
         }
-    });
-    console.log("current review:" + current_review["reviews"]);
+        var element = document.querySelector('[aria-selected="true"]');
+        var category = element.getAttribute("data-bs-target");
+        current_review["reviews"][i]["fieldReview"].push({
+          "timestamp": null, // TODO put actual timestamp
+          "user": "oep_contributor", // TODO put actual username
+          "role": "contributor",
+          "contributorValue": selectedFieldValue,
+          "comment": document.getElementById("commentarea").value,
+          "reviewerSuggestion": document.getElementById("valuearea").value,
+          "contributorstate": selectedState,
+        });
+        break;
+      }
+    }
+
     if (!reviewFound){
       var element = document.querySelector('[aria-selected="true"]');
-      var category = (element.getAttribute("data-bs-target"));
-      current_review["reviews"].push(
-        {
-          "category": category,
-          "key": selectedField,
-          "fieldReview": [
-            {
-              "timestamp": null, // TODO put actual timestamp
-              "user": "oep_contributor", // TODO put actual username
-              "role": "contributor",
-              "contributorValue": selectedFieldValue,
-              "comment": document.getElementById("commentarea").value,
-              "reviewerSuggestion": document.getElementById("valuearea").value,
-              "contributorstate": selectedState,
-            }]
-        },
-      )}
+      var category = element.getAttribute("data-bs-target");
+      current_review["reviews"].push({
+        "category": category,
+        "key": selectedField,
+        "fieldReview": [
+          {
+            "timestamp": null, // TODO put actual timestamp
+            "user": "oep_contributor", // TODO put actual username
+            "role": "contributor",
+            "contributorValue": selectedFieldValue,
+            "comment": document.getElementById("commentarea").value,
+            "reviewerSuggestion": document.getElementById("valuearea").value,
+            "contributorstate": selectedState,
+          }
+        ]
+      });
+    }
   }
+
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
 }
+
 
 
 
@@ -519,6 +572,45 @@ function updateSubmitButtonColor(){
   }
   else {
     $(submitButton).addClass('btn-danger');
+  }
+}
+
+/**
+ * Hide and show revier controles once the user clicks the summary tab
+ */
+const summaryTab = document.getElementById('summary-tab');
+const otherTabs = [
+  document.getElementById('general-tab'),
+  document.getElementById('spatiotemporal-tab'),
+  document.getElementById('source-tab'),
+  document.getElementById('license-tab'),
+  document.getElementById('contributor-tab'),
+  document.getElementById('resource-tab')
+];
+const reviewContent = document.querySelector(".review__content");
+
+// Event listener for clicking the "Summary" tab button
+summaryTab.addEventListener('click', function() {
+  toggleReviewControls(false);
+  reviewContent.classList.toggle("tab-pane--100");
+});
+
+// Event listener for clicking the other tabs
+otherTabs.forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    console.log("tab")
+    toggleReviewControls(true);
+    reviewContent.classList.remove("tab-pane--100");
+  });
+});
+
+/**
+ * Function to toggle the review controls visibility
+ */ 
+function toggleReviewControls(show) {
+  const reviewControls = document.querySelector('.review__controls');
+  if (reviewControls) {
+    reviewControls.style.display = show ? '' : 'none';
   }
 }
 
