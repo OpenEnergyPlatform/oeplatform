@@ -58,8 +58,21 @@ main.main {
                 @extend .fw-semibold;
                 @extend .fs-6;
                 @extend .mb-3;
-                background-color: $green-100;
-                color: $green-600;
+                
+                &--done {
+                    background-color: $green-100;
+                    color: $green-600;
+                }
+
+                &--ongoing {
+                    background-color: $blue-100;
+                    color: $blue-700;
+                }
+
+                &--start {
+                    background-color: $red-100;
+                    color: $red-600;
+                }
             }
         }
     }
