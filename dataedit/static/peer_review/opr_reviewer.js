@@ -122,13 +122,14 @@ function getErrorMsg(response) {
  */
 function peerReview(config) {
   /*
-    TODO: consolidate functions (same as in wizard and other places)
+    TODO: Show loading icon if peer review page is loaded 
     */
 
-  (function init() {
-    $('#peer_review-loading').removeClass('d-none');
-    config.form = $('#peer_review-form');
-  })();
+  // (function init() {
+  //   $('#peer_review-loading').removeClass('d-none');
+  //   config.form = $('#peer_review-form');
+  // })();
+
   selectNextField();
   renderSummaryPageFields();
 }

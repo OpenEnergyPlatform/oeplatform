@@ -2117,9 +2117,9 @@ class PeerRreviewContributorView(PeerReviewView):
             review_datamodel = review_data.get("reviewData")
             review_state = review_data.get("reviewFinished")
             current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
-            existing_reviews = current_opr.review.get('reviews', [])
+            existing_reviews = current_opr.review.get("reviews", [])
             combined_reviews = existing_reviews + [review_datamodel]
-            current_opr.review = {'reviews': combined_reviews}
+            current_opr.review = {"reviews": combined_reviews}
             current_opr.update(review_type=review_post_type)
 
         return render(request, 'dataedit/opr_contributor.html', context=context)
