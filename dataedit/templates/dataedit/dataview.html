@@ -191,11 +191,17 @@
 <h4> Open-Peer-Review </h4>
 {% if not opr.reviewer %} 
     {% if user.is_authenticated and opr.contributor.id != user.id %}
+      <div class="review-status review-status--done">
+        Table reviewed
+      </div>
       <a class="btn btn-success btn-sm" type="button"
       href="{% url 'peer_review_create' table=table schema=schema %}">
         Start Open-Peer-Review-Process
       </a>
     {% else %}
+    <div class="review-status review-status--start">
+      Table not reviewed
+    </div>
       <a class="btn btn-success btn-sm disabled" type="button"
       href="{% url 'peer_review_create' table=table schema=schema %}">
         Start Open-Peer-Review-Process
@@ -203,11 +209,17 @@
       <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
     {% endif %}
 {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id %}
+  <div class="review-status review-status--done">
+    Table reviewed
+  </div>
   <a class="btn btn-success btn-sm" type="button"
   href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
     Continue Open-Peer-Review-Process
   </a>
 {% else %}
+  <div class="review-status review-status--ongoing">
+    Table is being reviewed
+  </div>
   <a class="btn btn-success btn-sm disabled" type="button"
   href="">
   Continue Open-Peer-Review-Process
