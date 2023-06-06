@@ -165,12 +165,12 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <StyledTableCell padding="checkbox">
-          <Checkbox
+         {/*  <Checkbox
                 color="primary"
                 indeterminate={numSelected > 0 && numSelected < rowCount}
                 checked={rowCount > 0 && numSelected === rowCount}
                 onChange={onSelectAllClick}
-              />
+              /> */}
         </StyledTableCell>
         {headCells.map((headCell) => (
           <StyledTableCell
@@ -239,7 +239,7 @@ function EnhancedTableToolbar(props) {
           </Tooltip>}
       </Typography>
       <Tooltip title="Add a new factsheet">
-        <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+        <Link to={`sirop/factsheet/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
           <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}><AddIcon/></Button>
         </Link>
       </Tooltip>
@@ -256,7 +256,7 @@ export default function CustomTable(props) {
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('study name');
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -305,22 +305,28 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
 
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
+    const newSelected = new Set(selected);
+    if (newSelected.has(name)) newSelected.delete(name);
+    else newSelected.add(name);
 
+    // const selectedIndex = selected.indexOf(name);
+    // let newSelected = [];
+
+    // if (selectedIndex === -1) {
+    //   newSelected = newSelected.concat(selected, name);
+    // } else if (selectedIndex === 0) {
+    //   newSelected = newSelected.concat(selected.slice(1));
+    // } else if (selectedIndex === selected.length - 1) {
+    //   newSelected = newSelected.concat(selected.slice(0, -1));
+    // } else if (selectedIndex > 0) {
+    //   newSelected = newSelected.concat(
+    //     selected.slice(0, selectedIndex),
+    //     selected.slice(selectedIndex + 1),
+    //   );
+    // }
+
+    console.log(newSelected);
     setSelected(newSelected);
   };
 
@@ -449,7 +455,7 @@ export default function CustomTable(props) {
     };
 
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (name) => selected.has(name);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -501,14 +507,7 @@ export default function CustomTable(props) {
                   sx={{ cursor: 'pointer' }}
                 >
                   <TableCell padding="checkbox">
-                    <Checkbox
-                      onClick={(event) => handleClick(event, row.study_name)}
-                      color="primary"
-                      checked={isItemSelected}
-                      inputProps={{
-                        'aria-labelledby': labelId,
-                      }}
-                    />
+                   
                   </TableCell>
                   <TableCell>
                     <Typography variant="subtitle1" gutterBottom style={{ marginTop: '10px' }}>{row.study_name}</Typography>
@@ -522,7 +521,9 @@ export default function CustomTable(props) {
                   </TableCell>
                   <TableCell >
                       {row.scenarios.map((v) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <Tooltip title={v}>
+                          <Chip color="primary" label={v} variant={selected.has(v) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v)}/>
+                        </Tooltip>
                       ))}
                   </TableCell>
                   <TableCell>
@@ -535,7 +536,7 @@ export default function CustomTable(props) {
                     </IconButton>
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
-                    <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                       <ReadMoreIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px', fontSize: '35px' }}/>
                     </Link> 
                   </TableCell>
@@ -610,10 +611,10 @@ export default function CustomTable(props) {
         style={{ height: '85vh', overflow: 'auto' }}
       >
         <DialogTitle id="responsive-dialog-title">
-          <b>Please select the relevant aspects for the comparison.</b>
+          <b>  Which elements of the scenarios do you wish to compare? </b>
         </DialogTitle >
         <DialogContent>
-          <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
+         {/*  <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
             Which elements of the studies do you wish to compare?
           </Typography>
             <FormGroup>
@@ -624,10 +625,7 @@ export default function CustomTable(props) {
               <FormControlLabel control={<Checkbox />} label="Models" />
               <FormControlLabel control={<Checkbox />} label="Frameworks" />
             </FormGroup>
-          <Divider />
-          <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
-            Which elements of the scenarios do you wish to compare?
-          </Typography>
+          <Divider /> */}
           <FormGroup>
               <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
               <FormControlLabel control={<Checkbox />} label="Years" />
@@ -639,7 +637,7 @@ export default function CustomTable(props) {
         </DialogContent>
         <DialogActions>
           <Button variant="contained" >
-            <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
+            <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
               Show comparison
             </Link>
           </Button>
@@ -729,7 +727,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
+        <EnhancedTableToolbar numSelected={selected.size}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}

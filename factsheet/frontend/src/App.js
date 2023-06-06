@@ -26,7 +26,6 @@ import conf from "./conf.json";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ComparisonBoardMain from "./components/comparisonBoardMain";
 
-const url_id = String(window.location.href).split('/').pop()
 
 function App() {
   const [factsheet, setFactsheet] = useState({});
@@ -51,9 +50,13 @@ function App() {
   });
 
   const url_id = String(window.location.href).split('/').pop();
+  const url_sub_id = String(window.location.href).split('/').at(-2);
+  console.log(url_id);
+
+
   const getData = async () => {
     if (url_id !== '' && url_id !== 'new') {
-        const { data } = await axios.get(conf.toep + `factsheet/get/`, { params: { id: url_id } });
+        const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_id } });
         console.log(data);
         return data;
     }
@@ -70,10 +73,11 @@ function App() {
     return < Home id={url_id}/>
   } else {
     if (loading === false) {
-      if (url_id === 'compare') {
-        return <ComparisonBoardMain />
-      } else 
+      if (url_sub_id === 'compare') {
+        return <ThemeProvider theme={theme}><ComparisonBoardMain /></ThemeProvider>
+      } else if (url_sub_id === 'factsheet') {
       return <ThemeProvider theme={theme}><Factsheet id={url_id} fsData={factsheet}/></ThemeProvider>
+      }
     } else {
       return <LinearProgress />
     }

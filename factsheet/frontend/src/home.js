@@ -49,7 +49,7 @@ function Home(props) {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(conf.toep + `factsheet/all/`).then(response => {
+    axios.get(conf.toep + `sirop/all/`).then(response => {
       setFactsheets(response.data);
       setLoading(false);
     });

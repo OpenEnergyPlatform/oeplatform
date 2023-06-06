@@ -3,6 +3,11 @@ import ComparisonBoardItems from "./comparisonBoardItems";
 import { Box } from "@mui/system";
 import ComparisonControl from "./comparisonControl";
 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Link } from 'react-router-dom';
+import Button from '@mui/material/Button';
+
+
 const ComparisonBoardMain = (props) => {
   const { items } = props;
 
@@ -17,7 +22,18 @@ const ComparisonBoardMain = (props) => {
       height: '100%',
       padding: '20px'
      }}>
-       <ComparisonControl />
+       {/* <ComparisonControl /> */}
+        <Box sx={{ 
+            width: '100%',
+            display: 'block',
+
+          }}>
+            <Link to={`sirop/`} onClick={() => this.forceUpdate}>
+              <Button color="primary" variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginLeft': '10px', 'zIndex': '1000' }}>
+                <ArrowBackIcon />
+              </Button>
+            </Link>  
+          </Box>
        <ComparisonBoardItems factsheetName = {'A'} elements={
           [
             { id: '2', 

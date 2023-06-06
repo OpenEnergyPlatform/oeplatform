@@ -1597,7 +1597,6 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <CustomAutocomplete width="40%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
               
           
@@ -1667,6 +1666,7 @@ function getStepContent(step: number) {
       return (
         <div>
             <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+            <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
             <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
             <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
             <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
@@ -2022,12 +2022,7 @@ function getStepContent(step: number) {
                           ))}
                         </p>
                       
-                        <p>
-                          <b> Authors: </b>
-                            {selectedAuthors.map((v, i) => (
-                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                        </p>
+                       
 
                         </TimelineContent>
                       </TimelineItem>
@@ -2074,6 +2069,12 @@ function getStepContent(step: number) {
                         <TimelineContent>
                         <p>
                           <b>Report title: </b> {report_title !== undefined && report_title}
+                        </p>
+                        <p>
+                          <b> Authors: </b>
+                            {selectedAuthors.map((v, i) => (
+                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
                         </p>
                         <p>
                           <b>DOI: </b>
