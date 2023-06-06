@@ -130,6 +130,10 @@ function peerReview(config) {
   //   config.form = $('#peer_review-form');
   // })();
 
+  if ( existing_review ){
+    console.log(existing_review);
+    current_review = existing_review
+  }
   selectNextField();
   renderSummaryPageFields();
 }

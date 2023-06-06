@@ -1964,18 +1964,20 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
             
         metadata = self.sort_in_category(schema, table)
-
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id}
             )
+
+            existing_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id).review
         else:
             url_peer_review = reverse(
                 "peer_review_create",
                 kwargs={"schema": schema, "table": table}
             )
+            existing_review=None
 
         config_data = {
             "can_add": can_add,
@@ -1990,6 +1992,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
+            "existing_review": existing_review,
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
