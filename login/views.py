@@ -106,9 +106,11 @@ class ReviewsView(View):
             current_manager.update_open_since(opr=latest_reviewed_contribution)
             latest_reviewed_contribution_status = current_manager.status
             latest_reviewed_contribution_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
             reviewed_contributions_context = {
                 "latest": latest_reviewed_contribution,
                 "latest_status": latest_reviewed_contribution_status,
+                "current_reviewer": current_reviewer,
                 "latest_days_open": latest_reviewed_contribution_days_open,
                 "history": reviewed_contribution_history,
             }
