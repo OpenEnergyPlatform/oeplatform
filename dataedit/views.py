@@ -1070,9 +1070,10 @@ class DataView(View):
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
-            opr_context.update({"opr_id": latest_review.id})
+            current_reviewer = opr_manager.load(latest_review).current_reviewer
+            opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer})
         else:
-            opr_context.update({"opr_id": None})
+            opr_context.update({"opr_id": None, "opr_current_reviewer": None})
         
         #########################################################################
         context_dict = {
