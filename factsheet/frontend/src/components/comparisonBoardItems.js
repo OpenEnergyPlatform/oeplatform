@@ -24,7 +24,7 @@ const getItemStyle = (isDragging, draggableStyle, index) => ({
   marginTop: '10px',
   marginBottom: '10px',
   background: index === 0 ? '#488AC740' : '#87AFC740',
-  minWidth: '28%',
+  width: '30%',
   height: '90%',
   borderRadius: '5px',
   overflow: 'auto',
@@ -37,13 +37,14 @@ const getListStyle = isDraggingOver => ({
   display: 'flex',
   padding: grid,
   overflow: 'auto',
-  width: '100%',
-  height: '95%'
+  height: '98%'
 });
 
 export default function  ComparisonBoardItems (props) {
-  const { elements } = props;
+  const { elements, c_aspects } = props;
   const [state, setState] = useState({ items : elements });
+
+  console.log(state);
 
   function onDragEnd(result) {
     if (!result.destination) {
@@ -63,19 +64,21 @@ export default function  ComparisonBoardItems (props) {
   }
 
   const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+  console.log(state.items[0].data.descriptors);
 
   return (
-    <div style={{ overflow: 'auto'}}>
+    <div style={{ overflow: 'auto', width: '98%' }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" direction="horizontal">
-          {(provided, snapshot) => (
+          
+        {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
               style={getListStyle(snapshot.isDraggingOver)}
               {...provided.droppableProps}
-            >
-              {state.items.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
+            > 
+             {state.items.map((item, index) => (
+                <Draggable key={item.acronym} draggableId={item.acronym} index={index}>
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
@@ -88,125 +91,119 @@ export default function  ComparisonBoardItems (props) {
                       )}
                     >
 
-                      <div style={{ display: 'flex' }} >
-                        { index === 0 ? <HiveIcon sx={{ fontSize: 40 }}  /> : <HiveOutlinedIcon sx={{ fontSize: 40 }} /> }
-                        <Typography variant="h5" gutterBottom component="div" style={{ marginTop:'5px', marginBottom:'15px', height: '30px' }}>
-                        { index === 0 ? <b>{item.content}</b> : item.content }
-                        </Typography>
-                      </div>
-                      <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Institutions:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '30px'}} >
-                          {item['institutions'].map((v, i) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                          ))}
-                        </div>
-                      <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Descriptors:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '70px', overflow: 'auto' }} >
-                          {item['descriptors'].map((v, i) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                          ))}
-                        </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Sectors:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '30px', overflow: 'auto' }} >
-                          {item['sectors'].map((v) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: '#ffffff'}}/>
-                          ))}
-                        </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Energy carriers:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '50px', overflow: 'auto'}} >
-                          {item['enrgy-carriers'].map((v) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                          ))}
-                        </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Enrgy transformation processes:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '50px', overflow: 'auto'}} >
-                          {item['enrgy-transformation-processes'].map((v) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                          ))}
-                        </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                            <b>Scenarios:</b> 
-                          </Typography>
-                          <div style={{ marginBottom: '5px', height: '70px', overflow: 'auto'}} >
-                            {item['scenarios'].map((v, i) => (
-                               <div>
-                                  <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                                  <Checkbox {...label} defaultChecked color={[0, 1].includes(item['id']) ? "error" : "success"}  sx={{color: 'red' }}/>  <Typography variant="caption">Target-driven</Typography>
-                                  <Checkbox {...label} defaultChecked color="success"/><Typography variant="caption">Measure-driven</Typography>
-                             </div>
-                            ))}
-                         
-                          </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Scenario descriptors:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '50px', overflow: 'auto'}} >
-                          {item['scenario-descriptors'].map((v, i) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                          ))}
-                        </div>
-                        <Divider />
-                          <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                            <b>Regions:</b> 
-                          </Typography>
-                          <div style={{ marginBottom: '5px', height: '30px', overflow: 'auto'}} >
-                            {item['region'].map((v, i) => (
-                              <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
-                            ))}
-                          </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Years:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '30px', overflow: 'auto'}} >
-                          {item['scenario_years'].map((v, i) => (
-                            <Chip size='small' key={v}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor:'white' }}/>
-                          ))}
-                        </div>
-                      <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Models:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '30px', overflow: 'auto'}} >
-                          {item['models'].map((v) => (
-                            <Chip size='small' key={v.name}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: '#ffffff' }}/>
-                          ))}
-                        </div>
-                        <Divider />
-                        <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
-                          <b>Frameworks:</b> 
-                        </Typography>
-                        <div style={{ marginBottom: '5px', height: '30px', overflow: 'auto'}} >
-                          {item['frameworks'].map((v) => (
-                            <Chip size='small' key={v.name}  label={v} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: '#ffffff' }}/>
-                          ))}
-                        </div>
+                    <div style={{ display: 'flex' }} >
+                      { index === 0 ? <HiveIcon sx={{ fontSize: 40 }}  /> : <HiveOutlinedIcon sx={{ fontSize: 40 }} /> }
+                      <Typography variant="subtitle1" gutterBottom component="div" style={{ marginTop:'5px', marginBottom:'15px', height: '30px' }}>
+                        { index === 0 ? <b>{item.acronym}</b> : item.acronym }
+                      </Typography>
+                    </div> 
+
+                    {c_aspects.includes('des') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Descriptors:</b> 
+                      </Typography>
+                      {item.data.descriptors.map((descriptor) => (
+                        index === 0 ? 
+                        <Chip  color="default"  size='small' key={descriptor}  label={descriptor} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.descriptors.includes(descriptor) ?
+                        <Chip  color="success"  size='small' key={descriptor}  label={descriptor} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        <Chip  color="error"  size='small' key={descriptor}  label={descriptor} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                      ) )}
+                    </div>}
+                    
+
+
+                    {c_aspects.includes('reg') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Regions:</b> 
+                      </Typography>
+                      {item.data.regions.map(region => (
+                        index === 0 ? 
+                        <Chip color="default" size='small' key={region}  label={region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.regions.includes(region) ?
+                        <Chip color="success" size='small' key={region}  label={region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :<Chip  color="error" size='small' key={region}  label={region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        ) )}
                     </div>
+                    }
+
+                    {c_aspects.includes('int') && <div style= {{border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto'}} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Interacting regions:</b> 
+                      </Typography>
+                      {item.data.interacting_regions.map(interacting_region => (
+                        index === 0 ? 
+                        <Chip color="default" size='small' key={interacting_region}  label={interacting_region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.interacting_regions.includes(interacting_region) ?
+                        <Chip color="success" size='small' key={interacting_region}  label={interacting_region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        <Chip color="error" size='small' key={interacting_region}  label={interacting_region} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                      ) )}
+                    </div>}
+
+
+                    {c_aspects.includes('yea') && <div style= {{  border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Scenario years:</b> 
+                      </Typography>
+                      {item.data.scenario_years.map(scenario_year => (
+                        index === 0 ? 
+                        <Chip color="default" size='small' key={scenario_year}  label={scenario_year} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.scenario_years.includes(scenario_year) ?
+                        <Chip color="success" size='small' key={scenario_year}  label={scenario_year} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        <Chip color="error" size='small' key={scenario_year}  label={scenario_year} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                      ) )}
+                    </div>}
+
+
+                   {c_aspects.includes('int') && <div style= {{  border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '200px', overflow: 'auto' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Input datasets:</b> 
+                      </Typography>
+                      {item.data.input_datasets.map(input_dataset => (
+                        index === 0 ? 
+                        <Chip color="default" size='small' key={input_dataset}  label={input_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.input_datasets.includes(input_dataset) ?
+                        <Chip color="success" size='small' key={input_dataset}  label={input_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        <Chip color="error" size='small' key={input_dataset}  label={input_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                      ) )}
+                    </div>}
+
+
+                   { c_aspects.includes('out') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '200px', overflow: 'auto' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Output datasets:</b> 
+                      </Typography>
+                      {item.data.output_datasets.map(output_dataset => (
+                        index === 0 ? 
+                        <Chip  color="default" size='small' key={output_dataset}  label={output_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        state.items[0].data.output_datasets.includes(output_dataset) ?
+                        <Chip  color="success" size='small' key={output_dataset}  label={output_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                        :
+                        <Chip  color="error" size='small' key={output_dataset}  label={output_dataset} variant="outlined" sx={{ 'marginBottom': '5px', 'marginTop': '5px', 'marginLeft': '5px', backgroundColor: 'white' }}/>
+                      ) )}
+                    </div>}
+
+                    </div> 
                   )}
+
+                    
+
                 </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
+              ))} 
+            </div> 
+            )}
         </Droppable>
-      </DragDropContext>
-    </div>
+      </DragDropContext> 
+    </div> 
   );
 }

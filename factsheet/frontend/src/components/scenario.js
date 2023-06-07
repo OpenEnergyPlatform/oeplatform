@@ -321,7 +321,7 @@ export default function Scenario(props) {
           </Grid>
           <Grid item xs={6} style={{  width: '90%' }}>
             <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
-              What additional keywords describe your scenario?
+              Please select your scenario descriptors:
             </Typography>
               <div>
                <FormGroup>

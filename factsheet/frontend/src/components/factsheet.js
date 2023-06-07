@@ -258,7 +258,7 @@ function Factsheet(props) {
   }
 
   const populateFactsheetElements = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/populate_factsheets_elements/`);
+    const { data } = await axios.get(conf.toep + `sirop/populate_factsheets_elements/`);
     return data;
   };
 
@@ -308,7 +308,7 @@ function Factsheet(props) {
     if (acronym !== '') {
       if (id === 'new' && !isCreated) {
         const new_uid = uuid()
-        axios.post(conf.toep + 'factsheet/add/',
+        axios.post(conf.toep + 'sirop/add/',
         {
           id: id,
           uid: new_uid,
@@ -348,8 +348,8 @@ function Factsheet(props) {
         }
       });
       } else {
-        axios.get(conf.toep + `factsheet/get/`, { params: { id: uid } }).then(res => {
-          axios.post(conf.toep + 'factsheet/update/',
+        axios.get(conf.toep + `sirop/get/`, { params: { id: uid } }).then(res => {
+          axios.post(conf.toep + 'sirop/update/',
           {
             fsData: res.data,
             id: id,
@@ -396,7 +396,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -575,47 +575,47 @@ function Factsheet(props) {
   } 
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
   const getContactPersons = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getScenarioRegions = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
     return data;
   };
 
   const getScenarioInteractingRegions = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
     return data;
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
   const getModels = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
     return data;
   };
 
   const getFrameworks = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
     return data;
   };
 
@@ -693,7 +693,7 @@ function Factsheet(props) {
 
 
   const HandleAddNewInstitution = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
@@ -714,7 +714,7 @@ function Factsheet(props) {
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
     console.log(editIRI);
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
@@ -734,7 +734,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
@@ -753,7 +753,7 @@ function Factsheet(props) {
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
     console.log(editIRI)
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
@@ -773,7 +773,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewContactPerson = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
@@ -792,7 +792,7 @@ function Factsheet(props) {
   } 
 
   const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
@@ -812,7 +812,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewAuthor = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
@@ -831,7 +831,7 @@ function Factsheet(props) {
   }
 
   const HandleEditAuthors = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
@@ -851,7 +851,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewRegion = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OBO.BFO_0000006', 
       entity_label: newElement.name,
@@ -870,7 +870,7 @@ function Factsheet(props) {
   }
 
   const HandleEditRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: oldElement,
@@ -890,7 +890,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
@@ -909,7 +909,7 @@ function Factsheet(props) {
   }
   
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: oldElement,
@@ -929,7 +929,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNNewScenarioYears = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
@@ -948,7 +948,7 @@ function Factsheet(props) {
   }
 
   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: oldElement,
@@ -968,7 +968,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewModel = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
@@ -987,7 +987,7 @@ function Factsheet(props) {
   }
 
   const HandleEditModels = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: oldElement,
@@ -1007,7 +1007,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFramework = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
@@ -1026,7 +1026,7 @@ function Factsheet(props) {
   }
 
   const HandleEditFramework = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: oldElement,
@@ -1879,7 +1879,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes

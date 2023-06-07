@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, } from 'react';
 import ComparisonBoardItems from "./comparisonBoardItems";
 import { Box } from "@mui/system";
 import ComparisonControl from "./comparisonControl";
@@ -6,100 +6,54 @@ import ComparisonControl from "./comparisonControl";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import axios from 'axios';
+import conf from "../conf.json";
 
 
 const ComparisonBoardMain = (props) => {
-  const { items } = props;
+  const { params } = props;
+
+  const [scenarios, setScenarios] = useState([]);
+  
+  const scenario_acronyms = params.split('CASPECTS')[0].split('-');
+  const scenario_acronyms_json = JSON.stringify(scenario_acronyms);
+
+  const scenario_aspects = params.split('CASPECTS')[1].split('-');
+
+  const getScenarios = async () => {
+    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_acronym: scenario_acronyms_json } });
+    return data;
+  };
+
+  useEffect(() => {
+    getScenarios().then((data) => {
+      setScenarios(data);
+      });
+  }, []);
+
+  console.log(scenarios);
 
   return (
-    <Box sx={{ 
+    scenarios.length !== 0 && <Box sx={{ 
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       alignItems: 'center',
-      width: '100%',
       overflow: 'auto',
       height: '100%',
-      padding: '20px'
      }}>
        {/* <ComparisonControl /> */}
         <Box sx={{ 
             width: '100%',
             display: 'block',
-
           }}>
             <Link to={`sirop/`} onClick={() => this.forceUpdate}>
-              <Button color="primary" variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginLeft': '10px', 'zIndex': '1000' }}>
+              <Button color="primary" variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginLeft': '30px', 'marginTop': '20px', 'zIndex': '1000' }}>
                 <ArrowBackIcon />
               </Button>
             </Link>  
           </Box>
-       <ComparisonBoardItems factsheetName = {'A'} elements={
-          [
-            { id: '2', 
-              content: 'DEV06439',
-              'institutions': ['IKL', 'OTF'],
-              'scenario-descriptors': ['100% renewables', 'negative emission'],
-              'scenarios': ['Klimaschutzszenario-7480',' Mit-Erweiterten-Maßnahmen-Szenario'],
-              'region': ['Germany'],
-              'scenario_years': ['2020', '2025', '2030', '2035', '2040', '2045', '2050', '2055', '2060'],
-              'enrgy-transformation-processes': ['heat transfer', "chemical energy transfer", ],
-              'descriptors':  ['sufficiency', 'Greenhouse gas emissions', 'CO2 emissions', 'total net electricity generation', 'degree of electrifiaction', 'peak electricity generation'],
-              'sectors': ['CRF sectors (IPCC 2006)'],
-              'enrgy-carriers': ["compressed air", "natural gas", 'water'],
-              'models': ["PowerG", "FOREC"],
-              'frameworks': ["Open Energy Modelling KL"],
-            }, 
-            { id: '1', 
-              content: 'DJHG9087',
-              'institutions': ['IKL', 'RLS'],
-              'scenario-descriptors': ['100% renewables', 'grid / infrastructure extension'],
-              'scenarios': ['Klimaschutzszenario-7480', 'Mit-Erweiterten-Maßnahmen-Szenario'],
-              'region': ['Germany'],
-              'scenario_years': ['2020', '2025', '2030', '2035', '2040', '2045', '2050', '2055', '2060'],
-              'enrgy-transformation-processes': ['heat transfer', 'electrical energy transfer'],
-              'descriptors': ['total gross electricity generation',
-                'total net electricity generation',
-                'peak electricity generation'],
-              'sectors': ['CRF sectors (IPCC 2006)'],
-              'enrgy-carriers': ['liquid air', 'renewable fuel', 'water'],
-              'models': ["PowerG"],
-              'frameworks': ["Open Energy Modelling KL"],
-            },
-            { id: '0', 
-                content: 'PIO876',
-                'institutions': ['FH'],
-                'scenario-descriptors': ['acceptance', 'sufficiency', 'grid restrictions' ],
-                'scenarios': ['Klimaschutzszenario-4575', 'Mit-Erweiterten-Maßnahmen-Szenario'],
-                'region': ['Germany'],
-                'scenario_years': ['2020', '2025', '2030', '2035', '2040', '2045', '2050', '2055', '2060'],
-                'enrgy-transformation-processes': [
-                  'heat transfer', 'solar-steam-electric process', 'photovoltaic energy transformation'
-                ],
-                'descriptors': ["(changes in) demand", "total gross electricity generation"],
-                'sectors': ['CRF sectors (IPCC 1996)'],
-                'enrgy-carriers': [
-                  'coal', 
-                 'natural gas'
-                ],
-                'frameworks': ["Open Energy Modelling KL"],
-                'models': ["FOREC"],
-            },
-            { id: '3', 
-              content: 'HFG987',
-              'institutions': [],
-              'scenario-descriptors': [],
-              'scenarios': [],
-              'region': [],
-              'scenario_years': [],
-              'enrgy-transformation-processes': [],
-              'descriptors': [],
-              'sectors': [],
-              'enrgy-carriers': [],
-              'models': [],
-              'frameworks': [],
-            }
-          ]}/>
+      <ComparisonBoardItems elements={scenarios} c_aspects={scenario_aspects} />
     </Box>
   );
 };

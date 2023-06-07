@@ -49,18 +49,18 @@ function App() {
     },
   });
 
-  const url_id = String(window.location.href).split('/').pop();
-  const url_sub_id = String(window.location.href).split('/').at(-2);
-  console.log(url_id);
-
+  const url_params = String(window.location.href).split('/').pop();
+  const url_page = String(window.location.href).split('/').at(-2);
+  console.log(url_page);
+  console.log(url_params);
 
   const getData = async () => {
-    if (url_id !== '' && url_id !== 'new') {
-        const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_id } });
-        console.log(data);
+    if (url_page !== '' && url_page !== 'new') {
+        const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_params } });
         return data;
     }
   };
+  
   
   useEffect(() => {
     getData().then((data) => {
@@ -69,14 +69,14 @@ function App() {
   });
   }, []);
 
-  if (url_id === '') {
-    return < Home id={url_id}/>
+  if (url_page === 'sirop' && url_params === '') {
+    return < Home id={url_page}/>
   } else {
     if (loading === false) {
-      if (url_sub_id === 'compare') {
-        return <ThemeProvider theme={theme}><ComparisonBoardMain /></ThemeProvider>
-      } else if (url_sub_id === 'factsheet') {
-      return <ThemeProvider theme={theme}><Factsheet id={url_id} fsData={factsheet}/></ThemeProvider>
+      if (url_page === 'compare') {
+        return <ThemeProvider theme={theme}><ComparisonBoardMain params={url_params} /></ThemeProvider>
+      } else if (url_page === 'factsheet') {
+      return <ThemeProvider theme={theme}><Factsheet id={url_params} fsData={factsheet}/></ThemeProvider>
       }
     } else {
       return <LinearProgress />

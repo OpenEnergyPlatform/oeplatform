@@ -273,6 +273,7 @@ export default function CustomTable(props) {
   const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-1900');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
+  const [selectedAspects, setSelectedAspects] = useState([]);
 
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
 
@@ -381,17 +382,17 @@ export default function CustomTable(props) {
   }
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
@@ -457,6 +458,17 @@ export default function CustomTable(props) {
 
   const isSelected = (name) => selected.has(name);
 
+  const handleAspects = (event) => {
+    if (event.target.checked) {
+      if (!selectedAspects.includes(event.target.name)) {
+        setSelectedAspects([...selectedAspects, event.target.name]);
+      }
+    } else {
+      const filteredAspects = selectedAspects.filter(i => i !== event.target.name);
+      setSelectedAspects(filteredAspects);
+    }
+  }
+
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -487,8 +499,16 @@ export default function CustomTable(props) {
     'peak electricity generation'
   ];
 
+  const scenarioAspects = [
+    "Descriptors",
+    "Years",
+    "Regions", 
+    "Interacting regions",
+    "Input datasets",
+    "Output datasets",
+  ];
+
   const renderRows = (rs) => {
-    console.log(filteredFactsheets === []);
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody>
             {rowsToRender.map((row, index) => {
@@ -527,13 +547,13 @@ export default function CustomTable(props) {
                       ))}
                   </TableCell>
                   <TableCell>
-                    <IconButton
+                    {/* <IconButton
                       aria-label="expand row"
                       size="small"
                       onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
                     >
                       {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
+                    </IconButton> */}
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
                     <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
@@ -627,17 +647,15 @@ export default function CustomTable(props) {
             </FormGroup>
           <Divider /> */}
           <FormGroup>
-              <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
-              <FormControlLabel control={<Checkbox />} label="Years" />
-              <FormControlLabel control={<Checkbox />} label="Regions" />
-              <FormControlLabel control={<Checkbox />} label="Interacting regions" />
-              <FormControlLabel control={<Checkbox />} label="Input datasets" />
-              <FormControlLabel control={<Checkbox />} label="Ouput datasets" />
+              {
+                scenarioAspects.map((item) => <FormControlLabel control={<Checkbox />} checked={selectedAspects.includes(item)} onChange={handleAspects} label={item} name={item}/>)
+              }
+              
             </FormGroup>
         </DialogContent>
         <DialogActions>
           <Button variant="contained" >
-            <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
+            <Link to={`sirop/compare/${[...selected].join('-')}CASPECTS${[...selectedAspects.map(i => i.substring(0, 3).toLowerCase())].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
               Show comparison
             </Link>
           </Button>
