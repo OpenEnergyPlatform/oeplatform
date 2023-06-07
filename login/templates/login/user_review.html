@@ -67,32 +67,41 @@
 {% include "login/user_nav.html" %}
     <div>
         <h2>Active Open Peer Reviews (Reviewer)</h2>
-        <ul>
-            {% if reviewer_reviewed.latest is not None %}
-            <strong>Review with the most recent activity:</strong>
-            <li>
-                <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
-                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}
-                </a>
-                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
-                   Show review history 
-                </button>
-                <div class="collapse" id="collapseReviewHistory">
-                    <div class="card card-body">
-                        <p> History </p>
-                        {% for review in reviewer_reviewed.history %}
-                        <ul>
-                            <li>
-                                {{ review }} - Started: {{ review.date_started }} - Status: ...
-                            </li>
-                        </ul>
-                        {% empty %}
-                            No more reviews found for this user and table.
-                        {% endfor %}
+        
+        {% if reviewer_reviewed.latest is not None %}
+            {% if reviewer_reviewed.current_reviewer == "reviewer" %}
+            <ul>
+                <strong>Review with the most recent activity:</strong>
+                <li>
+                    <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
+                        {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}
+                    </a>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
+                    Show review history 
+                    </button>
+                    <div class="collapse" id="collapseReviewHistory">
+                        <div class="card card-body">
+                            <p> History </p>
+                            {% for review in reviewer_reviewed.history %}
+                            <ul>
+                                <li>
+                                    {{ review }} - Started: {{ review.date_started }} - Status: ...
+                                </li>
+                            </ul>
+                            {% empty %}
+                                No more reviews found for this user and table.
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
             </ul>
+            {% else %}
+            <ul>
+                <li>
+                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} wait for the contributor to submit the review.
+                </li>
+            </ul>
+            {% endif %}
             <h3>Participated as reviewer</h3>
             {% for table_name, reviews in reviewer_reviewed_grouped.items %}
             <p>{{ table_name }}</p>
@@ -134,32 +143,41 @@
 
     <div>
         <h2>Active Open Peer Reviews (Contributor)</h2>
-        <ul>
-            {% if contributor_reviewed.latest is not None %}
-            <strong>Review with the most recent activity:</strong>
-            <li>
-                <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">
-                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} 
-                </a>
-                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
-                   Show review history 
-                </button>
-                <div class="collapse" id="collapseContributionReviewHistory">
-                    <div class="card card-body">
-                        <p> History </p>
-                        {% for review in contributor_reviewed.history %}
-                        <ul>
-                            <li>
-                                {{ review }} - {{ review.date_started }} - Status: ...
-                            </li>
-                        </ul>
-                        {% empty %}
-                            No contributions found for this user and table.
-                        {% endfor %}
+        
+        {% if contributor_reviewed.latest is not None %}
+            {% if contributor_reviewed.current_reviewer == "contributor" %}
+            <ul>
+                <strong>Review with the most recent activity:</strong>
+                <li>
+                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">
+                        {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} 
+                    </a>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
+                    Show review history 
+                    </button>
+                    <div class="collapse" id="collapseContributionReviewHistory">
+                        <div class="card card-body">
+                            <p> History </p>
+                            {% for review in contributor_reviewed.history %}
+                            <ul>
+                                <li>
+                                    {{ review }} - {{ review.date_started }} - Status: ...
+                                </li>
+                            </ul>
+                            {% empty %}
+                                No contributions found for this user and table.
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            </li>
-        </ul>
+                </li>
+            </ul>
+            {% else %}
+            <ul>
+                <li>
+                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} wait for the reviewer to submit the review.
+                </li>
+            </ul>
+            {% endif %}
         <h3>Participated as contributor</h3>
         {% for table_name, reviews in contributor_reviewed_grouped.items %}
         <p>{{ table_name }}</p>
