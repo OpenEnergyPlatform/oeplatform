@@ -211,7 +211,7 @@
       </a>
       <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
   {% endif %}
-  {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id %}
+{% elif opr.reviewer.id == user.id and opr.contributor.id != user.id and opr.opr_current_reviewer == "reviewer" %}
     <div class="review-status review-status--ongoing">
       The table is currently under review.
     </div>
@@ -228,12 +228,12 @@
     Continue Review
     </a>
     <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
-  {% endif %}
-  {% if opr.is_finished %} 
-    <div class="review-status review-status--done">
-      Table reviewed
-    </div>
-  {% endif %}
+{% endif %}
+{% if opr.is_finished %} 
+  <div class="review-status review-status--done">
+    Table reviewed
+  </div>
+{% endif %}
 
 <h4>Tags</h4>
 
