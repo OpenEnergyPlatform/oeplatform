@@ -129,11 +129,11 @@ function peerReview(config) {
   //   $('#peer_review-loading').removeClass('d-none');
   //   config.form = $('#peer_review-form');
   // })();
-
-  if ( existing_review ){
-    console.log(existing_review);
-    current_review = existing_review
-  }
+  
+  // if ( existing_review != "None" ){
+  //   console.log(existing_review);
+  //   current_review = existing_review
+  // }
   selectNextField();
   renderSummaryPageFields();
 }
