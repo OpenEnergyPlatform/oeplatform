@@ -65,7 +65,7 @@ class ReviewsView(View):
             reviewer_user=user
         )
         latest_review = peer_review_reviews.last()
-        print(latest_review)
+        # print(latest_review)
         if latest_review is not None:
             review_history = peer_review_reviews.exclude(pk=latest_review.pk)
             current_manager = PeerReviewManager.load(latest_review)
