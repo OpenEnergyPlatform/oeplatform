@@ -185,3 +185,8 @@ h6 {
 i.default-user-icon {
   font-size: 8em !important;
 }
+
+/* show that topics are clickable (in dataedit/schemas) */
+.topic-card__header {
+  cursor: pointer;
+}
