@@ -2083,22 +2083,8 @@ class PeerRreviewContributorView(PeerReviewView):
         review_data = peer_review.review.get('reviews', [])
         
         categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
-        state_dict = process_review_data(review_data=review_data, metadata=metadata, categories=categories)
-        # for review in review_data:
-        #     field_key = review.get('key')
-        #     state = review.get('fieldReview', {}).get('state')
-        #     state_dict[field_key] = state
-        #     reviewer_suggestion = review.get('fieldReview', {}).get('reviewerSuggestion')
-        #     # print(reviewer_suggestion)
-        #     if reviewer_suggestion is not None:
-        #         review['value'] = reviewer_suggestion
-        #         for category in categories:
-        #             for item in metadata[category]:
-        #                 if item['field'] == field_key:
-        #                     item['reviewer_suggestion'] = reviewer_suggestion
+        state_dict = process_review_data(review_data=review_data, metadata=metadata, categories=categories)    
         
-        
-
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
