@@ -191,7 +191,7 @@
 <h4> Open-Peer-Review </h4>
 {% if not opr.reviewer %} 
     {% if user.is_authenticated and opr.contributor.id != user.id %}
-      
+      <!-- Start -->
       <div class="review-status review-status--start">
         Table not reviewed
       </div>
@@ -202,6 +202,7 @@
 
       
     {% else %}
+      <!-- Start but user is table holder - diable start button -->
       <div class="review-status review-status--start">
         Table not reviewed
       </div>
@@ -212,6 +213,7 @@
       <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
   {% endif %}
 {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id and opr.opr_current_reviewer == "reviewer" %}
+    <!-- Continue review -->
     <div class="review-status review-status--ongoing">
       The table is currently under review.
     </div>
@@ -220,16 +222,20 @@
       Continue Review
     </a>
   {% else %}
+    <!-- Continue review but user does not identify as the reviewer -->
     <div class="review-status review-status--ongoing">
       The table is currently under review.
+      Please visit your profile to view your active reviews.
     </div>
     <a class="btn btn-success btn-sm disabled" type="button"
     href="">
     Continue Review
     </a>
+  
     <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
 {% endif %}
 {% if opr.is_finished %} 
+  <!-- Review is finished -->
   <div class="review-status review-status--done">
     Table reviewed
   </div>
