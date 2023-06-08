@@ -101,9 +101,16 @@
                 {% for item in meta.spatial %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
-                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% endif %}
                   </p>
                 </div>
                 {% endfor %}
@@ -149,9 +156,14 @@
               {% for item in meta.license %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
-                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% endif %}
                   </p>
                 </div>
               {% endfor %}
@@ -162,9 +174,14 @@
               {% for item in meta.contributor %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
-                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% endif %}
                   </p>
                 </div>
               {% endfor %}
@@ -175,9 +192,14 @@
                 {% for item in meta.resource %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
-                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                    {% endif %}
                   </p>
                 </div>
               {% endfor %}
