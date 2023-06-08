@@ -3,3 +3,43 @@
 table {
     border-radius: 4px!important;
 }
+
+.review-summary {
+    @extend .border;
+    @extend .rounded;
+
+    thead {
+        @extend .bg-light;
+
+        th {
+            @extend .py-3;
+            white-space: nowrap;
+        }
+    }
+
+    th,
+    td {
+        @extend .px-3;
+    }
+
+    .status {
+        @extend .position-relative;
+        @extend .ps-4;
+        @extend .fw-normal;
+    }
+
+    .missing {
+        @extend .fw-bold;
+
+        &:before {
+            content: "";
+            @extend .position-absolute;
+            @extend .rounded-circle;
+            @extend .bg-warning;
+            width: 8px;
+            height: 8px;
+            left: 0.5rem;
+            top: 1rem;
+        }
+    }
+}

@@ -1,66 +1,219 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% block main-content-body %}
-    {% include "login/user_nav.html" %}
-{% endblock %}
 
 
 {% block main-right-sidebar-content %}
-    <br>
-    <div>
-    {% if profile_user.profile_img %}
-    <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
-{% else %}
-    <i class="far fa-user default-user-icon"></i>
-{% endif %}
-    </div>
-    <br>
-    <div><h2> {{ profile_user.name }} </h2></div>
-    <td> {% if profile_user.fullname %}
-                {{ profile_user.fullname }}
-            {% else %}
-                <p>Full Name</p>
-            {% endif %} </td>
-    <br>
-    <br>
-    <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
-    <hr>
-    <td> {% if profile_user.work %}
-                {{ profile_user.work }}
-            {% else %}
-                <p>Profession</p>
-            {% endif %} </td>
-    <td> {% if profile_user.location %}
-                {{ profile_user.location }}
-            {% else %}
-            <p>Location</p>
-    {% endif %} </td>
-    <br>
-    <td> {% if profile_user.email %}
-            <th style="width:20%"> E-Mail: </th>
-            <td> {{ profile_user.email }} </td>
-            {% endif %}
-    <br>
-    <br>
-    <td> {% if profile_user.linkedin %}
-        <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
-            {% else %}
-                LinkedIn
-            {% endif %} </td>
-    <br>
-    <td> {% if profile_user.facebook %}
-        <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
-            {% else %}
-                Facebook
-            {% endif %} </td>
-    <br>
-    <td> {% if profile_user.twitter %}
-        <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
-            {% else %}
-                Twitter
-            {% endif %} </td>
-    <br>
-    <hr>
+{% if profile_user == request.user %}
+        <br>
+        <div>
+        {% if profile_user.profile_img %}
+        <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
+    {% else %}
+        <i class="far fa-user default-user-icon"></i>
+    {% endif %}
+        </div>
+        <br>
+        <div><h2> {{ profile_user.name }} </h2></div>
+        <td> {% if profile_user.fullname %}
+                    {{ profile_user.fullname }}
+                {% else %}
+                    <p>Full Name</p>
+                {% endif %} </td>
+        <br>
+        <br>
+        <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
+        <hr>
+        <td> {% if profile_user.work %}
+                    {{ profile_user.work }}
+                {% else %}
+                    <p>Profession</p>
+                {% endif %} </td>
+        <td> {% if profile_user.location %}
+                    {{ profile_user.location }}
+                {% else %}
+                <p>Location</p>
+        {% endif %} </td>
+        <br>
+        <td> {% if profile_user.email %}
+                <th style="width:20%"> E-Mail: </th>
+                <td> {{ profile_user.email }} </td>
+                {% endif %}
+        <br>
+        <br>
+        <td> {% if profile_user.linkedin %}
+            <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+                {% else %}
+                    LinkedIn
+                {% endif %} </td>
+        <br>
+        <td> {% if profile_user.facebook %}
+            <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
+                {% else %}
+                    Facebook
+                {% endif %} </td>
+        <br>
+        <td> {% if profile_user.twitter %}
+            <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+                {% else %}
+                    Twitter
+                {% endif %} </td>
+        <br>
+        <hr>
+    {% endif %}
+{% endblock %}
 
+{% block main-content-body %}
+{% include "login/user_nav.html" %}
+    <div>
+        <h2>Active Open Peer Reviews (Reviewer)</h2>
+        
+        {% if reviewer_reviewed.latest is not None %}
+            {% if reviewer_reviewed.current_reviewer == "reviewer" %}
+            <ul>
+                <strong>Review with the most recent activity:</strong>
+                <li>
+                    <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
+                        {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} - Started: {{ reviewer_reviewed.latest.date_started }} - Days open: {{ reviewer_reviewed.latest_days_open }} - Status: {{ reviewer_reviewed.latest_status }}
+                    </a>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory" aria-expanded="false" aria-controls="collapseReviewHistory">
+                    Show review history 
+                    </button>
+                    <div class="collapse" id="collapseReviewHistory">
+                        <div class="card card-body">
+                            <p> History </p>
+                            {% for review in reviewer_reviewed.history %}
+                            <ul>
+                                <li>
+                                    {{ review }} - Started: {{ review.date_started }} - Status: ...
+                                </li>
+                            </ul>
+                            {% empty %}
+                                No more reviews found for this user and table.
+                            {% endfor %}
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            {% else %}
+            <ul>
+                <li>
+                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} wait for the contributor to submit the review.
+                </li>
+            </ul>
+            {% endif %}
+            <h3>Participated as reviewer</h3>
+            {% for table_name, reviews in reviewer_reviewed_grouped.items %}
+            <p>{{ table_name }}</p>
+            <ul>
+            {% for review in reviews %}
+            {% if forloop.first %}
+                <!-- Display the latest review separately -->
+               <strong>Review with the most recent activity:</strong> {{ review }}
+                <li>
+                <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory{{table_name}}" aria-expanded="false" aria-controls="collapseReviewHistory{{table_name}}">
+                Show review history 
+                </button>
+                </li>
+            {% endif %}
+            {% endfor %}
+            <div class="collapse" id="collapseReviewHistory{{table_name}}">
+                <div class="card card-body">
+                    <p> History </p>
+                    <ul>
+                        {% for review in reviews %}
+                        <!-- Display other reviews normally -->
+                        <li>{{ review.id }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </ul>
+            {% endfor %}
+            {% else %}
+        <ul>
+            <li>
+                No reviews found for this User.
+            </li>
+        </ul>
+            {% endif %}
+        
+    </div>
+
+    <div>
+        <h2>Active Open Peer Reviews (Contributor)</h2>
+        
+        {% if contributor_reviewed.latest is not None %}
+            {% if contributor_reviewed.current_reviewer == "contributor" %}
+            <ul>
+                <strong>Review with the most recent activity:</strong>
+                <li>
+                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}">
+                        {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} - Started: {{ contributor_reviewed.latest.date_started }} - Days open: {{ contributor_reviewed.latest_days_open }}  - Status: {{ contributor_reviewed.latest_status }} 
+                    </a>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContributionReviewHistory" aria-expanded="false" aria-controls="collapseContributionReviewHistory">
+                    Show review history 
+                    </button>
+                    <div class="collapse" id="collapseContributionReviewHistory">
+                        <div class="card card-body">
+                            <p> History </p>
+                            {% for review in contributor_reviewed.history %}
+                            <ul>
+                                <li>
+                                    {{ review }} - {{ review.date_started }} - Status: ...
+                                </li>
+                            </ul>
+                            {% empty %}
+                                No contributions found for this user and table.
+                            {% endfor %}
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            {% else %}
+            <ul>
+                <li>
+                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} wait for the reviewer to submit the review.
+                </li>
+            </ul>
+            {% endif %}
+        <h3>Participated as contributor</h3>
+        {% for table_name, reviews in contributor_reviewed_grouped.items %}
+        <p>{{ table_name }}</p>
+        <ul>
+        {% for review in reviews %}
+        {% if forloop.first %}
+            <!-- Display the latest review separately -->
+            <strong>Latest Review for this table:</strong> {{ review }}
+            <li>
+                <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContribHistory{{table_name}}" aria-expanded="false" aria-controls="collapseContribHistory{{table_name}}">
+                Show review history 
+                </button>
+            </li>
+        {% endif %}
+        {% endfor %}
+        <div class="collapse" id="collapseContribHistory{{table_name}}">
+            <div class="card card-body">
+                <p> History </p>
+                <ul>
+                    {% for review in reviews %}
+                    <!-- Display other reviews normally -->
+                    <li>{{ review.id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </ul>
+        {% endfor %}
+        {% else %}
+    <ul>
+        <li>
+            No contributions found for this User.
+        </li>
+    </ul>
+        {% endif %}
+    
+</div>
 {% endblock %}
