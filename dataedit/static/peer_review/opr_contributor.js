@@ -261,8 +261,6 @@ function makeFieldList(){
  */
 function selectNextField() {
   var fieldList = makeFieldList();
-  console.log("fieldList", fieldList)
-  console.log("selectedField", selectedField)
   var next = fieldList.indexOf('field_' + selectedField) + 1
   selectField(fieldList, next);
 }
