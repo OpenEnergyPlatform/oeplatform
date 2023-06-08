@@ -272,6 +272,7 @@
       let state_dict = JSON.parse('{{ state_dict | escapejs }}');
       for (let [key, value] of Object.entries(state_dict)) {
         let field_id = `#field_${key}`.replaceAll(".", "\\.");
+        // console.log("initialFieldStates", field_id)
         $(field_id).addClass(`field-${value}`);
       }
   </script>
