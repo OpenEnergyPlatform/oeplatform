@@ -45,6 +45,7 @@ from dataedit.models import Filter as DBFilter
 from dataedit.models import Table, PeerReview, PeerReviewManager, ReviewDataStatus
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
+from dataedit.helper import merge_field_reviews, process_review_data
 from login import models as login_models
 
 from .models import TableRevision
@@ -1971,14 +1972,16 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id}
             )
-
-            existing_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id).review
+            existing_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id).review.get('reviews', [])
+            categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
+            state_dict = process_review_data(review_data=existing_review, metadata=metadata, categories=categories)
         else:
             url_peer_review = reverse(
                 "peer_review_create",
                 kwargs={"schema": schema, "table": table}
             )
-            existing_review=None
+            # existing_review={}
+            state_dict=None
 
         config_data = {
             "can_add": can_add,
@@ -1993,7 +1996,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
-            "existing_review": existing_review,
+            "state_dict": json.dumps(state_dict),
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
@@ -2042,9 +2045,13 @@ class PeerReviewView(LoginRequiredMixin, View):
                     )
                     table_review.save(review_type=review_post_type)
                 else:
-                    # Aktiver PeerReview vorhanden, aktualisieren Sie den vorhandenen PeerReview
+                    # Aktiver PeerReview ist vorhanden ... aktualisieren 
+                    current_review_data = active_peer_review.review
+                    merged_review_data = merge_field_reviews(current_json=current_review_data, new_json=review_datamodel)
+
+                    # Set new review values and update existing review
                     active_peer_review.is_finished = review_finished
-                    active_peer_review.review = review_datamodel
+                    active_peer_review.review = merged_review_data
                     active_peer_review.reviewer = request.user
                     active_peer_review.contributor = contributor
                     active_peer_review.update(review_type=review_post_type)
@@ -2074,22 +2081,10 @@ class PeerRreviewContributorView(PeerReviewView):
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = peer_review.review.get('reviews', [])
-        state_dict = {}
+        
         categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
-
-        for review in review_data:
-            field_key = review.get('key')
-            state = review.get('fieldReview', {}).get('state')
-            state_dict[field_key] = state
-            reviewer_suggestion = review.get('fieldReview', {}).get('reviewerSuggestion')
-            # print(reviewer_suggestion)
-            if reviewer_suggestion is not None:
-                review['value'] = reviewer_suggestion
-                for category in categories:
-                    for item in metadata[category]:
-                        if item['field'] == field_key:
-                            item['reviewer_suggestion'] = reviewer_suggestion
-
+        state_dict = process_review_data(review_data=review_data, metadata=metadata, categories=categories)    
+        
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
@@ -2121,9 +2116,10 @@ class PeerRreviewContributorView(PeerReviewView):
             review_datamodel = review_data.get("reviewData")
             review_state = review_data.get("reviewFinished")
             current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
-            # existing_reviews = current_opr.review
-            # combined_reviews = existing_reviews + [review_datamodel]
-            current_opr.review = review_datamodel
+            existing_reviews = current_opr.review
+            merged_review = merge_field_reviews(current_json=existing_reviews, new_json=review_datamodel)
+
+            current_opr.review = merged_review
             current_opr.update(review_type=review_post_type)
 
         return render(request, 'dataedit/opr_contributor.html', context=context)

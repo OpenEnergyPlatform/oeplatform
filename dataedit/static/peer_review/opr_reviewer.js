@@ -130,10 +130,6 @@ function peerReview(config) {
   //   config.form = $('#peer_review-form');
   // })();
   
-  // if ( existing_review != "None" ){
-  //   console.log(existing_review);
-  //   current_review = existing_review
-  // }
   selectNextField();
   renderSummaryPageFields();
 }
@@ -227,7 +223,7 @@ function click_field(fieldKey, fieldValue, category) {
     if (selectedDiv) {
       selectedDiv.style.backgroundColor = '#F6F9FB';
     }
-    console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     clearInputFields();
 }
 
@@ -278,8 +274,6 @@ function selectPreviousField(){
 function selectField(fieldList, field){
   if (field >= 0 && field < fieldList.length){
     var element = fieldList[field];
-    console.log(fieldList)
-    console.log(field)
     document.getElementById(element).click();
   }
 }
@@ -455,7 +449,7 @@ function saveEntrances() {
                       "category": category,
                       "key": selectedField,
                       "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
+                          "timestamp": Date.now(),
                             "user": "oep_reviewer", // TODO put actual username
                             "role": "reviewer",
                             "contributorValue": selectedFieldValue,
@@ -471,7 +465,7 @@ function saveEntrances() {
                       "category": category,
                       "key": selectedField,
                       "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
+                          "timestamp": Date.now(),
                             "user": "oep_reviewer", // TODO put actual username
                             "role": "reviewer",
                             "contributorValue": selectedFieldValue,
@@ -493,7 +487,7 @@ function saveEntrances() {
           "category": category,
           "key": selectedField,
           "fieldReview": {
-            "timestamp": null, // TODO put actual timestamp
+            "timestamp": Date.now(), // TODO put actual timestamp
             "user": "oep_reviewer", // TODO put actual username
             "role": "reviewer",
             "contributorValue": selectedFieldValue,
@@ -532,14 +526,12 @@ function checkReviewComplete() {
     }
     fields_reviewed[category_name].push(review.key);
   }
-  console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
   
   for (const category of categories) {
     // const category_name = category.id;
     const category_name = category.id.slice(0);
-    console.log(category_name)
     // TODO: remove resources, once they are working correct
     if (["resource", "summary"].includes(category_name)) {
       continue;
@@ -548,7 +540,6 @@ function checkReviewComplete() {
       return;
     }
     const category_fields = category.querySelectorAll(".field");
-    console.log(category_fields)
     for (field of category_fields) {
       const field_name = field.id.slice(6);
       if (!fields_reviewed[category_name].includes(field_name)) {
@@ -581,6 +572,7 @@ function hideReviewerOptions(){
 function updateFieldColor(){
   // Color ok/suggestion/rejected
   field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  // console.log(field_id)
   $(field_id).removeClass('field-ok');
   $(field_id).removeClass('field-suggestion');
   $(field_id).removeClass('field-rejected');
@@ -625,7 +617,6 @@ summaryTab.addEventListener('click', function() {
 // Event listener for clicking the other tabs
 otherTabs.forEach(function(tab) {
   tab.addEventListener('click', function() {
-    console.log("tab")
     toggleReviewControls(true);
     reviewContent.classList.remove("tab-pane--100");
   });
