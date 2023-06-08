@@ -268,13 +268,13 @@
 {% block after-body-bottom-js %}
   <script>
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
-      var config = JSON.parse("{{ config|escapejs }}");
-      let state_dict = JSON.parse('{{ state_dict | escapejs }}');
-      for (let [key, value] of Object.entries(state_dict)) {
-        let field_id = `#field_${key}`.replaceAll(".", "\\.");
-        // console.log("initialFieldStates", field_id)
-        $(field_id).addClass(`field-${value}`);
-      }
+    var config = JSON.parse("{{ config|escapejs }}");
+    let state_dict = JSON.parse('{{ state_dict | escapejs }}');
+    for (let [key, value] of Object.entries(state_dict)) {
+      let field_id = `#field_${key}`.replaceAll(".", "\\.");
+      // console.log("initialFieldStates", field_id)
+      $(field_id).addClass(`field-${value}`);
+    }
   </script>
   <script src="/static/peer_review/opr_contributor.js"></script>
 {% endblock after-body-bottom-js %}
