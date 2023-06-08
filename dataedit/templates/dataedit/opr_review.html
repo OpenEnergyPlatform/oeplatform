@@ -288,7 +288,15 @@
   <script>
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
-    var existing_review = "{{ existing_review|escapejs }}";
+    let state_dict = JSON.parse('{{ state_dict | escapejs }}');
+    // console.log(state_dict)
+    for (let [key, value] of Object.entries(state_dict)) {
+      let field_id = `#field_${key}`.replaceAll(".", "\\.");
+      console.log(field_id)
+      $(field_id).addClass(`field-${value}`);
+    }
+    
+    // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
   <script src="/static/peer_review/opr_reviewer.js"></script>
 {% endblock after-body-bottom-js %}
