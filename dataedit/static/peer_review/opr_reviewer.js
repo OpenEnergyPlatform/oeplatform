@@ -572,7 +572,7 @@ function hideReviewerOptions(){
 function updateFieldColor(){
   // Color ok/suggestion/rejected
   field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
-  console.log(field_id)
+  // console.log(field_id)
   $(field_id).removeClass('field-ok');
   $(field_id).removeClass('field-suggestion');
   $(field_id).removeClass('field-rejected');
