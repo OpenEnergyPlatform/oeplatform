@@ -553,6 +553,14 @@ function checkReviewComplete() {
 }
 
 /**
+ * Checks if all fields are accepted and activates award badge div to finish the review.
+ * Also deactivates the submit button.
+ */
+function check_if_review_finished(){
+
+}
+
+/**
  * Shows reviewer Comment and Suggestion Input options
  */
 function showReviewerOptions(){
