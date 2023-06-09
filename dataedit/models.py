@@ -187,6 +187,10 @@ class PeerReview(models.Model):
             elif review_type == "submit":
                 current_pm.status = ReviewDataStatus.SUBMITTED.value
                 current_pm.set_next_reviewer()
+            elif review_type == "finished":
+                self.is_finished = True
+                self.date_finished = timezone.now()
+                current_pm.status = ReviewDataStatus.FINISHED.value
             
             # update peere review manager related to this peer review entry
             current_pm.save()
