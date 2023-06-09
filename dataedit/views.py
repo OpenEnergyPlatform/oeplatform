@@ -2050,7 +2050,6 @@ class PeerReviewView(LoginRequiredMixin, View):
                     merged_review_data = merge_field_reviews(current_json=current_review_data, new_json=review_datamodel)
 
                     # Set new review values and update existing review
-                    active_peer_review.is_finished = review_finished
                     active_peer_review.review = merged_review_data
                     active_peer_review.reviewer = request.user
                     active_peer_review.contributor = contributor
