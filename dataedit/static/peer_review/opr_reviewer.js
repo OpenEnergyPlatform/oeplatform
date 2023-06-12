@@ -3,11 +3,11 @@ var selectedFieldValue;
 var selectedState;
 
 var current_review = {
-  "topic": null,
-  "table": null,
+  "topic": config.topic,
+  "table": config.table,
   "dateStarted": null,
   "dateFinished": null,
-  "metadataVersion": "v1.5.2",
+  "metadataVersion": "v1.6.0",
   "reviews": [],
   "reviewFinished": false,
   "grantedBadge": null,
@@ -174,9 +174,12 @@ function submitPeerReview() {
  */
 function finishPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  current_review.badge = "badge name form radio"
+
+  var selectedBadge = $('input[name="reviewer-option"]:checked').val();
+  console.log(selectedBadge)
+  current_review.badge = selectedBadge
   current_review.reviewFinished = true
-  json = JSON.stringify({ reviewType: 'finished', reviewData: current_review });
+  json = JSON.stringify({ reviewType: 'finished', reviewData: current_review, reviewBadge: selectedBadge });
   sendJson("POST", config.url_peer_review, json).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
