@@ -294,9 +294,18 @@
     let state_dict = JSON.parse('{{ state_dict | escapejs }}');
     for (let [key, value] of Object.entries(state_dict)) {
       let field_id = `#field_${key}`.replaceAll(".", "\\.");
-      // console.log("initialFieldStates", field_id)
       $(field_id).addClass(`field-${value}`);
     }
   </script>
+    <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        let keys = document.querySelectorAll(".key");
+        keys.forEach(key => {
+            let words = key.textContent.split(".");
+            let formattedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+            key.textContent = formattedWords.join(" ");
+        });
+    });
+</script>
   <script src="/static/peer_review/opr_contributor.js"></script>
 {% endblock after-body-bottom-js %}
