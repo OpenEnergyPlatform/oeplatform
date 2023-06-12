@@ -1076,7 +1076,6 @@ class DataView(View):
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
 
-        print(opr_context)
         
         #########################################################################
         context_dict = {
