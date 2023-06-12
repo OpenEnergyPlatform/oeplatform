@@ -1072,9 +1072,11 @@ class DataView(View):
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
-            opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer})
+            opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer, "is_finished": latest_review.is_finished})
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
+
+        print(opr_context)
         
         #########################################################################
         context_dict = {
@@ -1987,6 +1989,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "can_add": can_add,
             "url_peer_review": url_peer_review,
             "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "topic": schema,
             "table": table,
         }
 
@@ -2092,8 +2095,9 @@ class PeerRreviewContributorView(PeerReviewView):
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
              ),
-             "table": table,
-             }),
+            "topic": schema,
+            "table": table,
+            }),
             "table": table,
             "meta": metadata,
             "json_schema": json_schema,
