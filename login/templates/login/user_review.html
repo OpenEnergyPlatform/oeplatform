@@ -65,7 +65,57 @@
 
 {% block main-content-body %}
 {% include "login/user_nav.html" %}
-    <div>
+    <div class="profile-rvw">
+        <!-- placeholder css class for contributor `profile-rvw__item--contributor` -->
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <div class="profile-rvw__item-top">
+                <div class="profile-rvw__item-left">
+                    <!-- placeholder type: contributor or reviewer -->
+                    <div class="profile-rvw__item-type">Contributing</div>
+                    <!-- placeholder status: saved, done, etc -->
+                    <div class="profile-rvw__item-status">Saved</div>
+                </div>
+                <div class="profile-rvw__item-right">
+                    <!-- placeholder open: day number -->
+                    <div class="profile-rvw__item-days">Open 5 days ago</div>
+                    <div>&nbsp—&nbsp</div>
+                    <!-- placeholder date -->
+                    <div class="profile-rvw__item-date">Started on 2023-06-13</div>
+                </div>
+            </div>
+            <div class="profile-rvw__item-btm">
+                <!-- placeholder table name -->
+                <div class="profile-rvw__item-name">
+                    <a href="#">Bundesnetzagentur - Marktstammdatenregister - Stromerzeuger (bnetza_mastr_rli_v2_2_0_hydro_clean)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- placeholder css class for contributor `profile-rvw__item--reviewer` -->
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+            <div class="profile-rvw__item-top">
+                <div class="profile-rvw__item-left">
+                    <!-- placeholder type: contributor or reviewer -->
+                    <div class="profile-rvw__item-type">Reviewing</div>
+                    <!-- placeholder status: saved, done, etc -->
+                    <div class="profile-rvw__item-status">Saved</div>
+                </div>
+                <div class="profile-rvw__item-right">
+                    <!-- placeholder open: day number -->
+                    <div class="profile-rvw__item-days">Open 18 days ago</div>
+                    <div>&nbsp—&nbsp</div>
+                    <!-- placeholder date -->
+                    <div class="profile-rvw__item-date">Started on 2023-06-1</div>
+                </div>
+            </div>
+            <div class="profile-rvw__item-btm">
+                <!-- placeholder table name -->
+                <div class="profile-rvw__item-name">
+                    <a href="#">table_v4464 - model_draft</a>
+                </div>
+            </div>
+        </div>
+        
         <h2>Active Open Peer Reviews (Reviewer)</h2>
         
         {% if reviewer_reviewed.latest is not None %}

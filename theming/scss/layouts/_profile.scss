@@ -1,0 +1,70 @@
+@use '../base/' as *;
+@use '../base/mixins' as *;
+
+
+.profile {
+    &-rvw {
+        &__item {
+            @extend .d-flex;
+            @extend .flex-column;
+            @extend .p-3;
+            @extend .mb-2;
+
+            &--highlight {
+                @extend .bg-light;
+                @extend .border;
+            }
+
+            &--contributor {
+                border-left: 4px solid $purple-500 !important;
+            }
+
+            &--reviewer {
+                border-left: 4px solid $cyan-500 !important;
+            }
+        }
+
+        &__item-top {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-between;
+            @extend .pb-3;
+        }
+
+        &__item-btm {
+            @extend .pb-2;
+        }
+
+        &__item-left {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .text-start;
+        }
+
+        &__item-right {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .text-end;
+        }
+
+        &__item-type {
+            @extend .text-uppercase;
+            @extend .pe-2;
+            @extend .fw-bold;
+            @extend .text-secondary;
+        }
+
+        &__item-status {
+            @extend .rounded-pill;
+            @extend .border;
+            @extend .border-secondary;
+            @extend .text-secondary;
+            @extend .px-2;
+        }
+
+        &__item-name a {
+            @extend .text-decoration-none;
+            @extend .fw-bold;
+        }
+    }
+}
