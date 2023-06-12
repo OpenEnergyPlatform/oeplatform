@@ -254,4 +254,8 @@
     &__key {
         @extend .fw-semibold;
     }
+
+    &__value {
+        word-wrap: break-word;
+    }
 }
