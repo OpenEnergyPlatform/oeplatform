@@ -3,11 +3,11 @@ var selectedFieldValue;
 var selectedState;
 
 var current_review = {
-  "topic": null,
-  "table": null,
+  "topic": config.topic,
+  "table": config.table,
   "dateStarted": null,
   "dateFinished": null,
-  "metadataVersion": "v1.5.2",
+  "metadataVersion": "v1.6.0",
   "reviews": [],
   "reviewFinished": false,
   "grantedBadge": null,

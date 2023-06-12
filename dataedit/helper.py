@@ -52,18 +52,22 @@ def process_review_data(review_data, metadata, categories):
             if latest_field_review:
                 state = latest_field_review.get('state')
                 reviewer_suggestion = latest_field_review.get('reviewerSuggestion')
+                reviewer_suggestion_comment = latest_field_review.get("comment")
             else:
                 state = None
                 reviewer_suggestion = None
+                reviewer_suggestion_comment = None
         else:
             state = field_review.get('state')
             reviewer_suggestion = field_review.get('reviewerSuggestion')
+            reviewer_suggestion_comment = field_review.get("comment")
 
-        if reviewer_suggestion is not None:
+        if reviewer_suggestion is not None and reviewer_suggestion_comment is not None:
             for category in categories:
                 for item in metadata[category]:
                     if item['field'] == field_key:
                         item['reviewer_suggestion'] = reviewer_suggestion
+                        item['suggestion_comment'] = reviewer_suggestion_comment
                         break
         state_dict[field_key] = state
 

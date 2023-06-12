@@ -3,11 +3,11 @@ var selectedFieldValue;
 var selectedState;
 
 var current_review = {
-  "topic": null,
-  "table": null,
+  "topic": config.topic,
+  "table": config.table,
   "dateStarted": null,
   "dateFinished": null,
-  "metadataVersion": "v1.5.2",
+  "metadataVersion": "v1.6.0",
   "reviews": [],
   "reviewFinished": false,
   "grantedBadge": null,
@@ -130,8 +130,13 @@ function peerReview(config) {
   //   config.form = $('#peer_review-form');
   // })();
   
+  
   selectNextField();
   renderSummaryPageFields();
+  if (state_dict){
+    check_if_review_finished();
+  }
+  
 }
 
 /**
@@ -155,6 +160,26 @@ function savePeerReview() {
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
   json = JSON.stringify({ reviewType: 'submit', reviewData: current_review });
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-submitting').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
+}
+
+/**
+ * Finish peer review and save to backend
+ */
+function finishPeerReview() {
+  $('#peer_review-submitting').removeClass('d-none');
+
+  var selectedBadge = $('input[name="reviewer-option"]:checked').val();
+  console.log(selectedBadge)
+  current_review.badge = selectedBadge
+  current_review.reviewFinished = true
+  json = JSON.stringify({ reviewType: 'finished', reviewData: current_review, reviewBadge: selectedBadge });
   sendJson("POST", config.url_peer_review, json).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
@@ -530,6 +555,55 @@ function checkReviewComplete() {
   $('#submit_summary').removeClass('disabled');
 }
 
+
+function checkFieldStates() {
+  var fieldList = makeFieldList();
+  for (var i = 0; i < fieldList.length; i++) {
+    var fieldName = fieldList[i].replace('field_', '');
+    var fieldState = state_dict[fieldName];
+    if (fieldState !== 'ok') {
+      return false; // Ein Feld hat nicht den Status "ok"
+    }
+  }
+  return true; // Alle Felder haben den Status "ok"
+}
+
+
+/**
+ * Checks if all fields are accepted and activates award badge div to finish the review.
+ * Also deactivates the submitbutton.
+ */
+function check_if_review_finished(){
+  
+  if (checkFieldStates()) {
+    // Creating the div with radio buttons
+    var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
+    var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
+    var silverRadio = $('<input type="radio" name="reviewer-option" value="silver"> Silver<br>');
+    var goldRadio = $('<input type="radio" name="reviewer-option" value="gold"> Gold<br>');
+    var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
+    var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
+    var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
+    
+    // Adding the radio buttons, text, and button to the div
+    reviewerDiv.append(reviewText);
+    reviewerDiv.append(bronzeRadio);
+    reviewerDiv.append(silverRadio);
+    reviewerDiv.append(goldRadio);
+    reviewerDiv.append(platinRadio);
+    reviewerDiv.append(finishButton);
+
+    finishButton.on('click', finishPeerReview);
+
+    // Displaying the div
+    reviewerDiv.show();
+    $('#submit_summary').prop('disabled', true);
+
+
+    // Adding the div to the desired location in the document
+    $('.content-finish-review').append(reviewerDiv);
+  }
+}
 
 /**
  * Shows reviewer Comment and Suggestion Input options
