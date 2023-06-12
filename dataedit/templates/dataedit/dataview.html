@@ -198,7 +198,7 @@
             <th>Date finished</th>
           </tr>
           <tr>
-            <td>{{ opr_result.review_url }}</td>
+            <td> <a class="btn btn-primary" href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
             <td>{{ opr_result.badge }}</td>
             <td>{{ opr_result.date_finished }}</td>
           </tr>
