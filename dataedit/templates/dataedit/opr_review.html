@@ -1,7 +1,6 @@
 {% extends "dataedit/filter.html" %}
 {% load static %}
 {% load django_bootstrap5 %}
-
 {% block after-head %}
 <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
@@ -325,5 +324,15 @@
     
     // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        let keys = document.querySelectorAll(".key");
+        keys.forEach(key => {
+            let words = key.textContent.split(".");
+            let formattedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+            key.textContent = formattedWords.join(" ");
+        });
+    });
+</script>
   <script src="/static/peer_review/opr_reviewer.js"></script>
 {% endblock after-body-bottom-js %}
