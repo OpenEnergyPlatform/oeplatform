@@ -178,6 +178,12 @@ function cancelPeerReview() {
  * @param {string} fieldValue Value of the field
  * @param {string} category Metadata catgeory related to the fieldKey
  */
+
+function getFieldState(fieldKey) {
+  // This function gets the state of a field
+  return state_dict[fieldKey];
+}
+
 function click_field(fieldKey, fieldValue, category) {
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     selectedField = fieldKey;
@@ -210,7 +216,7 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
     // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
-    const fieldState = state_dict[fieldKey];
+    const fieldState = getFieldState(fieldKey);
 
     if (fieldState === 'ok'|| !fieldState) {
         document.getElementById("ok-button").disabled = true;
@@ -491,38 +497,23 @@ function saveEntrances() {
  * Checks if all fields are reviewed and activates submit button if ready
  */
 function checkReviewComplete() {
-  var fields_reviewed = {};
-  for (const review of current_review.reviews) {
-    const category_name = review.category.slice(1);
-    if (!(category_name in fields_reviewed)) {
-      fields_reviewed[category_name] = [];
-    }
-    fields_reviewed[category_name].push(review.key);
-  }
+  const fields = document.querySelectorAll('.field');
+  for (let field of fields) {
+    let fieldName = field.id.slice(6);
+    const fieldState = getFieldState(fieldName);
+    console.log(fieldName, fieldState);
+    let reviewed = current_review["reviews"].find(review => review.key === fieldName);
 
-  const categories = document.querySelectorAll(".tab-pane");
-
-  for (const category of categories) {
-    // const category_name = category.id;
-    const category_name = category.id.slice(0);
-    // TODO: remove resources, once they are working correct
-    if (["resource", "summary"].includes(category_name)) {
-      continue;
-    }
-    if (!(category_name in fields_reviewed)) {
+    if (!reviewed && fieldState !== 'ok') {
+      $('#submit_summary').addClass('disabled');
       return;
     }
-    const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
-      const field_name = field.id.slice(6);
-      if (!fields_reviewed[category_name].includes(field_name)) {
-        return;
-      }
-    }
   }
-
   $('#submit_summary').removeClass('disabled');
 }
+
+
+
 
 /**
  * Shows reviewer Comment and Suggestion Input options
