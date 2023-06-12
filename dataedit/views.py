@@ -1090,6 +1090,7 @@ class DataView(View):
                         "badge": badge, 
                         "review_url": None,
                         "date_finished":  date_finished,
+                        "review_id": latest_review.id,
                         "finished": latest_review.is_finished, 
                         "review_exists": True}
                     )
@@ -1995,7 +1996,9 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id}
             )
-            existing_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id).review.get('reviews', [])
+            opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            existing_review = opr_review.review.get('reviews', [])
+            review_finished = opr_review.is_finished
             categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
             state_dict = process_review_data(review_data=existing_review, metadata=metadata, categories=categories)
         else:
