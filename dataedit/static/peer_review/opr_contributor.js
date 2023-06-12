@@ -3,11 +3,11 @@ var selectedFieldValue;
 var selectedState;
 
 var current_review = {
-  "topic": null,
-  "table": null,
+  "topic": config.topic,
+  "table": config.table,
   "dateStarted": null,
   "dateFinished": null,
-  "metadataVersion": "v1.5.2",
+  "metadataVersion": "v1.6.0",
   "reviews": [],
   "reviewFinished": false,
   "grantedBadge": null,
@@ -180,7 +180,7 @@ function cancelPeerReview() {
  */
 function click_field(fieldKey, fieldValue, category) {
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-    selectedField = cleanedFieldKey;
+    selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
     const selectedName = document.querySelector("#review-field-name");
@@ -189,7 +189,6 @@ function click_field(fieldKey, fieldValue, category) {
     const reviewItem = document.querySelectorAll('.review__item');
     let selectedDivId = 'field_' + fieldKey;
     let selectedDiv = document.getElementById(selectedDivId);
-    console.log("Field descriptions data:", fieldDescriptionsData);
     if (fieldDescriptionsData[cleanedFieldKey]) {
         let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
         let fieldInfoText = '<div class="reviewer-item">';
@@ -210,7 +209,7 @@ function click_field(fieldKey, fieldValue, category) {
     } else {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
-    console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     const fieldState = state_dict[fieldKey];
 
     if (fieldState === 'ok'|| !fieldState) {
@@ -281,8 +280,6 @@ function selectPreviousField(){
 function selectField(fieldList, field){
   if (field >= 0 && field < fieldList.length){
     var element = fieldList[field];
-    console.log(fieldList)
-    console.log(field)
     document.getElementById(element).click();
   }
 }
@@ -450,13 +447,13 @@ function saveEntrances() {
         var element = document.querySelector('[aria-selected="true"]');
         var category = element.getAttribute("data-bs-target");
         current_review["reviews"][i]["fieldReview"].push({
-          "timestamp": null, // TODO put actual timestamp
+          "timestamp": Date.now(),
           "user": "oep_contributor", // TODO put actual username
           "role": "contributor",
           "contributorValue": selectedFieldValue,
           "comment": document.getElementById("commentarea").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
-          "contributorstate": selectedState,
+          "state": selectedState,
         });
         break;
       }
@@ -470,13 +467,13 @@ function saveEntrances() {
         "key": selectedField,
         "fieldReview": [
           {
-            "timestamp": null, // TODO put actual timestamp
+            "timestamp": Date.now(), 
             "user": "oep_contributor", // TODO put actual username
             "role": "contributor",
             "contributorValue": selectedFieldValue,
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
-            "contributorstate": selectedState,
+            "state": selectedState,
           }
         ]
       });
@@ -488,10 +485,6 @@ function saveEntrances() {
   selectNextField();
   renderSummaryPageFields();
 }
-
-
-
-
 
 /**
  *
@@ -506,14 +499,12 @@ function checkReviewComplete() {
     }
     fields_reviewed[category_name].push(review.key);
   }
-  console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
 
   for (const category of categories) {
     // const category_name = category.id;
     const category_name = category.id.slice(0);
-    console.log(category_name)
     // TODO: remove resources, once they are working correct
     if (["resource", "summary"].includes(category_name)) {
       continue;
@@ -522,7 +513,6 @@ function checkReviewComplete() {
       return;
     }
     const category_fields = category.querySelectorAll(".field");
-    console.log(category_fields)
     for (field of category_fields) {
       const field_name = field.id.slice(6);
       if (!fields_reviewed[category_name].includes(field_name)) {
@@ -598,7 +588,6 @@ summaryTab.addEventListener('click', function() {
 // Event listener for clicking the other tabs
 otherTabs.forEach(function(tab) {
   tab.addEventListener('click', function() {
-    console.log("tab")
     toggleReviewControls(true);
     reviewContent.classList.remove("tab-pane--100");
   });

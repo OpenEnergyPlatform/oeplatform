@@ -163,6 +163,7 @@ class PeerReview(models.Model):
             elif review_type == "submit":
                 # Handle submit status
                 pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.SUBMITTED.value)
+                pm_new.set_next_reviewer()
 
             pm_new.save() 
 
@@ -185,6 +186,11 @@ class PeerReview(models.Model):
                 current_pm.status = ReviewDataStatus.SAVED.value
             elif review_type == "submit":
                 current_pm.status = ReviewDataStatus.SUBMITTED.value
+                current_pm.set_next_reviewer()
+            elif review_type == "finished":
+                self.is_finished = True
+                self.date_finished = timezone.now()
+                current_pm.status = ReviewDataStatus.FINISHED.value
             
             # update peere review manager related to this peer review entry
             current_pm.save()
@@ -231,7 +237,7 @@ class PeerReviewManager(models.Model):
     REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
 
     opr = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='review_id', null=False)
-    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.CONTRIBUTOR.value)
+    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.REVIEWER.value)
     status = models.CharField(choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
     is_open_since = models.CharField(null=True, max_length=10)
     prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None) #TODO: add logic
