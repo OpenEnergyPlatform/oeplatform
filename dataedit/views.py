@@ -1049,7 +1049,10 @@ class DataView(View):
         #########################################################################
         # Get open peer review process related metadata
         #########################################################################
+        # Context data for the open peer review (data view side panel)
         opr_context = {}
+        # Context data for review result tab
+        opr_result_context = {}
         # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
@@ -1073,10 +1076,29 @@ class DataView(View):
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer, "is_finished": latest_review.is_finished})
+            
+            # OPR result tab for latest review
+            # TODO: Update this as soon as more then one review can be done per table:
+            # ... check if last review is finished 
+            # ... check if any finished review for this table exists 
+            # ... get the latest finished review
+            if latest_review.is_finished:
+                badge = latest_review.review.get("badge")
+                date_finished = latest_review.date_finished
+                opr_result_context.update(
+                    {
+                        "badge": badge, 
+                        "review_url": None,
+                        "date_finished":  date_finished,
+                        "review_id": latest_review.id,
+                        "finished": latest_review.is_finished, 
+                        "review_exists": True}
+                    )
+                
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
+            opr_result_context.update({"review_exists": False})
 
-        
         #########################################################################
         context_dict = {
             # Not in use?
@@ -1097,6 +1119,7 @@ class DataView(View):
             "can_add": can_add,
             "host": request.get_host(),
             "opr": opr_context,
+            "opr_result": opr_result_context,
         }
 
         context_dict.update(current_view.options)
@@ -1973,7 +1996,9 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id}
             )
-            existing_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id).review.get('reviews', [])
+            opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            existing_review = opr_review.review.get('reviews', [])
+            review_finished = opr_review.is_finished
             categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
             state_dict = process_review_data(review_data=existing_review, metadata=metadata, categories=categories)
         else:
