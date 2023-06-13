@@ -72,13 +72,66 @@
     {% if reviewer_reviewed.latest is not None %}
         {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
             <div class="profile-rvw">
-               
                 <!-- placeholder css class for contributor `profile-rvw__item--reviewer` -->
                 <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
                     <div class="profile-rvw__item-top">
                         <div class="profile-rvw__item-left">
                             <!-- placeholder type: contributor or reviewer -->
                             <div class="profile-rvw__item-type">Participating as Reviewer</div>
+                            <!-- placeholder status: saved, submitted, finished -->
+                            <div class="profile-rvw__item-status">{{ reviewer_reviewed.latest_status }}</div>
+                        </div>
+                        <div class="profile-rvw__item-right">
+                            <!-- placeholder open: day number -->
+                            <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
+                            <div>&nbsp—&nbsp</div>
+                            <!-- placeholder date -->
+                            <div class="profile-rvw__item-date">Started on {{ reviewer_reviewed.latest.date_started }}</div>
+                        </div>
+                    </div>
+                    <div class="profile-rvw__item-btm">
+                        <!-- placeholder table name -->
+                        <div class="profile-rvw__item-name">
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
+                                {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- placeholder css class for reviewer completed -->
+                <div class="profile-rvw__item profile-rvw__item--done profile-rvw__item--reviewer">
+                    <div class="profile-rvw__item-top">
+                        <div class="profile-rvw__item-left">
+                            <!-- placeholder type: contributor or reviewer -->
+                            <div class="profile-rvw__item-type">Participated as Reviewer</div>
+                            <!-- placeholder status: saved, submitted, finished -->
+                            <div class="profile-rvw__item-status">{{ reviewer_reviewed.latest_status }}</div>
+                        </div>
+                        <div class="profile-rvw__item-right">
+                            <!-- placeholder open: day number -->
+                            <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
+                            <div>&nbsp—&nbsp</div>
+                            <!-- placeholder date -->
+                            <div class="profile-rvw__item-date">Started on {{ reviewer_reviewed.latest.date_started }}</div>
+                        </div>
+                    </div>
+                    <div class="profile-rvw__item-btm">
+                        <!-- placeholder table name -->
+                        <div class="profile-rvw__item-name">
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}">
+                                {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- placeholder css class for contributor completed -->
+                <div class="profile-rvw__item profile-rvw__item--done profile-rvw__item--contributor">
+                    <div class="profile-rvw__item-top">
+                        <div class="profile-rvw__item-left">
+                            <!-- placeholder type: contributor or reviewer -->
+                            <div class="profile-rvw__item-type">Participated as Contributor</div>
                             <!-- placeholder status: saved, submitted, finished -->
                             <div class="profile-rvw__item-status">{{ reviewer_reviewed.latest_status }}</div>
                         </div>
