@@ -1,9 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% block main-content-body %}
-    {% include "login/user_nav.html" %}
-{% endblock %}
 
 
 {% block main-right-sidebar-content %}
@@ -64,4 +61,239 @@
         <br>
         <hr>
     {% endif %}
+{% endblock %}
+
+{% block main-content-body %}
+{% include "login/user_nav.html" %}
+    <h2>Active Open Peer Reviews</h2>
+    <p> 
+        This section lists the latest active reviews in which you are currently participating as a reviewer or data contributor.
+    </p>
+    {% if reviewer_reviewed.latest is not None %}
+        {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
+            <div class="profile-rvw">
+                <!-- placeholder css class for contributor `profile-rvw__item--reviewer` -->
+                <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+                    <div class="profile-rvw__item-top">
+                        <div class="profile-rvw__item-left">
+                            <!-- placeholder type: contributor or reviewer -->
+                            <div class="profile-rvw__item-type">Participating as Reviewer</div>
+                            <!-- placeholder status: saved, submitted, finished -->
+                            <div class="profile-rvw__item-status">{{ reviewer_reviewed.latest_status }}</div>
+                        </div>
+                        <div class="profile-rvw__item-right">
+                            <!-- placeholder open: day number -->
+                            <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
+                            <div>&nbsp—&nbsp</div>
+                            <!-- placeholder date -->
+                            <div class="profile-rvw__item-date">Started on {{ reviewer_reviewed.latest.date_started }}</div>
+                        </div>
+                    </div>
+                    <div class="profile-rvw__item-btm">
+                        <!-- placeholder table name -->
+                        <div class="profile-rvw__item-name">
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-info">
+                                {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                
+        {% elif reviewer_reviewed.latest_status == "FINISHED" %}
+        <ul>
+            <li>
+                No active reviews where you participate as reviewer.
+            </li>
+        </ul>
+        {% else %}
+            <ul>
+                <li>
+                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} wait for the contributor to submit the review.
+                </li>
+            </ul>
+        {% endif %}
+    {% endif %}
+
+    {% if contributor_reviewed.latest is not None %}
+        {% if contributor_reviewed.current_reviewer == "contributor" and contributor_reviewed.latest_status != "FINISHED" %}  
+         <!-- placeholder css class for contributor `profile-rvw__item--contributor` -->
+         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <div class="profile-rvw__item-top">
+                <div class="profile-rvw__item-left">
+                    <!-- placeholder type: contributor or reviewer -->
+                    <div class="profile-rvw__item-type">Participating as data contributor</div>
+                    <!-- placeholder status: saved, done, etc -->
+                    <div class="profile-rvw__item-status">{{ contributor_reviewed.latest_status }}</div>
+                </div>
+                <div class="profile-rvw__item-right">
+                    <!-- placeholder open: day number -->
+                    <div class="profile-rvw__item-days">Open {{ contributor_reviewed.latest_days_open }} days ago</div>
+                    <div>&nbsp—&nbsp</div>
+                    <!-- placeholder date -->
+                    <div class="profile-rvw__item-date">Started on {{ contributor_reviewed.latest.date_started }}</div>
+                </div>
+            </div>
+            <div class="profile-rvw__item-btm">
+                <!-- placeholder table name -->
+                <div class="button profile-rvw__item-name">
+                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}" class="btn btn-info">
+                        {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}  
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% elif contributor_reviewed.latest_status == "FINISHED" %}
+        <ul>
+            <li>
+                No active reviews where you participate as data contributor.
+            </li>
+        </ul>
+        {% else %}
+            <ul>
+                <li>
+                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} wait for the reviewer to submit the review.
+                </li>
+            </ul>
+        {% endif %}
+    {% endif %}
+
+        <h2>All reviews</h2>
+        <p> 
+            This section list all available reviews. 
+        </p>
+
+        {% if reviewer_reviewed.latest is not None %}
+        {% for table_name, reviews in reviewer_reviewed_grouped.items %}
+        <p>Table name: {{ table_name }}</p>
+            
+        {% for review in reviews %}
+        {% if forloop.first %}
+            <!-- Display the latest review separately -->
+            <!-- <li> -->
+            
+            <!-- <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReviewHistory{{table_name}}" aria-expanded="false" aria-controls="collapseReviewHistory{{table_name}}">
+            Show review history 
+            </button> -->
+            <!-- </li> -->
+            <!-- placeholder css class for reviewer completed -->
+            <div class="profile-rvw__item profile-rvw__item--done profile-rvw__item--reviewer">
+                <div class="profile-rvw__item-top">
+                    <div class="profile-rvw__item-left">
+                        <!-- placeholder type: contributor or reviewer -->
+                        <div class="profile-rvw__item-type">Participated as Reviewer</div>
+                        <!-- placeholder status: saved, submitted, finished -->
+                        <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                    </div>
+                    <div class="profile-rvw__item-right">
+                        <!-- placeholder open: day number -->
+                        <!-- <div class="profile-rvw__item-days">Open ___ days ago</div>
+                        <div>&nbsp—&nbsp</div> -->
+                        <!-- placeholder date -->
+                        {% if review.is_finished == False %}
+                        <div class="profile-rvw__item-date">Started on {{ review.date_started }}</div>
+                        {% else %}
+                        <!-- placeholder date -->
+                        <div class="profile-rvw__item-date">Finished on {{ review.date_finished }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="profile-rvw__item-btm">
+                    <!-- placeholder table name -->
+                    <div class="profile-rvw__item-name">
+                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}" class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        {% endfor %}
+        
+        <div class="collapse" id="collapseReviewHistory{{table_name}}">
+            <div class="card card-body">
+                <p> History </p>
+                <ul>
+                    {% for review in reviews %}
+                    <!-- Display other reviews normally -->
+                    <li>{{ review.id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endfor %}
+    {% else %}
+        <ul>
+            <li>
+                No reviews found for this User.
+            </li>
+        </ul>
+    {% endif %}
+        
+    {% if contributor_reviewed.latest is not None %}
+    
+    {% for table_name, reviews in contributor_reviewed_grouped.items %}
+    <p>{{ table_name }}</p>
+
+    {% for review in reviews %}
+    {% if forloop.first %}
+
+        <!-- placeholder css class for contributor completed -->
+        <div class="profile-rvw__item profile-rvw__item--done profile-rvw__item--contributor">
+            <div class="profile-rvw__item-top">
+                <div class="profile-rvw__item-left">
+                    <!-- placeholder type: contributor or reviewer -->
+                    <div class="profile-rvw__item-type">Participated as Contributor</div>
+                    <!-- placeholder status: saved, submitted, finished -->
+                    <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                </div>
+                <div class="profile-rvw__item-right">
+                    <!-- placeholder open: day number -->
+                    <!-- <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
+                    <div>&nbsp—&nbsp</div> -->
+                    {% if review.is_finished == False %}
+                    <!-- placeholder date -->
+                    <div class="profile-rvw__item-date">Started on {{ review.date_started }}</div>
+                    {% else %}
+                    <!-- placeholder date -->
+                    <div class="profile-rvw__item-date">Finished on {{ review.date_finished }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="profile-rvw__item-btm">
+                <!-- placeholder table name -->
+                <div class="profile-rvw__item-name">
+                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}"  class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- <li>
+            
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContribHistory{{table_name}}" aria-expanded="false" aria-controls="collapseContribHistory{{table_name}}">
+            Show review history 
+            </button>
+        </li> -->
+    {% endif %}
+    {% endfor %}
+        <div class="collapse" id="collapseContribHistory{{table_name}}">
+            <div class="card card-body">
+                <p> History </p>
+                <ul>
+                    {% for review in reviews %}
+                    <!-- Display other reviews normally -->
+                    <li>{{ review.id }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+    <ul>
+        <li>
+            No contributions found for this User.
+        </li>
+    </ul>
+        {% endif %}
+    
+</div>
 {% endblock %}

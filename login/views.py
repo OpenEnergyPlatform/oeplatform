@@ -7,8 +7,10 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
+from itertools import groupby
+
 import login.models as models
-from dataedit.models import Table
+from dataedit.models import Table, PeerReviewManager
 
 from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
@@ -34,7 +36,7 @@ class TablesView(View):
             for table in tables
             if user.get_table_permission_level(table) >= models.WRITE_PERM
         ]  # WRITE_PERM = 4
-        # prepare for data for template
+        # prepare data for template
         tables = [{"name": table.name, "schema": table.schema} for table in user_tables]
 
         # get name of schema form FK object
@@ -49,14 +51,91 @@ class TablesView(View):
 class ReviewsView(View):
     def get(self, request, user_id):
         """
-        Load the user identified by user_id and is OAuth-token.
-            If latter does not exist yet, create one.
+        Load the reviews the user identifyes as reviewer and contributor for.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-        return render(request, "login/user_review.html", {"profile_user": user})
+        
+        ##################################################################
+        # get reviewer pov reviews
+        ##################################################################
+        peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(
+            reviewer_user=user
+        )
+        latest_review = peer_review_reviews.last()
+        # print(latest_review)
+        if latest_review is not None:
+            review_history = peer_review_reviews.exclude(pk=latest_review.pk)
+            current_manager = PeerReviewManager.load(latest_review)
+            # Update days open value stored in peerReviewManager table
+            current_manager.update_open_since(opr=latest_review)
+            latest_review_status = current_manager.status
+            latest_review_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
+            reviewed_context = {
+                "latest": latest_review,
+                "latest_status": latest_review_status,
+                "current_reviewer": current_reviewer,
+                "latest_days_open": latest_review_days_open, 
+                "history": review_history,
+            }
+        else:
+            reviewed_context = None
+
+        # Sort the reviews by table name
+        sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
+        # Group the reviews by table name
+        grouped_reviews = {
+            k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
+        }
+
+        ##################################################################
+        # get contributor pov reviews
+        ##################################################################
+        peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
+            contributor_user=user
+        )
+        latest_reviewed_contribution = peer_review_contributions.last()
+        if latest_reviewed_contribution is not None:
+            reviewed_contribution_history = peer_review_contributions.exclude(
+                pk=latest_reviewed_contribution.pk
+            )
+            current_manager = PeerReviewManager.load(latest_reviewed_contribution)
+            # Update days open value stored in peerReviewManager table
+            current_manager.update_open_since(opr=latest_reviewed_contribution)
+            latest_reviewed_contribution_status = current_manager.status
+            latest_reviewed_contribution_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
+            reviewed_contributions_context = {
+                "latest": latest_reviewed_contribution,
+                "latest_status": latest_reviewed_contribution_status,
+                "current_reviewer": current_reviewer,
+                "latest_days_open": latest_reviewed_contribution_days_open,
+                "history": reviewed_contribution_history,
+            }
+        else:
+            reviewed_contributions_context = None
+
+        # Sort the reviews by table name
+        sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)
+        # Group the reviews by table name
+        grouped_contributions = {
+            k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
+        }
+
+        return render(
+            request,
+            "login/user_review.html",
+            {
+                "profile_user": user,
+                "reviewer_reviewed": reviewed_context,
+                "reviewer_reviewed_grouped": grouped_reviews,
+                "contributor_reviewed": reviewed_contributions_context,
+                "contributor_reviewed_grouped": grouped_contributions,
+            },
+        )
 
 
 class SettingsView(View):
