@@ -112,7 +112,8 @@
     $border-radius-lg: $border-radius,
     $border-radius-sm: $border-radius-sm,
     $card-border-color: $card-border-color,
-    $card-cap-padding-y: $card-cap-padding-y
+    $card-cap-padding-y: $card-cap-padding-y,
+    $alert-bg-scale: $alert-bg-scale
 );
 
 @forward 'custom_variables';
