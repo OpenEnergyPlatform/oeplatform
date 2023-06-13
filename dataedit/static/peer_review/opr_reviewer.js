@@ -617,9 +617,19 @@ function check_if_review_finished(){
 
     finishButton.on('click', finishPeerReview);
 
+    if (config.review_finished !== true){
     // Displaying the div
     reviewerDiv.show();
     $('#submit_summary').prop('disabled', true);
+    }
+    else{
+      reviewerDiv.hide(); // Hiding the div
+      $('#submit_summary').hide();
+      $('#peer_review-save').hide();
+      // $('#review-window').hide();
+      $('#review-window').css('visibility', 'hidden');
+      
+    }
 
 
     // Adding the div to the desired location in the document
