@@ -34,17 +34,8 @@
   </div>
 
   <div class="content content-finish-review">
-    <div id="review-info">
-      <!-- Button Modal -->
-      <button type="button" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#myModal">
-        <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
-        The Open Peer Review process
-      </button>
-    </div>
-
-
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade modal-xl" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -252,6 +243,13 @@
           <div class="review__box">
             <div id="field-descriptions-json" style="display: none;">
               {{ field_descriptions_json }}
+            </div>
+            <div class="review__description" id="review-info">
+              <!-- Button Modal -->
+              <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
+                Open Peer Review process
+                <i class="fas fa-info-circle" style="color: #2972A6;"></i>
+              </button>
             </div>
             <div class="review__btn-nav">
               <button type="button" onclick="selectPreviousField()">

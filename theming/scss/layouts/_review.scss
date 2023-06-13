@@ -218,13 +218,32 @@
         }
     }
 
+    &__description {
+        @extend .mb-3;
+        @extend .text-end;
+
+        button {
+            @extend .btn;
+            @extend .btn-light;
+            @extend .btn-sm;
+            @extend .text-primary;
+            @extend .p-0;
+            @extend .border-0;
+
+            &:hover {
+                @extend .bg-transparent;
+                @extend .border-0;
+            }
+        }
+    }
+
     &__btn-nav {
         @extend .position-absolute;
         @extend .d-flex;
         @extend .flex-row;
         @extend .justify-content-between;
         @extend .p-0;
-        top: 1rem;
+        top: 3.75rem;
         left: $C--padding-standard;
         width: calc(100% - 2 * #{$C--padding-standard});
 
