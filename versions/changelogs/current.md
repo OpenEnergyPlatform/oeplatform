@@ -10,6 +10,7 @@
 - Implement the review result tab on the table dataview page. [(#1262)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1262)
 - Expand the reviewer page so that it can be used as a review detail page when a review is completed. All editing functionality is removed. [(#1267)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1267)
 - Implement and improve the peer review profile page UI and content. Also add a early feature release banner and link to a github discussion. Show a comment icon in the field box infornt of the reviewer comment text. [(#1250)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1250) 
+- update field value and comment on save button click in reviewer box [(#1269)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1269)
 
 ### Bugs
 
