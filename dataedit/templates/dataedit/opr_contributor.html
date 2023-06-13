@@ -33,6 +33,26 @@
     </div>
   </div>
 
+  <div class="content content-finish-review">
+    <!-- Modal -->
+    <div class="modal fade modal-xl" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">The Open Peer Review process</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
@@ -225,6 +245,29 @@
             <div id="field-descriptions-json" style="display: none;">
               {{ field_descriptions_json }}
             </div>
+            <div class="review__description" id="review-info">
+              <!-- Button Modal -->
+              <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
+                Open Peer Review process
+                <i class="fas fa-info-circle" style="color: #2972A6;"></i>
+              </button>
+            </div>
+            <div class="review__btn-nav">
+              <button type="button" onclick="selectPreviousField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                  </svg>
+                </span>
+              </button>
+              <button type="button" onclick="selectNextField()">
+                <span class="btn__icon">
+                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                    </svg>
+                </span>
+              </button>
+            </div>
             <div id="field-descriptions"></div>
             <div class="flex-reviewer" id="review-window">
               <h2 id="review-field-name" style="display:none"></h2>
@@ -263,22 +306,6 @@
                   <textarea class="form-control" id="commentarea" rows="2" placeholder="Comment here if you want to explain your suggestion" ></textarea>
                 </div>
                 <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
-              </div>
-              <div class="review__btn-nav">
-                <button type="button" onclick="selectPreviousField()">
-                  <span class="btn__icon">
-                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
-                    </svg>
-                  </span>
-                </button>
-                <button type="button" onclick="selectNextField()">
-                  <span class="btn__icon">
-                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
-                      </svg>
-                  </span>
-                </button>
               </div>
             </div>
           </div>
