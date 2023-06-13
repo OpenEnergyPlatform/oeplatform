@@ -67,7 +67,7 @@
 {% include "login/user_nav.html" %}
     <h2>Active Open Peer Reviews</h2>
     <p> 
-        This section lists all active reviews you currently participate as reviewer or data contributor.
+        This section lists the latest active reviews in which you are currently participating as a reviewer or data contributor.
     </p>
     {% if reviewer_reviewed.latest is not None %}
         {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
