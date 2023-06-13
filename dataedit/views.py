@@ -2008,6 +2008,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             )
             # existing_review={}
             state_dict=None
+            review_finished=None
 
         config_data = {
             "can_add": can_add,
@@ -2015,6 +2016,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
             "topic": schema,
             "table": table,
+            "review_finished": review_finished,
         }
 
         context_meta = {
@@ -2023,7 +2025,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
-            "state_dict": json.dumps(state_dict),
+            "state_dict": json.dumps(state_dict), 
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
