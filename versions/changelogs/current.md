@@ -7,6 +7,7 @@
 - Improve presentation logic on table data view page to show the user if a review is not yet present/currently running/finished.(#1251)
 - Enhanced review functionality: Following the submission of the initial review by the reviewer, subsequent field reviews are now seamlessly stored within the review JSON file. This improvement facilitates effective communication between the contributor and reviewer by enabling the loading of these reviews onto the review or contributor page. (#1252)
 - Add functionality to handel finished open peer reviews and extend the reviewer page to grant a badge and finish the current review.  [(#1260)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1260)
+- Implement the review result tab on the table dataview page. [(#1262)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1262)
 
 
 ### Bugs
