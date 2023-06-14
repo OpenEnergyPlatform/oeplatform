@@ -196,6 +196,8 @@ function cancelPeerReview() {
   window.location = config.url_table;
 }
 
+
+
 /**
  * Identifies field name and value sets selected stlye and refreshes 
  * reviewer box (side panel) infos.
@@ -203,6 +205,7 @@ function cancelPeerReview() {
  * @param {string} fieldValue Value of the field
  * @param {string} category Metadata catgeory related to the fieldKey 
  */
+
 function click_field(fieldKey, fieldValue, category) {
     // this seems unused but it is relevant to select next and prev field functions
     selectedField = fieldKey;
@@ -468,7 +471,7 @@ function saveEntrances() {
               unique_entry = false;
               var element = document.querySelector('[aria-selected="true"]');
               var category = (element.getAttribute("data-bs-target"));
-              if (selectedState == "ok") {
+              if (selectedState === "ok") {
               Object.assign(current_review["reviews"][idx],
                   {
                       "category": category,
@@ -526,8 +529,9 @@ function saveEntrances() {
 
   // Color ok/suggestion/rejected
   updateFieldColor();
-  checkReviewComplete();
   selectNextField();
+  checkReviewComplete();
+
   
 
   // IS THIS NEEDED?
@@ -538,22 +542,43 @@ function saveEntrances() {
 
   renderSummaryPageFields();
 }
+function getFieldState(fieldKey) {
+  if (state_dict && state_dict[fieldKey] !== undefined) {
+    console.log(state_dict[fieldKey]);
+    return state_dict[fieldKey];
+  } else {
+    console.error(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    return null;
+  }
+}
 
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
 function checkReviewComplete() {
   const fields = document.querySelectorAll('.field');
+  let allReviewed = true;
+
   for (let field of fields) {
     let fieldName = field.id.slice(6);
+    const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find(review => review.key === fieldName);
-    if (!reviewed) {
-      $('#submit_summary').addClass('disabled');
-      return;
+    // Если состояние поля равно null и оно не было оценено, то allReviewed становится false
+    if ((fieldState === null || fieldState === 'none') && !reviewed) {
+      allReviewed = false;
+      break;
     }
   }
-  $('#submit_summary').removeClass('disabled');
+
+  if (allReviewed) {
+    $('#submit_summary').removeClass('disabled');
+  } else {
+    $('#submit_summary').addClass('disabled');
+  }
 }
+
+
+
 
 
 function checkFieldStates() {
