@@ -25,6 +25,7 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
+$('#submitButton').bind('click', hideReviewerOptions);
 // Submit review (not visible to reviewer)
 $('#submit_summary').bind('click', submitPeerReview);
 // save the current review (not visible to reviewer)
@@ -461,6 +462,12 @@ function saveEntrances() {
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
         });
+        // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+        var fieldElement = document.getElementById("field_" + selectedField);
+        var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+        var commentElement = fieldElement.querySelector('.suggestion--comment');
+        suggestionElement.innerText = document.getElementById("valuearea").value;
+        commentElement.innerText = document.getElementById("commentarea").value;
         break;
       }
     }
@@ -483,6 +490,12 @@ function saveEntrances() {
           }
         ]
       });
+      // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+      var fieldElement = document.getElementById("field_" + selectedField);
+      var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+      var commentElement = fieldElement.querySelector('.suggestion--comment');
+      suggestionElement.innerText = document.getElementById("valuearea").value;
+      commentElement.innerText = document.getElementById("commentarea").value;
     }
   }
 

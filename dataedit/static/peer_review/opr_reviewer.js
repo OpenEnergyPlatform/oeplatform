@@ -25,6 +25,7 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
+$('#submitButton').bind('click', hideReviewerOptions);
 // Submit review (visible to contributor)
 $('#submit_summary').bind('click', submitPeerReview);
 // save the current review (not visible to contributor)
@@ -472,37 +473,55 @@ function saveEntrances() {
               var element = document.querySelector('[aria-selected="true"]');
               var category = (element.getAttribute("data-bs-target"));
               if (selectedState === "ok") {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": Date.now(),
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": "",
-                            "reviewerSuggestion": "",
-                            "state": selectedState,
-                      },
-                  },
-              )
+                // var fieldElement = document.getElementById("field_" + selectedField);
+                // var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                // var commentElement = fieldElement.querySelector('.suggestion--comment');
+                // var new_value
+                // var new_value_comment
+                // if (document.getElementById("valuearea").value !== '') {
+                //   new_value = document.getElementById("valuearea").value;
+                //   new_value_comment = document.getElementById("commentarea").value;
+                // } else {
+                //   new_value = selectedFieldValue
+                //   new_value_comment = ""
+                // }
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": category,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": "",
+                              "reviewerSuggestion": "",
+                              "state": selectedState,
+                        },
+                    },
+                )
               } else {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": Date.now(),
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": document.getElementById("commentarea").value,
-                            "reviewerSuggestion": document.getElementById("valuearea").value,
-                            "state": selectedState,
-                      },
-                  },
-              )
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": category,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": document.getElementById("commentarea").value,
+                              "reviewerSuggestion": document.getElementById("valuearea").value,
+                              "state": selectedState,
+                        },
+                    },
+                )
+                // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+                var fieldElement = document.getElementById("field_" + selectedField);
+                var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                var commentElement = fieldElement.querySelector('.suggestion--comment');
+                suggestionElement.innerText = document.getElementById("valuearea").value;
+                commentElement.innerText = document.getElementById("commentarea").value;
             }
           }
       });
@@ -524,7 +543,14 @@ function saveEntrances() {
             "state": selectedState,
           },
         },
-    )}
+      )
+      // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+      var fieldElement = document.getElementById("field_" + selectedField);
+      var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+      var commentElement = fieldElement.querySelector('.suggestion--comment');
+      suggestionElement.innerText = document.getElementById("valuearea").value;
+      commentElement.innerText = document.getElementById("commentarea").value;
+    }
   }
 
   // Color ok/suggestion/rejected
@@ -620,9 +646,19 @@ function check_if_review_finished(){
 
     finishButton.on('click', finishPeerReview);
 
+    if (config.review_finished !== true){
     // Displaying the div
     reviewerDiv.show();
     $('#submit_summary').prop('disabled', true);
+    }
+    else{
+      reviewerDiv.hide(); // Hiding the div
+      $('#submit_summary').hide();
+      $('#peer_review-save').hide();
+      // $('#review-window').hide();
+      $('#review-window').css('visibility', 'hidden');
+      
+    }
 
 
     // Adding the div to the desired location in the document
