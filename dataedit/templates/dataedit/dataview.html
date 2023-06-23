@@ -320,15 +320,17 @@ for row in result.json():
 </div>
 <hr>
 
+{% if can_add %} 
 <h4>Management</h4>
 <div>
-  <button class="btn btn-danger mt-2" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+  <button class="btn btn-danger mt-2 {% if not can_add %} disabled {% endif %}" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
   <div id="dataview-table-create-msg" class="invisible dataview-status">
     <span class="spinner spinner-border spinner-border-sm"></span>
     <span class="message"></span>
   </div>
 </div>
 <hr>
+{% endif %}
 
 {% endblock main-right-sidebar-content-additional %}
 
