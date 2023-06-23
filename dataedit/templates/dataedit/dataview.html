@@ -320,6 +320,16 @@ for row in result.json():
 </div>
 <hr>
 
+<h4>Management</h4>
+<div>
+  <button class="btn btn-danger mt-2" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+  <div id="dataview-table-create-msg" class="invisible dataview-status">
+    <span class="spinner spinner-border spinner-border-sm"></span>
+    <span class="message"></span>
+  </div>
+</div>
+<hr>
+
 {% endblock main-right-sidebar-content-additional %}
 
 {% block after-head %}
@@ -333,11 +343,28 @@ for row in result.json():
 {% endblock after-head %}
 
 {% block after-body-bottom-js %}
+
+<!-- dialog: keep outside of main container -->
+<div id="dataview-confirm-delete" class="modal fade">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              Do you want to delete the table (including data and metadata)?
+          </div>
+          <div class="modal-body">
+              <button class="btn btn-sm btn-dark mr-2" id="dataview-confirm-delete-delete">delete</buttton>
+              <button class="btn btn-sm btn-light" id="dataview-confirm-delete-cancel">cancel</buttton>
+          </div>
+      </div>
+  </di>
+</div>
+
 <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
 <script src="{% static 'dataedit/wkx.min.js' %}"></script>
 <script src="{% static 'dataedit/proj4.min.js' %}"></script><!-- src: https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js -->
 <script src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
 <script src="{% static 'dataedit/backend.js' %}"></script>
+<script src="{% static 'dataedit/dataedit.js' %}"></script>
 <script src="{% static 'dataedit/plotly-latest.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 <script src="{% static 'dataedit/json5.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 
@@ -377,6 +404,8 @@ for row in result.json():
       a.parentNode.removeChild(a);
     })
   };
+
+  DataEdit(table=table, schema=schema);
 
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()
