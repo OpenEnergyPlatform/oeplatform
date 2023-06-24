@@ -569,6 +569,35 @@ function updateSubmitButtonColor(){
   }
 }
 
+function updateTabClasses() {
+    const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+    for (let i = 0; i < tabNames.length; i++) {
+        let tabName = tabNames[i];
+        let tab = document.getElementById(tabName + '-tab');
+        if (!tab) continue;
+
+        let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+        let allOk = true;
+        for (let j = 0; j < fields.length; j++) {
+            let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+            if (fieldState !== 'ok') {
+                allOk = false;
+                break;
+            }
+        }
+        if (allOk) {
+    tab.classList.add('status');
+    tab.classList.add('status--done');
+        } else {
+            tab.classList.remove('status');
+            tab.classList.remove('status--done');
+        }
+    }
+}
+window.addEventListener('DOMContentLoaded', updateTabClasses);
+
+
 /**
  * Hide and show revier controles once the user clicks the summary tab
  */
