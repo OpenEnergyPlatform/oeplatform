@@ -721,8 +721,35 @@ const otherTabs = [
   document.getElementById('resource-tab')
 ];
 const reviewContent = document.querySelector(".review__content");
+function updateTabClasses() {
+    const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];  // список имен вкладок
+    for (let i = 0; i < tabNames.length; i++) {
+        let tabName = tabNames[i];
+        let tab = document.getElementById(tabName + '-tab');
+        if (!tab) continue; // пропускаем, если вкладка не найдена
 
-// Event listener for clicking the "Summary" tab button
+        let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));  // извлекаем поля для данной вкладки
+
+        let allOk = true; // предполагаем, что все поля в порядке
+        for (let j = 0; j < fields.length; j++) {
+            let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+            if (fieldState !== 'ok') {
+                allOk = false;
+                break;
+            }
+        }
+        if (allOk) {
+    tab.classList.add('status');
+    tab.classList.add('status--done');
+        } else {
+            tab.classList.remove('status');
+            tab.classList.remove('status--done');
+        }
+    }
+}
+window.addEventListener('DOMContentLoaded', updateTabClasses);
+
+
 summaryTab.addEventListener('click', function() {
   toggleReviewControls(false);
   reviewContent.classList.toggle("tab-pane--100");
@@ -747,3 +774,5 @@ function toggleReviewControls(show) {
 }
 
 peerReview(config);
+
+
