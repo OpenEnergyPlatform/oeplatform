@@ -308,6 +308,7 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  */
 function renderSummaryPageFields() {
   const acceptedFields = [];
+  const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
 
@@ -319,6 +320,8 @@ function renderSummaryPageFields() {
 
     if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
+    } else if (fieldState === 'suggestion') {
+      suggestingFields.push({ field_id, fieldValue, fieldCategory });
     } else if (fieldState === 'rejected') {
       rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
@@ -327,7 +330,7 @@ function renderSummaryPageFields() {
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id.slice(0);
-    if (["resource", "summary"].includes(category_name)) {
+    if (category_name === "summary") {
       continue;
     }
     const category_fields = category.querySelectorAll(".field");
@@ -341,6 +344,7 @@ function renderSummaryPageFields() {
       }
     }
   }
+
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
