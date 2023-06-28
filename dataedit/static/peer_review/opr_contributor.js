@@ -590,8 +590,7 @@ function updateTabClasses() {
     tab.classList.add('status');
     tab.classList.add('status--done');
         } else {
-            tab.classList.remove('status');
-            tab.classList.remove('status--done');
+            tab.classList.add('status');
         }
     }
 }
