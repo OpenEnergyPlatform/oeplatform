@@ -345,7 +345,7 @@ function renderSummaryPageFields() {
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id.slice(0);
-    if (["resource", "summary"].includes(category_name)) {
+    if (category_name === "summary") {
       continue;
     }
     const category_fields = category.querySelectorAll(".field");
