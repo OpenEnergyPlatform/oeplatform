@@ -22,12 +22,11 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 
-# versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
-versions = os.listdir(os.path.join(ONTOLOGY_FOLDER, 'oeo'))
+versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}") # TODO bad - windows dev will get path error
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
-file = "reasoned-oeo-full.owl"
-#file = "oeo-full.owl"
+path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}" # TODO bad - windows dev will get path error
+file = "reasoned-oeo-full.owl" # TODO- set in settings
+#file = "oeo-full.owl" # TODO- set in settings
 Ontology_URI = os.path.join(path, file)
 
 
@@ -50,6 +49,7 @@ store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
+# TODO- Alot of hardcoded URL, transfer to settings or other config
 OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")
@@ -112,6 +112,7 @@ def create_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
     else:
+        # TODO- set in settings
         study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + uid )
         oekg.add(( study_URI, RDF.type, OEO.OEO_00010252 ))
         if acronym != '':
@@ -134,6 +135,7 @@ def create_factsheet(request, *args, **kwargs):
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
             if item["acronym"] != '':
+                # TODO- set in settings
                 scenario_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario/" + item["id"]) 
                 oekg.add(( study_URI, OEKG["has_scenario"], scenario_URI ))
                 oekg.add(( scenario_URI, RDFS.label, Literal(item["acronym"])))
@@ -147,11 +149,13 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'regions' in item:
                     for region in item['regions']:
+                        # TODO- set in settings
                         region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
                         oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
                     
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
+                        # TODO- set in settings
                         interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
                         oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
                 
@@ -165,6 +169,7 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'input_datasets' in item:
                     for input_dataset in item['input_datasets']:
+                        # TODO- set in settings
                         input_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/input_datasets/" + input_dataset['key'])
                         oekg.add(( input_dataset_URI, RDF.type, OEO.OEO_00030030))
                         oekg.add(( input_dataset_URI, RDFS.label, Literal(input_dataset['value']['label'])))
@@ -175,6 +180,7 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'output_datasets' in item:
                     for output_dataset in item['output_datasets']:
+                        # TODO- set in settings
                         output_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/output_datasets/" + output_dataset['key'])
                         oekg.add(( output_dataset_URI, RDF.type, OEO.OEO_00030029))
                         oekg.add(( output_dataset_URI, RDFS.label, Literal(output_dataset['value']['label'])))
