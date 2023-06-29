@@ -27,3 +27,4 @@ GeoAlchemy2~=0.11
 jsonschema~=3.2
 oemetadata~=1.6.0
 django-cors-headers
+Owlready2
