@@ -22,7 +22,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 
-versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
+# versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
+versions = os.listdir(os.path.join(ONTOLOGY_FOLDER, 'oeo'))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
 file = "reasoned-oeo-full.owl"
