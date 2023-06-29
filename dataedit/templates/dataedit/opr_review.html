@@ -24,31 +24,79 @@
       <span class="main-header__wizard-path"><a href="/dataedit/schemas">Topics</a> / <a href="/dataedit/view/model_draft">model_draft</a> / {{ table }}</span>
     </div>
   </div>
+
+  <div class="content">
+    <div class="content__container">
+      <div class="alert alert-warning" style="width:100%" role="alert">
+        This feature is in early rollout phase now. We do expect you to experience some errors. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
+      </div>
+    </div>
+  </div>
+
+  <div class="content content-finish-review">
+    <!-- Modal -->
+    <div class="modal fade modal-xl" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">The Open Peer Review process</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
   <div class="fullwidth-tabs">
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
         <li class="nav-item show active" role="presentation">
-          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General Keys</button>
+          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false"> Spatiotemporal Keys</button>
+          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false">Spatial & temporal</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source Keys</button>
+          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License Keys</button>
+          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor Keys</button>
+          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource Keys</button>
+          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource</button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
         </li>
       </ul>
+      <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
+          <button id="submit_summary">
+            <span class="btn__icon">
+              <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z"/>
+              </svg>
+            </span>
+            <span>Submit</span>
+          </button>
+          <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="After submitting your work, please note that it may take some time for the contributor to respond and for the peer review process to continue. Please be patient while waiting for their feedback."></i>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
+          <button id="peer_review-save">Save Progress</button>
+        </div>
+        <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
+          <button id="peer_review-cancel">Quit</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="content">
@@ -67,6 +115,8 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight"> {{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -79,8 +129,15 @@
                 {% for item in meta.spatial %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                    {% endif %}
                   </p>
                 </div>  
                 {% endfor %}
@@ -94,6 +151,8 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
                 </div>
@@ -111,6 +170,8 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
                 </div> 
@@ -122,8 +183,15 @@
               {% for item in meta.license %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                    {% endif %}
                   </p>
                 </div>  
               {% endfor %}
@@ -134,8 +202,15 @@
               {% for item in meta.contributor %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                    {% endif %}
                   </p>
                 </div>  
               {% endfor %}
@@ -146,42 +221,21 @@
                 {% for item in meta.resource %}
                 <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
                   <p class="review__item-content">
-                    <span class="key">{{item.field}}</span>
-                    <span class="value">{{ item.value }}</span>
+                    {% if item.field is Null %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                    {% else %}
+                      <span class="key">{{item.field}}</span>
+                      <span class="value">{{ item.value }}</span>
+                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
+                    {% endif %}
                   </p>
                 </div>  
               {% endfor %}
               </div>
             </div>
             <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
-              <ul class="nav nav-tabs sticky-top" id="summarySubTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="#missingReviewSummaryTab" data-bs-toggle="tab" data-bs-target="#missingReviewSummaryTab" type="button" role="tab" aria-controls="missingReviewSummaryTab" aria-selected="true">Review missing</button>
-                </li>
-                  <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="#rejectedSummaryTab" data-bs-toggle="tab" data-bs-target="#rejectedSummaryTab" type="button" role="tab" aria-controls="rejectedSummaryTab" aria-selected="false">Rejected</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="#suggestionsSummaryTab" data-bs-toggle="tab" data-bs-target="#suggestionsSummaryTab" type="button" role="tab" aria-controls="suggestionsSummaryTab" aria-selected="true">Suggestions</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="#acceptedSummaryTab" data-bs-toggle="tab" data-bs-target="#acceptedSummaryTab" type="button" role="tab" aria-controls="acceptedSummaryTab" aria-selected="true">Accepted</button>
-                </li>
-              </ul>
-            </div>
-            <div class="tab-content">
-              <div id="missingReviewSummaryTab" role="tabpanel" class="tab-pane fade">
-                <i> Show missing review fields here.</i>
-              </div>
-              <div id="rejectedSummaryTab" role="tabpanel" class="tab-pane fade">
-                <i> Show rejected fields here.</i>
-              </div>
-              <div id="suggestionsSummaryTab" role="tabpanel" class="tab-pane fade">
-                <i> Show suggestion fields here.</i>
-              </div>
-              <div id="acceptedSummaryTab" role="tabpanel" class="tab-pane fade">
-                <i> Show accepted fields here.</i>
-              </div>
             </div>
           </div>
         </div>
@@ -190,18 +244,62 @@
             <div id="field-descriptions-json" style="display: none;">
               {{ field_descriptions_json }}
             </div>
+            <div class="review__description" id="review-info">
+              <!-- Button Modal -->
+              <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
+                Open Peer Review process
+                <i class="fas fa-info-circle" style="color: #2972A6;"></i>
+              </button>
+            </div>
+            <div class="review__btn-nav">
+              <button type="button" onclick="selectPreviousField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
+                  </svg>
+                </span>
+              </button>
+              <button type="button" onclick="selectNextField()">
+                <span class="btn__icon">
+                  <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
+                  </svg>
+                </span>
+              </button>
+            </div>
             <div id="field-descriptions"></div>
             <div class="flex-reviewer" id="review-window">
               <h2 id="review-field-name" style="display:none"></h2>
               <div class="review__btns" role="group">
                 <div class="review__btn review__btn--success">
-                  <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">Accept</button>
+                  <button type="button" id="ok-button" value="ok" onclick="selectState('ok');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m22.28,3.75c-.31,0-.6.14-.81.36l-13.4,13.4-5.66-4.37h0c-.25-.19-.56-.28-.87-.24-.31.04-.59.2-.79.45s-.28.56-.23.88c.04.31.21.59.46.78l6.48,5.01c.47.36,1.14.32,1.55-.1l14.14-14.14c.35-.34.46-.86.26-1.31-.19-.45-.64-.73-1.13-.71h0Z"/>
+                      </svg>
+                    </span>
+                    <span>Accept</span>
+                  </button>
                 </div>
                 <div class="review__btn review__btn--suggested">
-                  <button type="button" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">Suggest</button>
+                  <button type="button" id="suggestion-button" value="suggestion" onclick="selectState('suggestion');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m10.6,17.92c-.01-.37-.02-.65-.02-.83,0-1.09.15-2.03.46-2.82.23-.59.59-1.19,1.09-1.8.37-.44,1.04-1.08,1.99-1.93.96-.85,1.58-1.52,1.87-2.03.29-.5.43-1.05.43-1.65,0-1.08-.42-2.02-1.26-2.84-.84-.81-1.88-1.22-3.1-1.22s-2.17.37-2.95,1.11c-.79.74-1.31,1.9-1.56,3.47l-2.85-.34c.26-2.1,1.02-3.72,2.29-4.84,1.27-1.12,2.94-1.68,5.03-1.68,2.21,0,3.97.6,5.28,1.8,1.31,1.2,1.97,2.65,1.97,4.36,0,.98-.23,1.89-.69,2.72-.46.83-1.36,1.85-2.71,3.03-.9.8-1.49,1.39-1.77,1.77-.28.38-.48.82-.61,1.31-.14.49-.21,1.29-.23,2.4h-2.67Zm-.17,5.56v-3.16h3.15v3.16h-3.15Z"/>
+                      </svg>
+                    </span>
+                    <span>Suggest</span>
+                  </button>
                 </div>
                 <div class="review__btn review__btn--denied">
-                  <button type="button" id="rejected-button" value= "rejected" onclick="selectState('rejected');">Deny</button>
+                  <button type="button" id="rejected-button" value= "rejected" onclick="selectState('rejected');">
+                    <span class="btn__icon">
+                      <svg width="12" height="12" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m13.46,12.41L22.94,2.92c.4-.4.4-1.06,0-1.46s-1.06-.4-1.46,0l-9.49,9.48L2.52,1.46c-.4-.4-1.06-.4-1.46,0-.4.4-.4,1.06,0,1.46l9.47,9.48L1.06,21.87c-.4.4-.4,1.06,0,1.46.2.2.47.3.73.3s.53-.1.73-.3l9.47-9.47,9.47,9.48c.2.2.47.3.73.3s.53-.1.73-.3c.4-.4.4-1.06,0-1.46l-9.47-9.48Z"/>
+                      </svg>
+                    </span>
+                    <span>Deny</span>
+                  </button>
                 </div>
               </div>
               <div class="d-none review__remarks" id="reviewer_remarks">
@@ -215,40 +313,6 @@
                 </div>
                 <button type="button" class="btn btn-warning review__field-save" id="submitButton">Save comment/new value</button>
               </div>
-              <div class="review__btn-nav">
-                <button type="button" onclick="selectPreviousField()">
-                  <span class="btn__icon">
-                    <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
-                    </svg>
-                  </span>
-                  <span class="btn__text">Back</span>
-                </button>
-                <button type="button" onclick="selectNextField()">
-                  <span class="btn__icon">
-                      <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
-                      </svg>
-                  </span>
-                  <span class="btn__text">Next</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="review__save-btns" id="peer_review-controls">
-            <div class="review__save-btn review__save-btn--save">
-              <span class="" {% if not can_add %} data-toggle="tooltip" title="You need write permissions on this table to upload meta data" {% endif %}>
-                <a href="#peer_review-submit" class="{% if not can_add %} disabled {% endif %}" id="peer_review-submit">
-                  <span class="spinner-border text-light d-none spinner-border-sm" id="peer_review-submitting">
-                  </span>Save Review Progress
-                </a>
-              </span>
-            </div>
-            <div class="review__save-btn review__save-btn--summary">
-              <button id="submit_summary">Submit summary</button>
-            </div>
-            <div class="review__save-btn review__save-btn--quit">
-              <button id="peer_review-cancel">Quit</button>
             </div>
           </div>
           <div class="review__infos">
@@ -261,16 +325,23 @@
   </div>
 </main>
 
-
-
-
 {% endblock main %}
-
 
 {% block after-body-bottom-js %}
   <script>
-  const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
+    const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
+    let state_dict = JSON.parse('{{ state_dict | escapejs }}');
+    console.log(state_dict)
+    if ( state_dict && Object.keys(state_dict).length > 0) {
+    for (let [key, value] of Object.entries(state_dict)) {
+      let field_id = `#field_${key}`.replace(/\./g, "\\.");
+      console.log(field_id);
+      $(field_id).addClass(`field-${value}`);
+    }
+}
+    
+    // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
   <script src="/static/peer_review/opr_reviewer.js"></script>
 {% endblock after-body-bottom-js %}

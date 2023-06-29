@@ -7,6 +7,8 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, View
 from django.views.generic.edit import DeleteView, UpdateView
 
+from itertools import groupby
+
 import login.models as models
 from dataedit.models import Table, PeerReviewManager
 
@@ -55,12 +57,15 @@ class ReviewsView(View):
         :return: Profile renderer
         """
         user = get_object_or_404(OepUser, pk=user_id)
-
+        
+        ##################################################################
         # get reviewer pov reviews
+        ##################################################################
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(
             reviewer_user=user
         )
         latest_review = peer_review_reviews.last()
+        # print(latest_review)
         if latest_review is not None:
             review_history = peer_review_reviews.exclude(pk=latest_review.pk)
             current_manager = PeerReviewManager.load(latest_review)
@@ -68,16 +73,16 @@ class ReviewsView(View):
             current_manager.update_open_since(opr=latest_review)
             latest_review_status = current_manager.status
             latest_review_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
             reviewed_context = {
                 "latest": latest_review,
                 "latest_status": latest_review_status,
-                "latest_days_open": latest_review_days_open,
+                "current_reviewer": current_reviewer,
+                "latest_days_open": latest_review_days_open, 
                 "history": review_history,
             }
         else:
             reviewed_context = None
-
-        from itertools import groupby
 
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
@@ -86,23 +91,27 @@ class ReviewsView(View):
             k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
         }
 
+        ##################################################################
         # get contributor pov reviews
+        ##################################################################
         peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
             contributor_user=user
         )
         latest_reviewed_contribution = peer_review_contributions.last()
-        if latest_review is not None:
+        if latest_reviewed_contribution is not None:
             reviewed_contribution_history = peer_review_contributions.exclude(
-                pk=latest_review.pk
+                pk=latest_reviewed_contribution.pk
             )
-            current_manager = PeerReviewManager.load(latest_review)
+            current_manager = PeerReviewManager.load(latest_reviewed_contribution)
             # Update days open value stored in peerReviewManager table
-            current_manager.update_open_since(opr=latest_review)
+            current_manager.update_open_since(opr=latest_reviewed_contribution)
             latest_reviewed_contribution_status = current_manager.status
             latest_reviewed_contribution_days_open = current_manager.is_open_since
+            current_reviewer = current_manager.current_reviewer
             reviewed_contributions_context = {
                 "latest": latest_reviewed_contribution,
                 "latest_status": latest_reviewed_contribution_status,
+                "current_reviewer": current_reviewer,
                 "latest_days_open": latest_reviewed_contribution_days_open,
                 "history": reviewed_contribution_history,
             }
