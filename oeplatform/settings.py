@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     "oeo_viewer",
     "factsheet",
     "corsheaders",
-    "bootstrap4"
+    "owlready2"
 )
 
 MIDDLEWARE = (
