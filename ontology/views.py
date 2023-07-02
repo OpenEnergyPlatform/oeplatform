@@ -13,6 +13,7 @@ from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
 
 def collect_modules(path):
     modules = dict()
+
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
             match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
@@ -247,16 +248,16 @@ class OntologyOverview(View):
                     class_notes=class_notes,
                 ))
             else:
-                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
+                main_module = collect_modules(path) #TODO fix varname - not clear what path this is
                 main_module_name = list(main_module.keys())[0]
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
                 submodules = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules"
+                    (path / "modules")
                 )
                 # Collect all file names
                 imports = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports"
+                    path / "imports"
                 )
 
                 return render(
@@ -314,19 +315,21 @@ class OntologyStatics(View):
         :return:
         """
 
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
         if not extension:
             extension = "owl"
         if not version:
             version = max(
-                (d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")),
+                (d for d in os.listdir(onto_base_path)),
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
             file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports/{file}.{extension}"
+                 onto_base_path / imports / (file + "." + extension) 
             )
         else:
-            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+            file_path = onto_base_path / version / (file + "." + extension)
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
@@ -338,7 +341,7 @@ class OntologyStatics(View):
                 return response
         else:
             file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
+                onto_base_path / version / "modules" / (file + "." + extension)
             )
             if not os.path.exists(file_path):
                 raise Http404
