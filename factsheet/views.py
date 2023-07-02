@@ -16,26 +16,30 @@ from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
 from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 
-versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}") # TODO bad - windows dev will get path error
-version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}" # TODO bad - windows dev will get path error
-file = "reasoned-oeo-full.owl" # TODO- set in settings
-#file = "oeo-full.owl" # TODO- set in settings
-Ontology_URI = os.path.join(path, file)
+from pathlib import Path
 
+versions = os.listdir(Path(ONTOLOGY_ROOT, 'oeo')) # TODO bad - windows dev will get path error
+version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
+ONTHOLOGY_NAME = 'oeo'
+onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+path = onto_base_path / version # TODO bad - windows dev will get path error
+# file = "reasoned-oeo-full.owl" # TODO- set in settings
+file = "oeo-full.owl" # TODO- set in settings
+Ontology_URI = path / file
+Ontology_URI_STR = Ontology_URI.as_posix()
 
 sys.path.append(path)
 
 oeo = Graph()
-oeo.parse(Ontology_URI)
+oeo.parse(Ontology_URI.as_uri())
 
-oeo_owl = get_ontology(Ontology_URI).load()
+oeo_owl = get_ontology(Ontology_URI_STR).load()
 
 #query_endpoint = 'http://localhost:3030/ds/query'
 #update_endpoint = 'http://localhost:3030/ds/update'
