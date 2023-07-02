@@ -2,11 +2,13 @@ import os
 import re
 from collections import defaultdict
 
+from pathlib import Path
+
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
 
 
 def collect_modules(path):
@@ -32,9 +34,12 @@ def collect_modules(path):
 
 class OntologyVersion(View):
     def get(self, request, ontology="oeo", version=None):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
+            print("test")
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         print(versions)
         if not version:
             version = max(
@@ -51,20 +56,22 @@ class OntologyVersion(View):
 
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
             )
 
-        path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
+        path = onto_base_path / version
         # This is temporary (macOS related)
         file = "oeo-full.owl"
-        Ontology_URI = os.path.join(path, file)
+        Ontology_URI = path / file
         g = Graph()
-        g.parse(Ontology_URI)
+        g.parse(Ontology_URI.as_posix())
 
         q_global = g.query(
             """
