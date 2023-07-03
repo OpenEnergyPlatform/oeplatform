@@ -308,43 +308,49 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  */
 function renderSummaryPageFields() {
   const acceptedFields = [];
-  const suggestingFields = [];
   const rejectedFields = [];
   const missingFields = [];
 
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
     const fieldValue = $(field_id).text();
-    const fieldState = review.fieldReview.state;
-    const fieldCategory = review.category.slice(1);
+    const isAccepted = review.fieldReview.some(fieldReview => fieldReview.state === 'ok');
+    const isRejected = review.fieldReview.some(fieldReview => fieldReview.state === 'rejected');
 
-    if (fieldState === 'ok') {
-      acceptedFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (fieldState === 'suggestion') {
-      suggestingFields.push({ field_id, fieldValue, fieldCategory });
-    } else if (fieldState === 'rejected') {
-      rejectedFields.push({ field_id, fieldValue, fieldCategory });
-    }
+    const fieldCategory = review.category;
+
+    if (isAccepted) {
+  acceptedFields.push({ field_id, fieldValue, fieldCategory });
+} else if (isRejected) {
+  rejectedFields.push({ field_id, fieldValue, fieldCategory });
+}
+
   }
-  const categories = document.querySelectorAll(".tab-pane");
-  for (const category of categories) {
-    const category_name = category.id.slice(0);
-    if (category_name === "summary") {
-      continue;
-    }
-    const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
-      const field_name = field.id.slice(6);
-      const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
-      const fieldValue = $(field_id).text();
-      const found = current_review.reviews.some(review => review.key === field_name);
-      const fieldCategory = field.getAttribute('data-category');
-      if (!found) {
-        missingFields.push({ field_id, fieldValue, fieldCategory });
+
+     const categories = document.querySelectorAll(".tab-pane");
+
+     for (const category of categories) {
+      const category_name = category.id.slice(0);
+
+      if (category_name === "summary") {
+        continue;
+      }
+      const category_fields = category.querySelectorAll(".field");
+      for (field of category_fields) {
+        const field_name = field.id.slice(6);
+        const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
+        const fieldValue = $(field_id).text();
+        const found = current_review.reviews.some(review => review.key === field_name);
+        const fieldCategory = field.getAttribute('data-category');
+
+        if (!found) {
+          missingFields.push({ field_id, fieldValue, fieldCategory });
+        }
       }
     }
-  }
 
+
+  // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
@@ -399,26 +405,28 @@ function renderSummaryPageFields() {
 
   function updateSummaryTable() {
     clearSummaryTable();
-    
+
     let allData = [];
     allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
     allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
     allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
-    
+
     let table = generateTable(allData);
     summaryContainer.appendChild(table);
   }
 
   updateSummaryTable();
-  // const summaryContainer = document.getElementById("summary");
-  // summaryContainer.innerHTML = `
-  //   <h4>Accepted:</h4>
-  //   ${createFieldList(acceptedFields)}
-  //   <h4>Deny:</h4>
-  //   ${createFieldList(rejectedFields)}
-  //   <h4>Missing:</h4>
-  //   ${createFieldList(missingFields)}
-  // `;
+
+  /* summaryContainer.innerHTML = `
+    <h4>Accepted:</h4>
+    ${createFieldList(acceptedFields)}
+    <h4>Suggesting:</h4>
+    ${createFieldList(suggestingFields)}
+    <h4>Rejected:</h4>
+    ${createFieldList(rejectedFields)}
+    <h4>Missing:</h4>
+    ${createFieldList(missingFields)}
+  `; */
 }
 
 /**
@@ -516,7 +524,6 @@ function checkReviewComplete() {
   for (let field of fields) {
     let fieldName = field.id.slice(6);
     const fieldState = getFieldState(fieldName);
-    console.log(fieldName, fieldState);
     let reviewed = current_review["reviews"].find(review => review.key === fieldName);
 
     if (!reviewed && fieldState !== 'ok') {
