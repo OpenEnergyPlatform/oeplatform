@@ -326,7 +326,6 @@ function renderSummaryPageFields() {
       rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
   }
-
   const categories = document.querySelectorAll(".tab-pane");
   for (const category of categories) {
     const category_name = category.id.slice(0);
@@ -339,14 +338,13 @@ function renderSummaryPageFields() {
       const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
       const fieldValue = $(field_id).text();
       const found = current_review.reviews.some(review => review.key === field_name);
+      const fieldCategory = field.getAttribute('data-category');
       if (!found) {
-        missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
+        missingFields.push({ field_id, fieldValue, fieldCategory });
       }
     }
   }
 
-
-  // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
@@ -480,7 +478,7 @@ function saveEntrances() {
       var element = document.querySelector('[aria-selected="true"]');
       var category = element.getAttribute("data-bs-target");
       current_review["reviews"].push({
-        "category": category,
+        "category": selectedCategory,
         "key": selectedField,
         "fieldReview": [
           {
