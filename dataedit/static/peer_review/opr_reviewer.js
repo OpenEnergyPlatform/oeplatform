@@ -212,7 +212,6 @@ function click_field(fieldKey, fieldValue, category) {
     selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
-
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
@@ -331,7 +330,7 @@ function renderSummaryPageFields() {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
     const fieldValue = $(field_id).text();
     const fieldState = review.fieldReview.state;
-    const fieldCategory = review.category.slice(1);
+    const fieldCategory = review.category;
 
     if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
@@ -342,23 +341,28 @@ function renderSummaryPageFields() {
     }
   }
 
-  const categories = document.querySelectorAll(".tab-pane");
-  for (const category of categories) {
-    const category_name = category.id.slice(0);
-    if (category_name === "summary") {
-      continue;
-    }
-    const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
-      const field_name = field.id.slice(6);
-      const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
-      const fieldValue = $(field_id).text();
-      const found = current_review.reviews.some(review => review.key === field_name);
-      if (!found) {
-        missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
+     const categories = document.querySelectorAll(".tab-pane");
+
+     for (const category of categories) {
+      const category_name = category.id.slice(0);
+
+      if (category_name === "summary") {
+        continue;
+      }
+      const category_fields = category.querySelectorAll(".field");
+      for (field of category_fields) {
+        const field_name = field.id.slice(6);
+        const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
+        const fieldValue = $(field_id).text();
+        const found = current_review.reviews.some(review => review.key === field_name);
+        const fieldCategory = field.getAttribute('data-category');
+
+        if (!found) {
+          missingFields.push({ field_id, fieldValue, fieldCategory });
+        }
       }
     }
-  }
+
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
@@ -487,7 +491,7 @@ function saveEntrances() {
                 // }
                 Object.assign(current_review["reviews"][idx],
                     {
-                        "category": category,
+                        "category": selectedCategory,
                         "key": selectedField,
                         "fieldReview": {
                             "timestamp": Date.now(),
@@ -503,7 +507,7 @@ function saveEntrances() {
               } else {
                 Object.assign(current_review["reviews"][idx],
                     {
-                        "category": category,
+                        "category": selectedCategory,
                         "key": selectedField,
                         "fieldReview": {
                             "timestamp": Date.now(),
@@ -531,7 +535,7 @@ function saveEntrances() {
     if (unique_entry){
     current_review["reviews"].push(
         {
-          "category": category,
+          "category": selectedCategory,
           "key": selectedField,
           "fieldReview": {
             "timestamp": Date.now(), // TODO put actual timestamp
@@ -555,8 +559,8 @@ function saveEntrances() {
 
   // Color ok/suggestion/rejected
   updateFieldColor();
-  selectNextField();
   checkReviewComplete();
+  selectNextField();
 
   
 
@@ -589,7 +593,6 @@ function checkReviewComplete() {
     let fieldName = field.id.slice(6);
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find(review => review.key === fieldName);
-    // Если состояние поля равно null и оно не было оценено, то allReviewed становится false
     if ((fieldState === null || fieldState === 'none') && !reviewed) {
       allReviewed = false;
       break;
