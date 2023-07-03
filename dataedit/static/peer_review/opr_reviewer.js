@@ -555,13 +555,6 @@ function saveEntrances() {
   checkReviewComplete();
   selectNextField();
   
-
-  // IS THIS NEEDED?
-  // alert(JSON.stringify(current_review, null, 4));
-  // document.getElementById("summary").innerHTML = (
-  //   JSON.stringify(current_review, null, 4)
-  // );
-
   renderSummaryPageFields();
 }
 
