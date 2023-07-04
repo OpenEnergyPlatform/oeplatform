@@ -20,8 +20,8 @@ class Command(BaseCommand):
         be deleted after confirmation.
 
         Usage:
-        python manage.py clear_opr --all  # Delete all entries
-        python manage.py clear_opr        # Delete a single entry by ID
+        python manage.py clear_peer_reviews --all  # Delete all entries
+        python manage.py clear_peer_reviews        # Delete a single entry by ID
         """
 
         delete_all = options['all']

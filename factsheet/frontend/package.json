@@ -30,6 +30,7 @@
     "jquery": "^3.6.0",
     "jsonld": "^8.1.0",
     "lodash": "^4.17.21",
+    "mkdirp": "^3.0.1",
     "npm": "^9.2.0",
     "react": "^17.0.2",
     "react-beautiful-dnd": "^13.1.1",
@@ -54,9 +55,9 @@
   "scripts": {
     "start": "react-scripts start",
     "create": "rm -rf ../static && npm run build",
-    "build": "BUILD_PATH='../static/temp' react-scripts build && npm run build:make_dir",
-    "build:make_dir": "mkdir -p ../static/factsheet/css && mkdir -p ../static/factsheet/js && npm run build:relocate",
-    "build:relocate": "mv ../static/temp/static/css ../static/factsheet/ && mv ../static/temp/static/js ../static/factsheet/ && npm run build:clean",
+    "build": "set BUILD_PATH=../static/temp && react-scripts build && npm run build:make_dir",
+    "build:make_dir": "mkdirp ../static/factsheet/css && mkdirp ../static/factsheet/js && npm run build:relocate",
+    "build:relocate": "move ../static/temp/static/css ../../static/factsheet/ && move ../static/temp/static/js ../../static/factsheet/ && npm run build:clean",
     "build:clean": "rm -rf ../static/temp",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

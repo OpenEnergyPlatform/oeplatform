@@ -24,9 +24,7 @@ from django.views.generic import View
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
-from omi.dialects.oep.dialect import OEP_V_1_5_Dialect
-from omi.oem_structures.oem_v15 import OEPMetadata
-
+from metadata.v160.schema import OEMETADATA_V160_SCHEMA 
 
 import api.parser
 from api.actions import describe_columns
@@ -44,9 +42,10 @@ from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table, PeerReview, PeerReviewManager
+from dataedit.models import Table, PeerReview, PeerReviewManager, ReviewDataStatus
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
+from dataedit.helper import merge_field_reviews, process_review_data
 from login import models as login_models
 
 from .models import TableRevision
@@ -1050,7 +1049,10 @@ class DataView(View):
         #########################################################################
         # Get open peer review process related metadata
         #########################################################################
+        # Context data for the open peer review (data view side panel)
         opr_context = {}
+        # Context data for review result tab
+        opr_result_context = {}
         # maybe call the update also on this view to show the days open on page
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(schema=schema, table=table)
@@ -1072,10 +1074,31 @@ class DataView(View):
         if reviews.last() is not None:
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
-            opr_context.update({"opr_id": latest_review.id})
+            current_reviewer = opr_manager.load(latest_review).current_reviewer
+            opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer, "is_finished": latest_review.is_finished})
+            
+            # OPR result tab for latest review
+            # TODO: Update this as soon as more then one review can be done per table:
+            # ... check if last review is finished 
+            # ... check if any finished review for this table exists 
+            # ... get the latest finished review
+            if latest_review.is_finished:
+                badge = latest_review.review.get("badge")
+                date_finished = latest_review.date_finished
+                opr_result_context.update(
+                    {
+                        "badge": badge, 
+                        "review_url": None,
+                        "date_finished":  date_finished,
+                        "review_id": latest_review.id,
+                        "finished": latest_review.is_finished, 
+                        "review_exists": True}
+                    )
+                
         else:
-            opr_context.update({"opr_id": None})
-        
+            opr_context.update({"opr_id": None, "opr_current_reviewer": None})
+            opr_result_context.update({"review_exists": False})
+
         #########################################################################
         context_dict = {
             # Not in use?
@@ -1096,6 +1119,7 @@ class DataView(View):
             "can_add": can_add,
             "host": request.get_host(),
             "opr": opr_context,
+            "opr_result": opr_result_context,
         }
 
         context_dict.update(current_view.options)
@@ -1861,8 +1885,8 @@ class PeerReviewView(LoginRequiredMixin, View):
         return metadata
 
     def load_json_schema(self):
-        with open('dataedit/static/peer_review/schema.json', encoding="utf-8") as f:
-            json_schema = json.load(f)
+        # Update this if new oemetadata version is released
+        json_schema = OEMETADATA_V160_SCHEMA  
         return(json_schema)
 
     def parse_keys(self, val, old=""):
@@ -1966,24 +1990,33 @@ class PeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login_models.WRITE_PERM
             
         metadata = self.sort_in_category(schema, table)
-
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "peer_review_reviewer",
                 kwargs={"schema": schema, "table": table, "review_id": review_id}
             )
+            opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            existing_review = opr_review.review.get('reviews', [])
+            review_finished = opr_review.is_finished
+            categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
+            state_dict = process_review_data(review_data=existing_review, metadata=metadata, categories=categories)
         else:
             url_peer_review = reverse(
                 "peer_review_create",
                 kwargs={"schema": schema, "table": table}
             )
+            # existing_review={}
+            state_dict=None
+            review_finished=None
 
         config_data = {
             "can_add": can_add,
             "url_peer_review": url_peer_review,
             "url_table": reverse("view", kwargs={"schema": schema, "table": table}),
+            "topic": schema,
             "table": table,
+            "review_finished": review_finished,
         }
 
         context_meta = {
@@ -1992,36 +2025,76 @@ class PeerReviewView(LoginRequiredMixin, View):
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
+            "state_dict": json.dumps(state_dict), 
         }
         return render(request, 'dataedit/opr_review.html', context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
         """
         Handel reviews submitted by the reviewer. 
-        - Save Reviews in the PeerReview table
+        - Creates (Save) Reviews in the PeerReview table
         - Update the review finished attribute in the dataedit.Tables table indicating table can be moved from model draft topic
+
+          
+        Missing parts:
+        - once the opr is finished (all field reviews agreed on) 
+            - set the review to finished
+            - merge field review results to metadata on table
+            - awarde a badge
+                - is field filled in?
+                - calculate the badge by comparing filled fields and the badges form metadata schema
+            - update indicator on table view (this table was succesuflly reviewed)
+            - ...
         """
         context = {}
-        
         if request.method == "POST":
+            # get the review data and additional application metadata from user peer review submit/save
             review_data = json.loads(request.body)
-            review_finised = review_data.get("reviewFinished")
-            # TODO: Send notification to user that he cant review tables he is the table holder. 
+
+            # The type can be "save" or "submit" as this triggers different behavior
+            review_post_type = review_data.get("reviewType")
+            # The opr datamodel that includes the field review data and metadata
+            review_datamodel = review_data.get("reviewData")
+            review_finished = review_datamodel.get("reviewFinished")
+            # TODO: Send a notification to the user that he can't review tables he is the table holder.
             contributor = PeerReviewManager.load_contributor(schema, table)
-            if contributor is not None: 
-                    table_review= PeerReview(schema=schema, table=table, is_finished=review_finised, review=review_data, reviewer=request.user, contributor=contributor)
-                    table_review.save()
+
+            if contributor is not None:
+                # Überprüfen, ob ein aktiver PeerReview existiert
+                active_peer_review = PeerReview.load(schema=schema, table=table)
+                if active_peer_review is None or active_peer_review.is_finished:
+                    # Kein aktiver PeerReview vorhanden oder der aktive PeerReview ist abgeschlossen
+                    table_review = PeerReview(
+                        schema=schema,
+                        table=table,
+                        is_finished=review_finished,
+                        review=review_datamodel,
+                        reviewer=request.user,
+                        contributor=contributor,
+                    )
+                    table_review.save(review_type=review_post_type)
+                else:
+                    # Aktiver PeerReview ist vorhanden ... aktualisieren 
+                    current_review_data = active_peer_review.review
+                    merged_review_data = merge_field_reviews(current_json=current_review_data, new_json=review_datamodel)
+
+                    # Set new review values and update existing review
+                    active_peer_review.review = merged_review_data
+                    active_peer_review.reviewer = request.user
+                    active_peer_review.contributor = contributor
+                    active_peer_review.update(review_type=review_post_type)
             else:
-                error_msg = f"Failed to retrive any user that identifies as table holder for current table: { table } !"
+                error_msg = f"Failed to retrieve any user that identifies as table holder for the current table: {table}!"
                 return JsonResponse({"error": error_msg}, status=400)
 
-            #TODO: Check for schema/topic as reviewd finished also indicates the  table needs to be or has to be moved.
-            if review_finised is True:  
+            # TODO: Check for schema/topic as reviewed finished also indicates the table needs to be or has to be moved.
+            if review_finished is True:
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
-                # logging.INFO(f"Table {table.name} is now reviewd and can be moved to destination schema.")
+                # TODO: also update reviewFinished in review datamodel json
+                # logging.INFO(f"Table {table.name} is now reviewed and can be moved to the destination schema.")
 
-        return render(request, 'dataedit/opr_review.html', context=context)
+        return render(request, "dataedit/opr_review.html", context=context)
 
 
 class PeerRreviewContributorView(PeerReviewView):
@@ -2036,22 +2109,10 @@ class PeerRreviewContributorView(PeerReviewView):
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
         review_data = peer_review.review.get('reviews', [])
-        state_dict = {}
+        
         categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
-
-        for review in review_data:
-            field_key = review.get('key')
-            state = review.get('fieldReview', {}).get('state')
-            state_dict[field_key] = state
-            reviewer_suggestion = review.get('fieldReview', {}).get('reviewerSuggestion')
-            print(reviewer_suggestion)
-            if reviewer_suggestion is not None:
-                review['value'] = reviewer_suggestion
-                for category in categories:
-                    for item in metadata[category]:
-                        if item['field'] == field_key:
-                            item['reviewer_suggestion'] = reviewer_suggestion
-
+        state_dict = process_review_data(review_data=review_data, metadata=metadata, categories=categories)    
+        
         context_meta = {"config": json.dumps(
             {"can_add": can_add,
              "url_peer_review": reverse(
@@ -2060,8 +2121,9 @@ class PeerRreviewContributorView(PeerReviewView):
              "url_table": reverse(
                  "view", kwargs={"schema": schema, "table": table}
              ),
-             "table": table,
-             }),
+            "topic": schema,
+            "table": table,
+            }),
             "table": table,
             "meta": metadata,
             "json_schema": json_schema,
@@ -2070,11 +2132,23 @@ class PeerRreviewContributorView(PeerReviewView):
         }
         return render(request, 'dataedit/opr_contributor.html', context=context_meta)
 
-    def post(self, request, schema, table):
+    def post(self, request, schema, table, review_id):
+        """
+        Missing parts:
+        - merge contributor field review and reviewer field review 
+        - ???
+        """
         context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)
+            review_post_type = review_data.get("reviewType")
+            review_datamodel = review_data.get("reviewData")
             review_state = review_data.get("reviewFinished")
-            table_obj = PeerReview(schema=schema, table=table, is_finished=review_state, review=review_data)
-            table_obj.save()
+            current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
+            existing_reviews = current_opr.review
+            merged_review = merge_field_reviews(current_json=existing_reviews, new_json=review_datamodel)
+
+            current_opr.review = merged_review
+            current_opr.update(review_type=review_post_type)
+
         return render(request, 'dataedit/opr_contributor.html', context=context)

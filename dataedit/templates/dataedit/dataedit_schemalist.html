@@ -93,7 +93,7 @@
     </div>
     {% endif %}
     {% endfor %}
-    
+
     <div class="topics__row">
         {% for schema, description, tables in schemas %}
         {% if schema != "model_draft" %}
@@ -108,22 +108,22 @@
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m0,0v16h16V0H0Zm15,15H1V1h14v14Zm-6.5-9h-1v-3h1v3Zm-2.5,2.5h-3v-1h3v1Zm2.5,4.5h-1v-3h1v3Zm4.5-4.5h-3v-1h3v1Z"/>
                                 </svg>
-                                {% endif %} 
+                                {% endif %}
                                 {% if schema == "climate" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m11,10.73V3c0-1.65-1.35-3-3-3s-3,1.35-3,3v7.73c-.31.52-.5,1.12-.5,1.77,0,1.93,1.57,3.5,3.5,3.5s3.5-1.57,3.5-3.5c0-.65-.19-1.25-.5-1.77Zm-3,4.27c-1.38,0-2.5-1.12-2.5-2.5,0-.56.19-1.07.5-1.48V3c0-1.1.9-2,2-2s2,.9,2,2v8.02c.31.42.5.93.5,1.48,0,1.38-1.12,2.5-2.5,2.5Zm1.5-2.5c0,.83-.67,1.5-1.5,1.5s-1.5-.67-1.5-1.5c0-.65.42-1.2,1-1.41v-5.09h1v5.09c.58.21,1,.76,1,1.41Z"/>
                                 </svg>
-                                {% endif %} 
+                                {% endif %}
                                 {% if schema == "demand" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m16,15v1H0V0h1v15h15ZM6,7.71l3,3,6.35-6.35-.71-.71-5.65,5.65-3-3-3.35,3.35.71.71,2.65-2.65Z"/>
                                 </svg>
-                                {% endif %} 
+                                {% endif %}
                                 {% if schema == "economy" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m12.67,13.66l.72.72c-1.25.86-2.76,1.37-4.39,1.37-3.4,0-6.29-2.2-7.33-5.25H0v-1h1.4c-.1-.49-.15-.99-.15-1.5s.05-1.01.15-1.5H0v-1h1.67C2.71,2.45,5.6.25,9,.25c1.63,0,3.14.51,4.39,1.37l-.72.72c-1.06-.69-2.32-1.09-3.67-1.09-2.84,0-5.27,1.76-6.26,4.25h8.26v1H2.42c-.11.48-.17.98-.17,1.5s.06,1.02.17,1.5h8.58v1H2.74c1,2.49,3.43,4.25,6.26,4.25,1.35,0,2.61-.4,3.67-1.09Z"/>
                                 </svg>
-                                {% endif %} 
+                                {% endif %}
                                 {% if schema == "environment" %}
                                 <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                                     <path d="m8.5,11.97c3.07-.26,5.5-2.83,5.5-5.97,0-3.31-2.69-6-6-6S2,2.69,2,6s2.43,5.72,5.5,5.97v3.03H3.5v1h9v-1h-4v-3.03ZM3,6c0-2.76,2.24-5,5-5s5,2.24,5,5-2.24,5-5,5-5-2.24-5-5Z"/>
@@ -165,13 +165,13 @@
                         <div class="topic-card__table-nb">{{tables}} tables</div>
                     </div>
                     <div class="topic-card__header-btm">
-                        {% if schema == "boundaries" %}<span class="topic-card__tag">polygons</span>{% endif %} 
-                        {% if schema == "climate" %}<span class="topic-card__tag">climate</span>{% endif %} 
-                        {% if schema == "demand" %}<span class="topic-card__tag">commodities</span> <span class="topic-card__tag">services</span>{% endif %} 
-                        {% if schema == "economy" %}<span class="topic-card__tag">prices</span> <span class="topic-card__tag">GDP</span>{% endif %} 
+                        {% if schema == "boundaries" %}<span class="topic-card__tag">polygons</span>{% endif %}
+                        {% if schema == "climate" %}<span class="topic-card__tag">climate</span>{% endif %}
+                        {% if schema == "demand" %}<span class="topic-card__tag">commodities</span> <span class="topic-card__tag">services</span>{% endif %}
+                        {% if schema == "economy" %}<span class="topic-card__tag">prices</span> <span class="topic-card__tag">GDP</span>{% endif %}
                         {% if schema == "environment" %}<span class="topic-card__tag">environment</span> <span class="topic-card__tag">resources</span> <span class="topic-card__tag">protection</span>{% endif %}
                         {% if schema == "grid" %}<span class="topic-card__tag">energy</span> <span class="topic-card__tag">services</span>{% endif %}
-                        {% if schema == "openstreetmap" %}<span class="topic-card__tag">OMS</span>{% endif %}
+                        {% if schema == "openstreetmap" %}<span class="topic-card__tag">OSM</span>{% endif %}
                         {% if schema == "policy" %}<span class="topic-card__tag">laws</span>{% endif %}
                         {% if schema == "reference" %}<span class="topic-card__tag">sources</span> <span class="topic-card__tag">literature</span>{% endif %}
                         {% if schema == "society" %}<span class="topic-card__tag">demography</span> <span class="topic-card__tag">society</span>{% endif %}
@@ -188,6 +188,6 @@
         {% endif %}
         {% endif %}
         {% endfor %}
-    </div>    
+    </div>
 </div>
 {% endblock %}

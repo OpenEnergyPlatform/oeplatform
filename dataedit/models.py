@@ -11,6 +11,7 @@ from django.db.models import (
     JSONField,
 )
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -142,8 +143,7 @@ class PeerReview(models.Model):
         return prev_review, next_review
 
     def save(self, *args, **kwargs):
-        from django.core.exceptions import ValidationError
-        
+        review_type = kwargs.pop('review_type', None)
         if not self.contributor == self.reviewer:
             # Call the parent class's save method to save the PeerReview instance
             super().save(*args, **kwargs)
@@ -151,16 +151,50 @@ class PeerReview(models.Model):
             # TODO: This causes errors if review list ist empty
             # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
             
+            # print(prev_review.id, next_review)
             # print(prev_review, next_review)
             # Create a new PeerReviewManager entry for this PeerReview
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
-            pm_new = PeerReviewManager(opr=self)
+            
+            if review_type == "save":
+                # Handle save status
+                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SAVED.value)
+
+            elif review_type == "submit":
+                # Handle submit status
+                pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.SUBMITTED.value)
+                pm_new.set_next_reviewer()
+
             pm_new.save() 
 
             # if prev_review is not None:
             #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
             #     pm_prev.next_review = next_review
             #     pm_prev.save()
+        else: 
+            raise ValidationError("Contributor and reviewer cannot be the same.")
+
+    def update(self, *args, **kwargs):
+        """
+        Update the peer review if the latest peer review is not finished yet but either saved or submitted.
+
+        """
+        review_type = kwargs.pop('review_type', None)
+        if not self.contributor == self.reviewer:
+            current_pm = PeerReviewManager.load(opr=self)
+            if review_type == "save":
+                current_pm.status = ReviewDataStatus.SAVED.value
+            elif review_type == "submit":
+                current_pm.status = ReviewDataStatus.SUBMITTED.value
+                current_pm.set_next_reviewer()
+            elif review_type == "finished":
+                self.is_finished = True
+                self.date_finished = timezone.now()
+                current_pm.status = ReviewDataStatus.FINISHED.value
+            
+            # update peere review manager related to this peer review entry
+            current_pm.save()
+            super().save(*args, **kwargs)
         else: 
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
@@ -203,7 +237,7 @@ class PeerReviewManager(models.Model):
     REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
 
     opr = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='review_id', null=False)
-    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.CONTRIBUTOR.value)
+    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.REVIEWER.value)
     status = models.CharField(choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
     is_open_since = models.CharField(null=True, max_length=10)
     prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None) #TODO: add logic
@@ -238,7 +272,7 @@ class PeerReviewManager(models.Model):
             days_open = peer_review.days_open
             if days_open is not None:
                 self.is_open_since = str(days_open)
-
+        # print(self.is_open_since, self.status)
         # Call the parent class's save method to save the PeerReviewManager instance
         super().save(*args, **kwargs)
     
@@ -334,7 +368,8 @@ class PeerReviewManager(models.Model):
     @staticmethod
     def filter_opr_by_reviewer(reviewer_user):
         """
-        Filter peer reviews by reviewer.
+        Filter peer reviews by reviewer, excluding those with current peer 
+        is contributor and the data status "SAVED" in the peer review manager.
 
         Args:
             reviewer_user (User): The reviewer user.
@@ -342,12 +377,18 @@ class PeerReviewManager(models.Model):
         Returns:
             QuerySet: Filtered peer reviews.
         """
-        return PeerReview.objects.filter(reviewer=reviewer_user)
+        return PeerReview.objects.filter(
+            reviewer=reviewer_user
+        ).exclude(
+            review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
+            review_id__status=ReviewDataStatus.SAVED.value
+        )
     
     @staticmethod
     def filter_opr_by_contributor(contributor_user):
         """
-        Filter peer reviews by contributor.
+        Filter peer reviews by contributor, excluding those with current peer 
+        is reviewer and the data status "SAVED" in the peer review manager.
 
         Args:
             contributor_user (User): The contributor user.
@@ -356,7 +397,12 @@ class PeerReviewManager(models.Model):
             QuerySet: Filtered peer reviews.
         """
                 
-        return PeerReview.objects.filter(contributor=contributor_user)
+        return PeerReview.objects.filter(
+            contributor=contributor_user
+        ).exclude(
+            review_id__current_reviewer=Reviewer.REVIEWER.value,
+            review_id__status=ReviewDataStatus.SAVED.value
+        )
     
     @staticmethod
     def filter_opr_by_table(schema, table):
@@ -371,4 +417,7 @@ class PeerReviewManager(models.Model):
             QuerySet: Filtered peer reviews.
         """
         return PeerReview.objects.filter(schema=schema, table=table)
+    
+    def filter_opr_by_id(opr_id):
+        return PeerReview.objects.filter(id=opr_id).first()
     

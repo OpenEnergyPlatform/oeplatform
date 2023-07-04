@@ -3,11 +3,11 @@ var selectedFieldValue;
 var selectedState;
 
 var current_review = {
-  "topic": null,
-  "table": null,
+  "topic": config.topic,
+  "table": config.table,
   "dateStarted": null,
   "dateFinished": null,
-  "metadataVersion": "v1.5.2",
+  "metadataVersion": "v1.6.0",
   "reviews": [],
   "reviewFinished": false,
   "grantedBadge": null,
@@ -25,8 +25,11 @@ var current_review = {
 
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
-// Submit review
+$('#submitButton').bind('click', hideReviewerOptions);
+// Submit review (visible to contributor)
 $('#submit_summary').bind('click', submitPeerReview);
+// save the current review (not visible to contributor)
+$('#peer_review-save').bind('click', savePeerReview);
 // Cancel review
 $('#peer_review-cancel').bind('click', cancelPeerReview);
 // OK Field View Change
@@ -120,13 +123,36 @@ function getErrorMsg(response) {
  */
 function peerReview(config) {
   /*
-    TODO: consolidate functions (same as in wizard and other places)
+    TODO: Show loading icon if peer review page is loaded 
     */
 
-  (function init() {
-    $('#peer_review-loading').removeClass('d-none');
-    config.form = $('#peer_review-form');
-  })();
+  // (function init() {
+  //   $('#peer_review-loading').removeClass('d-none');
+  //   config.form = $('#peer_review-form');
+  // })();
+  
+  
+  selectNextField();
+  renderSummaryPageFields();
+  if (state_dict){
+    check_if_review_finished();
+  }
+  
+}
+
+/**
+ * Save peer review to backend
+ */
+function savePeerReview() {
+  $('#peer_review-save').removeClass('d-none');
+  json = JSON.stringify({ reviewType: 'save', reviewData: current_review });
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-save').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
 }
 
 /**
@@ -134,7 +160,27 @@ function peerReview(config) {
  */
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  json = JSON.stringify(current_review);
+  json = JSON.stringify({ reviewType: 'submit', reviewData: current_review });
+  sendJson("POST", config.url_peer_review, json).then(function() {
+    window.location = config.url_table;
+  }).catch(function(err) {
+    // TODO evaluate error, show user message
+    $('#peer_review-submitting').addClass('d-none');
+    alert(getErrorMsg(err));
+  });
+}
+
+/**
+ * Finish peer review and save to backend
+ */
+function finishPeerReview() {
+  $('#peer_review-submitting').removeClass('d-none');
+
+  var selectedBadge = $('input[name="reviewer-option"]:checked').val();
+  console.log(selectedBadge)
+  current_review.badge = selectedBadge
+  current_review.reviewFinished = true
+  json = JSON.stringify({ reviewType: 'finished', reviewData: current_review, reviewBadge: selectedBadge });
   sendJson("POST", config.url_peer_review, json).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
@@ -203,7 +249,7 @@ function click_field(fieldKey, fieldValue, category) {
     if (selectedDiv) {
       selectedDiv.style.backgroundColor = '#F6F9FB';
     }
-    console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     clearInputFields();
 }
 
@@ -223,8 +269,11 @@ function makeFieldList(){
  * Clears User Input fields
  */
 function clearInputFields(){
-  document.getElementById("valuearea").value = "";
-  document.getElementById("commentarea").value = "";
+  const reviewControls = document.querySelector('.review__controls');
+  if (reviewControls) {
+    document.getElementById("valuearea").value = "";
+    document.getElementById("commentarea").value = "";
+  }
 }
 
 /**
@@ -251,8 +300,6 @@ function selectPreviousField(){
 function selectField(fieldList, field){
   if (field >= 0 && field < fieldList.length){
     var element = fieldList[field];
-    console.log(fieldList)
-    console.log(field)
     document.getElementById(element).click();
   }
 }
@@ -312,7 +359,73 @@ function renderSummaryPageFields() {
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
-  summaryContainer.innerHTML = `
+
+  function clearSummaryTable() {
+    while(summaryContainer.firstChild) {
+      summaryContainer.firstChild.remove();
+    }
+  }
+  function generateTable(data) {
+    let table = document.createElement('table');
+    table.className = 'table review-summary';
+
+    let thead = document.createElement('thead');
+    let header = document.createElement('tr');
+    header.innerHTML = '<th scope="col">Status</th><th scope="col">Field Category</th><th scope="col">Field Name</th><th scope="col">Field Value</th>';
+    thead.appendChild(header);
+    table.appendChild(thead);
+
+    let tbody = document.createElement('tbody');
+
+    data.forEach(item => {
+        let row = document.createElement('tr');
+
+        let th = document.createElement('th');
+        th.scope = "row";
+        th.className = "status";
+        if (item.fieldStatus === "Missing") {
+            th.className = "status missing";
+        }
+        th.textContent = item.fieldStatus;
+        row.appendChild(th);
+
+        let tdFieldCategory = document.createElement('td');
+        tdFieldCategory.textContent = item.fieldCategory;
+        row.appendChild(tdFieldCategory);
+
+        let tdFieldId = document.createElement('td');
+        tdFieldId.textContent = item.field_id;
+        row.appendChild(tdFieldId);
+
+        let tdFieldValue = document.createElement('td');
+        tdFieldValue.textContent = item.fieldValue;
+        row.appendChild(tdFieldValue);
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+
+    return table;
+}
+
+
+  function updateSummaryTable() {
+    clearSummaryTable();
+    
+    let allData = [];
+    allData.push(...missingFields.map(item => ({ ...item, fieldStatus: 'Missing' })));
+    allData.push(...acceptedFields.map(item => ({ ...item, fieldStatus: 'Accepted' })));
+    allData.push(...suggestingFields.map(item => ({ ...item, fieldStatus: 'Suggested' })));
+    allData.push(...rejectedFields.map(item => ({ ...item, fieldStatus: 'Rejected' })));
+    
+    let table = generateTable(allData);
+    summaryContainer.appendChild(table);
+  }
+
+  updateSummaryTable();
+
+  /* summaryContainer.innerHTML = `
     <h4>Accepted:</h4>
     ${createFieldList(acceptedFields)}
     <h4>Suggesting:</h4>
@@ -321,7 +434,7 @@ function renderSummaryPageFields() {
     ${createFieldList(rejectedFields)}
     <h4>Missing:</h4>
     ${createFieldList(missingFields)}
-  `;
+  `; */
 }
 
 /**
@@ -357,37 +470,55 @@ function saveEntrances() {
               var element = document.querySelector('[aria-selected="true"]');
               var category = (element.getAttribute("data-bs-target"));
               if (selectedState == "ok") {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": "",
-                            "reviewerSuggestion": "",
-                            "state": selectedState,
-                      },
-                  },
-              )
+                // var fieldElement = document.getElementById("field_" + selectedField);
+                // var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                // var commentElement = fieldElement.querySelector('.suggestion--comment');
+                // var new_value
+                // var new_value_comment
+                // if (document.getElementById("valuearea").value !== '') {
+                //   new_value = document.getElementById("valuearea").value;
+                //   new_value_comment = document.getElementById("commentarea").value;
+                // } else {
+                //   new_value = selectedFieldValue
+                //   new_value_comment = ""
+                // }
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": category,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": "",
+                              "reviewerSuggestion": "",
+                              "state": selectedState,
+                        },
+                    },
+                )
               } else {
-              Object.assign(current_review["reviews"][idx],
-                  {
-                      "category": category,
-                      "key": selectedField,
-                      "fieldReview": {
-                          "timestamp": null, // TODO put actual timestamp
-                            "user": "oep_reviewer", // TODO put actual username
-                            "role": "reviewer",
-                            "contributorValue": selectedFieldValue,
-                            "comment": document.getElementById("commentarea").value,
-                            "reviewerSuggestion": document.getElementById("valuearea").value,
-                            "state": selectedState,
-                      },
-                  },
-              )
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": category,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": document.getElementById("commentarea").value,
+                              "reviewerSuggestion": document.getElementById("valuearea").value,
+                              "state": selectedState,
+                        },
+                    },
+                )
+                // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+                var fieldElement = document.getElementById("field_" + selectedField);
+                var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                var commentElement = fieldElement.querySelector('.suggestion--comment');
+                suggestionElement.innerText = document.getElementById("valuearea").value;
+                commentElement.innerText = document.getElementById("commentarea").value;
             }
           }
       });
@@ -400,7 +531,7 @@ function saveEntrances() {
           "category": category,
           "key": selectedField,
           "fieldReview": {
-            "timestamp": null, // TODO put actual timestamp
+            "timestamp": Date.now(), // TODO put actual timestamp
             "user": "oep_reviewer", // TODO put actual username
             "role": "reviewer",
             "contributorValue": selectedFieldValue,
@@ -409,7 +540,14 @@ function saveEntrances() {
             "state": selectedState,
           },
         },
-    )}
+      )
+      // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+      var fieldElement = document.getElementById("field_" + selectedField);
+      var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+      var commentElement = fieldElement.querySelector('.suggestion--comment');
+      suggestionElement.innerText = document.getElementById("valuearea").value;
+      commentElement.innerText = document.getElementById("commentarea").value;
+    }
   }
 
   // Color ok/suggestion/rejected
@@ -439,14 +577,12 @@ function checkReviewComplete() {
     }
     fields_reviewed[category_name].push(review.key);
   }
-  console.log(fields_reviewed)
 
   const categories = document.querySelectorAll(".tab-pane");
   
   for (const category of categories) {
     // const category_name = category.id;
     const category_name = category.id.slice(0);
-    console.log(category_name)
     // TODO: remove resources, once they are working correct
     if (["resource", "summary"].includes(category_name)) {
       continue;
@@ -455,7 +591,6 @@ function checkReviewComplete() {
       return;
     }
     const category_fields = category.querySelectorAll(".field");
-    console.log(category_fields)
     for (field of category_fields) {
       const field_name = field.id.slice(6);
       if (!fields_reviewed[category_name].includes(field_name)) {
@@ -466,6 +601,66 @@ function checkReviewComplete() {
 
   // All fields reviewed!
   $('#submit_summary').removeClass('disabled');
+}
+
+
+function checkFieldStates() {
+  var fieldList = makeFieldList();
+  for (var i = 0; i < fieldList.length; i++) {
+    var fieldName = fieldList[i].replace('field_', '');
+    var fieldState = state_dict[fieldName];
+    if (fieldState !== 'ok') {
+      return false; // Ein Feld hat nicht den Status "ok"
+    }
+  }
+  return true; // Alle Felder haben den Status "ok"
+}
+
+
+/**
+ * Checks if all fields are accepted and activates award badge div to finish the review.
+ * Also deactivates the submitbutton.
+ */
+function check_if_review_finished(){
+  
+  if (checkFieldStates()) {
+    // Creating the div with radio buttons
+    var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
+    var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
+    var silverRadio = $('<input type="radio" name="reviewer-option" value="silver"> Silver<br>');
+    var goldRadio = $('<input type="radio" name="reviewer-option" value="gold"> Gold<br>');
+    var platinRadio = $('<input type="radio" name="reviewer-option" value="platin"> Platin <br>');
+    var reviewText = $('<p>The review is complete. Please award a badge and finish the review.</p>');
+    var finishButton = $('<button type="button" id="review-finish-button">Finish</button>');
+    
+    // Adding the radio buttons, text, and button to the div
+    reviewerDiv.append(reviewText);
+    reviewerDiv.append(bronzeRadio);
+    reviewerDiv.append(silverRadio);
+    reviewerDiv.append(goldRadio);
+    reviewerDiv.append(platinRadio);
+    reviewerDiv.append(finishButton);
+
+    finishButton.on('click', finishPeerReview);
+
+    if (config.review_finished !== true){
+    // Displaying the div
+    reviewerDiv.show();
+    $('#submit_summary').prop('disabled', true);
+    }
+    else{
+      reviewerDiv.hide(); // Hiding the div
+      $('#submit_summary').hide();
+      $('#peer_review-save').hide();
+      // $('#review-window').hide();
+      $('#review-window').css('visibility', 'hidden');
+      
+    }
+
+
+    // Adding the div to the desired location in the document
+    $('.content-finish-review').append(reviewerDiv);
+  }
 }
 
 /**
@@ -488,6 +683,7 @@ function hideReviewerOptions(){
 function updateFieldColor(){
   // Color ok/suggestion/rejected
   field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
+  // console.log(field_id)
   $(field_id).removeClass('field-ok');
   $(field_id).removeClass('field-suggestion');
   $(field_id).removeClass('field-rejected');
@@ -506,6 +702,44 @@ function updateSubmitButtonColor(){
   }
   else {
     $(submitButton).addClass('btn-danger');
+  }
+}
+
+/**
+ * Hide and show revier controles once the user clicks the summary tab
+ */
+const summaryTab = document.getElementById('summary-tab');
+const otherTabs = [
+  document.getElementById('general-tab'),
+  document.getElementById('spatiotemporal-tab'),
+  document.getElementById('source-tab'),
+  document.getElementById('license-tab'),
+  document.getElementById('contributor-tab'),
+  document.getElementById('resource-tab')
+];
+const reviewContent = document.querySelector(".review__content");
+
+// Event listener for clicking the "Summary" tab button
+summaryTab.addEventListener('click', function() {
+  toggleReviewControls(false);
+  reviewContent.classList.toggle("tab-pane--100");
+});
+
+// Event listener for clicking the other tabs
+otherTabs.forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    toggleReviewControls(true);
+    reviewContent.classList.remove("tab-pane--100");
+  });
+});
+
+/**
+ * Function to toggle the review controls visibility
+ */ 
+function toggleReviewControls(show) {
+  const reviewControls = document.querySelector('.review__controls');
+  if (reviewControls) {
+    reviewControls.style.display = show ? '' : 'none';
   }
 }
 

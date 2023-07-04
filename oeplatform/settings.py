@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     "oeo_viewer",
     "factsheet",
     "corsheaders",
-    "bootstrap4"
+    "owlready2"
 )
 
 MIDDLEWARE = (
@@ -85,6 +85,7 @@ EXTERNAL_URLS = {
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",
     # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+    "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
 

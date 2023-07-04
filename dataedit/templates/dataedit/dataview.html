@@ -41,7 +41,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list-ul" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
           </svg>
-          OPR results
+          Review results
         </button>
       </li>
     </ul>
@@ -162,7 +162,6 @@
       </div>
     </div>
   </div>
-
   <div class="tab-pane metadata fade" id="metadata-tab-pane" role="tabpanel" aria-labelledby="metadata-tab" tabindex="0">
     <div class="metadata__options">
       <span>
@@ -182,6 +181,38 @@
       {{ meta_widget }}
     </div>
   </div>
+  
+  <div class="tab-pane open-peer-review fade" id="opr-tab-pane" role="tabpanel" aria-labelledby="opr-tab" tabindex="0">
+    {% if opr_result.review_exists %}
+    <div class="metadata__options">
+      <span>
+        
+      </span>
+    </div>
+    <div class="metadata__container">
+      <span>
+        <table class="table">
+          <tr>
+            <th>Access the Review</th>
+            <th>Badge</th>
+            <th>Date finished</th>
+          </tr>
+          <tr>
+            <td> <a class="btn btn-primary" href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr_result.review_id %}">Review details</a></td>
+            <td>{{ opr_result.badge }}</td>
+            <td>{{ opr_result.date_finished }}</td>
+          </tr>
+        </table>
+      </span>
+    </div>
+    {% else %}
+    <div class="metadata__container">
+      <span>
+        This table is not reviewed yet. 
+      </span>
+    </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
 
@@ -189,31 +220,59 @@
 
 
 <h4> Open-Peer-Review </h4>
-{% if not opr.reviewer %} 
-    {% if user.is_authenticated and opr.contributor.id != user.id %}
+{% if opr.is_finished %} 
+  <!-- Review is finished -->
+  <div class="review-status review-status--done">
+    Table reviewed
+  </div>
+{% else %}
+  {% if not opr.reviewer %} 
+      {% if user.is_authenticated and opr.contributor.id != user.id %}
+        <!-- Start -->
+        <div class="review-status review-status--start">
+          Table not reviewed
+        </div>
+        <a class="btn btn-success btn-sm" type="button"
+        href="{% url 'peer_review_create' table=table schema=schema %}">
+          Start Open-Peer-Review-Process
+        </a>
+
+        
+      {% else %}
+        <!-- Start but user is table holder - diable start button -->
+        <div class="review-status review-status--start">
+          Table not reviewed
+        </div>
+        <a class="btn btn-success btn-sm disabled" type="button"
+        href="{% url 'peer_review_create' table=table schema=schema %}">
+          Start Open-Peer-Review-Process
+        </a>
+        <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
+    {% endif %}
+  {% elif opr.reviewer.id == user.id and opr.contributor.id != user.id and opr.opr_current_reviewer == "reviewer" %}
+      <!-- Continue review -->
+      <div class="review-status review-status--ongoing">
+        The table is currently under review.
+      </div>
       <a class="btn btn-success btn-sm" type="button"
-      href="{% url 'peer_review_create' table=table schema=schema %}">
-        Start Open-Peer-Review-Process
+      href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
+        Continue Review
       </a>
     {% else %}
+      <!-- Continue review but user does not identify as the reviewer -->
+      <div class="review-status review-status--ongoing">
+        The table is currently under review.
+        Please visit your profile to view your active reviews.
+      </div>
       <a class="btn btn-success btn-sm disabled" type="button"
-      href="{% url 'peer_review_create' table=table schema=schema %}">
-        Start Open-Peer-Review-Process
+      href="">
+      Continue Review
       </a>
-      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in."></i>
-    {% endif %}
-{% elif opr.reviewer.id == user.id and opr.contributor.id != user.id %}
-  <a class="btn btn-success btn-sm" type="button"
-  href="{% url 'peer_review_reviewer' table=table schema=schema review_id=opr.opr_id %}">
-    Continue Open-Peer-Review-Process
-  </a>
-{% else %}
-  <a class="btn btn-success btn-sm disabled" type="button"
-  href="">
-  Continue Open-Peer-Review-Process
-  </a>
-  <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
-{% endif %}  
+    
+      <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="top" title="You cant review this table if you are the table owner or not logged in. You cant continue a review that is alerady in progress if you are not the reviewer who started it."></i>
+  {% endif %}
+{% endif %}
+
 
 <h4>Tags</h4>
 
