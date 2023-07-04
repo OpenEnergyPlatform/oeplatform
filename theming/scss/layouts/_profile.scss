@@ -25,6 +25,16 @@ main.main .content .content__container.content__container--profile {
             @extend .pt-3;
             @extend .pb-2;
             @extend .border-bottom;
+
+            p {
+                @extend .mb-1;
+            }
+        }
+
+        &__name {
+            @extend .fs-4;
+            @extend .fw-bold;
+            @extend .mb-0;
         }
     }
 }

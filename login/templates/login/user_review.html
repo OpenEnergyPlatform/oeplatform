@@ -31,20 +31,19 @@
     </div>
     <div class="profile-sidebar__block">
         <div>{% if profile_user.work %}
-            {{ profile_user.work }}
+            <p>{{ profile_user.work }}</p>
         {% else %}
-        <p>Profession</p>
+            <p>Profession</p>
         {% endif %} 
         </div>
         <div>{% if profile_user.location %}
-                {{ profile_user.location }}
-            {% else %}
+            <p>{{ profile_user.location }}</p>
+        {% else %}
             <p>Location</p>
-            {% endif %} 
+        {% endif %} 
         </div>
         <div> {% if profile_user.email %}
-            <p style="width:20%"> E-Mail: </p>
-            <p> {{ profile_user.email }} </p>
+            <p>{{ profile_user.email }}</p>
             {% endif %}
             <p> {% if profile_user.linkedin %}
                 <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
