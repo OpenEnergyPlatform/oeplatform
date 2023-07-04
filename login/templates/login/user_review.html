@@ -70,7 +70,7 @@
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
-    <h2>Active Open Peer Reviews</h2>
+    <h2 class="header">Active Open Peer Reviews</h2>
     <p> 
         This section lists the latest active reviews in which you are currently participating as a reviewer or data contributor.
     </p>
@@ -164,7 +164,7 @@
         {% endif %}
     {% endif %}
 
-        <h2>All reviews</h2>
+        <h2 class="header">All reviews</h2>
         <p> 
             This section list all available reviews. 
         </p>

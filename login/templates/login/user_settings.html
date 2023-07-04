@@ -5,7 +5,7 @@
 {% include "login/user_nav.html" %}
 
 {% if profile_user == request.user %}
-<h2>Your Security Information</h2>
+<h2 class="header">Your Security Information</h2>
 <table class="table">
         <tr>
             <th> API-Token: </th>
@@ -37,12 +37,12 @@
     <br>
     {% if request.user.is_authenticated and request.user == user%}
         <hr>
-        <h3>Manage Profile</h3>
+        <h2 class="header">Manage Profile</h2>
         <div style="overflow: hidden;">
 <a href="{% url 'edit' request.user.id %}" class="btn btn-secondary">Edit</a>
         </div>
         <hr>
-        <h3>Manage Groups</h3>
+        <h2 class="header">Manage Groups</h2>
         <div style="overflow: hidden;">
             <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
         </div>

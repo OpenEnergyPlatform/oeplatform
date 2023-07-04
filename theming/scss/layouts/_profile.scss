@@ -33,9 +33,16 @@ main.main .content .content__container.content__container--profile {
 
         &__name {
             @extend .fs-4;
-            @extend .fw-bold;
+            @extend .fw-semibold;
             @extend .mb-0;
         }
+    }
+
+    .header {
+        @extend .pt-2;
+        @extend .fs-4;
+        @extend .fw-semibold;
+        @extend .text-secondary;
     }
 }
 
@@ -50,6 +57,7 @@ main.main .content .content__container.content__container--profile {
             &--highlight {
                 @extend .bg-light;
                 @extend .border;
+                @extend .mb-4;
 
                 &.profile-rvw__item--contributor {
                     border-left: 4px solid $purple-500 !important;
@@ -88,7 +96,7 @@ main.main .content .content__container.content__container--profile {
             @extend .position-relative;
             @extend .text-uppercase;
             @extend .pe-2;
-            @extend .fw-bold;
+            @extend .fw-semibold;
             @extend .text-secondary;
         }
 
@@ -129,7 +137,7 @@ main.main .content .content__container.content__container--profile {
 
         &__item-name a {
             @extend .text-decoration-none;
-            @extend .fw-bold;
+            @extend .fw-semibold;
         }
     }
 }
