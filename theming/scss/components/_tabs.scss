@@ -126,3 +126,17 @@
         }
     }
 }
+
+.pages-nav-tabs {
+    @extend .pb-2;
+    @extend .mb-4;
+    @extend .border-bottom;
+
+    a {
+        @extend .text-secondary;
+        @extend .fw-bold;
+        @extend .fs-6;
+        @extend .text-decoration-none;
+        @extend .px-4;
+    }
+}

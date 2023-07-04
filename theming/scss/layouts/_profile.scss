@@ -4,16 +4,16 @@
 main.main .content .content__container.content__container--profile {
     .content {
         &__side {
+            @extend .py-5;
             @extend .pe-4;
         }
         &__main {
+            @extend .py-5;
             @extend .pe-0;
         }
     }
 
     .profile-sidebar {
-        @extend .py-5;
-
         &__img {
             @extend .d-flex;
             @extend .flex-row;
