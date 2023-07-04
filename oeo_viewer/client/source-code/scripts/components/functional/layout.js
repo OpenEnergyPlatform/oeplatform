@@ -540,7 +540,7 @@ class Layout extends Component {
                     var num_of_words = label.split(" ").length;
 
                     ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
-                    ctx.fillRect(node.x - 2, node.y - 5, 18 * num_of_words, 8); 
+                    ctx.fillRect(node.x - 6, node.y - 5, 22 * num_of_words, 8); 
 
                     const fontSize = 3;
                     ctx.font = `${fontSize}px Tahoma`;

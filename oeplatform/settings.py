@@ -130,6 +130,7 @@ try:
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
 
+ONTOLOGY_ROOT = '/Users/memarian/Documents/OEO/'
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
