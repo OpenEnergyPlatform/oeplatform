@@ -38,7 +38,7 @@ import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 import RuleIcon from '@mui/icons-material/Rule';
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -508,6 +508,19 @@ export default function CustomTable(props) {
     "Output datasets",
   ];
 
+  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      maxWidth: 520,
+      fontSize: theme.typography.pxToRem(20),
+      border: '1px solid black',
+      padding: '20px'
+    },
+  }));
+
   const renderRows = (rs) => {
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody>
@@ -540,10 +553,25 @@ export default function CustomTable(props) {
                     ))}
                   </TableCell>
                   <TableCell >
+
+                 
+
                       {row.scenarios.map((v) => (
-                        <Tooltip title={v}>
-                          <Chip color="primary" label={v} variant={selected.has(v) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v)}/>
-                        </Tooltip>
+                        <HtmlTooltip
+                          style={{ marginLeft: '10px' }}
+                          placement="top"
+                          title={
+                            <React.Fragment>
+                              <Typography color="inherit" variant="caption">
+                                Full name: {v.full_name}
+                                <br />
+                                Abstract: {v.abstract}
+                              </Typography>
+                            </React.Fragment>
+                          }
+                        >
+                          <Chip color="primary" label={v.label} variant={selected.has(v.label) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v.label)}/>
+                        </HtmlTooltip>
                       ))}
                   </TableCell>
                   <TableCell>

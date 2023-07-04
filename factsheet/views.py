@@ -37,11 +37,11 @@ oeo.parse(Ontology_URI)
 
 oeo_owl = get_ontology(Ontology_URI).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -881,8 +881,10 @@ def get_all_factsheets(request, *args, **kwargs):
         element['date_of_publication'] = oekg.value(study_URI,OEKG["date_of_publication"])
         for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
             label = oekg.value(o, RDFS.label)
+            abstract = oekg.value(o, DC.abstract)
+            full_name = oekg.value(o, OEKG.has_full_name)
             if label != None:
-                element['scenarios'].append(label)
+                element['scenarios'].append({'label': label, 'abstract': abstract, 'full_name': full_name})
 
         all_factsheets.append(element)
 

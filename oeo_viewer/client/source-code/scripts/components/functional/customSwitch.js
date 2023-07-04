@@ -9,11 +9,11 @@ import Typography from '@material-ui/core/Typography';
 
 const IOSSwitch = withStyles((theme) => ({
   root: {
-    width: 42,
-    height: 26,
+    width: 35,
+    height: 21,
     padding: 0,
-    margin: 10,
-    marginLeft: 40,
+    margin: 4,
+    marginLeft: 20,
   },
   switchBase: {
     padding: 1,
@@ -21,7 +21,7 @@ const IOSSwitch = withStyles((theme) => ({
       transform: 'translateX(16px)',
       color: theme.palette.common.white,
       '& + $track': {
-        backgroundColor: '#52d869',
+        backgroundColor: '#04678F',
         opacity: 1,
         border: 'none',
       },
@@ -32,8 +32,8 @@ const IOSSwitch = withStyles((theme) => ({
     },
   },
   thumb: {
-    width: 24,
-    height: 24,
+    width: 18,
+    height: 18,
   },
   track: {
     borderRadius: 26 / 2,
@@ -77,7 +77,7 @@ export default function CustomSwitch(props) {
   };
 
   return (
-    <FormGroup>
+    <FormGroup style={{ alignItems: "end" }}>
       <FormControlLabel
         control={
           <IOSSwitch
@@ -85,7 +85,7 @@ export default function CustomSwitch(props) {
           onChange={handleChange}
           name="checkedB"
           />}
-        label="Hierarchical view"
+        //label="Hierarchical view"
       />
     </FormGroup>
   );
