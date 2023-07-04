@@ -2,7 +2,31 @@
 @use '../base/mixins' as *;
 
 main.main .content .content__container.content__container--profile {
-    
+    .content {
+        &__side {
+            @extend .pe-4;
+        }
+        &__main {
+            @extend .pe-0;
+        }
+    }
+
+    .profile-sidebar {
+        @extend .py-5;
+
+        &__img {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-center;
+            @extend .pb-3;
+        }
+
+        &__block {
+            @extend .pt-3;
+            @extend .pb-2;
+            @extend .border-bottom;
+        }
+    }
 }
 
 .profile {
@@ -90,6 +114,7 @@ main.main .content .content__container.content__container--profile {
             @extend .border-secondary;
             @extend .text-secondary;
             @extend .px-2;
+            height: fit-content;
         }
 
         &__item-name a {
