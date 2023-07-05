@@ -131,8 +131,14 @@ main.main .content .content__container.content__container--profile {
             @extend .border;
             @extend .border-secondary;
             @extend .text-secondary;
+            @extend .text-lowercase;
             @extend .px-2;
             height: fit-content;
+
+            &--done {
+                @extend .text-muted;
+                border-color: $text-muted !important;
+            }
         }
 
         &__item-name a {

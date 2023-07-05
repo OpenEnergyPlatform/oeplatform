@@ -97,7 +97,7 @@
                     <div class="profile-rvw__item-btm">
                         <!-- placeholder table name -->
                         <div class="profile-rvw__item-name">
-                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-info">
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-primary">
                                 {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
                             </a>
                         </div>
@@ -166,7 +166,7 @@
 
         <h2 class="header">All reviews</h2>
         <p> 
-            This section list all available reviews. 
+            This section lists all available reviews. 
         </p>
 
         {% if reviewer_reviewed.latest is not None %}
@@ -189,7 +189,7 @@
                         <!-- placeholder type: contributor or reviewer -->
                         <div class="profile-rvw__item-type">Participated as Reviewer</div>
                         <!-- placeholder status: saved, submitted, finished -->
-                        <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                        <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
                     </div>
                     <div class="profile-rvw__item-right">
                         <!-- placeholder open: day number -->
@@ -207,7 +207,7 @@
                 <div class="profile-rvw__item-btm">
                     <!-- placeholder table name -->
                     <div class="profile-rvw__item-name">
-                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}" class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
                     </div>
                 </div>
             </div>
@@ -249,7 +249,7 @@
                     <!-- placeholder type: contributor or reviewer -->
                     <div class="profile-rvw__item-type">Participated as Contributor</div>
                     <!-- placeholder status: saved, submitted, finished -->
-                    <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                    <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
                 </div>
                 <div class="profile-rvw__item-right">
                     <!-- placeholder open: day number -->
@@ -267,7 +267,7 @@
             <div class="profile-rvw__item-btm">
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
-                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}"  class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
                 </div>
             </div>
         </div>
