@@ -15,11 +15,10 @@ class APITestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-
-        actions.perform_sql("DROP SCHEMA IF EXISTS test CASCADE")
-        actions.perform_sql("CREATE SCHEMA test")
-        actions.perform_sql("DROP SCHEMA IF EXISTS _test CASCADE")
-        actions.perform_sql("CREATE SCHEMA _test")
+        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
+        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
+        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
+        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
@@ -126,7 +125,9 @@ class APITestCase(TestCase):
 
         return json_resp
 
-    def create_table(self, structure, data=None, schema=None, table=None):
+    def create_table(self, structure=None, data=None, schema=None, table=None):
+        # default structure
+        structure = structure or {"columns": [{"name": "id", "data_type": "bigint"}]}
         self.api_req("put", table, schema, data={"query": structure})
         if data:
             self.api_req(

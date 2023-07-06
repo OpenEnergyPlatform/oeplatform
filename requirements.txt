@@ -25,3 +25,6 @@ django_better_admin_arrayfield~=1.4
 sparqlwrapper~=1.8
 GeoAlchemy2~=0.11
 jsonschema~=3.2
+oemetadata~=1.6.0
+django-cors-headers
+Owlready2

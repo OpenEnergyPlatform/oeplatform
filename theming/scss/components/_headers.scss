@@ -17,6 +17,18 @@
     }
 
     &__wizard {
-        @extend .fw-semibold;
+        &-process {
+            @extend .text-uppercase;
+            @extend .fw-semibold;
+            @extend .rounded-pill;
+            @extend .py-1;
+            @extend .px-2;
+            background-color: $gray-200;
+        }
+
+        a {
+            @extend .fw-semibold;
+            @extend .text-decoration-none;
+        }
     }
 }

@@ -1,11 +1,9 @@
 ### Changes
-
-- updated metadata editor (json-editor) to latest version, using bootstrap5 (#1198)
+- Update links in github pull request template (#1235)
 
 ### Features
 
-- Implement new topic overview page ui #1203
-
 ### Bugs
+- Fix access to profile review page: restict to current user [(#1279)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1279)
 
-- fixed missing user image
+### Removed

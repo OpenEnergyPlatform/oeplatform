@@ -57,7 +57,8 @@ INSTALLED_APPS = (
     "django_better_admin_arrayfield",
     "oeo_viewer",
     "factsheet",
-    "corsheaders"
+    "corsheaders",
+    "owlready2"
 )
 
 MIDDLEWARE = (
@@ -84,6 +85,7 @@ EXTERNAL_URLS = {
     "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",
     # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
+    "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
 
@@ -127,6 +129,7 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

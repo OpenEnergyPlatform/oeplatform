@@ -106,6 +106,8 @@ function Factsheet(props) {
   const steps = getSteps();
 
   const { id, fsData } = props;
+  console.log(fsData);
+  
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -256,7 +258,7 @@ function Factsheet(props) {
   }
 
   const populateFactsheetElements = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/populate_factsheets_elements/`);
+    const { data } = await axios.get(conf.toep + `sirop/populate_factsheets_elements/`);
     return data;
   };
 
@@ -271,10 +273,12 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      setEnergyTransformationProcesses(data.energy_transformation_processes);
+      setEnergyTransformationProcesses(data.energy_transformation_processes[0].children);
       setEnergyCarries(data.energy_carriers);
       setSectors(data.sectors);
       setSectorDivisions(data.sector_divisions);
+
+      
 
       let energy_carriers_ids = [];
       data.energy_carriers.forEach(({ value, children }) => {
@@ -287,7 +291,6 @@ function Factsheet(props) {
         energy_transformation_processes_ids = [...energy_transformation_processes_ids, value, ...getNodeIds(children)];
       });
       setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
-
 
       myChartRef.current = Sunburst
       const sampleData = {
@@ -305,7 +308,7 @@ function Factsheet(props) {
     if (acronym !== '') {
       if (id === 'new' && !isCreated) {
         const new_uid = uuid()
-        axios.post(conf.toep + 'factsheet/add/',
+        axios.post(conf.toep + 'sirop/add/',
         {
           id: id,
           uid: new_uid,
@@ -345,8 +348,8 @@ function Factsheet(props) {
         }
       });
       } else {
-        axios.get(conf.toep + `factsheet/get/`, { params: { id: uid } }).then(res => {
-          axios.post(conf.toep + 'factsheet/update/',
+        axios.get(conf.toep + `sirop/get/`, { params: { id: uid } }).then(res => {
+          axios.post(conf.toep + 'sirop/update/',
           {
             fsData: res.data,
             id: id,
@@ -393,7 +396,7 @@ function Factsheet(props) {
   };
 
   const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+    axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
   }
 
   const handleCloseSavedDialog = () => {
@@ -572,47 +575,47 @@ function Factsheet(props) {
   } 
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
   const getContactPersons = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000107' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getScenarioRegions = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.BFO_0000006' } });
     return data;
   };
 
   const getScenarioInteractingRegions = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00020036' } });
     return data;
   };
 
   const getScenarioYears = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OBO.OEO_00020097' } });
     return data;
   };
 
   const getModels = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000274' } });
     return data;
   };
 
   const getFrameworks = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000172' } });
     return data;
   };
 
@@ -690,7 +693,7 @@ function Factsheet(props) {
 
 
   const HandleAddNewInstitution = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: newElement.name,
@@ -711,7 +714,7 @@ function Factsheet(props) {
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
     console.log(editIRI);
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
       entity_label: oldElement,
@@ -731,7 +734,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewFundingSource = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: newElement.name,
@@ -750,7 +753,7 @@ function Factsheet(props) {
 
   const HandleEditFundingSource = (oldElement, newElement, editIRI) => {
     console.log(editIRI)
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00090001',
       entity_label: oldElement,
@@ -770,7 +773,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewContactPerson = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: newElement.name,
@@ -789,7 +792,7 @@ function Factsheet(props) {
   } 
 
   const HandleEditContactPerson = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000107',
       entity_label: oldElement,
@@ -809,7 +812,7 @@ function Factsheet(props) {
   } 
 
   const HandleAddNewAuthor = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: newElement.name,
@@ -828,7 +831,7 @@ function Factsheet(props) {
   }
 
   const HandleEditAuthors = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000064',
       entity_label: oldElement,
@@ -848,7 +851,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewRegion = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OBO.BFO_0000006', 
       entity_label: newElement.name,
@@ -867,7 +870,7 @@ function Factsheet(props) {
   }
 
   const HandleEditRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OBO.BFO_0000006',
       entity_label: oldElement,
@@ -887,7 +890,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewInteractingRegion = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: newElement.name,
@@ -906,7 +909,7 @@ function Factsheet(props) {
   }
   
   const HandleEditInteractingRegion = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00020036',
       entity_label: oldElement,
@@ -926,7 +929,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNNewScenarioYears = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: newElement.name,
@@ -945,7 +948,7 @@ function Factsheet(props) {
   }
 
   const HandleEditScenarioYears = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OBO.OEO_00020097',
       entity_label: oldElement,
@@ -965,7 +968,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewModel = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: newElement.name,
@@ -984,7 +987,7 @@ function Factsheet(props) {
   }
 
   const HandleEditModels = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000274',
       entity_label: oldElement,
@@ -1004,7 +1007,7 @@ function Factsheet(props) {
   }
 
   const HandleAddNewFramework = (newElement) => {
-    axios.post(conf.toep + 'factsheet/add_entities/',
+    axios.post(conf.toep + 'sirop/add_entities/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: newElement.name,
@@ -1023,7 +1026,7 @@ function Factsheet(props) {
   }
 
   const HandleEditFramework = (oldElement, newElement, editIRI) => {
-    axios.post(conf.toep + 'factsheet/update_an_entity/',
+    axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000172',
       entity_label: oldElement,
@@ -1112,6 +1115,7 @@ function Factsheet(props) {
   };
 
   const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
+    console.log(energyProcessesList);
     const zipped = []
     energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
     setSelectedEnergyTransformationProcesses(zipped);
@@ -1517,7 +1521,7 @@ function getSteps() {
   'Scenarios',
   'Models',
   'Frameworks',
-  'test',
+  //'Energy_carrier',
   ];
   }
 
@@ -1593,7 +1597,6 @@ function getStepContent(step: number) {
                     <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
                   </HtmlTooltip>
                 </div>
-                <CustomAutocomplete width="40%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
               </div>
               
           
@@ -1663,6 +1666,7 @@ function getStepContent(step: number) {
       return (
         <div>
             <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+            <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
             <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
             <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" value={place_of_publication} onChange={handlePlaceOfPublication} />
             <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
@@ -1697,7 +1701,7 @@ function getStepContent(step: number) {
     case 5:
       return (
         <div>
-          {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   /> */}
+          <CustomTreeViewWithCheckBox flat={false} showFilter={true} size="600px" checked={selectedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   />
         </div>
       );
     case 6:
@@ -1712,21 +1716,21 @@ function getStepContent(step: number) {
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
-    case 9:
-      return (
-        <div>
-          <Sunburst 
-            width="700" 
-            data={sunburstData} 
-            handleNonFittingLabel={handleNonFittingLabelFn}  
-            minSliceAngle={0.4} 
-            label={"label"} 
-            sort={((a, b) => a.value - b.value)}
-            excludeRoot={true}
-            radiusScaleExponent={1}
-          />
-        </div>
-      );
+    // case 9:
+    //   return (
+    //     <div>
+    //       <Sunburst 
+    //         width="700" 
+    //         data={sunburstData} 
+    //         handleNonFittingLabel={handleNonFittingLabelFn}  
+    //         minSliceAngle={0.4} 
+    //         label={"label"} 
+    //         sort={((a, b) => a.value - b.value)}
+    //         excludeRoot={true}
+    //         radiusScaleExponent={1}
+    //       />
+    //     </div>
+    //   );
     default:
     return 'Unknown step';
   }
@@ -1875,7 +1879,7 @@ function getStepContent(step: number) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'factsheet/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
+              <Link to={`factsheet/`} onClick={() => { axios.post(conf.toep + 'sirop/delete/', null, { params: { id: id } }).then(response => setOpenRemovedDialog(true));
                 this.reloadRoute();}} className="btn btn-primary" style={{ textDecoration: 'none', color: 'blue', marginRight: '10px' }}>
               <Button variant="contained" color="error" >
                 Yes
@@ -2018,12 +2022,7 @@ function getStepContent(step: number) {
                           ))}
                         </p>
                       
-                        <p>
-                          <b> Authors: </b>
-                            {selectedAuthors.map((v, i) => (
-                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                        </p>
+                       
 
                         </TimelineContent>
                       </TimelineItem>
@@ -2047,7 +2046,7 @@ function getStepContent(step: number) {
                          </p>
                         <p>  <b>Abstract:</b> {abstract !== undefined && abstract}  </p>
                         <p>
-                        <b>Keywords: </b>  
+                        <b>Descriptors: </b>  
                           {selectedStudyKewords.map((v, i) => (
                           <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
                           ))}
@@ -2070,6 +2069,12 @@ function getStepContent(step: number) {
                         <TimelineContent>
                         <p>
                           <b>Report title: </b> {report_title !== undefined && report_title}
+                        </p>
+                        <p>
+                          <b> Authors: </b>
+                            {selectedAuthors.map((v, i) => (
+                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                            ))}
                         </p>
                         <p>
                           <b>DOI: </b>

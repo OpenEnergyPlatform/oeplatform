@@ -4,7 +4,7 @@ from factsheet import views
 
 urlpatterns = [
     path(r'', views.factsheets_index),
-    re_path(r'^fs/*', views.factsheets_index),
+    re_path(r'^factsheet/*', views.factsheets_index),
     path(r"add/", views.create_factsheet),
     path(r"update/", views.update_factsheet),
     path(r"name/", views.factsheet_by_name),
@@ -19,5 +19,7 @@ urlpatterns = [
     path(r"add_a_fact/", views.add_a_fact),
     path(r"populate_factsheets_elements/", views.populate_factsheets_elements),
     path(r"update_an_entity/", views.update_an_entity),
-    path(r"query/", views.query_oekg)
+    path(r"query/", views.query_oekg),
+    path(r"get_scenarios/", views.get_scenarios)
+    
 ]

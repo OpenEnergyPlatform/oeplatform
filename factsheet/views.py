@@ -16,29 +16,36 @@ from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
 from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 
-versions = os.listdir(f"{ONTOLOGY_FOLDER}/{'oeo'}")
-version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
-path = f"{ONTOLOGY_FOLDER}/{'oeo'}/{version}"
-file = "reasoned-oeo-full.owl"
-#file = "oeo-full.owl"
-Ontology_URI = os.path.join(path, file)
+from pathlib import Path
 
+versions = os.listdir(Path(ONTOLOGY_ROOT, 'oeo')) # TODO bad - windows dev will get path error
+version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
+ONTHOLOGY_NAME = 'oeo'
+onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
+path = onto_base_path / version # TODO bad - windows dev will get path error
+# file = "reasoned-oeo-full.owl" # TODO- set in settings
+file = "oeo-full.owl" # TODO- set in settings
+Ontology_URI = path / file
+Ontology_URI_STR = Ontology_URI.as_posix()
 
 sys.path.append(path)
 
 oeo = Graph()
-oeo.parse(Ontology_URI)
+oeo.parse(Ontology_URI.as_uri())
 
-oeo_owl = get_ontology(Ontology_URI).load()
+oeo_owl = get_ontology(Ontology_URI_STR).load()
 
 query_endpoint = 'http://localhost:3030/ds/query'
 update_endpoint = 'http://localhost:3030/ds/update'
+
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -46,6 +53,7 @@ store = sparqlstore.SPARQLUpdateStore()
 store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
+# TODO- Alot of hardcoded URL, transfer to settings or other config
 OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
 OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")
@@ -108,6 +116,7 @@ def create_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
     else:
+        # TODO- set in settings
         study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + uid )
         oekg.add(( study_URI, RDF.type, OEO.OEO_00010252 ))
         if acronym != '':
@@ -130,6 +139,7 @@ def create_factsheet(request, *args, **kwargs):
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
             if item["acronym"] != '':
+                # TODO- set in settings
                 scenario_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario/" + item["id"]) 
                 oekg.add(( study_URI, OEKG["has_scenario"], scenario_URI ))
                 oekg.add(( scenario_URI, RDFS.label, Literal(item["acronym"])))
@@ -143,13 +153,15 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'regions' in item:
                     for region in item['regions']:
+                        # TODO- set in settings
                         region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
                         oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
                     
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
+                        # TODO- set in settings
                         interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
-                        oekg.add(( scenario_URI, OEO.OEO_00000522, interacting_regions_URI ))
+                        oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
                 
                 if 'scenario_years' in item:
                     for scenario_year in item['scenario_years']:
@@ -157,10 +169,11 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'keywords' in item:
                     for keyword in item['keywords']:
-                        oekg.add(( scenario_URI, OEO["has_scenario_keyword"], Literal(keyword) ))
+                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
 
                 if 'input_datasets' in item:
                     for input_dataset in item['input_datasets']:
+                        # TODO- set in settings
                         input_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/input_datasets/" + input_dataset['key'])
                         oekg.add(( input_dataset_URI, RDF.type, OEO.OEO_00030030))
                         oekg.add(( input_dataset_URI, RDFS.label, Literal(input_dataset['value']['label'])))
@@ -171,6 +184,7 @@ def create_factsheet(request, *args, **kwargs):
 
                 if 'output_datasets' in item:
                     for output_dataset in item['output_datasets']:
+                        # TODO- set in settings
                         output_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/output_datasets/" + output_dataset['key'])
                         oekg.add(( output_dataset_URI, RDF.type, OEO.OEO_00030029))
                         oekg.add(( output_dataset_URI, RDFS.label, Literal(output_dataset['value']['label'])))
@@ -318,7 +332,13 @@ def update_factsheet(request, *args, **kwargs):
                 for s, p, o in oekg.triples(( scenario_URI, OEO.OEO_00000522, None )):
                     oekg.remove((s, p, o))
 
+                for s, p, o in oekg.triples(( scenario_URI, OEO['covers_interacting_regions'], None )):
+                    oekg.remove((s, p, o))
+
                 for s, p, o in oekg.triples(( scenario_URI, OEO.OEO_00020224, None )):
+                    oekg.remove((s, p, o))
+
+                for s, p, o in oekg.triples(( scenario_URI, OEO["has_scenario_descriptor"], None )):
                     oekg.remove((s, p, o))
 
                 if 'regions' in item:
@@ -329,7 +349,7 @@ def update_factsheet(request, *args, **kwargs):
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
                         interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
-                        oekg.add(( scenario_URI, OEO.OEO_00000522, interacting_regions_URI ))
+                        oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
                 
                 if 'scenario_years' in item:
                     for scenario_year in item['scenario_years']:
@@ -337,7 +357,7 @@ def update_factsheet(request, *args, **kwargs):
 
                 if 'keywords' in item:
                     for keyword in item['keywords']:
-                        oekg.add(( scenario_URI, OEO["has_scenario_keyword"], Literal(keyword) ))
+                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
 
                 for s, p, o in oekg.triples(( scenario_URI, OEO.RO_0002233, None )):
                     oekg.remove((s, p, o))
@@ -642,7 +662,7 @@ def factsheet_by_id(request, *args, **kwargs):
             if (o1_type == OEO.OEO_00020036):
                 scenario['interacting_regions'].append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
         
-        for s11, p11, o11 in oekg.triples(( o, OEO["has_scenario_keyword"], None )):
+        for s11, p11, o11 in oekg.triples(( o, OEO["has_scenario_descriptor"], None )):
             scenario['keywords'].append(o11)
 
         for s2, p2, o2 in oekg.triples(( o, OEO.RO_0002233, None )):
@@ -724,7 +744,7 @@ def query_oekg(request, *args, **kwargs):
                 )
 
     print(final_query)
-
+    
     sparql.setReturnFormat(JSON)
     sparql.setQuery(final_query)
     results = sparql.query().convert()
@@ -872,13 +892,57 @@ def get_all_factsheets(request, *args, **kwargs):
         element['date_of_publication'] = oekg.value(study_URI,OEKG["date_of_publication"])
         for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
             label = oekg.value(o, RDFS.label)
+            abstract = oekg.value(o, DC.abstract)
+            full_name = oekg.value(o, OEKG.has_full_name)
             if label != None:
-                element['scenarios'].append(label)
+                element['scenarios'].append({'label': label, 'abstract': abstract, 'full_name': full_name})
 
         all_factsheets.append(element)
 
     response = JsonResponse(all_factsheets, safe=False, content_type='application/json') 
     patch_response_headers(response, cache_timeout=1)
+    return response
+
+@csrf_exempt
+def get_scenarios(request, *args, **kwargs):
+    scenarios_acronym = [i.replace('%20', ' ') for i in  json.loads(request.GET.get('scenarios_acronym'))]
+
+    scenarios = []
+    print(scenarios_acronym)
+
+    for s, p, o in oekg.triples(( None, RDF.type, OEO.OEO_00000365 )):
+        print(str(oekg.value(s, RDFS.label) ))
+        if str(oekg.value(s, RDFS.label) ) in scenarios_acronym:
+            descriptors = []
+            regions = []
+            interacting_regions = []
+            scenario_years = []
+            input_datasets = []
+            output_datasets = []
+            for s1, p1, o1 in oekg.triples(( s, OEO['has_scenario_descriptor'], None )):
+                descriptors.append(o1)
+            for s2, p2, o2 in oekg.triples(( s, OEO.OEO_00000522, None )):
+                regions.append(oekg.value(o2, RDFS.label))
+            for s3, p3, o3 in oekg.triples(( s, OEO['covers_interacting_regions'], None )):
+                interacting_regions.append(oekg.value(o3, RDFS.label))
+            for s4, p4, o4 in oekg.triples(( s, OEO.OEO_00020224, None )):
+                scenario_years.append(o4)
+            for s5, p5, o5 in oekg.triples(( s, OEO.RO_0002233, None )):
+                input_datasets.append(oekg.value(o5, RDFS.label))
+            for s6, p6, o6 in oekg.triples(( s, OEO.RO_0002234, None )):
+                output_datasets.append(oekg.value(o6, RDFS.label))
+                
+
+            scenarios.append({ 'acronym' : oekg.value(s, RDFS.label), 'data': { 
+                'descriptors': descriptors, 
+                'regions': regions, 
+                'interacting_regions': interacting_regions, 
+                'scenario_years': scenario_years,
+                'input_datasets': input_datasets,
+                'output_datasets': output_datasets 
+                } })
+
+    response = JsonResponse(scenarios, safe=False, content_type='application/json') 
     return response
 
 @csrf_exempt
@@ -908,7 +972,7 @@ def get_all_sub_classes(cls, visited=None):
     subclasses = cls.subclasses()
     value = 10 if childCount > 5 else 500
 
-    dict = { "name": cls.label.first(),  "label": cls.label.first(), "value": 10, "iri": cls.iri}
+    dict = { "name": cls.label.first(),  "label": cls.label.first(), "value": cls.label.first(), "iri": cls.iri}
 
     if childCount > 0:
       dict["children"] = [get_all_sub_classes(subclass, visited) for subclass in subclasses if subclass.label.first() not in visited ]

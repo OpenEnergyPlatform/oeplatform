@@ -38,7 +38,7 @@ import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
 import RuleIcon from '@mui/icons-material/Rule';
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -49,6 +49,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Slider from '@mui/material/Slider';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import Divider from '@mui/material/Divider';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -164,12 +165,12 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <StyledTableCell padding="checkbox">
-          <Checkbox
+         {/*  <Checkbox
                 color="primary"
                 indeterminate={numSelected > 0 && numSelected < rowCount}
                 checked={rowCount > 0 && numSelected === rowCount}
                 onChange={onSelectAllClick}
-              />
+              /> */}
         </StyledTableCell>
         {headCells.map((headCell) => (
           <StyledTableCell
@@ -207,7 +208,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll} = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison} = props;
 
   return (
     <Toolbar
@@ -230,15 +231,15 @@ function EnhancedTableToolbar(props) {
         component="div"
       >
         {numSelected > 1 && <Tooltip title="Compare">
-            <Link to={`factsheet/fs/compare`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+
               <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} variant="contained" key="Compare">
-              <CompareArrowsIcon />
+              <CompareArrowsIcon onClick={handleOpenAspectsOfComparison} />
               </Button>
-            </Link>
+
           </Tooltip>}
       </Typography>
       <Tooltip title="Add a new factsheet">
-        <Link to={`factsheet/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+        <Link to={`sirop/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
           <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}><AddIcon/></Button>
         </Link>
       </Tooltip>
@@ -255,12 +256,13 @@ export default function CustomTable(props) {
 
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('study name');
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState([]);
   const [openQuery, setOpenQuery] = useState(false);
+  const [openAspectsForComparison, setOpenAspectsForComparison] = useState(false);
   const [selectedInstitution, setSelectedInstitution] = useState([]);
   const [institutions, setInstitutions] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState([]);
@@ -271,6 +273,7 @@ export default function CustomTable(props) {
   const [endDateOfPublication, setEndDateOfPublication] = useState('01-01-1900');
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
+  const [selectedAspects, setSelectedAspects] = useState([]);
 
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
 
@@ -303,22 +306,28 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
 
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
+    const newSelected = new Set(selected);
+    if (newSelected.has(name)) newSelected.delete(name);
+    else newSelected.add(name);
 
+    // const selectedIndex = selected.indexOf(name);
+    // let newSelected = [];
+
+    // if (selectedIndex === -1) {
+    //   newSelected = newSelected.concat(selected, name);
+    // } else if (selectedIndex === 0) {
+    //   newSelected = newSelected.concat(selected.slice(1));
+    // } else if (selectedIndex === selected.length - 1) {
+    //   newSelected = newSelected.concat(selected.slice(0, -1));
+    // } else if (selectedIndex > 0) {
+    //   newSelected = newSelected.concat(
+    //     selected.slice(0, selectedIndex),
+    //     selected.slice(selectedIndex + 1),
+    //   );
+    // }
+
+    console.log(newSelected);
     setSelected(newSelected);
   };
 
@@ -337,6 +346,14 @@ export default function CustomTable(props) {
 
   const handleOpenQuery = (event) => {
     setOpenQuery(true);
+  };
+
+  const handleOpenAspectsOfComparison = (event) => {
+    setOpenAspectsForComparison(true);
+  };
+
+  const handleCloseAspectsForComparison = (event) => {
+    setOpenAspectsForComparison(false);
   };
 
   const handleShowAll = (event) => {
@@ -365,17 +382,17 @@ export default function CustomTable(props) {
   }
 
   const getInstitution = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000238' } });
     return data;
   };
 
   const getAuthors = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00000064' } });
     return data;
   };
 
   const getFundingSources = async () => {
-    const { data } = await axios.get(conf.toep + `factsheet/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
+    const { data } = await axios.get(conf.toep + `sirop/get_entities_by_type/`, { params: { entity_type: 'OEO.OEO_00090001' } });
     return data;
   };
 
@@ -439,7 +456,18 @@ export default function CustomTable(props) {
     };
 
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (name) => selected.has(name);
+
+  const handleAspects = (event) => {
+    if (event.target.checked) {
+      if (!selectedAspects.includes(event.target.name)) {
+        setSelectedAspects([...selectedAspects, event.target.name]);
+      }
+    } else {
+      const filteredAspects = selectedAspects.filter(i => i !== event.target.name);
+      setSelectedAspects(filteredAspects);
+    }
+  }
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -471,8 +499,29 @@ export default function CustomTable(props) {
     'peak electricity generation'
   ];
 
+  const scenarioAspects = [
+    "Descriptors",
+    "Years",
+    "Regions", 
+    "Interacting regions",
+    "Input datasets",
+    "Output datasets",
+  ];
+
+  const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+    <Tooltip {...props} classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      color: 'white',
+      maxWidth: 520,
+      fontSize: theme.typography.pxToRem(20),
+      border: '1px solid black',
+      padding: '20px'
+    },
+  }));
+
   const renderRows = (rs) => {
-    console.log(filteredFactsheets === []);
     const rowsToRender =  filteredFactsheets.length == 0 ? factsheets : filteredFactsheets;
     return <TableBody>
             {rowsToRender.map((row, index) => {
@@ -483,7 +532,6 @@ export default function CustomTable(props) {
                 <React.Fragment>
                 <StyledTableRow
                   hover
-                
                   role="checkbox"
                   aria-checked={isItemSelected}
                   tabIndex={-1}
@@ -492,14 +540,7 @@ export default function CustomTable(props) {
                   sx={{ cursor: 'pointer' }}
                 >
                   <TableCell padding="checkbox">
-                    <Checkbox
-                      onClick={(event) => handleClick(event, row.study_name)}
-                      color="primary"
-                      checked={isItemSelected}
-                      inputProps={{
-                        'aria-labelledby': labelId,
-                      }}
-                    />
+                   
                   </TableCell>
                   <TableCell>
                     <Typography variant="subtitle1" gutterBottom style={{ marginTop: '10px' }}>{row.study_name}</Typography>
@@ -512,21 +553,38 @@ export default function CustomTable(props) {
                     ))}
                   </TableCell>
                   <TableCell >
+
+                 
+
                       {row.scenarios.map((v) => (
-                        <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                        <HtmlTooltip
+                          style={{ marginLeft: '10px' }}
+                          placement="top"
+                          title={
+                            <React.Fragment>
+                              <Typography color="inherit" variant="caption">
+                                Full name: {v.full_name}
+                                <br />
+                                Abstract: {v.abstract}
+                              </Typography>
+                            </React.Fragment>
+                          }
+                        >
+                          <Chip color="primary" label={v.label} variant={selected.has(v.label) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v.label)}/>
+                        </HtmlTooltip>
                       ))}
                   </TableCell>
                   <TableCell>
-                    <IconButton
+                    {/* <IconButton
                       aria-label="expand row"
                       size="small"
                       onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
                     >
                       {open === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
+                    </IconButton> */}
                   </TableCell>
                   <TableCell sx={{ textAlign: 'center' }}>
-                    <Link to={`factsheet/fs/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                       <ReadMoreIcon sx={{ cursor: 'pointer', color: '#04678F', marginTop: '5px', fontSize: '35px' }}/>
                     </Link> 
                   </TableCell>
@@ -596,6 +654,48 @@ export default function CustomTable(props) {
       </Backdrop>
       <Dialog
         maxWidth="md"
+        open={openAspectsForComparison}
+        aria-labelledby="responsive-dialog-title"
+        style={{ height: '85vh', overflow: 'auto' }}
+      >
+        <DialogTitle id="responsive-dialog-title">
+          <b>  Which elements of the scenarios do you wish to compare? </b>
+        </DialogTitle >
+        <DialogContent>
+         {/*  <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
+            Which elements of the studies do you wish to compare?
+          </Typography>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
+              <FormControlLabel control={<Checkbox />} label="Sectors" />
+              <FormControlLabel control={<Checkbox />} label="Enrgy carriers" />
+              <FormControlLabel control={<Checkbox />} label="Enrgy transformation processes" />
+              <FormControlLabel control={<Checkbox />} label="Models" />
+              <FormControlLabel control={<Checkbox />} label="Frameworks" />
+            </FormGroup>
+          <Divider /> */}
+          <FormGroup>
+              {
+                scenarioAspects.map((item) => <FormControlLabel control={<Checkbox />} checked={selectedAspects.includes(item)} onChange={handleAspects} label={item} name={item}/>)
+              }
+              
+            </FormGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" >
+            <Link to={`sirop/compare/${[...selected].join('-')}CASPECTS${[...selectedAspects.map(i => i.substring(0, 3).toLowerCase())].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
+              Show comparison
+            </Link>
+          </Button>
+          <Button variant="outlined" onClick={handleCloseAspectsForComparison}  >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      <Dialog
+        maxWidth="md"
         open={openQuery}
         aria-labelledby="responsive-dialog-title"
         style={{ height: '85vh', overflow: 'auto' }}
@@ -638,7 +738,6 @@ export default function CustomTable(props) {
                   </Stack>
               </LocalizationProvider>
               </div>
-
               <div style={{ marginTop: "20px" }}>
                 <div>Study descriptors:</div>
                 <FormGroup>
@@ -660,8 +759,6 @@ export default function CustomTable(props) {
                   max={2200}
                 />
               </div>
-             
-
             </div>
           </DialogContentText>
         </DialogContent>
@@ -676,7 +773,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll}/>
+        <EnhancedTableToolbar numSelected={selected.size}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
