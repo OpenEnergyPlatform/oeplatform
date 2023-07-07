@@ -239,7 +239,7 @@ function EnhancedTableToolbar(props) {
           </Tooltip>}
       </Typography>
       <Tooltip title="Add a new factsheet">
-        <Link to={`sirop/fs/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
+        <Link to={`sirop/factsheet/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
           <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}><AddIcon/></Button>
         </Link>
       </Tooltip>
@@ -443,7 +443,7 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
-    axios.post(conf.toep + 'factsheet/query/',
+    axios.post(conf.toep + 'sirop/query/',
     {
       'criteria': criteria,
     }).then(response => {

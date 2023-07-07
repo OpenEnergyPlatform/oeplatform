@@ -50,6 +50,8 @@ function Home(props) {
   useEffect(() => {
     setLoading(true);
     axios.get(conf.toep + `sirop/all/`).then(response => {
+      const token = response.data.token;
+      console.log(token);
       setFactsheets(response.data);
       setLoading(false);
     });
