@@ -443,7 +443,7 @@ export default function CustomTable(props) {
       'studyKewords': selectedStudyKewords,
       'scenarioYearValue': scenarioYearValue,
     }
-    axios.post(conf.toep + 'factsheet/query/',
+    axios.post(conf.toep + 'sirop/query/',
     {
       'criteria': criteria,
     }).then(response => {

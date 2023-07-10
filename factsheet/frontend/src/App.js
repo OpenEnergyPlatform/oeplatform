@@ -51,6 +51,7 @@ function App() {
 
   const url_params = String(window.location.href).split('/').pop();
   const url_page = String(window.location.href).split('/').at(-2);
+  
   console.log(url_page);
   console.log(url_params);
 

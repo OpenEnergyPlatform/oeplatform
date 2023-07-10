@@ -1981,7 +1981,7 @@ function getStepContent(step: number) {
                       <Typography variant="caption" gutterBottom component="div" >
                         To be completed!
                       </Typography>
-                      <Typography variant="h6" gutterBottom component="div">
+                      <Typography variant="h4" gutterBottom component="div">
                         <b> {acronym}</b>
                       </Typography>
                     
