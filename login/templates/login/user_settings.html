@@ -49,7 +49,9 @@
     {% endif %}
 {% endif %}
 {% endblock %}
+
 {% block main-right-sidebar-content %}
+{% if profile_user == request.user %}
     <br>
     <div>
     {% if profile_user.profile_img %}
@@ -59,51 +61,67 @@
 {% endif %}
     </div>
     <br>
-    <div><h2> {{ profile_user.name }} </h2></div>
-    <td> {% if profile_user.fullname %}
-                {{ profile_user.fullname }}
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add Full Name</a>
-            {% endif %} </td>
+    <div>
+        <h2> {{ profile_user.name }} </h2>
+        <p>Username</p>
+    </div>
+    <td> 
+        {% if profile_user.fullname %}
+            {{ profile_user.fullname }}
+        {% else %}
+            No full name added.
+        {% endif %} 
+    </td>
     <br>
     <br>
     <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
     <hr>
-    <td> {% if profile_user.work %}
-                {{ profile_user.work }}
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add profession</a>
-            {% endif %} </td>
+    <td> 
+        {% if profile_user.work %}
+            {{ profile_user.work }}
+        {% else %}
+            No profession added.
+        {% endif %}
+    </td>
     <br>
-    <td> {% if profile_user.location %}
-                {{ profile_user.location }}
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add location </a>
-            {% endif %} </td>
+    <td> 
+        {% if profile_user.location %}
+            {{ profile_user.location }}
+        {% else %}
+            No location added.
+        {% endif %}
+    </td>
     <br>
-    <td> {% if profile_user == request.user %}
+    <td>
+        {% if profile_user == request.user %}
             <th style="width:20%"> E-Mail: </th>
             <td> {{ profile_user.email }} </td>
-            {% endif %}
+        {% endif %}
     <br>
     <br>
-    <td> {% if profile_user.linkedin %}
-        <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add LinkedIn page</a>
-            {% endif %} </td>
+    <td>
+        {% if profile_user.linkedin %}
+        <a  target="_blank" href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+        {% else %}
+            No LinkedIn page added.
+        {% endif %}
+    </td>
     <br>
-    <td> {% if profile_user.facebook %}
+    <td>
+        {% if profile_user.facebook %}
         <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add Facebook page</a>
-            {% endif %} </td>
+        {% else %}
+            No Facebook page added. 
+        {% endif %}
+    </td>
     <br>
-    <td> {% if profile_user.twitter %}
-        <a href="{% url 'edit' request.user.id %}">{{ profile_user.twitter }}</a>
-            {% else %}
-                <a href="{% url 'edit' request.user.id %}">Add Twitter page</a>
-            {% endif %} </td>
+    <td> 
+        {% if profile_user.twitter %}
+        <a target="_blank" href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+        {% else %}
+            No Twitter page added.
+        {% endif %}
+    </td>
     <br>
     <hr>
     <table class="table">
@@ -114,7 +132,7 @@
             {% if profile_user.affiliation %}
                 {{ profile_user.affiliation }}
             {% elif profile_user == request.user %}
-                <a href="{% url 'edit' request.user.id %}">Add your affiliation</a>
+                No affiliation added.
             {% else %}
                 -
             {% endif %}
@@ -122,13 +140,15 @@
     </tr>
     <tr>
         <th> Description: </th>
-        <td> {% if profile_user.description %}
+        <td> 
+            {% if profile_user.description %}
                 {{ profile_user.description }}
-            {% elif profile_user == request.user %}
-                <a href="{% url 'edit' request.user.id %}">Add a description</a>
             {% else %}
-                -
-            {% endif %} </td>
+                No description added.
+            {% endif %} 
+        </td>
     </tr>
 </table>
+{% endif %}
 {% endblock %}
+
