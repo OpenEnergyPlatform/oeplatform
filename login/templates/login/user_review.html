@@ -14,50 +14,63 @@
     {% endif %}
         </div>
         <br>
-        <div><h2> {{ profile_user.name }} </h2></div>
-        <td> {% if profile_user.fullname %}
-                    {{ profile_user.fullname }}
-                {% else %}
-                    <p>Full Name</p>
-                {% endif %} </td>
+        <div><h2> {{ profile_user.name }} </h2> <p>Username</p></div>
+        <td> 
+            {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} </td>
         <br>
         <br>
         <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
         <hr>
-        <td> {% if profile_user.work %}
-                    {{ profile_user.work }}
-                {% else %}
-                    <p>Profession</p>
-                {% endif %} </td>
-        <td> {% if profile_user.location %}
-                    {{ profile_user.location }}
-                {% else %}
-                <p>Location</p>
-        {% endif %} </td>
+        <td> 
+            {% if profile_user.work %}
+                {{ profile_user.work }}
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} 
+        </td>
         <br>
-        <td> {% if profile_user.email %}
+        <td> 
+            {% if profile_user.location %}
+                {{ profile_user.location }}
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} 
+        </td>
+        <br>
+        <td> 
+            {% if profile_user.email %}
                 <th style="width:20%"> E-Mail: </th>
                 <td> {{ profile_user.email }} </td>
-                {% endif %}
+            {% endif %}
         <br>
         <br>
-        <td> {% if profile_user.linkedin %}
-            <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
-                {% else %}
-                    LinkedIn
-                {% endif %} </td>
+        <td> 
+            {% if profile_user.linkedin %}
+                <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} 
+        </td>
         <br>
-        <td> {% if profile_user.facebook %}
-            <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
-                {% else %}
-                    Facebook
-                {% endif %} </td>
+        <td> 
+            {% if profile_user.facebook %}
+                <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} 
+        </td>
         <br>
-        <td> {% if profile_user.twitter %}
-            <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
-                {% else %}
-                    Twitter
-                {% endif %} </td>
+        <td> 
+            {% if profile_user.twitter %}
+                <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+            {% else %}
+                <!-- empty or placeholder or just show icon? -->
+            {% endif %} 
+        </td>
         <br>
         <hr>
     {% endif %}
