@@ -171,7 +171,6 @@
 
         {% if reviewer_reviewed.latest is not None %}
         {% for table_name, reviews in reviewer_reviewed_grouped.items %}
-        <p>Table name: {{ table_name }}</p>
             
         {% for review in reviews %}
         {% if forloop.first %}
@@ -237,7 +236,6 @@
     {% if contributor_reviewed.latest is not None %}
     
     {% for table_name, reviews in contributor_reviewed_grouped.items %}
-    <p>{{ table_name }}</p>
 
     {% for review in reviews %}
     {% if forloop.first %}
