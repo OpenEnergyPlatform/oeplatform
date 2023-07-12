@@ -22,7 +22,7 @@ Closes #
 ### PR-Assignee
 - [ ] 🐙 Follow the workflow in [CONTRIBUTING.md](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md)
 - [ ] 📝 Update the [CHANGELOG.md](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md)
-- [ ] 📙 Update the documentation on [Read The Docs](https://oeplatform.readthedocs.io/en/latest/?badge=latest) 
+- [ ] 📙 Update the documentation the [documentaion](gh-pages) 
 
 ### Reviewer
 - [ ] 🐙 Follow the [Reviewer Guidelines](https://github.com/rl-institut/super-repo/blob/develop/CONTRIBUTING.md#40-let-someone-else-review-your-pr)
