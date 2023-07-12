@@ -1,0 +1,58 @@
+# Project
+site_name: Open Energy Platform Documentation
+site_url: 
+site_description: The Open Energy Platform is the Frontend of the Open Energy Family and specifically provides a Webapplication which is documented using mkdocs.
+
+# Repository
+repo_name: OpenEnergyFamily/oeplatform
+repo_url: https://github.com/OpenEnergyPlatform/oeplatform
+docs_dir: docs
+
+# Configuration
+theme:
+  name: material
+  logo: 
+  palette:
+    # Palette toggle for dark mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.path
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+
+# extensions 
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: 💙
+
+plugins:
+- mkdocstrings:
+
+# Customization
+extra:
+  generator: false
+
+extra_css:
+  - css/extra.css
+
+# Navigation
+nav:
+  - Home: index.md
+  - Dataedit: 
+    - dataedit/views.md
