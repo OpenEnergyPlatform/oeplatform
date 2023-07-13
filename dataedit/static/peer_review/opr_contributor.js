@@ -311,6 +311,22 @@ function renderSummaryPageFields() {
   const rejectedFields = [];
   const missingFields = [];
 
+    if (state_dict && Object.keys(state_dict).length > 0) {
+    const fields = document.querySelectorAll('.field');
+    for (let field of fields) {
+      let field_id = field.id.slice(6);
+      const fieldValue = $(field).text();
+      const fieldState = getFieldState(field_id);
+      console.log(field_id + fieldState)
+      const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
+      if (fieldState === 'ok') {
+        acceptedFields.push({ field_id, fieldValue, fieldCategory });
+      } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        missingFields.push({ field_id, fieldValue, fieldCategory });
+      }
+    }
+  }
+
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
     const fieldValue = $(field_id).text();
@@ -337,16 +353,16 @@ function renderSummaryPageFields() {
       }
       const category_fields = category.querySelectorAll(".field");
       for (field of category_fields) {
-        const field_name = field.id.slice(6);
-        const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
-        const fieldValue = $(field_id).text();
-        const found = current_review.reviews.some(review => review.key === field_name);
-        const fieldCategory = field.getAttribute('data-category');
+  const field_id = field.id.slice(6);
+  const fieldValue = $(field).text();
+  const found = current_review.reviews.some(review => review.key === field_id);
+  const fieldState = getFieldState(field_id);
+  const fieldCategory = field.getAttribute('data-category');
 
-        if (!found) {
-          missingFields.push({ field_id, fieldValue, fieldCategory });
-        }
-      }
+  if (!found && fieldState !== 'ok') {
+    missingFields.push({ field_id, fieldValue, fieldCategory });
+  }
+}
     }
 
 
