@@ -244,6 +244,19 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
 
+     const fieldState = getFieldState(fieldKey);
+
+    if (fieldState === 'ok'|| !fieldState) {
+        document.getElementById("ok-button").disabled = true;
+        document.getElementById("rejected-button").disabled = true;
+        document.getElementById("suggestion-button").disabled = true;
+    } else if (fieldState === 'rejected') {
+        document.getElementById("ok-button").disabled = false;
+        document.getElementById("rejected-button").disabled = false;
+        document.getElementById("suggestion-button").disabled = false;
+    }
+
+
     // Set selected / not selected style on metadata fields
     reviewItem.forEach(function(div) {
       div.style.backgroundColor = '';
@@ -601,23 +614,17 @@ function getFieldState(fieldKey) {
  */
 function checkReviewComplete() {
   const fields = document.querySelectorAll('.field');
-  let allReviewed = true;
-
   for (let field of fields) {
     let fieldName = field.id.slice(6);
     const fieldState = getFieldState(fieldName);
     let reviewed = current_review["reviews"].find(review => review.key === fieldName);
-    if ((fieldState === null || fieldState === 'none') && !reviewed) {
-      allReviewed = false;
-      break;
+
+    if (!reviewed && fieldState !== 'ok') {
+      $('#submit_summary').addClass('disabled');
+      return;
     }
   }
-
-  if (allReviewed) {
-    $('#submit_summary').removeClass('disabled');
-  } else {
-    $('#submit_summary').addClass('disabled');
-  }
+  $('#submit_summary').removeClass('disabled');
 }
 
 
