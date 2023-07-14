@@ -244,18 +244,17 @@ function click_field(fieldKey, fieldValue, category) {
         fieldDescriptionsElement.textContent = "Описание не найдено";
     }
 
-     const fieldState = getFieldState(fieldKey);
+ const fieldState = getFieldState(fieldKey);
 
-    if (fieldState === 'ok'|| !fieldState) {
-        document.getElementById("ok-button").disabled = true;
-        document.getElementById("rejected-button").disabled = true;
-        document.getElementById("suggestion-button").disabled = true;
-    } else if (fieldState === 'rejected') {
-        document.getElementById("ok-button").disabled = false;
-        document.getElementById("rejected-button").disabled = false;
-        document.getElementById("suggestion-button").disabled = false;
-    }
-
+if (fieldState === 'ok'|| !fieldState) {
+    document.getElementById("ok-button").disabled = true;
+    document.getElementById("rejected-button").disabled = true;
+    document.getElementById("suggestion-button").disabled = true;
+} else if (fieldState === 'rejected') {
+    document.getElementById("ok-button").disabled = false;
+    document.getElementById("rejected-button").disabled = false;
+    document.getElementById("suggestion-button").disabled = false;
+}
 
     // Set selected / not selected style on metadata fields
     reviewItem.forEach(function(div) {
