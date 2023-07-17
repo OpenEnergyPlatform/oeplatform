@@ -101,7 +101,7 @@ main.main .content .content__container.content__container--profile {
         }
 
         &__item--done {
-            @extend .border-bottom;
+            @extend .border;
             
             .profile-rvw__item-type {
                 @extend .ps-3;
