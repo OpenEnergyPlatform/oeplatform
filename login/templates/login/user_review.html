@@ -101,6 +101,16 @@
                                 {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
                             </a>
                         </div>
+                        <div class="profile-rvw__item-history">
+                            <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                                Show history
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -150,6 +160,16 @@
                     <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}" class="btn btn-primary">
                         {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}  
                     </a>
+                </div>
+                <div class="profile-rvw__item-history">
+                    <button type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                        Show history
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton2">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </div>
             </div>
         </div>

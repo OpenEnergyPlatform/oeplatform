@@ -77,6 +77,9 @@ main.main .content .content__container.content__container--profile {
         }
 
         &__item-btm {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-between;
             @extend .pb-2;
         }
 
@@ -144,6 +147,16 @@ main.main .content .content__container.content__container--profile {
         &__item-name a {
             @extend .text-decoration-none;
             @extend .fw-semibold;
+        }
+
+        &__item-history {
+            @extend .dropdown;
+
+            button {
+                @extend .btn;
+                @extend .btn-light; 
+                @extend .dropdown-toggle;
+            }
         }
 
         &__list {
