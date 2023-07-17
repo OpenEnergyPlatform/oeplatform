@@ -107,16 +107,18 @@
 
                 
         {% elif reviewer_reviewed.latest_status == "FINISHED" %}
-        <ul>
-            <li>
-                No active reviews where you participate as reviewer.
-            </li>
-        </ul>
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+            <ul class="profile-rvw__list">
+                <li>
+                    No active reviews where you participate as a reviewer.
+                </li>
+            </ul>
+        </div>
         {% else %}
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
             <ul class="profile-rvw__list">
                 <li>
-                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> wait for the contributor to submit the review.
+                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> waits for the contributor to submit the review.
                 </li>
             </ul>
         </div>
@@ -152,17 +154,21 @@
             </div>
         </div>
         {% elif contributor_reviewed.latest_status == "FINISHED" %}
-        <ul>
-            <li>
-                No active reviews where you participate as data contributor.
-            </li>
-        </ul>
-        {% else %}
-            <ul>
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <ul class="profile-rvw__list">
                 <li>
-                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} wait for the reviewer to submit the review.
+                    No active reviews where you participate as a data contributor.
                 </li>
             </ul>
+        </div>
+        {% else %}
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <ul class="profile-rvw__list">
+                <li>
+                    <span>{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}</span> waits for the reviewer to submit the review.
+                </li>
+            </ul>
+        </div>
         {% endif %}
     {% endif %}
 
