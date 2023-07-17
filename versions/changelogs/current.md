@@ -1,5 +1,6 @@
 ### Changes
 - Update links in github pull request template (#1235)
+- Add captcha to password reset form and prevent vulnerability [(1288)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1288)
 
 ### Features
 - Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
