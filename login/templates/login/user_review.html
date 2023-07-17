@@ -72,7 +72,7 @@
 {% include "login/user_nav.html" %}
     <h2 class="header">Active Open Peer Reviews</h2>
     <p> 
-        This section lists the latest active reviews in which you are currently participating as a reviewer or data contributor.
+        This section lists the latest active reviews in which you are currently participating as a Reviewer or Data Publisher.
     </p>
     {% if reviewer_reviewed.latest is not None %}
         {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
@@ -120,7 +120,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
             <ul class="profile-rvw__list">
                 <li>
-                    No active reviews where you participate as a reviewer.
+                    No active reviews where you participate as a Reviewer.
                 </li>
             </ul>
         </div>
@@ -128,7 +128,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
             <ul class="profile-rvw__list">
                 <li>
-                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> waits for the contributor to submit the review.
+                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> waits for the Data Publisher to submit the review.
                 </li>
             </ul>
         </div>
@@ -142,7 +142,7 @@
             <div class="profile-rvw__item-top">
                 <div class="profile-rvw__item-left">
                     <!-- placeholder type: contributor or reviewer -->
-                    <div class="profile-rvw__item-type">Participating as data contributor</div>
+                    <div class="profile-rvw__item-type">Participating as Data Publisher</div>
                     <!-- placeholder status: saved, done, etc -->
                     <div class="profile-rvw__item-status">{{ contributor_reviewed.latest_status }}</div>
                 </div>
@@ -177,7 +177,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
             <ul class="profile-rvw__list">
                 <li>
-                    No active reviews where you participate as a data contributor.
+                    No active reviews where you participate as a Data Publisher.
                 </li>
             </ul>
         </div>
@@ -185,7 +185,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
             <ul class="profile-rvw__list">
                 <li>
-                    <span>{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}</span> waits for the reviewer to submit the review.
+                    <span>{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}</span> waits for the Reviewer to submit the review.
                 </li>
             </ul>
         </div>
@@ -283,7 +283,7 @@
             <div class="profile-rvw__item-top">
                 <div class="profile-rvw__item-left">
                     <!-- placeholder type: contributor or reviewer -->
-                    <div class="profile-rvw__item-type">Participated as Contributor</div>
+                    <div class="profile-rvw__item-type">Participated as Data Publisher</div>
                     <!-- placeholder status: saved, submitted, finished -->
                     <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
                 </div>
