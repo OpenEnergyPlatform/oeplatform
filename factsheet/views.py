@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from rest_framework import status
-from .models import Factsheet
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
@@ -16,13 +15,23 @@ from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
 from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
 from owlready2 import get_ontology
 
 from pathlib import Path
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.decorators import login_required
+
+from .models import HistoryOfOEKG
+
 
 versions = os.listdir(Path(ONTOLOGY_ROOT, 'oeo')) # TODO bad - windows dev will get path error
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
@@ -49,9 +58,15 @@ update_endpoint = 'http://localhost:3030/ds/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
-store = sparqlstore.SPARQLUpdateStore()
+store = sparqlstore.SPARQLUpdateStore(
+    auth=(
+        RDF_DATABASES.get("factsheet").get("dbuser"), 
+        RDF_DATABASES.get("factsheet").get("dbpasswd")
+    )
+)
 store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
+
 
 # TODO- Alot of hardcoded URL, transfer to settings or other config
 OEO = Namespace("http://openenergy-platform.org/ontology/oeo/")
@@ -82,6 +97,23 @@ def undo_clean_name(name):
 def factsheets_index(request, *args, **kwargs):
     return render(request, 'factsheet/index.html')
 
+def add_history(triple_subject, triple_predicate, triple_object, type_of_action, user):
+    histroy_instance = HistoryOfOEKG(triple_subject=triple_subject, 
+        triple_predicate=triple_predicate, 
+        triple_object=triple_object, 
+        type_of_action=type_of_action, 
+        user=user)
+    histroy_instance.save()
+    return "saved"
+
+def get_history(request, *args, **kwargs):
+    histroy = HistoryOfOEKG.objects.all()
+    histroy_json = serializers.serialize('json', histroy)
+    response = JsonResponse(histroy_json, safe=False, content_type='application/json')
+    patch_response_headers(response, cache_timeout=1)
+    return response
+
+#@login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -111,30 +143,42 @@ def create_factsheet(request, *args, **kwargs):
     date_of_publication = request_body['date_of_publication']
     report_title = request_body['report_title']
 
+
     if (None, DC.acronym, Literal(clean_name(acronym)) ) in oekg:
         response = JsonResponse('Factsheet exists', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
         return response
     else:
         # TODO- set in settings
+        
         study_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + uid )
         oekg.add(( study_URI, RDF.type, OEO.OEO_00010252 ))
+        add_history(study_URI, RDF.type, OEO.OEO_00010252, 'add', request.user)
+        
         if acronym != '':
             oekg.add(( study_URI, DC.acronym, Literal(acronym)))
+            add_history(study_URI, DC.acronym, Literal(acronym), 'add', request.user)
         if study_name != '':
             oekg.add((study_URI, OEKG["has_full_name"], Literal(study_name)))
+            add_history(study_URI, OEKG["has_full_name"], Literal(study_name), 'add', request.user)
         if abstract != '':
             oekg.add(( study_URI, DC.abstract, Literal(abstract) ))
+            add_history(study_URI, DC.abstract, Literal(abstract), 'add', request.user)
         if report_title != '':
             oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
+            add_history(study_URI, OEKG["report_title"], Literal(report_title), 'add', request.user)
         if date_of_publication != '01-01-1900' and date_of_publication != '':
             oekg.add(( study_URI, OEKG["date_of_publication"], Literal(date_of_publication[:10], datatype=XSD.date) ))
+            add_history( study_URI, OEKG["date_of_publication"], Literal(date_of_publication[:10], datatype=XSD.date), 'add', request.user)
         if place_of_publication:
             oekg.add(( study_URI, OEKG["place_of_publication"], Literal(place_of_publication) ))
+            add_history( study_URI, OEKG["place_of_publication"], Literal(place_of_publication), 'add', request.user)
         if link_to_study != '':
             oekg.add(( study_URI, OEKG["link_to_study"], Literal(link_to_study) ))
+            add_history( study_URI, OEKG["link_to_study"], Literal(link_to_study), 'add', request.user)
         if report_doi != '':
             oekg.add(( study_URI, OEKG["doi"], Literal(report_doi) ))
+            add_history( study_URI, OEKG["doi"], Literal(report_doi), 'add', request.user)
 
         _scenarios = json.loads(scenarios) if scenarios is not None else []
         for item in _scenarios:
@@ -142,114 +186,164 @@ def create_factsheet(request, *args, **kwargs):
                 # TODO- set in settings
                 scenario_URI = URIRef("http://openenergy-platform.org/ontology/oekg/scenario/" + item["id"]) 
                 oekg.add(( study_URI, OEKG["has_scenario"], scenario_URI ))
+                add_history( study_URI, OEKG["has_scenario"], scenario_URI, 'add', request.user)
                 oekg.add(( scenario_URI, RDFS.label, Literal(item["acronym"])))
+                add_history( scenario_URI, RDFS.label, Literal(item["acronym"]), 'add', request.user)
                 if item["name"] != '':
                     oekg.add(( scenario_URI, OEKG["has_full_name"], Literal(item["name"])))
+                    add_history( scenario_URI, OEKG["has_full_name"], Literal(item["name"]), 'add', request.user)
                     oekg.add(( scenario_URI, RDF.type, OEO.OEO_00000365))
+                    add_history( scenario_URI, RDF.type, OEO.OEO_00000365, 'add', request.user)
                 if item["abstract"] != '':
                     oekg.add(( scenario_URI, DC.abstract, Literal(item["abstract"]) ))
+                    add_history( scenario_URI, DC.abstract, Literal(item["abstract"]), 'add', request.user)
 
                 oekg.add(( scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]) ))
+                add_history(scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]), 'add', request.user)
+
 
                 if 'regions' in item:
                     for region in item['regions']:
                         # TODO- set in settings
                         region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
                         oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
+                        add_history( scenario_URI, OEO.OEO_00000522, region_URI, 'add', request.user)
                     
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
                         # TODO- set in settings
                         interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
                         oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
+                        add_history( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI, 'add', request.user)
                 
                 if 'scenario_years' in item:
                     for scenario_year in item['scenario_years']:
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
+                        add_history( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']), 'add', request.user)
 
                 if 'keywords' in item:
                     for keyword in item['keywords']:
                         oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
+                        add_history( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword), 'add', request.user)
 
                 if 'input_datasets' in item:
                     for input_dataset in item['input_datasets']:
                         # TODO- set in settings
                         input_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/input_datasets/" + input_dataset['key'])
                         oekg.add(( input_dataset_URI, RDF.type, OEO.OEO_00030030))
+                        add_history( input_dataset_URI, RDF.type, OEO.OEO_00030030, 'add', request.user)
+
                         oekg.add(( input_dataset_URI, RDFS.label, Literal(input_dataset['value']['label'])))
+                        add_history( input_dataset_URI, RDFS.label, Literal(input_dataset['value']['label']), 'add', request.user)
+
                         oekg.add(( input_dataset_URI, OEO['has_iri'], Literal(input_dataset['value']['iri'])))
+                        add_history( input_dataset_URI, OEO['has_iri'], Literal(input_dataset['value']['iri']), 'add', request.user)
+
                         oekg.add(( input_dataset_URI, OEO['has_id'], Literal(input_dataset['idx'])))
+                        add_history( input_dataset_URI, OEO['has_id'], Literal(input_dataset['idx']), 'add', request.user)
+
                         oekg.add(( input_dataset_URI, OEO['has_key'], Literal(input_dataset['key'])))
+                        add_history( input_dataset_URI, OEO['has_key'], Literal(input_dataset['key']), 'add', request.user)
+
                         oekg.add(( scenario_URI,  OEO.RO_0002233, input_dataset_URI ))
+                        add_history( scenario_URI,  OEO.RO_0002233, input_dataset_URI, 'add', request.user)
+
+                        
 
                 if 'output_datasets' in item:
                     for output_dataset in item['output_datasets']:
                         # TODO- set in settings
                         output_dataset_URI = URIRef("http://openenergy-platform.org/ontology/oekg/output_datasets/" + output_dataset['key'])
                         oekg.add(( output_dataset_URI, RDF.type, OEO.OEO_00030029))
+                        add_history(output_dataset_URI, RDF.type, OEO.OEO_00030029, 'add', request.user)
+
                         oekg.add(( output_dataset_URI, RDFS.label, Literal(output_dataset['value']['label'])))
+                        add_history( output_dataset_URI, RDFS.label, Literal(output_dataset['value']['label']), 'add', request.user)
+
                         oekg.add(( output_dataset_URI, OEO['has_iri'], Literal(output_dataset['value']['iri'])))
+                        add_history( output_dataset_URI, OEO['has_iri'], Literal(output_dataset['value']['iri']), 'add', request.user)
+
                         oekg.add(( output_dataset_URI, OEO['has_id'], Literal(output_dataset['idx'])))
+                        add_history( output_dataset_URI, OEO['has_id'], Literal(output_dataset['idx']), 'add', request.user)
+
                         oekg.add(( output_dataset_URI, OEO['has_key'], Literal(output_dataset['key'])))
+                        add_history( output_dataset_URI, OEO['has_key'], Literal(output_dataset['key']), 'add', request.user)
+
                         oekg.add(( scenario_URI,  OEO.RO_0002234, output_dataset_URI ))
+                        add_history( scenario_URI,  OEO.RO_0002234, output_dataset_URI, 'add', request.user)
 
         institutions = json.loads(institution) if institution is not None else []
         for item in institutions:
             institution_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add(( study_URI, OEO.OEO_00000510, institution_URI ))
+            add_history( study_URI, OEO.OEO_00000510, institution_URI, 'add', request.user)
 
         funding_sources = json.loads(funding_source) if funding_source is not None else []
         for item in funding_sources:
             funding_source_URI =  URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add(( study_URI, OEO.OEO_00000509, funding_source_URI ))
+            add_history( study_URI, OEO.OEO_00000509, funding_source_URI, 'add', request.user)
 
         contact_persons = json.loads(contact_person) if contact_person is not None else []
         for item in contact_persons:
             contact_person_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_0000050, contact_person_URI))
+            add_history(study_URI, OEO.OEO_0000050, contact_person_URI, 'add', request.user)
 
         _sector_divisions = json.loads(sector_divisions) if sector_divisions is not None else []
         for item in _sector_divisions:
             sector_divisions_URI = URIRef(item['class'])
             oekg.add((study_URI, OEO["based_on_sector_division"], sector_divisions_URI))
+            add_history(study_URI, OEO["based_on_sector_division"], sector_divisions_URI, 'add', request.user)
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
             sector_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO.OEO_00000505, sector_URI))
+            add_history(study_URI, OEO.OEO_00000505, sector_URI, 'add', request.user)
 
         _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
         for item in _energy_carriers:
             energy_carriers_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
+            add_history(study_URI, OEO["covers_energy_carrier"], energy_carriers_URI, 'add', request.user)
 
         _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
         for item in _energy_transformation_processes:
             energy_transformation_processes_URI = URIRef(item["class"])
             oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
+            add_history(study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI, 'add', request.user)
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
             oekg.add((study_URI, OEO["has_model"], Literal(item['name'])))
+            add_history(study_URI, OEO["has_model"], Literal(item['name']), 'add', request.user)
 
         _frameworks = json.loads(frameworks) if frameworks is not None else []
         for item in _frameworks:
             oekg.add((study_URI, OEO["has_framework"], Literal(item['name'])))
+            add_history(study_URI, OEO["has_framework"], Literal(item['name']), 'add', request.user)
 
         _authors = json.loads(authors) if authors is not None else []
         for item in _authors:
             author_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + item['iri'])
             oekg.add((study_URI, OEO.OEO_00000506, author_URI))
+            add_history(study_URI, OEO.OEO_00000506, author_URI, 'add', request.user)
 
         _study_keywords = json.loads(study_keywords) if study_keywords is not None else []
         if _study_keywords != []:
             for keyword in _study_keywords:
                 oekg.add(( study_URI, OEO["has_study_keyword"], Literal(keyword) ))
+                add_history( study_URI, OEO["has_study_keyword"], Literal(keyword), 'add', request.user)
+
 
         response = JsonResponse('Factsheet saved', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
+
+
         return response
 
+#@login_required
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -507,6 +601,7 @@ def update_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
 
+#@login_required
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get('name')
@@ -516,7 +611,7 @@ def factsheet_by_name(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-
+#@login_required
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
 
@@ -691,6 +786,7 @@ def factsheet_by_id(request, *args, **kwargs):
 
     return response
 
+#@login_required
 @csrf_exempt
 def query_oekg(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -752,6 +848,7 @@ def query_oekg(request, *args, **kwargs):
     response = JsonResponse(results["results"]["bindings"], safe=False, content_type='application/json')
     return response
 
+#@login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
@@ -762,6 +859,7 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+#@login_required
 @csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     entity_type = request.GET.get('entity_type')
@@ -784,7 +882,7 @@ def get_entities_by_type(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-
+#@login_required
 @csrf_exempt
 def add_entities(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -811,6 +909,7 @@ def add_entities(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+#@login_required
 @csrf_exempt
 def add_a_fact(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -828,6 +927,7 @@ def add_a_fact(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+#@login_required
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
     entity_type = request.GET.get('entity_type')
@@ -842,6 +942,7 @@ def delete_entities(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+#@login_required
 @csrf_exempt
 def update_an_entity(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -868,6 +969,8 @@ def update_an_entity(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+
+#@login_required
 @csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
@@ -899,11 +1002,13 @@ def get_all_factsheets(request, *args, **kwargs):
 
         all_factsheets.append(element)
 
+    print(request.user)
     response = JsonResponse(all_factsheets, safe=False, content_type='application/json') 
     patch_response_headers(response, cache_timeout=1)
     return response
 
 @csrf_exempt
+#@login_required
 def get_scenarios(request, *args, **kwargs):
     scenarios_acronym = [i.replace('%20', ' ') for i in  json.loads(request.GET.get('scenarios_acronym'))]
 
@@ -946,6 +1051,7 @@ def get_scenarios(request, *args, **kwargs):
     return response
 
 @csrf_exempt
+#@login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
@@ -954,6 +1060,7 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
     return response
 
 @csrf_exempt
+#@login_required
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="json-ld")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
@@ -980,6 +1087,7 @@ def get_all_sub_classes(cls, visited=None):
 
 
 @csrf_exempt
+#@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
 
     energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039")
