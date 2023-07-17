@@ -145,5 +145,18 @@ main.main .content .content__container.content__container--profile {
             @extend .text-decoration-none;
             @extend .fw-semibold;
         }
+
+        &__list {
+            @extend .mb-0;
+            @extend .ps-0;
+
+            li {
+                @extend .d-inline-block;
+
+                span {
+                    @extend .fw-semibold;
+                }
+            }
+        }
     }
 }

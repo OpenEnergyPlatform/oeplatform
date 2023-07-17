@@ -113,11 +113,13 @@
             </li>
         </ul>
         {% else %}
-            <ul>
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+            <ul class="profile-rvw__list">
                 <li>
-                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} wait for the contributor to submit the review.
+                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> wait for the contributor to submit the review.
                 </li>
             </ul>
+        </div>
         {% endif %}
     {% endif %}
 
