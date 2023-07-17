@@ -52,6 +52,7 @@ main.main .content .content__container.content__container--profile {
             @extend .d-flex;
             @extend .flex-column;
             @extend .p-3;
+            @extend .pb-2;
             @extend .mb-2;
 
             &--highlight {
@@ -80,6 +81,7 @@ main.main .content .content__container.content__container--profile {
             @extend .d-flex;
             @extend .flex-row;
             @extend .justify-content-between;
+            @extend .align-items-center;
             @extend .pb-2;
         }
 

@@ -236,6 +236,16 @@
                     <div class="profile-rvw__item-name">
                         <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
                     </div>
+                    <div class="profile-rvw__item-history">
+                        <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            Show history
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         {% endif %}
@@ -294,6 +304,16 @@
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
                     <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                </div>
+                <div class="profile-rvw__item-history">
+                    <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                        Show history
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
