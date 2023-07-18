@@ -1,11 +1,11 @@
-{% extends "base/base.html" %}
+{% extends "base/base-profile.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
 {% block main-content-body %}
 {% include "login/user_nav.html" %}
 
 {% if profile_user == request.user %}
-<h2>Your Security Information</h2>
+<h2 class="header">Your Security Information</h2>
 <table class="table">
         <tr>
             <th> API-Token: </th>
@@ -37,12 +37,12 @@
     <br>
     {% if request.user.is_authenticated and request.user == user%}
         <hr>
-        <h3>Manage Profile</h3>
+        <h2 class="header">Manage Profile</h2>
         <div style="overflow: hidden;">
 <a href="{% url 'edit' request.user.id %}" class="btn btn-secondary">Edit</a>
         </div>
         <hr>
-        <h3>Manage Groups</h3>
+        <h2 class="header">Manage Groups</h2>
         <div style="overflow: hidden;">
             <a href="/user/groups/" class="btn btn-secondary">Manage Groups</a>
         </div>
@@ -52,78 +52,60 @@
 
 {% block main-right-sidebar-content %}
 {% if profile_user == request.user %}
-    <br>
-    <div>
-    {% if profile_user.profile_img %}
-    <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
-{% else %}
-    <i class="far fa-user default-user-icon"></i>
-{% endif %}
-    </div>
-    <br>
-    <div>
-        <h2> {{ profile_user.name }} </h2>
-        <p>Username</p>
-    </div>
-    <td> 
-        {% if profile_user.fullname %}
-            {{ profile_user.fullname }}
+<div class="profile-sidebar">
+    <div class="profile-sidebar__img">
+        {% if profile_user.profile_img %}
+        <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
         {% else %}
-            No full name added.
-        {% endif %} 
-    </td>
-    <br>
-    <br>
-    <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
-    <hr>
-    <td> 
-        {% if profile_user.work %}
+        <svg width="100" height="100" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g>
+                <path d="m90.469 80.945v-9.5234h-4.7617v-4.7617h-4.7617v-4.7617h-4.7617v-4.7773h-14.285v4.7773h-9.5234v0.019531h-14.297v-4.7773h-14.285v4.7773h-4.7617v4.7617h-4.7617v4.7617h-4.7617v9.5234l-4.7461-0.003906v14.293h47.652v-0.019531h42.848v-14.293zm0 9.5195h-38.094v0.019531h-42.867v-4.7617h4.7617v-9.5234h4.7617v-4.7617h4.7617v-4.7617h4.7617v-4.7617h4.7617v4.7617h19.074v-0.019531h14.27v-4.7617h4.7617v4.7617h4.7617v4.7617h4.7617v4.7617h4.7617v9.5234h4.7617z"/>
+                <path d="m71.43 19.027v-4.7617h-4.7617v-4.7617h-4.7617v-4.7539h-9.5234v0.019531h-14.312v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v19.047h4.7617v4.7617h4.7617v4.7617h4.7617v4.7695h14.312v-0.019531h9.5234v-4.7695h4.7617v-4.7617h4.7617v-4.7617h4.7617v-19.047l-4.7617-0.003906zm0 9.5234v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v0.019532h-9.5508v-4.7617h-4.7617v-4.7617h-4.7617v-4.7617h-4.7617v-9.5234h4.7617v-4.7617h4.7617v-4.7617h4.7617v-4.7617h9.5508l0.003907-0.015626h4.7617v4.7617h4.7617v4.7617h4.7617v4.7617h4.7617z"/>
+            </g>
+        </svg>
+    {% endif %}
+    </div>
+    <div class="profile-sidebar__block">
+        <div><p class="profile-sidebar__name"> {{ profile_user.name }} </p></div>
+        <p> {% if profile_user.fullname %}
+                    {{ profile_user.fullname }}
+                {% else %}
+                    <a href="{% url 'edit' request.user.id %}">Add Full Name</a>
+                {% endif %} </p>
+        <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
+    </div>
+    <div class="profile-sidebar__block">
+        <p> {% if profile_user.work %}
             {{ profile_user.work }}
         {% else %}
-            No profession added.
-        {% endif %}
-    </td>
-    <br>
-    <td> 
-        {% if profile_user.location %}
+            <a href="{% url 'edit' request.user.id %}">Add profession</a>
+        {% endif %} </p>
+        <p> {% if profile_user.location %}
             {{ profile_user.location }}
         {% else %}
-            No location added.
+            <a href="{% url 'edit' request.user.id %}">Add location </a>
+        {% endif %} </p>
+        <p> {% if profile_user == request.user %}</p>
+        <p> {{ profile_user.email }} </p>
         {% endif %}
-    </td>
-    <br>
-    <td>
-        {% if profile_user == request.user %}
-            <th style="width:20%"> E-Mail: </th>
-            <td> {{ profile_user.email }} </td>
-        {% endif %}
-    <br>
-    <br>
-    <td>
-        {% if profile_user.linkedin %}
-        <a  target="_blank" href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+        <p> {% if profile_user.linkedin %}
+        <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
         {% else %}
-            No LinkedIn page added.
-        {% endif %}
-    </td>
-    <br>
-    <td>
-        {% if profile_user.facebook %}
+            <a href="{% url 'edit' request.user.id %}">Add LinkedIn page</a>
+        {% endif %} </p>
+        <p> {% if profile_user.facebook %}
         <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
         {% else %}
-            No Facebook page added. 
-        {% endif %}
-    </td>
-    <br>
-    <td> 
-        {% if profile_user.twitter %}
-        <a target="_blank" href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+            <a href="{% url 'edit' request.user.id %}">Add Facebook page</a>
+        {% endif %} </p>
+        <p> {% if profile_user.twitter %}
+        <a href="{% url 'edit' request.user.id %}">{{ profile_user.twitter }}</a>
         {% else %}
-            No Twitter page added.
-        {% endif %}
-    </td>
-    <br>
-    <hr>
+            <a href="{% url 'edit' request.user.id %}">Add Twitter page</a>
+        {% endif %} </p>
+    </div>
+</div>
+    
     <table class="table">
 
     <tr>
