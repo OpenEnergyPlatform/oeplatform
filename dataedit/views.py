@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 import re
 from functools import reduce
@@ -21,14 +22,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.views.generic import View
+from metadata.v160.schema import OEMETADATA_V160_SCHEMA
 from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
-from metadata.v160.schema import OEMETADATA_V160_SCHEMA 
-
 import api.parser
 from api.actions import describe_columns
-import logging
+
 try:
     import oeplatform.securitysettings as sec
 except Exception:
@@ -39,13 +39,13 @@ from django.contrib import messages
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
+from dataedit.helper import merge_field_reviews, process_review_data
 from dataedit.metadata import load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
-from dataedit.models import Table, PeerReview, PeerReviewManager, ReviewDataStatus
+from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
-from dataedit.helper import merge_field_reviews, process_review_data
 from login import models as login_models
 
 from .models import TableRevision
@@ -158,7 +158,6 @@ def change_requests(schema, table):
     old_description = actions.describe_columns(schema, table)
 
     for change in api_columns:
-
         name = change["column_name"]
         id = change["id"]
 
@@ -179,7 +178,7 @@ def change_requests(schema, table):
             for key in list(change):
                 value = change[key]
                 if key not in keyword_whitelist and (
-                        value is None or value == old[key]
+                    value is None or value == old[key]
                 ):
                     old.pop(key)
                     change.pop(key)
@@ -195,8 +194,8 @@ def change_requests(schema, table):
         value = api_constraints[i]
         id = value.get("id")
         if (
-                value.get("reference_table") is None
-                or value.get("reference_column") is None
+            value.get("reference_table") is None
+            or value.get("reference_column") is None
         ):
             value.pop("reference_table")
             value.pop("reference_column")
@@ -607,26 +606,26 @@ def create_dump(schema, table, fname):
         if not os.path.exists(sec.MEDIA_ROOT + path):
             os.mkdir(sec.MEDIA_ROOT + path)
     L = [
-            "pg_dump",
-            "-O",
-            "-x",
-            "-w",
-            "-Fc",
-            "--quote-all-identifiers",
-            "-U",
-            sec.dbuser,
-            "-h",
-            sec.dbhost,
-            "-p",
-            str(sec.dbport),
-            "-d",
-            sec.dbname,
-            "-f",
-            sec.MEDIA_ROOT
-            + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
-            + fname
-            + ".dump",
-        ] + reduce(
+        "pg_dump",
+        "-O",
+        "-x",
+        "-w",
+        "-Fc",
+        "--quote-all-identifiers",
+        "-U",
+        sec.dbuser,
+        "-h",
+        sec.dbhost,
+        "-p",
+        str(sec.dbport),
+        "-d",
+        sec.dbname,
+        "-f",
+        sec.MEDIA_ROOT
+        + "/dumps/{schema}/{table}/".format(schema=schema, table=table)
+        + fname
+        + ".dump",
+    ] + reduce(
         add,
         (["-n", s, "-t", s + "." + t] for s, t in get_dependencies(schema, table)),
         [],
@@ -661,7 +660,6 @@ def show_revision(request, schema, table, date):
 
 @login_required
 def tag_overview(request):
-
     # if rename or adding of tag fails: display error message
     context = {
         "errorMsg": "Tag name is not valid"
@@ -689,7 +687,7 @@ def tag_editor(request, id=""):
             Session = sessionmaker()
             session = Session(bind=engine)
             assigned = (
-                    session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
+                session.query(TableTags).filter(TableTags.tag == t["id"]).count() > 0
             )
 
             return render(
@@ -711,7 +709,6 @@ def tag_editor(request, id=""):
 
 @login_required
 def change_tag(request):
-
     status = ""  # error status if operation fails
 
     if "submit_save" in request.POST:
@@ -802,7 +799,7 @@ def view_save(request, schema, table):
         for item in request.POST.items():
             item_name, item_value = item
             if item_name.startswith("y-axis-") and item_value == "on":
-                y_axis_list.append(item_name["y-axis-".__len__():])
+                y_axis_list.append(item_name["y-axis-".__len__() :])
         post_options = {"x_axis": post_x_axis, "y_axis": y_axis_list}
     elif post_type == "map":
         # add location column info to options
@@ -986,6 +983,7 @@ class DataView(View):
             raise Http404("Schema not accessible")
 
         tags = []  # TODO: Unused - Remove
+
         # db = sec.dbname
 
         engine = actions._get_engine()
@@ -998,16 +996,15 @@ class DataView(View):
 
         # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
-        
+
         # setup oemetadata string order according to oem v1.5.1
         from dataedit.metadata import TEMPLATE_V1_5
-        
+
         def iter_oem_key_order(metadata: dict):
             oem_151_key_order = [key for key in TEMPLATE_V1_5.keys()]
             for key in oem_151_key_order:
                 yield key, metadata.get(key)
 
-        
         ordered_oem_151 = {key: value for key, value in iter_oem_key_order(metadata)}
 
         # the key order of the metadata matters
@@ -1045,7 +1042,7 @@ class DataView(View):
                 current_view = default
 
         table_views = list(chain((default,), table_views))
-        
+
         #########################################################################
         # Get open peer review process related metadata
         #########################################################################
@@ -1075,26 +1072,33 @@ class DataView(View):
             latest_review = reviews.last()
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
-            opr_context.update({"opr_id": latest_review.id, "opr_current_reviewer": current_reviewer, "is_finished": latest_review.is_finished})
-            
+            opr_context.update(
+                {
+                    "opr_id": latest_review.id,
+                    "opr_current_reviewer": current_reviewer,
+                    "is_finished": latest_review.is_finished,
+                }
+            )
+
             # OPR result tab for latest review
             # TODO: Update this as soon as more then one review can be done per table:
-            # ... check if last review is finished 
-            # ... check if any finished review for this table exists 
+            # ... check if last review is finished
+            # ... check if any finished review for this table exists
             # ... get the latest finished review
             if latest_review.is_finished:
                 badge = latest_review.review.get("badge")
                 date_finished = latest_review.date_finished
                 opr_result_context.update(
                     {
-                        "badge": badge, 
+                        "badge": badge,
                         "review_url": None,
-                        "date_finished":  date_finished,
+                        "date_finished": date_finished,
                         "review_id": latest_review.id,
-                        "finished": latest_review.is_finished, 
-                        "review_exists": True}
-                    )
-                
+                        "finished": latest_review.is_finished,
+                        "review_exists": True,
+                    }
+                )
+
         else:
             opr_context.update({"opr_id": None, "opr_current_reviewer": None})
             opr_result_context.update({"review_exists": False})
@@ -1163,7 +1167,6 @@ class PermissionView(View):
     """
 
     def get(self, request, schema, table):
-
         if schema not in schema_whitelist:
             raise Http404("Schema not accessible")
 
@@ -1199,9 +1202,9 @@ class PermissionView(View):
     def post(self, request, schema, table):
         table_obj = Table.load(schema, table)
         if (
-                request.user.is_anonymous
-                or request.user.get_table_permission_level(table_obj)
-                < login_models.ADMIN_PERM
+            request.user.is_anonymous
+            or request.user.get_table_permission_level(table_obj)
+            < login_models.ADMIN_PERM
         ):
             raise PermissionDenied
         if request.POST["mode"] == "add_user":
@@ -1390,7 +1393,6 @@ def add_existing_keyword_tag_to_table_tags(session, schema, table, keyword_tag_i
     """
 
     if check_is_tag(session, keyword_tag_id):
-
         t = TableTags(
             **{"schema_name": schema, "table_name": table, "tag": keyword_tag_id}
         )
@@ -1417,7 +1419,7 @@ def get_tag_keywords_synchronized_metadata(
         metadata_new (_type_, optional): _description_. Defaults to None.
         tag_ids_new (_type_, optional): _description_. Defaults to None.
     """
-    
+
     session = create_oedb_session()
 
     metadata = load_metadata_from_db(schema=schema, table=table)
@@ -1451,7 +1453,7 @@ def get_tag_keywords_synchronized_metadata(
                 .first()
             )
             if tag is None:
-                name = name[:40] # max len
+                name = name[:40]  # max len
                 tag = Tag(name=name)
                 session.add(tag)
                 session.flush()
@@ -1471,7 +1473,6 @@ def get_tag_keywords_synchronized_metadata(
     keyword_tag_ids_old = set(get_or_create_tag_by_name(n).id for n in keywords_old)
 
     if keywords_new is not None:  # user updated metadata keywords
-
         # map new keywords to tag ids (create tags if needed)
         keywords_new = [
             k for k in keywords_new if Tag.create_name_normalized(k)
@@ -1484,7 +1485,6 @@ def get_tag_keywords_synchronized_metadata(
         tag_ids_new = set()
 
     elif tag_ids_new is not None:  # user updated tags in UI
-
         # determine which tag ids the user wants to remove
         remove_table_tag_ids = tag_ids_old - tag_ids_new
         keywords_new = [
@@ -1548,7 +1548,9 @@ def update_table_tags(request):
     """
     # check if valid table / schema
     schema, table = actions.get_table_name(
-        schema=request.POST["schema"], table=request.POST["table"], restrict_schemas=False
+        schema=request.POST["schema"],
+        table=request.POST["table"],
+        restrict_schemas=False,
     )
     # check write permission
     actions.assert_add_tag_permission(
@@ -1556,7 +1558,7 @@ def update_table_tags(request):
     )
 
     ids = {
-        int(field[len("tag_"):]) for field in request.POST if field.startswith("tag_")
+        int(field[len("tag_") :]) for field in request.POST if field.startswith("tag_")
     }
 
     # update tags in db and harmonize metadata
@@ -1566,7 +1568,7 @@ def update_table_tags(request):
 
     with _get_engine().connect() as con:
         with con.begin():
-            # TODO Add metadata to table (JSONB field) somewhere here 
+            # TODO Add metadata to table (JSONB field) somewhere here
             actions.set_table_metadata(
                 table=table, schema=schema, metadata=metadata, cursor=con
             )
@@ -1575,11 +1577,14 @@ def update_table_tags(request):
         request,
         'Please note that OEMetadata keywords and table tags are synchronized. When submitting new tags, you may notice automatic changes to the table tags on the OEP and/or the "Keywords" field in the metadata.',  # noqa
     )
-    return render(request, "dataedit/dataview.html", {"messages": messasge, "table": table, "schema": schema})
+    return render(
+        request,
+        "dataedit/dataview.html",
+        {"messages": messasge, "table": table, "schema": schema},
+    )
 
 
 def redirect_after_table_tags_updated(request):
-
     update_table_tags(request)
     return redirect(request.META["HTTP_REFERER"])
 
@@ -1627,10 +1632,10 @@ def get_all_tags(schema=None, table=None):
                 Tag.usage_tracked_since.label("usage_tracked_since"),
                 TableTags.table_name,
             )
-                .filter(TableTags.tag == Tag.id)
-                .filter(TableTags.table_name == table)
-                .filter(TableTags.schema_name == schema)
-                .order_by("name")
+            .filter(TableTags.tag == Tag.id)
+            .filter(TableTags.table_name == table)
+            .filter(TableTags.schema_name == schema)
+            .order_by("name")
         )
         session.commit()
     finally:
@@ -1866,7 +1871,6 @@ class MetaEditView(LoginRequiredMixin, View):
 
 class StandaloneMetaEditView(LoginRequiredMixin, View):
     def get(self, request):
-
         context_dict = {
             "config": json.dumps(
                 {"cancle_url": get_cancle_state(self.request), "standalone": True}
@@ -1886,8 +1890,8 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def load_json_schema(self):
         # Update this if new oemetadata version is released
-        json_schema = OEMETADATA_V160_SCHEMA  
-        return(json_schema)
+        json_schema = OEMETADATA_V160_SCHEMA
+        return json_schema
 
     def parse_keys(self, val, old=""):
         lines = []
@@ -1896,14 +1900,16 @@ class PeerReviewView(LoginRequiredMixin, View):
                 lines += self.parse_keys(val[k], old + "." + str(k))
         elif isinstance(val, list):
             if not val:
-                lines += [{ "field": old[1:], "value" : str(val)}] # handles empty list
-                #pass
+                lines += [{"field": old[1:], "value": str(val)}]  # handles empty list
+                # pass
             else:
                 for i, k in enumerate(val):
-                    lines += self.parse_keys(k, old + "."+ str(i)) # handles user value
+                    lines += self.parse_keys(
+                        k, old + "." + str(i)
+                    )  # handles user value
         else:
-            lines += [{ "field": old[1:], "value" : str(val)}]
-        return(lines)
+            lines += [{"field": old[1:], "value": str(val)}]
+        return lines
 
     def sort_in_category(self, schema, table):
         metadata = self.load_json(schema, table)
@@ -1915,7 +1921,6 @@ class PeerReviewView(LoginRequiredMixin, View):
         license_key_list = []
         contributor_key_list = []
         resource_key_list = []
-
 
         for i in val:
             fieldKey = list(i.values())[0]
@@ -1931,32 +1936,42 @@ class PeerReviewView(LoginRequiredMixin, View):
                 contributor_key_list.append(i)
             elif fieldKey.split(".")[0] == "resources":
                 resource_key_list.append(i)
-            elif fieldKey.split(".")[0] == "name" or fieldKey.split(".")[0] == "title" or fieldKey.split(".")[
-                0] == "id" \
-                    or fieldKey.split(".")[0] == "description" or fieldKey.split(".")[0] == "language" \
-                    or fieldKey.split(".")[0] == "subject" or fieldKey.split(".")[0] == "keywords" \
-                    or fieldKey.split(".")[0] == "publicationDate" or fieldKey.split(".")[0] == "context":
+            elif (
+                fieldKey.split(".")[0] == "name"
+                or fieldKey.split(".")[0] == "title"
+                or fieldKey.split(".")[0] == "id"
+                or fieldKey.split(".")[0] == "description"
+                or fieldKey.split(".")[0] == "language"
+                or fieldKey.split(".")[0] == "subject"
+                or fieldKey.split(".")[0] == "keywords"
+                or fieldKey.split(".")[0] == "publicationDate"
+                or fieldKey.split(".")[0] == "context"
+            ):
                 gen_key_list.append(i)
 
-        meta = {"general": gen_key_list,
-                "spatial": spatial_key_list,
-                "temporal": temporal_key_list,
-                "source": source_key_list,
-                "license": license_key_list,
-                "contributor": contributor_key_list,
-                "resource": resource_key_list
-                }
+        meta = {
+            "general": gen_key_list,
+            "spatial": spatial_key_list,
+            "temporal": temporal_key_list,
+            "source": source_key_list,
+            "license": license_key_list,
+            "contributor": contributor_key_list,
+            "resource": resource_key_list,
+        }
 
         return meta
 
-    def get_all_field_descriptions(self, json_schema, prefix=''):
+    def get_all_field_descriptions(self, json_schema, prefix=""):
         field_descriptions = {}
 
         def extract_descriptions(properties, prefix=""):
             for field, value in properties.items():
                 key = f"{prefix}.{field}" if prefix else field
 
-                if any(attr in value for attr in ["description", "example", "badge", "title"]):
+                if any(
+                    attr in value
+                    for attr in ["description", "example", "badge", "title"]
+                ):
                     field_descriptions[key] = {}
                     if "description" in value:
                         field_descriptions[key]["description"] = value["description"]
@@ -1978,7 +1993,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         return field_descriptions
 
     def get(self, request, schema, table, review_id=None):
-        review_state = PeerReview.is_finished #TODO: Use later
+        # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
         table_obj = Table.load(schema, table)
@@ -1988,27 +2003,36 @@ class PeerReviewView(LoginRequiredMixin, View):
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
-            
+
         metadata = self.sort_in_category(schema, table)
         # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
                 "peer_review_reviewer",
-                kwargs={"schema": schema, "table": table, "review_id": review_id}
+                kwargs={"schema": schema, "table": table, "review_id": review_id},
             )
             opr_review = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
-            existing_review = opr_review.review.get('reviews', [])
+            existing_review = opr_review.review.get("reviews", [])
             review_finished = opr_review.is_finished
-            categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
-            state_dict = process_review_data(review_data=existing_review, metadata=metadata, categories=categories)
+            categories = [
+                "general",
+                "spatial",
+                "temporal",
+                "source",
+                "license",
+                "contributor",
+                "resource",
+            ]
+            state_dict = process_review_data(
+                review_data=existing_review, metadata=metadata, categories=categories
+            )
         else:
             url_peer_review = reverse(
-                "peer_review_create",
-                kwargs={"schema": schema, "table": table}
+                "peer_review_create", kwargs={"schema": schema, "table": table}
             )
             # existing_review={}
-            state_dict=None
-            review_finished=None
+            state_dict = None
+            review_finished = None
 
         config_data = {
             "can_add": can_add,
@@ -2020,35 +2044,40 @@ class PeerReviewView(LoginRequiredMixin, View):
         }
 
         context_meta = {
-            "table": table, # need this here as json.dumps breaks the template syntax access like {{ config.table }} now you can use {{ table }}
+            # need this here as json.dumps breaks the template syntax access
+            # like {{ config.table }} now you can use {{ table }}
+            "table": table,
             "config": json.dumps(config_data),
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
-            "state_dict": json.dumps(state_dict), 
+            "state_dict": json.dumps(state_dict),
         }
-        return render(request, 'dataedit/opr_review.html', context=context_meta)
+        return render(request, "dataedit/opr_review.html", context=context_meta)
 
     def post(self, request, schema, table, review_id=None):
         """
-        Handel reviews submitted by the reviewer. 
+        Handel reviews submitted by the reviewer.
         - Creates (Save) Reviews in the PeerReview table
-        - Update the review finished attribute in the dataedit.Tables table indicating table can be moved from model draft topic
+        - Update the review finished attribute in the dataedit.Tables table indicating
+          table can be moved from model draft topic
 
-          
+
         Missing parts:
-        - once the opr is finished (all field reviews agreed on) 
+        - once the opr is finished (all field reviews agreed on)
             - set the review to finished
             - merge field review results to metadata on table
             - awarde a badge
                 - is field filled in?
-                - calculate the badge by comparing filled fields and the badges form metadata schema
+                - calculate the badge by comparing filled fields
+                  and the badges form metadata schema
             - update indicator on table view (this table was succesuflly reviewed)
             - ...
         """
         context = {}
         if request.method == "POST":
-            # get the review data and additional application metadata from user peer review submit/save
+            # get the review data and additional application metadata
+            # from user peer review submit/save
             review_data = json.loads(request.body)
 
             # The type can be "save" or "submit" as this triggers different behavior
@@ -2056,14 +2085,16 @@ class PeerReviewView(LoginRequiredMixin, View):
             # The opr datamodel that includes the field review data and metadata
             review_datamodel = review_data.get("reviewData")
             review_finished = review_datamodel.get("reviewFinished")
-            # TODO: Send a notification to the user that he can't review tables he is the table holder.
+            # TODO: Send a notification to the user that he can't review tables
+            # he is the table holder.
             contributor = PeerReviewManager.load_contributor(schema, table)
 
             if contributor is not None:
                 # Überprüfen, ob ein aktiver PeerReview existiert
                 active_peer_review = PeerReview.load(schema=schema, table=table)
                 if active_peer_review is None or active_peer_review.is_finished:
-                    # Kein aktiver PeerReview vorhanden oder der aktive PeerReview ist abgeschlossen
+                    # Kein aktiver PeerReview vorhanden
+                    # oder der aktive PeerReview ist abgeschlossen
                     table_review = PeerReview(
                         schema=schema,
                         table=table,
@@ -2074,9 +2105,11 @@ class PeerReviewView(LoginRequiredMixin, View):
                     )
                     table_review.save(review_type=review_post_type)
                 else:
-                    # Aktiver PeerReview ist vorhanden ... aktualisieren 
+                    # Aktiver PeerReview ist vorhanden ... aktualisieren
                     current_review_data = active_peer_review.review
-                    merged_review_data = merge_field_reviews(current_json=current_review_data, new_json=review_datamodel)
+                    merged_review_data = merge_field_reviews(
+                        current_json=current_review_data, new_json=review_datamodel
+                    )
 
                     # Set new review values and update existing review
                     active_peer_review.review = merged_review_data
@@ -2084,15 +2117,20 @@ class PeerReviewView(LoginRequiredMixin, View):
                     active_peer_review.contributor = contributor
                     active_peer_review.update(review_type=review_post_type)
             else:
-                error_msg = f"Failed to retrieve any user that identifies as table holder for the current table: {table}!"
+                error_msg = (
+                    "Failed to retrieve any user that identifies "
+                    f"as table holder for the current table: {table}!"
+                )
                 return JsonResponse({"error": error_msg}, status=400)
 
-            # TODO: Check for schema/topic as reviewed finished also indicates the table needs to be or has to be moved.
+            # TODO: Check for schema/topic as reviewed finished also indicates the table
+            # needs to be or has to be moved.
             if review_finished is True:
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
                 # TODO: also update reviewFinished in review datamodel json
-                # logging.INFO(f"Table {table.name} is now reviewed and can be moved to the destination schema.")
+                # logging.INFO(f"Table {table.name} is now reviewed and can be moved
+                # to the destination schema.")
 
         return render(request, "dataedit/opr_review.html", context=context)
 
@@ -2108,34 +2146,52 @@ class PeerRreviewContributorView(PeerReviewView):
         metadata = self.sort_in_category(schema, table)
         json_schema = self.load_json_schema()
         field_descriptions = self.get_all_field_descriptions(json_schema)
-        review_data = peer_review.review.get('reviews', [])
-        
-        categories = ['general', 'spatial', 'temporal', 'source', 'license', 'contributor', 'resource']
-        state_dict = process_review_data(review_data=review_data, metadata=metadata, categories=categories)    
-        
-        context_meta = {"config": json.dumps(
-            {"can_add": can_add,
-             "url_peer_review": reverse(
-                 "peer_review_contributor", kwargs={"schema": schema, "table": table, "review_id": review_id}
-             ),
-             "url_table": reverse(
-                 "view", kwargs={"schema": schema, "table": table}
-             ),
-            "topic": schema,
-            "table": table,
-            }),
+        review_data = peer_review.review.get("reviews", [])
+
+        categories = [
+            "general",
+            "spatial",
+            "temporal",
+            "source",
+            "license",
+            "contributor",
+            "resource",
+        ]
+        state_dict = process_review_data(
+            review_data=review_data, metadata=metadata, categories=categories
+        )
+
+        context_meta = {
+            "config": json.dumps(
+                {
+                    "can_add": can_add,
+                    "url_peer_review": reverse(
+                        "peer_review_contributor",
+                        kwargs={
+                            "schema": schema,
+                            "table": table,
+                            "review_id": review_id,
+                        },
+                    ),
+                    "url_table": reverse(
+                        "view", kwargs={"schema": schema, "table": table}
+                    ),
+                    "topic": schema,
+                    "table": table,
+                }
+            ),
             "table": table,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
         }
-        return render(request, 'dataedit/opr_contributor.html', context=context_meta)
+        return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
     def post(self, request, schema, table, review_id):
         """
         Missing parts:
-        - merge contributor field review and reviewer field review 
+        - merge contributor field review and reviewer field review
         - ???
         """
         context = {}
@@ -2143,12 +2199,15 @@ class PeerRreviewContributorView(PeerReviewView):
             review_data = json.loads(request.body)
             review_post_type = review_data.get("reviewType")
             review_datamodel = review_data.get("reviewData")
-            review_state = review_data.get("reviewFinished")
+            # unused
+            # review_state = review_data.get("reviewFinished")
             current_opr = PeerReviewManager.filter_opr_by_id(opr_id=review_id)
             existing_reviews = current_opr.review
-            merged_review = merge_field_reviews(current_json=existing_reviews, new_json=review_datamodel)
+            merged_review = merge_field_reviews(
+                current_json=existing_reviews, new_json=review_datamodel
+            )
 
             current_opr.review = merged_review
             current_opr.update(review_type=review_post_type)
 
-        return render(request, 'dataedit/opr_contributor.html', context=context)
+        return render(request, "dataedit/opr_contributor.html", context=context)
