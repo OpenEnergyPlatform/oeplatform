@@ -1,74 +1,78 @@
-{% extends "base/base.html" %}
+{% extends "base/base-profile.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
 
 
 {% block main-right-sidebar-content %}
 {% if profile_user == request.user %}
-        <br>
-        <div>
+<div class="profile-sidebar">
+    <div class="profile-sidebar__img">
         {% if profile_user.profile_img %}
         <img class="rounded-circle account-img" src="{{ profile_user.profile_img.url }}" width="200" height="200" alt="Profile picture">
-    {% else %}
-        <i class="far fa-user default-user-icon"></i>
+        {% else %}
+        <svg width="100" height="100" fill="currentColor" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <g>
+                <path d="m90.469 80.945v-9.5234h-4.7617v-4.7617h-4.7617v-4.7617h-4.7617v-4.7773h-14.285v4.7773h-9.5234v0.019531h-14.297v-4.7773h-14.285v4.7773h-4.7617v4.7617h-4.7617v4.7617h-4.7617v9.5234l-4.7461-0.003906v14.293h47.652v-0.019531h42.848v-14.293zm0 9.5195h-38.094v0.019531h-42.867v-4.7617h4.7617v-9.5234h4.7617v-4.7617h4.7617v-4.7617h4.7617v-4.7617h4.7617v4.7617h19.074v-0.019531h14.27v-4.7617h4.7617v4.7617h4.7617v4.7617h4.7617v4.7617h4.7617v9.5234h4.7617z"/>
+                <path d="m71.43 19.027v-4.7617h-4.7617v-4.7617h-4.7617v-4.7539h-9.5234v0.019531h-14.312v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v19.047h4.7617v4.7617h4.7617v4.7617h4.7617v4.7695h14.312v-0.019531h9.5234v-4.7695h4.7617v-4.7617h4.7617v-4.7617h4.7617v-19.047l-4.7617-0.003906zm0 9.5234v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v4.7617h-4.7617v0.019532h-9.5508v-4.7617h-4.7617v-4.7617h-4.7617v-4.7617h-4.7617v-9.5234h4.7617v-4.7617h4.7617v-4.7617h4.7617v-4.7617h9.5508l0.003907-0.015626h4.7617v4.7617h4.7617v4.7617h4.7617v4.7617h4.7617z"/>
+            </g>
+        </svg>
     {% endif %}
+    </div>
+    <div class="profile-sidebar__block">
+        <p class="profile-sidebar__name">{{ profile_user.name }}</p>
+        <div>
+            {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
+            {% else %}
+                <p>Full Name</p>
+            {% endif %} 
         </div>
-        <br>
-        <div><h2> {{ profile_user.name }} </h2></div>
-        <td> {% if profile_user.fullname %}
-                    {{ profile_user.fullname }}
-                {% else %}
-                    <p>Full Name</p>
-                {% endif %} </td>
-        <br>
-        <br>
         <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
-        <hr>
-        <td> {% if profile_user.work %}
-                    {{ profile_user.work }}
-                {% else %}
-                    <p>Profession</p>
-                {% endif %} </td>
-        <td> {% if profile_user.location %}
-                    {{ profile_user.location }}
-                {% else %}
-                <p>Location</p>
-        {% endif %} </td>
-        <br>
-        <td> {% if profile_user.email %}
-                <th style="width:20%"> E-Mail: </th>
-                <td> {{ profile_user.email }} </td>
-                {% endif %}
-        <br>
-        <br>
-        <td> {% if profile_user.linkedin %}
-            <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+    </div>
+    <div class="profile-sidebar__block">
+        <div>{% if profile_user.work %}
+            <p>{{ profile_user.work }}</p>
+        {% else %}
+            <p>Profession</p>
+        {% endif %} 
+        </div>
+        <div>{% if profile_user.location %}
+            <p>{{ profile_user.location }}</p>
+        {% else %}
+            <p>Location</p>
+        {% endif %} 
+        </div>
+        <div> {% if profile_user.email %}
+            <p>{{ profile_user.email }}</p>
+            {% endif %}
+            <p> {% if profile_user.linkedin %}
+                <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
                 {% else %}
                     LinkedIn
-                {% endif %} </td>
-        <br>
-        <td> {% if profile_user.facebook %}
-            <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
+                {% endif %} </p>
+            <p> {% if profile_user.facebook %}
+                <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
                 {% else %}
                     Facebook
-                {% endif %} </td>
-        <br>
-        <td> {% if profile_user.twitter %}
-            <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
+                {% endif %} </p>
+            <p> {% if profile_user.twitter %}
+                <a href="{{ profile_user.twitter }}">{{ profile_user.twitter }}</a>
                 {% else %}
                     Twitter
-                {% endif %} </td>
-        <br>
-        <hr>
+                {% endif %} </p>
+        </div>
+    </div>
+</div>
+    
     {% endif %}
 {% endblock %}
 
 {% block main-content-body %}
 {% if profile_user == request.user %}
 {% include "login/user_nav.html" %}
-    <h2>Active Open Peer Reviews</h2>
+    <h2 class="header">Active Open Peer Reviews</h2>
     <p> 
-        This section lists the latest active reviews in which you are currently participating as a reviewer or data contributor.
+        This section lists the latest active reviews in which you are currently participating as a Reviewer or Data Publisher.
     </p>
     {% if reviewer_reviewed.latest is not None %}
         {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
@@ -93,9 +97,22 @@
                     <div class="profile-rvw__item-btm">
                         <!-- placeholder table name -->
                         <div class="profile-rvw__item-name">
-                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-info">
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-primary">
                                 {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
                             </a>
+                        </div>
+                        <div class="profile-rvw__item-history">
+                            <!-- remove button wrapper div once history dropdown is implemented -->
+                            <div data-bs-toggle="dropdown tooltip" aria-expanded="false" title="This feature is not implemented yet.">
+                                <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                                    Show history
+                                </button>
+                            </div>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -103,17 +120,21 @@
 
                 
         {% elif reviewer_reviewed.latest_status == "FINISHED" %}
-        <ul>
-            <li>
-                No active reviews where you participate as reviewer.
-            </li>
-        </ul>
-        {% else %}
-            <ul>
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+            <ul class="profile-rvw__list">
                 <li>
-                    {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} wait for the contributor to submit the review.
+                    No active reviews where you participate as a Reviewer.
                 </li>
             </ul>
+        </div>
+        {% else %}
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
+            <ul class="profile-rvw__list">
+                <li>
+                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> waits for the Data Publisher to submit the review.
+                </li>
+            </ul>
+        </div>
         {% endif %}
     {% endif %}
 
@@ -124,7 +145,7 @@
             <div class="profile-rvw__item-top">
                 <div class="profile-rvw__item-left">
                     <!-- placeholder type: contributor or reviewer -->
-                    <div class="profile-rvw__item-type">Participating as data contributor</div>
+                    <div class="profile-rvw__item-type">Participating as Data Publisher</div>
                     <!-- placeholder status: saved, done, etc -->
                     <div class="profile-rvw__item-status">{{ contributor_reviewed.latest_status }}</div>
                 </div>
@@ -139,35 +160,52 @@
             <div class="profile-rvw__item-btm">
                 <!-- placeholder table name -->
                 <div class="button profile-rvw__item-name">
-                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}" class="btn btn-info">
+                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}" class="btn btn-primary">
                         {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}  
                     </a>
+                </div>
+                <div class="profile-rvw__item-history">
+                    <!-- remove button wrapper div once history dropdown is implemented -->
+                    <div data-bs-toggle="dropdown tooltip" aria-expanded="false" title="This feature is not implemented yet.">
+                        <button type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            Show history
+                            
+                        </button>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton2">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
         {% elif contributor_reviewed.latest_status == "FINISHED" %}
-        <ul>
-            <li>
-                No active reviews where you participate as data contributor.
-            </li>
-        </ul>
-        {% else %}
-            <ul>
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <ul class="profile-rvw__list">
                 <li>
-                    {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }} wait for the reviewer to submit the review.
+                    No active reviews where you participate as a Data Publisher.
                 </li>
             </ul>
+        </div>
+        {% else %}
+        <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
+            <ul class="profile-rvw__list">
+                <li>
+                    <span>{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}</span> waits for the Reviewer to submit the review.
+                </li>
+            </ul>
+        </div>
         {% endif %}
     {% endif %}
 
-        <h2>All reviews</h2>
+        <h2 class="header">All reviews</h2>
         <p> 
-            This section list all available reviews. 
+            This section lists all available reviews. 
         </p>
 
         {% if reviewer_reviewed.latest is not None %}
         {% for table_name, reviews in reviewer_reviewed_grouped.items %}
-        <p>Table name: {{ table_name }}</p>
             
         {% for review in reviews %}
         {% if forloop.first %}
@@ -185,7 +223,7 @@
                         <!-- placeholder type: contributor or reviewer -->
                         <div class="profile-rvw__item-type">Participated as Reviewer</div>
                         <!-- placeholder status: saved, submitted, finished -->
-                        <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                        <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
                     </div>
                     <div class="profile-rvw__item-right">
                         <!-- placeholder open: day number -->
@@ -203,7 +241,20 @@
                 <div class="profile-rvw__item-btm">
                     <!-- placeholder table name -->
                     <div class="profile-rvw__item-name">
-                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}" class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                    </div>
+                    <div class="profile-rvw__item-history">
+                        <!-- remove button wrapper div once history dropdown is implemented -->
+                        <div data-bs-toggle="dropdown tooltip" aria-expanded="false" title="This feature is not implemented yet.">
+                            <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                                Show history
+                            </button>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -233,7 +284,6 @@
     {% if contributor_reviewed.latest is not None %}
     
     {% for table_name, reviews in contributor_reviewed_grouped.items %}
-    <p>{{ table_name }}</p>
 
     {% for review in reviews %}
     {% if forloop.first %}
@@ -243,9 +293,9 @@
             <div class="profile-rvw__item-top">
                 <div class="profile-rvw__item-left">
                     <!-- placeholder type: contributor or reviewer -->
-                    <div class="profile-rvw__item-type">Participated as Contributor</div>
+                    <div class="profile-rvw__item-type">Participated as Data Publisher</div>
                     <!-- placeholder status: saved, submitted, finished -->
-                    <div class="profile-rvw__item-status">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                    <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
                 </div>
                 <div class="profile-rvw__item-right">
                     <!-- placeholder open: day number -->
@@ -263,7 +313,20 @@
             <div class="profile-rvw__item-btm">
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
-                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}"  class="btn btn-light">{{ review.schema }} - {{ review.table }}</a>
+                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                </div>
+                <div class="profile-rvw__item-history">
+                    <!-- remove button wrapper div once history dropdown is implemented -->
+                    <div data-bs-toggle="dropdown tooltip" aria-expanded="false" title="This feature is not implemented yet.">
+                        <button type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            Show history
+                        </button>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
                 </div>
             </div>
         </div>

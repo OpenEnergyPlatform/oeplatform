@@ -1,6 +1,50 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
 
+main.main .content .content__container.content__container--profile {
+    .content {
+        &__side {
+            @extend .py-5;
+            @extend .pe-4;
+        }
+        &__main {
+            @extend .py-5;
+            @extend .pe-0;
+        }
+    }
+
+    .profile-sidebar {
+        &__img {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-center;
+            @extend .pb-3;
+        }
+
+        &__block {
+            @extend .pt-3;
+            @extend .pb-2;
+            @extend .border-bottom;
+
+            p {
+                @extend .mb-1;
+            }
+        }
+
+        &__name {
+            @extend .fs-4;
+            @extend .fw-semibold;
+            @extend .mb-0;
+        }
+    }
+
+    .header {
+        @extend .pt-2;
+        @extend .fs-4;
+        @extend .fw-semibold;
+        @extend .text-secondary;
+    }
+}
 
 .profile {
     &-rvw {
@@ -13,6 +57,7 @@
             &--highlight {
                 @extend .bg-light;
                 @extend .border;
+                @extend .mb-4;
 
                 &.profile-rvw__item--contributor {
                     border-left: 4px solid $purple-500 !important;
@@ -32,6 +77,10 @@
         }
 
         &__item-btm {
+            @extend .d-flex;
+            @extend .flex-row;
+            @extend .justify-content-between;
+            @extend .align-items-center;
             @extend .pb-2;
         }
 
@@ -51,12 +100,12 @@
             @extend .position-relative;
             @extend .text-uppercase;
             @extend .pe-2;
-            @extend .fw-bold;
+            @extend .fw-semibold;
             @extend .text-secondary;
         }
 
         &__item--done {
-            @extend .border-bottom;
+            @extend .border;
             
             .profile-rvw__item-type {
                 @extend .ps-3;
@@ -86,12 +135,42 @@
             @extend .border;
             @extend .border-secondary;
             @extend .text-secondary;
+            @extend .text-lowercase;
             @extend .px-2;
+            height: fit-content;
+
+            &--done {
+                @extend .text-muted;
+                border-color: $text-muted !important;
+            }
         }
 
         &__item-name a {
             @extend .text-decoration-none;
-            @extend .fw-bold;
+            @extend .fw-semibold;
+        }
+
+        &__item-history {
+            @extend .dropdown;
+
+            button {
+                @extend .btn;
+                @extend .btn-light; 
+                @extend .dropdown-toggle;
+            }
+        }
+
+        &__list {
+            @extend .mb-0;
+            @extend .ps-0;
+
+            li {
+                @extend .d-inline-block;
+
+                span {
+                    @extend .fw-semibold;
+                }
+            }
         }
     }
 }
