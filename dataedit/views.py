@@ -71,6 +71,8 @@ schema_whitelist = [
     "supply",
 ]
 
+schema_sandbox = "sandbox"
+
 
 def admin_constraints(request):
     """
@@ -448,6 +450,9 @@ def listtables(request, schema_name):
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
+
+    if schema_name not in schema_whitelist or schema_name.startswith("_"):
+        raise Http404("Schema not accessible")
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = list(
@@ -979,7 +984,10 @@ class DataView(View):
         :param table: Name of a table stored in this schema
         :return:
         """
-        if schema not in schema_whitelist or schema.startswith("_"):
+
+        if (
+            schema not in schema_whitelist and schema != schema_sandbox
+        ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 
         tags = []  # TODO: Unused - Remove
