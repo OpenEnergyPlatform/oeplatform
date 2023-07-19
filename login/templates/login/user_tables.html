@@ -35,12 +35,19 @@
     {% endif %}
     </div>
     <div class="profile-sidebar__block">
-        <p class="profile-sidebar__name">{{ profile_user.name }}</p>
         <div>
-            {% if profile_user.fullname %}
-                <p>{{ profile_user.fullname }}</p>
-            {% endif %} 
+            <p class="profile-sidebar__name"> {{ profile_user.name }} </p>
         </div>
+        <p> 
+            {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
+            {% endif %}
+        </p>
+        {% if profile_user.affiliation %}
+            <div class="profile-sidebar__affiliation">
+                {{ profile_user.affiliation }}
+            </div>
+        {% endif %}
         <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
     </div>
     <div class="profile-sidebar__block">
@@ -102,6 +109,16 @@
             </p>
         </div>
     </div>
+    {% if profile_user.description %}
+        <div class="profile-sidebar__block">
+            <div class="profile-sidebar__detail">
+                <div>
+                    <p class="profile-sidebar__detail--header">About</p>
+                    <p>{{ profile_user.description }}</p>
+                </div>
+            </div>
+        </div>
+    {% endif %} 
 </div>
     
     {% endif %}

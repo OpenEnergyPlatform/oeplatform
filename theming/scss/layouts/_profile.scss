@@ -48,6 +48,15 @@ main.main .content .content__container.content__container--profile {
             @extend .mb-0;
         }
 
+        &__affiliation {
+            @extend .d-inline-block;
+            @extend .bg-light;
+            @extend .border;
+            @extend .rounded-pill;
+            @extend .px-2;
+            @extend .mb-3;
+        }
+
         &__detail {
             p {
                 @extend .mb-2;
@@ -56,6 +65,10 @@ main.main .content .content__container.content__container--profile {
             svg {
                 @extend .me-1;
                 vertical-align: text-top;
+            }
+
+            &--header {
+                @extend .fw-semibold;
             }
         }
     }
