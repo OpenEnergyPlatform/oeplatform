@@ -36,6 +36,17 @@ main.main .content .content__container.content__container--profile {
             @extend .fw-semibold;
             @extend .mb-0;
         }
+
+        &__detail {
+            p {
+                @extend .mb-2;
+            }
+
+            svg {
+                @extend .me-1;
+                vertical-align: text-top;
+            }
+        }
     }
 
     .header {
