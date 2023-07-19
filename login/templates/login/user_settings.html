@@ -67,42 +67,56 @@
     </div>
     <div class="profile-sidebar__block">
         <div><p class="profile-sidebar__name"> {{ profile_user.name }} </p></div>
-        <p> {% if profile_user.fullname %}
-                    {{ profile_user.fullname }}
-                {% else %}
-                    <a href="{% url 'edit' request.user.id %}">Add Full Name</a>
-                {% endif %} </p>
+        <p> 
+            {% if profile_user.fullname %}
+                {{ profile_user.fullname }}
+            {% else %}
+                No full name added
+            {% endif %}
+        </p>
         <p>Member since {{ profile_user.registration_date|date:"d/m/Y" }}</p>
     </div>
     <div class="profile-sidebar__block">
-        <p> {% if profile_user.work %}
-            {{ profile_user.work }}
-        {% else %}
-            <a href="{% url 'edit' request.user.id %}">Add profession</a>
-        {% endif %} </p>
-        <p> {% if profile_user.location %}
-            {{ profile_user.location }}
-        {% else %}
-            <a href="{% url 'edit' request.user.id %}">Add location </a>
-        {% endif %} </p>
-        <p> {% if profile_user == request.user %}</p>
-        <p> {{ profile_user.email }} </p>
-        {% endif %}
-        <p> {% if profile_user.linkedin %}
-        <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
-        {% else %}
-            <a href="{% url 'edit' request.user.id %}">Add LinkedIn page</a>
-        {% endif %} </p>
-        <p> {% if profile_user.facebook %}
-        <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
-        {% else %}
-            <a href="{% url 'edit' request.user.id %}">Add Facebook page</a>
-        {% endif %} </p>
-        <p> {% if profile_user.twitter %}
-        <a href="{% url 'edit' request.user.id %}">{{ profile_user.twitter }}</a>
-        {% else %}
-            <a href="{% url 'edit' request.user.id %}">Add Twitter page</a>
-        {% endif %} </p>
+        <p>
+            {% if profile_user.work %}
+                {{ profile_user.work }}
+            {% else %}
+                No profession added
+            {% endif %}
+        </p>
+        <p> 
+            {% if profile_user.location %}
+                {{ profile_user.location }}
+            {% else %}
+                No location added
+            {% endif %}
+        </p>
+        <p> 
+            {% if profile_user == request.user %}
+                {{ profile_user.email }} 
+            {% endif %}
+        </p>
+        <p> 
+            {% if profile_user.linkedin %}
+                <a href="{{ profile_user.linkedin }}">{{ profile_user.linkedin }}</a>
+            {% else %}
+                No LinkedIn page added
+            {% endif %}
+        </p>
+        <p> 
+            {% if profile_user.facebook %}
+                <a target="_blank" href="{{ profile_user.facebook }}">{{ profile_user.facebook }}</a>
+            {% else %}
+                No Facebook page added
+            {% endif %}
+        </p>
+        <p> 
+            {% if profile_user.twitter %}
+                <a href="{% url 'edit' request.user.id %}">{{ profile_user.twitter }}</a>
+            {% else %}
+                No Twitter added
+            {% endif %}
+        </p>
     </div>
 </div>
     
