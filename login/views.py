@@ -12,7 +12,7 @@ from itertools import groupby
 import login.models as models
 from dataedit.models import Table, PeerReviewManager
 
-from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm
+from .forms import ChangeEmailForm, CreateUserForm, DetachForm, EditUserForm, GroupForm, OEPPasswordChangeForm
 from .models import ADMIN_PERM, GroupMembership, UserGroup
 from .models import myuser as OepUser
 
@@ -410,6 +410,7 @@ class DetachView(LoginRequiredMixin, View):
 class OEPPasswordChangeView(PasswordChangeView):
     template_name = "login/generic_form.html"
     success_url = "/"
+    form_class = OEPPasswordChangeForm
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
