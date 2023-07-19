@@ -18,7 +18,18 @@ main.main .content .content__container.content__container--profile {
             @extend .d-flex;
             @extend .flex-row;
             @extend .justify-content-center;
-            @extend .pb-3;
+            @extend .align-items-center;
+            @extend .rounded-circle;
+            @extend .overflow-hidden;
+            width: 200px;
+            height: 200px;
+
+            img,
+            svg {
+                @extend .w-100;
+                @extend .h-100;
+                object-fit: cove
+            }
         }
 
         &__block {
