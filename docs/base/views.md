@@ -1,0 +1,3 @@
+# Views
+
+::: base.views
