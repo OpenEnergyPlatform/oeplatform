@@ -1,3 +1,0 @@
-# Factsheet handler
-
-::: modelview.views

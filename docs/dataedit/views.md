@@ -1,3 +1,3 @@
-# Database visualisation
+# Views
 
 ::: dataedit.views
