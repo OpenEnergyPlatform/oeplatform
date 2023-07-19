@@ -5,8 +5,7 @@
 - show sandbox tables in interface but not in schema view
 
 ### Features
-- Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
-
+- Update of the general user interface of the profile page [(#1300)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1300)
 - Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
 
 ### Bugs
