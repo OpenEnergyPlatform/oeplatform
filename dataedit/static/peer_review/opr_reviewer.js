@@ -597,7 +597,8 @@ function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
   } else {
-    console.error(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    // I dont like that this shows as a error in the console
+    // console.log(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
     return null;
   }
 }
