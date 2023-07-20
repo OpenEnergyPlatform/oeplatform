@@ -311,7 +311,7 @@ function renderSummaryPageFields() {
   const rejectedFields = [];
   const missingFields = [];
 
-    if (state_dict && Object.keys(state_dict).length > 0) {
+  if (state_dict && Object.keys(state_dict).length > 0) {
     const fields = document.querySelectorAll('.field');
     for (let field of fields) {
       let field_id = field.id.slice(6);
@@ -321,9 +321,12 @@ function renderSummaryPageFields() {
       const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
-      } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-        missingFields.push({ field_id, fieldValue, fieldCategory });
-      }
+      } 
+      // TODO: The following line duplicates enties in the summary tab
+      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        // missingFields.push({ field_id, fieldValue, fieldCategory });
+        // console.log("Hello", missingFields)
+      // }
     }
   }
 
@@ -336,34 +339,34 @@ function renderSummaryPageFields() {
     const fieldCategory = review.category;
 
     if (isAccepted) {
-  acceptedFields.push({ field_id, fieldValue, fieldCategory });
-} else if (isRejected) {
-  rejectedFields.push({ field_id, fieldValue, fieldCategory });
-}
-
-  }
-
-     const categories = document.querySelectorAll(".tab-pane");
-
-     for (const category of categories) {
-      const category_name = category.id.slice(0);
-
-      if (category_name === "summary") {
-        continue;
-      }
-      const category_fields = category.querySelectorAll(".field");
-      for (field of category_fields) {
-  const field_id = field.id.slice(6);
-  const fieldValue = $(field).text();
-  const found = current_review.reviews.some(review => review.key === field_id);
-  const fieldState = getFieldState(field_id);
-  const fieldCategory = field.getAttribute('data-category');
-
-  if (!found && fieldState !== 'ok') {
-    missingFields.push({ field_id, fieldValue, fieldCategory });
-  }
-}
+      acceptedFields.push({ field_id, fieldValue, fieldCategory });
+    } else if (isRejected) {
+      rejectedFields.push({ field_id, fieldValue, fieldCategory });
     }
+
+  }
+
+  const categories = document.querySelectorAll(".tab-pane");
+
+  for (const category of categories) {
+    const category_name = category.id.slice(0);
+
+    if (category_name === "summary") {
+      continue;
+    }
+    const category_fields = category.querySelectorAll(".field");
+    for (field of category_fields) {
+      const field_id = field.id.slice(6);
+      const fieldValue = $(field).text();
+      const found = current_review.reviews.some(review => review.key === field_id);
+      const fieldState = getFieldState(field_id);
+      const fieldCategory = field.getAttribute('data-category');
+
+      if (!found && fieldState !== 'ok') {
+        missingFields.push({ field_id, fieldValue, fieldCategory });
+      }
+    }
+  }
 
 
   // Display fields on the Summary page
@@ -374,6 +377,7 @@ function renderSummaryPageFields() {
       summaryContainer.firstChild.remove();
     }
   }
+
   function generateTable(data) {
     let table = document.createElement('table');
     table.className = 'table review-summary';
@@ -387,36 +391,36 @@ function renderSummaryPageFields() {
     let tbody = document.createElement('tbody');
 
     data.forEach(item => {
-        let row = document.createElement('tr');
+      let row = document.createElement('tr');
 
-        let th = document.createElement('th');
-        th.scope = "row";
-        th.className = "status";
-        if (item.fieldStatus === "Missing") {
-            th.className = "status missing";
-        }
-        th.textContent = item.fieldStatus;
-        row.appendChild(th);
+      let th = document.createElement('th');
+      th.scope = "row";
+      th.className = "status";
+      if (item.fieldStatus === "Missing") {
+        th.className = "status missing";
+      }
+      th.textContent = item.fieldStatus;
+      row.appendChild(th);
 
-        let tdFieldCategory = document.createElement('td');
-        tdFieldCategory.textContent = item.fieldCategory;
-        row.appendChild(tdFieldCategory);
+      let tdFieldCategory = document.createElement('td');
+      tdFieldCategory.textContent = item.fieldCategory;
+      row.appendChild(tdFieldCategory);
 
-        let tdFieldId = document.createElement('td');
-        tdFieldId.textContent = item.field_id;
-        row.appendChild(tdFieldId);
+      let tdFieldId = document.createElement('td');
+      tdFieldId.textContent = item.field_id;
+      row.appendChild(tdFieldId);
 
-        let tdFieldValue = document.createElement('td');
-        tdFieldValue.textContent = item.fieldValue;
-        row.appendChild(tdFieldValue);
+      let tdFieldValue = document.createElement('td');
+      tdFieldValue.textContent = item.fieldValue;
+      row.appendChild(tdFieldValue);
 
-        tbody.appendChild(row);
+      tbody.appendChild(row);
     });
 
     table.appendChild(tbody);
 
     return table;
-}
+  }
 
 
   function updateSummaryTable() {
@@ -432,17 +436,6 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
-
-  /* summaryContainer.innerHTML = `
-    <h4>Accepted:</h4>
-    ${createFieldList(acceptedFields)}
-    <h4>Suggesting:</h4>
-    ${createFieldList(suggestingFields)}
-    <h4>Rejected:</h4>
-    ${createFieldList(rejectedFields)}
-    <h4>Missing:</h4>
-    ${createFieldList(missingFields)}
-  `; */
 }
 
 /**

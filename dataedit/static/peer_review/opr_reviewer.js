@@ -348,9 +348,11 @@ function renderSummaryPageFields() {
       const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
-      } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-        missingFields.push({ field_id, fieldValue, fieldCategory });
-      }
+      } 
+      // TODO: The following line duplicates enties in the summary tab
+      // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        // missingFields.push({ field_id, fieldValue, fieldCategory });
+      // }
     }
   }
 
