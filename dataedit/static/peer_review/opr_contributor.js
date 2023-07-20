@@ -89,7 +89,7 @@ function sendJson(method, url, data, success, error) {
   var token = getCsrfToken();
   return $.ajax({
     url: url,
-    headers: {"X-CSRFToken": token},
+    headers: { "X-CSRFToken": token },
     data_type: "json",
     cache: false,
     contentType: "application/json; charset=utf-8",
@@ -127,10 +127,10 @@ function peerReview(config) {
     TODO: Show loading icon if peer review page is loaded 
     */
 
-    //   (function init() {
-    //     $('#peer_review-loading').removeClass('d-none');
-    //     config.form = $('#peer_review-form');
-    //   })();
+  //   (function init() {
+  //     $('#peer_review-loading').removeClass('d-none');
+  //     config.form = $('#peer_review-form');
+  //   })();
   selectNextField();
   renderSummaryPageFields();
 }
@@ -141,9 +141,9 @@ function peerReview(config) {
 function savePeerReview() {
   $('#peer_review-save').removeClass('d-none');
   json = JSON.stringify({ reviewType: 'save', reviewData: current_review });
-  sendJson("POST", config.url_peer_review, json).then(function() {
+  sendJson("POST", config.url_peer_review, json).then(function () {
     window.location = config.url_table;
-  }).catch(function(err) {
+  }).catch(function (err) {
     // TODO evaluate error, show user message
     $('#peer_review-save').addClass('d-none');
     alert(getErrorMsg(err));
@@ -156,9 +156,9 @@ function savePeerReview() {
 function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
   json = JSON.stringify({ reviewType: 'submit', reviewData: current_review });
-  sendJson("POST", config.url_peer_review, json).then(function() {
+  sendJson("POST", config.url_peer_review, json).then(function () {
     window.location = config.url_table;
-  }).catch(function(err) {
+  }).catch(function (err) {
     // TODO evaluate error, show user message
     $('#peer_review-submitting').addClass('d-none');
     alert(getErrorMsg(err));
@@ -186,62 +186,62 @@ function getFieldState(fieldKey) {
 }
 
 function click_field(fieldKey, fieldValue, category) {
-    const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-    selectedField = fieldKey;
-    selectedFieldValue = fieldValue;
-    selectedCategory = category;
-    const selectedName = document.querySelector("#review-field-name");
-    selectedName.textContent = cleanedFieldKey + " " + fieldValue;
-    const fieldDescriptionsElement = document.getElementById("field-descriptions");
-    const reviewItem = document.querySelectorAll('.review__item');
-    let selectedDivId = 'field_' + fieldKey;
-    let selectedDiv = document.getElementById(selectedDivId);
-    if (fieldDescriptionsData[cleanedFieldKey]) {
-        let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
-        let fieldInfoText = '<div class="reviewer-item">';
-        if (fieldInfo.title) {
-          fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
-        }
-        if (fieldInfo.description) {
-            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
-        }
-        if (fieldInfo.example) {
-            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
-        }
-        if (fieldInfo.badge) {
-            fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
-        }
-        fieldInfoText += '<div class="reviewer-item__row">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
-        fieldDescriptionsElement.innerHTML = fieldInfoText;
-    } else {
-        fieldDescriptionsElement.textContent = "No description found";
+  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+  selectedField = fieldKey;
+  selectedFieldValue = fieldValue;
+  selectedCategory = category;
+  const selectedName = document.querySelector("#review-field-name");
+  selectedName.textContent = cleanedFieldKey + " " + fieldValue;
+  const fieldDescriptionsElement = document.getElementById("field-descriptions");
+  const reviewItem = document.querySelectorAll('.review__item');
+  let selectedDivId = 'field_' + fieldKey;
+  let selectedDiv = document.getElementById(selectedDivId);
+  if (fieldDescriptionsData[cleanedFieldKey]) {
+    let fieldInfo = fieldDescriptionsData[cleanedFieldKey];
+    let fieldInfoText = '<div class="reviewer-item">';
+    if (fieldInfo.title) {
+      fieldInfoText += '<div class="reviewer-item__row"><h2 class="reviewer-item__title">' + fieldInfo.title + '</h2></div>';
     }
-    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
-    const fieldState = getFieldState(fieldKey);
-
-    if (fieldState === 'ok'|| !fieldState) {
-        document.getElementById("ok-button").disabled = true;
-        document.getElementById("rejected-button").disabled = true;
-    } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-        document.getElementById("ok-button").disabled = false;
-        document.getElementById("rejected-button").disabled = false;
+    if (fieldInfo.description) {
+      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">' + fieldInfo.description + '</div></div>';
     }
-
-    // Set selected / not selected style on metadata fields
-    reviewItem.forEach(function(div) {
-      div.style.backgroundColor = '';
-    });
-    if (selectedDiv) {
-      if (!selectedDiv.classList.contains('field-ok')) {
-        selectedDiv.style.backgroundColor = '#F6F9FB';
-      }
+    if (fieldInfo.example) {
+      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">' + fieldInfo.example + '</div></div>';
     }
+    if (fieldInfo.badge) {
+      fieldInfoText += '<div class="reviewer-item__row"><div class="reviewer-item__key">Badge:</div><div class="reviewer-item__value">' + fieldInfo.badge + '</div></div>';
+    }
+    fieldInfoText += '<div class="reviewer-item__row">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
+    fieldDescriptionsElement.innerHTML = fieldInfoText;
+  } else {
+    fieldDescriptionsElement.textContent = "No description found";
+  }
+  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+  const fieldState = getFieldState(fieldKey);
 
-    clearInputFields();
+  if (fieldState === 'ok' || !fieldState) {
+    document.getElementById("ok-button").disabled = true;
+    document.getElementById("rejected-button").disabled = true;
+  } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+    document.getElementById("ok-button").disabled = false;
+    document.getElementById("rejected-button").disabled = false;
+  }
+
+  // Set selected / not selected style on metadata fields
+  reviewItem.forEach(function (div) {
+    div.style.backgroundColor = '';
+  });
+  if (selectedDiv) {
+    if (!selectedDiv.classList.contains('field-ok')) {
+      selectedDiv.style.backgroundColor = '#F6F9FB';
+    }
+  }
+
+  clearInputFields();
 
 }
 
-function clearInputFields(){
+function clearInputFields() {
   document.getElementById("valuearea").value = "";
   document.getElementById("commentarea").value = "";
 }
@@ -251,9 +251,9 @@ function clearInputFields(){
 /**
  * Creates List of all fields from html elements
  */
-function makeFieldList(){
+function makeFieldList() {
   var fieldElements = [];
-  $( ".field" ).each(function() { fieldElements.push(this.id) } ) ;
+  $(".field").each(function () { fieldElements.push(this.id) });
   //alert(fieldElements[14]);
   return fieldElements;
 }
@@ -275,7 +275,7 @@ function selectNextField() {
 /**
  * Selects the HTML field element previous to the current one and clicks it
  */
-function selectPreviousField(){
+function selectPreviousField() {
   var fieldList = makeFieldList();
   var prev = fieldList.indexOf('field_' + selectedField) - 1
   selectField(fieldList, prev);
@@ -284,8 +284,8 @@ function selectPreviousField(){
 /**
  * Clicks a Field after checking it exists
  */
-function selectField(fieldList, field){
-  if (field >= 0 && field < fieldList.length){
+function selectField(fieldList, field) {
+  if (field >= 0 && field < fieldList.length) {
     var element = fieldList[field];
     document.getElementById(element).click();
   }
@@ -321,11 +321,11 @@ function renderSummaryPageFields() {
       const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
-      } 
+      }
       // TODO: The following line duplicates enties in the summary tab
       // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
-        // missingFields.push({ field_id, fieldValue, fieldCategory });
-        // console.log("Hello", missingFields)
+      // missingFields.push({ field_id, fieldValue, fieldCategory });
+      // console.log("Hello", missingFields)
       // }
     }
   }
@@ -373,7 +373,7 @@ function renderSummaryPageFields() {
   const summaryContainer = document.getElementById("summary");
 
   function clearSummaryTable() {
-    while(summaryContainer.firstChild) {
+    while (summaryContainer.firstChild) {
       summaryContainer.firstChild.remove();
     }
   }
@@ -457,7 +457,7 @@ function createFieldList(fields) {
  */
 function saveEntrances() {
   if (Object.keys(current_review["reviews"]).length === 0 &&
-      current_review["reviews"].constructor === Object) {
+    current_review["reviews"].constructor === Object) {
     current_review["reviews"] = [];
   }
 
@@ -465,7 +465,7 @@ function saveEntrances() {
     var reviewFound = false;
 
     for (let i = 0; i < current_review["reviews"].length; i++) {
-      if (current_review["reviews"][i]["key"] === selectedField){
+      if (current_review["reviews"][i]["key"] === selectedField) {
         reviewFound = true;
         if (!Array.isArray(current_review["reviews"][i]["fieldReview"])) {
           current_review["reviews"][i]["fieldReview"] = [current_review["reviews"][i]["fieldReview"]];
@@ -491,7 +491,7 @@ function saveEntrances() {
       }
     }
 
-    if (!reviewFound){
+    if (!reviewFound) {
       var element = document.querySelector('[aria-selected="true"]');
       var category = element.getAttribute("data-bs-target");
       current_review["reviews"].push({
@@ -499,7 +499,7 @@ function saveEntrances() {
         "key": selectedField,
         "fieldReview": [
           {
-            "timestamp": Date.now(), 
+            "timestamp": Date.now(),
             "user": "oep_contributor", // TODO put actual username
             "role": "contributor",
             "contributorValue": selectedFieldValue,
@@ -549,21 +549,21 @@ function checkReviewComplete() {
 /**
  * Shows reviewer Comment and Suggestion Input options
  */
-function showReviewerOptions(){
-    $("#reviewer_remarks").removeClass('d-none');
+function showReviewerOptions() {
+  $("#reviewer_remarks").removeClass('d-none');
 }
 
 /**
  * Hides reviewer Comment and Suggestion Input options
  */
-function hideReviewerOptions(){
-    $("#reviewer_remarks").addClass('d-none');
+function hideReviewerOptions() {
+  $("#reviewer_remarks").addClass('d-none');
 }
 
 /**
  * Colors Field based on Reviewer input
  */
-function updateFieldColor(){
+function updateFieldColor() {
   // Color ok/suggestion/rejected
   field_id = `#field_${selectedField}`.replaceAll(".", "\\.");
   $(field_id).removeClass('field-ok');
@@ -575,11 +575,11 @@ function updateFieldColor(){
 /**
  * Colors Field based on Reviewer input
  */
-function updateSubmitButtonColor(){
+function updateSubmitButtonColor() {
   // Color Save comment / new value
   $(submitButton).removeClass('btn-warning');
   $(submitButton).removeClass('btn-danger');
-  if (selectedState == "suggestion"){
+  if (selectedState == "suggestion") {
     $(submitButton).addClass('btn-warning');
   }
   else {
@@ -588,29 +588,29 @@ function updateSubmitButtonColor(){
 }
 
 function updateTabClasses() {
-    const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
-    for (let i = 0; i < tabNames.length; i++) {
-        let tabName = tabNames[i];
-        let tab = document.getElementById(tabName + '-tab');
-        if (!tab) continue;
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
 
-        let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+    let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-        let allOk = true;
-        for (let j = 0; j < fields.length; j++) {
-            let fieldState = getFieldState(fields[j].id.replace('field_', ''));
-            if (fieldState !== 'ok') {
-                allOk = false;
-                break;
-            }
-        }
-        if (allOk) {
-    tab.classList.add('status');
-    tab.classList.add('status--done');
-        } else {
-            tab.classList.add('status');
-        }
+    let allOk = true;
+    for (let j = 0; j < fields.length; j++) {
+      let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+      if (fieldState !== 'ok') {
+        allOk = false;
+        break;
+      }
     }
+    if (allOk) {
+      tab.classList.add('status');
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
@@ -630,14 +630,14 @@ const otherTabs = [
 const reviewContent = document.querySelector(".review__content");
 
 // Event listener for clicking the "Summary" tab button
-summaryTab.addEventListener('click', function() {
+summaryTab.addEventListener('click', function () {
   toggleReviewControls(false);
   reviewContent.classList.toggle("tab-pane--100");
 });
 
 // Event listener for clicking the other tabs
-otherTabs.forEach(function(tab) {
-  tab.addEventListener('click', function() {
+otherTabs.forEach(function (tab) {
+  tab.addEventListener('click', function () {
     toggleReviewControls(true);
     reviewContent.classList.remove("tab-pane--100");
   });
@@ -645,7 +645,7 @@ otherTabs.forEach(function(tab) {
 
 /**
  * Function to toggle the review controls visibility
- */ 
+ */
 function toggleReviewControls(show) {
   const reviewControls = document.querySelector('.review__controls');
   if (reviewControls) {
