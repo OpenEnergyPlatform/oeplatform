@@ -214,7 +214,7 @@ function click_field(fieldKey, fieldValue, category) {
         fieldInfoText += '<div class="reviewer-item__row">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
         fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
-        fieldDescriptionsElement.textContent = "Описание не найдено";
+        fieldDescriptionsElement.textContent = "No description found";
     }
     // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
     const fieldState = getFieldState(fieldKey);
