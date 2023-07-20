@@ -4,7 +4,7 @@
 - show sandbox tables in interface but not in schema view
 
 ### Features
-- Visually indicate the progress of a review for each category of the metadata for both contributor and reviewer [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
+- Enable submit button if all fields are reviewd (contributor & reviewer page) [(#1258)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1258)
 - Update of the general user interface of the profile page [(#1300)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1300)
 - Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
 
