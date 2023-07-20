@@ -241,31 +241,31 @@ function click_field(fieldKey, fieldValue, category) {
         fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
         fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
-        fieldDescriptionsElement.textContent = "Описание не найдено";
+        fieldDescriptionsElement.textContent = "No description found";
     }
 
-// TODO - This leads to buttons being disabeld is state dict is empty (at least)
- const fieldState = getFieldState(fieldKey);
+  // TODO - This leads to buttons being disabeld is state dict is empty (at least)
+  // const fieldState = getFieldState(fieldKey);
 
-if (fieldState === 'ok'|| !fieldState) {
-    document.getElementById("ok-button").disabled = true;
-    document.getElementById("rejected-button").disabled = true;
-    document.getElementById("suggestion-button").disabled = true;
-} else if (fieldState === 'rejected') {
-    document.getElementById("ok-button").disabled = false;
-    document.getElementById("rejected-button").disabled = false;
-    document.getElementById("suggestion-button").disabled = false;
-}
+  // if (fieldState === 'ok'|| !fieldState) {
+  //     document.getElementById("ok-button").disabled = true;
+  //     document.getElementById("rejected-button").disabled = true;
+  //     document.getElementById("suggestion-button").disabled = true;
+  // } else if (fieldState === 'rejected') {
+  //     document.getElementById("ok-button").disabled = false;
+  //     document.getElementById("rejected-button").disabled = false;
+  //     document.getElementById("suggestion-button").disabled = false;
+  // }
 
-    // Set selected / not selected style on metadata fields
-    reviewItem.forEach(function(div) {
-      div.style.backgroundColor = '';
-    });
-    if (selectedDiv) {
-      selectedDiv.style.backgroundColor = '#F6F9FB';
-    }
-    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
-    clearInputFields();
+  // Set selected / not selected style on metadata fields
+  reviewItem.forEach(function(div) {
+    div.style.backgroundColor = '';
+  });
+  if (selectedDiv) {
+    selectedDiv.style.backgroundColor = '#F6F9FB';
+  }
+  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+  clearInputFields();
 }
 
 
