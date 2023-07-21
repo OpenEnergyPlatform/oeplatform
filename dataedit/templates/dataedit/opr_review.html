@@ -331,11 +331,9 @@
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     let state_dict = JSON.parse('{{ state_dict | escapejs }}');
-    console.log(state_dict)
     if ( state_dict && Object.keys(state_dict).length > 0) {
     for (let [key, value] of Object.entries(state_dict)) {
       let field_id = `#field_${key}`.replace(/\./g, "\\.");
-      console.log(field_id);
       $(field_id).addClass(`field-${value}`);
     }
 }
