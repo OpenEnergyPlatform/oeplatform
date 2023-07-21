@@ -1,3 +1,7 @@
+// this raises more errors as transition from script to module 
+// makes it more complicated to use onclick in html elements
+// import { updateClientStateDict } from './frontend/state.js'
+
 var selectedField;
 var selectedFieldValue;
 var selectedState;
@@ -264,7 +268,7 @@ function click_field(fieldKey, fieldValue, category) {
   if (selectedDiv) {
     selectedDiv.style.backgroundColor = '#F6F9FB';
   }
-  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+
   clearInputFields();
 }
 
@@ -325,6 +329,26 @@ function selectField(fieldList, field){
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
+  updateClientStateDict(fieldKey=selectedField, state=state);
+  check_if_review_finished();
+}
+
+/**
+ * Saves selected state the client added. 
+ * As the state_dict is generated on page load (in django view) 
+ * based on the stored review, these updates will not be sent to the backend.
+ * @param {string} fieldKey Identifiere of the field
+ * @param {string} state Selected state
+ */
+function updateClientStateDict(fieldKey, state){
+  state_dict = state_dict ?? {};
+  if (fieldKey in state_dict) {
+    // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
+    state_dict[fieldKey] = state;
+  } else {
+    // console.log(`Der Schlüssel '${fieldKey}' ist nicht vorhanden.`);
+    state_dict[fieldKey] = state;
+  }
 }
 
 /**
