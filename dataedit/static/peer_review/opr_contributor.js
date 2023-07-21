@@ -120,7 +120,7 @@ function getErrorMsg(response) {
 
 /**
  * Configurates peer review
- * @param {json} config Configuration JSON
+ * @param {json} config Configuration JSON from Django backend.
  */
 function peerReview(config) {
   /*
@@ -432,17 +432,6 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
-
-  /* summaryContainer.innerHTML = `
-    <h4>Accepted:</h4>
-    ${createFieldList(acceptedFields)}
-    <h4>Suggesting:</h4>
-    ${createFieldList(suggestingFields)}
-    <h4>Rejected:</h4>
-    ${createFieldList(rejectedFields)}
-    <h4>Missing:</h4>
-    ${createFieldList(missingFields)}
-  `; */
 }
 
 /**
