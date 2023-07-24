@@ -1920,6 +1920,33 @@ class PeerReviewView(LoginRequiredMixin, View):
         return lines
 
     def sort_in_category(self, schema, table):
+        """
+        Sorts the metadata of a table into categories and adds the value
+        suggestion and comment that were added during the review, to facilitate 
+        Further processing easier.
+
+        Note:
+        The categories spatial & temporal are often combined during visualization.
+
+        >>> Example return:
+            {
+                "general": [
+                    {
+                    "field": "id",
+                    "value": "http: //127.0.0.1:8000/dataedit/view/model_draft/test2",
+                    "reviewer_suggestion": "",
+                    "suggestion_comment": ""
+                    }
+                ],
+                "spatial": [...],
+                "temporal": [...],
+                "source": [...],
+                "license": [...],
+                "contributor": [...],
+                "resource": [...]
+            }
+        """
+        
         metadata = self.load_json(schema, table)
         val = self.parse_keys(metadata)
         gen_key_list = []
@@ -1970,6 +1997,13 @@ class PeerReviewView(LoginRequiredMixin, View):
         return meta
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
+        """
+        Collects the field title, descriptions, examples and badge information 
+        for each field of the oemetadata from the json schema and prepares them 
+        so that the values can be easily processed or used. Used to populate 
+        the reviewer box.
+        """
+        
         field_descriptions = {}
 
         def extract_descriptions(properties, prefix=""):
