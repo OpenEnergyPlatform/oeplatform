@@ -451,11 +451,36 @@ function createFieldList(fields) {
   `;
 }
 
+// Function to show the error toast
+function showErrorToast(liveToast) {
+  liveToast.show();
+}
+
 
 /**
  * Saves field review to current review list
  */
 function saveEntrances() {
+
+  if (selectedState != "ok") {
+    // Get the valuearea element
+    const valuearea = document.getElementById('valuearea');
+    const liveToastBtn = document.getElementById('liveToastBtn');
+    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+    // const validityState = valuearea.validity;
+
+    // Validate the valuearea before proceeding
+    if (valuearea.value.trim() === '') {
+      valuearea.setCustomValidity('Value suggestion is required');
+      showErrorToast(liveToast);
+      return; // Stop execution if validation fails
+    } else {
+      valuearea.setCustomValidity('');
+    }
+
+    valuearea.reportValidity();
+  }
+
   if (Object.keys(current_review["reviews"]).length === 0 &&
     current_review["reviews"].constructor === Object) {
     current_review["reviews"] = [];
