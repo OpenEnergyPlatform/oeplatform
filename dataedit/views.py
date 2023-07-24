@@ -2085,16 +2085,6 @@ class PeerReviewView(LoginRequiredMixin, View):
             "review_finished": review_finished,
         }
 
-        print(len(metadata.get("general", [])))
-        print(len(metadata.get("spatial", [])))
-        print(len(metadata.get("temporal", [])))
-        print(len(metadata.get("source", [])))
-        print(len(metadata.get("license", [])))
-        print(len(metadata.get("contributor", [])))
-        print(len(metadata.get("resource", [])))
-        print("----------------------------------")
-        print(metadata)
-
         context_meta = {
             # need this here as json.dumps breaks the template syntax access
             # like {{ config.table }} now you can use {{ table }}
