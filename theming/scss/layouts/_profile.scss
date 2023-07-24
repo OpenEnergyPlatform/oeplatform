@@ -18,7 +18,18 @@ main.main .content .content__container.content__container--profile {
             @extend .d-flex;
             @extend .flex-row;
             @extend .justify-content-center;
-            @extend .pb-3;
+            @extend .align-items-center;
+            @extend .rounded-circle;
+            @extend .overflow-hidden;
+            width: 200px;
+            height: 200px;
+
+            img,
+            svg {
+                @extend .w-100;
+                @extend .h-100;
+                object-fit: cove
+            }
         }
 
         &__block {
@@ -35,6 +46,30 @@ main.main .content .content__container.content__container--profile {
             @extend .fs-4;
             @extend .fw-semibold;
             @extend .mb-0;
+        }
+
+        &__affiliation {
+            @extend .d-inline-block;
+            @extend .bg-light;
+            @extend .border;
+            @extend .rounded-pill;
+            @extend .px-2;
+            @extend .mb-3;
+        }
+
+        &__detail {
+            p {
+                @extend .mb-2;
+            }
+
+            svg {
+                @extend .me-1;
+                vertical-align: text-top;
+            }
+
+            &--header {
+                @extend .fw-semibold;
+            }
         }
     }
 

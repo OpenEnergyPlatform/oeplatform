@@ -404,6 +404,28 @@ class PeerReviewManager(models.Model):
             review_id__status=ReviewDataStatus.SAVED.value
         )
     
+    # @staticmethod
+    # def get_last_open_peer_review(contributor_user):
+    #     """
+    #     Get the last open peer review for the given contributor.
+
+    #     Args:
+    #         contributor_user (User): The contributor user.
+
+    #     Returns:
+    #         PeerReview: Last open peer review or None if not found.
+    #     """
+    #     try:
+    #         return PeerReview.objects.filter(
+    #             contributor=contributor_user,
+    #             is_finished=False
+    #         ).exclude(
+    #             review_id__current_reviewer=Reviewer.REVIEWER.value,
+    #             review_id__status=ReviewDataStatus.SAVED.value
+    #         ).latest('date_started')
+    #     except PeerReview.DoesNotExist:
+    #         return None
+        
     @staticmethod
     def filter_opr_by_table(schema, table):
         """

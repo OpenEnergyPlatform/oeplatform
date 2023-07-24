@@ -197,6 +197,8 @@ function cancelPeerReview() {
   window.location = config.url_table;
 }
 
+
+
 /**
  * Identifies field name and value sets selected stlye and refreshes 
  * reviewer box (side panel) infos.
@@ -204,12 +206,12 @@ function cancelPeerReview() {
  * @param {string} fieldValue Value of the field
  * @param {string} category Metadata catgeory related to the fieldKey 
  */
+
 function click_field(fieldKey, fieldValue, category) {
     // this seems unused but it is relevant to select next and prev field functions
     selectedField = fieldKey;
     selectedFieldValue = fieldValue;
     selectedCategory = category;
-
     const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
     const selectedName = document.querySelector("#review-field-name");
     selectedName.textContent = cleanedFieldKey + " " + fieldValue;
@@ -239,18 +241,31 @@ function click_field(fieldKey, fieldValue, category) {
         fieldInfoText += '<div class="reviewer-item__row reviewer-item__row--border">Does it comply with the required ' + fieldInfo.title + ' description convention?</div></div>';
         fieldDescriptionsElement.innerHTML = fieldInfoText;
     } else {
-        fieldDescriptionsElement.textContent = "Описание не найдено";
+        fieldDescriptionsElement.textContent = "No description found";
     }
 
-    // Set selected / not selected style on metadata fields
-    reviewItem.forEach(function(div) {
-      div.style.backgroundColor = '';
-    });
-    if (selectedDiv) {
-      selectedDiv.style.backgroundColor = '#F6F9FB';
+  const fieldState = getFieldState(fieldKey);
+  if (fieldState) {
+    if (fieldState === 'ok') {
+        document.getElementById("ok-button").disabled = true;
+        document.getElementById("rejected-button").disabled = true;
+        document.getElementById("suggestion-button").disabled = true;
+    } else if (fieldState === 'rejected') {
+        document.getElementById("ok-button").disabled = false;
+        document.getElementById("rejected-button").disabled = false;
+        document.getElementById("suggestion-button").disabled = false;
     }
-    // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
-    clearInputFields();
+  }
+
+  // Set selected / not selected style on metadata fields
+  reviewItem.forEach(function(div) {
+    div.style.backgroundColor = '';
+  });
+  if (selectedDiv) {
+    selectedDiv.style.backgroundColor = '#F6F9FB';
+  }
+  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+  clearInputFields();
 }
 
 
@@ -324,11 +339,26 @@ function renderSummaryPageFields() {
   const rejectedFields = [];
   const missingFields = [];
 
+  if (state_dict && Object.keys(state_dict).length > 0) {
+    const fields = document.querySelectorAll('.field');
+    for (let field of fields) {
+      let field_id = field.id.slice(6);
+      const fieldValue = $(field).text();
+      const fieldState = getFieldState(field_id);
+      const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
+      if (fieldState === 'ok') {
+        acceptedFields.push({ field_id, fieldValue, fieldCategory });
+      } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
+        missingFields.push({ field_id, fieldValue, fieldCategory });
+      }
+    }
+  }
+
   for (const review of current_review.reviews) {
     const field_id = `#field_${review.key}`.replaceAll(".", "\\.");
     const fieldValue = $(field_id).text();
     const fieldState = review.fieldReview.state;
-    const fieldCategory = review.category.slice(1);
+    const fieldCategory = review.category;
 
     if (fieldState === 'ok') {
       acceptedFields.push({ field_id, fieldValue, fieldCategory });
@@ -339,23 +369,28 @@ function renderSummaryPageFields() {
     }
   }
 
-  const categories = document.querySelectorAll(".tab-pane");
-  for (const category of categories) {
-    const category_name = category.id.slice(0);
-    if (["resource", "summary"].includes(category_name)) {
-      continue;
-    }
-    const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
-      const field_name = field.id.slice(6);
-      const field_id = `#field_${field_name}`.replaceAll(".", "\\.");
-      const fieldValue = $(field_id).text();
-      const found = current_review.reviews.some(review => review.key === field_name);
-      if (!found) {
-        missingFields.push({ field_id, fieldValue, fieldCategory: category_name });
+     const categories = document.querySelectorAll(".tab-pane");
+
+     for (const category of categories) {
+      const category_name = category.id.slice(0);
+
+      if (category_name === "summary") {
+        continue;
       }
-    }
+      const category_fields = category.querySelectorAll(".field");
+      for (field of category_fields) {
+  const field_id = field.id.slice(6);
+  const fieldValue = $(field).text();
+  const found = current_review.reviews.some(review => review.key === field_id);
+  const fieldState = getFieldState(field_id);
+  const fieldCategory = field.getAttribute('data-category');
+
+  if (!found && fieldState !== 'ok') {
+    missingFields.push({ field_id, fieldValue, fieldCategory });
   }
+}
+    }
+
 
   // Display fields on the Summary page
   const summaryContainer = document.getElementById("summary");
@@ -469,7 +504,7 @@ function saveEntrances() {
               unique_entry = false;
               var element = document.querySelector('[aria-selected="true"]');
               var category = (element.getAttribute("data-bs-target"));
-              if (selectedState == "ok") {
+              if (selectedState === "ok") {
                 // var fieldElement = document.getElementById("field_" + selectedField);
                 // var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
                 // var commentElement = fieldElement.querySelector('.suggestion--comment');
@@ -484,7 +519,7 @@ function saveEntrances() {
                 // }
                 Object.assign(current_review["reviews"][idx],
                     {
-                        "category": category,
+                        "category": selectedCategory,
                         "key": selectedField,
                         "fieldReview": {
                             "timestamp": Date.now(),
@@ -500,7 +535,7 @@ function saveEntrances() {
               } else {
                 Object.assign(current_review["reviews"][idx],
                     {
-                        "category": category,
+                        "category": selectedCategory,
                         "key": selectedField,
                         "fieldReview": {
                             "timestamp": Date.now(),
@@ -528,7 +563,7 @@ function saveEntrances() {
     if (unique_entry){
     current_review["reviews"].push(
         {
-          "category": category,
+          "category": selectedCategory,
           "key": selectedField,
           "fieldReview": {
             "timestamp": Date.now(), // TODO put actual timestamp
@@ -554,45 +589,34 @@ function saveEntrances() {
   updateFieldColor();
   checkReviewComplete();
   selectNextField();
+
   
   renderSummaryPageFields();
+}
+function getFieldState(fieldKey) {
+  if (state_dict && state_dict[fieldKey] !== undefined) {
+    return state_dict[fieldKey];
+  } else {
+    console.error(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    return null;
+  }
 }
 
 /**
  * Checks if all fields are reviewed and activates submit button if ready
  */
 function checkReviewComplete() {
-  var fields_reviewed = {};
-  for (const review of current_review.reviews) {
-    const category_name = review.category.slice(1);
-    if (!(category_name in fields_reviewed)) {
-      fields_reviewed[category_name] = [];
-    }
-    fields_reviewed[category_name].push(review.key);
-  }
+  const fields = document.querySelectorAll('.field');
+  for (let field of fields) {
+    let fieldName = field.id.slice(6);
+    const fieldState = getFieldState(fieldName);
+    let reviewed = current_review["reviews"].find(review => review.key === fieldName);
 
-  const categories = document.querySelectorAll(".tab-pane");
-  
-  for (const category of categories) {
-    // const category_name = category.id;
-    const category_name = category.id.slice(0);
-    // TODO: remove resources, once they are working correct
-    if (["resource", "summary"].includes(category_name)) {
-      continue;
-    }
-    if (!(category_name in fields_reviewed)) {
+    if (!reviewed && fieldState !== 'ok') {
+      $('#submit_summary').addClass('disabled');
       return;
     }
-    const category_fields = category.querySelectorAll(".field");
-    for (field of category_fields) {
-      const field_name = field.id.slice(6);
-      if (!fields_reviewed[category_name].includes(field_name)) {
-        return;
-      }
-    }
   }
-
-  // All fields reviewed!
   $('#submit_summary').removeClass('disabled');
 }
 
@@ -711,8 +735,34 @@ const otherTabs = [
   document.getElementById('resource-tab')
 ];
 const reviewContent = document.querySelector(".review__content");
+function updateTabClasses() {
+    const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+    for (let i = 0; i < tabNames.length; i++) {
+        let tabName = tabNames[i];
+        let tab = document.getElementById(tabName + '-tab');
+        if (!tab) continue;
 
-// Event listener for clicking the "Summary" tab button
+        let fields = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+        let allOk = true;
+        for (let j = 0; j < fields.length; j++) {
+            let fieldState = getFieldState(fields[j].id.replace('field_', ''));
+            if (fieldState !== 'ok') {
+                allOk = false;
+                break;
+            }
+        }
+        if (allOk) {
+    tab.classList.add('status');
+    tab.classList.add('status--done');
+        } else {
+            tab.classList.add('status');
+        }
+    }
+}
+window.addEventListener('DOMContentLoaded', updateTabClasses);
+
+
 summaryTab.addEventListener('click', function() {
   toggleReviewControls(false);
   reviewContent.classList.toggle("tab-pane--100");
@@ -737,3 +787,5 @@ function toggleReviewControls(show) {
 }
 
 peerReview(config);
+
+
