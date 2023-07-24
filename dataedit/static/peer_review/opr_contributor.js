@@ -120,7 +120,7 @@ function getErrorMsg(response) {
 
 /**
  * Configurates peer review
- * @param {json} config Configuration JSON
+ * @param {json} config Configuration JSON from Django backend.
  */
 function peerReview(config) {
   /*

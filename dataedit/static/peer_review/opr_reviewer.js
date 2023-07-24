@@ -1,6 +1,11 @@
+// this raises more errors as transition from script to module 
+// makes it more complicated to use onclick in html elements
+// import { updateClientStateDict } from './frontend/state.js'
+
 var selectedField;
 var selectedFieldValue;
 var selectedState;
+var clientSideReviewFinished = false;
 
 var current_review = {
   "topic": config.topic,
@@ -119,7 +124,7 @@ function getErrorMsg(response) {
 
 /**
  * Configurates peer review
- * @param {json} config Configuration JSON
+ * @param {json} config Configuration JSON from Django backend.
  */
 function peerReview(config) {
   /*
@@ -264,7 +269,7 @@ function click_field(fieldKey, fieldValue, category) {
   if (selectedDiv) {
     selectedDiv.style.backgroundColor = '#F6F9FB';
   }
-  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
+
   clearInputFields();
 }
 
@@ -325,6 +330,26 @@ function selectField(fieldList, field) {
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
+  updateClientStateDict(fieldKey=selectedField, state=state);
+  check_if_review_finished();
+}
+
+/**
+ * Saves selected state the client added. 
+ * As the state_dict is generated on page load (in django view) 
+ * based on the stored review, these updates will not be sent to the backend.
+ * @param {string} fieldKey Identifiere of the field
+ * @param {string} state Selected state
+ */
+function updateClientStateDict(fieldKey, state){
+  state_dict = state_dict ?? {};
+  if (fieldKey in state_dict) {
+    // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
+    state_dict[fieldKey] = state;
+  } else {
+    // console.log(`Der Schlüssel '${fieldKey}' ist nicht vorhanden.`);
+    state_dict[fieldKey] = state;
+  }
 }
 
 /**
@@ -461,17 +486,6 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
-
-  /* summaryContainer.innerHTML = `
-    <h4>Accepted:</h4>
-    ${createFieldList(acceptedFields)}
-    <h4>Suggesting:</h4>
-    ${createFieldList(suggestingFields)}
-    <h4>Rejected:</h4>
-    ${createFieldList(rejectedFields)}
-    <h4>Missing:</h4>
-    ${createFieldList(missingFields)}
-  `; */
 }
 
 /**
@@ -498,67 +512,55 @@ function saveEntrances() {
     current_review["reviews"] = [];
   }
   if (selectedField) {
-    var unique_entry = true;
-    var dummy_review = current_review;
-    dummy_review["reviews"].forEach(function (value, idx) {
-      // if field is present already, update field
-      if (value["key"] === selectedField) {
-        unique_entry = false;
-        var element = document.querySelector('[aria-selected="true"]');
-        var category = (element.getAttribute("data-bs-target"));
-        if (selectedState === "ok") {
-          // var fieldElement = document.getElementById("field_" + selectedField);
-          // var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
-          // var commentElement = fieldElement.querySelector('.suggestion--comment');
-          // var new_value
-          // var new_value_comment
-          // if (document.getElementById("valuearea").value !== '') {
-          //   new_value = document.getElementById("valuearea").value;
-          //   new_value_comment = document.getElementById("commentarea").value;
-          // } else {
-          //   new_value = selectedFieldValue
-          //   new_value_comment = ""
-          // }
-          Object.assign(current_review["reviews"][idx],
-            {
-              "category": selectedCategory,
-              "key": selectedField,
-              "fieldReview": {
-                "timestamp": Date.now(),
-                "user": "oep_reviewer", // TODO put actual username
-                "role": "reviewer",
-                "contributorValue": selectedFieldValue,
-                "comment": "",
-                "reviewerSuggestion": "",
-                "state": selectedState,
-              },
-            },
-          )
-        } else {
-          Object.assign(current_review["reviews"][idx],
-            {
-              "category": selectedCategory,
-              "key": selectedField,
-              "fieldReview": {
-                "timestamp": Date.now(),
-                "user": "oep_reviewer", // TODO put actual username
-                "role": "reviewer",
-                "contributorValue": selectedFieldValue,
-                "comment": document.getElementById("commentarea").value,
-                "reviewerSuggestion": document.getElementById("valuearea").value,
-                "state": selectedState,
-              },
-            },
-          )
-          // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
-          var fieldElement = document.getElementById("field_" + selectedField);
-          var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
-          var commentElement = fieldElement.querySelector('.suggestion--comment');
-          suggestionElement.innerText = document.getElementById("valuearea").value;
-          commentElement.innerText = document.getElementById("commentarea").value;
-        }
-      }
-    });
+      var unique_entry = true;
+      var dummy_review = current_review;
+      dummy_review["reviews"].forEach(function ( value, idx ){
+          // if field is present already, update field
+          if (value["key"] === selectedField){
+              unique_entry = false;
+              var element = document.querySelector('[aria-selected="true"]');
+              var category = (element.getAttribute("data-bs-target"));
+              if (selectedState === "ok") {
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": selectedCategory,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": "",
+                              "reviewerSuggestion": "",
+                              "state": selectedState,
+                        },
+                    },
+                )
+              } else {
+                Object.assign(current_review["reviews"][idx],
+                    {
+                        "category": selectedCategory,
+                        "key": selectedField,
+                        "fieldReview": {
+                            "timestamp": Date.now(),
+                              "user": "oep_reviewer", // TODO put actual username
+                              "role": "reviewer",
+                              "contributorValue": selectedFieldValue,
+                              "comment": document.getElementById("commentarea").value,
+                              "reviewerSuggestion": document.getElementById("valuearea").value,
+                              "state": selectedState,
+                        },
+                    },
+                )
+                // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+                var fieldElement = document.getElementById("field_" + selectedField);
+                var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+                var commentElement = fieldElement.querySelector('.suggestion--comment');
+                suggestionElement.innerText = document.getElementById("valuearea").value;
+                commentElement.innerText = document.getElementById("commentarea").value;
+            }
+          }
+      });
     var element = document.querySelector('[aria-selected="true"]');
     var category = (element.getAttribute("data-bs-target"));
     // if field hasn't been written before, add it
@@ -599,7 +601,8 @@ function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
     return state_dict[fieldKey];
   } else {
-    console.error(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
+    // I dont like that this shows as a error in the console
+    // console.log(`Cannot get state for fieldKey "${fieldKey}" because it is not found in stateDict or stateDict itself is null.`);
     return null;
   }
 }
@@ -642,7 +645,8 @@ function checkFieldStates() {
  */
 function check_if_review_finished() {
 
-  if (checkFieldStates()) {
+  if (checkFieldStates() && !clientSideReviewFinished) {
+    clientSideReviewFinished = true;
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
