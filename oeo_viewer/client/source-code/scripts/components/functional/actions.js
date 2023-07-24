@@ -45,7 +45,7 @@ const GreenButton = withStyles((theme) => ({
 const BlueButton = withStyles((theme) => ({
   root: {
     color: 'white',
-    backgroundColor: '#667292',
+    backgroundColor: '#04678F',
     '&:hover': {
       backgroundColor: 'black',
     },
@@ -109,69 +109,70 @@ export default function LayoutActions(props) {
   return (
       <div>
         <Grid container
-              direction="row"
-              >
-              <Grid item xs={6}>
-                  <ButtonGroup color="primary" aria-label="outlined primary button group">
-                      {annotate &&
-                        <GreenButton
-                          variant="contained"
-                          component="span"
-                          onClick={annotateDatabaseHandler}
-                          startIcon={<StorageIcon />}>
-                        Annotate My Data
-                        </GreenButton>
-                      }
-                      <RedButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<ExpandLessIcon />}
-                        onClick={shrinkHandler}>
-                          Shrink
-                      </RedButton>
-                      <OrangeButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<ExpandMoreIcon />}
-                        onClick={expandHandler}>
-                          Expand
-                      </OrangeButton>
-                      <GreenButton
-                        variant="contained"
-                        component="span"
-                        onClick={showParentHandler}
-                        startIcon={<ArrowDropUpIcon />}>
-                          Parent
-                      </GreenButton>
-                      <PurpleButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<CenterFocusWeakIcon />}
-                        onClick={focusHandler}>
-                          Focus
-                      </PurpleButton>
-                      <BlueButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<FullscreenIcon />}
-                        onClick={fitAllHandler}>
-                          Fit
-                      </BlueButton>
-                      {viewAll && <DarkGreenButton
-                        variant="contained"
-                        component="span"
-                        startIcon={<SelectAllIcon />}
-                        onClick={viewAllHandler}>
-                          View All
-                      </DarkGreenButton>}
-                    </ButtonGroup>
-                </Grid>
-                <Grid item xs={1}>
-                  {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
-                </Grid>
-                <Grid item xs={5}>
-                  {search && <CustomSearchInput searchHandler={searchHandler} />}
-                </Grid>
+          direction="row"
+          >
+          <Grid item xs={1} >
+            {hierarchicalView && <CustomSwitch toggleRenderMode={HierarchicalViewHandler}/>}
+          </Grid>
+          <Grid item xs={5}>
+              <ButtonGroup color="primary" aria-label="outlined primary button group">
+                  {annotate &&
+                    <GreenButton
+                      variant="contained"
+                      component="span"
+                      onClick={annotateDatabaseHandler}
+                      startIcon={<StorageIcon />}>
+                    Annotate My Data
+                    </GreenButton>
+                  }
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<ExpandLessIcon />}
+                    onClick={shrinkHandler}>
+                      Shrink
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<ExpandMoreIcon />}
+                    onClick={expandHandler}>
+                      Expand
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    onClick={showParentHandler}
+                    startIcon={<ArrowDropUpIcon />}>
+                      Parent
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<CenterFocusWeakIcon />}
+                    onClick={focusHandler}>
+                      Focus
+                  </BlueButton>
+                  <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<FullscreenIcon />}
+                    onClick={fitAllHandler}>
+                      Fit
+                  </BlueButton>
+                  {viewAll && <BlueButton
+                    variant="contained"
+                    component="span"
+                    startIcon={<SelectAllIcon />}
+                    onClick={viewAllHandler}>
+                      View All
+                  </BlueButton>}
+                </ButtonGroup>
+            </Grid>
+            
+            <Grid item xs={6}>
+              {search && <CustomSearchInput searchHandler={searchHandler} />}
+            </Grid>
         </Grid>
       </div>
   );

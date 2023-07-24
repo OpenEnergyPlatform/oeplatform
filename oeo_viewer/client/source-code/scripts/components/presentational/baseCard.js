@@ -11,8 +11,6 @@ const useStyles = makeStyles({
     borderWidth: "1px",
     backgroundColor: "#f7f7f7",
     borderColor: "#00688B",
-    overflow: "auto",
-    height: '75%',
   }
 });
 

@@ -75,7 +75,7 @@ target/
 
 # Other generated files
 venv*/
-src
+#src
 0_env/
 /envs
 /node_env
@@ -91,3 +91,5 @@ oep-website/oeo_viewer/client/node_modules
 oep-website/oeo_viewer/client/static
 ontologies/
 scripts/
+
+/oeo
