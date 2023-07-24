@@ -5,6 +5,7 @@
 var selectedField;
 var selectedFieldValue;
 var selectedState;
+var clientSideReviewFinished = false;
 
 var current_review = {
   "topic": config.topic,
@@ -644,7 +645,8 @@ function checkFieldStates() {
  */
 function check_if_review_finished() {
 
-  if (checkFieldStates()) {
+  if (checkFieldStates() && !clientSideReviewFinished) {
+    clientSideReviewFinished = true;
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
