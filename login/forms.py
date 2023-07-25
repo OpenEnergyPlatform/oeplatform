@@ -1,7 +1,7 @@
 from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib.auth.forms import SetPasswordForm, UserChangeForm, UserCreationForm
+from django.contrib.auth.forms import SetPasswordForm, UserChangeForm, UserCreationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 
 from .models import UserGroup
@@ -100,6 +100,10 @@ class DetachForm(SetPasswordForm):
         if commit:
             self.user.save()
             self.user.send_activation_mail()
+
+
+class OEPPasswordChangeForm(PasswordChangeForm):
+    captcha = CaptchaField()
 
 
 class ChangeEmailForm(forms.Form):

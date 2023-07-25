@@ -385,6 +385,28 @@ class PeerReviewManager(models.Model):
         )
     
     @staticmethod
+    def filter_latest_open_opr_by_reviewer(reviewer_user):
+        """
+        Get the last open peer review for the given contributor.
+
+        Args:
+            contributor_user (User): The contributor user.
+
+        Returns:
+            PeerReview: Last open peer review or None if not found.
+        """
+        try:
+            return PeerReview.objects.filter(
+                reviewer=reviewer_user,
+                is_finished=False
+            ).exclude(
+                review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
+                review_id__status=ReviewDataStatus.SAVED.value
+            ).latest('date_started')
+        except PeerReview.DoesNotExist:
+            return None
+
+    @staticmethod
     def filter_opr_by_contributor(contributor_user):
         """
         Filter peer reviews by contributor, excluding those with current peer 
@@ -404,6 +426,28 @@ class PeerReviewManager(models.Model):
             review_id__status=ReviewDataStatus.SAVED.value
         )
     
+    @staticmethod
+    def filter_latest_open_opr_by_contributor(contributor_user):
+        """
+        Get the last open peer review for the given contributor.
+
+        Args:
+            contributor_user (User): The contributor user.
+
+        Returns:
+            PeerReview: Last open peer review or None if not found.
+        """
+        try:
+            return PeerReview.objects.filter(
+                contributor=contributor_user,
+                is_finished=False
+            ).exclude(
+                review_id__current_reviewer=Reviewer.REVIEWER.value,
+                review_id__status=ReviewDataStatus.SAVED.value
+            ).latest('date_started')
+        except PeerReview.DoesNotExist:
+            return None
+        
     @staticmethod
     def filter_opr_by_table(schema, table):
         """
