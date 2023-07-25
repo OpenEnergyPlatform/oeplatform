@@ -34,7 +34,7 @@ from .models import HistoryOfOEKG
 
 
 versions = os.listdir(Path(ONTOLOGY_ROOT, 'oeo')) # TODO bad - windows dev will get path error
-print(versions.remove(".DS_Store"))
+# Bryans custom hack!! print(versions.remove(".DS_Store"))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 ONTHOLOGY_NAME = 'oeo'
 onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
