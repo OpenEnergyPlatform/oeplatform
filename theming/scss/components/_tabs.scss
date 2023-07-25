@@ -126,3 +126,29 @@
         }
     }
 }
+
+.pages-nav-tabs {
+    @extend .pb-2;
+    @extend .mb-4;
+    @extend .border-bottom;
+
+    a {
+        @extend .pb-2;
+        @extend .text-secondary;
+        @extend .fw-bold;
+        @extend .fs-6;
+        @extend .text-decoration-none;
+        @extend .px-4;
+
+        &.active {
+            @extend .border-bottom;
+            @extend .border-secondary;
+            @extend .border-4;
+        }
+    }
+
+    svg {
+        @extend .me-1;
+        vertical-align: text-bottom;
+    }
+}
