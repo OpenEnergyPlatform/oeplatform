@@ -52,6 +52,7 @@ class ReviewsView(View):
     def get(self, request, user_id):
         """
         Load the reviews the user identifyes as reviewer and contributor for.
+
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
         :return: Profile renderer
@@ -61,28 +62,57 @@ class ReviewsView(View):
         ##################################################################
         # get reviewer pov reviews
         ##################################################################
+        reviewed_context = {}
+
+        # get all reviews where current user is the reviewer
         peer_review_reviews = PeerReviewManager.filter_opr_by_reviewer(
             reviewer_user=user
         )
+
         latest_review = peer_review_reviews.last()
-        # print(latest_review)
         if latest_review is not None:
-            review_history = peer_review_reviews.exclude(pk=latest_review.pk)
-            current_manager = PeerReviewManager.load(latest_review)
-            # Update days open value stored in peerReviewManager table
-            current_manager.update_open_since(opr=latest_review)
-            latest_review_status = current_manager.status
-            latest_review_days_open = current_manager.is_open_since
-            current_reviewer = current_manager.current_reviewer
-            reviewed_context = {
-                "latest": latest_review,
-                "latest_status": latest_review_status,
-                "current_reviewer": current_reviewer,
-                "latest_days_open": latest_review_days_open, 
+
+            reviewed_context.update({"reviews_available": True}) # TODO: use this in template
+            
+            # Get the latest open peer review (where this user is the reviewer)
+            active_peer_review_revewier = PeerReviewManager.filter_latest_open_opr_by_reviewer(
+                reviewer_user=user
+            )
+
+            review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)
+            
+            # Context da for the "All reviews" section on the profile page
+            reviewed_context.update({
+                "latest": latest_review, # mainly used to check if review exists
                 "history": review_history,
-            }
+            })
+
+            
+            if active_peer_review_revewier is not None:
+                current_manager = PeerReviewManager.load(active_peer_review_revewier)
+                # Update days open value stored in peerReviewManager table
+                current_manager.update_open_since(opr=active_peer_review_revewier)
+                latest_review_status = current_manager.status
+                latest_review_days_open = current_manager.is_open_since
+                current_reviewer = current_manager.current_reviewer
+
+                # All data in this dict is related to the latest active opr
+                # Context da for the "Active reviews" section on the profile page
+                reviewed_context.update({ 
+                    "latest_active": active_peer_review_revewier, # will always be updated if there is another opr available
+                    "latest_status": latest_review_status,
+                    "current_reviewer": current_reviewer,
+                    "latest_days_open": latest_review_days_open, 
+                })
+            else: # TODO remove else if not causes error in template
+                reviewed_context.update({ 
+                    "latest_active": None,
+                    "latest_status": None,
+                    "current_reviewer": None,
+                    "latest_days_open": None, 
+                })
         else:
-            reviewed_context = None
+            reviewed_context.update({"reviews_available": False})  # TODO: use this in template
 
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
@@ -94,29 +124,58 @@ class ReviewsView(View):
         ##################################################################
         # get contributor pov reviews
         ##################################################################
+        reviewed_contributions_context = {}
+
+        # all peer reviews related to the contributor user
         peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
             contributor_user=user
         )
         latest_reviewed_contribution = peer_review_contributions.last()
         if latest_reviewed_contribution is not None:
-            reviewed_contribution_history = peer_review_contributions.exclude(
-                pk=latest_reviewed_contribution.pk
+
+            reviewed_contributions_context.update({"reviews_available": True}) # TODO: use this in template
+
+            # Get the latest open peer review (where this user is the contributor)
+            active_peer_review_contributor =  PeerReviewManager.filter_latest_open_opr_by_contributor(
+                contributor_user=user
             )
-            current_manager = PeerReviewManager.load(latest_reviewed_contribution)
-            # Update days open value stored in peerReviewManager table
-            current_manager.update_open_since(opr=latest_reviewed_contribution)
-            latest_reviewed_contribution_status = current_manager.status
-            latest_reviewed_contribution_days_open = current_manager.is_open_since
-            current_reviewer = current_manager.current_reviewer
+
+            reviewed_contribution_history = peer_review_contributions.exclude(
+                pk=active_peer_review_contributor.pk
+            )
+
+            # Context da for the "All reviews" section on the profile page
             reviewed_contributions_context = {
-                "latest": latest_reviewed_contribution,
-                "latest_status": latest_reviewed_contribution_status,
-                "current_reviewer": current_reviewer,
-                "latest_days_open": latest_reviewed_contribution_days_open,
+                "latest": latest_reviewed_contribution, # mainly used to check if review exists
                 "history": reviewed_contribution_history,
             }
+
+            if active_peer_review_contributor is not None:
+
+                current_manager = PeerReviewManager.load(active_peer_review_contributor)
+                # Update days open value stored in peerReviewManager table
+                current_manager.update_open_since(opr=active_peer_review_contributor)
+                latest_reviewed_contribution_status = current_manager.status
+                latest_reviewed_contribution_days_open = current_manager.is_open_since
+                current_reviewer = current_manager.current_reviewer
+
+                # All data in this dict is related to the latest active opr
+                # Context da for the "Active reviews" section on the profile page
+                reviewed_contributions_context.update({ 
+                    "latest_active": active_peer_review_contributor, # will always be updated if there is another opr available
+                    "latest_status": latest_reviewed_contribution_status,
+                    "current_reviewer": current_reviewer,
+                    "latest_days_open": latest_reviewed_contribution_days_open, 
+                })
+            else: # TODO remove else if not causes error in template
+                reviewed_contributions_context.update({ 
+                    "latest_active": None,
+                    "latest_status": None,
+                    "current_reviewer": None,
+                    "latest_days_open": None, 
+                })         
         else:
-            reviewed_contributions_context = None
+            reviewed_contributions_context.update({"reviews_available": False}) # TODO: use this in template
 
         # Sort the reviews by table name
         sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)

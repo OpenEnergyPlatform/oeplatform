@@ -112,9 +112,9 @@
 {% include "login/user_nav.html" %}
     <h2 class="header">Active Open Peer Reviews</h2>
     <p> 
-        This section lists the latest active reviews in which you are currently participating as a Reviewer or Data Publisher.
+        This section displays the review with the latest activity, where you are currently participating as a Reviewer or Data Publisher.
     </p>
-    {% if reviewer_reviewed.latest is not None %}
+    {% if not reviewer_reviewed.latest_active or reviewer_reviewed.latest_active is not None %}
         {% if reviewer_reviewed.current_reviewer == "reviewer" and reviewer_reviewed.latest_status != "FINISHED" %}
             <div class="profile-rvw">
                 <!-- placeholder css class for contributor `profile-rvw__item--reviewer` -->
@@ -131,14 +131,14 @@
                             <div class="profile-rvw__item-days">Open {{ reviewer_reviewed.latest_days_open }} days ago</div>
                             <div>&nbsp—&nbsp</div>
                             <!-- placeholder date -->
-                            <div class="profile-rvw__item-date">Started on {{ reviewer_reviewed.latest.date_started }}</div>
+                            <div class="profile-rvw__item-date">Started on {{ reviewer_reviewed.latest_active.date_started }}</div>
                         </div>
                     </div>
                     <div class="profile-rvw__item-btm">
                         <!-- placeholder table name -->
                         <div class="profile-rvw__item-name">
-                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest.schema reviewer_reviewed.latest.table reviewer_reviewed.latest.id %}" class="btn btn-primary">
-                                {{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }} 
+                            <a href="{% url 'peer_review_reviewer' reviewer_reviewed.latest_active.schema reviewer_reviewed.latest_active.table reviewer_reviewed.latest_active.id %}" class="btn btn-primary">
+                                {{ reviewer_reviewed.latest_active.schema }} - {{ reviewer_reviewed.latest_active.table }} 
                             </a>
                         </div>
                         <div class="profile-rvw__item-history">
@@ -159,7 +159,7 @@
 
 
                 
-        {% elif reviewer_reviewed.latest_status == "FINISHED" %}
+        {% elif reviewer_reviewed.latest_active is None %}
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
             <ul class="profile-rvw__list">
                 <li>
@@ -171,14 +171,14 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--reviewer">
             <ul class="profile-rvw__list">
                 <li>
-                    <span>{{ reviewer_reviewed.latest.schema }} - {{ reviewer_reviewed.latest.table }}</span> waits for the Data Publisher to submit the review.
+                    <span>{{ reviewer_reviewed.latest_active.schema }} - {{ reviewer_reviewed.latest_active.table }}</span> waits for the Data Publisher to submit the review.
                 </li>
             </ul>
         </div>
         {% endif %}
     {% endif %}
 
-    {% if contributor_reviewed.latest is not None %}
+    {% if not contributor_reviewed.latest_active or contributor_reviewed.latest_active is not None %}
         {% if contributor_reviewed.current_reviewer == "contributor" and contributor_reviewed.latest_status != "FINISHED" %}  
          <!-- placeholder css class for contributor `profile-rvw__item--contributor` -->
          <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
@@ -194,14 +194,14 @@
                     <div class="profile-rvw__item-days">Open {{ contributor_reviewed.latest_days_open }} days ago</div>
                     <div>&nbsp—&nbsp</div>
                     <!-- placeholder date -->
-                    <div class="profile-rvw__item-date">Started on {{ contributor_reviewed.latest.date_started }}</div>
+                    <div class="profile-rvw__item-date">Started on {{ contributor_reviewed.latest_active.date_started }}</div>
                 </div>
             </div>
             <div class="profile-rvw__item-btm">
                 <!-- placeholder table name -->
                 <div class="button profile-rvw__item-name">
-                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest.schema contributor_reviewed.latest.table contributor_reviewed.latest.id %}" class="btn btn-primary">
-                        {{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}  
+                    <a href="{% url 'peer_review_contributor' contributor_reviewed.latest_active.schema contributor_reviewed.latest_active.table contributor_reviewed.latest_active.id %}" class="btn btn-primary">
+                        {{ contributor_reviewed.latest_active.schema }} - {{ contributor_reviewed.latest_active.table }}  
                     </a>
                 </div>
                 <div class="profile-rvw__item-history">
@@ -220,7 +220,7 @@
                 </div>
             </div>
         </div>
-        {% elif contributor_reviewed.latest_status == "FINISHED" %}
+        {% elif contributor_reviewed.latest_active is None %}
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
             <ul class="profile-rvw__list">
                 <li>
@@ -232,14 +232,31 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
             <ul class="profile-rvw__list">
                 <li>
-                    <span>{{ contributor_reviewed.latest.schema }} - {{ contributor_reviewed.latest.table }}</span> waits for the Reviewer to submit the review.
+                    <span>{{ contributor_reviewed.latest_active.schema }} - {{ contributor_reviewed_active.latest.table }}</span> waits for the Reviewer to submit the review.
                 </li>
             </ul>
         </div>
         {% endif %}
     {% endif %}
 
-        <h2 class="header">All reviews</h2>
+        <h2 class="header">
+            All reviews
+            
+            <button type="button"
+                class="btn btn-outline-light"
+                data-bs-toggle="popover"
+                data-trigger="focus"
+                title="Review cards"
+                data-bs-content="The listed reviews are either ongoing or completed. 
+                                You can click the topic - table name link to either open the dataview page or access the review, 
+                                depending on the status of the review. If the review is ongoing and it is currently your turn, 
+                                you will be able to access the review. However, if you have been the last user to submit a review, 
+                                you will have to wait for the other participant to submit or finish the review before you can access it."
+                style="margin-left: 10px;">
+                
+                <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+            </button>
+        </h2>
         <p> 
             This section lists all available reviews. 
         </p>
@@ -263,7 +280,9 @@
                         <!-- placeholder type: contributor or reviewer -->
                         <div class="profile-rvw__item-type">Participated as Reviewer</div>
                         <!-- placeholder status: saved, submitted, finished -->
-                        <div class="profile-rvw__item-status profile-rvw__item-status--done">{% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}</div>
+                        <div class="profile-rvw__item-status profile-rvw__item-status--done">
+                            {% if review.is_finished == True %} Completed {% else %} Ongoing {% endif %}
+                        </div>
                     </div>
                     <div class="profile-rvw__item-right">
                         <!-- placeholder open: day number -->
@@ -281,7 +300,11 @@
                 <div class="profile-rvw__item-btm">
                     <!-- placeholder table name -->
                     <div class="profile-rvw__item-name">
-                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                        {% if review.is_finished == True %} 
+                            <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a> 
+                        {% else %} 
+                            <a href=" {% url 'peer_review_reviewer' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a> 
+                        {% endif %}  
                     </div>
                     <div class="profile-rvw__item-history">
                         <!-- remove button wrapper div once history dropdown is implemented -->
@@ -316,7 +339,7 @@
     {% else %}
         <ul>
             <li>
-                No reviews found for this User.
+                You have not participated in a review yet.
             </li>
         </ul>
     {% endif %}
@@ -353,7 +376,11 @@
             <div class="profile-rvw__item-btm">
                 <!-- placeholder table name -->
                 <div class="profile-rvw__item-name">
-                    <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a>
+                    {% if review.is_finished == True %} 
+                        <a href="/dataedit/view/{{ review.schema }}/{{ review.table }}">{{ review.schema }} - {{ review.table }}</a> 
+                    {% else %} 
+                        <a href=" {% url 'peer_review_contributor' table=review.table schema=review.schema review_id=review.id %}">{{ review.schema }} - {{ review.table }}</a> 
+                    {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">
                     <!-- remove button wrapper div once history dropdown is implemented -->
@@ -394,7 +421,7 @@
         {% else %}
     <ul>
         <li>
-            No contributions found for this User.
+            No reviews available for your published data.
         </li>
     </ul>
         {% endif %}
@@ -402,3 +429,15 @@
 </div>
 {% endif %}
 {% endblock %}
+
+{% block after-body-bottom-js %}
+<script>
+    $(function () {
+        $('[data-bs-toggle="popover"]').popover()
+        // $('.popover-dismiss').popover({
+        //     trigger: 'focus'
+        // })
+    } )
+
+</script>
+{% endblock after-body-bottom-js %}

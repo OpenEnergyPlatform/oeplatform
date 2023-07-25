@@ -26,6 +26,19 @@
 
   <div class="content">
     <div class="content__container">
+
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header bg-danger">
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            The value suggestion text field is required to save the field review!
+          </div>
+        </div>
+      </div>
+
       <div class="alert alert-warning" style="width:100%" role="alert">
         This feature is in early rollout phase now. We do expect you to experience some errors. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
       </div>
@@ -45,7 +58,7 @@
             <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -303,7 +316,7 @@
               </div>
               <div class="d-none review__remarks" id="reviewer_remarks">
                 <div class="review__field" id="field-value">
-                  <label for="valuearea" class="form-label">Your value suggestion</label>
+                  <label for="valuearea" class="form-label">Your value suggestion*</label>
                   <textarea class="form-control" id="valuearea" rows="2" ></textarea>
                 </div>
                 <div class="review__field review__field--nolabel" id="field-comment">
@@ -331,11 +344,9 @@
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     let state_dict = JSON.parse('{{ state_dict | escapejs }}');
-    console.log(state_dict)
     if ( state_dict && Object.keys(state_dict).length > 0) {
     for (let [key, value] of Object.entries(state_dict)) {
       let field_id = `#field_${key}`.replace(/\./g, "\\.");
-      console.log(field_id);
       $(field_id).addClass(`field-${value}`);
     }
 }
