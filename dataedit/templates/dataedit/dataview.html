@@ -171,11 +171,11 @@
         </a>
       </span>
       <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
-      <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
-        <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
-          Edit
-        </a>
-      </span>
+      <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata or your review is in progress, data can't be changed" {% endif %}>
+    <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add or opr.opr_id and not opr.is_finished %} disabled {% endif %}">
+      Edit
+    </a>
+</span>
     </div>
     <div class="metadata__container">
       {{ meta_widget }}

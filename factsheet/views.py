@@ -15,7 +15,7 @@ from rdflib.namespace import XSD, Namespace
 from rdflib.graph import DATASET_DEFAULT_GRAPH_ID as default
 
 import os
-from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT, RDF_DATABASES
 from datetime import date
 from SPARQLWrapper import SPARQLWrapper, JSON
 import sys
@@ -34,6 +34,7 @@ from .models import HistoryOfOEKG
 
 
 versions = os.listdir(Path(ONTOLOGY_ROOT, 'oeo')) # TODO bad - windows dev will get path error
+# Bryans custom hack!! print(versions.remove(".DS_Store"))
 version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 ONTHOLOGY_NAME = 'oeo'
 onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
@@ -58,7 +59,12 @@ update_endpoint = 'http://localhost:3030/ds/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
-store = sparqlstore.SPARQLUpdateStore()
+store = sparqlstore.SPARQLUpdateStore(
+    auth=(
+        RDF_DATABASES.get("factsheet").get("dbuser"), 
+        RDF_DATABASES.get("factsheet").get("dbpasswd")
+    )
+)
 store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
