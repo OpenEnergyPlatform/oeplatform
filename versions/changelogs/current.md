@@ -4,6 +4,7 @@
 - show sandbox tables in interface but not in schema view
 
 ### Features
+- Adding a cache-busting mechanism to deliver changes to the user interface more easily to the user [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
 - Add input field validation for value suggestion field (open peer review) [(#1320)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1320)
 - Enable submit button if all fields are reviewd (contributor & reviewer page) [(#1258)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1258)
 - Visually indicate the progress of a review for each category of the metadata for both contributor and reviewer [(#1275)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1275)
