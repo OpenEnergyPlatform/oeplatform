@@ -84,3 +84,5 @@ if not DEBUG:
     AUTHENTICATION_BACKENDS = ['login.models.UserBackend', 'axes.backends.AxesBackend']
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+CORS_ORIGIN_ALLOW_ALL = True
