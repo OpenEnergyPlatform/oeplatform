@@ -671,8 +671,9 @@ function checkReviewComplete() {
     }
   }
   $('#submit_summary').removeClass('disabled');
-
-  showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+  if (!clientSideReviewFinished){
+    showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+  }
 }
 
 
@@ -697,7 +698,7 @@ function check_if_review_finished() {
 
   if (checkFieldStates() && !clientSideReviewFinished) {
     clientSideReviewFinished = true;
-    showToast("Review completed!", "You completed the review an can now grant a suitable badge!", 'success');
+    showToast("Review completed!", "You completed the review an can now award a suitable  badge!", 'success');
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
