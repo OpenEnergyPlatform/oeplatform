@@ -11,7 +11,7 @@
 - Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
 
 ### Bugs
-- Store the ne oem-field value as accapted value in the op-review datamodel [(#)](https://github.com/OpenEnergyPlatform/oeplatform/pull/)
+- If a new value was accapted as part of a field review store the value as accapted value in the op-review datamodel [(#1322)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1322)
 - Fix the active reviews list in the profile page will now always show the latest open review and the all reviews list provides a link to the review if it is ongoing [(#1317)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1317)
 - Fixed a bug that prevents a review from being completed (awarding a badge) and the contributor getting stuck on the review page because the "Submit" button remains disabled [(#1314)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1314)
 - Fix Open Peer review: Remove duplicated entries in summary table [(#1279)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1279)
