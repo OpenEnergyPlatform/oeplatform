@@ -59,12 +59,16 @@ update_endpoint = 'http://localhost:3030/ds/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
-store = sparqlstore.SPARQLUpdateStore(
+""" store = sparqlstore.SPARQLUpdateStore(
     auth=(
         RDF_DATABASES.get("factsheet").get("dbuser"), 
         RDF_DATABASES.get("factsheet").get("dbpasswd")
     )
-)
+) """
+
+
+store = sparqlstore.SPARQLUpdateStore()
+
 store.open((query_endpoint, update_endpoint))
 oekg = Graph(store, identifier=default)
 
