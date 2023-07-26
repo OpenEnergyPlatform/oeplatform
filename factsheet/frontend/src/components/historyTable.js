@@ -55,7 +55,7 @@ export default function HistoryTable() {
     const [loading, setLoading] = useState(true);
 
     const getHistory= async () => {
-    const { data } = await axios.get(conf.toep + `sirop/history/`);
+    const { data } = await axios.get(conf.toep + `sirop/get_oekg_history/`);
         return data;
     };
 

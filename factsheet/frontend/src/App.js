@@ -33,9 +33,6 @@ function App() {
   const url_params = String(window.location.href).split('/').pop();
   const url_page = String(window.location.href).split('/').at(-2);
 
-  console.log(url_params);
-  console.log(url_page);
-
   const getData = async () => {
     if (url_page === 'factsheet') {
       const { data } = await axios.get(conf.toep + `sirop/get/`, { params: { id: url_params } });
@@ -55,7 +52,7 @@ function App() {
   } 
 
 
-  if (url_params === 'history') {
+  if (url_params === 'oekg_history') {
     return <ThemeProvider theme={theme}><HistoryTable/></ThemeProvider>
   }
 
