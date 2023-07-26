@@ -101,7 +101,6 @@ function TabPanel(props: TabPanelProps) {
 function Factsheet(props) {
   
   const navigate = useNavigate();
-
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = getSteps();
 

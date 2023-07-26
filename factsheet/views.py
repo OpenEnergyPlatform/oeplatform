@@ -50,11 +50,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -138,8 +138,16 @@ def create_factsheet(request, *args, **kwargs):
     date_of_publication = request_body['date_of_publication']
     report_title = request_body['report_title']
 
+ 
 
-    if (None, DC.acronym, Literal(clean_name(acronym)) ) in oekg:
+    Duplicate_study_factsheet = False
+
+    for s, p, o in oekg.triples(( None, RDF.type , OEO.OEO_00010252 )):
+        study_acronym = oekg.value(s, DC.acronym)
+        if (str(clean_name(acronym)) == str(study_acronym)):
+            Duplicate_study_factsheet = True
+
+    if Duplicate_study_factsheet == True:
         response = JsonResponse('Factsheet exists', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
         return response
@@ -370,20 +378,20 @@ def update_factsheet(request, *args, **kwargs):
     models = request_body['models']
     frameworks = request_body['frameworks']
 
-    update_factsheet = "No"
-    if (fsData["acronym"] != acronym):
-        if (None, DC.acronym, Literal(clean_name(acronym)) ) in oekg:
-            update_factsheet = "Duplicate"
-        update_factsheet = "Yes"
-    else:
-        update_factsheet = "Yes"
 
-    if update_factsheet ==  "Duplicate":
+    Duplicate_study_factsheet = False
+
+    for s, p, o in oekg.triples(( None, RDF.type , OEO.OEO_00010252 )):
+        study_acronym = oekg.value(s, DC.acronym)
+        if ( str(clean_name(acronym)) == str(study_acronym) and str(clean_name(acronym)) != str(fsData['acronym']) ):
+            Duplicate_study_factsheet = True
+
+    if Duplicate_study_factsheet ==  True:
         response = JsonResponse('Factsheet exists', safe=False, content_type='application/json')
         patch_response_headers(response, cache_timeout=1)
         return response
         
-    if update_factsheet ==  "Yes":
+    if Duplicate_study_factsheet ==  False:
         study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
 
         for s, p, o in oekg.triples(( study_URI, OEKG["has_scenario"], None )):
@@ -473,16 +481,20 @@ def update_factsheet(request, *args, **kwargs):
                         oekg.add(( scenario_URI,  OEO.RO_0002234, output_dataset_URI ))
 
                 oekg.add(( study_URI, OEKG["has_scenario"], scenario_URI ))
-                
-        for s, p, o in oekg.triples((study_URI, DC.acronym, None)):
-            oekg.remove((s, p, o))
-        if acronym != '':
-            oekg.add((study_URI, DC.acronym, Literal(acronym)))
 
-        for s, p, o in oekg.triples((study_URI, OEKG["has_full_name"], None)):
-            oekg.remove((s, p, o))
-        if studyName != '':
+        if str(clean_name(acronym)) != str(fsData['acronym']) and acronym != '':
+            oekg.remove((study_URI, DC.acronym, Literal(clean_name(fsData['acronym']))))
+            add_history( study_URI, DC.acronym, clean_name(fsData['acronym']), 'remove', request.user)
+            oekg.add((study_URI, DC.acronym, Literal(acronym)))
+            add_history( study_URI, DC.acronym, Literal(acronym), 'add', request.user)
+
+        if str(clean_name(studyName)) != str(fsData['study_name']) and studyName != '':
+            oekg.remove((study_URI, OEKG["has_full_name"], Literal(clean_name(fsData['study_name']))))
+            if fsData['study_name'] != '':
+                add_history(study_URI, OEKG["has_full_name"], clean_name(fsData['study_name']), 'remove', request.user)
             oekg.add((study_URI, OEKG["has_full_name"], Literal(studyName)))
+            add_history( study_URI, OEKG["has_full_name"], Literal(studyName), 'add', request.user)
+
 
         for s, p, o in oekg.triples((study_URI, OEKG["report_title"], None)):
             oekg.remove((s, p, o))
@@ -834,7 +846,6 @@ def query_oekg(request, *args, **kwargs):
                 authors_exp = "OEO:OEO_00000506 ?authors ;" if authors_list != [] else ""
                 )
 
-    print(final_query)
     
     sparql.setReturnFormat(JSON)
     sparql.setQuery(final_query)

@@ -7,7 +7,7 @@ urlpatterns = [
     re_path(r'^factsheet/*', views.factsheets_index),
     re_path(r'^compare/*', views.factsheets_index),
     path(r"add/", views.create_factsheet),
-    path(r"get_history/", views.get_history),
+    path(r"history/", views.get_history),
     path(r"update/", views.update_factsheet),
     path(r"name/", views.factsheet_by_name),
     path(r"get/", views.factsheet_by_id),
