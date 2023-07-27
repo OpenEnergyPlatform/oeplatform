@@ -505,11 +505,12 @@ def update_factsheet(request, *args, **kwargs):
             oekg.add((study_URI, OEKG["has_full_name"], Literal(studyName)))
             add_history( study_URI, OEKG["has_full_name"], Literal(studyName), 'add', request.user)
 
-
-        for s, p, o in oekg.triples((study_URI, OEKG["report_title"], None)):
-            oekg.remove((s, p, o))
-        if report_title != '':
+        if str(clean_name(report_title)) != str(fsData['report_title']) and report_title != '':
+            oekg.remove((study_URI, OEKG["report_title"], Literal(clean_name(fsData['report_title']))))
+        if fsData['report_title'] != '':
+            add_history(study_URI, OEKG["report_title"], clean_name(fsData['report_title']), 'remove', request.user)
             oekg.add(( study_URI, OEKG["report_title"], Literal(report_title) ))
+            add_history( study_URI, OEKG["report_title"], Literal(report_title), 'add', request.user)
 
         for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
             oekg.remove((s, p, o))

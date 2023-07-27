@@ -20,17 +20,17 @@ const columns: GridColDef[] = [
     {
       field: 'subject',
       headerName: 'Subject',
-      width: 500,
+      width: 600,
     },
     {
       field: 'predicate',
       headerName: 'Predicate',
-      width: 500,
+      width: 470,
     },
     {
       field: 'object',
       headerName: 'Object',
-      width: 500,
+      width: 470,
     },
     {
       field: 'action',
@@ -40,7 +40,7 @@ const columns: GridColDef[] = [
     {
       field: 'user',
       headerName: 'User',
-      width: 200,
+      width: 180,
     },
     {
       field: 'timestamp',
