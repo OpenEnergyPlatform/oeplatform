@@ -78,7 +78,8 @@ jobs:
       - name: Create API token
         run: |
           echo LOCAL_OEP_TOKEN=`python manage.py shell -c "from login.models import Token; print(Token.objects.filter(user__name='test').first().key)"` >> $GITHUB_ENV
-      
+      - name: Compress cache & cache busting 
+        run: python manage.py compress
       - name: Start OEP
         run: python manage.py runserver 8000 &
 
