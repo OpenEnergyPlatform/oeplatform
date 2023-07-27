@@ -1,6 +1,7 @@
 {% extends "dataedit/filter.html" %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load compress %}
 {% block after-head %}
 <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
@@ -363,5 +364,7 @@
         });
     });
 </script>
+{% compress js %}
   <script src="/static/peer_review/opr_reviewer.js"></script>
+{% endcompress %}
 {% endblock after-body-bottom-js %}
