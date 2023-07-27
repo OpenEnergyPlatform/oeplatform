@@ -129,7 +129,7 @@
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -150,7 +150,7 @@
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -166,7 +166,7 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -185,7 +185,7 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -204,7 +204,7 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -223,7 +223,7 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -242,7 +242,7 @@
                     {% else %}
                       <span class="key">{{item.field}}</span>
                       <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span id="reviewerSuggestion" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -358,6 +358,12 @@
             key.textContent = formattedWords.join(" ");
         });
     });
+</script>
+    <script>
+        var initialReviewerSuggestion;
+window.onload = function() {
+  initialReviewerSuggestion = document.getElementById('reviewerSuggestion').innerText;
+}
 </script>
   <script src="/static/peer_review/opr_contributor.js"></script>
 {% endblock after-body-bottom-js %}
