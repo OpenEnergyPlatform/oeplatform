@@ -12,6 +12,7 @@
 - Add delete table button to dataview page [(#1280)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1280)
 
 ### Bugs
+- Reset review controles once another field is selected and enhance notifications [(#1326)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1326)
 - Fix the active reviews list in the profile page will now always show the latest open review and the all reviews list provides a link to the review if it is ongoing [(#1317)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1317)
 - Fixed a bug that prevents a review from being completed (awarding a badge) and the contributor getting stuck on the review page because the "Submit" button remains disabled [(#1314)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1314)
 - Fix Open Peer review: Remove duplicated entries in summary table [(#1279)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1279)
