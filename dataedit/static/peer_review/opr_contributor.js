@@ -486,8 +486,7 @@ function saveEntrances() {
   if (selectedState != "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    const liveToastBtn = document.getElementById('liveToastBtn');
-    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+  
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
