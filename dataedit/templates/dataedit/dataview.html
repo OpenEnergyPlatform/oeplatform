@@ -2,6 +2,7 @@
 {% load dataedit.metadata %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load compress %}
 
 
 {% block site-header %}
@@ -171,11 +172,11 @@
         </a>
       </span>
       <button class="btn btn-sm btn-success" onclick="downloadMetadata();" data-bs-toggle="tooltip" title="Download metadata in JSON format">Download JSON</button>
-      <span {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata" {% endif %}>
-        <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add %} disabled {% endif %}">
-          Edit
-        </a>
-      </span>
+      <span {% if not can_add or opr.opr_id and not opr.is_finished %} data-bs-toggle="tooltip" title="You need write permissions on this table to edit metadata or your review is in progress, data can't be changed" {% endif %}>
+    <a href="{{table}}/meta_edit" type="button" class="btn btn-success btn-sm {% if not can_add or opr.opr_id and not opr.is_finished %} disabled {% endif %}">
+      Edit
+    </a>
+</span>
     </div>
     <div class="metadata__container">
       {{ meta_widget }}
@@ -320,6 +321,18 @@ for row in result.json():
 </div>
 <hr>
 
+{% if can_add %} 
+<h4>Management</h4>
+<div>
+  <button class="btn btn-danger mt-2 {% if not can_add %} disabled {% endif %}" id="dataview-table-delete"><i class="fa fa-trash mr-2"></i>Delete table</button>
+  <div id="dataview-table-create-msg" class="invisible dataview-status">
+    <span class="spinner spinner-border spinner-border-sm"></span>
+    <span class="message"></span>
+  </div>
+</div>
+<hr>
+{% endif %}
+
 {% endblock main-right-sidebar-content-additional %}
 
 {% block after-head %}
@@ -333,17 +346,35 @@ for row in result.json():
 {% endblock after-head %}
 
 {% block after-body-bottom-js %}
+
+<!-- dialog: keep outside of main container -->
+<div id="dataview-confirm-delete" class="modal fade">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              Do you want to delete the table (including data and metadata)?
+          </div>
+          <div class="modal-body">
+              <button class="btn btn-sm btn-dark mr-2" id="dataview-confirm-delete-delete">delete</buttton>
+              <button class="btn btn-sm btn-light" id="dataview-confirm-delete-cancel">cancel</buttton>
+          </div>
+      </div>
+  </di>
+</div>
+
+{% compress js %}
 <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
 <script src="{% static 'dataedit/wkx.min.js' %}"></script>
 <script src="{% static 'dataedit/proj4.min.js' %}"></script><!-- src: https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js -->
 <script src="{% static 'dataedit/query-builder.standalone.js' %}"></script>
 <script src="{% static 'dataedit/backend.js' %}"></script>
+<script src="{% static 'dataedit/dataedit.js' %}"></script>
 <script src="{% static 'dataedit/plotly-latest.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 <script src="{% static 'dataedit/json5.min.js' %}"></script><!-- src: https://unpkg.com/json5@^2.0.0/dist/index.min.js -->
 
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="{% static 'dataedit/leaflet.min.js' %}"></script><!-- src: https://unpkg.com/leaflet@1.3.1/dist/leaflet.js -->
-
+{% endcompress %}
 
 <script>
   var csrftoken = getCookie('csrftoken');
@@ -377,6 +408,8 @@ for row in result.json():
       a.parentNode.removeChild(a);
     })
   };
+
+  DataEdit(table=table, schema=schema);
 
   $(function () {
     $('[data-toggle="tooltip"]').tooltip()

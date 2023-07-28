@@ -56,6 +56,7 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "compressor",
 )
 
 MIDDLEWARE = (
@@ -159,3 +160,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+STATICFILES_FINDERS = {
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+}
+
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True

@@ -1,7 +1,7 @@
 {% extends "dataedit/filter.html" %}
 {% load static %}
 {% load django_bootstrap5 %}
-
+{% load compress %}
 {% block after-head %}
 <!-- <link href="/static/peer_review/peer_review.css" rel="stylesheet"> -->
 {% endblock after-head %}
@@ -27,6 +27,31 @@
 
   <div class="content">
     <div class="content__container">
+
+      <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <!-- <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header bg-success"> 
+            <strong class="me-auto">Success</strong> 
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-header bg-danger">
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            The value suggestion text field is required to save the field review!
+          </div>
+        </div> -->
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto" id="toastTitle"></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body" id="toastBody">
+          </div>
+        </div>
+      </div>
+
       <div class="alert alert-warning" style="width:100%" role="alert">
         This feature is in early rollout phase now. We do expect you to experience some errors. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
       </div>
@@ -46,7 +71,7 @@
             <img src="{% static 'peer_review/img/opr-process-bpmn.png' %}" alt="Bild" class="img-fluid">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
@@ -57,22 +82,22 @@
     <div class="fullwidth-tabs__container">
       <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
         <li class="nav-item show active" role="presentation">
-          <button class="nav-link active status status--done" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
+          <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">General</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false">Spatial & temporal</button>
+          <button class="nav-link" id="spatiotemporal-tab" data-bs-toggle="tab" data-bs-target="#spatiotemporal" type="button" role="tab" aria-controls="spatiotemporal" aria-selected="false">Spatial & temporal</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source</button>
+          <button class="nav-link" id="source-tab" data-bs-toggle="tab" data-bs-target="#source" type="button" role="tab" aria-controls="source" aria-selected="false">Source</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status status--done" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
+          <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">License</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
+          <button class="nav-link" id="contributor-tab" data-bs-toggle="tab" data-bs-target="#contributor" type="button" role="tab" aria-controls="contributor" aria-selected="false">Contributor</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link status" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource</button>
+          <button class="nav-link" id="resource-tab" data-bs-toggle="tab" data-bs-target="#resource" type="button" role="tab" aria-controls="resource" aria-selected="false">Resource</button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
@@ -80,7 +105,7 @@
       </ul>
       <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
         <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
-          <button id="submit_summary">
+          <button id="submit_summary" class="disabled">
             <span class="btn__icon">
               <svg width="16" height="16" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z"/>
@@ -107,7 +132,7 @@
             <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
               <div class="review__items">
                 {% for item in meta.general %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="general" onclick="click_field('{{item.field}}', '{{ item.value }}', 'general');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -127,7 +152,7 @@
               <div class="review__items">
                 <p class="review__items-cat">Spatial</p>
                 {% for item in meta.spatial %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="spatial" onclick="click_field('{{item.field}}', '{{ item.value }}', 'spatial');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -143,7 +168,7 @@
                 {% endfor %}
                 <p class="review__items-cat">Temporal</p>
                 {% for item in meta.temporal %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="temporal" onclick="click_field('{{item.field}}', '{{ item.value }}', 'temporal');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -162,7 +187,7 @@
             <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
               <div class="review__items">
               {% for item in meta.source %} 
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="source" onclick="click_field('{{item.field}}', '{{ item.value }}', 'source');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -181,7 +206,7 @@
             <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
               <div class="review__items">
               {% for item in meta.license %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="license" onclick="click_field('{{item.field}}', '{{ item.value }}', 'license');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -200,7 +225,7 @@
             <div class="tab-pane fade" id="contributor" role="tabpanel" aria-labelledby="contributor-tab">
               <div class="review__items">
               {% for item in meta.contributor %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="contributor" onclick="click_field('{{item.field}}', '{{ item.value }}', 'contributor');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -219,7 +244,7 @@
             <div class="tab-pane fade" id="resource" role="tabpanel" aria-labelledby="resource-tab">
               <div class="review__items">
                 {% for item in meta.resource %}
-                <div id="field_{{item.field}}" class="field review__item" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
+                <div id="field_{{item.field}}" class="field review__item" data-category="resource" onclick="click_field('{{item.field}}', '{{ item.value }}', 'resource');">
                   <p class="review__item-content">
                     {% if item.field is Null %}
                       <span class="key">{{item.field}}</span>
@@ -304,7 +329,7 @@
               </div>
               <div class="d-none review__remarks" id="reviewer_remarks">
                 <div class="review__field" id="field-value">
-                  <label for="valuearea" class="form-label">Your value suggestion</label>
+                  <label for="valuearea" class="form-label">Your value suggestion*</label>
                   <textarea class="form-control" id="valuearea" rows="2" ></textarea>
                 </div>
                 <div class="review__field review__field--nolabel" id="field-comment">
@@ -332,16 +357,26 @@
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     let state_dict = JSON.parse('{{ state_dict | escapejs }}');
-    console.log(state_dict)
     if ( state_dict && Object.keys(state_dict).length > 0) {
     for (let [key, value] of Object.entries(state_dict)) {
       let field_id = `#field_${key}`.replace(/\./g, "\\.");
-      console.log(field_id);
       $(field_id).addClass(`field-${value}`);
     }
 }
     
     // var existing_review = JSON.parse("{{ existing_review | escapejs }}");
   </script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        let keys = document.querySelectorAll(".key");
+        keys.forEach(key => {
+            let words = key.textContent.split(".");
+            let formattedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1));
+            key.textContent = formattedWords.join(" ");
+        });
+    });
+</script>
+{% compress js %}
   <script src="/static/peer_review/opr_reviewer.js"></script>
+{% endcompress %}
 {% endblock after-body-bottom-js %}

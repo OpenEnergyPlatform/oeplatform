@@ -18,9 +18,9 @@
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
 
     {% fontawesome_5_static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     {% compress css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">
     {% endcompress %}
     {% block after-head %}{% endblock after-head %}
@@ -76,8 +76,8 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
                             <a class="dropdown-item" href="/about/">Overview</a>
+                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.compendium }}">Compendium</a>
                             <a class="dropdown-item" href="{{ EXTERNAL_URLS.readthedocs }}" target="_blank">Developer Documentation</a>
-                            <a class="dropdown-item" href="{{ EXTERNAL_URLS.tutorials_faq }}">FAQ</a>
                         </div>
                     </li>
                 </ul>
@@ -103,10 +103,32 @@
     {% block site-header %}
     {% endblock site-header %}
         <div class="content">
-            <div class="content__container">
+            <div class="content__container content__container--profile">
                 {% block main-left-sidebar %}{% endblock main-left-sidebar %}
+                {% block main-right-sidebar %}
+                    <section class="content__side">
+                        <!-- {% block main-right-sidebar-disclaimer %}
+                        <div>
+                            <p>
+                                If you find bugs or if you have ideas to improve the Open Energy Platform, you are
+                                welcome to add your comments to the existing issues on <a
+                                    href="https://github.com/openego/oeplatform" target="_blank">GitHub</a>. <br>
+                                You can also fork the project and get involved.
+                            </p>
+                            <p>
+                                <b> Please note that the platform is still under construction and therefore the
+                                    design of this page is still highly volatile!</b>
+                            </p>
+                        </div>
+                        {% endblock main-right-sidebar-disclaimer %} -->
+                        <div>
+                            {% block main-right-sidebar-content %}
+                            {% endblock main-right-sidebar-content %}
+                        </div>
+                    </section>
+                {% endblock main-right-sidebar %}
                 {% block main-content %}
-                    <section class="content__fullwidth">
+                    <section class="content__main">
                         {% block main-content-body %}{% endblock %}
                     </section>
                 {% endblock main-content %}
