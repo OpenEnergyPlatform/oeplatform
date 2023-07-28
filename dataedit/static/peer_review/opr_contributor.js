@@ -484,8 +484,8 @@ function showToast(title, message, type) {
 function saveEntrances() {
   if (selectedState !== "ok") {
     const valuearea = document.getElementById('valuearea');
-    const liveToastBtn = document.getElementById('liveToastBtn');
-    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+    // const liveToastBtn = document.getElementById('liveToastBtn');
+    // const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
     if (valuearea.value.trim() === '') {
       valuearea.setCustomValidity('Value suggestion is required');
       showToast("Error", "The value suggestion text field is required to save the field review!", "error");
