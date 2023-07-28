@@ -218,7 +218,6 @@ function click_field(fieldKey, fieldValue, category) {
   }
   // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
   const fieldState = getFieldState(fieldKey);
-
   if (fieldState === 'ok' || !fieldState) {
     document.getElementById("ok-button").disabled = true;
     document.getElementById("rejected-button").disabled = true;
@@ -238,7 +237,7 @@ function click_field(fieldKey, fieldValue, category) {
   }
 
   clearInputFields();
-
+  hideReviewerOptions();
 }
 
 function clearInputFields() {
@@ -451,9 +450,31 @@ function createFieldList(fields) {
   `;
 }
 
-// Function to show the error toast
-function showErrorToast(liveToast) {
-  liveToast.show();
+// // Function to show the error toast
+// function showErrorToast(liveToast) {
+//   liveToast.show();
+// }
+
+function showToast(title, message, type) {
+  var toast = document.getElementById('liveToast');
+  var toastTitle = document.getElementById('toastTitle');
+  var toastBody = document.getElementById('toastBody');
+  
+  // Update the toast's header and body based on the type
+  if (type === 'error') {
+    toast.classList.remove('bg-success');
+    toast.classList.add('bg-danger');
+  } else if (type === 'success') {
+    toast.classList.remove('bg-danger');
+    toast.classList.add('bg-success');
+  }
+  
+  // Set the title and body text
+  toastTitle.textContent = title;
+  toastBody.textContent = message;
+  
+  var bsToast = new bootstrap.Toast(toast);
+  bsToast.show();
 }
 
 
@@ -467,7 +488,7 @@ function saveEntrances() {
     const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
     if (valuearea.value.trim() === '') {
       valuearea.setCustomValidity('Value suggestion is required');
-      showErrorToast(liveToast);
+      showToast("Error", "The value suggestion text field is required to save the field review!", "error");
       return; // Stop execution if validation fails
     } else {
       valuearea.setCustomValidity('');
@@ -563,6 +584,7 @@ function checkReviewComplete() {
     }
   }
   $('#submit_summary').removeClass('disabled');
+  showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
 }
 
 
