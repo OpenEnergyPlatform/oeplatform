@@ -165,6 +165,14 @@ class PeerReview(models.Model):
                 pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.SUBMITTED.value)
                 pm_new.set_next_reviewer()
 
+            elif review_type == "finished":
+                # TODO: fails if the review is completed without submitting (finish in one run)
+                pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.FINISHED.value)
+                self.is_finished = True
+                self.date_finished = timezone.now()
+                # Call the parent class's save method to save the PeerReview instance
+                super().save(*args, **kwargs)
+
             pm_new.save() 
 
             # if prev_review is not None:
@@ -179,6 +187,7 @@ class PeerReview(models.Model):
         Update the peer review if the latest peer review is not finished yet but either saved or submitted.
 
         """
+
         review_type = kwargs.pop('review_type', None)
         if not self.contributor == self.reviewer:
             current_pm = PeerReviewManager.load(opr=self)
