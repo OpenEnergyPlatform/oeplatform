@@ -140,15 +140,16 @@ class ReviewsView(View):
                 contributor_user=user
             )
 
-            reviewed_contribution_history = peer_review_contributions.exclude(
-                pk=active_peer_review_contributor.pk
-            )
-
-            # Context da for the "All reviews" section on the profile page
-            reviewed_contributions_context = {
-                "latest": latest_reviewed_contribution, # mainly used to check if review exists
-                "history": reviewed_contribution_history,
-            }
+            if latest_reviewed_contribution is not None:
+                if active_peer_review_contributor is not None:
+                    reviewed_contribution_history = peer_review_contributions.exclude(
+                        pk=active_peer_review_contributor.pk)
+                else:
+                    reviewed_contribution_history = peer_review_contributions
+                reviewed_contributions_context = {
+                    "latest": latest_reviewed_contribution,  # mainly used to check if review exists
+                    "history": reviewed_contribution_history,
+                }
 
             if active_peer_review_contributor is not None:
 
