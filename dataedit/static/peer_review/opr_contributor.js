@@ -316,6 +316,7 @@ function renderSummaryPageFields() {
       let field_id = field.id.slice(6);
       const fieldValue = $(field).text();
       const fieldState = getFieldState(field_id);
+      console.log(field_id + fieldState)
       const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
@@ -481,10 +482,15 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-  if (selectedState !== "ok") {
+
+  if (selectedState != "ok") {
+    // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    // const liveToastBtn = document.getElementById('liveToastBtn');
-    // const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+    const liveToastBtn = document.getElementById('liveToastBtn');
+    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+    // const validityState = valuearea.validity;
+
+    // Validate the valuearea before proceeding
     if (valuearea.value.trim() === '') {
       valuearea.setCustomValidity('Value suggestion is required');
       showToast("Error", "The value suggestion text field is required to save the field review!", "error");
@@ -492,6 +498,7 @@ function saveEntrances() {
     } else {
       valuearea.setCustomValidity('');
     }
+
     valuearea.reportValidity();
   }
 
@@ -502,6 +509,7 @@ function saveEntrances() {
 
   if (selectedField) {
     var reviewFound = false;
+
     for (let i = 0; i < current_review["reviews"].length; i++) {
       if (current_review["reviews"][i]["key"] === selectedField) {
         reviewFound = true;
@@ -515,13 +523,11 @@ function saveEntrances() {
           "user": "oep_contributor", // TODO put actual username
           "role": "contributor",
           "contributorValue": selectedFieldValue,
-          "newValue": selectedState === "ok" ? initialReviewerSuggestion : "",
           "comment": document.getElementById("commentarea").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
         });
-console.log(initialReviewerSuggestion)
-        // Update HTML elements with entered values
+        // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
         var fieldElement = document.getElementById("field_" + selectedField);
         var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
         var commentElement = fieldElement.querySelector('.suggestion--comment');
@@ -543,14 +549,13 @@ console.log(initialReviewerSuggestion)
             "user": "oep_contributor", // TODO put actual username
             "role": "contributor",
             "contributorValue": selectedFieldValue,
-            "newValue": selectedState === "ok" ? initialReviewerSuggestion : "",
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,
           }
         ]
       });
-      // Update HTML elements with entered values
+      // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
       var fieldElement = document.getElementById("field_" + selectedField);
       var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
       var commentElement = fieldElement.querySelector('.suggestion--comment');
@@ -564,8 +569,6 @@ console.log(initialReviewerSuggestion)
   selectNextField();
   renderSummaryPageFields();
 }
-
-
 
 /**
  *
