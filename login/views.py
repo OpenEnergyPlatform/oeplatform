@@ -71,16 +71,20 @@ class ReviewsView(View):
 
         latest_review = peer_review_reviews.last()
         if latest_review is not None:
+            reviewed_context.update({"reviews_available": True})  # TODO: use this in template
 
-            reviewed_context.update({"reviews_available": True}) # TODO: use this in template
-            
             # Get the latest open peer review (where this user is the reviewer)
             active_peer_review_revewier = PeerReviewManager.filter_latest_open_opr_by_reviewer(
                 reviewer_user=user
             )
 
-            review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)
-            
+            if active_peer_review_revewier is not None:
+                review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)
+            else:
+                # Handle the case when active_peer_review_revewier is None.
+                # Maybe set review_history to some default value or just leave it as None.
+                review_history = None
+
             # Context da for the "All reviews" section on the profile page
             reviewed_context.update({
                 "latest": latest_review, # mainly used to check if review exists
@@ -125,31 +129,30 @@ class ReviewsView(View):
         # get contributor pov reviews
         ##################################################################
         reviewed_contributions_context = {}
-
-        # all peer reviews related to the contributor user
         peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
             contributor_user=user
         )
         latest_reviewed_contribution = peer_review_contributions.last()
         if latest_reviewed_contribution is not None:
 
-            reviewed_contributions_context.update({"reviews_available": True}) # TODO: use this in template
+            reviewed_contributions_context.update({"reviews_available": True})  # TODO: use this in template
 
-            # Get the latest open peer review (where this user is the contributor)
-            active_peer_review_contributor =  PeerReviewManager.filter_latest_open_opr_by_contributor(
+            active_peer_review_contributor = PeerReviewManager.filter_latest_open_opr_by_contributor(
                 contributor_user=user
             )
+            if active_peer_review_contributor is not None:
+                reviewed_contribution_history = peer_review_contributions.exclude(
+                    pk=active_peer_review_contributor.pk
+                )
+            else:
+                # Handle the case when active_peer_review_contributor is None.
+                # Maybe set reviewed_contribution_history to some default value or just leave it as None.
+                reviewed_contribution_history = None
 
-            if latest_reviewed_contribution is not None:
-                if active_peer_review_contributor is not None:
-                    reviewed_contribution_history = peer_review_contributions.exclude(
-                        pk=active_peer_review_contributor.pk)
-                else:
-                    reviewed_contribution_history = peer_review_contributions
-                reviewed_contributions_context = {
-                    "latest": latest_reviewed_contribution,  # mainly used to check if review exists
-                    "history": reviewed_contribution_history,
-                }
+            reviewed_contributions_context = {
+                "latest": latest_reviewed_contribution,  # mainly used to check if review exists
+                "history": reviewed_contribution_history,
+            }
 
             if active_peer_review_contributor is not None:
 
