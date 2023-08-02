@@ -316,7 +316,6 @@ function renderSummaryPageFields() {
       let field_id = field.id.slice(6);
       const fieldValue = $(field).text();
       const fieldState = getFieldState(field_id);
-      console.log(field_id + fieldState)
       const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
@@ -521,7 +520,7 @@ function saveEntrances() {
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
         });
-
+console.log(initialReviewerSuggestion)
         // Update HTML elements with entered values
         var fieldElement = document.getElementById("field_" + selectedField);
         var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
@@ -565,6 +564,7 @@ function saveEntrances() {
   selectNextField();
   renderSummaryPageFields();
 }
+
 
 
 /**
