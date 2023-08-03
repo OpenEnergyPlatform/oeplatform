@@ -1,6 +1,7 @@
 {% load static %}
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
+{% load compress %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,9 +18,11 @@
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon"/>
 
     {% fontawesome_5_static %}
+    {% compress css %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/jquery-ui.min.css' %}"><!-- //cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.css -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/base-style.css' %}?md5=d4e024ac45daad057d0191a8f6266156">
+    {% endcompress %}
     {% block after-head %}{% endblock after-head %}
 </head>
 
@@ -136,12 +139,14 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
+    {% compress js %}
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
     <script src="{% static 'js/jsi18n.js' %}"></script>
     <script src="{% static 'js/oep-tags.js' %}"></script>
+    {% endcompress %}
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

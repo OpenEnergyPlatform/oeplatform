@@ -79,12 +79,12 @@ class ReviewsView(View):
                 reviewer_user=user
             )
 
-            review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)
+            # review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)
             
             # Context da for the "All reviews" section on the profile page
             reviewed_context.update({
                 "latest": latest_review, # mainly used to check if review exists
-                "history": review_history,
+                # "history": review_history,
             })
 
             
