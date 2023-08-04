@@ -2107,14 +2107,11 @@ class PeerReviewView(LoginRequiredMixin, View):
 
         Missing parts:
         - once the opr is finished (all field reviews agreed on)
-            - set the review to finished
             - merge field review results to metadata on table
             - awarde a badge
                 - is field filled in?
                 - calculate the badge by comparing filled fields
                   and the badges form metadata schema
-            - update indicator on table view (this table was succesuflly reviewed)
-            - ...
         """
         context = {}
         if request.method == "POST":

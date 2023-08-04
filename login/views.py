@@ -88,7 +88,7 @@ class ReviewsView(View):
             # Context da for the "All reviews" section on the profile page
             reviewed_context.update({
                 "latest": latest_review, # mainly used to check if review exists
-                "history": review_history,
+                # "history": review_history,
             })
 
             
