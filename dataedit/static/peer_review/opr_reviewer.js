@@ -250,7 +250,6 @@ function click_field(fieldKey, fieldValue, category) {
   } else {
     fieldDescriptionsElement.textContent = "No description found";
   }
-
   const fieldState = getFieldState(fieldKey);
   if (fieldState) {
     if (fieldState === 'ok') {
@@ -534,7 +533,6 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-
   if (selectedState != "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
@@ -578,6 +576,7 @@ function saveEntrances() {
                               "user": "oep_reviewer", // TODO put actual username
                               "role": "reviewer",
                               "contributorValue": selectedFieldValue,
+                              "newValue": initialReviewerSuggestions[selectedField],
                               "comment": "",
                               "reviewerSuggestion": "",
                               "state": selectedState,
@@ -594,6 +593,7 @@ function saveEntrances() {
                               "user": "oep_reviewer", // TODO put actual username
                               "role": "reviewer",
                               "contributorValue": selectedFieldValue,
+                              "newValue": "",
                               "comment": document.getElementById("commentarea").value,
                               "reviewerSuggestion": document.getElementById("valuearea").value,
                               "state": selectedState,
@@ -612,6 +612,7 @@ function saveEntrances() {
     var element = document.querySelector('[aria-selected="true"]');
     var category = (element.getAttribute("data-bs-target"));
     // if field hasn't been written before, add it
+
     if (unique_entry) {
       current_review["reviews"].push(
         {
@@ -622,6 +623,7 @@ function saveEntrances() {
             "user": "oep_reviewer", // TODO put actual username
             "role": "reviewer",
             "contributorValue": selectedFieldValue,
+            "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,
