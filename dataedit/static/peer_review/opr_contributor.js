@@ -12,7 +12,7 @@ var current_review = {
   "reviewFinished": false,
   "grantedBadge": null,
   "metaMetadata": {
-    "reviewVersion": "OEP-0.0.1",
+    "reviewVersion": "OEP-0.1.0",
     "metadataLicense": {
       "name": "CC0-1.0",
       "title": "Creative Commons Zero v1.0 Universal",
