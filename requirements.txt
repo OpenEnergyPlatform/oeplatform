@@ -27,3 +27,6 @@ GeoAlchemy2~=0.11
 jsonschema~=3.2
 oemetadata~=1.6.0
 django_compressor~=4.4
+mkdocs-material~=9.1
+mkdocstrings~=0.22
+mkdocstrings-python~=1.1
