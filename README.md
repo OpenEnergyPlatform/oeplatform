@@ -1,4 +1,9 @@
-[![Documentation Status](https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/deploy-docs.yaml/badge.svg)](https://openenergyplatform.github.io/oeplatform/)
+
+
+| Workflow                                       | Badge & Link                                                                                               |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Automated tests                                | [![Automated tests](https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/automated-testing.yaml/badge.svg)](https://github.com/OpenEnergyPlatform/oemetadata/actions/workflows/automated-testing.yaml) |
+| Docs                                           | [![Documentation Status](https://github.com/OpenEnergyPlatform/oeplatform/actions/workflows/deploy-docs.yaml/badge.svg)](https://openenergyplatform.github.io/oeplatform/)
 
 <a href="https://openenergy-platform.org/"><img align="right" width="200" height="200" src="https://avatars2.githubusercontent.com/u/37101913?s=400&u=9b593cfdb6048a05ea6e72d333169a65e7c922be&v=4" alt="OpenEnergyPlatform"></a>
 
