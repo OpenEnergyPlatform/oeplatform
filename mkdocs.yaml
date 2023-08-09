@@ -62,8 +62,8 @@ nav:
     - Manual database setup: install/manual_db_setup.md
   - Developement & Collaboration: dev/developement.md
   - Code Documentation: 
-    - oeplatform/index.md
+    - oeplatform-code/index.md
     - Architecture:
-      - oeplatform/architecture/index.md
+      - oeplatform-code/architecture/index.md
     - Application Programming Interface:
-      - oeplatform/api/index.md
+      - oeplatform-code/api/index.md
