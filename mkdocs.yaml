@@ -57,8 +57,13 @@ extra_css:
 # Navigation
 nav:
   - Home: index.md
-  - Installation & Setup: installation.md
-  - Django Application:
-    - Overview: oeplatform/index.md
+  - Installation & Setup: 
+    - Installation Guide: install/installation.md
+    - Manual database setup: install/manual_db_setup.md
+  - Developement & Collaboration: dev/developement.md
+  - Code Documentation: 
+    - oeplatform-code/index.md
+    - Architecture:
+      - oeplatform-code/architecture/index.md
     - Application Programming Interface:
-      - api/index.md
+      - oeplatform-code/api/index.md

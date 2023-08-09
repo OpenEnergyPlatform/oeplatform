@@ -1,9 +1,8 @@
-name: gh-pages-compendium
+name: Deploy-Docs
 on:
   push:
     branches:
       - develop
-      - feature-1277/initial-mkdocs-and-add-content-supported-api-types
 permissions:
   contents: write
 jobs:
