@@ -1,4 +1,4 @@
-name: gh-pages-compendium
+name: Deploy-Docs
 on:
   push:
     branches:
