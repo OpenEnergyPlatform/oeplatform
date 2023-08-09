@@ -1,0 +1,104 @@
+# Project
+site_name: Open Energy Platform Documentation
+site_url: 
+site_description: The Open Energy Platform is the Frontend of the Open Energy Family and specifically provides a Webapplication which is documented using mkdocs.
+
+# Repository
+repo_name: OpenEnergyFamily/oeplatform
+repo_url: https://github.com/OpenEnergyPlatform/oeplatform
+docs_dir: docs
+
+# Configuration
+theme:
+  name: material
+  logo: 
+  palette:
+    # Palette toggle for dark mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.path
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.share
+
+# extensions 
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: "#"
+
+plugins:
+- search:
+- mkdocstrings:
+
+# Customization
+extra:
+  generator: false
+
+extra_css:
+  - css/extra.css
+
+# Navigation
+nav:
+  - Home: index.md
+  - Installation & Setup: installation.md
+  - Django Application:
+    - Overview: django/index.md
+    - Base:
+      - base/index.md
+      - Views: base/views.md
+      - Forms: base/forms.md
+    - Application Programming Interface:
+      - api/index.md
+      - Views: api/views.md
+      - Models: api/models.md
+      - Actions: api/actions.md
+      - Connection: api/connection.md
+      - Encode: api/encode.md
+      - Parser: api/parser.md
+      - References: api/references.md
+      - Sessions: api/sessions.md
+      - Error: api/error.md
+    - Dataedit:
+      - dataedit/index.md 
+      - Views: dataedit/views.md
+      - Models: dataedit/models.md
+      - Structures: dataedit/structures.md
+      - Forms: dataedit/forms.md
+      - Helper: dataedit/helper.md
+    - Modelview:
+      - modelview/index.md
+      - Views: modelview/views.md
+      - Models: modelview/models.md
+      - Forms: modelview/forms.md
+    - Login:
+      - login/index.md
+    - Open Energy Ontologie Viewer:
+      - oeo_viewer/index.md
+      - Views: oeo_viewer/views.md
+      - Models: oeo_viewer/models.md
+    - Oeplatform:
+      - oeplatform/index.md
+    - Ontology:
+      - ontology/index.md
+      - Views: ontology/views.md
+      - Models: ontology/models.md
+      - Forms: ontology/forms.md
+    - Theming:
+      - theming/index.md

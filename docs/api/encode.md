@@ -1,0 +1,3 @@
+# Encoder
+
+::: api.encode
