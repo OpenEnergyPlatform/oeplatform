@@ -10,7 +10,7 @@ Repository for the code of the Open Energy Platform (OEP) website [https://opene
 
 This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-3.0)](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
-# Installation
+# Installation & Setup
 
 
 ### Deploy locally
@@ -42,6 +42,6 @@ Then execute this python code (either directly in a terminal or from a file)
       u.set_password('pass')
       u.save()
 
-## Code contribution
+## Developement & Code contribution
 
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
