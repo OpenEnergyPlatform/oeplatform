@@ -12,36 +12,10 @@ This repository is licensed under [GNU Affero General Public License v3.0 (AGPL-
 
 # Installation & Setup
 
-
-### Deploy locally
-
-You can run your local copy of the OEP website with
-
-    python manage.py runserver
-
-By default, you should be able to connect to this copy by visiting [localhost:8000](http://localhost:8000) in your web browser.
-
-### User Management
-
-To create a dummy user for functionality testing purposes
-
-- On windows
-
-      set DJANGO_SETTINGS_MODULE=oeplatform.settings
-
-- On linux
-
-      export DJANGO_SETTINGS_MODULE=oeplatform.settings
-
-Then execute this python code (either directly in a terminal or from a file)
-
-      import django
-      django.setup()
-      from login.models import myuser
-      u = myuser.objects.create_devuser('test','test@mail.com')
-      u.set_password('pass')
-      u.save()
+Follow the detailed [installation guide](https://openenergyplatform.github.io/oeplatform/install/installation/).
 
 ## Developement & Code contribution
 
 Please read carefully the `CONTRIBUTING.md` [file](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/CONTRIBUTING.md) before you start contributing!
+
+For further information visit our [developement & contribution guide](https://openenergyplatform.github.io/oeplatform/dev/developement/)
