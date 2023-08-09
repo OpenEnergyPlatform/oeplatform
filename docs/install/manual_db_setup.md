@@ -1,60 +1,26 @@
-# Install and setup the Open Energ Platform Application
+# Manual setup for all databases 
 
-Below we describe the complete manual installation of the OEP website and database. We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+Below we describe the complete manual installation of the interal django databse as well as the open energy database. 
 
-[Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
+!!! tip
+    We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
-The installation steps have been proofed on linux and windows for python 3.8 and 3.9. Be aware that some of the required packages present installation's difficulties on windows.
+    [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
 
-### Setup the repository
+## 1. Django internal database
 
-Clone the repository locally
-
-    git clone https://github.com/OpenEnergyPlatform/oeplatform.git oep-website
-
-Move to the cloned repository
-
-    cd oep-website
-
-### Setup virtual environment
-
-If you are a windows user, we recommand you use conda because of the dependency on the `shapely` package
-
-    conda env create -f environment.yml
-
-You can also use Python to create the environment
-
-    python -m venv env
-
-If you don't want to use conda, [here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) you can find instructions for setting up virtual environment
-
-After you have activated your virtual environment, install the required python libraries
-
-    pip install -r requirements.txt
-
-### Setup the databases
-
-The OEP website relies on two different databases:
-
-1. One that is managed by django itself (django internal database)
-   This database contains all information that is needed for the website (user management, factsheets and api token for connection to the second database).
-2. The second one
-   will contain the data that the user can access from the website (primary database)
-
-#### 1. Django internal database
-
-##### 0.1 Install postgresql
+#### 0.1 Install postgresql
 
 If postgresql is not installed yet on your computer, you can follow this [guide](https://wam.readthedocs.io/en/latest/getting_started.html#installation-from-scratch)
 
-##### 1.1 Posgresql command line setup
+#### 1.1 Posgresql command line setup
 
 Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
     create user oep_django_user with password '<oep_django_password>';
     create database oep_django with owner = oep_django_user;
 
-##### 1.2 Django setup
+#### 1.2 Django setup
 
 In the repository, copy the file `oeplatform/securitysettings.py.default` and rename it `oeplatform/securitysettings.py`. Then, enter the connection to your above mentioned postgresql database.
 
@@ -79,14 +45,14 @@ Finish the django database setup with this command
 
     python manage.py migrate
 
-#### 2. Primary Database
+### 2. Primary Database
 
 This database is used for the data input functionality implemented in `dataedit/`.
 
 If this is your first local setup of the OEP website, this database should be an empty database as
 it will be instantiated by automated scripts later on.
 
-##### 2.1 Posgresql command line setup
+### 2.1 Posgresql command line setup
 
 Once logged into your psql session (for linux: `sudo -u postgres psql`, for windows: `psql`), run the following lines:
 
@@ -105,7 +71,7 @@ After successfully installing PostGIS, enter in `oep_db` (`\c oep_db;`) and type
     create extension postgis_topology;
     create extension hstore;
 
-##### 2.2 Database connection setup
+#### 2.2 Database connection setup
 
 | environment variable | required |
 | -------------------- | -------- |
@@ -134,29 +100,9 @@ For default settings, you can type the following commands
 Note, if you kept the default name from the above example in 2.1, then the environment variables
 `LOCAL_DB_USER` and `LOCAL_DB_NAME` should have the values `oep_db_user` and `oep_db`, respectively
 
-##### 2.3 Alembic setup
+#### 2.3 Alembic setup
 
 In order to run the OEP website, the primary database needs some extra management tables.
 We use `alembic` to keep track of changes in those tables. To create all tables that are needed, simply type
 
     python manage.py alembic upgrade head
-
-#### 3. Setup the OEO-viewer
-
-The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
-
-1- Install npm:
-
-- On linux: `sudo apt install npm`
-
-- On MacOS: `brew install node`
-
-- On windows see [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-
-2- Build the oeo-viewer:
-
-    cd oep-website/oeo_viewer/client
-    npm install
-    npm run build
-
-After these steps, a `static` folder inside `oep-website/oeo_viewer/` will be created which includes the results of the `npm run build` command. These files are necessary for the oeo-viewer.
