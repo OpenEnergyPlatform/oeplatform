@@ -213,6 +213,9 @@ function cancelPeerReview() {
  */
 
 function click_field(fieldKey, fieldValue, category) {
+  // Check if the category tab needs to be switched
+  switchCategoryTab(category);
+
   // this seems unused but it is relevant to select next and prev field functions
   selectedField = fieldKey;
   selectedFieldValue = fieldValue;
@@ -255,7 +258,7 @@ function click_field(fieldKey, fieldValue, category) {
       document.getElementById("ok-button").disabled = true;
       document.getElementById("rejected-button").disabled = true;
       document.getElementById("suggestion-button").disabled = true;
-    } else if (fieldState === 'rejected') {
+    } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
       document.getElementById("ok-button").disabled = false;
       document.getElementById("rejected-button").disabled = false;
       document.getElementById("suggestion-button").disabled = false;
@@ -269,10 +272,43 @@ function click_field(fieldKey, fieldValue, category) {
   if (selectedDiv) {
     selectedDiv.style.backgroundColor = '#F6F9FB';
   }
-
   clearInputFields();
+  hideReviewerOptions();
 }
 
+/**
+ * Switch to the category tab if needed
+ */
+function switchCategoryTab(category) {
+  const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
+  const tabIdForCategory = getCategoryToTabIdMapping()[category];
+  console.log("tabID", tabIdForCategory);
+  if (currentTab.getAttribute('id') !== tabIdForCategory) {
+    // The clicked field does not belong to the current tab, switch to the next tab
+    const targetTab = document.getElementById(tabIdForCategory);
+    if (targetTab) {
+      // The target tab exists, click the tab link to switch to it
+      targetTab.click();
+    }
+  }
+}
+
+/**
+ * Function to provide the mapping of category to the correct tab ID
+ */
+function getCategoryToTabIdMapping() {
+  // Define the mapping of category to tab ID
+  const mapping = {
+    'general': 'general-tab',
+    'spatial': 'spatiotemporal-tab',
+    'temporal': 'spatiotemporal-tab',
+    'source': 'source-tab',
+    'license': 'license-tab',
+    'contributor': 'contributor-tab',
+    'resource': 'resource-tab',
+  };
+  return mapping;
+}
 
 
 /**
@@ -501,9 +537,31 @@ function createFieldList(fields) {
   `;
 }
 
-// Function to show the error toast
-function showErrorToast(liveToast) {
-  liveToast.show();
+// // Function to show the error toast
+// function showErrorToast(liveToast) {
+//   liveToast.show();
+// }
+
+function showToast(title, message, type) {
+  var toast = document.getElementById('liveToast');
+  var toastTitle = document.getElementById('toastTitle');
+  var toastBody = document.getElementById('toastBody');
+  
+  // Update the toast's header and body based on the type
+  if (type === 'error') {
+    toast.classList.remove('bg-success');
+    toast.classList.add('bg-danger');
+  } else if (type === 'success') {
+    toast.classList.remove('bg-danger');
+    toast.classList.add('bg-success');
+  }
+  
+  // Set the title and body text
+  toastTitle.textContent = title;
+  toastBody.textContent = message;
+  
+  var bsToast = new bootstrap.Toast(toast);
+  bsToast.show();
 }
 
 /**
@@ -514,14 +572,13 @@ function saveEntrances() {
   if (selectedState != "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    const liveToastBtn = document.getElementById('liveToastBtn');
-    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
     if (valuearea.value.trim() === '') {
       valuearea.setCustomValidity('Value suggestion is required');
-      showErrorToast(liveToast);
+      showToast("Error", "The value suggestion text field is required to save the field review!", "error");
       return; // Stop execution if validation fails
     } else {
       valuearea.setCustomValidity('');
@@ -647,6 +704,9 @@ function checkReviewComplete() {
     }
   }
   $('#submit_summary').removeClass('disabled');
+  if (!clientSideReviewFinished){
+    showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
+  }
 }
 
 
@@ -671,6 +731,7 @@ function check_if_review_finished() {
 
   if (checkFieldStates() && !clientSideReviewFinished) {
     clientSideReviewFinished = true;
+    showToast("Review completed!", "You completed the review an can now award a suitable  badge!", 'success');
     // Creating the div with radio buttons
     var reviewerDiv = $('<div class="bg-warning" id="finish-review-div"></div>');
     var bronzeRadio = $('<input type="radio" name="reviewer-option" value="bronze"> Bronze<br>');
