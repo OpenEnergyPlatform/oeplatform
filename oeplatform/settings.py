@@ -58,7 +58,7 @@ INSTALLED_APPS = (
     "oeo_viewer",
     "factsheet",
     "corsheaders",
-    "owlready2"
+    "owlready2",
     "compressor",
 )
 
