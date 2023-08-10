@@ -528,7 +528,16 @@ function saveEntrances() {
     }
 
     valuearea.reportValidity();
-  }
+  } else if (initialReviewerSuggestions[selectedField]) {  // Check if the state is "ok" and if there's a valid suggestion
+        var fieldElement = document.getElementById("field_" + selectedField);
+        if (fieldElement) {
+            var valueElement = fieldElement.querySelector('.value');
+            if (valueElement) {
+                valueElement.innerText = initialReviewerSuggestions[selectedField];
+            }
+        }
+    }
+
 
   if (Object.keys(current_review["reviews"]).length === 0 &&
     current_review["reviews"].constructor === Object) {
