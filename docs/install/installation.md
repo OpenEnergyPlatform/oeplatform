@@ -4,38 +4,11 @@ Below we describe the manual installation of the oeplatform code and infrastruct
 The installation steps have been proofed on linux and windows for python 3.6 and 3.9.
 
 !!! tip
-    We also offer the possibility to use [docker](https://www.docker.com/), if you are a developer you could manually install the OEP alongside the dockercontainer to run the database or run everything in docker. For this purpose, 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database) are published with each release, which can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
+    We also offer the possibility to use [docker](https://www.docker.com/), to install the oeplatform and additional databases. As the hole setup is preconfigured docker can be used to automatically install the hole infrastructure. 
+    
+    We provide 2 [docker container images](https://docs.docker.com/get-started/#what-is-a-container-image) (OEP-website and OEP-database). The images are updated & published with each release. They can be pulled from [GitHub packages](https://github.com/OpenEnergyPlatform/oeplatform/pkgs/container/oeplatform).
 
     [Here you can find instructions on how to install the docker images.](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/docker/USAGE.md)
-
-!!! tip
-    Summary of how to run the oeplatform and start developement
-    
-    1. Get code & install depenecies. 
-        - git clone https://github.com/OpenEnergyPlatform/oeplatform.git
-        - cd oeplatform
-        - pip -m venv env 
-        - pip install -r requirements.txt
-
-    2. Install databases & setup connection
-        - install docker (or [install manually](manual_db_setup.md))
-        - in oeplatform directory cd docker
-        - docker compose -f docker-compose.yaml
-        - start docker container
-
-    3. Run managemant commands
-        - python manage.py mirror
-        - python manage.py clear_sandbox
-        - python manage.py clear_peer_reviews --all
-        - python manage.py migrate
-        - python manage.py alembic upgrade head
-        - python manage.py collectstatic
-
-    4. Deploy locally
-        - python manage.py runserver
-        - Open Browser URL: 127.0.0.1:8000
-
-        - [create a test user.](../dev/developement.md#user-management)
 
 
 ## Setup the repository
@@ -47,6 +20,38 @@ Clone the repository locally
 Move to the cloned repository
 
     cd oep-website
+
+
+!!! tip
+    All setps&commands in one list:
+    
+    1. Get code & install depenecies.
+        - `git clone https://github.com/OpenEnergyPlatform/oeplatform.git`
+        - `cd oeplatform`
+        - `pip -m venv env`
+        - `pip install -r requirements.txt`
+
+    2. Install databases & setup connection
+        - install docker (or [install manually](manual_db_setup.md))
+        - make sure the database connection is setup in the `oeplatoform/securitysettings.py`
+        - while in oeplatform directory `cd docker`
+        - `docker compose -f docker-compose.yaml`
+        - start docker container
+
+    3. Run managemant commands
+        - `python manage.py mirror`
+        - `python manage.py clear_sandbox`
+        - `python manage.py clear_peer_reviews --all`
+        - `python manage.py migrate`
+        - python manage.py alembic upgrade head`
+        - `python manage.py collectstatic`
+
+    4. Deploy locally
+        - Ckeck if the all connected database servers are running.
+        - `python manage.py runserver`
+        - Open Browser URL: 127.0.0.1:8000
+
+        - [create a test user.](../dev/developement.md#user-management)
 
 ## Setup virtual environment
 
