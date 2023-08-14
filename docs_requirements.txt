@@ -1,3 +1,4 @@
 mkdocs-material # Raises error in py3.6?? ~=9.1
 mkdocstrings # Raises error in py3.6?? ~=0.22
 mkdocstrings-python 
+mike
