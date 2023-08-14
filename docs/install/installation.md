@@ -39,7 +39,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
 
         ??? Info "Sept 3.1: Additional commands" 
             These commands are not relevant if you are setting up oeplatform for the first time. One exception is the mirror command. If you have created some tables manually in the oedb database, you can use the mirror command to register them in the oeplatform.
-            
+
             - `python manage.py mirror`
             - `python manage.py clear_sandbox`
             - `python manage.py clear_peer_reviews --all`
@@ -83,9 +83,13 @@ After you have activated your virtual environment, install the required python l
 
 ## 3 Databases setup
 
-Currently we use two relational databases to store the oeplatform data: 
+We use two relational databases to store the oeplatform data: 
  - The oep-django database is our interal database and it is used to store the application related data. This icludes things linke user information, reviews, table names, ... 
  - Our primary database is the oedb (Open Energy Databsae). It is used to store all data the user uploaded. In production it stores multiple terrabyte of data.
+
+Additional we use a graph databse:
+ - Store the open energy ontologie and open energy knowlage graph 
+ - For now this is not part of the installation guide as it is not mandatory to run the oeplatform and can be added later.
 
 ### 3.1 How to install the databases
 You have two options: 
