@@ -31,7 +31,6 @@ from dataedit.models import Topic
 from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
 from oeplatform.settings import (
     DATASET_SCHEMA,
-    DEFAULT_SCHEMA,
     DRAFT_SCHEMA,
     PLAYGROUND_SCHEMAS,
     UNVERSIONED_SCHEMAS,
@@ -192,9 +191,8 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", DEFAULT_SCHEMA)
         table = kwargs.get("table") or kwargs.get("sequence")
-        actions.assert_permission(request.user, table, permission, schema=schema)
+        actions.assert_permission(request.user, table, permission)
         return f(caller, request, *args, **kwargs)
 
     return wrapper
