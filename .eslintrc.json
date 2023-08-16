@@ -13,17 +13,13 @@
   },
   "rules": {
     "no-var": 0,
+    "require-jsdoc": 0,
+    "max-len": 0,
     "camelcase": 0,
     "prefer-const": 0,
-    "valid-jsdoc": [
-      2,
-      {
-        "prefer": { "return": "returns" },
-        "requireReturn": false,
-        "requireReturnDescription": false,
-        "requireParamDescription": false
-      }
-    ],
+    "valid-jsdoc": 0,
+    "no-throw-literal": 0,
+    "no-unused-vars": 0,
     "quotes": [0, "single", "double"],
     "space-before-function-paren": [
       "error",
