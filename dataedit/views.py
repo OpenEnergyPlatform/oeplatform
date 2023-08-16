@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import re
-import sys
 from functools import reduce
 from io import TextIOWrapper
 from itertools import chain
@@ -49,31 +48,15 @@ from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import (
-    DATASET_SCHEMA,
-    DRAFT_SCHEMA,
-    SANDBOX_SCHEMA,
-    TEST_SCHEMAS,
-)
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SANDBOX_SCHEMA
 
 session = None
-
-
-def is_test() -> bool:
-    """determine if system is in testing mode"""
-    args = sys.argv[1:2]
-    return args and args[0] == "test"
 
 
 def get_schema_whitelist():
     """TODO: this is only temporary until schemas are removed"""
     schema_whitelist = Topic.get_topic_names()
     schema_whitelist += [DRAFT_SCHEMA, DATASET_SCHEMA]
-
-    # only if testing
-    if is_test():
-        schema_whitelist += TEST_SCHEMAS
-
     return schema_whitelist
 
 

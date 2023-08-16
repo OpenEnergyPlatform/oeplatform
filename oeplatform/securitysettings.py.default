@@ -30,7 +30,7 @@ SANDBOX_SCHEMA = "sandbox"
 DRAFT_SCHEMA = "model_draft"
 # schema for finialized datasets
 DATASET_SCHEMA = "dataset"
-TEST_SCHEMAS = ("test",)
+
 
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']

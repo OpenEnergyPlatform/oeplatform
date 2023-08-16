@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
+from .utils import is_test
+
 try:
     from .securitysettings import *  # noqa
 except ImportError:
@@ -84,21 +86,24 @@ EXTERNAL_URLS = {
     "compendium": "https://openenergyplatform.github.io/organisation/",
 }
 
+#  OEDB SCHEMAS
 
-# manages schemas for oedb
-DEFAULT_SCHEMA = SANDBOX_SCHEMA  # noqa F405: from security settings
-PLAYGROUND_SCHEMAS = (
-    SANDBOX_SCHEMA,  # noqa F405: from security settings
-) + TEST_SCHEMAS  # noqa F405: from security settings
-UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA,)  # noqa F405: from security settings
-# these are the schemas that should be created by alembic in order
-# for everything to work
-MANAGED_SCHEMAS = (
-    SANDBOX_SCHEMA,  # noqa F405: from security settings
-    DRAFT_SCHEMA,  # noqa F405: from security settings
-    DATASET_SCHEMA,  # noqa F405: from security settings
-)
-ALL_SCHEMAS = MANAGED_SCHEMAS + TEST_SCHEMAS  # noqa F405: from security settings
+TEST_DRAFT_SCHEMA = "test_" + DRAFT_SCHEMA  # noqa F405 from securitysettings
+TEST_DATASET_SCHEMA = "test_" + DATASET_SCHEMA  # noqa F405 from securitysettings
+
+ALL_SCHEMAS = [
+    SANDBOX_SCHEMA,  # noqa F405 from securitysettings
+    DRAFT_SCHEMA,  # noqa F405 from securitysettings
+    DATASET_SCHEMA,  # noqa F405 from securitysettings
+    TEST_DRAFT_SCHEMA,
+    TEST_DATASET_SCHEMA,
+]
+if is_test:
+    DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
+    DATASET_SCHEMA = TEST_DATASET_SCHEMA
+DEFAULT_SCHEMA = DRAFT_SCHEMA
+UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA, TEST_DRAFT_SCHEMA)
+PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA,)  # noqa F405 from securitysettings
 
 
 def add_settings_to_request_context(request):
