@@ -166,5 +166,9 @@ STATICFILES_FINDERS = {
     "compressor.finders.CompressorFinder",
 }
 
+
+# https://django-compressor.readthedocs.io/en/stable/settings.html
 COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
+COMPRESS_REBUILD_TIMEOUT = 0
+COMPRESS_MTIME_DELAY = 0
