@@ -34,7 +34,7 @@ from api.sessions import (
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
-from oeplatform.settings import DEFAULT_SCHEMA, PLAYGROUND_SCHEMAS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import DEFAULT_SCHEMA, EDITABLE_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
 
@@ -77,7 +77,7 @@ def get_table_name(schema, table, restrict_schemas=True):
     if schema.startswith("_") or schema == "public" or schema is None:
         raise PermissionDenied
     if restrict_schemas:
-        if schema not in PLAYGROUND_SCHEMAS + UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
     # TODO check if table in schema_whitelist but circular import
     # from dataedit.views import schema_whitelist
@@ -1194,7 +1194,7 @@ def data_delete(request, context=None):
     setter = []
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter, ["id"])
-    if orig_schema in PLAYGROUND_SCHEMAS + UNVERSIONED_SCHEMAS:
+    if orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1220,7 +1220,7 @@ def data_update(request, context=None):
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)
     result = __change_rows(request, context, target_table, setter)
-    if orig_schema in PLAYGROUND_SCHEMAS + UNVERSIONED_SCHEMAS:
+    if orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
     return result
 
@@ -1355,7 +1355,7 @@ def data_insert(request, context=None):
             for col in description
         ]
     response["rowcount"] = cursor.rowcount
-    if schema in PLAYGROUND_SCHEMAS or orig_schema in UNVERSIONED_SCHEMAS:
+    if schema in EDITABLE_SCHEMAS or orig_schema in EDITABLE_SCHEMAS:
         apply_changes(schema, table, cursor)
 
     return response

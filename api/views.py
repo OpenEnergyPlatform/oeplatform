@@ -29,12 +29,7 @@ from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
-from oeplatform.settings import (
-    DATASET_SCHEMA,
-    DRAFT_SCHEMA,
-    PLAYGROUND_SCHEMAS,
-    UNVERSIONED_SCHEMAS,
-)
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, EDITABLE_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
@@ -217,7 +212,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -230,7 +225,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -303,7 +298,7 @@ class Table(APIView):
     """
 
     @api_exception
-    def get(self, request, schema, table):
+    def get(self, request, table, schema=None):
         """
         Returns a dictionary that describes the DDL-make-up of this table.
         Fields are:
@@ -332,7 +327,7 @@ class Table(APIView):
         )
 
     @api_exception
-    def post(self, request, schema, table):
+    def post(self, request, table, schema=None):
         """
         Changes properties of tables and table columns
         :param request:
@@ -340,7 +335,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -382,7 +377,7 @@ class Table(APIView):
             )
 
     @api_exception
-    def put(self, request, schema, table):
+    def put(self, request, table, schema=None):
         """
         Every request to unsave http methods have to contain a "csrftoken".
         This token is used to deny cross site reference forwarding.
@@ -393,7 +388,7 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in EDITABLE_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -495,7 +490,7 @@ class Table(APIView):
 
     @api_exception
     @require_delete_permission
-    def delete(self, request, schema, table):
+    def delete(self, request, table, schema=None):
         schema, table = actions.get_table_name(schema, table)
 
         meta_schema = actions.get_meta_schema_name(schema)

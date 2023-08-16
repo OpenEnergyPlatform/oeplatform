@@ -96,8 +96,7 @@ if is_test():
     DATASET_SCHEMA = TEST_DATASET_SCHEMA
 
 DEFAULT_SCHEMA = DRAFT_SCHEMA
-UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA, TEST_DRAFT_SCHEMA)
-PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA,)  # noqa F405 from securitysettings
+EDITABLE_SCHEMAS = [DRAFT_SCHEMA, SANDBOX_SCHEMA]  # noqa F405 from securitysettings
 ALL_SCHEMAS = [
     SANDBOX_SCHEMA,  # noqa F405 from securitysettings
     DRAFT_SCHEMA,  # noqa F405 from securitysettings
