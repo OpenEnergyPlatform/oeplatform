@@ -465,8 +465,7 @@ class Table(APIView):
         metadata=None,
     ):
         self.validate_column_names(column_definitions)
-
-        schema_object, _ = DBSchema.objects.get_or_create(name=schema)
+        schema_object = DBSchema.objects.get(name=schema)
         try:
             table_object = DBTable.objects.create(name=table, schema=schema_object)
         except IntegrityError:

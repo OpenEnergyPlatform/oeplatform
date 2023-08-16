@@ -8,7 +8,7 @@ Create Date: 2023-08-16 13:57:22.942292
 # import sqlalchemy as sa
 from alembic import op
 
-from oeplatform.settings import MANAGED_SCHEMAS
+from oeplatform.settings import MANAGED_SCHEMAS, TEST_SCHEMAS
 
 # revision identifiers, used by Alembic.
 revision = "4f01a68dcf6f"
@@ -18,9 +18,10 @@ depends_on = None
 
 
 def upgrade():
-    for s in MANAGED_SCHEMAS:
+    schemas = MANAGED_SCHEMAS + TEST_SCHEMAS
+    for s in schemas:
         op.execute("CREATE SCHEMA IF NOT EXISTS " + s)
-    for s in MANAGED_SCHEMAS:
+    for s in schemas:
         op.execute("CREATE SCHEMA IF NOT EXISTS _" + s)
 
 

@@ -5,7 +5,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import migrations, models
 
-from oeplatform.settings import MANAGED_SCHEMAS
+from oeplatform.settings import MANAGED_SCHEMAS, TEST_SCHEMAS
 
 
 def create_topics(apps, schema_editor):
@@ -28,6 +28,17 @@ def create_topics(apps, schema_editor):
         "policy": "Data on policies and measures. This could, for example, include a list of renewable energy policies per European Member State. It could also be a list of climate related policies and measures in a specific country.",  # noqa
     }.items():
         Topic(name=name, description=description).save()
+
+
+def ensure_schemas(apps, schema_editor):
+    """we still need the schema objetcs, but no new schema objects should be created.
+    Here we ensure that the managed schemas at least exist.
+    """
+
+    Schema = apps.get_model("dataedit", "Schema")
+
+    for name in MANAGED_SCHEMAS + TEST_SCHEMAS:
+        Schema.objects.get_or_create(name=name)[0].save()
 
 
 def convert_schema_to_topic(apps, schema_editor):
@@ -83,6 +94,7 @@ class Migration(migrations.Migration):
             name="topics",
             field=models.ManyToManyField(to="dataedit.Topic", related_name="tables"),
         ),
+        migrations.RunPython(ensure_schemas, do_nothing),
         migrations.RunPython(create_topics, do_nothing),
         migrations.RunPython(convert_schema_to_topic, do_nothing),
     ]

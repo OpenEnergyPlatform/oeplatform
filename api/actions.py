@@ -2236,9 +2236,7 @@ def update_meta_search(table, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj, _ = DBSchema.objects.get_or_create(
-        name=schema if schema is not None else DEFAULT_SCHEMA
-    )
+    schema_obj = DBSchema.objects.get(name=schema or DEFAULT_SCHEMA)
     t = DBTable.objects.get(name=table, schema=schema_obj)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())

@@ -5,12 +5,13 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
+from oeplatform.settings import TEST_SCHEMAS
 
 from .util import load_content_as_json
 
 
 class APITestCase(TestCase):
-    test_schema = "test"
+    test_schema = TEST_SCHEMAS[0]
     test_table = "test_table"
 
     @classmethod

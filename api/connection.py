@@ -59,8 +59,7 @@ def table_exists_in_django(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
-    schema_obj = Schema.objects.get_or_create(name=schema)[0]
+    schema_obj = Schema.objects.get(name=(schema or DEFAULT_SCHEMA))
     try:
         Table.objects.get(name=table, schema=schema_obj)
         return True
