@@ -34,7 +34,8 @@ DATASET_SCHEMA = "dataset"
 DEFAULT_SCHEMA = SANDBOX_SCHEMA
 PLAYGROUNDS = (SANDBOX_SCHEMA, "test")
 UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA,)
-
+# these are the schemas that should be created by alembic in order for everything to work
+MANAGED_SCHEMAS = (SANDBOX_SCHEMA, DRAFT_SCHEMA, DATASET_SCHEMA)
 
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']
