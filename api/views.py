@@ -28,8 +28,15 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
+from dataedit.models import Topic
 from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
-from oeplatform.settings import DEFAULT_SCHEMA, PLAYGROUND_SCHEMAS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DEFAULT_SCHEMA,
+    DRAFT_SCHEMA,
+    PLAYGROUND_SCHEMAS,
+    UNVERSIONED_SCHEMAS,
+)
 
 logger = logging.getLogger("oeplatform")
 
@@ -597,11 +604,41 @@ class Fields(APIView):
 class Move(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema, table, to_schema):
+    def post(self, request, schema: str, table: str, to_schema: str):
+        """With the removal of schemas,  we physicall will only move tables between
+        DRAFT_SCHEMA and DATASET_SCHEMA (draft and published).
+        However, if the target schema isa topic, we will attach that information
+
+        In consequence, this is equivalent to publish/unpublish
+        """
+
         schema_whitelist = get_schema_whitelist()
+        # schema_whitelist: all topics + DRAFT_SCHEMA + DATASET_SCHEMA
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
+
+        topic_name = None
+        if schema == DRAFT_SCHEMA and to_schema != DRAFT_SCHEMA:
+            # publish (move from draft to not draft)
+            if to_schema != DATASET_SCHEMA:
+                topic_name = to_schema
+                to_schema = DATASET_SCHEMA
+        elif to_schema == DRAFT_SCHEMA and schema != DRAFT_SCHEMA:
+            # unpublish
+            pass
+        else:
+            raise APIError(
+                f"exactly one of origin and target schema must be {DRAFT_SCHEMA}"
+            )
+
         actions.move(schema, table, to_schema)
+
+        if topic_name:
+            table_obj = DBTable.load(table=table)
+            topic = Topic.objects.get(name=topic_name)
+            # according to doc, usind `add` does not create duplicates
+            table_obj.topics.add(topic)
+
         return HttpResponse(status=status.HTTP_200_OK)
 
 
