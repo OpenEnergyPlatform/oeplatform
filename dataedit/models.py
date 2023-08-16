@@ -12,11 +12,12 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    Q,
     TextField,
 )
 from django.utils import timezone
 
-from oeplatform.settings import DRAFT_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SANDBOX_SCHEMA
 
 # Create your models here.
 
@@ -50,7 +51,7 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
-    topics = models.ManyToManyField(to="dataedit.Topic")
+    topics = models.ManyToManyField(to="dataedit.Topic", related_name="tables")
 
     @classmethod
     def load(cls, schema, table):
@@ -75,9 +76,26 @@ class Table(Tagable):
     def is_sandbox(self):
         return self.schema.name == SANDBOX_SCHEMA
 
-    @property
-    def is_published(self):
-        return not (self.is_draft or self.is_sandbox)
+    @staticmethod
+    def find_draft():
+        """find all unpublished tables"""
+        return Table.objects.filter(schema__name=DRAFT_SCHEMA)
+
+    @staticmethod
+    def find_published():
+        """find all unpublished tables"""
+        # either in dataset schema OR
+        # (old tables): schema name is one of the topic names
+        # TODO: how to do this directly in the query below?
+        topic_names = Topic.get_topic_names()
+        return Table.objects.filter(
+            Q(schema__name=DATASET_SCHEMA) | Q(schema__name__in=topic_names)
+        )
+
+    @staticmethod
+    def find_in_topic(topic_name: str):
+        """find all unpublished tables"""
+        return Table.objects.filter(topics__name=topic_name)
 
 
 class View(models.Model):
@@ -539,3 +557,7 @@ class PeerReviewManager(models.Model):
 class Topic(models.Model):
     name = CharField(max_length=64, null=False, unique=True)
     description = TextField(max_length=2048)
+
+    @staticmethod
+    def get_topic_names():
+        return Topic.objects.values_list("name", flat=True)
