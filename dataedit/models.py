@@ -70,6 +70,9 @@ class Table(Tagable):
         self.is_reviewed = True
         self.save()
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def create_with_schema(name: str, schema_name: str = None):
         """this should be the only way a table object is created, so we can

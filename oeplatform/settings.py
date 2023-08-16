@@ -91,7 +91,7 @@ EXTERNAL_URLS = {
 TEST_DRAFT_SCHEMA = "test_" + DRAFT_SCHEMA  # noqa F405 from securitysettings
 TEST_DATASET_SCHEMA = "test_" + DATASET_SCHEMA  # noqa F405 from securitysettings
 
-if is_test:
+if is_test():
     DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
     DATASET_SCHEMA = TEST_DATASET_SCHEMA
 
