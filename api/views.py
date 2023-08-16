@@ -527,7 +527,7 @@ class Table(APIView):
                 schema=schema, table=table
             )
         )
-        table_object = DBTable.objects.get(name=table, schema__name=schema)
+        table_object = DBTable.objects.get(name=table)
         table_object.delete()
         return JsonResponse({}, status=status.HTTP_200_OK)
 

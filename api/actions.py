@@ -31,7 +31,6 @@ from api.sessions import (
     load_cursor_from_context,
     load_session_from_context,
 )
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
 from dataedit.structures import Tag as OEDBTag
@@ -1484,16 +1483,12 @@ def move(from_schema, table, to_schema):
     session = Session()
     try:
         try:
-            t = DBTable.objects.get(name=table, schema__name=from_schema)
+            table_obj = DBTable.objects.get(name=table)
         except DBTable.DoesNotExist:
             raise APIError("Table for schema movement not found")
-        try:
-            to_schema_reg = DBSchema.objects.get(name=to_schema)
-        except DBSchema.DoesNotExist:
-            raise APIError("Target schema not found")
         if from_schema == to_schema:
             raise APIError("Target schema same as current schema")
-        t.schema = to_schema_reg
+        table_obj.change_schema(schema_name=to_schema)
 
         meta_to_schema = get_meta_schema_name(to_schema)
         meta_from_schema = get_meta_schema_name(from_schema)
@@ -1523,7 +1518,7 @@ def move(from_schema, table, to_schema):
             OEDBTableTags.schema_name == from_schema, OEDBTableTags.table_name == table
         ).update({OEDBTableTags.schema_name: to_schema})
         session.commit()
-        t.save()
+        table_obj.save()
     except Exception:
         session.rollback()
         raise
@@ -2232,12 +2227,11 @@ def apply_deletion(session, table, rows, rids):
         set_applied(session, table, [rid], __DELETE)
 
 
-def update_meta_search(table, schema):
+def update_meta_search(table: str, schema):
     """
     TODO: also update JSONB index fields
     """
-    schema_obj = DBSchema.objects.get(name=schema or DEFAULT_SCHEMA)
-    t = DBTable.objects.get(name=table, schema=schema_obj)
+    t = DBTable.objects.get(name=table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(

@@ -45,6 +45,11 @@ class Tagable(models.Model):
 
 
 class Schema(Tagable):
+    """Eventually, we want to remove this.
+    For now: do NOT import this class in another module and create
+    bew dependencies
+    """
+
     class Meta:
         unique_together = (("name",),)
 
@@ -75,6 +80,15 @@ class Table(Tagable):
             schema_name = DRAFT_SCHEMA
         schema_obj = Schema.objects.get(name=schema_name)
         return Table.objects.create(name=name, schema=schema_obj)
+
+    def change_schema(self, schema_name: str = None) -> None:
+        """this should be the only way a the schema is changed, so we can
+        remove the schema later entirely
+        """
+        if schema_name not in ALL_SCHEMAS:
+            # TODO CHW: raise exception or default?
+            schema_name = DRAFT_SCHEMA
+        self.schema = Schema.objects.get(name=schema_name)
 
     @property
     def is_draft(self):
