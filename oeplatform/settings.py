@@ -91,19 +91,18 @@ EXTERNAL_URLS = {
 TEST_DRAFT_SCHEMA = "test_" + DRAFT_SCHEMA  # noqa F405 from securitysettings
 TEST_DATASET_SCHEMA = "test_" + DATASET_SCHEMA  # noqa F405 from securitysettings
 
+if is_test:
+    DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
+    DATASET_SCHEMA = TEST_DATASET_SCHEMA
+
+DEFAULT_SCHEMA = DRAFT_SCHEMA
+UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA, TEST_DRAFT_SCHEMA)
+PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA,)  # noqa F405 from securitysettings
 ALL_SCHEMAS = [
     SANDBOX_SCHEMA,  # noqa F405 from securitysettings
     DRAFT_SCHEMA,  # noqa F405 from securitysettings
     DATASET_SCHEMA,  # noqa F405 from securitysettings
-    TEST_DRAFT_SCHEMA,
-    TEST_DATASET_SCHEMA,
 ]
-if is_test:
-    DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
-    DATASET_SCHEMA = TEST_DATASET_SCHEMA
-DEFAULT_SCHEMA = DRAFT_SCHEMA
-UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA, TEST_DRAFT_SCHEMA)
-PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA,)  # noqa F405 from securitysettings
 
 
 def add_settings_to_request_context(request):

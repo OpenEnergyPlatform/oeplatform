@@ -610,6 +610,9 @@ class Move(APIView):
         In consequence, this is equivalent to publish/unpublish
         """
 
+        # ignore schema from user
+        schema = DBTable.objects.get(name=table).schema.name
+
         schema_whitelist = get_schema_whitelist()
         # schema_whitelist: all topics + DRAFT_SCHEMA + DATASET_SCHEMA
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
@@ -626,7 +629,8 @@ class Move(APIView):
             pass
         else:
             raise APIError(
-                f"exactly one of origin and target schema must be {DRAFT_SCHEMA}"
+                f"exactly one of origin and target schema must be {DRAFT_SCHEMA}, "
+                f"got {schema}, {to_schema}"
             )
 
         actions.move(schema, table, to_schema)

@@ -5,12 +5,18 @@ from rest_framework.authtoken.models import Token
 
 from api import actions
 from login.models import myuser
-from oeplatform.settings import DRAFT_SCHEMA, TEST_DRAFT_SCHEMA
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    TEST_DATASET_SCHEMA,
+    TEST_DRAFT_SCHEMA,
+)
 
 from .util import load_content_as_json
 
 # because we are in test mode(if detected properly)
 assert TEST_DRAFT_SCHEMA == DRAFT_SCHEMA
+assert TEST_DATASET_SCHEMA == DATASET_SCHEMA
 
 
 class APITestCase(TestCase):
@@ -19,10 +25,11 @@ class APITestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS {cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA {cls.test_schema}")
-        actions.perform_sql(f"DROP SCHEMA IF EXISTS _{cls.test_schema} CASCADE")
-        actions.perform_sql(f"CREATE SCHEMA _{cls.test_schema}")
+        for schema in [TEST_DRAFT_SCHEMA, TEST_DRAFT_SCHEMA]:
+            actions.perform_sql(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
+            actions.perform_sql(f"CREATE SCHEMA {schema}")
+            actions.perform_sql(f"DROP SCHEMA IF EXISTS _{schema} CASCADE")
+            actions.perform_sql(f"CREATE SCHEMA _{schema}")
 
         super(APITestCase, cls).setUpClass()
         cls.user, _ = myuser.objects.get_or_create(
