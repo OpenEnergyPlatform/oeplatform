@@ -1,4 +1,4 @@
-"""empty message
+"""ensure schemas
 
 Revision ID: 4f01a68dcf6f
 Revises: 3c2369dfcc55
@@ -21,7 +21,7 @@ def upgrade():
     for s in MANAGED_SCHEMAS:
         op.execute("CREATE SCHEMA IF NOT EXISTS " + s)
     for s in MANAGED_SCHEMAS:
-        op.execute("CREATE SCHEMA IF NOT EXISTS " + s)
+        op.execute("CREATE SCHEMA IF NOT EXISTS _" + s)
 
 
 def downgrade():

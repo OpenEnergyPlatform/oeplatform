@@ -1,4 +1,4 @@
-"""empty message
+"""normalize tags
 
 Revision ID: 3c2369dfcc55
 Revises: 7dd42bf4925b

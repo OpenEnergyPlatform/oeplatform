@@ -12,8 +12,11 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    TextField,
 )
 from django.utils import timezone
+
+from oeplatform.settings import DRAFT_SCHEMA, SANDBOX_SCHEMA
 
 # Create your models here.
 
@@ -37,7 +40,7 @@ class Tagable(models.Model):
 
 class Schema(Tagable):
     class Meta:
-        unique_together = (("name"),)
+        unique_together = (("name",),)
 
 
 class Table(Tagable):
@@ -47,6 +50,7 @@ class Table(Tagable):
     # due to oem string (json) parsing like when reading the oem form comment on table
     oemetadata = JSONField(null=True)
     is_reviewed = BooleanField(default=False, null=False)
+    topics = models.ManyToManyField(to="dataedit.Topic")
 
     @classmethod
     def load(cls, schema, table):
@@ -62,6 +66,18 @@ class Table(Tagable):
 
     class Meta:
         unique_together = (("name",),)
+
+    @property
+    def is_draft(self):
+        return self.schema.name == DRAFT_SCHEMA
+
+    @property
+    def is_sandbox(self):
+        return self.schema.name == SANDBOX_SCHEMA
+
+    @property
+    def is_published(self):
+        return not (self.is_draft or self.is_sandbox)
 
 
 class View(models.Model):
@@ -518,3 +534,8 @@ class PeerReviewManager(models.Model):
 
     def filter_opr_by_id(opr_id):
         return PeerReview.objects.filter(id=opr_id).first()
+
+
+class Topic(models.Model):
+    name = CharField(max_length=64, null=False, unique=True)
+    description = TextField(max_length=2048)

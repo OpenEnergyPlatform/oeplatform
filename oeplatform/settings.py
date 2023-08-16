@@ -87,9 +87,10 @@ EXTERNAL_URLS = {
 
 # manages schemas for oedb
 DEFAULT_SCHEMA = SANDBOX_SCHEMA  # noqa F405: from security settings
-PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA, TEST_SCHEMAS)  # noqa F405: from security settings
+PLAYGROUND_SCHEMAS = (
+    SANDBOX_SCHEMA,  # noqa F405: from security settings
+) + TEST_SCHEMAS  # noqa F405: from security settings
 UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA,)  # noqa F405: from security settings
-UNVERSIONED_AND_PLAYGROUND_SCHEMAS = PLAYGROUND_SCHEMAS + UNVERSIONED_SCHEMAS
 # these are the schemas that should be created by alembic in order
 # for everything to work
 MANAGED_SCHEMAS = (
