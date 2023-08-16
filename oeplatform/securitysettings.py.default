@@ -24,10 +24,17 @@ DATABASES = {
 	}
 }
 
-DEFAULT_SCHEMA = 'sandbox'
-PLAYGROUNDS = (DEFAULT_SCHEMA, 'test')
+# schema for user testing
+SANDBOX_SCHEMA = "sandbox"
+# schema for newly created, unfinished data
+DRAFT_SCHEMA = "model_draft"
+# schema for finialized datasets
+DATASET_SCHEMA = "dataset"
 
-UNVERSIONED_SCHEMAS = ("model_draft", )
+DEFAULT_SCHEMA = SANDBOX_SCHEMA
+PLAYGROUNDS = (SANDBOX_SCHEMA, "test")
+UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA,)
+
 
 # This is unnecessary as long DEBUG is True
 ALLOWED_HOSTS = [] if DEBUG else ['localhost']

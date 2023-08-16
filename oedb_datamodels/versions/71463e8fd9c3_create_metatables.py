@@ -21,7 +21,6 @@ engine = _get_engine()
 
 
 def upgrade():
-
     Session = sessionmaker(bind=engine)
     sess = Session()
     try:
@@ -52,4 +51,8 @@ def upgrade():
 
 
 def downgrade():
+    # NOTE: this downgrade will fail if there are still tables in the database
+    # adding CASCADE (how?) would fix that, but that would delete all data, which
+    # we probably also do not want. so you cannot automatically
+    # downgrade further from here
     op.drop_table("_edit_base")
