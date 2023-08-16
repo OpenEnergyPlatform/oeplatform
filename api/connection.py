@@ -3,8 +3,8 @@
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-from api import DEFAULT_SCHEMA
 from dataedit.models import Schema, Table
+from oeplatform.settings import DEFAULT_SCHEMA
 
 try:
     import oeplatform.securitysettings as sec

@@ -34,8 +34,7 @@ from sqlalchemy.sql.sqltypes import Interval
 
 from api.connection import _get_engine
 from api.error import APIError, APIKeyError
-
-from . import DEFAULT_SCHEMA
+from oeplatform.settings import DEFAULT_SCHEMA
 
 __KNOWN_TABLES = {}
 

@@ -47,7 +47,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import DRAFT_SCHEMA
+from oeplatform.settings import DRAFT_SCHEMA, SANDBOX_SCHEMA
 
 from .models import TableRevision
 from .models import View as DataViewModel
@@ -71,8 +71,6 @@ schema_whitelist = [
     "society",
     "supply",
 ]
-
-schema_sandbox = "sandbox"
 
 
 def admin_constraints(request):
@@ -987,7 +985,7 @@ class DataView(View):
         """
 
         if (
-            schema not in schema_whitelist and schema != schema_sandbox
+            schema not in schema_whitelist and schema != SANDBOX_SCHEMA
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 

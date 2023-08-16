@@ -1,5 +1,5 @@
 try:
-    from oeplatform.securitysettings import DEFAULT_SCHEMA  # noqa
+    from oeplatform.settings import DEFAULT_SCHEMA  # noqa
 except Exception:
     import logging
 

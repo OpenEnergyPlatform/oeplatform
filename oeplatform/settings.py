@@ -85,6 +85,20 @@ EXTERNAL_URLS = {
 }
 
 
+# manages schemas for oedb
+DEFAULT_SCHEMA = SANDBOX_SCHEMA  # noqa F405: from security settings
+PLAYGROUND_SCHEMAS = (SANDBOX_SCHEMA, TEST_SCHEMAS)  # noqa F405: from security settings
+UNVERSIONED_SCHEMAS = (DRAFT_SCHEMA,)  # noqa F405: from security settings
+UNVERSIONED_AND_PLAYGROUND_SCHEMAS = PLAYGROUND_SCHEMAS + UNVERSIONED_SCHEMAS
+# these are the schemas that should be created by alembic in order
+# for everything to work
+MANAGED_SCHEMAS = (
+    SANDBOX_SCHEMA,  # noqa F405: from security settings
+    DRAFT_SCHEMA,  # noqa F405: from security settings
+    DATASET_SCHEMA,  # noqa F405: from security settings
+)
+
+
 def add_settings_to_request_context(request):
     """Define hard coded external urls here.
     Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}

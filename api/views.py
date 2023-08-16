@@ -29,7 +29,7 @@ from api.helpers.http import ModHttpResponse
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
-from oeplatform.securitysettings import PLAYGROUNDS, UNVERSIONED_SCHEMAS
+from oeplatform.settings import DEFAULT_SCHEMA, PLAYGROUND_SCHEMAS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
 
@@ -186,7 +186,7 @@ def api_exception(f):
 
 def permission_wrapper(permission, f):
     def wrapper(caller, request, *args, **kwargs):
-        schema = kwargs.get("schema", actions.DEFAULT_SCHEMA)
+        schema = kwargs.get("schema", DEFAULT_SCHEMA)
         table = kwargs.get("table") or kwargs.get("sequence")
         actions.assert_permission(request.user, table, permission, schema=schema)
         return f(caller, request, *args, **kwargs)
@@ -213,7 +213,7 @@ def conjunction(clauses):
 class Sequence(APIView):
     @api_exception
     def put(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -226,7 +226,7 @@ class Sequence(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, schema, sequence):
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -335,7 +335,7 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied
@@ -388,7 +388,7 @@ class Table(APIView):
         :param request:
         :return:
         """
-        if schema not in PLAYGROUNDS and schema not in UNVERSIONED_SCHEMAS:
+        if schema not in PLAYGROUND_SCHEMAS and schema not in UNVERSIONED_SCHEMAS:
             raise PermissionDenied
         if schema.startswith("_"):
             raise PermissionDenied

@@ -5,10 +5,11 @@ from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
 from dataedit.models import Table
-from oeplatform.securitysettings import PLAYGROUNDS
+from oeplatform.settings import PLAYGROUND_SCHEMAS, SANDBOX_SCHEMA
 
-SANDBOX_SCHEMA = "sandbox"
-assert SANDBOX_SCHEMA in PLAYGROUNDS, f"{SANDBOX_SCHEMA} not in playground schemas"
+assert (
+    SANDBOX_SCHEMA in PLAYGROUND_SCHEMAS
+), f"{SANDBOX_SCHEMA} not in playground schemas"
 
 
 def get_sandbox_tables_django() -> List[Table]:
