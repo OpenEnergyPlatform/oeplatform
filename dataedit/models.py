@@ -1,4 +1,7 @@
+from enum import Enum
+
 from django.contrib.postgres.search import SearchVectorField
+from django.core.exceptions import ValidationError
 from django.db import models
 
 # django.contrib.postgres.fields.JSONField is deprecated.
@@ -11,7 +14,6 @@ from django.db.models import (
     JSONField,
 )
 from django.utils import timezone
-from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -88,19 +90,26 @@ class Filter(models.Model):
 class PeerReview(models.Model):
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
-    reviewer = ForeignKey('login.myuser', on_delete=models.CASCADE, related_name='reviewed_by', null=True)
-    contributor = ForeignKey('login.myuser', on_delete=models.CASCADE, related_name='review_received', null=True)
+    reviewer = ForeignKey(
+        "login.myuser", on_delete=models.CASCADE, related_name="reviewed_by", null=True
+    )
+    contributor = ForeignKey(
+        "login.myuser",
+        on_delete=models.CASCADE,
+        related_name="review_received",
+        null=True,
+    )
     is_finished = BooleanField(null=False, default=False)
     date_started = DateTimeField(max_length=1000, null=False, default=timezone.now)
     date_submitted = DateTimeField(max_length=1000, null=True, default=None)
     date_finished = DateTimeField(max_length=1000, null=True, default=None)
     review = JSONField(null=True)
-    
+
     # laden
     @classmethod
     def load(cls, schema, table):
         """
-        Load the current reviewer user. 
+        Load the current reviewer user.
         The current review is review is determened by the latest date started.
 
         Args:
@@ -108,21 +117,26 @@ class PeerReview(models.Model):
             table (string): Table name
 
         Returns:
-            opr (PeerReview): PeerReview object related to the latest date started. 
+            opr (PeerReview): PeerReview object related to the latest date started.
         """
-        opr = PeerReview.objects.filter(
-            table=table, schema=schema
-        ).order_by('-date_started').first()
+        opr = (
+            PeerReview.objects.filter(table=table, schema=schema)
+            .order_by("-date_started")
+            .first()
+        )
         return opr
-    
-    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the related ones (reviews on same table) .. procudes false results
+
+    # TODO: CAUTION unifinished work ... fix: includes all id´s and not just the
+    # related ones (reviews on same table) .. procudes false results
     def get_prev_and_next_reviews(self, schema, table):
         """
-        Sets the prev_review and next_review fields based on the date_started field of the PeerReview objects
-        associated with the same table.
+        Sets the prev_review and next_review fields based on the date_started field of
+        the PeerReview objects associated with the same table.
         """
         # Get all the PeerReview objects associated with the same schema and table name
-        peer_reviews = PeerReview.objects.filter(table=table, schema=schema).order_by('date_started')
+        peer_reviews = PeerReview.objects.filter(table=table, schema=schema).order_by(
+            "date_started"
+        )
 
         current_index = None
         for index, review in enumerate(peer_reviews):
@@ -143,52 +157,62 @@ class PeerReview(models.Model):
         return prev_review, next_review
 
     def save(self, *args, **kwargs):
-        review_type = kwargs.pop('review_type', None)
+        review_type = kwargs.pop("review_type", None)
         if not self.contributor == self.reviewer:
             # Call the parent class's save method to save the PeerReview instance
             super().save(*args, **kwargs)
 
             # TODO: This causes errors if review list ist empty
-            # prev_review, next_review = self.get_prev_and_next_reviews(self.schema, self.table)
-            
+            # prev_review, next_review = self.get_prev_and_next_reviews(
+            #   self.schema, self.table
+            # )
+
             # print(prev_review.id, next_review)
             # print(prev_review, next_review)
             # Create a new PeerReviewManager entry for this PeerReview
             # pm_new = PeerReviewManager(opr=self, prev_review=prev_review)
-            
+
             if review_type == "save":
                 # Handle save status
-                pm_new = PeerReviewManager(opr=self, status=ReviewDataStatus.SAVED.value)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.SAVED.value
+                )
 
             elif review_type == "submit":
                 # Handle submit status
-                pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.SUBMITTED.value)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.SUBMITTED.value
+                )
                 pm_new.set_next_reviewer()
 
             elif review_type == "finished":
-                # TODO: fails if the review is completed without submitting (finish in one run)
-                pm_new = PeerReviewManager(opr=self,  status=ReviewDataStatus.FINISHED.value)
+                # TODO: fails if the review is completed without submitting
+                # (finish in one run)
+                pm_new = PeerReviewManager(
+                    opr=self, status=ReviewDataStatus.FINISHED.value
+                )
                 self.is_finished = True
                 self.date_finished = timezone.now()
                 # Call the parent class's save method to save the PeerReview instance
                 super().save(*args, **kwargs)
 
-            pm_new.save() 
+            pm_new.save()
 
             # if prev_review is not None:
             #     pm_prev = PeerReviewManager.objects.get(opr=prev_review)
             #     pm_prev.next_review = next_review
             #     pm_prev.save()
-        else: 
+        else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
     def update(self, *args, **kwargs):
         """
-        Update the peer review if the latest peer review is not finished yet but either saved or submitted.
+        Update the peer review if the latest peer review is not finished yet
+        but either saved or submitted.
 
         """
 
-        review_type = kwargs.pop('review_type', None)
+        review_type = kwargs.pop("review_type", None)
         if not self.contributor == self.reviewer:
             current_pm = PeerReviewManager.load(opr=self)
             if review_type == "save":
@@ -200,11 +224,11 @@ class PeerReview(models.Model):
                 self.is_finished = True
                 self.date_finished = timezone.now()
                 current_pm.status = ReviewDataStatus.FINISHED.value
-            
+
             # update peere review manager related to this peer review entry
             current_pm.save()
             super().save(*args, **kwargs)
-        else: 
+        else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
 
     @property
@@ -216,13 +240,11 @@ class PeerReview(models.Model):
         else:
             return (timezone.now() - self.date_started).days  # Review is still open
 
-from enum import Enum
-
 
 class ReviewDataStatus(Enum):
-    SAVED = 'SAVED'
-    SUBMITTED = 'SUBMITTED'
-    FINISHED = 'FINISHED'
+    SAVED = "SAVED"
+    SUBMITTED = "SUBMITTED"
+    FINISHED = "FINISHED"
 
 
 class Reviewer(Enum):
@@ -232,25 +254,45 @@ class Reviewer(Enum):
 
 class PeerReviewManager(models.Model):
     """
-    Model representing the manager of a peer review. 
-    
-        - It handles the 1:n relation between table and open peer reviews. 
+    Model representing the manager of a peer review.
+
+        - It handles the 1:n relation between table and open peer reviews.
         - It tracks the days open for the peer review.
-        - It tracks the state of the peer review as it can be SAVED, SUBMITTED (stated) or FINISHED.
+        - It tracks the state of the peer review as it can be SAVED, SUBMITTED (stated)
+          or FINISHED.
         - It determines who is next in the process between reviewer and contributor.
         - it provides information about the previous and next review.
-        - It provides several methods that provide generic filters for the peerReviews 
+        - It provides several methods that provide generic filters for the peerReviews
             (like filter by table, contributor ...)
     """
+
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
     REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
 
-    opr = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='review_id', null=False)
-    current_reviewer = models.CharField(choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.REVIEWER.value)
-    status = models.CharField(choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value)
+    opr = ForeignKey(
+        PeerReview, on_delete=models.CASCADE, related_name="review_id", null=False
+    )
+    current_reviewer = models.CharField(
+        choices=REVIEWER_CHOICES, max_length=20, default=Reviewer.REVIEWER.value
+    )
+    status = models.CharField(
+        choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value
+    )
     is_open_since = models.CharField(null=True, max_length=10)
-    prev_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='prev_review', null=True, default=None) #TODO: add logic
-    next_review = ForeignKey(PeerReview, on_delete=models.CASCADE, related_name='next_review', null=True, default=None) #TODO: add logic
+    prev_review = ForeignKey(
+        PeerReview,
+        on_delete=models.CASCADE,
+        related_name="prev_review",
+        null=True,
+        default=None,
+    )  # TODO: add logic
+    next_review = ForeignKey(
+        PeerReview,
+        on_delete=models.CASCADE,
+        related_name="next_review",
+        null=True,
+        default=None,
+    )  # TODO: add logic
 
     @classmethod
     def load(cls, opr):
@@ -263,54 +305,53 @@ class PeerReviewManager(models.Model):
         Returns:
             PeerReviewManager: The peer review manager.
         """
-        peer_review_manager = PeerReviewManager.objects.get(
-            opr=opr
-        )
+        peer_review_manager = PeerReviewManager.objects.get(opr=opr)
         return peer_review_manager
 
     def save(self, *args, **kwargs):
         """
-        Override the save method to perform additional logic before saving the peer review manager.
+        Override the save method to perform additional logic
+        before saving the peer review manager.
         """
         # Set is_open_since field if it is None
         if self.is_open_since is None:
             # Get the associated PeerReview instance
             peer_review = self.opr
 
-            # Set is_open_since based on the days_open property of the PeerReview instance
+            # Set is_open_since based on the days_open property of the
+            # PeerReview instance
             days_open = peer_review.days_open
             if days_open is not None:
                 self.is_open_since = str(days_open)
         # print(self.is_open_since, self.status)
         # Call the parent class's save method to save the PeerReviewManager instance
         super().save(*args, **kwargs)
-    
+
     @classmethod
     def update_open_since(cls, opr=None, *args, **kwargs):
         """
         Update the "is_open_since" field of the peer review manager.
 
         Args:
-            opr (PeerReview): The peer review. If None, use the peer review associated with the manager.
+            opr (PeerReview): The peer review.
+            If None, use the peer review associated with the manager.
 
         """
         if opr is not None:
-            peer_review = PeerReviewManager.objects.get(
-                opr=opr
-            )
+            peer_review = PeerReviewManager.objects.get(opr=opr)
         else:
             peer_review = cls.opr
 
         days_open = peer_review.opr.days_open
-        peer_review.is_open_since = str(days_open) 
+        peer_review.is_open_since = str(days_open)
 
         # Call the parent class's save method to save the PeerReviewManager instance
         peer_review.save(*args, **kwargs)
 
     def set_next_reviewer(self):
         """
-        Set the order on which peer will be requred to perform a action to 
-        continue with the process. 
+        Set the order on which peer will be requred to perform a action to
+        continue with the process.
         """
         # TODO:check for user identifies as ...
         if self.current_reviewer == Reviewer.REVIEWER.value:
@@ -329,14 +370,14 @@ class PeerReviewManager(models.Model):
         role, result = None, None
         peer_review = self.opr
         if self.current_reviewer == Reviewer.REVIEWER.value:
-            role= Reviewer.REVIEWER.value
-            result= peer_review.reviewer
+            role = Reviewer.REVIEWER.value
+            result = peer_review.reviewer
         else:
-            role= Reviewer.CONTRIBUTOR.value
-            result= peer_review.contributor
+            role = Reviewer.CONTRIBUTOR.value
+            result = peer_review.contributor
 
         return role, result
-    
+
     @staticmethod
     def load_contributor(schema, table):
         """
@@ -351,33 +392,37 @@ class PeerReviewManager(models.Model):
         """
         current_table = Table.load(schema=schema, table=table)
         try:
-            table_holder = current_table.userpermission_set.filter(table=current_table.id).first().holder
+            table_holder = (
+                current_table.userpermission_set.filter(table=current_table.id)
+                .first()
+                .holder
+            )
         except AttributeError:
             table_holder = None
         return table_holder
-    
+
     @staticmethod
     def load_reviewer(schema, table):
         """
-        Get the reviewer for the table a review is started. 
-    .
-        Args:
-            schema (str): Schema name.
-            table (str): Table name.
+            Get the reviewer for the table a review is started.
+        .
+            Args:
+                schema (str): Schema name.
+                table (str): Table name.
 
-        Returns:
-            User: The reviewer user.
+            Returns:
+                User: The reviewer user.
         """
         current_review = PeerReview.load(schema=schema, table=table)
-        if current_review and hasattr(current_review, 'reviewer'):
+        if current_review and hasattr(current_review, "reviewer"):
             return current_review.reviewer
         else:
             return None
-        
+
     @staticmethod
     def filter_opr_by_reviewer(reviewer_user):
         """
-        Filter peer reviews by reviewer, excluding those with current peer 
+        Filter peer reviews by reviewer, excluding those with current peer
         is contributor and the data status "SAVED" in the peer review manager.
 
         Args:
@@ -386,13 +431,11 @@ class PeerReviewManager(models.Model):
         Returns:
             QuerySet: Filtered peer reviews.
         """
-        return PeerReview.objects.filter(
-            reviewer=reviewer_user
-        ).exclude(
+        return PeerReview.objects.filter(reviewer=reviewer_user).exclude(
             review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
-            review_id__status=ReviewDataStatus.SAVED.value
+            review_id__status=ReviewDataStatus.SAVED.value,
         )
-    
+
     @staticmethod
     def filter_latest_open_opr_by_reviewer(reviewer_user):
         """
@@ -405,20 +448,21 @@ class PeerReviewManager(models.Model):
             PeerReview: Last open peer review or None if not found.
         """
         try:
-            return PeerReview.objects.filter(
-                reviewer=reviewer_user,
-                is_finished=False
-            ).exclude(
-                review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
-                review_id__status=ReviewDataStatus.SAVED.value
-            ).latest('date_started')
+            return (
+                PeerReview.objects.filter(reviewer=reviewer_user, is_finished=False)
+                .exclude(
+                    review_id__current_reviewer=Reviewer.CONTRIBUTOR.value,
+                    review_id__status=ReviewDataStatus.SAVED.value,
+                )
+                .latest("date_started")
+            )
         except PeerReview.DoesNotExist:
             return None
 
     @staticmethod
     def filter_opr_by_contributor(contributor_user):
         """
-        Filter peer reviews by contributor, excluding those with current peer 
+        Filter peer reviews by contributor, excluding those with current peer
         is reviewer and the data status "SAVED" in the peer review manager.
 
         Args:
@@ -427,14 +471,12 @@ class PeerReviewManager(models.Model):
         Returns:
             QuerySet: Filtered peer reviews.
         """
-                
-        return PeerReview.objects.filter(
-            contributor=contributor_user
-        ).exclude(
+
+        return PeerReview.objects.filter(contributor=contributor_user).exclude(
             review_id__current_reviewer=Reviewer.REVIEWER.value,
-            review_id__status=ReviewDataStatus.SAVED.value
+            review_id__status=ReviewDataStatus.SAVED.value,
         )
-    
+
     @staticmethod
     def filter_latest_open_opr_by_contributor(contributor_user):
         """
@@ -447,16 +489,19 @@ class PeerReviewManager(models.Model):
             PeerReview: Last open peer review or None if not found.
         """
         try:
-            return PeerReview.objects.filter(
-                contributor=contributor_user,
-                is_finished=False
-            ).exclude(
-                review_id__current_reviewer=Reviewer.REVIEWER.value,
-                review_id__status=ReviewDataStatus.SAVED.value
-            ).latest('date_started')
+            return (
+                PeerReview.objects.filter(
+                    contributor=contributor_user, is_finished=False
+                )
+                .exclude(
+                    review_id__current_reviewer=Reviewer.REVIEWER.value,
+                    review_id__status=ReviewDataStatus.SAVED.value,
+                )
+                .latest("date_started")
+            )
         except PeerReview.DoesNotExist:
             return None
-        
+
     @staticmethod
     def filter_opr_by_table(schema, table):
         """
@@ -470,7 +515,6 @@ class PeerReviewManager(models.Model):
             QuerySet: Filtered peer reviews.
         """
         return PeerReview.objects.filter(schema=schema, table=table)
-    
+
     def filter_opr_by_id(opr_id):
         return PeerReview.objects.filter(id=opr_id).first()
-    

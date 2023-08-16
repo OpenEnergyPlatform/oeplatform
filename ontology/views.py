@@ -231,14 +231,18 @@ class OntologyOverview(View):
                 if module_or_id in classes_notes.keys():
                     class_notes = classes_notes[module_or_id]
 
-                return render(request, "ontology/class.html", dict(
-                    class_id=module_or_id,
-                    class_name=class_name,
-                    sub_classes=sub_classes,
-                    super_classes=super_classes,
-                    class_definitions=class_definitions,
-                    class_notes=class_notes,
-                ))
+                return render(
+                    request,
+                    "ontology/class.html",
+                    dict(
+                        class_id=module_or_id,
+                        class_name=class_name,
+                        sub_classes=sub_classes,
+                        super_classes=super_classes,
+                        class_definitions=class_definitions,
+                        class_notes=class_notes,
+                    ),
+                )
             else:
                 main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
                 main_module_name = list(main_module.keys())[0]

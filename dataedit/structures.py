@@ -54,7 +54,7 @@ class Tag(Base):
         name_norm = name_norm.lower()
         name_norm = re.sub("[^a-z0-9]+", "_", name_norm)
         name_norm = name_norm.strip("_")
-        name_norm = name_norm[:40] # max len
+        name_norm = name_norm[:40]  # max len
         return name_norm
 
     @staticmethod
