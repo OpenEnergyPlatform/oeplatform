@@ -85,12 +85,15 @@ EXTERNAL_URLS = {
 }
 
 
-def external_urls_context_processor(request):
+def add_settings_to_request_context(request):
     """Define hard coded external urls here.
     Use in templates like this: {{ EXTERNAL_URLS.<name_of_url> }}
     Also, you may want to add an icon indicating external links, e.g.
     """
-    return {"EXTERNAL_URLS": EXTERNAL_URLS}
+    return {
+        "EXTERNAL_URLS": EXTERNAL_URLS,
+        "DRAFT_SCHEMA": DRAFT_SCHEMA,  # noqa F405: from security settings
+    }
 
 
 SITE_ID = 1
@@ -106,7 +109,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "oeplatform.settings.external_urls_context_processor",
+                "oeplatform.settings.add_settings_to_request_context",
             ]
         },
     }

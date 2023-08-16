@@ -14,11 +14,11 @@
         </div>
     </div>
 {% endblock site-header %}
-
 {% block data_content %}
+
 <div class="topics">
     {% for schema, description, tables in schemas %}
-    {% if schema == "model_draft" %}
+    {% if schema == "{{DRAFT_SCHEMA}}" %}
     <div class="topics__row">
         <div class="topics__col">
             <div class="topic-card">
@@ -96,7 +96,7 @@
 
     <div class="topics__row">
         {% for schema, description, tables in schemas %}
-        {% if schema != "model_draft" %}
+        {% if schema != "{{DRAFT_SCHEMA}}" %}
         {% if schema != "scenario" %}
         <div class="topics__col topics__col--4">
             <div class="topic-card">

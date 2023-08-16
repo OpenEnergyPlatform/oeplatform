@@ -47,6 +47,7 @@ from dataedit.models import PeerReview, PeerReviewManager, Table
 from dataedit.models import View as DBView
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
+from oeplatform.settings import DRAFT_SCHEMA
 
 from .models import TableRevision
 from .models import View as DataViewModel
@@ -1784,7 +1785,7 @@ def get_column_description(schema, table):
 class WizardView(LoginRequiredMixin, View):
     """View for the upload wizard (create tables, upload csv)."""
 
-    def get(self, request, schema="model_draft", table=None):
+    def get(self, request, schema=DRAFT_SCHEMA, table=None):
         """Handle GET request (render the page)."""
         engine = actions._get_engine()
 
@@ -1794,9 +1795,9 @@ class WizardView(LoginRequiredMixin, View):
         n_rows = None
         if table:
             # get information about the table
-            # if upload: table must exist in schema model_draft
-            if schema != "model_draft":
-                raise Http404("Can only upload to schema model_draft")
+            # if upload: table must exist in DRAFT_SCHEMA
+            if schema != DRAFT_SCHEMA:
+                raise Http404(f"Can only upload to schema {DRAFT_SCHEMA}")
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
             table_obj = Table.load(schema, table)
