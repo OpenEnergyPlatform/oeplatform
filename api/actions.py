@@ -93,9 +93,7 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table: str, permission, schema=None):
-    if schema is None:
-        schema = DEFAULT_SCHEMA
+def assert_permission(user, table: str, permission):
     if (
         user.is_anonymous
         or user.get_table_permission_level(DBTable.objects.get(name=table)) < permission
@@ -1190,7 +1188,7 @@ def data_delete(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.DELETE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.DELETE_PERM)
 
     target_table = get_delete_table_name(orig_schema, orig_table)
     setter = []
@@ -1211,7 +1209,7 @@ def data_update(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.WRITE_PERM)
 
     target_table = get_edit_table_name(orig_schema, orig_table)
     setter = get_or_403(request, "values")
@@ -1330,7 +1328,7 @@ def data_insert(request, context=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
 
-    assert_permission(context["user"], table, login_models.WRITE_PERM, schema=schema)
+    assert_permission(context["user"], table, login_models.WRITE_PERM)
 
     # mapper = {orig_schema: schema, orig_table: table}
 

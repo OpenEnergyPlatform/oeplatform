@@ -18,7 +18,6 @@ class Test_issue_807_table_artefacts(APITestCase):
         try:
             assert_permission(
                 user=self.user,  # created in APITestCase
-                schema=self.schema,
                 table=self.table,
                 permission=0,  # any value will do
             )
