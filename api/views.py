@@ -253,14 +253,15 @@ class Sequence(APIView):
 
 class Metadata(APIView):
     @api_exception
-    def get(self, request, schema, table):
-        metadata = actions.get_table_metadata(schema, table)
+    def get(self, request, table, schema=None):
+        """schema will be ignored"""
+        metadata = DBTable.objects.get(name=table).oemetadata
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
-    def post(self, request, schema, table):
+    def post(self, request, table, schema=None):
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
