@@ -33,7 +33,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tgpag as OEDBTag
+from dataedit.structures import Tag as OEDBTag
 from oeplatform.settings import DEFAULT_SCHEMA, EDITABLE_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
