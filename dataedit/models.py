@@ -560,4 +560,4 @@ class Topic(models.Model):
 
     @staticmethod
     def get_topic_names():
-        return Topic.objects.values_list("name", flat=True)
+        return list(Topic.objects.values_list("name", flat=True))

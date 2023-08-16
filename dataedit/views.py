@@ -48,14 +48,22 @@ from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import DRAFT_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SANDBOX_SCHEMA
 
 session = None
 
 
 def get_schema_whitelist():
-    """todo: maybe asaconstant somewhere?"""
-    return Topic.get_topic_names()
+    """TODO: this is only temporary until schemas are removed"""
+    return Topic.get_topic_names() + [DRAFT_SCHEMA, DATASET_SCHEMA]
+
+
+def get_schema_description():
+    """TODO: this is only temporary until schemas are removed"""
+    schema_description = dict((t.name, t.description) for t in Topic.objects.all())
+    schema_description[DRAFT_SCHEMA] = "Data in draft"
+    schema_description[DATASET_SCHEMA] = "Finalized Data"
+    return schema_description
 
 
 def admin_constraints(request):
@@ -240,8 +248,7 @@ def listschemas(request):
     # get table count per schema
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
-    # TODO: set as constant somewhere?
-    schema_description = dict((t.name, t.description) for t in Topic.objects.all())
+    schema_description = get_schema_description()
 
     # triples of name, description, table_count
     schemas = [
