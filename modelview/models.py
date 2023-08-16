@@ -1272,7 +1272,6 @@ class Energystudy(models.Model):
 
 
 class Energyscenario(models.Model):
-
     study = ForeignKey(
         "Energystudy",
         db_column="name_of_the_study_id",

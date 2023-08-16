@@ -186,6 +186,9 @@ function getFieldState(fieldKey) {
 }
 
 function click_field(fieldKey, fieldValue, category) {
+  // Check if the category tab needs to be switched
+  switchCategoryTab(category);
+
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
   selectedField = fieldKey;
   selectedFieldValue = fieldValue;
@@ -245,7 +248,39 @@ function clearInputFields() {
   document.getElementById("commentarea").value = "";
 }
 
+/**
+ * Switch to the category tab if needed
+ */
+function switchCategoryTab(category) {
+  const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
+  const tabIdForCategory = getCategoryToTabIdMapping()[category];
+  console.log("tabID", tabIdForCategory);
+  if (currentTab.getAttribute('id') !== tabIdForCategory) {
+    // The clicked field does not belong to the current tab, switch to the next tab
+    const targetTab = document.getElementById(tabIdForCategory);
+    if (targetTab) {
+      // The target tab exists, click the tab link to switch to it
+      targetTab.click();
+    }
+  }
+}
 
+/**
+ * Function to provide the mapping of category to the correct tab ID
+ */
+function getCategoryToTabIdMapping() {
+  // Define the mapping of category to tab ID
+  const mapping = {
+    'general': 'general-tab',
+    'spatial': 'spatiotemporal-tab',
+    'temporal': 'spatiotemporal-tab',
+    'source': 'source-tab',
+    'license': 'license-tab',
+    'contributor': 'contributor-tab',
+    'resource': 'resource-tab',
+  };
+  return mapping;
+}
 
 /**
  * Creates List of all fields from html elements
@@ -486,8 +521,7 @@ function saveEntrances() {
   if (selectedState != "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    const liveToastBtn = document.getElementById('liveToastBtn');
-    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+  
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
