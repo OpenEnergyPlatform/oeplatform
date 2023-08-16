@@ -18,9 +18,10 @@ from django.db.models import (
 from django.utils import timezone
 
 from oeplatform.settings import (
-    ALL_SCHEMAS,
     DATASET_SCHEMA,
     DRAFT_SCHEMA,
+    EDITABLE_SCHEMAS,
+    LEGACY_SCHEMAS,
     SANDBOX_SCHEMA,
 )
 
@@ -55,6 +56,7 @@ class Schema(Tagable):
 
 
 class Table(Tagable):
+    # physical schema in OEDB
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
     # Add field to store oemetadata related to the table and avoide performance issues
@@ -78,9 +80,8 @@ class Table(Tagable):
         """this should be the only way a table object is created, so we can
         remove the schema later entirely
         """
-        if schema_name not in ALL_SCHEMAS:
-            # TODO CHW: raise exception or default?
-            schema_name = DRAFT_SCHEMA
+        if schema_name not in EDITABLE_SCHEMAS:
+            raise Exception(f"Invalid schema: {schema_name}")
         schema_obj = Schema.objects.get(name=schema_name)
         return Table.objects.create(name=name, schema=schema_obj)
 
@@ -88,9 +89,8 @@ class Table(Tagable):
         """this should be the only way a the schema is changed, so we can
         remove the schema later entirely
         """
-        if schema_name not in ALL_SCHEMAS:
-            # TODO CHW: raise exception or default?
-            schema_name = DRAFT_SCHEMA
+        if schema_name not in [DRAFT_SCHEMA, DATASET_SCHEMA]:
+            raise Exception(f"Invalid schema: {schema_name}")
         self.schema = Schema.objects.get(name=schema_name)
 
     @property
@@ -109,12 +109,8 @@ class Table(Tagable):
     @staticmethod
     def find_published():
         """find all unpublished tables"""
-        # either in dataset schema OR
-        # (old tables): schema name is one of the topic names
-        # TODO: how to do this directly in the query below?
-        topic_names = Topic.get_topic_names()
         return Table.objects.filter(
-            Q(schema__name=DATASET_SCHEMA) | Q(schema__name__in=topic_names)
+            Q(schema__name=DATASET_SCHEMA) | Q(schema__name__in=LEGACY_SCHEMAS)
         )
 
     @staticmethod

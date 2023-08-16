@@ -17,7 +17,6 @@ class TestMove(APITestCaseWithTable):
             path=f"move/{TEST_DATASET_SCHEMA}/",
             exp_code=200,
         )
-
         self.assertEqual(
             Table.objects.get(name=self.test_table).schema.name, TEST_DATASET_SCHEMA
         )

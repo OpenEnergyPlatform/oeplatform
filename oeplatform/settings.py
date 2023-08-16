@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 from .utils import is_test
 
+# TODO CHW: should not start without security settings
 try:
     from .securitysettings import *  # noqa
 except ImportError:
@@ -88,19 +89,38 @@ EXTERNAL_URLS = {
 
 #  OEDB SCHEMAS
 
+# in test environment: use different schemas, so we don't mess
+# with the dev oedb. the test schemas are automatically created and deleted
+# by the unit tests
 TEST_DRAFT_SCHEMA = "test_" + DRAFT_SCHEMA  # noqa F405 from securitysettings
 TEST_DATASET_SCHEMA = "test_" + DATASET_SCHEMA  # noqa F405 from securitysettings
-
 if is_test():
     DRAFT_SCHEMA = TEST_DRAFT_SCHEMA
     DATASET_SCHEMA = TEST_DATASET_SCHEMA
-
-DEFAULT_SCHEMA = DRAFT_SCHEMA
+# schemas where tables can be created or changed
 EDITABLE_SCHEMAS = [DRAFT_SCHEMA, SANDBOX_SCHEMA]  # noqa F405 from securitysettings
-ALL_SCHEMAS = [
+DEFAULT_SCHEMA = SANDBOX_SCHEMA  # noqa F405 from securitysettings
+# old schemas, that still may contain data
+LEGACY_SCHEMAS = [
+    "boundaries",
+    "climate",
+    "economy",
+    "demand",
+    "grid",
+    "supply",
+    "environment",
+    "society",
+    "scenario",
+    "reference",
+    "emission",
+    "openstreetmap",
+    "policy",
+]
+# complete lists of oedb schemas in which tables are allowed
+SCHEMA_WHITELIST = LEGACY_SCHEMAS + [
+    DRAFT_SCHEMA,
+    DATASET_SCHEMA,
     SANDBOX_SCHEMA,  # noqa F405 from securitysettings
-    DRAFT_SCHEMA,  # noqa F405 from securitysettings
-    DATASET_SCHEMA,  # noqa F405 from securitysettings
 ]
 
 

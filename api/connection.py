@@ -4,7 +4,6 @@ import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
 from dataedit.models import Table
-from oeplatform.settings import DEFAULT_SCHEMA
 
 try:
     import oeplatform.securitysettings as sec
@@ -29,7 +28,7 @@ def _get_engine():
     return __ENGINE
 
 
-def table_exists_in_oedb(table, schema=None):
+def table_exists_in_oedb(table, schema):
     """check if table exists in oedb
 
     Args:
@@ -39,7 +38,6 @@ def table_exists_in_oedb(table, schema=None):
     Returns:
         bool
     """
-    schema = schema or DEFAULT_SCHEMA
     engine = _get_engine()
     conn = engine.connect()
     try:

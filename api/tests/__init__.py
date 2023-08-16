@@ -96,7 +96,6 @@ class APITestCase(TestCase):
             table = table or self.test_table
             schema = schema or self.test_schema
             url = f"/api/v0/schema/{schema}/tables/{table}/{path}"
-
         data = json.dumps(data) if data else ""  # IMPORTANT: keep empty string
 
         method = method.lower()

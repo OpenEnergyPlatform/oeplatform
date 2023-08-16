@@ -1,21 +1,31 @@
 from django.conf.urls import url
-from django.views.generic import RedirectView
+
+# from django.urls import reverse
+from django.views.generic.base import RedirectView
 
 from dataedit import views
+
+# TODO CHW:
+# def create_redirect_wo_schema(name):
+#    class _RedirectView(RedirectView):
+#        def get_redirect_url(self, **kwargs):
+#            return reverse(name, kwargs=kwargs.pop("schema"))
+#
+#    return _RedirectView.as_view(permanent=False)
+
 
 pgsql_qualifier = r"[\w\d_]+"
 
 urlpatterns = [
-    url(r"^schemas$", views.listschemas, name="index"),
-    url(r"^$", RedirectView.as_view(url="/dataedit/schemas")),
-    # url(r'^admin/$', views.admin, name='index'),
-    url(r"^admin/columns/", views.admin_columns, name="input"),
-    url(r"^admin/constraints/", views.admin_constraints, name="input"),
     url(r"^view/$", views.listschemas, name="index"),
+    url(r"^schemas$", RedirectView.as_view(pattern_name="index")),
+    url(r"^$", RedirectView.as_view(pattern_name="index")),
+    # url(r'^admin/$', views.admin, name='index'),
+    url(r"^admin/columns/", views.admin_columns),
+    url(r"^admin/constraints/", views.admin_constraints),
     url(
-        r"^view/(?P<schema_name>{qual})$".format(qual=pgsql_qualifier),
+        r"^view/(?P<topic_name>{qual})$".format(qual=pgsql_qualifier),
         views.listtables,
-        name="input",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})$".format(qual=pgsql_qualifier),
@@ -31,14 +41,12 @@ urlpatterns = [
             qual=pgsql_qualifier
         ),
         views.RevisionView.as_view(),
-        name="input",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/permissions$".format(
             qual=pgsql_qualifier
         ),
         views.PermissionView.as_view(),
-        name="input",
     ),
     url(
         r"^view/(?P<schema>{qual})/(?P<table>{qual})/meta_edit$".format(
@@ -70,7 +78,6 @@ urlpatterns = [
             qual=pgsql_qualifier
         ),
         views.show_revision,
-        name="input",
     ),
     url(r"^tags/?$", views.tag_overview),
     url(r"^tags/set/?$", views.change_tag),

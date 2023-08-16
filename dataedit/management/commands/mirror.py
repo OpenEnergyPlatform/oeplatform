@@ -3,21 +3,17 @@ from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
 from dataedit.models import Table
-from dataedit.views import get_schema_whitelist
-from oeplatform.settings import ALL_SCHEMAS, DEFAULT_SCHEMA
+from oeplatform.settings import SCHEMA_WHITELIST
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        schema_whitelist = get_schema_whitelist()
-
         engine = _get_engine()
         inspector = sqla.inspect(engine)
         real_tables = {
             (schema, table_name)
-            for schema in schema_whitelist
+            for schema in SCHEMA_WHITELIST
             for table_name in inspector.get_table_names(schema=schema)
-            if schema in schema_whitelist
         }
         table_objects = {(t.schema.name, t.name) for t in Table.objects.all()}
 
@@ -38,10 +34,8 @@ class Command(BaseCommand):
         # create django table objects if table in oedb and not in django
         for schema, table in real_tables.difference(table_objects):
             print(schema, table)
-            if schema not in ALL_SCHEMAS:
-                print(
-                    f"Warning: schema {schema} not allowed, default to {DEFAULT_SCHEMA}"
-                )
-                schema = DEFAULT_SCHEMA
+            if schema not in SCHEMA_WHITELIST:
+                print(f"Warning: schema {schema} not allowed")
+                continue
             t = Table.create_with_schema(name=table, schema=schema)
             t.save()

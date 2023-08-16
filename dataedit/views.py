@@ -48,24 +48,14 @@ from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    SANDBOX_SCHEMA,
+    SCHEMA_WHITELIST,
+)
 
 session = None
-
-
-def get_schema_whitelist():
-    """TODO: this is only temporary until schemas are removed"""
-    schema_whitelist = Topic.get_topic_names()
-    schema_whitelist += [DRAFT_SCHEMA, DATASET_SCHEMA]
-    return schema_whitelist
-
-
-def get_schema_description():
-    """TODO: this is only temporary until schemas are removed"""
-    schema_description = dict((t.name, t.description) for t in Topic.objects.all())
-    schema_description[DRAFT_SCHEMA] = "Data in draft"
-    schema_description[DATASET_SCHEMA] = "Finalized Data"
-    return schema_description
 
 
 def admin_constraints(request):
@@ -250,7 +240,10 @@ def listschemas(request):
     # get table count per schema
     response = tables.values("schema__name").annotate(tables_count=Count("name"))
 
-    schema_description = get_schema_description()
+    # TODO CHW: migrate from schema to topic
+    schema_description = dict((t.name, t.description) for t in Topic.objects.all())
+    schema_description[DRAFT_SCHEMA] = "Data in draft"
+    schema_description[DATASET_SCHEMA] = "Finalized Data"
 
     # triples of name, description, table_count
     schemas = [
@@ -368,8 +361,7 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     filters = []
 
     # only whitelisted schemata:
-    schema_whitelist = get_schema_whitelist()
-    filters.append(Q(schema__name__in=schema_whitelist))
+    filters.append(Q(schema__name__in=SCHEMA_WHITELIST))
 
     if schema_name:  # only tables in schema
         filters.append(Q(schema__name=schema_name))
@@ -424,15 +416,14 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
     return tables
 
 
-def listtables(request, schema_name):
+def listtables(request, topic_name):
     """
     :param request: A HTTP-request object sent by the Django framework
     :param schema_name: Name of a schema
     :return: Renders the list of all tables in the specified schema
     """
 
-    schema_whitelist = get_schema_whitelist()
-    if schema_name not in schema_whitelist or schema_name.startswith("_"):
+    if topic_name not in SCHEMA_WHITELIST or topic_name.startswith("_"):
         raise Http404("Schema not accessible")
 
     searched_query_string = request.GET.get("query")
@@ -448,7 +439,7 @@ def listtables(request, schema_name):
 
     # find all tables (layzy query set) in this schema
     tables = find_tables(
-        schema_name=schema_name,
+        schema_name=topic_name,
         query_string=searched_query_string,
         tag_ids=searched_tag_ids,
     )
@@ -462,7 +453,7 @@ def listtables(request, schema_name):
             array_agg(Tag.color),
             array_agg(Tag.usage_count),
         )
-        .filter(TableTags.schema_name == schema_name, TableTags.tag == Tag.id)  # join
+        .filter(TableTags.schema_name == topic_name, TableTags.tag == Tag.id)  # join
         .group_by(TableTags.table_name)
     )
 
@@ -482,7 +473,7 @@ def listtables(request, schema_name):
         (
             table.name,
             # TODO: slow, because must read metadata for each table!
-            get_readable_table_name(schema_name=schema_name, table_name=table.name),
+            get_readable_table_name(schema_name=topic_name, table_name=table.name),
             tags.get(table.name, []),
         )
         for table in tables
@@ -495,7 +486,7 @@ def listtables(request, schema_name):
         request,
         "dataedit/dataedit_tablelist.html",
         {
-            "schema": schema_name,
+            "schema": topic_name,
             "tables": tables,
             "query": searched_query_string,
             "tags": searched_tag_ids,
@@ -954,7 +945,7 @@ class DataView(View):
     Initialises the session data (if necessary)
     """
 
-    def get(self, request, schema, table):
+    def get(self, request, table, schema=None):
         """
         Collects the following information on the specified table:
             * Postgresql comment on this table
@@ -967,9 +958,11 @@ class DataView(View):
         :return:
         """
 
-        schema_whitelist = get_schema_whitelist()
+        table_obj = Table.objects.get(name=Table)
+        schema = table_obj
+
         if (
-            schema not in schema_whitelist and schema != SANDBOX_SCHEMA
+            schema not in SCHEMA_WHITELIST and schema != SANDBOX_SCHEMA
         ) or schema.startswith("_"):
             raise Http404("Schema not accessible")
 
@@ -1158,8 +1151,7 @@ class PermissionView(View):
     """
 
     def get(self, request, schema, table):
-        schema_whitelist = get_schema_whitelist()
-        if schema not in schema_whitelist:
+        if schema not in SCHEMA_WHITELIST:
             raise Http404("Schema not accessible")
 
         table_obj = Table.objects.get(name=table)

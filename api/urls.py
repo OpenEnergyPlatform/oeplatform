@@ -20,6 +20,12 @@ urlpatterns = [
         views.Metadata.as_view(),
         name="api_table_meta",
     ),
+    # TODO CHW:
+    # url(
+    #    r"^v0/dataset/(?P<table>[\w\d_\s]+)/meta/$",
+    #    views.Metadata.as_view(),
+    #    name="api_table_meta_wo_schema",
+    # ),
     url(
         r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",  # noqa
         views.Move.as_view(),

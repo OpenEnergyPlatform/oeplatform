@@ -28,8 +28,13 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
-from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
-from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, EDITABLE_SCHEMAS
+from dataedit.views import get_tag_keywords_synchronized_metadata
+from oeplatform.settings import (
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    EDITABLE_SCHEMAS,
+    SCHEMA_WHITELIST,
+)
 
 logger = logging.getLogger("oeplatform")
 
@@ -607,9 +612,8 @@ class Move(APIView):
         # ignore schema from user
         schema = DBTable.objects.get(name=table).schema.name
 
-        schema_whitelist = get_schema_whitelist()
         # schema_whitelist: all topics + DRAFT_SCHEMA + DATASET_SCHEMA
-        if schema not in schema_whitelist or to_schema not in schema_whitelist:
+        if schema not in SCHEMA_WHITELIST or to_schema not in SCHEMA_WHITELIST:
             raise APIError("Invalid origin or target schema")
 
         topic_name = None
