@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="table",
             name="topics",
-            field=models.ManyToManyField(to="dataedit.Topic"),
+            field=models.ManyToManyField(to="dataedit.Topic", related_name="tables"),
         ),
         migrations.RunPython(create_topics, do_nothing),
         migrations.RunPython(convert_schema_to_topic, do_nothing),

@@ -28,7 +28,7 @@ from api.error import APIError
 from api.helpers.http import ModHttpResponse
 from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
 from oeplatform.settings import DEFAULT_SCHEMA, PLAYGROUND_SCHEMAS, UNVERSIONED_SCHEMAS
 
 logger = logging.getLogger("oeplatform")
@@ -599,6 +599,7 @@ class Move(APIView):
     @require_admin_permission
     @api_exception
     def post(self, request, schema, table, to_schema):
+        schema_whitelist = get_schema_whitelist()
         if schema not in schema_whitelist or to_schema not in schema_whitelist:
             raise APIError("Invalid origin or target schema")
         actions.move(schema, table, to_schema)
