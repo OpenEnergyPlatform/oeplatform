@@ -111,28 +111,26 @@ class OEPUserManager(UserManager):
 
 
 class PermissionHolder:
-    def has_write_permissions(self, schema, table):
+    def has_write_permissions(self, table: str):
         """
         This function returns the authorization given the schema and table.
         """
-        return self.__get_perm(schema, table) >= WRITE_PERM
+        return self.__get_perm(table) >= WRITE_PERM
 
-    def has_delete_permissions(self, schema, table):
+    def has_delete_permissions(self, table: str):
         """
         This function returns the authorization given the schema and table.
         """
-        return self.__get_perm(schema, table) >= DELETE_PERM
+        return self.__get_perm(table) >= DELETE_PERM
 
-    def has_admin_permissions(self, schema, table):
+    def has_admin_permissions(self, table: str):
         """
         This function returns the authorization given the schema and table.
         """
-        return self.__get_perm(schema, table) >= ADMIN_PERM
+        return self.__get_perm(table) >= ADMIN_PERM
 
-    def __get_perm(self, schema, table):
-        perm = self.table_permissions.filter(
-            table__name=table, table__schema__name=schema
-        ).first()
+    def __get_perm(self, table: str):
+        perm = self.table_permissions.filter(table__name=table).first()
         if perm:
             return perm.level
         else:
@@ -143,7 +141,7 @@ class UserGroup(Group, PermissionHolder):
     description = models.TextField(null=False, default="")
     is_admin = models.BooleanField(null=False, default=False)
 
-    def get_table_permission_level(self, table):
+    def get_table_permission_level(self, table: datamodels.Table):
         if self.is_admin:
             return ADMIN_PERM
         return max(
@@ -215,7 +213,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
     def is_staff(self):
         return self.is_admin
 
-    def get_table_permission_level(self, table):
+    def get_table_permission_level(self, table: datamodels.Table):
         # Check admin permissions for user
         if self.is_admin:
             return ADMIN_PERM

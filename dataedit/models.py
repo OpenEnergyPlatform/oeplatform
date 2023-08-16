@@ -98,8 +98,20 @@ class Table(Tagable):
         return self.schema.name == DRAFT_SCHEMA
 
     @property
+    def is_published(self):
+        return self.schema.name == DATASET_SCHEMA or self.schema.name in LEGACY_SCHEMAS
+
+    @property
     def is_sandbox(self):
         return self.schema.name == SANDBOX_SCHEMA
+
+    @property
+    def is_editable(self):
+        return self.schema.name in EDITABLE_SCHEMAS
+
+    @property
+    def is_visible(self):
+        return self.is_draft or self.is_sandbox or self.is_published
 
     @staticmethod
     def find_draft():

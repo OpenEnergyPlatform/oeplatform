@@ -1006,7 +1006,7 @@ class DataView(View):
         can_add = False  # can upload data
         table_obj = Table.objects.get(name=table)
         if request.user and not request.user.is_anonymous:
-            is_admin = request.user.has_admin_permissions(schema, table)
+            is_admin = request.user.has_admin_permissions(table)
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
 

@@ -25,7 +25,7 @@ class APITestCase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        for schema in [TEST_DRAFT_SCHEMA, TEST_DRAFT_SCHEMA]:
+        for schema in [TEST_DRAFT_SCHEMA, TEST_DATASET_SCHEMA]:
             actions.perform_sql(f"DROP SCHEMA IF EXISTS {schema} CASCADE")
             actions.perform_sql(f"CREATE SCHEMA {schema}")
             actions.perform_sql(f"DROP SCHEMA IF EXISTS _{schema} CASCADE")

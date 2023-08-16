@@ -6,7 +6,7 @@ from datetime import datetime
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 import sqlalchemy as sa
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Func, Value
 from django.http import Http404
 from omi.dialects.oep import OEP_V_1_4_Dialect, OEP_V_1_5_Dialect
@@ -33,7 +33,7 @@ from api.sessions import (
 )
 from dataedit.models import Table as DBTable
 from dataedit.structures import TableTags as OEDBTableTags
-from dataedit.structures import Tag as OEDBTag
+from dataedit.structures import Tgpag as OEDBTag
 from oeplatform.settings import DEFAULT_SCHEMA, EDITABLE_SCHEMAS
 
 pgsql_qualifier = re.compile(r"^[\w\d_\.]+$")
@@ -69,7 +69,26 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
+def get_table_obj(table: str, only_editable=False):
+    """
+    Raises Http404 if table not found, or PermissionDenied if restrict_schemas
+    """
+    try:
+        table_obj = DBTable.objects.get(name=table)
+    except ObjectDoesNotExist:
+        raise Http404
+
+    if only_editable:
+        if not table_obj.is_editable:
+            raise PermissionDenied
+    elif not table_obj.is_visible:
+        raise PermissionDenied
+
+    return table_obj
+
+
 def get_table_name(schema, table, restrict_schemas=True):
+    # TODO CHW replace with get_table_obj
     if not has_schema(dict(schema=schema)):
         raise Http404
     if not has_table(dict(schema=schema, table=table)):
@@ -94,14 +113,12 @@ class ResponsiveException(Exception):
 
 
 def assert_permission(user, table: str, permission):
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.objects.get(name=table)) < permission
-    ):
+    table_obj = DBTable.objects.get(name=table)
+    if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
 
-def assert_add_tag_permission(user, table, permission, schema):
+def assert_add_tag_permission(user, table, permission, schema=None):
     """
     Tags can be added to tables that are in any schema. However,
     it is necessary to check whether the user has write permission
@@ -118,14 +135,8 @@ def assert_add_tag_permission(user, table, permission, schema):
         PermissionDenied: _description_
 
     """
-    # if not request.user.is_anonymous:
-    #         level = request.user.get_table_permission_level(table)
-    #         can_add = level >= login_models.WRITE_PERM
-
-    if (
-        user.is_anonymous
-        or user.get_table_permission_level(DBTable.objects.get(name=table)) < permission
-    ):
+    table_obj = DBTable.objects.get(name=table)
+    if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
 

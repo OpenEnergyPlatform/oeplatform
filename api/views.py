@@ -31,9 +31,9 @@ from dataedit.models import Topic
 from dataedit.views import get_tag_keywords_synchronized_metadata
 from oeplatform.settings import (
     DATASET_SCHEMA,
+    DEFAULT_SCHEMA,
     DRAFT_SCHEMA,
     EDITABLE_SCHEMAS,
-    SCHEMA_WHITELIST,
 )
 
 logger = logging.getLogger("oeplatform")
@@ -255,13 +255,18 @@ class Metadata(APIView):
     @api_exception
     def get(self, request, table, schema=None):
         """schema will be ignored"""
-        metadata = DBTable.objects.get(name=table).oemetadata
+        table_obj = actions.get_table_obj(table)
+        metadata = table_obj.oemetadata
         return JsonResponse(metadata)
 
     @api_exception
     @require_write_permission
     @load_cursor()
     def post(self, request, table, schema=None):
+        """schema will be ignored"""
+        table_obj = actions.get_table_obj(table)
+        schema = table_obj.schema.name
+
         raw_input = request.data
         metadata, error = actions.try_parse_metadata(raw_input)
 
@@ -318,8 +323,9 @@ class Table(APIView):
         :param request:
         :return:
         """
-
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        # schema will be ignored
+        table_obj = actions.get_table_obj(table)
+        schema = table_obj.schema.name
 
         return JsonResponse(
             {
@@ -340,10 +346,10 @@ class Table(APIView):
         :param table:
         :return:
         """
-        if schema not in EDITABLE_SCHEMAS:
-            raise PermissionDenied
-        if schema.startswith("_"):
-            raise PermissionDenied
+        # schema will be ignored
+        table_obj = actions.get_table_obj(table, only_editable=True)
+        schema = table_obj.schema.name
+
         json_data = request.data
 
         if "column" in json_data["type"]:
@@ -393,9 +399,8 @@ class Table(APIView):
         :param request:
         :return:
         """
+        schema = schema or DEFAULT_SCHEMA
         if schema not in EDITABLE_SCHEMAS:
-            raise PermissionDenied
-        if schema.startswith("_"):
             raise PermissionDenied
         if request.user.is_anonymous:
             raise PermissionDenied
@@ -496,7 +501,9 @@ class Table(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request, table, schema=None):
-        schema, table = actions.get_table_name(schema, table)
+        # schema will be ignored
+        table_obj = actions.get_table_obj(table, only_editable=True)
+        schema = table_obj.schema.name
 
         meta_schema = actions.get_meta_schema_name(schema)
 
@@ -601,7 +608,7 @@ class Fields(APIView):
 class Move(APIView):
     @require_admin_permission
     @api_exception
-    def post(self, request, schema: str, table: str, to_schema: str):
+    def post(self, request, table: str, topic: str, schema: str = None):
         """With the removal of schemas,  we physicall will only move tables between
         DRAFT_SCHEMA and DATASET_SCHEMA (draft and published).
         However, if the target schema isa topic, we will attach that information
@@ -609,35 +616,29 @@ class Move(APIView):
         In consequence, this is equivalent to publish/unpublish
         """
 
-        # ignore schema from user
-        schema = DBTable.objects.get(name=table).schema.name
+        # schema will be ignored
+        table_obj = actions.get_table_obj(table)
+        schema = table_obj.schema.name
 
-        # schema_whitelist: all topics + DRAFT_SCHEMA + DATASET_SCHEMA
-        if schema not in SCHEMA_WHITELIST or to_schema not in SCHEMA_WHITELIST:
-            raise APIError("Invalid origin or target schema")
-
-        topic_name = None
-        if schema == DRAFT_SCHEMA and to_schema != DRAFT_SCHEMA:
-            # publish (move from draft to not draft)
-            if to_schema != DATASET_SCHEMA:
-                topic_name = to_schema
-                to_schema = DATASET_SCHEMA
-        elif to_schema == DRAFT_SCHEMA and schema != DRAFT_SCHEMA:
-            # unpublish
-            pass
+        if topic == DRAFT_SCHEMA and table_obj.is_published:
+            # unpublish: move back into draft
+            target_schema = DRAFT_SCHEMA
+        elif table_obj.is_draft:
+            # publish
+            target_schema = DATASET_SCHEMA
         else:
             raise APIError(
                 f"exactly one of origin and target schema must be {DRAFT_SCHEMA}, "
-                f"got {schema}, {to_schema}"
+                f"got {schema}, {topic}"
             )
 
-        actions.move(schema, table, to_schema)
+        actions.move(schema, table, target_schema)
 
-        if topic_name:
-            table_obj = DBTable.objects.get(name=table)
-            topic = Topic.objects.get(name=topic_name)
+        # add topic, if it exists
+        topic_objs = Topic.objects.filter(name=topic)
+        if topic_objs.exists():
             # according to doc, usind `add` does not create duplicates
-            table_obj.topics.add(topic)
+            table_obj.topics.add(topic_objs.first())
 
         return HttpResponse(status=status.HTTP_200_OK)
 

@@ -27,7 +27,7 @@ urlpatterns = [
     #    name="api_table_meta_wo_schema",
     # ),
     url(
-        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<to_schema>[\w\d_\s]+)/$",  # noqa
+        r"^v0/schema/(?P<schema>[\w\d_\s]+)/tables/(?P<table>[\w\d_\s]+)/move/(?P<topic>[\w\d_\s]+)/$",  # noqa
         views.Move.as_view(),
         name="move",
     ),
