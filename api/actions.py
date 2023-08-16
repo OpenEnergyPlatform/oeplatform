@@ -94,12 +94,12 @@ class ResponsiveException(Exception):
     pass
 
 
-def assert_permission(user, table, permission, schema=None):
+def assert_permission(user, table: str, permission, schema=None):
     if schema is None:
         schema = DEFAULT_SCHEMA
     if (
         user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
+        or user.get_table_permission_level(DBTable.objects.get(name=table)) < permission
     ):
         raise PermissionDenied
 
@@ -127,7 +127,7 @@ def assert_add_tag_permission(user, table, permission, schema):
 
     if (
         user.is_anonymous
-        or user.get_table_permission_level(DBTable.load(schema, table)) < permission
+        or user.get_table_permission_level(DBTable.objects.get(name=table)) < permission
     ):
         raise PermissionDenied
 
@@ -2291,7 +2291,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.load(table=table, schema=schema)
+    django_table_obj = DBTable.objects.get(name=table)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 

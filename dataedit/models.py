@@ -17,7 +17,12 @@ from django.db.models import (
 )
 from django.utils import timezone
 
-from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SANDBOX_SCHEMA
+from oeplatform.settings import (
+    ALL_SCHEMAS,
+    DATASET_SCHEMA,
+    DRAFT_SCHEMA,
+    SANDBOX_SCHEMA,
+)
 
 # Create your models here.
 
@@ -53,20 +58,23 @@ class Table(Tagable):
     is_reviewed = BooleanField(default=False, null=False)
     topics = models.ManyToManyField(to="dataedit.Topic", related_name="tables")
 
-    @classmethod
-    def load(cls, schema, table):
-        table_obj = Table.objects.get(
-            name=table, schema=Schema.objects.get(name=schema)
-        )
-
-        return table_obj
+    class Meta:
+        unique_together = (("name",),)
 
     def set_is_reviewed(self):
         self.is_reviewed = True
         self.save()
 
-    class Meta:
-        unique_together = (("name",),)
+    @staticmethod
+    def create_with_schema(name: str, schema_name: str = None):
+        """this should be the only way a table object is created, so we can
+        remove the schema later entirely
+        """
+        if schema_name not in ALL_SCHEMAS:
+            # TODO CHW: raise exception or default?
+            schema_name = DRAFT_SCHEMA
+        schema_obj = Schema.objects.get(name=schema_name)
+        return Table.objects.create(name=name, schema=schema_obj)
 
     @property
     def is_draft(self):
@@ -424,7 +432,7 @@ class PeerReviewManager(models.Model):
         Returns:
             User: The contributor user.
         """
-        current_table = Table.load(schema=schema, table=table)
+        current_table = Table.objects.get(name=table)
         try:
             table_holder = (
                 current_table.userpermission_set.filter(table=current_table.id)

@@ -2,8 +2,9 @@ import sqlalchemy as sqla
 from django.core.management.base import BaseCommand
 
 from api.connection import _get_engine
-from dataedit.models import Schema, Table
+from dataedit.models import Table
 from dataedit.views import get_schema_whitelist
+from oeplatform.settings import ALL_SCHEMAS, DEFAULT_SCHEMA
 
 
 class Command(BaseCommand):
@@ -31,12 +32,16 @@ class Command(BaseCommand):
             if inp == "Y":
                 for schema, table in delete_schema_tables:
                     print(schema, table)
-                    Table.objects.get(name=table, schema__name=schema).delete()
+                    Table.objects.get(name=table).delete()
 
         print("---")
         # create django table objects if table in oedb and not in django
         for schema, table in real_tables.difference(table_objects):
             print(schema, table)
-            s = Schema.objects.get(name=schema)
-            t = Table(name=table, schema=s)
+            if schema not in ALL_SCHEMAS:
+                print(
+                    f"Warning: schema {schema} not allowed, default to {DEFAULT_SCHEMA}"
+                )
+                schema = DEFAULT_SCHEMA
+            t = Table.create_with_schema(name=table, schema=schema)
             t.save()

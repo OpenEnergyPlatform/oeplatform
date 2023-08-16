@@ -98,6 +98,7 @@ MANAGED_SCHEMAS = (
     DRAFT_SCHEMA,  # noqa F405: from security settings
     DATASET_SCHEMA,  # noqa F405: from security settings
 )
+ALL_SCHEMAS = MANAGED_SCHEMAS + TEST_SCHEMAS  # noqa F405: from security settings
 
 
 def add_settings_to_request_context(request):

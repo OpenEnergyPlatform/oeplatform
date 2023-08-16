@@ -26,7 +26,6 @@ from api import actions, parser, sessions
 from api.encode import Echo, GeneratorJSONEncoder
 from api.error import APIError
 from api.helpers.http import ModHttpResponse
-from dataedit.models import Schema as DBSchema
 from dataedit.models import Table as DBTable
 from dataedit.models import Topic
 from dataedit.views import get_schema_whitelist, get_tag_keywords_synchronized_metadata
@@ -430,7 +429,7 @@ class Table(APIView):
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=DBTable.load(schema, table), holder=request.user
+            table=DBTable.objects.get(name=table), holder=request.user
         )
         perm.level = login_models.ADMIN_PERM
         perm.save()
@@ -472,9 +471,8 @@ class Table(APIView):
         metadata=None,
     ):
         self.validate_column_names(column_definitions)
-        schema_object = DBSchema.objects.get(name=schema)
         try:
-            table_object = DBTable.objects.create(name=table, schema=schema_object)
+            table_object = DBTable.create_with_schema(table, schema_name=schema)
         except IntegrityError:
             raise APIError("Table aready exists")
 
@@ -634,7 +632,7 @@ class Move(APIView):
         actions.move(schema, table, to_schema)
 
         if topic_name:
-            table_obj = DBTable.load(table=table)
+            table_obj = DBTable.objects.get(name=table)
             topic = Topic.objects.get(name=topic_name)
             # according to doc, usind `add` does not create duplicates
             table_obj.topics.add(topic)

@@ -5,7 +5,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import migrations, models
 
-from oeplatform.settings import MANAGED_SCHEMAS, TEST_SCHEMAS
+from oeplatform.settings import ALL_SCHEMAS
 
 
 def create_topics(apps, schema_editor):
@@ -37,7 +37,7 @@ def ensure_schemas(apps, schema_editor):
 
     Schema = apps.get_model("dataedit", "Schema")
 
-    for name in MANAGED_SCHEMAS + TEST_SCHEMAS:
+    for name in ALL_SCHEMAS:
         Schema.objects.get_or_create(name=name)[0].save()
 
 
@@ -49,8 +49,8 @@ def convert_schema_to_topic(apps, schema_editor):
     for table in Table.objects.all():
         name = table.schema.name
 
-        # skip if in model_draft, sandbox, or datasets
-        if name in MANAGED_SCHEMAS:
+        # skip if in model_draft, sandbox, or datasets, or tests
+        if name in ALL_SCHEMAS:
             continue
 
         try:

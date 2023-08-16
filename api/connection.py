@@ -3,7 +3,7 @@
 import sqlalchemy as sqla
 from sqlalchemy.orm import sessionmaker
 
-from dataedit.models import Schema, Table
+from dataedit.models import Table
 from oeplatform.settings import DEFAULT_SCHEMA
 
 try:
@@ -59,9 +59,8 @@ def table_exists_in_django(table, schema=None):
     Returns:
         bool
     """
-    schema_obj = Schema.objects.get(name=(schema or DEFAULT_SCHEMA))
     try:
-        Table.objects.get(name=table, schema=schema_obj)
+        Table.objects.get(name=table)
         return True
     except Table.DoesNotExist:
         return False
