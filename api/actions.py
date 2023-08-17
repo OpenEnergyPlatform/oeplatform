@@ -69,7 +69,7 @@ def get_column_obj(table, column):
         raise APIError("Column '%s' does not exist." % column)
 
 
-def get_table_obj(table: str, only_editable=False):
+def get_django_table_obj(table: str, only_editable=False):
     """
     Raises Http404 if table not found, or PermissionDenied if restrict_schemas
     """
@@ -87,22 +87,13 @@ def get_table_obj(table: str, only_editable=False):
     return table_obj
 
 
-def get_table_name(schema, table, restrict_schemas=True):
-    # TODO CHW replace with get_table_obj
-    if not has_schema(dict(schema=schema)):
-        raise Http404
-    if not has_table(dict(schema=schema, table=table)):
-        raise Http404
-    if schema.startswith("_") or schema == "public" or schema is None:
-        raise PermissionDenied
-    if restrict_schemas:
-        if schema not in EDITABLE_SCHEMAS:
-            raise PermissionDenied
-    # TODO check if table in schema_whitelist but circular import
-    # from dataedit.views import schema_whitelist
-    # if schema not in schema_whitelist
-    #     raise PermissionDenied
-    return schema, table
+def get_schema_and_table_name(table: str, restrict_schemas=True):
+    """
+    Returns:
+        tuple: schema_name, table_name
+    """
+    table_obj = get_django_table_obj(table, only_editable=restrict_schemas)
+    return table_obj.schema.name, table_obj.name
 
 
 Base = declarative_base()
@@ -113,7 +104,7 @@ class ResponsiveException(Exception):
 
 
 def assert_permission(user, table: str, permission):
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = get_django_table_obj(table)
     if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
@@ -135,7 +126,7 @@ def assert_add_tag_permission(user, table, permission, schema=None):
         PermissionDenied: _description_
 
     """
-    table_obj = DBTable.objects.get(name=table)
+    table_obj = get_django_table_obj(table)
     if user.is_anonymous or user.get_table_permission_level(table_obj) < permission:
         raise PermissionDenied
 
@@ -1194,7 +1185,7 @@ def data_delete(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = request.get("schema", DEFAULT_SCHEMA)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
@@ -1215,7 +1206,7 @@ def data_update(request, context=None):
     if orig_table.startswith("_") or orig_table.endswith("_cor"):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = read_pgid(request.get("schema", DEFAULT_SCHEMA))
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
@@ -1334,7 +1325,7 @@ def data_insert(request, context=None):
         raise APIError("Insertions on meta tables is not allowed", status=403)
     orig_schema = request.get("schema", DEFAULT_SCHEMA)
 
-    schema, table = get_table_name(orig_schema, orig_table)
+    schema, table = get_schema_and_table_name(orig_table)
 
     if schema is None:
         schema = DEFAULT_SCHEMA
@@ -2240,7 +2231,7 @@ def update_meta_search(table: str, schema):
     """
     TODO: also update JSONB index fields
     """
-    t = DBTable.objects.get(name=table)
+    t = get_django_table_obj(table)
     comment = str(dataedit.metadata.load_metadata_from_db(schema, table))
     session = sessionmaker()(bind=_get_engine())
     tags = session.query(OEDBTag.name).filter(
@@ -2294,7 +2285,7 @@ def set_table_metadata(table, schema, metadata, cursor=None):
     # update the oemetadata field (JSONB) in django db
     # ---------------------------------------
 
-    django_table_obj = DBTable.objects.get(name=table)
+    django_table_obj = get_django_table_obj(table)
     django_table_obj.oemetadata = metadata_obj
     django_table_obj.save()
 

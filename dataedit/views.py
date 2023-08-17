@@ -27,7 +27,7 @@ from sqlalchemy.dialects.postgresql import array_agg
 from sqlalchemy.orm import sessionmaker
 
 import api.parser
-from api.actions import describe_columns
+from api.actions import describe_columns, get_django_table_obj
 
 try:
     import oeplatform.securitysettings as sec
@@ -48,12 +48,7 @@ from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.structures import TableTags, Tag
 from login import models as login_models
-from oeplatform.settings import (
-    DATASET_SCHEMA,
-    DRAFT_SCHEMA,
-    SANDBOX_SCHEMA,
-    SCHEMA_WHITELIST,
-)
+from oeplatform.settings import DATASET_SCHEMA, DRAFT_SCHEMA, SCHEMA_WHITELIST
 
 session = None
 
@@ -419,12 +414,15 @@ def find_tables(schema_name=None, query_string=None, tag_ids=None):
 def listtables(request, topic_name):
     """
     :param request: A HTTP-request object sent by the Django framework
-    :param schema_name: Name of a schema
+    :param topic_name: Name of a topic
     :return: Renders the list of all tables in the specified schema
     """
 
-    if topic_name not in SCHEMA_WHITELIST or topic_name.startswith("_"):
-        raise Http404("Schema not accessible")
+    if not (
+        Topic.objects.filter(name=topic_name).exists()
+        or topic_name in [DRAFT_SCHEMA, DATASET_SCHEMA]
+    ):
+        raise Http404("Topic not accessible")
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = list(
@@ -958,13 +956,8 @@ class DataView(View):
         :return:
         """
 
-        table_obj = Table.objects.get(name=Table)
-        schema = table_obj
-
-        if (
-            schema not in SCHEMA_WHITELIST and schema != SANDBOX_SCHEMA
-        ) or schema.startswith("_"):
-            raise Http404("Schema not accessible")
+        table_obj = get_django_table_obj(table)
+        schema = table_obj.schema.name
 
         tags = []  # TODO: Unused - Remove
 
@@ -978,7 +971,6 @@ class DataView(View):
         # create a table for the metadata linked to the given table
         actions.create_meta(schema, table)
 
-        # the metadata are stored in the table's comment
         metadata = load_metadata_from_db(schema, table)
 
         # setup oemetadata string order according to oem v1.5.1
@@ -1004,7 +996,7 @@ class DataView(View):
 
         is_admin = False
         can_add = False  # can upload data
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         if request.user and not request.user.is_anonymous:
             is_admin = request.user.has_admin_permissions(table)
             level = request.user.get_table_permission_level(table_obj)
@@ -1154,7 +1146,7 @@ class PermissionView(View):
         if schema not in SCHEMA_WHITELIST:
             raise Http404("Schema not accessible")
 
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
 
         user_perms = login_models.UserPermission.objects.filter(table=table_obj)
         group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
@@ -1184,7 +1176,7 @@ class PermissionView(View):
         )
 
     def post(self, request, schema, table):
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         if (
             request.user.is_anonymous
             or request.user.get_table_permission_level(table_obj)
@@ -1206,7 +1198,7 @@ class PermissionView(View):
 
     def __add_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(name=request.POST["name"]).first()
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p, _ = login_models.UserPermission.objects.get_or_create(
             holder=user, table=table_obj
         )
@@ -1215,7 +1207,7 @@ class PermissionView(View):
 
     def __change_user(self, request, schema, table):
         user = login_models.myuser.objects.filter(id=request.POST["user_id"]).first()
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.level = request.POST["level"]
         p.save()
@@ -1223,14 +1215,14 @@ class PermissionView(View):
 
     def __remove_user(self, request, schema, table):
         user = get_object_or_404(login_models.myuser, id=request.POST["user_id"])
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
         p.delete()
         return self.get(request, schema, table)
 
     def __add_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, name=request.POST["name"])
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
         )
@@ -1239,7 +1231,7 @@ class PermissionView(View):
 
     def __change_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -1249,7 +1241,7 @@ class PermissionView(View):
 
     def __remove_group(self, request, schema, table):
         group = get_object_or_404(login_models.UserGroup, id=request.POST["group_id"])
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
         )
@@ -1531,8 +1523,7 @@ def update_table_tags(request):
     :return: Redirects to the previous page
     """
     # check if valid table / schema
-    schema, table = actions.get_table_name(
-        schema=request.POST["schema"],
+    schema, table = actions.get_schema_and_table_name(
         table=request.POST["table"],
         restrict_schemas=False,
     )
@@ -1774,7 +1765,7 @@ class WizardView(LoginRequiredMixin, View):
                 raise Http404(f"Can only upload to schema {DRAFT_SCHEMA}")
             if not engine.dialect.has_table(engine, table, schema=schema):
                 raise Http404("Table does not exist")
-            table_obj = Table.objects.get(name=table)
+            table_obj = get_django_table_obj(table)
             if not request.user.is_anonymous:
                 # user_perms = login_models.UserPermission.objects.filter(table=table_obj)  # noqa
                 level = request.user.get_table_permission_level(table_obj)
@@ -1816,7 +1807,7 @@ class MetaEditView(LoginRequiredMixin, View):
         columns = get_column_description(schema, table)
 
         can_add = False
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM
@@ -2013,7 +2004,7 @@ class PeerReviewView(LoginRequiredMixin, View):
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        table_obj = Table.objects.get(name=table)
+        table_obj = get_django_table_obj(table)
         field_descriptions = self.get_all_field_descriptions(json_schema)
 
         # Check user permissions
@@ -2140,7 +2131,7 @@ class PeerReviewView(LoginRequiredMixin, View):
             # TODO: Check for schema/topic as reviewed finished also indicates the table
             # needs to be or has to be moved.
             if review_finished is True:
-                review_table = Table.objects.get(name=table)
+                review_table = get_django_table_obj(table)
                 review_table.set_is_reviewed()
                 # TODO: also update reviewFinished in review datamodel json
                 # logging.INFO(f"Table {table.name} is now reviewed and can be moved
@@ -2153,7 +2144,7 @@ class PeerRreviewContributorView(PeerReviewView):
     def get(self, request, schema, table, review_id):
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
-        table_obj = Table.objects.get(name=peer_review.table)
+        table_obj = get_django_table_obj(peer_review.table)
         if not request.user.is_anonymous:
             level = request.user.get_table_permission_level(table_obj)
             can_add = level >= login_models.WRITE_PERM

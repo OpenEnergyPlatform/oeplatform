@@ -117,11 +117,7 @@ LEGACY_SCHEMAS = [
     "policy",
 ]
 # complete lists of oedb schemas in which tables are allowed
-SCHEMA_WHITELIST = LEGACY_SCHEMAS + [
-    DRAFT_SCHEMA,
-    DATASET_SCHEMA,
-    SANDBOX_SCHEMA,  # noqa F405 from securitysettings
-]
+SCHEMA_WHITELIST = LEGACY_SCHEMAS + [DRAFT_SCHEMA, DATASET_SCHEMA]
 
 
 def add_settings_to_request_context(request):

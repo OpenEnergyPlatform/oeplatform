@@ -33,6 +33,11 @@ urlpatterns = [
         name="view",
     ),
     url(
+        r"^view/datasets/(?P<table>{qual})$".format(qual=pgsql_qualifier),
+        views.DataView.as_view(),
+        name="view_wo_schema",
+    ),
+    url(
         r"^tags/add/$",
         views.redirect_after_table_tags_updated,
     ),

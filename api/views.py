@@ -255,7 +255,7 @@ class Metadata(APIView):
     @api_exception
     def get(self, request, table, schema=None):
         """schema will be ignored"""
-        table_obj = actions.get_table_obj(table)
+        table_obj = actions.get_django_table_obj(table)
         metadata = table_obj.oemetadata
         return JsonResponse(metadata)
 
@@ -264,7 +264,7 @@ class Metadata(APIView):
     @load_cursor()
     def post(self, request, table, schema=None):
         """schema will be ignored"""
-        table_obj = actions.get_table_obj(table)
+        table_obj = actions.get_django_table_obj(table)
         schema = table_obj.schema.name
 
         raw_input = request.data
@@ -324,7 +324,7 @@ class Table(APIView):
         :return:
         """
         # schema will be ignored
-        table_obj = actions.get_table_obj(table)
+        table_obj = actions.get_django_table_obj(table)
         schema = table_obj.schema.name
 
         return JsonResponse(
@@ -347,7 +347,7 @@ class Table(APIView):
         :return:
         """
         # schema will be ignored
-        table_obj = actions.get_table_obj(table, only_editable=True)
+        table_obj = actions.get_django_table_obj(table, only_editable=True)
         schema = table_obj.schema.name
 
         json_data = request.data
@@ -433,7 +433,7 @@ class Table(APIView):
         )
 
         perm, _ = login_models.UserPermission.objects.get_or_create(
-            table=DBTable.objects.get(name=table), holder=request.user
+            table=actions.get_django_table_obj(table), holder=request.user
         )
         perm.level = login_models.ADMIN_PERM
         perm.save()
@@ -502,7 +502,7 @@ class Table(APIView):
     @require_delete_permission
     def delete(self, request, table, schema=None):
         # schema will be ignored
-        table_obj = actions.get_table_obj(table, only_editable=True)
+        table_obj = actions.get_django_table_obj(table, only_editable=True)
         schema = table_obj.schema.name
 
         meta_schema = actions.get_meta_schema_name(schema)
@@ -552,7 +552,7 @@ class Index(APIView):
 class Column(APIView):
     @api_exception
     def get(self, request, schema, table, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_schema_and_table_name(table, restrict_schemas=False)
         response = actions.describe_columns(schema, table)
         if column:
             try:
@@ -566,7 +566,7 @@ class Column(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         response = actions.column_alter(
             request.data["query"], {}, schema, table, column
         )
@@ -575,14 +575,14 @@ class Column(APIView):
     @api_exception
     @require_write_permission
     def put(self, request, schema, table, column):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         actions.column_add(schema, table, column, request.data["query"])
         return JsonResponse({}, status=201)
 
 
 class Fields(APIView):
     def get(self, request, schema, table, id, column=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+        schema, table = actions.get_schema_and_table_name(table, restrict_schemas=False)
         if (
             not parser.is_pg_qual(table)
             or not parser.is_pg_qual(schema)
@@ -617,7 +617,7 @@ class Move(APIView):
         """
 
         # schema will be ignored
-        table_obj = actions.get_table_obj(table)
+        table_obj = actions.get_django_table_obj(table)
         schema = table_obj.schema.name
 
         if topic == DRAFT_SCHEMA and table_obj.is_published:
@@ -645,8 +645,10 @@ class Move(APIView):
 
 class Rows(APIView):
     @api_exception
-    def get(self, request, schema, table, row_id=None):
-        schema, table = actions.get_table_name(schema, table, restrict_schemas=False)
+    def get(self, request, table, row_id=None, schema=None):
+        table_obj = actions.get_django_table_obj(table)
+        schema = table_obj.schema.name
+
         columns = request.GET.getlist("column")
 
         where = request.GET.getlist("where")
@@ -799,7 +801,7 @@ class Rows(APIView):
     @api_exception
     @require_write_permission
     def post(self, request, schema, table, row_id=None, action=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         column_data = request.data["query"]
         status_code = status.HTTP_200_OK
         if row_id:
@@ -823,7 +825,7 @@ class Rows(APIView):
                 "This request type (PUT) is not supported. The "
                 "'new' statement is only possible in POST requests."
             )
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         if not row_id:
             return JsonResponse(
                 actions._response_error("This methods requires an id"),
@@ -861,7 +863,7 @@ class Rows(APIView):
 
     @require_delete_permission
     def delete(self, request, table, schema, row_id=None):
-        schema, table = actions.get_table_name(schema, table)
+        schema, table = actions.get_schema_and_table_name(table)
         result = self.__delete_rows(request, schema, table, row_id)
         actions.apply_changes(schema, table)
         return JsonResponse(result)
