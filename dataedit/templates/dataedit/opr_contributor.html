@@ -127,7 +127,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
@@ -148,7 +148,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span class="suggestion">{{ reviewer_suggestions.item.field }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
@@ -165,7 +165,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
@@ -184,7 +184,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
@@ -203,7 +203,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
@@ -222,7 +222,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
@@ -241,7 +241,7 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
                       <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
                     {% endif %}
@@ -370,7 +370,10 @@ window.onload = function() {
     initialReviewerSuggestions[field] = suggestion.innerText;
   });
 }
+
 </script>
+
+
 
 {% compress js %}
   <script src="/static/peer_review/opr_contributor.js"></script>
