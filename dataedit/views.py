@@ -1934,6 +1934,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                     {
                     "field": "id",
                     "value": "http: //127.0.0.1:8000/dataedit/view/model_draft/test2",
+                    "newValue": "",
                     "reviewer_suggestion": "",
                     "suggestion_comment": ""
                     }
@@ -2199,7 +2200,6 @@ class PeerRreviewContributorView(PeerReviewView):
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories
         )
-
         context_meta = {
             "config": json.dumps(
                 {

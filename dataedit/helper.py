@@ -45,7 +45,6 @@ def process_review_data(review_data, metadata, categories):
         field_review = review.get('fieldReview')
 
         if isinstance(field_review, list):
-            # Sortiere die fieldReview-Einträge nach dem timestamp (neueste zuerst)
             sorted_field_review = sorted(field_review, key=lambda x: x.get('timestamp'), reverse=True)
             latest_field_review = sorted_field_review[0] if sorted_field_review else None
 
@@ -53,14 +52,17 @@ def process_review_data(review_data, metadata, categories):
                 state = latest_field_review.get('state')
                 reviewer_suggestion = latest_field_review.get('reviewerSuggestion')
                 reviewer_suggestion_comment = latest_field_review.get("comment")
+                newValue = latest_field_review.get("newValue")
             else:
                 state = None
                 reviewer_suggestion = None
                 reviewer_suggestion_comment = None
+                newValue = None
         else:
             state = field_review.get('state')
             reviewer_suggestion = field_review.get('reviewerSuggestion')
             reviewer_suggestion_comment = field_review.get("comment")
+            newValue = field_review.get("newValue")
 
         if reviewer_suggestion is not None and reviewer_suggestion_comment is not None:
             for category in categories:
@@ -69,6 +71,15 @@ def process_review_data(review_data, metadata, categories):
                         item['reviewer_suggestion'] = reviewer_suggestion
                         item['suggestion_comment'] = reviewer_suggestion_comment
                         break
+
+        if newValue is not None:
+            for category in categories:
+                for item in metadata[category]:
+                    if item['field'] == field_key:
+                        item['newValue'] = newValue
+                        break
+
         state_dict[field_key] = state
 
     return state_dict
+
