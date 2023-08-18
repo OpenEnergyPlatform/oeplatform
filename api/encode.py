@@ -78,7 +78,6 @@ def _make_iterencode(
     tuple=tuple,
     _intstr=int.__str__,
 ):
-
     if _indent is not None and not isinstance(_indent, str):
         _indent = " " * _indent
 

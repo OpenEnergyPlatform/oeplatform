@@ -339,7 +339,6 @@ class FSAdd(LoginRequiredMixin, View):
                 )
         else:
             if form.is_valid():
-
                 model = form.save()
                 if hasattr(model, "license") and model.license:
                     if model.license != "Other":
@@ -488,7 +487,6 @@ class RDFFactoryView(View):
             )
 
     def post(self, request, factory_id, identifier):
-
         if not request.user.is_authenticated:
             return HttpResponseForbidden()
         context = connection.ConnectionContext()
@@ -561,7 +559,6 @@ class RDFInstanceView(View):
 
 class RDFView(View):
     def get(self, request, factory_id=None):
-
         try:
             fac = factory.get_factory(factory_id)
         except KeyError:

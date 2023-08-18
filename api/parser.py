@@ -378,7 +378,6 @@ def parse_column(d, mapper):
 
 
 def parse_type(dt_string, **kwargs):
-
     if isinstance(dt_string, dict):
         dt = parse_type(
             get_or_403(dt_string, "datatype"), **dt_string.get("kwargs", {})

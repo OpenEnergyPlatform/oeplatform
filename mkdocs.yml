@@ -40,6 +40,10 @@ theme:
 # extensions 
 markdown_extensions:
   - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      use_pygments: true
   - toc:
       permalink: "#"
 
@@ -50,6 +54,8 @@ plugins:
 # Customization
 extra:
   generator: false
+  version:
+    provider: mike
 
 extra_css:
   - css/extra.css
