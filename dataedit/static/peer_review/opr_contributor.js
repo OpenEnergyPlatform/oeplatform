@@ -12,7 +12,7 @@ var current_review = {
   "reviewFinished": false,
   "grantedBadge": null,
   "metaMetadata": {
-    "reviewVersion": "OEP-0.0.1",
+    "reviewVersion": "OEP-0.1.0",
     "metadataLicense": {
       "name": "CC0-1.0",
       "title": "Creative Commons Zero v1.0 Universal",
@@ -22,7 +22,6 @@ var current_review = {
 };
 
 // BINDS
-
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
 $('#submitButton').bind('click', hideReviewerOptions);
@@ -112,7 +111,6 @@ function getErrorMsg(response) {
       'Upload failed: ' + JSON.parse(response.responseJSON).error
     );
   } catch (e) {
-    console.log(response)
     var response_msg = response.responseText;
   }
   return response_msg;
@@ -219,7 +217,6 @@ function click_field(fieldKey, fieldValue, category) {
   } else {
     fieldDescriptionsElement.textContent = "No description found";
   }
-  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
   const fieldState = getFieldState(fieldKey);
   if (fieldState === 'ok' || !fieldState) {
     document.getElementById("ok-button").disabled = true;
@@ -351,15 +348,13 @@ function renderSummaryPageFields() {
       let field_id = field.id.slice(6);
       const fieldValue = $(field).text();
       const fieldState = getFieldState(field_id);
-      console.log(field_id + fieldState)
-      const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
+      const fieldCategory = field.getAttribute('data-category');
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
       }
       // TODO: The following line duplicates enties in the summary tab
       // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
       // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // console.log("Hello", missingFields)
       // }
     }
   }
@@ -517,8 +512,7 @@ function showToast(title, message, type) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-
-  if (selectedState != "ok") {
+  if (selectedState !== "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
   
@@ -534,7 +528,16 @@ function saveEntrances() {
     }
 
     valuearea.reportValidity();
-  }
+  } else if (initialReviewerSuggestions[selectedField]) {  // Check if the state is "ok" and if there's a valid suggestion
+        var fieldElement = document.getElementById("field_" + selectedField);
+        if (fieldElement) {
+            var valueElement = fieldElement.querySelector('.value');
+            if (valueElement) {
+                valueElement.innerText = initialReviewerSuggestions[selectedField];
+            }
+        }
+    }
+
 
   if (Object.keys(current_review["reviews"]).length === 0 &&
     current_review["reviews"].constructor === Object) {
@@ -557,6 +560,7 @@ function saveEntrances() {
           "user": "oep_contributor", // TODO put actual username
           "role": "contributor",
           "contributorValue": selectedFieldValue,
+          "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
           "comment": document.getElementById("commentarea").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
@@ -583,6 +587,7 @@ function saveEntrances() {
             "user": "oep_contributor", // TODO put actual username
             "role": "contributor",
             "contributorValue": selectedFieldValue,
+            "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,

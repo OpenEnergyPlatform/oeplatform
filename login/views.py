@@ -87,7 +87,12 @@ class ReviewsView(View):
                 PeerReviewManager.filter_latest_open_opr_by_reviewer(reviewer_user=user)
             )
 
-            # review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)  # noqa
+            if active_peer_review_revewier is not None:
+                review_history = peer_review_reviews.exclude(pk=active_peer_review_revewier.pk)  # noqa
+            else:
+                # Handle the case when active_peer_review_revewier is None.
+                # Maybe set review_history to some default value or just leave it as None.
+                review_history = None
 
             # Context da for the "All reviews" section on the profile page
             reviewed_context.update(
@@ -141,8 +146,6 @@ class ReviewsView(View):
         # get contributor pov reviews
         ##################################################################
         reviewed_contributions_context = {}
-
-        # all peer reviews related to the contributor user
         peer_review_contributions = PeerReviewManager.filter_opr_by_contributor(
             contributor_user=user
         )
@@ -158,12 +161,15 @@ class ReviewsView(View):
                     contributor_user=user
                 )
             )
+            if active_peer_review_contributor is not None:
+                reviewed_contribution_history = peer_review_contributions.exclude(
+                    pk=active_peer_review_contributor.pk
+                )
+            else:
+                # Handle the case when active_peer_review_contributor is None.
+                # Maybe set reviewed_contribution_history to some default value or just leave it as None.
+                reviewed_contribution_history = None
 
-            reviewed_contribution_history = peer_review_contributions.exclude(
-                pk=active_peer_review_contributor.pk
-            )
-
-            # Context da for the "All reviews" section on the profile page
             reviewed_contributions_context = {
                 # mainly used to check if review exists
                 "latest": latest_reviewed_contribution,
