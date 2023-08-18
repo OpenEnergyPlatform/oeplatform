@@ -1922,7 +1922,7 @@ class PeerReviewView(LoginRequiredMixin, View):
     def sort_in_category(self, schema, table):
         """
         Sorts the metadata of a table into categories and adds the value
-        suggestion and comment that were added during the review, to facilitate 
+        suggestion and comment that were added during the review, to facilitate
         Further processing easier.
 
         Note:
@@ -1947,7 +1947,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "resource": [...]
             }
         """
-        
+
         metadata = self.load_json(schema, table)
         val = self.parse_keys(metadata)
         gen_key_list = []
@@ -1999,12 +1999,12 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
-        Collects the field title, descriptions, examples and badge information 
-        for each field of the oemetadata from the json schema and prepares them 
-        so that the values can be easily processed or used. Used to populate 
+        Collects the field title, descriptions, examples and badge information
+        for each field of the oemetadata from the json schema and prepares them
+        so that the values can be easily processed or used. Used to populate
         the reviewer box.
         """
-        
+
         field_descriptions = {}
 
         def extract_descriptions(properties, prefix=""):
