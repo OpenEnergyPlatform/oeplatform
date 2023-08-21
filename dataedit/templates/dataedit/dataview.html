@@ -2,6 +2,7 @@
 {% load dataedit.metadata %}
 {% load static %}
 {% load django_bootstrap5 %}
+{% load compress %}
 
 
 {% block site-header %}
@@ -361,6 +362,7 @@ for row in result.json():
   </di>
 </div>
 
+{% compress js %}
 <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
 <script src="{% static 'dataedit/wkx.min.js' %}"></script>
 <script src="{% static 'dataedit/proj4.min.js' %}"></script><!-- src: https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js -->
@@ -372,7 +374,7 @@ for row in result.json():
 
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="{% static 'dataedit/leaflet.min.js' %}"></script><!-- src: https://unpkg.com/leaflet@1.3.1/dist/leaflet.js -->
-
+{% endcompress %}
 
 <script>
   var csrftoken = getCookie('csrftoken');
