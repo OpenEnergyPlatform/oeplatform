@@ -31,8 +31,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
+import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
+
 import oedb_iris from '../data/datasets_iris.json';
 import oedb_names from '../data/datasets_names.json';
+import LCC from '../data/countries.json';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -184,6 +187,7 @@ export default function Scenario(props) {
 
     const options_db_names = oedb_iris;
     const options_db_iris = oedb_names;
+    const options_LCC = LCC;
 
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
@@ -337,7 +341,15 @@ export default function Scenario(props) {
              </div>
          </Grid>
           <Grid item xs={5} style={{ marginTop: '15px', marginBottom: '10px' }}>
-            <CustomAutocomplete  width="95%" type="spatial region" editHandler={HandleEditRegion} addNewHandler={HandleAddNewRegion}  showSelectedElements={true} selectedElements={data.regions} manyItems optionsSet={scenarioRegion} kind='Which spatial regions does this scenario focus on (study regions)?' handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)} />
+            <CustomAutocompleteWithoutAddNew  
+              width="95%"
+              showSelectedElements={true}
+              optionsSet={options_LCC}
+              kind='Which spatial regions does this scenario focus on (study regions)?'
+              handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)}
+              selectedElements={data.regions}
+              noTooltip={true}
+            />
           </Grid>
           <Grid item xs={4} style={{  marginTop: '15px', marginBottom: '10px' }}>
            <CustomAutocomplete  width="95%" type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='Are there other, interacting regions considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>

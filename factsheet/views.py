@@ -51,11 +51,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -148,8 +148,6 @@ def create_factsheet(request, *args, **kwargs):
     date_of_publication = request_body['date_of_publication']
     report_title = request_body['report_title']
 
- 
-
     Duplicate_study_factsheet = False
 
     for s, p, o in oekg.triples(( None, RDF.type , OEO.OEO_00010252 )):
@@ -214,13 +212,18 @@ def create_factsheet(request, *args, **kwargs):
                 oekg.add(( scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]) ))
                 add_history(scenario_URI, OEKG['scenario_uuid'], Literal(item["id"]), 'add', request.user)
 
-
                 if 'regions' in item:
                     for region in item['regions']:
+                        region_URI = URIRef(region['iri'])
+                        scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + region['iri'].rsplit('/', 1)[1] ) 
+                        oekg.add((scenario_region, RDF.type, OEO.OEO_00020032))
+                        oekg.add((scenario_region, RDFS.label, Literal(region['name'])))
+                        oekg.add((scenario_region, OEKG["reference"], region_URI))
                         # TODO- set in settings
-                        region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
-                        oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
-                        add_history( scenario_URI, OEO.OEO_00000522, region_URI, 'add', request.user)
+                        
+                        # OEO_00020220 'has study region'
+                        oekg.add(( scenario_URI, OEO.OEO_00020220, scenario_region )) 
+                        add_history( scenario_URI, OEO.OEO_00020220, region_URI, 'add', request.user)
                     
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
@@ -260,8 +263,6 @@ def create_factsheet(request, *args, **kwargs):
 
                         oekg.add(( scenario_URI,  OEO.RO_0002233, input_dataset_URI ))
                         add_history( scenario_URI,  OEO.RO_0002233, input_dataset_URI, 'add', request.user)
-
-                        
 
                 if 'output_datasets' in item:
                     for output_dataset in item['output_datasets']:
@@ -436,8 +437,16 @@ def update_factsheet(request, *args, **kwargs):
                 if item["abstract"] != '' and item["abstract"] != None:
                     oekg.add(( scenario_URI, DC.abstract, Literal(item["abstract"]) ))
 
+                
                 for s, p, o in oekg.triples(( scenario_URI, OEO.OEO_00000522, None )):
                     oekg.remove((s, p, o))
+
+                # OEO_00020220 'has study region'
+                for s, p, o in oekg.triples(( scenario_URI, OEO.OEO_00020220, None )):
+                    oekg.remove((s, p, o))
+                    for s1, p1, o1 in oekg.triples(( o, None, None )):
+                        oekg.remove((s1, p1, o1))
+
 
                 for s, p, o in oekg.triples(( scenario_URI, OEO['covers_interacting_regions'], None )):
                     oekg.remove((s, p, o))
@@ -450,8 +459,17 @@ def update_factsheet(request, *args, **kwargs):
 
                 if 'regions' in item:
                     for region in item['regions']:
-                        region_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + region['iri'])
-                        oekg.add(( scenario_URI, OEO.OEO_00000522, region_URI ))
+                        region_URI = URIRef(region['iri'])
+                        print(region)
+                        scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + region['iri'].rsplit('/', 1)[1] ) 
+                        oekg.add((scenario_region, RDF.type, OEO.OEO_00020032))
+                        oekg.add((scenario_region, RDFS.label, Literal(region['name'])))
+                        oekg.add((scenario_region, OEKG["reference"], region_URI))
+                        # TODO- set in settings
+                        
+                        # OEO_00020220 'has study region'
+                        oekg.add(( scenario_URI, OEO.OEO_00020220, scenario_region )) 
+                        add_history( scenario_URI, OEO.OEO_00020220, region_URI, 'add', request.user)
                     
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
@@ -767,10 +785,10 @@ def factsheet_by_id(request, *args, **kwargs):
         scenario['name'] = name
         scenario['abstract'] = abstract
 
-        for s1, p1, o1 in oekg.triples(( o, OEO.OEO_00000522, None )):
+        for s1, p1, o1 in oekg.triples(( o, OEO.OEO_00020220, None )):
             o1_type = oekg.value(o1, RDF.type)
             o1_label = oekg.value(o1, RDFS.label)
-            if (o1_type == OBO.BFO_0000006):
+            if (o1_type == OEO.OEO_00020032):
                 scenario['regions'].append({  "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
             if (o1_type == OEO.OEO_00020036):
                 scenario['interacting_regions'].append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
@@ -907,6 +925,7 @@ def add_entities(request, *args, **kwargs):
     entity_label = request_body['entity_label']
     entity_iri = request_body['entity_iri']
 
+
     vocab = entity_type.split('.')[0]
     classId = entity_type.split('.')[1]
     prefix = ''
@@ -921,6 +940,7 @@ def add_entities(request, *args, **kwargs):
 
     oekg.add((entity_URI, RDF.type, entity_type_URI ))
     oekg.add((entity_URI, RDFS.label, Literal(entity_label)))
+
 
     response = JsonResponse('A new entity added!', safe=False, content_type='application/json')
     patch_response_headers(response, cache_timeout=1)

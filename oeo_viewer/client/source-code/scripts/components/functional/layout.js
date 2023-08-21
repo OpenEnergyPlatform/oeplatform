@@ -1,16 +1,13 @@
 import React, { Component, useEffect } from "react";
-import ForceGraph3D from "react-force-graph-3d";
 import ForceGraph2D from "react-force-graph-2d";
-import GraphData from "../../../../../data/oeo_viewer_json_data.json";
-import SpriteText from "three-spritetext";
+import GraphData from "../../../statics/oeo_info.json";
 import CustomDialog from "../presentational/customDialog";
-import CustomMenu from "../presentational/customMenu";
 import BaseCard from "../presentational/baseCard";
 import CustomCard from "../presentational/customCard";
-import CustomSubmitButton from "../presentational/customSubmitButton";
 import CustomTreeView from "./customTreeView";
 import LayoutActions from "./actions.js";
 import Grid from "@material-ui/core/Grid";
+
 
 import * as d3 from 'd3';
 
@@ -37,7 +34,7 @@ class Layout extends Component {
   state = {
     openSettingDialog: false,
     currentNode: "",
-    hierarchicalView: true,
+    hierarchicalView: false,
     cooldownTicks: 1000
   };
 
@@ -68,7 +65,7 @@ class Layout extends Component {
 
   updateWindowDimensions() {
   this.setState({
-    width: window.innerWidth / 1.23 ,
+    width: window.innerWidth / 1.4 ,
     height: window.innerHeight / 1.8
   });
   }
@@ -116,7 +113,7 @@ class Layout extends Component {
     this.setState({
       currentNode: node,
       currentNodeAllParents: allParents,
-      cooldownTicks: 5,
+      cooldownTicks: 500,
     });
   };
 
@@ -479,134 +476,136 @@ class Layout extends Component {
 
   renderSense() {
     return (
-            <ForceGraph2D
-              height={this.state.height}
-              width={this.state.width}
-              graphData={this.state.ontologyData}
-              backgroundColor={"#f7f7f7"}
-              nodeOpacity={1}
-              showNavInfo={false}
-              nodeResolution={20}
-              //nodeAutoColorBy="group"
-              //nodeAutoColorBy={node => node.current !== undefined ? "#ff0000": "#f7f7f7"}
-              // nodeCanvasObject={(node, ctx, globalScale) => {
-              //   const label = node.name;
-              //   const fontSize = 12 / globalScale;
-              //   ctx.font = `Bold ${fontSize}px Tahoma`;
-              //   const textWidth = ctx.measureText(label).width;
-              //   const bckgDimensions = [textWidth, fontSize].map(
-              //     n => n + fontSize * 1.2
-              //   ); // some padding
-              //
-              //   ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" :'#deeaee';
-              //   ctx.fillRect(
-              //     node.x - bckgDimensions[0] / 2,
-              //     node.y - bckgDimensions[1] / 2,
-              //     ...bckgDimensions
-              //   );
-              //
-              //   ctx.lineWidth = 0.05;
-              //   ctx.strokeRect(
-              //     node.x - bckgDimensions[0] / 2,
-              //     node.y - bckgDimensions[1] / 2,
-              //     ...bckgDimensions
-              //   );
-              //
-              //   ctx.textAlign = "center";
-              //   ctx.textBaseline = "middle";
-              //   ctx.fillStyle = node.id === this.state.currentNode.id ? "#ffffff" : "#034f84";
-              //   ctx.strokeStyle = "#00688B";
-              //   ctx.fillText(label, node.x, node.y);
-              //
-              //   node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
-              // }}
+      <ForceGraph2D
+        zoom={5.8}
+        height={this.state.height}
+        width={this.state.width}
+        graphData={this.state.ontologyData}
+        backgroundColor={"#f7f7f7"}
+        nodeOpacity={0.8}
+        showNavInfo={false}
+        nodeResolution={20}
+        //nodeAutoColorBy="group"
+        //nodeAutoColorBy={node => node.current !== undefined ? "#ff0000": "#f7f7f7"}
+        // nodeCanvasObject={(node, ctx, globalScale) => {
+        //   const label = node.name;
+        //   const fontSize = 12 / globalScale;
+        //   ctx.font = `Bold ${fontSize}px Tahoma`;
+        //   const textWidth = ctx.measureText(label).width;
+        //   const bckgDimensions = [textWidth, fontSize].map(
+        //     n => n + fontSize * 1.2
+        //   ); // some padding
+        //
+        //   ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" :'#deeaee';
+        //   ctx.fillRect(
+        //     node.x - bckgDimensions[0] / 2,
+        //     node.y - bckgDimensions[1] / 2,
+        //     ...bckgDimensions
+        //   );
+        //
+        //   ctx.lineWidth = 0.05;
+        //   ctx.strokeRect(
+        //     node.x - bckgDimensions[0] / 2,
+        //     node.y - bckgDimensions[1] / 2,
+        //     ...bckgDimensions
+        //   );
+        //
+        //   ctx.textAlign = "center";
+        //   ctx.textBaseline = "middle";
+        //   ctx.fillStyle = node.id === this.state.currentNode.id ? "#ffffff" : "#034f84";
+        //   ctx.strokeStyle = "#00688B";
+        //   ctx.fillText(label, node.x, node.y);
+        //
+        //   node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+        // }}
 
-              nodeCanvasObject={(node, ctx, globalScale) => {
-                    
-                    //ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" :'#deeaee';
+        nodeCanvasObject={(node, ctx, globalScale) => {
+              
+              //ctx.fillStyle = node.id === this.state.currentNode.id ? "#009688" :'#deeaee';
 
-                    /* ctx.beginPath();
-                    ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.fill();
+              /* ctx.beginPath();
+              ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI);
+              ctx.stroke();
+              ctx.fill();
 
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle =  node.id === this.state.currentNode.id ? "#ffffff" :'#034f84';
-                    ctx.strokeStyle = "#00688B";
-                    ctx.lineWidth = 2; */
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillStyle =  node.id === this.state.currentNode.id ? "#ffffff" :'#034f84';
+              ctx.strokeStyle = "#00688B";
+              ctx.lineWidth = 2; */
 
-                    const label = node.name;
-                    var num_of_words = label.split(" ").length;
+              const label = node.name;
+              var num_of_words = label.length;
 
-                    ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
-                    ctx.fillRect(node.x - 6, node.y - 5, 22 * num_of_words, 8); 
+              ctx.fillStyle =  node.id === this.state.currentNode.id ? "#78C1AE" :'#04678F';
+              ctx.fillRect(node.x - 1, node.y - 8, (num_of_words * 2.4) + 2 , 12); 
 
-                    const fontSize = 3;
-                    ctx.font = `${fontSize}px Tahoma`;
-                    ctx.fillStyle = node.id === this.state.currentNode.id ? "#04678F" :'#ffffff';
-                    ctx.fillText(label, node.x, node.y )
-                    
-                    
+              const fontSize = 5;
+              ctx.font = `${fontSize}px Tahoma`;
+              ctx.fillStyle = node.id === this.state.currentNode.id ? "#04678F" :'#ffffff';
+              ctx.fillText(label, node.x, node.y )
+              
+              
 
-                    /* if (lines.length == 1) {
-                      ctx.fillText(lines[0], node.x, node.y )
-                    } else {
-                      for (var i = 0; i<lines.length; i++) {
-                        if (i == 0) {
-                          ctx.fillText(lines[i], node.x, node.y - 8 );
-                        } else if (i == 1) {
-                          ctx.fillText(lines[i], node.x, node.y - 2 );
-                        } else if (i == 2) {
-                          ctx.fillText(lines[i], node.x, node.y + 4 );
-                        } else {
-                          ctx.fillText(lines[i], node.x, node.y + 10 );
-                        }
-                      }
-                    } */
+              /* if (lines.length == 1) {
+                ctx.fillText(lines[0], node.x, node.y )
+              } else {
+                for (var i = 0; i<lines.length; i++) {
+                  if (i == 0) {
+                    ctx.fillText(lines[i], node.x, node.y - 8 );
+                  } else if (i == 1) {
+                    ctx.fillText(lines[i], node.x, node.y - 2 );
+                  } else if (i == 2) {
+                    ctx.fillText(lines[i], node.x, node.y + 4 );
+                  } else {
+                    ctx.fillText(lines[i], node.x, node.y + 10 );
+                  }
+                }
+              } */
 
 
-                    const textWidth = ctx.measureText(label).width;
-                    const bckgDimensions = [textWidth, fontSize].map(
-                      n => n + fontSize * 6
-                      ); // some padding
-                      node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
-                    }}
-
-              nodePointerAreaPaint={(node, color, ctx) => {
-                ctx.fillStyle = color;
-                const bckgDimensions = node.__bckgDimensions;
-                bckgDimensions &&
-                  ctx.fillRect(
-                    node.x - bckgDimensions[0] / 2,
-                    node.y - bckgDimensions[1] / 2,
-                    ...bckgDimensions
-                  );
+              const textWidth = ctx.measureText(label).width;
+              const bckgDimensions = [textWidth, fontSize].map(
+                n => n + fontSize * 6
+                ); // some padding
+                node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
               }}
-              ref={this.fgRef}
-              //onNodeRightClick={n => {
-              //  this.handleNodeRightClick(n);
-              //}}
-              linkDirectionalArrowLength={5}
-              linkDirectionalArrowRelPos={0.5}
-              //linkCurvature={0.25}
-              dagMode={this.state.hierarchicalView ? "td" : ""}
-              linkColor={() => "#9AC0CD"}
-              d3VelocityDecay={0.01}
-              dagLevelDistance={50}
-              // d3VelocityDecay={0.001}
-              // dagLevelDistance={200}
-              cooldownTicks={this.state.cooldownTicks}
-              cooldownTime={1000}
-              onNodeDragEnd={node => {
-                node.fx = node.x;
-                node.fy = node.y;
-                node.fz = node.z;
-              }}
-              onNodeClick={n => {
-                this.handleNodeClick(n);
-              }}
-            />
+
+        nodePointerAreaPaint={(node, color, ctx) => {
+          ctx.fillStyle = color;
+          const bckgDimensions = node.__bckgDimensions;
+          bckgDimensions &&
+            ctx.fillRect(
+              node.x - bckgDimensions[0] / 2,
+              node.y - bckgDimensions[1] / 2,
+              ...bckgDimensions
+            );
+        }}
+        ref={this.fgRef}
+        //onNodeRightClick={n => {
+        //  this.handleNodeRightClick(n);
+        //}}
+        linkDirectionalArrowLength={5}
+        linkDirectionalArrowRelPos={4}
+        //linkCurvature={0.25}
+        dagMode={this.state.hierarchicalView ? "td" : ""}
+        linkColor={() => "#004D80"}
+        d3VelocityDecay={0.01}
+        dagLevelDistance={50}
+        // d3VelocityDecay={0.001}
+        // dagLevelDistance={200}
+        cooldownTicks={this.state.cooldownTicks}
+        cooldownTime={2000}
+        onNodeDragEnd={node => {
+          node.fx = node.x;
+          node.fy = node.y;
+          node.fz = node.z;
+        }}
+        zoomToFit={(200, 500)}
+        onNodeClick={n => {
+          this.handleNodeClick(n);
+        }}
+      />
     );
   }
 
@@ -620,20 +619,15 @@ class Layout extends Component {
           //alignItems="stretch"
           spacing={2}>
               <Grid item xs={3}>
-                  <CustomTreeView
-                    treeViewData={this.state.treeViewData}
-                    expanded={this.state.currentNodeAllParents}
-                    treeViewSelectHandler={this.treeViewSelectHandler}
-                    />
-                 {/*  <div style={{ padding: "15px" }}>
-                  If you find bugs or if you have ideas to improve the Open Energy Platform, you are welcome to add your comments to the existing issues on
-                  <a href="https://github.com/OpenEnergyPlatform/oeplatform"> GitHub. </a>
+                  <div>
+                      <BaseCard
+                        content={<CustomTreeView
+                        treeViewData={this.state.treeViewData}
+                        expanded={this.state.currentNodeAllParents}
+                        treeViewSelectHandler={this.treeViewSelectHandler}
+                        />}
+                      />
                   </div>
-
-                  <div style={{ padding: "15px" }}>
-                  You can also fork the project and get involved.
-                  Please note that the platform is still under construction and therefore the design of this page is still highly volatile!
-                  </div> */}
               </Grid>
               <Grid item xs={9} >
                 <Grid

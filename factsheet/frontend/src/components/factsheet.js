@@ -76,6 +76,8 @@ import LinkIcon from '@mui/icons-material/Link';
 
 import Chip from '@mui/material/Chip';
 
+
+
 import '../styles/App.css';
 import '../styles/sunburst.css';
 
@@ -503,14 +505,13 @@ function Factsheet(props) {
   };
 
   const handleScenariosAutoCompleteChange = (selectedList, name, idx) => {
-    console.log(selectedList, name, idx);
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === idx);
     if (obj)
       obj[name] = selectedList
     setScenarios(newScenarios);
   };
-
+  
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === id);
@@ -852,9 +853,9 @@ function Factsheet(props) {
   const HandleAddNewRegion = (newElement) => {
     axios.post(conf.toep + 'sirop/add_entities/',
     {
-      entity_type: 'OBO.BFO_0000006', 
-      entity_label: newElement.name,
-      entity_iri: newElement.iri
+      'entity_type': 'OEO.OEO_00020032', 
+      'entity_label': newElement.name,
+      'entity_iri': newElement.iri,
     }).then(response => {
     if (response.data === 'A new entity added!')
       setOpenAddedDialog(true);
