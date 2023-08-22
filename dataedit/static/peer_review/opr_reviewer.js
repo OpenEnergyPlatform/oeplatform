@@ -262,6 +262,10 @@ function click_field(fieldKey, fieldValue, category) {
       document.getElementById("rejected-button").disabled = false;
       document.getElementById("suggestion-button").disabled = false;
     }
+  } else {
+    document.getElementById("ok-button").disabled = false;
+    document.getElementById("rejected-button").disabled = false;
+    document.getElementById("suggestion-button").disabled = false;
   }
 
   // Set selected / not selected style on metadata fields
@@ -365,7 +369,7 @@ function selectField(fieldList, field) {
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
-  updateClientStateDict(fieldKey=selectedField, state=state);
+  updateClientStateDict(fieldKey = selectedField, state = state);
   check_if_review_finished();
 }
 
@@ -376,7 +380,7 @@ function selectState(state) { // eslint-disable-line no-unused-vars
  * @param {string} fieldKey Identifiere of the field
  * @param {string} state Selected state
  */
-function updateClientStateDict(fieldKey, state){
+function updateClientStateDict(fieldKey, state) {
   state_dict = state_dict ?? {};
   if (fieldKey in state_dict) {
     // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
@@ -545,7 +549,7 @@ function showToast(title, message, type) {
   var toast = document.getElementById('liveToast');
   var toastTitle = document.getElementById('toastTitle');
   var toastBody = document.getElementById('toastBody');
-  
+
   // Update the toast's header and body based on the type
   if (type === 'error') {
     toast.classList.remove('bg-success');
@@ -554,11 +558,11 @@ function showToast(title, message, type) {
     toast.classList.remove('bg-danger');
     toast.classList.add('bg-success');
   }
-  
+
   // Set the title and body text
   toastTitle.textContent = title;
   toastBody.textContent = message;
-  
+
   var bsToast = new bootstrap.Toast(toast);
   bsToast.show();
 }
@@ -570,7 +574,7 @@ function saveEntrances() {
   if (selectedState != "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    
+
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
@@ -584,14 +588,14 @@ function saveEntrances() {
 
     valuearea.reportValidity();
   } else if (initialReviewerSuggestions[selectedField]) {  // Check if the state is "ok" and if there's a valid suggestion
-        var fieldElement = document.getElementById("field_" + selectedField);
-        if (fieldElement) {
-            var valueElement = fieldElement.querySelector('.value');
-            if (valueElement) {
-                valueElement.innerText = initialReviewerSuggestions[selectedField];
-            }
-        }
+    var fieldElement = document.getElementById("field_" + selectedField);
+    if (fieldElement) {
+      var valueElement = fieldElement.querySelector('.value');
+      if (valueElement) {
+        valueElement.innerText = initialReviewerSuggestions[selectedField];
+      }
     }
+  }
 
   // Create list for review fields if it doesn't exist yet
   if (Object.keys(current_review["reviews"]).length === 0 &&
@@ -599,57 +603,57 @@ function saveEntrances() {
     current_review["reviews"] = [];
   }
   if (selectedField) {
-      var unique_entry = true;
-      var dummy_review = current_review;
-      dummy_review["reviews"].forEach(function ( value, idx ){
-          // if field is present already, update field
-          if (value["key"] === selectedField){
-              unique_entry = false;
-              var element = document.querySelector('[aria-selected="true"]');
-              var category = (element.getAttribute("data-bs-target"));
-              if (selectedState === "ok") {
-                Object.assign(current_review["reviews"][idx],
-                    {
-                        "category": selectedCategory,
-                        "key": selectedField,
-                        "fieldReview": {
-                            "timestamp": Date.now(),
-                              "user": "oep_reviewer", // TODO put actual username
-                              "role": "reviewer",
-                              "contributorValue": selectedFieldValue,
-                              "newValue": initialReviewerSuggestions[selectedField],
-                              "comment": "",
-                              "reviewerSuggestion": "",
-                              "state": selectedState,
-                        },
-                    },
-                )
-              } else {
-                Object.assign(current_review["reviews"][idx],
-                    {
-                        "category": selectedCategory,
-                        "key": selectedField,
-                        "fieldReview": {
-                            "timestamp": Date.now(),
-                              "user": "oep_reviewer", // TODO put actual username
-                              "role": "reviewer",
-                              "contributorValue": selectedFieldValue,
-                              "newValue": "",
-                              "comment": document.getElementById("commentarea").value,
-                              "reviewerSuggestion": document.getElementById("valuearea").value,
-                              "state": selectedState,
-                        },
-                    },
-                )
-                // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
-                var fieldElement = document.getElementById("field_" + selectedField);
-                var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
-                var commentElement = fieldElement.querySelector('.suggestion--comment');
-                suggestionElement.innerText = document.getElementById("valuearea").value;
-                commentElement.innerText = document.getElementById("commentarea").value;
-            }
-          }
-      });
+    var unique_entry = true;
+    var dummy_review = current_review;
+    dummy_review["reviews"].forEach(function (value, idx) {
+      // if field is present already, update field
+      if (value["key"] === selectedField) {
+        unique_entry = false;
+        var element = document.querySelector('[aria-selected="true"]');
+        var category = (element.getAttribute("data-bs-target"));
+        if (selectedState === "ok") {
+          Object.assign(current_review["reviews"][idx],
+            {
+              "category": selectedCategory,
+              "key": selectedField,
+              "fieldReview": {
+                "timestamp": Date.now(),
+                "user": "oep_reviewer", // TODO put actual username
+                "role": "reviewer",
+                "contributorValue": selectedFieldValue,
+                "newValue": initialReviewerSuggestions[selectedField],
+                "comment": "",
+                "reviewerSuggestion": "",
+                "state": selectedState,
+              },
+            },
+          )
+        } else {
+          Object.assign(current_review["reviews"][idx],
+            {
+              "category": selectedCategory,
+              "key": selectedField,
+              "fieldReview": {
+                "timestamp": Date.now(),
+                "user": "oep_reviewer", // TODO put actual username
+                "role": "reviewer",
+                "contributorValue": selectedFieldValue,
+                "newValue": "",
+                "comment": document.getElementById("commentarea").value,
+                "reviewerSuggestion": document.getElementById("valuearea").value,
+                "state": selectedState,
+              },
+            },
+          )
+          // Aktualisiere die HTML-Elemente mit den eingegebenen Werten
+          var fieldElement = document.getElementById("field_" + selectedField);
+          var suggestionElement = fieldElement.querySelector('.suggestion--highlight');
+          var commentElement = fieldElement.querySelector('.suggestion--comment');
+          suggestionElement.innerText = document.getElementById("valuearea").value;
+          commentElement.innerText = document.getElementById("commentarea").value;
+        }
+      }
+    });
     var element = document.querySelector('[aria-selected="true"]');
     var category = (element.getAttribute("data-bs-target"));
     // if field hasn't been written before, add it
@@ -714,7 +718,7 @@ function checkReviewComplete() {
     }
   }
   $('#submit_summary').removeClass('disabled');
-  if (!clientSideReviewFinished){
+  if (!clientSideReviewFinished) {
     showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
   }
 }
