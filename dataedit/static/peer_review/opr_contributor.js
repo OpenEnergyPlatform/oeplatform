@@ -224,6 +224,10 @@ function click_field(fieldKey, fieldValue, category) {
   } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
     document.getElementById("ok-button").disabled = false;
     document.getElementById("rejected-button").disabled = false;
+  } else {
+    document.getElementById("ok-button").disabled = false;
+    document.getElementById("rejected-button").disabled = false;
+    document.getElementById("suggestion-button").disabled = false;
   }
 
   // Set selected / not selected style on metadata fields
