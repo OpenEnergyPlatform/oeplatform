@@ -489,7 +489,7 @@ function showToast(title, message, type) {
   var toast = document.getElementById('liveToast');
   var toastTitle = document.getElementById('toastTitle');
   var toastBody = document.getElementById('toastBody');
-  
+
   // Update the toast's header and body based on the type
   if (type === 'error') {
     toast.classList.remove('bg-success');
@@ -498,11 +498,11 @@ function showToast(title, message, type) {
     toast.classList.remove('bg-danger');
     toast.classList.add('bg-success');
   }
-  
+
   // Set the title and body text
   toastTitle.textContent = title;
   toastBody.textContent = message;
-  
+
   var bsToast = new bootstrap.Toast(toast);
   bsToast.show();
 }
@@ -515,7 +515,7 @@ function saveEntrances() {
   if (selectedState !== "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-  
+
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
@@ -529,14 +529,14 @@ function saveEntrances() {
 
     valuearea.reportValidity();
   } else if (initialReviewerSuggestions[selectedField]) {  // Check if the state is "ok" and if there's a valid suggestion
-        var fieldElement = document.getElementById("field_" + selectedField);
-        if (fieldElement) {
-            var valueElement = fieldElement.querySelector('.value');
-            if (valueElement) {
-                valueElement.innerText = initialReviewerSuggestions[selectedField];
-            }
-        }
+    var fieldElement = document.getElementById("field_" + selectedField);
+    if (fieldElement) {
+      var valueElement = fieldElement.querySelector('.value');
+      if (valueElement) {
+        valueElement.innerText = initialReviewerSuggestions[selectedField];
+      }
     }
+  }
 
 
   if (Object.keys(current_review["reviews"]).length === 0 &&
