@@ -94,10 +94,10 @@ In the oeplatform repository, copy the file `oeplatform/securitysettings.py.defa
 To setup the connection in the oeplatform project you can either setup environment variables that store the database connection credentials locally on your system or you can change the default value in the securitysetting. For production systems it is recommended to use the concept of environment variables.
 
 !!! Note
-    You have to provide the user name and password (with access to the oep_django and oedb database). Additionaly you can configure the databse name and the host and port variables if you dont run the database server using the default values.
+    You have to provide the user name and password (with access to the oep_django and oedb database). Additionally you can configure the database name and the host and port variables if you don't run the database server using the default values.
 #### 3.1.1 oep_django internal database
 
-In the oeplatform/securitysettings.py file enter the database connection detials in this section:
+In the oeplatform/securitysettings.py file enter the database connection details in this section:
 
 !!! Info
     This code will attempt to collect the value from a environment variable in case it is not available the fallback value is used.
@@ -151,7 +151,7 @@ DATABASES = {
 
 #### 3.1.2 oedb primary database 
 
-In the oeplatform/securitysettings.py file enter the database connection detials in this section:
+In the oeplatform/securitysettings.py file enter the database connection details in this section:
 
 ``` python
 # oeplatform/securitysettings.py
@@ -204,4 +204,4 @@ If you have already set up the oeplatoform environment from [installation guide]
     python manage.py runserver
 ## 4 Create the database tables
 
-Procede with the next steps in section [3.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
+Proceed with the next steps in section [3.2 Create the database table structures](installation.md#32-create-the-database-table-structures) of the oeplatform installation guide.
