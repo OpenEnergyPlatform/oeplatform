@@ -51,11 +51,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-query_endpoint = 'http://localhost:3030/ds/query'
-update_endpoint = 'http://localhost:3030/ds/update'
+#query_endpoint = 'http://localhost:3030/ds/query'
+#update_endpoint = 'http://localhost:3030/ds/update'
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
