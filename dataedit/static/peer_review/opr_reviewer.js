@@ -139,6 +139,7 @@ function peerReview(config) {
 
   selectNextField();
   renderSummaryPageFields();
+  updateTabClassesBasedOnCurrentReview();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -525,6 +526,8 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
+  updateTabClassesBasedOnCurrentReview();
+
 }
 
 /**
@@ -691,6 +694,8 @@ function saveEntrances() {
 
 
   renderSummaryPageFields();
+  updateTabClassesBasedOnCurrentReview();
+
 }
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
@@ -867,6 +872,38 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
+function updateTabClassesBasedOnCurrentReview() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+    let allOk = true;
+
+    for (let j = 0; j < fieldsInTab.length; j++) {
+      let fieldName = fieldsInTab[j].id.replace('field_', '');
+
+      let fieldReview = current_review.reviews.find(review => review.key === fieldName);
+      console.log(fieldReview)
+
+      if (!fieldReview || fieldReview.fieldReview.state !== 'ok') {
+        allOk = false;
+        break;
+      }
+    }
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
+updateTabClassesBasedOnCurrentReview();
 
 summaryTab.addEventListener('click', function () {
   toggleReviewControls(false);
