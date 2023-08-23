@@ -36,6 +36,7 @@ theme:
     - toc.follow
     - search.suggest
     - search.share
+    - content.tabs.link
 
 # extensions 
 markdown_extensions:
