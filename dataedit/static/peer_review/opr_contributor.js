@@ -131,6 +131,7 @@ function peerReview(config) {
   //   })();
   selectNextField();
   renderSummaryPageFields();
+  updateTabClassesBasedOnCurrentReview();
 }
 
 /**
@@ -469,6 +470,7 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
+  updateTabClassesBasedOnCurrentReview();
 }
 
 /**
@@ -611,6 +613,7 @@ function saveEntrances() {
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
+  updateTabClassesBasedOnCurrentReview();
 }
 
 /**
@@ -676,6 +679,48 @@ function updateSubmitButtonColor() {
     $(submitButton).addClass('btn-danger');
   }
 }
+function updateTabClassesBasedOnCurrentReview() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    // Фильтрация полей, которые нужно учитывать
+    let relevantFields = fieldsInTab.filter(field => {
+      let fieldName = field.id.replace('field_', '');
+      let fieldState = getFieldState(fieldName);
+
+      if (fieldState && fieldState.state === 'ok') {
+        return false;
+      }
+      return true;
+    });
+
+    let allOk = relevantFields.every(field => {
+      let fieldName = field.id.replace('field_', '');
+      let fieldReview = current_review.reviews.find(review => review.key === fieldName);
+
+      return fieldReview && fieldReview.fieldReview.state === 'ok';
+    });
+
+    // Удаление старых классов может быть полезным, чтобы избежать наложения стилей
+    // tab.classList.remove('status');
+    // tab.classList.remove('status--done');
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
+
+updateTabClassesBasedOnCurrentReview();
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
