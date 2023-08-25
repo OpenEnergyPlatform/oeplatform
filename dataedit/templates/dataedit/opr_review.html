@@ -29,19 +29,6 @@
     <div class="content__container">
 
       <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <!-- <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header bg-success"> 
-            <strong class="me-auto">Success</strong> 
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-header bg-danger">
-            <strong class="me-auto">Error</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">
-            The value suggestion text field is required to save the field review!
-          </div>
-        </div> -->
         <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <strong class="me-auto" id="toastTitle"></strong>
@@ -53,7 +40,7 @@
       </div>
 
       <div class="alert alert-warning" style="width:100%" role="alert">
-        This feature is in early rollout phase now. We do expect you to experience some errors. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
+        This feature is now in its second phase of implementation. Errors are still expected to occur. In general, the feature is much more stable now. Please share your experience in this <a href="https://github.com/OpenEnergyPlatform/oeplatform/discussions/1268">discussion on GitHub</a> (login required).
       </div>
     </div>
   </div>
@@ -139,8 +126,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight"> {{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight"> {{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -159,8 +146,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -175,8 +162,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -194,8 +181,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -213,8 +200,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -232,8 +219,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -251,8 +238,8 @@
                       <span class="value">{{ item.value }}</span>
                     {% else %}
                       <span class="key">{{item.field}}</span>
-                      <span class="value">{{ item.value }}</span>
-                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+                      <span class="value">{{ item.newValue|default:item.value }}</span>
+                      <span id="reviewerSuggestion_{{item.field}}" class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment"> {{ item.suggestion_comment }}</span>
                     {% endif %}
                   </p>
@@ -376,6 +363,20 @@
         });
     });
 </script>
+ <script>
+var initialReviewerSuggestions = {};
+
+window.onload = function() {
+  var suggestions = document.querySelectorAll('.suggestion--highlight');
+
+  suggestions.forEach(function(suggestion) {
+    var field = suggestion.id.split('_')[1];
+    initialReviewerSuggestions[field] = suggestion.innerText;
+  });
+  console.log(initialReviewerSuggestions);
+}
+</script>
+
 {% compress js %}
   <script src="/static/peer_review/opr_reviewer.js"></script>
 {% endcompress %}

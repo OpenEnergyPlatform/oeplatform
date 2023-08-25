@@ -1,0 +1,6 @@
+-r requirements.txt
+flake8
+black
+isort
+pre-commit
+bumpversion
