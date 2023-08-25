@@ -139,7 +139,7 @@ function peerReview(config) {
 
   selectNextField();
   renderSummaryPageFields();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -526,7 +526,7 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
 
 }
 
@@ -694,7 +694,7 @@ function saveEntrances() {
 
 
   renderSummaryPageFields();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
 
 }
 function getFieldState(fieldKey) {
@@ -872,7 +872,7 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
-function updateTabClassesBasedOnCurrentReview() {
+function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
 
   for (let i = 0; i < tabNames.length; i++) {
@@ -881,19 +881,8 @@ function updateTabClassesBasedOnCurrentReview() {
     if (!tab) continue;
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
-    let allOk = true;
 
-    for (let j = 0; j < fieldsInTab.length; j++) {
-      let fieldName = fieldsInTab[j].id.replace('field_', '');
-
-      let fieldReview = current_review.reviews.find(review => review.key === fieldName);
-      console.log(fieldReview)
-
-      if (!fieldReview || fieldReview.fieldReview.state !== 'ok') {
-        allOk = false;
-        break;
-      }
-    }
+    let allOk = fieldsInTab.every(field => field.classList.contains('field-ok'));
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -902,8 +891,6 @@ function updateTabClassesBasedOnCurrentReview() {
     }
   }
 }
-
-updateTabClassesBasedOnCurrentReview();
 
 summaryTab.addEventListener('click', function () {
   toggleReviewControls(false);
