@@ -139,6 +139,7 @@ function peerReview(config) {
 
   selectNextField();
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -525,6 +526,8 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
+  updateTabProgressIndicatorClasses();
+
 }
 
 /**
@@ -691,6 +694,8 @@ function saveEntrances() {
 
 
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+
 }
 function getFieldState(fieldKey) {
   if (state_dict && state_dict[fieldKey] !== undefined) {
@@ -867,6 +872,25 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', updateTabClasses);
 
+function updateTabProgressIndicatorClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = fieldsInTab.every(field => field.classList.contains('field-ok'));
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
 
 summaryTab.addEventListener('click', function () {
   toggleReviewControls(false);

@@ -131,6 +131,7 @@ function peerReview(config) {
   //   })();
   selectNextField();
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -469,6 +470,7 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -611,6 +613,7 @@ function saveEntrances() {
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -676,6 +679,28 @@ function updateSubmitButtonColor() {
     $(submitButton).addClass('btn-danger');
   }
 }
+
+
+function updateTabProgressIndicatorClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = fieldsInTab.every(field => field.classList.contains('field-ok'));
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
