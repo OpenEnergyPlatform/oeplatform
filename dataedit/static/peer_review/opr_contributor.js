@@ -131,7 +131,7 @@ function peerReview(config) {
   //   })();
   selectNextField();
   renderSummaryPageFields();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -470,7 +470,7 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -613,7 +613,7 @@ function saveEntrances() {
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
-  updateTabClassesBasedOnCurrentReview();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -679,7 +679,9 @@ function updateSubmitButtonColor() {
     $(submitButton).addClass('btn-danger');
   }
 }
-function updateTabClassesBasedOnCurrentReview() {
+
+
+function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
 
   for (let i = 0; i < tabNames.length; i++) {
@@ -689,27 +691,7 @@ function updateTabClassesBasedOnCurrentReview() {
 
     let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
 
-    // Фильтрация полей, которые нужно учитывать
-    let relevantFields = fieldsInTab.filter(field => {
-      let fieldName = field.id.replace('field_', '');
-      let fieldState = getFieldState(fieldName);
-
-      if (fieldState && fieldState.state === 'ok') {
-        return false;
-      }
-      return true;
-    });
-
-    let allOk = relevantFields.every(field => {
-      let fieldName = field.id.replace('field_', '');
-      let fieldReview = current_review.reviews.find(review => review.key === fieldName);
-
-      return fieldReview && fieldReview.fieldReview.state === 'ok';
-    });
-
-    // Удаление старых классов может быть полезным, чтобы избежать наложения стилей
-    // tab.classList.remove('status');
-    // tab.classList.remove('status--done');
+    let allOk = fieldsInTab.every(field => field.classList.contains('field-ok'));
 
     if (allOk) {
       tab.classList.add('status--done');
@@ -719,8 +701,6 @@ function updateTabClassesBasedOnCurrentReview() {
   }
 }
 
-
-updateTabClassesBasedOnCurrentReview();
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
