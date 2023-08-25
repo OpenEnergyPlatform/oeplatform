@@ -1,7 +1,7 @@
 ### Changes
 
 ### Features
-- Open Peer Review: Add functionality that updates the red/green dot (progress indicator) if all fields are accepted for each metadata tab [(#13)](https://github.com/OpenEnergyPlatform/oeplatform/pull/13)
+- Open Peer Review: Add functionality that updates the red/green dot (progress indicator) if all fields are accepted for each metadata tab [(#1364)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1364)
 - Add initial version of new documentation created using mkdocs and hosted on gh-pages [(#1347)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1347)
 - Open Peer Review: Add functionality that switches to the next category tab if the selected field is not part of the current category [(#1328)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1328)
 - Add funder logo in about page [#1344](https://github.com/OpenEnergyPlatform/oeplatform/pull/1344)
