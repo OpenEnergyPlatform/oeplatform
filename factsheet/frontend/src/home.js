@@ -16,30 +16,35 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import ButtonGroup from '@mui/material/ButtonGroup';
 
 
+import BootstrapButton from './styles/style.js';
+
 import './styles/App.css';
+
+
+import { StyledEngineProvider } from '@mui/material/styles';
 
 function Home(props) {
 
   const [factsheets, setFactsheets] = React.useState([]);
   const [loading, setLoading] = useState(true);
 
-  const theme = createTheme({
-    status: {
-      danger: '#e53e3e',
-    },
-    palette: {
-      primary: {
-        main: '#04678F',
-        darker: '#053e85',
-        contrastText: '#fff',
-      },
-      neutral: {
-        main: '#198BB9',
-        darker: '#053e85',
-        contrastText: '#fff',
-      },
-    },
-  });
+  // const theme = createTheme({
+  //   status: {
+  //     danger: '#e53e3e',
+  //   },
+  //   palette: {
+  //     primary: {
+  //       main: '#04678F',
+  //       darker: '#053e85',
+  //       contrastText: '#fff',
+  //     },
+  //     neutral: {
+  //       main: '#198BB9',
+  //       darker: '#053e85',
+  //       contrastText: '#fff',
+  //     },
+  //   },
+  // });
 
   const useStyles = makeStyles({
     drawerPaper: {
@@ -51,7 +56,6 @@ function Home(props) {
     setLoading(true);
     axios.get(conf.toep + `sirop/all/`).then(response => {
       const token = response.data.token;
-      console.log(token);
       setFactsheets(response.data);
       setLoading(false);
     });
@@ -59,9 +63,10 @@ function Home(props) {
 
   if (loading === false) {
     return (
-            <ThemeProvider theme={theme}>
+      <StyledEngineProvider injectFirst>
               <CustomTable factsheets={eval(factsheets)} />
-            </ThemeProvider>
+              <BootstrapButton variant="contained">Custom CSS</BootstrapButton>
+      </StyledEngineProvider>
     );
   }
   else {

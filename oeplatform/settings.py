@@ -58,7 +58,8 @@ INSTALLED_APPS = (
     "oeo_viewer",
     "factsheet",
     "corsheaders",
-    "owlready2"
+    "owlready2",
+    "compressor",
 )
 
 MIDDLEWARE = (
@@ -167,3 +168,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+STATICFILES_FINDERS = {
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+}
+
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True

@@ -44,8 +44,6 @@ export default function  ComparisonBoardItems (props) {
   const { elements, c_aspects } = props;
   const [state, setState] = useState({ items : elements });
 
-  console.log(state);
-
   function onDragEnd(result) {
     if (!result.destination) {
       return;
@@ -64,7 +62,6 @@ export default function  ComparisonBoardItems (props) {
   }
 
   const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-  console.log(state.items[0].data.descriptors);
 
   return (
     <div style={{ overflow: 'auto', width: '98%' }}>
@@ -195,9 +192,6 @@ export default function  ComparisonBoardItems (props) {
 
                     </div> 
                   )}
-
-                    
-
                 </Draggable>
               ))} 
             </div> 

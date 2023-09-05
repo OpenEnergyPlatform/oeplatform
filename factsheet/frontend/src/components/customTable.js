@@ -51,6 +51,9 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
 
+
+import '../styles/App.css';
+
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: "#04678fa8",
@@ -240,7 +243,7 @@ function EnhancedTableToolbar(props) {
       </Typography>
       <Tooltip title="Add a new factsheet">
         <Link to={`sirop/factsheet/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
-          <Button size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" key="Add" sx={{ marginLeft: '5px', textTransform: 'none' }}><AddIcon/></Button>
+          <Button className='custom-button custom-button_2nd' size="small" variant="outlined" key="Add" disabled><AddIcon/></Button>
         </Link>
       </Tooltip>
     </Toolbar>
@@ -549,7 +552,7 @@ export default function CustomTable(props) {
                   <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
                   <TableCell >
                     {row.institutions.map((v) => (
-                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="secondary"/>
                     ))}
                   </TableCell>
                   <TableCell >

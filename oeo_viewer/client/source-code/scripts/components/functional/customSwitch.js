@@ -9,31 +9,31 @@ import Typography from '@material-ui/core/Typography';
 
 const IOSSwitch = withStyles((theme) => ({
   root: {
-    width: 35,
-    height: 21,
+    width: 42,
+    height: 28,
     padding: 0,
-    margin: 4,
+    marginTop: 12,
     marginLeft: 20,
   },
   switchBase: {
     padding: 1,
     '&$checked': {
-      transform: 'translateX(16px)',
+      transform: 'translateX(15px)',
       color: theme.palette.common.white,
       '& + $track': {
-        backgroundColor: '#04678F',
+        backgroundColor: '#1f567d',
         opacity: 1,
         border: 'none',
       },
     },
     '&$focusVisible $thumb': {
-      color: '#52d869',
-      border: '6px solid #fff',
+      color: '#1f567d',
+      border: '8px solid #fff',
     },
   },
   thumb: {
-    width: 18,
-    height: 18,
+    width: 24,
+    height: 24,
   },
   track: {
     borderRadius: 26 / 2,
@@ -85,7 +85,7 @@ export default function CustomSwitch(props) {
           onChange={handleChange}
           name="checkedB"
           />}
-        //label="Hierarchical view"
+        label=""
       />
     </FormGroup>
   );

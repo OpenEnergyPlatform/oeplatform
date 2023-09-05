@@ -17,10 +17,8 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 export default function CustomAutocompleteWithoutAddNew(parameters) {
-  const { manyItems, idx, name, type, showSelectedElements, handler, width } = parameters;
+  const { manyItems, idx, name, type, showSelectedElements, handler, width, noTooltip=false } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
-  console.log(value);
-
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
@@ -57,7 +55,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
               style={{ marginRight: 8 }}
               checked={ selected }
             />}
-            {!option.inputValue && <HtmlTooltip
+            {!noTooltip && !option.inputValue && <HtmlTooltip
             style={{ marginRight: '5px' }}
             placement="top"
             title={

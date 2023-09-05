@@ -109,7 +109,7 @@
 }
 
 .wizard {
-    background-color: rgba(255, 255, 255);
+    background-color: rgb(255, 255, 255);
     height: 100%;
     overflow: auto;
 }
@@ -154,4 +154,27 @@ a:active {
 
 p {
   font-size: 16px
+}
+
+.custom-button {
+  text-transform: none;
+  color: rgb(31, 18, 114); 
+  
+ 
+}
+
+.custom-button_2nd {
+  height: 50px;
+  background-color: red; 
+}
+
+.Button {
+  color: rgb(4, 0, 255);
+}
+
+.custom-button:disabled {
+  background-color: rgb(49, 18, 172);
+  pointer-events: none; /* Disable click events */
+  opacity: 0.6; /* Apply a visual disabled style (optional) */
+  cursor: not-allowed;
 }

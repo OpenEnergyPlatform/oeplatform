@@ -4,4 +4,5 @@
     <td> {% if not field.is_checkbox or not add %}
             {{ field }}
          {% if field.help_text != "" %}<a href='#' data-bs-toggle='tooltip' title='{{ field.help_text }}'><span class='fas fa-question'></span></a>{% endif %} {% if field.errors %} {{ field.errors }} {% endif %} </td>
+        {% endif %}
 </tr>
