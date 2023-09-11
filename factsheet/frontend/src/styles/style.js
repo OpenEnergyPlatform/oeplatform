@@ -3,7 +3,7 @@ import Button from '@mui/material/Button';
 
 import { purple } from '@mui/material/colors';
 
-const BootstrapButton = styled(Button)({
+/* const BootstrapButton = styled(Button)({
     boxShadow: 'none',
     textTransform: 'none',
     fontSize: 36,
@@ -45,3 +45,4 @@ const BootstrapButton = styled(Button)({
   });
 
 export default BootstrapButton
+*/

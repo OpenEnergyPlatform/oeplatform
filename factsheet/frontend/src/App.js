@@ -5,30 +5,14 @@ import Home from './home.js';
 import Factsheet from './components/factsheet.js';
 import './styles/App.css';
 import conf from "./conf.json";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import oepTheme from './styles/oep-theme.js';
 import ComparisonBoardMain from "./components/comparisonBoardMain";
 import HistoryTable from './components/historyTable.js';
 
 function App() {
   const [factsheet, setFactsheet] = useState({});
   const [loading, setLoading] = useState(true);
-  const theme = createTheme({
-    status: {
-      danger: '#e53e3e',
-    },
-    palette: {
-      primary: {
-        main: '#04678F',
-        darker: '#053e85',
-        contrastText: '#fff',
-      },
-      neutral: {
-        main: '#198BB9',
-        darker: '#053e85',
-        contrastText: '#fff',
-      },
-    },
-  });
 
   const url_params = String(window.location.href).split('/').pop();
   const url_page = String(window.location.href).split('/').at(-2);
@@ -48,21 +32,25 @@ function App() {
   }, []);
 
   if (url_page === 'sirop' && url_params === '') {
-    return < Home />
+    return (
+      <ThemeProvider theme={oepTheme}>
+        <Home />
+      </ThemeProvider>
+    );
   } 
 
 
   if (url_params === 'oekg_history') {
-    return <ThemeProvider theme={theme}><HistoryTable/></ThemeProvider>
+    return <ThemeProvider theme={oepTheme}><HistoryTable/></ThemeProvider>
   }
 
   if (loading === false) {
    
     if (url_page === 'compare') {
-      return <ThemeProvider theme={theme}><ComparisonBoardMain params={url_params} /></ThemeProvider>
+      return <ThemeProvider theme={oepTheme}><ComparisonBoardMain params={url_params} /></ThemeProvider>
     }
     if (url_page === 'factsheet') {
-      return <ThemeProvider theme={theme}><Factsheet id={url_params} fsData={factsheet}/></ThemeProvider>
+      return <ThemeProvider theme={oepTheme}><Factsheet id={url_params} fsData={factsheet}/></ThemeProvider>
     } 
   } else {
     return <LinearProgress />
