@@ -65,7 +65,6 @@ function Home(props) {
     return (
       <StyledEngineProvider injectFirst>
               <CustomTable factsheets={eval(factsheets)} />
-              <BootstrapButton variant="contained">Custom CSS</BootstrapButton>
       </StyledEngineProvider>
     );
   }

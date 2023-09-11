@@ -21,7 +21,9 @@ export default function CustomTreeViewWithCheckBox(props) {
     handler,
    } = props;
 
-  console.log(data);
+
+  console.log(props);
+  
   const [expanded, setExpanded] = useState([]);
   const [checked, setChecked] = useState(props.checked.map(i => i.label));
   const handleChange = (checked) => {

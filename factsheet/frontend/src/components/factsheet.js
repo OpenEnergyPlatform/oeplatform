@@ -38,10 +38,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-// import study_keywords from '../data/study_keywords.json';
-// import scenario_years from '../data/scenario_years.json';
-// import sectors_json from   '../data/sectors.json';
-// import energyTransformations from '../data/energyTransformations';
 import Stepper from '@mui/material/Stepper';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
@@ -107,6 +103,7 @@ function Factsheet(props) {
   const steps = getSteps();
 
   const { id, fsData } = props;
+  
   console.log(fsData);
   
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
@@ -124,6 +121,8 @@ function Factsheet(props) {
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors : []);
   const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
+  const [expandedTechnologies, setExpandedTechnologies] = useState(id !== 'new' ? [] : []);
+  
   const [institutions, setInstitutions] = useState([]);
   const [authors, setAuthors] = useState([]);
   const [fundingSources, setFundingSources] = useState([]);
@@ -220,12 +219,7 @@ function Factsheet(props) {
     }
   ]);
   const [scenariosObject, setScenariosObject] = useState({});
-  const [selectedEnergyCarriers, setSelectedEnergyCarriers] = useState(id !== 'new' ? fsData.energy_carriers : []);
-  const [expandedEnergyCarriers, setExpandedEnergyCarriers] = useState([]);
-  const [selectedEnergyTransformationProcesses, setSelectedEnergyTransformationProcesses] = useState(id !== 'new' ? fsData.energy_transformation_processes : []);
-  const [expandedEnergyTransformationProcesses, setExpandedEnergyTransformationProcesses] = useState([]);
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
-  // const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? [] : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -234,8 +228,13 @@ function Factsheet(props) {
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
   const [editedEntity, setEditedEntity] = useState(false);
   const [scenarioTabValue, setScenarioTabValue] = React.useState(0);
-  const [energyTransformationProcesses, setEnergyTransformationProcesses] = React.useState([]);
-  const [energyCarriers, setEnergyCarries] = React.useState([]);
+
+  const [technologies, setTechnologies] = React.useState([]);
+  const [selectedTechnologies, setSelectedTechnologies] = useState(id !== 'new' ? fsData.technologies : []);
+  const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
+  
+  const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
+  const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState(id !== 'new' ? fsData.scenario_descriptors : []);
 
   const StudyKeywords = [
     'resilience',
@@ -274,30 +273,16 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
-      setEnergyTransformationProcesses(data.energy_transformation_processes[0].children);
-      setEnergyCarries(data.energy_carriers);
+      setTechnologies(data.technologies['children']);
+      setScenarioDescriptors(data.scenario_descriptors);
       setSectors(data.sectors);
       setSectorDivisions(data.sector_divisions);
-
-      
-
-      let energy_carriers_ids = [];
-      data.energy_carriers.forEach(({ value, children }) => {
-        energy_carriers_ids = [...energy_carriers_ids, value, ...getNodeIds(children)];
-      });
-      setExpandedEnergyCarriers(energy_carriers_ids);
-
-      let energy_transformation_processes_ids = [];
-      data.energy_transformation_processes.forEach(({ value, children }) => {
-        energy_transformation_processes_ids = [...energy_transformation_processes_ids, value, ...getNodeIds(children)];
-      });
-      setExpandedEnergyTransformationProcesses(energy_transformation_processes_ids);
 
       myChartRef.current = Sunburst
       const sampleData = {
         name: "root",
         label: "Energy carrier",
-        children: data.energy_carriers[0].children
+        children: []
       }
       setSunburstData(sampleData);
       });
@@ -323,10 +308,6 @@ function Factsheet(props) {
           sector_divisions: JSON.stringify(selectedSectorDivisions),
           sectors: JSON.stringify(selectedSectors),
           expanded_sectors: JSON.stringify(expandedSectors),
-          energy_carriers: JSON.stringify(selectedEnergyCarriers),
-          expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-          expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
-          energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
           study_keywords: JSON.stringify(selectedStudyKewords),
           report_title: report_title,
           date_of_publication: date_of_publication,
@@ -365,9 +346,6 @@ function Factsheet(props) {
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
             expanded_sectors: JSON.stringify(expandedSectors),
-            energy_carriers: JSON.stringify(selectedEnergyCarriers),
-            expanded_energy_transformation_processes: JSON.stringify(expandedEnergyTransformationProcesses),
-            expanded_energy_carriers: JSON.stringify(expandedEnergyCarriers),
             study_keywords: JSON.stringify(selectedStudyKewords),
             report_title: report_title,
             date_of_publication: date_of_publication,
@@ -378,7 +356,6 @@ function Factsheet(props) {
             scenarios: JSON.stringify(scenarios),
             models: JSON.stringify(selectedModels),
             frameworks: JSON.stringify(selectedFrameworks),
-            energy_transformation_processes: JSON.stringify(selectedEnergyTransformationProcesses),
           }).then(response => {
             if (response.data === "factsheet updated!") {
               setUID(uid);
@@ -1091,15 +1068,17 @@ function Factsheet(props) {
     return foundObj;
   };
 
-  const energyCarriersHandler = (energyCarriersList, nodes) => {
+
+  const technologyHandler = (technologyList, nodes) => {
     const zipped = []
-    energyCarriersList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
-    setSelectedEnergyCarriers(zipped);
+    technologyList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
+    setSelectedTechnologies(zipped);
   };
 
-
-  const expandedEnergyCarriersHandler = (expandedEnergyCarriersList) => {
-    setExpandedEnergyCarriers(expandedEnergyCarriersList);
+  const expandedTechnologyHandler = (expandedTechnologyList) => {
+    const zipped = []
+    expandedTechnologyList.map((v) => zipped.push({ "value": v, "label": v }));
+    setExpandedTechnologyList(zipped);
   };
 
   const sectorsHandler = (sectorsList, nodes) => {
@@ -1114,16 +1093,12 @@ function Factsheet(props) {
     setExpandedSectors(zipped);
   };
 
-  const energyTransformationProcessesHandler = (energyProcessesList, nodes) => {
-    console.log(energyProcessesList);
+  const expandedTechnologiesHandler = (expandedTechnologiesList) => {
     const zipped = []
-    energyProcessesList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
-    setSelectedEnergyTransformationProcesses(zipped);
+    expandedTechnologiesList.map((v) => zipped.push({ "value": v, "label": v }));
+    setExpandedTechnologies(zipped);
   };
-
-  const expandedEnergyTransformationProcessesHandler = (expandedEnergyProcessesList) => {
-    setExpandedEnergyTransformationProcesses(expandedEnergyProcessesList);
-  };
+  
 
   function a11yProps(index: number) {
     return {
@@ -1516,12 +1491,10 @@ function getSteps() {
   'Study details',
   'Publication',
   'Sectors',
-  'Energy carriers',
-  'Energy transformation processes',
+  'Technologies',
   'Scenarios',
   'Models',
   'Frameworks',
-  //'Energy_carrier',
   ];
   }
 
@@ -1689,30 +1662,43 @@ function getStepContent(step: number) {
       return (
         <div>
             <CustomAutocompleteWithoutAddNew  width="50%" showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
-            <CustomTreeViewWithCheckBox flat={true} showFilter={false} size="360px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={filteredSectors} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+            <CustomTreeViewWithCheckBox flat={true} 
+                                        showFilter={false} 
+                                        size="360px" 
+                                        checked={selectedSectors} 
+                                        expanded={expandedSectors} 
+                                        handler={sectorsHandler} 
+                                        expandedHandler={expandedSectorsHandler} 
+                                        data={filteredSectors} 
+                                        title={"Which sectors are considered in the study?"} 
+                                        toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
         </div>
             );
     case 4:
       return (
         <div>
-          {/* <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriers} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} /> */}
+          <CustomTreeViewWithCheckBox showFilter={false}
+                                      size="260px" 
+                                      checked={selectedTechnologies} 
+                                      expanded={expandedTechnologyList} 
+                                      handler={technologyHandler} 
+                                      expandedHandler={expandedTechnologyHandler} 
+                                      data={technologies} 
+                                      title={"What technologies are considered?"} 
+                                      toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
+                                      />
+        
         </div>
       );
     case 5:
-      return (
-        <div>
-          <CustomTreeViewWithCheckBox flat={false} showFilter={true} size="600px" checked={selectedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"}   />
-        </div>
-      );
-    case 6:
           return (
             renderScenario()
           );
-    case 7:
+    case 6:
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
       );
-    case 8:
+    case 7:
       return (
         <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
       );
@@ -2120,33 +2106,6 @@ function getStepContent(step: number) {
                           </p>
                         </TimelineContent>
                       </TimelineItem>
-
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Energy carriers</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                            <b>Energy carriers: </b>   
-                            {selectedEnergyCarriers.map((v, i) => (
-                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                          </p>
-                          <p>
-                            <b>Energy Transformation Processes: </b>   
-                            {selectedEnergyTransformationProcesses.map((v, i) => (
-                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                          </p>
-                        </TimelineContent>
-                      </TimelineItem>
-
                       <TimelineItem>
                         <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
                           <Typography variant="subtitle1" component="span"><b>Scenarios</b></Typography>
