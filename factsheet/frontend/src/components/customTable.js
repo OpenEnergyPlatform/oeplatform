@@ -20,6 +20,8 @@ import Button from '@mui/material/Button';
 import { Route, Routes, Link } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ViewComfyAltIcon from '@mui/icons-material/ViewComfyAlt';
+import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
+import ReplayIcon from '@mui/icons-material/Replay';
 import Chip from '@mui/material/Chip';
 import ReadMoreIcon from '@mui/icons-material/ReadMore';
 import Dialog from '@mui/material/Dialog';
@@ -221,12 +223,14 @@ function EnhancedTableToolbar(props) {
           display: 'flex',
       }}
     >
+      
       <Tooltip title="Show all">
-        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }}><SelectAllIcon onClick={handleShowAll}/></Button>
+        <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
       </Tooltip>
-      <Tooltip title="Comparison criteria">
-        <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000' }} key="Query" sx={{ marginLeft: '5px', textTransform: 'none' }} onClick={handleOpenQuery}><RuleIcon /></Button>
-      </Tooltip>
+      <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px'}} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
+      <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />}>Reset</Button>
+      <Button variant="contained" size="small" key="compareScenariosBtn" sx={{ marginLeft: '8px'}} startIcon={<CompareArrowsIcon />}>Compare scenarios</Button>
+
       <Typography
         sx={{ flex: '1 1 70%' }}
         color="inherit"
@@ -241,14 +245,10 @@ function EnhancedTableToolbar(props) {
 
           </Tooltip>}
       </Typography>
-      <Tooltip title="Add a new factsheet">
-        <Link to={`sirop/factsheet/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
-          <Button variant="contained" size="small" key="Add">
-            <AddIcon/>
-            Create new
-          </Button>
-        </Link>
-      </Tooltip>
+      <Button component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
+        <AddIcon/>
+        Create new
+      </Button>
     </Toolbar>
   );
 }

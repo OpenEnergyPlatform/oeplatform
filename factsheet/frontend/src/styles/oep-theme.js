@@ -8,8 +8,14 @@ const oepTheme = createTheme({
       },
       styleOverrides: {
         root: {
-          textTransform: 'capitalize'
+          textTransform: 'capitalize',
+          minWidth: 'fit-content',
         }
+      }
+    },
+    MuiSvgIcon: {
+      defaultProps: {
+        fontSize: 'small'
       }
     }
   },
