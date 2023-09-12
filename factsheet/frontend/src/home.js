@@ -46,17 +46,7 @@ function Home(props) {
 
   if (loading === false) {
     return (
-      <>
-        <CustomTable factsheets={eval(factsheets)} />
-        {/* <BootstrapButton variant="contained">Custom CSS</BootstrapButton> */}
-        <Button 
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          Text
-        </Button>
-      </>
+      <CustomTable factsheets={eval(factsheets)} />
     );
   }
   else {

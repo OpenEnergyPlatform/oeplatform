@@ -1,6 +1,18 @@
 import { createTheme } from '@mui/material/styles';
 
 const oepTheme = createTheme({
+  components: {
+    MuiButton: {
+      defaultProps: {
+        disableElevation : true
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'capitalize'
+        }
+      }
+    }
+  },
   status: {
     danger: '#e53e3e',
   },
@@ -18,7 +30,7 @@ const oepTheme = createTheme({
       darker: '#053e85',
       contrastText: '#fff',
     },
-  },
+  }
 });
 
 export default oepTheme;

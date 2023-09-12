@@ -243,7 +243,10 @@ function EnhancedTableToolbar(props) {
       </Typography>
       <Tooltip title="Add a new factsheet">
         <Link to={`sirop/factsheet/new`} onClick={() => this.forceUpdate} style={{  color: '#005374' }} >
-          <Button className='custom-button custom-button_2nd' size="small" variant="outlined" key="Add" disabled><AddIcon/></Button>
+          <Button variant="contained" size="small" key="Add">
+            <AddIcon/>
+            Create new
+          </Button>
         </Link>
       </Tooltip>
     </Toolbar>
