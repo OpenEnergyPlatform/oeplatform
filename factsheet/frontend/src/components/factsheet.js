@@ -1698,7 +1698,7 @@ function getStepContent(step: number) {
           <CustomTreeViewWithCheckBox showFilter={false}
                                       size="260px" 
                                       checked={selectedTechnologies} 
-                                      expanded={getNodeIds(technologies)} 
+                                      expanded={getNodeIds(technologies['children'])} 
                                       handler={technologyHandler} 
                                       expandedHandler={expandedTechnologyHandler} 
                                       data={technologies} 
@@ -2124,6 +2124,28 @@ function getStepContent(step: number) {
                           </p>
                         </TimelineContent>
                       </TimelineItem>
+
+                      <TimelineItem>
+                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
+                          <Typography variant="subtitle1" component="span"><b>Technologies</b></Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot>
+                            <FeedOutlinedIcon />
+                          </TimelineDot>
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <p>
+                            <b>Technologies: </b>
+                              {selectedTechnologies.map((v, i) => (
+                                <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                              ))}
+                          </p>
+                        </TimelineContent>
+                      </TimelineItem>
+
+
                       <TimelineItem>
                         <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
                           <Typography variant="subtitle1" component="span"><b>Scenarios</b></Typography>
