@@ -212,11 +212,14 @@ function Factsheet(props) {
     regions: [],
     interacting_regions: [],
     scenario_years: [],
-    keywords: [],
+    descriptors: [],
     input_datasets: [],
     output_datasets: [],
     }
   ]);
+
+  console.log(scenarios);
+
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models : []);
@@ -233,7 +236,7 @@ function Factsheet(props) {
   const [expandedTechnologyList, setExpandedTechnologyList] = useState([]);
   
   const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
-  const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState(id !== 'new' ? fsData.scenario_descriptors : []);
+  const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState([]);
 
 
   const StudyKeywords = [
@@ -519,7 +522,7 @@ function Factsheet(props) {
         regions: [],
         interacting_regions: [],
         scenario_years: [],
-        keywords: [],
+        descriptors: [],
         input_datasets: [],
         output_datasets: [],
       });
@@ -692,7 +695,6 @@ function Factsheet(props) {
 
 
   const HandleEditInstitution = (oldElement, newElement, editIRI) => {
-    console.log(editIRI);
     axios.post(conf.toep + 'sirop/update_an_entity/',
     {
       entity_type: 'OEO.OEO_00000238',
@@ -1073,13 +1075,10 @@ function Factsheet(props) {
   const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
     const zipped = []
     descriptorList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
-    setSelectedScenarioDescriptors(zipped);
-    
     const newScenarios = [...scenarios];
     const obj = newScenarios.find(el => el.id === id);
-    obj.keywords = zipped;
+    obj.descriptors = zipped;
     setScenarios(newScenarios);
-    console.log(newScenarios);
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
 
   };
@@ -1464,7 +1463,6 @@ function Factsheet(props) {
                       HandleEditScenarioYear={HandleEditScenarioYears}
                       HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
                       scenarioDescriptorHandler={scenarioDescriptorHandler}
-                      selectedDescriptors={selectedScenarioDescriptors}
                     />
                   </TabPanel>
                 )}
@@ -2150,8 +2148,8 @@ function getStepContent(step: number) {
                                 {v.abstract}
                               </Typography>
                               <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>  Keywords:</b>
-                                {v.keywords.map( (e) =>  <Chip label={e} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
+                              <b>  Descriptors:</b>
+                                {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
                               </Typography>
                               <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
                               <b>   Years:</b>

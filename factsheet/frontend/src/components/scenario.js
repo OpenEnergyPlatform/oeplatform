@@ -99,26 +99,30 @@ export default function Scenario(props) {
     HandleEditScenarioYear,
     HandleAddNNewScenarioYear,
     descriptors,
-    selectedDescriptors,
     scenarioDescriptorHandler
    } = props;
-    function createData(
-      Model: string,
-      Scenario: number,
-      Region: number,
-      Year: number,
-      Capacity: number,
-    ) {
-      return { Model, Scenario, Region, Year, Capacity };
-    }
-    const rows = [
-      createData('dea_technology_data_generation', 'WEM', 'Germany', 2015, 4.0),
-      createData('dea_technology_data_generation', 'WAM', 'Germany', 2015, 4.3),
-      createData('dea_technology_data_generation', 'WEM', 'Europe', 2015, 6.0),
-      createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 4.3),
-      createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 3.9),
-    ];
 
+  console.log(data);
+
+  function createData(
+    Model: string,
+    Scenario: number,
+    Region: number,
+    Year: number,
+    Capacity: number,
+  ) {
+    return { Model, Scenario, Region, Year, Capacity };
+  }
+  const rows = [
+    createData('dea_technology_data_generation', 'WEM', 'Germany', 2015, 4.0),
+    createData('dea_technology_data_generation', 'WAM', 'Germany', 2015, 4.3),
+    createData('dea_technology_data_generation', 'WEM', 'Europe', 2015, 6.0),
+    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 4.3),
+    createData('dea_technology_data_generation', 'WAM', 'Europe', 2020, 3.9),
+  ];
+
+    
+    
     const [scenariosInputDatasetsObj, setScenariosInputDatasetsObj] = useState(data.input_datasets);
     const [scenariosOutputDatasetsObj, setScenariosOutputDatasetsObj] = useState(data.output_datasets);
     const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
@@ -361,14 +365,14 @@ export default function Scenario(props) {
             </Typography>
               <div>
                <FormGroup>
-                  <div>
+                  {/* <div>
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("100% renewables")} onChange={scenarioKeywordsHandler} label="100% renewables" name={"100% renewables_" + data.id} />
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("acceptance")} onChange={scenarioKeywordsHandler} label="acceptance" name={"acceptance_" + data.id} />
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("sufficiency")} onChange={scenarioKeywordsHandler} label="sufficiency" name={"sufficiency_" + data.id} />
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("negative emissionen")} onChange={scenarioKeywordsHandler} label="negative emissionen" name={"negative emissionen_" + data.id} />
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid restrictions")} onChange={scenarioKeywordsHandler} label="grid restrictions" name={"grid restrictions_" + data.id} />
                     <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid / infrastructure extension")} onChange={scenarioKeywordsHandler} label="grid / infrastructure extension" name={"grid / infrastructure extension_" + data.id} />
-                  </div> 
+                  </div>  */}
                </FormGroup>
              </div>
          </Grid>
@@ -391,9 +395,9 @@ export default function Scenario(props) {
           </Grid>
           <Grid item xs={12} style={{  marginTop: '15px', marginBottom: '10px' }}>
           <CustomTreeViewWithCheckBox 
-            showFilter={false} 
+            showFilter={true} 
             size="300px" 
-            checked={selectedDescriptors} 
+            checked={data.descriptors} 
             expanded={getNodeIds(descriptors)}
             handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
             expandedHandler={expandDescriptorsHandler} 

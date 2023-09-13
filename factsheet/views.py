@@ -238,9 +238,9 @@ def create_factsheet(request, *args, **kwargs):
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
                         add_history( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']), 'add', request.user)
 
-                if 'keywords' in item:
-                    for keyword in item['keywords']:
-                        descriptor = URIRef(keyword['class']);
+                if 'descriptors' in item:
+                    for descriptor in item['descriptors']:
+                        descriptor = URIRef(descriptor['class']);
                         oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], descriptor ))
                         add_history( scenario_URI, OEO["has_scenario_descriptor"],  descriptor, 'add', request.user)
 
@@ -333,7 +333,6 @@ def create_factsheet(request, *args, **kwargs):
         _technologies = json.loads(technologies) if technologies is not None else []
         for item in _technologies:
             technology_URI = URIRef(item["class"])
-            print(technology_URI)
             oekg.add((study_URI, OEO.OEO_00000522, technology_URI))
             add_history(study_URI, OEO.OEO_00000522, technology_URI, 'add', request.user)
 
@@ -490,9 +489,12 @@ def update_factsheet(request, *args, **kwargs):
                     for scenario_year in item['scenario_years']:
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
 
-                if 'keywords' in item:
-                    for keyword in item['keywords']:
-                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
+
+                if 'descriptors' in item:
+                    for descriptor in item['descriptors']:
+                        descriptor = URIRef(descriptor['class']);
+                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], descriptor ))
+                        add_history( scenario_URI, OEO["has_scenario_descriptor"],  descriptor, 'add', request.user)
 
                 for s, p, o in oekg.triples(( scenario_URI, OEO.RO_0002233, None )):
                     oekg.remove((s, p, o))
@@ -770,7 +772,6 @@ def factsheet_by_id(request, *args, **kwargs):
         if label != None:
             factsheet['technologies'].append({ "value": label, "label":label, "class": o })
 
-    factsheet['scenario_descriptors'] = []
 
     factsheet['authors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000506, None )):
@@ -805,7 +806,7 @@ def factsheet_by_id(request, *args, **kwargs):
         scenario['scenario_years'] = []
         scenario['regions'] = []
         scenario['interacting_regions'] = []
-        scenario['keywords'] = []
+        scenario['descriptors'] = []
         scenario['input_datasets'] = []
         scenario['output_datasets'] = []
 
@@ -823,7 +824,8 @@ def factsheet_by_id(request, *args, **kwargs):
                 scenario['interacting_regions'].append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
         
         for s11, p11, o11 in oekg.triples(( o, OEO["has_scenario_descriptor"], None )):
-            scenario['keywords'].append(o11)
+            label = oeo.value(o11, RDFS.label)
+            scenario['descriptors'].append({ "value": label, "label":label, "class": o11 })
 
         for s2, p2, o2 in oekg.triples(( o, OEO.RO_0002233, None )):
             o2_iri = oekg.value(o2, OEO['has_iri'])
