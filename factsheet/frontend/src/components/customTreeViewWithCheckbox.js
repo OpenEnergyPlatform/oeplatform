@@ -21,16 +21,13 @@ export default function CustomTreeViewWithCheckBox(props) {
     handler,
    } = props;
 
-
-  console.log(props);
-  
   const [expanded, setExpanded] = useState([]);
   const [checked, setChecked] = useState(props.checked.map(i => i.label));
   const handleChange = (checked) => {
     setChecked(checked);
     handler(checked, data);
-
   };
+  
   return (
     <Box>
       <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>

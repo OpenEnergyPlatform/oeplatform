@@ -104,7 +104,6 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
   
-  console.log(fsData);
   
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
@@ -236,6 +235,7 @@ function Factsheet(props) {
   const [scenarioDescriptors, setScenarioDescriptors] = React.useState([]);
   const [selectedScenarioDescriptors, setSelectedScenarioDescriptors] = useState(id !== 'new' ? fsData.scenario_descriptors : []);
 
+
   const StudyKeywords = [
     'resilience',
     'life cycle analysis',
@@ -308,6 +308,7 @@ function Factsheet(props) {
           sector_divisions: JSON.stringify(selectedSectorDivisions),
           sectors: JSON.stringify(selectedSectors),
           expanded_sectors: JSON.stringify(expandedSectors),
+          technologies: JSON.stringify(selectedTechnologies),
           study_keywords: JSON.stringify(selectedStudyKewords),
           report_title: report_title,
           date_of_publication: date_of_publication,
@@ -346,6 +347,7 @@ function Factsheet(props) {
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
             expanded_sectors: JSON.stringify(expandedSectors),
+            technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
             report_title: report_title,
             date_of_publication: date_of_publication,
@@ -1068,6 +1070,19 @@ function Factsheet(props) {
     return foundObj;
   };
 
+  const scenarioDescriptorHandler = (descriptorList, nodes, id) => {
+    const zipped = []
+    descriptorList.map((v) => zipped.push({"value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).label, "class": findNestedObj(nodes, 'value', v).iri}));
+    setSelectedScenarioDescriptors(zipped);
+    
+    const newScenarios = [...scenarios];
+    const obj = newScenarios.find(el => el.id === id);
+    obj.keywords = zipped;
+    setScenarios(newScenarios);
+    console.log(newScenarios);
+    factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
+
+  };
 
   const technologyHandler = (technologyList, nodes) => {
     const zipped = []
@@ -1078,6 +1093,8 @@ function Factsheet(props) {
   const expandedTechnologyHandler = (expandedTechnologyList) => {
     const zipped = []
     expandedTechnologyList.map((v) => zipped.push({ "value": v, "label": v }));
+    console.log(zipped);
+
     setExpandedTechnologyList(zipped);
   };
 
@@ -1429,6 +1446,7 @@ function Factsheet(props) {
                     key={'Scenario_panel_' + item.id}
                   >
                     <Scenario
+                      descriptors={scenarioDescriptors['children']}
                       data={item}
                       handleScenariosInputChange={handleScenariosInputChange}
                       handleScenariosAutoCompleteChange={handleScenariosAutoCompleteChange}
@@ -1445,6 +1463,8 @@ function Factsheet(props) {
                       HandleAddNewInteractingRegion={HandleAddNewInteractingRegion}
                       HandleEditScenarioYear={HandleEditScenarioYears}
                       HandleAddNNewScenarioYear={HandleAddNNewScenarioYears}
+                      scenarioDescriptorHandler={scenarioDescriptorHandler}
+                      selectedDescriptors={selectedScenarioDescriptors}
                     />
                   </TabPanel>
                 )}
@@ -1680,7 +1700,7 @@ function getStepContent(step: number) {
           <CustomTreeViewWithCheckBox showFilter={false}
                                       size="260px" 
                                       checked={selectedTechnologies} 
-                                      expanded={expandedTechnologyList} 
+                                      expanded={getNodeIds(technologies)} 
                                       handler={technologyHandler} 
                                       expandedHandler={expandedTechnologyHandler} 
                                       data={technologies} 

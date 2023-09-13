@@ -30,7 +30,7 @@ import Paper from '@mui/material/Paper';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-
+import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
 
 import oedb_iris from '../data/datasets_iris.json';
@@ -42,6 +42,15 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
+
+const getNodeIds = (nodes) => {
+  let ids = [];
+
+  nodes?.forEach(({ value, children }) => {
+    ids = [...ids, value, ...getNodeIds(children)];
+  });
+  return ids;
+};
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -88,7 +97,10 @@ export default function Scenario(props) {
     HandleEditInteractingRegion,
     HandleAddNewInteractingRegion,
     HandleEditScenarioYear,
-    HandleAddNNewScenarioYear
+    HandleAddNNewScenarioYear,
+    descriptors,
+    selectedDescriptors,
+    scenarioDescriptorHandler
    } = props;
     function createData(
       Model: string,
@@ -112,6 +124,19 @@ export default function Scenario(props) {
     const [openRemoveddDialog, setOpenRemovedDialog] = useState(false);
     const [value, setValue] = React.useState(0);
 
+    const [expandedDesciptorList, setExpandedDesciptorList] = useState([]);
+    
+
+    const findNestedObj = (entireObj, keyToFind, valToFind) => {
+      let foundObj;
+      JSON.stringify(entireObj, (_, nestedValue) => {
+        if (nestedValue && nestedValue[keyToFind] === valToFind) {
+          foundObj = nestedValue;
+        }
+        return nestedValue;
+      });
+      return foundObj;
+    };
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
       setValue(newValue);
@@ -184,6 +209,14 @@ export default function Scenario(props) {
         scenariosOutputDatasetsHandler(updateScenariosOutputDatasetsObj, data.id);
       };
 
+    
+    const expandDescriptorsHandler = (expandedDescriptorList) => {
+      const zipped = []
+      expandedDescriptorList.map((v) => zipped.push({ "value": v, "label": v }));
+      setExpandedDesciptorList(zipped);
+    };
+
+    
 
     const options_db_names = oedb_iris;
     const options_db_iris = oedb_names;
@@ -197,7 +230,6 @@ export default function Scenario(props) {
       forceUpdate();
     }
 
-    console.log(data);
 
 
     const mapping = 
@@ -356,6 +388,19 @@ export default function Scenario(props) {
           </Grid>
           <Grid item xs={3} style={{  marginTop: '15px', marginBottom: '10px' }}>
             <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
+          </Grid>
+          <Grid item xs={12} style={{  marginTop: '15px', marginBottom: '10px' }}>
+          <CustomTreeViewWithCheckBox 
+            showFilter={false} 
+            size="300px" 
+            checked={selectedDescriptors} 
+            expanded={getNodeIds(descriptors)}
+            handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
+            expandedHandler={expandDescriptorsHandler} 
+            data={descriptors} 
+            title={"Please select your scenario descriptors:"} 
+            toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
+          />
           </Grid>
           
           <Grid

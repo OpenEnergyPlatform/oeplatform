@@ -131,7 +131,6 @@ export default function CustomAutocomplete(parameters) {
     value[objIndex].name = updatedLabel;
   }
 
-  console.log(parameters);
 
   return (
     <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
