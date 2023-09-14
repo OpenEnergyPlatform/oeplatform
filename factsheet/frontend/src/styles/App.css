@@ -4,108 +4,10 @@
   flex-direction: row;
 }
 
-.Playground {
-  min-height: 15vh;
-  z-index: 1000;
-}
-
 .bg_img {
   background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
   border: 1px solid rgba(0, 0, 0, 0.5);
 
-}
-
-.top_actions {
-  background-color: rgba(221, 221, 221, 0.5);
-  padding: 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
-  height: 0px;
-}
-
-.wizard_element-div {
-  margin-top: 10px;
-}
-
-.wizard_element {
-  margin-top: 20px;
-  width: 500px;
-  height: 700px;
-}
-
-.search-input {
-  font-weight: 500;
-  font-size: 40px;
-}
-
-.context-menu {
-    position: fixed;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    background-color: rgba(250, 250, 250, 1.0);
-    color: black;
-    z-index: 1000;
-    border-radius: 8px;
-    width: 350px;
-    font-size: 14px;
-    padding: 2px;
-    font-weight: bold;
-}
-
-.context-menu .context-menu__item {
-    padding: 5px;
-    height: 40px;
-}
-
-.context-menu .context-menu__item:last-child {
-    border-top: 1px solid rgba(0, 0, 0, 0.3);
-    padding-top: 10px;
-}
-
-.context-menu .context-menu__item:nth-last-child(2) {
-    border-top: 1px solid rgba(0, 0, 0, 0.3);
-    padding-top: 10px;
-}
-
-.context-menu .context-menu__item:nth-child(4) {
-    height: 70px;
-}
-.context-menu .context-menu__item:nth-child(5) {
-    height: 70px;
-}
-
-.context-menu .context-menu__item:first-child {
-    padding-top: 10px;
-    font-size: 16px;
-    height: 30px;
-}
-
-.context-menu .context-menu__item:hover {
-    cursor: pointer;
-}
-
-.context-menu_link {
-    position: fixed;
-    border: 1px solid black;
-    background-color: rgba(255, 255, 255, 0.9);
-    z-index: 1000;
-    border-radius: 8px;
-    width: 150px;
-    font-size: 15px;
-    padding: 2px;
-    font-weight: bold;
-}
-
-.context-menu_link .context-menu__item_link {
-    padding: 5px;
-}
-
-.context-menu_link .context-menu__item_link:not(:first-child) {
-    border-top: 1px solid rgba(0, 0, 0, 0.2);
-}
-
-.context-menu_link .context-menu__item_link:hover {
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: rgba(255, 255, 255, 1);
 }
 
 .wizard {
@@ -114,47 +16,11 @@
     overflow: auto;
 }
 
-.MuiCard-root{
-  display: flex;
-  flex-direction: column;
-}
-
-.actions {
-  margin-top: auto;
-  text-align: right;
-}
-
-
-a:link {
-  color: #92def7;
-  text-decoration: none;
-  font-weight: bold
-}
-
-a:visited {
-  color: #92def7;
-  text-decoration: none;
-  font-weight: bold
-}
-
-a:hover {
-  color: #92def7;
-  font-weight: bold
-}
-
-a:active {
-  color: #92def7;
-  font-weight: bold
-}
-
 .bgimg {
   background: url('./OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg') no-repeat center /cover ;
 }
 
 
-p {
-  font-size: 16px
-}
 
 .custom-button {
   text-transform: none;

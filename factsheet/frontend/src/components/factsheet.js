@@ -54,7 +54,7 @@ import IconButton from '@mui/material/IconButton';
 import oep_models from '../data/models.json';
 import oep_frameworks from '../data/frameworks.json';
 import Divider from '@mui/material/Divider';
-
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
@@ -75,7 +75,6 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 
 
 import '../styles/App.css';
-import '../styles/sunburst.css';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -1152,25 +1151,40 @@ function Factsheet(props) {
   };
 
   
-
+  const useStyles = makeStyles((theme: Theme) => ({
+    root: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.paper,
+    },
+    tab: {
+      background: '#e3eaef',
+      '&.Mui-selected': {
+        background: '#001c30e6',
+        color: 'white'
+      }
+    },
+  }));
+  const classes = useStyles();
+  const tabClasses = {root: classes.tab};
 
   const renderScenario = () => {
     return  <div>
-              <Box sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height:'72vh', overflow: 'auto' }} >
+              <Box sx={{ flexGrow: 1, display: 'flex', height:'72vh', overflow: 'auto' }} >
                 <Tabs
                   orientation="vertical"
-                  variant="scrollable"
                   value={scenarioTabValue}
                   onChange={handleScenarioTabChange}
                   aria-label="Vertical tabs example"
                   sx={{ borderRight: 1, borderColor: 'divider' }}
                   key={'Scenario_tabs'}
+                  classes={'tabs'} 
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.acronym !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== '' ? item.acronym.substring(0,30) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
-                    style={{ borderTop: '1px solid #cecece', borderLeft: '1px solid #cecece', borderBottom: '1px solid #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
+                    classes={tabClasses}
+                    style={{ borderTop: '1px solid #cecece', borderLeft: '1px solid #cecece', borderBottom: '1px solid #cecece', marginBottom: '5px',  width:'500px' }}
                   />
                 )}
                 <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1188,7 +1202,7 @@ function Factsheet(props) {
                   <TabPanel
                     value={scenarioTabValue}
                     index={i}
-                    style={{ width: '90%', overflow: 'auto', borderTop: '1px solid #cecece', borderRight: '1px solid #cecece', borderBottom: '1px solid #cecece',  backgroundColor:'#FCFCFC' }}
+                    style={{ width: '90%', overflow: 'auto' }}
                     key={'Scenario_panel_' + item.id}
                   >
                     <Scenario
@@ -1226,7 +1240,7 @@ const renderBasicInformation = () => (
     flexWrap: 'wrap',
     padding: '10px',
   }}>
-    <TextField size="small" style={{  width: '40%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+    <TextField size="small" style={{  width: '40%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
     <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
       <HtmlTooltip
         title={
@@ -1239,7 +1253,7 @@ const renderBasicInformation = () => (
         <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
       </HtmlTooltip>
     </div>
-    <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+    <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
     <div style={{ marginLeft: '10px', marginTop: '40px'}}>
       <HtmlTooltip
         title={
@@ -1292,7 +1306,7 @@ const renderBasicInformation = () => (
       alignItems: 'center',
       flexWrap: 'wrap',
     }}>
-      <CustomAutocomplete width="60%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+      <CustomAutocomplete width="100%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
       <div style={{ marginTop: '10px' }}>
         <HtmlTooltip
           style={{ marginLeft: '10px' }}
@@ -1311,7 +1325,7 @@ const renderBasicInformation = () => (
         </HtmlTooltip>
       </div>
       <div style={{ width: '35%' }}></div>
-      <TextField size="small" variant="standard" style={{ width: '60%', MarginBottom: '10px', marginTop: '20px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+      <TextField size="small" variant="outlined" style={{ width: '100%', MarginBottom: '10px', marginTop: '20px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
       <div style={{ width: '35%' }}></div>
       <div style={{ marginTop: '30px' }}>
           <HtmlTooltip
@@ -1349,10 +1363,10 @@ const renderBasicInformation = () => (
 
   const renderStudyPublications= () =>  (
     <div>
-        <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+        <TextField size="small" variant="outlined" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
         <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
-        <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
-        <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+        <TextField ssize="small" variant="outlined" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
+        <TextField size="small" variant="outlined" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Stack spacing={3}  style={{ marginTop:'20px', width: '70%', marginBottom:'40px' }}>
             <DesktopDatePicker
@@ -1362,7 +1376,7 @@ const renderBasicInformation = () => (
                 onChange={(newValue) => {
                   setDateOfPublication(newValue);
                 }}
-                renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
+                renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />
           </Stack>
         </LocalizationProvider>
@@ -1372,7 +1386,7 @@ const renderBasicInformation = () => (
 
   const renderSectorsAndTecnology = () => (
     <div>
-        <CustomAutocompleteWithoutAddNew  width="50%" showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+        <CustomAutocompleteWithoutAddNew showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
         <CustomTreeViewWithCheckBox flat={true} 
                                     showFilter={false} 
                                     size="360px" 
@@ -1398,8 +1412,8 @@ const renderBasicInformation = () => (
 
   const renderModelsAndFrameworks = () => (
     <div>
-      <CustomAutocompleteWithoutEdit  width="60%" type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
-      <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+      <CustomAutocompleteWithoutEdit  type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+      <CustomAutocompleteWithoutEdit  type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
     </div>
   );
 
@@ -1683,16 +1697,16 @@ function getStepContent(step: number) {
           <div id='headerSubStyle'> <span> {mode} </span> / {acronym} </div>
         </div>
         </Grid>
-        <Grid item xs={2} >
+        <Grid item xs={2} style={{ 'marginLeft': '50px' }}>
           <div>
                 <CustomSwap handleSwap={handleSwap} />
           </div >
         </Grid>
-        <Grid item xs={8} >
+        <Grid item xs={4} >
           <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
         </div>
         </Grid>
-        <Grid item xs={2} >
+        <Grid item xs={3} style={{ 'marginRight': '50px' }}>
           <div style={{ 'textAlign': 'right' }}>
             {mode === 'edit' && <Tooltip title="Save factsheet">
               <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
@@ -1834,10 +1848,12 @@ function getStepContent(step: number) {
             <div className='wizard'>
                 <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
-                    <Divider style={{ marginBottom: '40px' }}/>
-                    <CustomTabs
-                      items={items}
-                    />
+                    <Divider style={{ marginBottom: '40px', marginLeft: '50px', marginRight: '60px' }}/>
+                    <div style={{ marginLeft: '50px', marginRight: '60px' }} >
+                      <CustomTabs
+                        items={items}
+                      />
+                    </div>
                     {/* <Stepper activeStep={activeStep}  >
                       {steps.map((label, index) => (
                       <Step key={label} >
