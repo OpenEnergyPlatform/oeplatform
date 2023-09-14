@@ -32,7 +32,10 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import CustomTreeViewWithCheckBox from './customTreeViewWithCheckbox.js';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
-
+import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { styled } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
 import oedb_iris from '../data/datasets_iris.json';
 import oedb_names from '../data/datasets_names.json';
 import LCC from '../data/countries.json';
@@ -79,12 +82,24 @@ function a11yProps(index: number) {
   };
 }
 
+const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+  <Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+  [`& .${tooltipClasses.tooltip}`]: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    color: 'white',
+    maxWidth: 520,
+    fontSize: theme.typography.pxToRem(20),
+    border: '1px solid black',
+    padding: '20px'
+  },
+}));
+
 export default function Scenario(props) {
   const {
     data,
     handleScenariosInputChange,
     handleScenariosAutoCompleteChange,
-    scenariosKeywordsHandler,
     scenariosInputDatasetsHandler,
     scenariosOutputDatasetsHandler,
     removeScenario,
@@ -102,7 +117,6 @@ export default function Scenario(props) {
     scenarioDescriptorHandler
    } = props;
 
-  console.log(data);
 
   function createData(
     Model: string,
@@ -265,297 +279,312 @@ export default function Scenario(props) {
       <Grid container
             direction="row"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems="start"
+            spacing={2} 
       >
-          <Grid item xs={12} style={{ textAlign: 'right', marginBottom: '30px' }}>
-            <Dialog
-              fullWidth
-              maxWidth="lg"
-              open={openRemoveddDialog}
-              onClose={handleClickOpenRemovedDialog}
-              aria-labelledby="responsive-dialog-title"
-            >
-              <DialogTitle>
-                <b>Align your data to Open Energy Knowledge Graph</b>
-              </DialogTitle>
-              <DialogContent style={{ height:'700px' }}>
-                <DialogContentText>
-                  <div>
-                    <b>
-                    Wind_turbine_domestic_lod_geoss_tp_oeo
-                    </b>
-                    <TableContainer component={Paper}>
-                          <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Model</TableCell>
-                                <TableCell align="right">Scenario</TableCell>
-                                <TableCell align="right">Region</TableCell>
-                                <TableCell align="right">Year</TableCell>
-                                <TableCell align="right">Generating capacity (MW)</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {rows.map((row) => (
-                                <TableRow
-                                  key={row.name}
-                                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                  <TableCell component="th" scope="row">
-                                    {row.Model}
-                                  </TableCell>
-                                  <TableCell align="right">{row.Scenario}</TableCell>
-                                  <TableCell align="right">{row.Region}</TableCell>
-                                  <TableCell align="right">{row.Year}</TableCell>
-                                  <TableCell align="right">{row.Capacity}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                    <Box sx={{ width: '100%' }}>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                      <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                        <Tab label="R2RML mapping" {...a11yProps(0)} />
-                        <Tab label="Wizard" {...a11yProps(1)} />
-                        <Tab label="Visual mapping" {...a11yProps(2)} />
-                      </Tabs>
-                    </Box>
-                      <TabPanel value={value} index={0}>
-                        <TextField style={{ width: '100%', Margin: '10px',  backgroundColor:'#FCFCFC' }} label="" variant="outlined" multiline rows={15} maxRows={50} value={mapping}/>
-                      </TabPanel>
-                      <TabPanel value={value} index={1}>
-                        Wizard
-                      </TabPanel>
-                      <TabPanel value={value} index={2}>
-                        Visual
-                      </TabPanel>
-                    </Box>
-                  </div>
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button variant="contained" color="success" >
-                  Save
-                </Button>
-                <Button variant="contained" onClick={handleClickCloseRemovedDialog}  >
-                Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
-            <Fab color="primary" size="small" aria-label="upload picture" component="label" disabled>
-              <ContentCopyIcon />
-            </Fab>
-            <Fab style={{ 'marginLeft': '5px' }} color="error" size="small" aria-label="upload picture" component="label" onClick={handleRemoveScenario} >
-              <DeleteOutlineIcon />
-            </Fab>
-          </Grid>
-          <Grid item xs={6} style={{ marginBottom: '30px' }}>
-            <TextField size="small" variant='standard' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of this scenario?" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
-          </Grid>
-          <Grid item xs={6} style={{ marginBottom: '30px' }}>
-            <TextField size="small" variant='standard' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please provide a unique acronym for this scenario." name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
-          </Grid>
-          <Grid item xs={6} style={{ marginTop: '0px' }}>
-            <TextField size="small" variant='standard' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the storyline of this scenario? (max 400 characters)" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
-          </Grid>
-          <Grid item xs={6} style={{  width: '90%' }}>
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'5px' }}>
-              Please select your scenario descriptors:
-            </Typography>
-              <div>
-               <FormGroup>
-                  {/* <div>
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("100% renewables")} onChange={scenarioKeywordsHandler} label="100% renewables" name={"100% renewables_" + data.id} />
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("acceptance")} onChange={scenarioKeywordsHandler} label="acceptance" name={"acceptance_" + data.id} />
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("sufficiency")} onChange={scenarioKeywordsHandler} label="sufficiency" name={"sufficiency_" + data.id} />
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("negative emissionen")} onChange={scenarioKeywordsHandler} label="negative emissionen" name={"negative emissionen_" + data.id} />
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid restrictions")} onChange={scenarioKeywordsHandler} label="grid restrictions" name={"grid restrictions_" + data.id} />
-                    <FormControlLabel control={<Checkbox size="small" color="default" />} checked={data.keywords.includes("grid / infrastructure extension")} onChange={scenarioKeywordsHandler} label="grid / infrastructure extension" name={"grid / infrastructure extension_" + data.id} />
-                  </div>  */}
-               </FormGroup>
-             </div>
-         </Grid>
-          <Grid item xs={5} style={{ marginTop: '15px', marginBottom: '10px' }}>
-            <CustomAutocompleteWithoutAddNew  
-              width="95%"
-              showSelectedElements={true}
-              optionsSet={options_LCC}
-              kind='Which spatial regions does this scenario focus on (study regions)?'
-              handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)}
-              selectedElements={data.regions}
-              noTooltip={true}
-            />
-          </Grid>
-          <Grid item xs={4} style={{  marginTop: '15px', marginBottom: '10px' }}>
-           <CustomAutocomplete  width="95%" type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='Are there other, interacting regions considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
-          </Grid>
-          <Grid item xs={3} style={{  marginTop: '15px', marginBottom: '10px' }}>
-            <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='Which scenario years are considered?' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
-          </Grid>
-          <Grid item xs={12} style={{  marginTop: '15px', marginBottom: '10px' }}>
-          <CustomTreeViewWithCheckBox 
-            showFilter={true} 
-            size="300px" 
-            checked={data.descriptors} 
-            expanded={getNodeIds(descriptors)}
-            handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
-            expandedHandler={expandDescriptorsHandler} 
-            data={descriptors} 
-            title={"Please select your scenario descriptors:"} 
-            toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
-          />
-          </Grid>
-          
-          <Grid
-            container
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            style={{ marginTop: '10px', 'padding': '20px', 'width': '100%', 'border':'1px solid #cecece', 'borderRadius': '2px', 'backgroundColor':'#FCFCFC' }}
-          >
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Input dataset(s):
-            </Typography>
-          </Grid>
-          {Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) =>
-            <Grid container xs={12} direction="row" >
-              <Grid item xs={4} style={{ marginTop: '10px' }}>
-                <Autocomplete
-                  disableCloseOnSelect
-                  options={options_db_names}
-                  sx={{ width: '100%' }}
-                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='standard' />}
-                  onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
-                  value={item.value.label}
-                  size="small"
-                  variant='standard'
-                />
-              </Grid>
-              <Grid item xs={1} style={{ marginTop: '5px', textAlign: 'center' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'20px', marginBottom:'10px' }}>
-                  OR
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}> <b>Name</b> </span>
+          <span >
+            <HtmlTooltip
+              title={
+              <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  {'A study is a project with the goal to investigate something.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                 </Typography>
-              </Grid>
-              <Grid item xs={6} style={{ marginTop: '10px' }}>
-                <Autocomplete
-                  disableCloseOnSelect
-                  options={options_db_iris}
-                  sx={{ width: '95%' }}
-                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='standard' />}
-                  onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
-                  value={ item.value.iri}
-                />
-              </Grid>
-              <Grid item xs={1} style={{ marginTop: '20px' }}>
-                <Fab
-                  color="error"
-                  aria-label="add"
-                  size="small"
-                  onClick={() => removeInputDataset(item.key, data.index)}
-                  sx={{ transform: 'scale(0.8)' }}
-                >
-                  <DeleteOutlineIcon />
-                </Fab>
-                <Fab
-                  color="success"
-                  size="small"
-                  sx={{ transform: 'scale(0.8)' }}
-                  onClick={handleClickOpenRemovedDialog}
-                  // disabled
-                >
-                  <EmojiObjectsIcon />
-                </Fab>
-              </Grid>
-            </Grid>)
-        }
-        <Grid item xs={12} style={{'textAlign': 'left', marginTop: '15px' }}>
-          <Fab
+              </React.Fragment>
+            }
+            >
+            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
+        </Grid>
+
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}> <b>Acronym</b>  </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
+        </Grid>
+
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}>  <b>Storyline </b>  </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+        </Grid>
+
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}> <b>Spatial regions </b>  </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <CustomAutocompleteWithoutAddNew  
+            width="95%"
+            showSelectedElements={true}
+            optionsSet={options_LCC}
+            kind=''
+            handler={(e) => handleScenariosAutoCompleteChange(e, 'regions', data.id)}
+            selectedElements={data.regions}
+            noTooltip={true}
+          />
+        </Grid>
+
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}><b>Iinteracting regions</b> </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <CustomAutocomplete  width="95%" type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
+        </Grid>
+
+        <Grid item xs={2} >
+          <span style={{ color: '#294456'}}><b>Scenario years</b> </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+          <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
+        </Grid>
+         
+        <Grid item xs={2}  >
+          <span style={{ color: '#294456'}}> <b>Scenario descriptors</b> </span>
+          <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+          </span>
+        </Grid>
+        <Grid item xs={10} >
+        <CustomTreeViewWithCheckBox 
+          showFilter={true} 
+          size="300px" 
+          checked={data.descriptors} 
+          expanded={getNodeIds(descriptors)}
+          handler={(list, nodes, id) => scenarioDescriptorHandler(list, nodes, data.id)} 
+          expandedHandler={expandDescriptorsHandler} 
+          data={descriptors} 
+          title={""} 
+          toolTipInfo={['A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000364']} 
+        />
+        </Grid>
+
+          
+        <Grid item xs={2} style={{ marginTop: '10px' }}>
+          <div>
+            <span style={{ color: '#294456'}}> <b> Input dataset(s) </b> </span>
+            <span >
+            <HtmlTooltip
+              title={
+              <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  {'A study is a project with the goal to investigate something.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                </Typography>
+              </React.Fragment>
+            }
+            >
+            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+            </span>
+          </div>
+          <IconButton
           color="primary"
           aria-label="add"
-          size="small"
           onClick={() => addInputDatasetItem(uuid())}
           >
           <AddIcon />
-          </Fab>
-        </Grid>
+          </IconButton>
         </Grid>
 
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          style={{ marginTop: '30px', padding: '20px', border: '1px solid #cecece', width: '100%', borderRadius: '2px',  backgroundColor:'#FCFCFC' }}
+        <Grid item xs={10} style={{ marginTop: '10px' }}>
+          {Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) =>
+                <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
+                  <Grid item xs={5} >
+                    <Autocomplete
+                      disableCloseOnSelect
+                      options={options_db_names}
+                      renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined' />}
+                      onChange={(event, value) => updateInputDatasetName(value, item.key, index)}
+                      value={item.value.label}
+                      size="small"
+                      variant='standard'
+                    />
+                  </Grid>
+                  <Grid item xs={1} sx={{ textAlign: "center"}} >
+                    <b style={{ verticalAlign: "sub"}}>OR</b>
+                  </Grid>
+                  <Grid item xs={5} >
+                    <Autocomplete
+                      disableCloseOnSelect
+                      options={options_db_iris}
+                      renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined' />}
+                      onChange={(event, value) => updateInputDatasetIRI(value, item.key, index)}
+                      value={ item.value.iri}
+                    />
+                  </Grid>
+                  <Grid item xs={1} >
+                    <IconButton
+                      color="primary"
+                      aria-label="add"
+                      onClick={() => removeInputDataset(item.key, data.index)}
+                    >
+                      <DeleteOutlineIcon />
+                    </IconButton>
+                  </Grid>
+                </Grid>)
+          }
+        </Grid>
+
+        <Grid item xs={2} style={{ marginTop: '10px' }}>
+          <div>
+            <span style={{ color: '#294456'}}> <b> Output dataset(s) </b> </span>
+            <span >
+            <HtmlTooltip
+              title={
+              <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  {'A study is a project with the goal to investigate something.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                </Typography>
+              </React.Fragment>
+            }
+            >
+            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+            </HtmlTooltip>
+            </span>
+          </div>
+        <IconButton
+          color="primary"
+          aria-label="add"
+          onClick={() => addOutputDatasetItem(uuid())}
         >
+          <AddIcon />
+        </IconButton>
+        </Grid>
 
-          <Grid item xs={12} >
-            <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-              Output dataset(s):
-            </Typography>
-          </Grid>
-
+        <Grid item xs={10} style={{ marginTop: '10px' }}>
           {Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) =>
-            <Grid container xs={12} direction="row" >
-              <Grid item xs={4} style={{ marginTop: '10px' }}>
+             <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
+              <Grid item xs={5} >
                 <Autocomplete
                   disableCloseOnSelect
                   options={options_db_names}
-                  sx={{ width: '100%' }}
-                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='standard'/>}
+                  renderInput={(params) => <TextField {...params} label="Name" size="small"  variant='outlined'/>}
                   onChange={(event, value) => updateOutputDatasetName(value, item.key, index)}
                   value={item.value.label}
                 />
               </Grid>
-              <Grid item xs={1} style={{ marginTop: '15px', textAlign: 'center' }}>
-                <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'10px' }}>
-                  OR
-                </Typography>
+              <Grid item xs={1} style={{ textAlign: 'center' }}>
+                <b style={{ verticalAlign: "sub"}}>OR</b>
               </Grid>
-              <Grid item xs={6} style={{ marginTop: '10px' }}>
+              <Grid item xs={5} >
                 <Autocomplete
                   disableCloseOnSelect
                   options={options_db_iris}
-                  sx={{ width: '95%' }}
-                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='standard'/>}
+                  renderInput={(params) => <TextField {...params} label="IRI" size="small"  variant='outlined'/>}
                   onChange={(event, value) => updateOutputDatasetIRI(value, item.key, index)}
                   value={item.value.iri}
                 />
               </Grid>
-              <Grid item xs={1} style={{ marginTop: '20px' }}>
-                <Fab
-                  color="error"
+              <Grid item xs={1}>
+                <IconButton
+                  color="primary"
                   aria-label="add"
-                  size="small"
                   onClick={() => removeOutputDataset(item.key, data.index)}
-                  sx={{  transform: 'scale(0.8)' }}
                 >
                   <DeleteOutlineIcon />
-                </Fab>
-                <Fab
-                  color="success"
-                  size="small"
-                  sx={{ transform: 'scale(0.8)' }}
-                  // disabled
-                >
-                  <EmojiObjectsIcon />
-                </Fab>
+                </IconButton>
               </Grid>
             </Grid>
           )}
-
-          <Grid item xs={12} style={{'textAlign': 'left', marginTop: '20px' }}>
-            <Fab
-            color="primary"
-            aria-label="add"
-            size="small"
-            onClick={() => addOutputDatasetItem(uuid())}
-            >
-            <AddIcon />
-            </Fab>
-          </Grid>
-
         </Grid>
       </Grid>
 

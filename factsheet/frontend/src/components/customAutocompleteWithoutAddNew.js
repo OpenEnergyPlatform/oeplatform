@@ -39,7 +39,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
   }));
 
   return (
-    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: '10px', }}>
       <Autocomplete
         size="small" 
         multiple
@@ -78,7 +78,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="standard"/>
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined"/>
         )}
       />
       {showSelectedElements && <Box

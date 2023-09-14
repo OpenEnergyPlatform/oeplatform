@@ -133,7 +133,7 @@ export default function CustomAutocomplete(parameters) {
 
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '20px' :'10px', }}>
+    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: '5px', }}>
       <Autocomplete
         size="small" 
         multiple
@@ -172,7 +172,7 @@ export default function CustomAutocomplete(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="standard"/>
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined"/>
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
