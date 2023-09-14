@@ -50,10 +50,10 @@ import sunburstKapsule from 'sunburst-chart';
 import fromKapsule from 'react-kapsule';
 import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.js';
-
+import IconButton from '@mui/material/IconButton';
 import oep_models from '../data/models.json';
 import oep_frameworks from '../data/frameworks.json';
-
+import Divider from '@mui/material/Divider';
 
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -71,7 +71,7 @@ import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import LinkIcon from '@mui/icons-material/Link';
 
 import Chip from '@mui/material/Chip';
-
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 
 
 import '../styles/App.css';
@@ -1151,260 +1151,7 @@ function Factsheet(props) {
     factsheetObjectHandler('scenarios', JSON.stringify(newScenarios));
   };
 
-  const renderStudy = () => {
-    return <Grid container
-      direction="row"
-      justifyContent="space-between"
-      alignItems="center"
-    >
-      <Grid item xs={6} style={{ marginBottom: '10px' }}>
-        <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-          }}>
-          <TextField style={{  width: '90%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
-          <div>
-            <HtmlTooltip
-              style={{ marginLeft: '10px' }}
-              placement="top"
-              title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="caption">
-                    {'A study is a project with the goal to investigate something.'}
-                    <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                </React.Fragment>
-              }
-            >
-              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-          </div>
-        </div>
-      </Grid>
-      <Grid item xs={6} style={{ marginBottom: '10px' }}>
-        <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-          }}>
-          <TextField style={{  width: '90%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
-          <div>
-            <HtmlTooltip
-              style={{ marginLeft: '10px' }}
-              placement="top"
-              title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="caption">
-                    {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                    <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                </React.Fragment>
-              }
-            >
-              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-          </div>
-        </div>
-      </Grid>
-      <Grid item xs={6} >
-        <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              flexWrap: 'wrap',
-          }}>
-          <CustomAutocomplete type="Institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
-          <div style={{ marginTop: '30px' }}>
-            <HtmlTooltip
-              style={{ marginLeft: '10px' }}
-              placement="top"
-              title={
-                <React.Fragment>
-                  <Typography color="inherit" variant="caption">
-                    {'An institution is an organisation that serves a social purpose.'}
-                    <br />
-                    <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
-                  </Typography>
-                </React.Fragment>
-              }
-            >
-              <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-            </HtmlTooltip>
-          </div>
-        </div>
-      </Grid>
-      <Grid item xs={6} >
-      <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            flexWrap: 'wrap',
-        }}>
-        <CustomAutocomplete type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
-        <div style={{ marginTop: '30px' }}>
-          <HtmlTooltip
-            style={{ marginLeft: '10px' }}
-            placement="top"
-            title={
-              <React.Fragment>
-                <Typography color="inherit" variant="caption">
-                  {'A funder is a sponsor that supports by giving money.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-                </Typography>
-              </React.Fragment>
-            }
-          >
-            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </div>
-      </div>
-      </Grid>
-      <Grid item xs={6} style={{ marginTop: '0px' }}>
-        <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              flexWrap: 'wrap',
-          }}>
-          <TextField style={{ width: '90%', MarginBottom: '10px', marginTop: '5px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." variant="outlined" multiline rows={7} maxRows={10} value={abstract} onChange={handleAbstract}/>
-        <div style={{ marginTop: '20px' }}>
-
-        </div>
-      </div>
-      </Grid>
-      <Grid item xs={6} style={{ marginBottom: '10px' }}>
-        <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              flexWrap: 'wrap',
-          }}>
-            <CustomAutocomplete type="Contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-        <div style={{ marginTop: '30px' }}>
-          <HtmlTooltip
-            style={{ marginLeft: '10px' }}
-            placement="top"
-            title={
-              <React.Fragment>
-                <Typography color="inherit" variant="caption">
-                  {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-                  <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
-                </Typography>
-              </React.Fragment>
-            }
-          >
-            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-          </HtmlTooltip>
-        </div>
-      </div>
-      </Grid>
-      <Grid item xs={6} style={{ marginBottom: '10px' }}>
-      </Grid>
-      <Grid
-        container
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        style={{ 'padding': '20px', 'border': '1px solid #cecece', width: '95%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
-      >
-            <Grid item xs={12} >
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px' }}>
-                Study content description:
-              </Typography>
-            </Grid>
-            <Grid item xs={6} >
-              <div style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    flexWrap: 'wrap',
-                }}>
-                {/* <CustomAutocompleteWithoutEdit type="sector_division" showSelectedElements={true} manyItems optionsSet={sector_divisions_json} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/> */}
-                <div style={{ marginTop: '30px' }}>
-                  <HtmlTooltip
-                    style={{ marginLeft: '10px' }}
-                    placement="top"
-                    title={
-                      <React.Fragment>
-                        <Typography color="inherit" variant="caption">
-                          {'A sector division is a specific way to subdivide a system.'}
-                          <br />
-                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
-                        </Typography>
-                      </React.Fragment>
-                    }
-                  >
-                    <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip>
-                  </div>
-                </div>
-              <CustomTreeViewWithCheckBox showFilter={false} size="260px" checked={selectedSectors} expanded={expandedSectors} handler={sectorsHandler} expandedHandler={expandedSectorsHandler} data={[]} title={"Which sectors are considered in the study?"} toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
-              <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
-                Please select study descriptors.
-              </Typography>
-              <div style={{ marginTop: "10px" }}>
-                <FormGroup>
-                    <div>
-                      {
-                        selectedStudyKewords.map((item) => <FormControlLabel control={<Checkbox color="default" />} checked={selectedStudyKewords.includes(item.name)} onChange={handleStudyKeywords} label={item.name} name={item.name} />)
-                      }
-                  </div>
-                </FormGroup>
-              </div>
-          </Grid>
-          <Grid item xs={6} style={{ marginBottom: '10px' }}>
-            {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyCarriers} expanded={expandedEnergyCarriers} handler={energyCarriersHandler} expandedHandler={expandedEnergyCarriersHandler} data={energyCarriers} title={"What energy carriers are considered?"} toolTipInfo={['An energy carrier is a material entity that has an energy carrier disposition.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020039']} /> */}
-            {/* <CustomTreeViewWithCheckBox showFilter={true} size="200px" checked={selectedEnergyTransformationProcesses} expanded={expandedEnergyTransformationProcesses} handler={energyTransformationProcessesHandler} expandedHandler={expandedEnergyTransformationProcessesHandler} data={energyTransformationProcesses} title={"Which energy transformation processes are considered?"} */}
-            toolTipInfo={['Energy transformation is a transformation in which one or more certain types of energy as input result in certain types of energy as output.', 'http://openenergy-platform.org/ontology/oeo/OEO_00020003']} />
-          </Grid>
-      </Grid>
-      <Grid
-        container
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        style={{ 'padding': '20px', 'marginTop': '20px', 'border': '1px solid #cecece', width: '95%', borderRadius: '5px', backgroundColor:'#FCFCFC' }}
-      >
-        <Grid item xs={12} >
-          <Typography variant="subtitle1" gutterBottom style={{ marginTop:'10px', marginBottom:'20px' }}>
-            Report:
-          </Typography>
-        </Grid>
-        <Grid item xs={6} >
-          <TextField style={{ marginTop:'-20px', width: '90%' }} id="outlined-basic" label="Title" variant="outlined" value={report_title} onChange={handleReportTitle} />
-        </Grid>
-        <Grid item xs={6} >
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Stack spacing={3} style={{ width: '90%' }}>
-              <DesktopDatePicker
-                  label='Date of publication'
-                  inputFormat="MM/DD/YYYY"
-                  value={date_of_publication}
-                  onChange={(newValue) => {
-                    setDateOfPublication(newValue);
-                    factsheetObjectHandler('date_of_publication', newValue);
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-            </Stack>
-          </LocalizationProvider>
-        </Grid>
-        <Grid item xs={6} >
-          <TextField style={{ width: '90%' }} id="outlined-basic" label="DOI" variant="outlined" value={doi} onChange={handleDOI} />
-        </Grid>
-        <Grid item xs={6} >
-          <TextField style={{ width: '90%', marginTop:'20px' }} id="outlined-basic" label="Place of publication" variant="outlined" value={place_of_publication} onChange={handlePlaceOfPublication} />
-        </Grid>
-        <Grid item xs={6} >
-          <TextField style={{ width: '90%', marginTop:'-60px' }} id="outlined-basic" label="Link to study report" variant="outlined" value={link_to_study} onChange={handleLinkToStudy} />
-        </Grid>
-        <Grid item xs={6} >
-          <CustomAutocomplete type="Author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
-        </Grid>
-       
-      </Grid>
-    </Grid>
-  }
+  
 
 
   const renderScenario = () => {
@@ -1423,19 +1170,19 @@ function Factsheet(props) {
                   <Tab
                     label={item.acronym !== '' ? item.acronym.substring(0,14) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
-                    style={{ borderTop: '1px dashed #cecece', borderLeft: '1px dashed #cecece', borderBottom: '1px dashed #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
+                    style={{ borderTop: '1px solid #cecece', borderLeft: '1px solid #cecece', borderBottom: '1px solid #cecece', marginBottom: '5px',  backgroundColor:'#FCFCFC', width:'150px' }}
                   />
                 )}
-                  <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
-                    <Fab
-                      color="primary"
-                      aria-label="add"
-                      size="small"
-                      onClick={handleAddScenario}
-                    >
-                      <AddIcon  />
-                    </Fab>
-                  </Box>
+                <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
+                  <IconButton
+                    color="primary"
+                    aria-label="add"
+                    size="small"
+                    onClick={handleAddScenario}
+                  >
+                    <AddIcon  />
+                  </IconButton>
+                </Box>
                 </Tabs>
                 {scenarios.map((item, i) =>
                   <TabPanel
@@ -1471,25 +1218,203 @@ function Factsheet(props) {
     }
 
 
-  const items = {
-    titles: ['Study', 'Scenarios', 'Models and Frameworks'],
-    contents: [
-      renderStudy(),
-      renderScenario(),
-      <Grid container
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
+
+const renderBasicInformation = () => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'stretch',
+    flexWrap: 'wrap',
+    padding: '10px',
+  }}>
+    <TextField size="small" style={{  width: '40%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="standard" value={studyName} onChange={handleStudyName}/>
+    <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
+      <HtmlTooltip
+        title={
+          <Typography color="inherit" variant="caption">
+            {'A study is a project with the goal to investigate something.'} <br />
+            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+          </Typography>
+        }
       >
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          {/* <CustomAutocompleteWithoutEdit type="Model" manyItems showSelectedElements={true} optionsSet={models_json} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/> */}
-        </Grid>
-        <Grid item xs={6} style={{ marginBottom: '10px' }}>
-          {/* <CustomAutocompleteWithoutEdit type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={frameworks_json} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/> */}
-        </Grid>
-      </Grid>,
-      ]
-  }
+        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+      </HtmlTooltip>
+    </div>
+    <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
+    <div style={{ marginLeft: '10px', marginTop: '40px'}}>
+      <HtmlTooltip
+        title={
+          <Typography color="inherit" variant="caption">
+            {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'} <br />
+            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
+          </Typography>
+        }
+      >
+        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+      </HtmlTooltip>
+    </div>
+    <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
+    <div style={{ marginLeft: '10px',  marginRight: '15%', marginTop: '20px'  }}>
+    <HtmlTooltip
+      title={
+        <Typography color="inherit" variant="caption">
+          {'An institution is an organisation that serves a social purpose.'}<br />
+          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
+        </Typography>
+      }
+    >
+      <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+    </HtmlTooltip>
+    </div>
+    <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+    <div style={{ marginTop: '40px'  }}>
+      <HtmlTooltip
+        style={{ marginLeft: '10px' }}
+        placement="top"
+        title={
+          <React.Fragment>
+            <Typography color="inherit" variant="caption">
+              {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+              <br />
+              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
+            </Typography>
+          </React.Fragment>
+        }
+      >
+        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+      </HtmlTooltip>
+    </div>
+  </div>
+  );
+
+  const renderStudyDetail = () => (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    }}>
+      <CustomAutocomplete width="60%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='What are the funding sources of this study?' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
+      <div style={{ marginTop: '10px' }}>
+        <HtmlTooltip
+          style={{ marginLeft: '10px' }}
+          placement="top"
+          title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A funder is a sponsor that supports by giving money.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+        >
+          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+        </HtmlTooltip>
+      </div>
+      <div style={{ width: '35%' }}></div>
+      <TextField size="small" variant="standard" style={{ width: '60%', MarginBottom: '10px', marginTop: '20px', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="Please describe the research questions of the study in max 400 characters." multiline rows={4} maxRows={10} value={abstract} onChange={handleAbstract}/>
+      <div style={{ width: '35%' }}></div>
+      <div style={{ marginTop: '30px' }}>
+          <HtmlTooltip
+            style={{ marginLeft: '10px' }}
+            placement="top"
+            title={
+              <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  {'A sector division is a specific way to subdivide a system.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000368">More info from Open Enrgy Ontology (OEO)...</a>
+                </Typography>
+              </React.Fragment>
+            }
+          >
+            <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </div>
+        <div style={{ marginTop: "10px", width: '80%' }}>
+          <Typography variant="subtitle1" gutterBottom style={{ marginTop:'30px', marginBottom:'10px' }}>
+          <b>Please select study descriptors.</b>
+          </Typography>
+        </div>
+        <div style={{ marginTop: "10px", width: '80%' }}>
+          <FormGroup>
+              <div >
+                {
+                  StudyKeywords.map((item) => <FormControlLabel control={<Checkbox size="small" color="default" />} checked={selectedStudyKewords.includes(item)} onChange={handleStudyKeywords} label={item} name={item} />)
+                }
+            </div>
+          </FormGroup>
+        </div>
+         </div>
+  );
+
+  const renderStudyPublications= () =>  (
+    <div>
+        <TextField size="small" variant="standard" style={{ marginTop:'20px', width: '70%' }} id="outlined-basic" label="Title"  value={report_title} onChange={handleReportTitle} />
+        <CustomAutocomplete width="70%" type="author" showSelectedElements={true} editHandler={HandleEditAuthors}  addNewHandler={HandleAddNewAuthor}  manyItems optionsSet={authors} kind='Authors' handler={authorsHandler} selectedElements={selectedAuthors}  />
+        <TextField ssize="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="DOI" value={doi} onChange={handleDOI} />
+        <TextField size="small" variant="standard" style={{ width: '70%', marginTop:'20px' }} id="outlined-basic" label="Link to study report" value={link_to_study} onChange={handleLinkToStudy} />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Stack spacing={3}  style={{ marginTop:'20px', width: '70%', marginBottom:'40px' }}>
+            <DesktopDatePicker
+                label='Date of publication'
+                inputFormat="YYYY-MM-DD"
+                value={date_of_publication}
+                onChange={(newValue) => {
+                  setDateOfPublication(newValue);
+                }}
+                renderInput={(params) => <TextField {...params} size="small" variant="standard" />}
+              />
+          </Stack>
+        </LocalizationProvider>
+    </div>
+  );
+
+
+  const renderSectorsAndTecnology = () => (
+    <div>
+        <CustomAutocompleteWithoutAddNew  width="50%" showSelectedElements={true} optionsSet={sectorDivisions} kind='Do you use a predefined sector division? ' handler={sectorDivisionsHandler} selectedElements={selectedSectorDivisions}/>
+        <CustomTreeViewWithCheckBox flat={true} 
+                                    showFilter={false} 
+                                    size="360px" 
+                                    checked={selectedSectors} 
+                                    expanded={expandedSectors} 
+                                    handler={sectorsHandler} 
+                                    expandedHandler={expandedSectorsHandler} 
+                                    data={filteredSectors} 
+                                    title={"Which sectors are considered in the study?"} 
+                                    toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000367']} />
+        <CustomTreeViewWithCheckBox showFilter={false}
+                                    size="260px" 
+                                    checked={selectedTechnologies} 
+                                    expanded={getNodeIds(technologies['children'])} 
+                                    handler={technologyHandler} 
+                                    expandedHandler={expandedTechnologyHandler} 
+                                    data={technologies} 
+                                    title={"What technologies are considered?"} 
+                                    toolTipInfo={['A technology is a plan specification that describes how to combine artificial objects or other material entities and processes in a specific way.', 'http://openenergy-platform.org/ontology/oeo/OEO_00000407']} 
+                                    />
+    </div>
+  );
+
+  const renderModelsAndFrameworks = () => (
+    <div>
+      <CustomAutocompleteWithoutEdit  width="60%" type="Model" manyItems showSelectedElements={true} optionsSet={oep_models} kind='Models' handler={modelsHandler} selectedElements={selectedModels}/>
+      <CustomAutocompleteWithoutEdit  width="60%" type="Frameworks"  manyItems showSelectedElements={true}  optionsSet={oep_frameworks} kind='Frameworks' handler={frameworksHandler} selectedElements={selectedFrameworks}/>
+    </div>
+  );
+
+const items = {
+  titles: ['Basic information', 'Study detail', 'Publications', 'Sectors and technology', 'Scenarios', 'Models and frameworks'],
+  contents: [
+    renderBasicInformation(),
+    renderStudyDetail(),
+    renderStudyPublications(),
+    renderSectorsAndTecnology(),
+    renderScenario(),
+    renderModelsAndFrameworks()
+    ]
+}
+
 
 const handleSaveMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
   if (reason === 'clickaway') {
@@ -1746,30 +1671,40 @@ function getStepContent(step: number) {
       direction="row"
       justifyContent="space-between"
       alignItems="center"
-    >
-        <Grid item xs={2} >
-        <div>
-              <CustomSwap handleSwap={handleSwap} />
-        </div >
-        </Grid>
-        <Grid item xs={8} >
-        <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
-         
+      >
+        <Grid item xs={12} >
+        <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
+          <div id='headerStyle'>
+            <span>
+              <ListAltOutlinedIcon />
+            </span>
+            <p>Study Factsheets</p>
+          </div>
+          <div id='headerSubStyle'> <span> {mode} </span> / {acronym} </div>
         </div>
         </Grid>
-          <Grid item xs={2} >
-            <div style={{ 'textAlign': 'right' }}>
-              {mode === 'edit' && <Tooltip title="Save factsheet">
-                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} ><SaveIcon /> </Button>
-              </Tooltip>}
-              <Tooltip title="Share this factsheet">
-                <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" > <ShareIcon /> </Button>
-              </Tooltip>
-              <Tooltip title="Delete factsheet">
-                <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog}> <DeleteOutlineIcon /> </Button>
-              </Tooltip>
-            </div >
+        <Grid item xs={2} >
+          <div>
+                <CustomSwap handleSwap={handleSwap} />
+          </div >
         </Grid>
+        <Grid item xs={8} >
+          <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
+        </div>
+        </Grid>
+        <Grid item xs={2} >
+          <div style={{ 'textAlign': 'right' }}>
+            {mode === 'edit' && <Tooltip title="Save factsheet">
+              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
+            </Tooltip>}
+            <Tooltip title="Share this factsheet">
+              <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>}> Share </Button>
+            </Tooltip>
+            <Tooltip title="Delete factsheet">
+              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
+            </Tooltip>
+          </div >
+      </Grid>
         <Grid item xs={12}>
           <Snackbar
             open={openSavedDialog}
@@ -1897,13 +1832,13 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container style={{ marginTop: '10px', marginLeft:'10px', 'width': '99%' }}>
-                  <Grid item xs={12} style={{ padding: '20px', border: '1px solid #cecece', borderRadius: '2px',  backgroundColor:'#FCFCFC', 'height':'80vh', 'overflow': 'auto' }}>
-                    {/* <CustomTabs
-                      factsheetObjectHandler={factsheetObjectHandler}
+                <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
+                  <Grid item xs={12} style={{ 'overflow': 'auto' }}>
+                    <Divider style={{ marginBottom: '40px' }}/>
+                    <CustomTabs
                       items={items}
-                    /> */}
-                    <Stepper activeStep={activeStep} orientation="vertical" >
+                    />
+                    {/* <Stepper activeStep={activeStep}  >
                       {steps.map((label, index) => (
                       <Step key={label} >
                         <StepLabel onClick={() => handleStepClick(index)}><b>{label}</b></StepLabel>
@@ -1934,7 +1869,7 @@ function getStepContent(step: number) {
                         </StepContent>
                       </Step>
                       ))}
-                    </Stepper>
+                    </Stepper> */}
                   </Grid>
                 </Grid>
             </div>

@@ -3,6 +3,9 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { makeStyles, Theme } from '@material-ui/core/styles';
+
+import '../styles/App.css';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,13 +45,38 @@ export default function CustomTabs(props) {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
+  const useStyles = makeStyles((theme: Theme) => ({
+    root: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.paper,
+    },
+    tab: {
+      background: '#e3eaef',
+      '&.Mui-selected': {
+        background: '#001c30e6',
+        color: 'white'
+      }
+    },
+  }));
+  const classes = useStyles();
+  const tabClasses = {root: classes.tab};
   return (
-    <Box sx={{ 'marginTop': '10px', 'marginLeft': '10px', 'marginRight': '10px','paddingTop': '10px', 'paddingBottom': '10px', 'border': '1px solid #cecece', 'height':'70vh', 'overflow': 'auto'  }}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange}  variant="scrollable" allowScrollButtonsMobile scrollButtons>
+    <Box >
+      <Box className={classes.root}>
+        <Tabs value={value} 
+              onChange={handleChange} 
+              allowScrollButtonsMobile 
+              scrollButtons 
+              classes={'tabs'} 
+              variant="fullWidth"
+              TabIndicatorProps={{
+                style: {
+                  display: 'none'
+                }
+              }}
+        >
           {items.titles.map((item, index) => {
-            return <Tab label={item} {...arrayProps(index)} />;
+            return <Tab label={item} {...arrayProps(index)}  sx={{ textTransform :"none" }} classes={tabClasses}/>;
             })}
         </Tabs>
       </Box>

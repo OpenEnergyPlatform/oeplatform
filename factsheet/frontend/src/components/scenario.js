@@ -283,7 +283,7 @@ export default function Scenario(props) {
             spacing={2} 
       >
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}> <b>Name</b> </span>
+          <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name</b> </span>
           <span >
             <HtmlTooltip
               title={
@@ -305,7 +305,7 @@ export default function Scenario(props) {
         </Grid>
 
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}> <b>Acronym</b>  </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Acronym</b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -327,7 +327,7 @@ export default function Scenario(props) {
         </Grid>
 
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}>  <b>Storyline </b>  </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}>  <b>Storyline </b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -345,11 +345,11 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={10} >
-          <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" multiline rows={4} maxRows={8} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
         </Grid>
 
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}> <b>Spatial regions </b>  </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Spatial regions </b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -379,7 +379,7 @@ export default function Scenario(props) {
         </Grid>
 
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}><b>Iinteracting regions</b> </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}><b>Iinteracting regions</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -401,7 +401,7 @@ export default function Scenario(props) {
         </Grid>
 
         <Grid item xs={2} >
-          <span style={{ color: '#294456'}}><b>Scenario years</b> </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}><b>Scenario years</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -423,7 +423,7 @@ export default function Scenario(props) {
         </Grid>
          
         <Grid item xs={2}  >
-          <span style={{ color: '#294456'}}> <b>Scenario descriptors</b> </span>
+          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Scenario descriptors</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -457,7 +457,7 @@ export default function Scenario(props) {
           
         <Grid item xs={2} style={{ marginTop: '10px' }}>
           <div>
-            <span style={{ color: '#294456'}}> <b> Input dataset(s) </b> </span>
+            <span style={{ color: '#294456', marginLeft:'20px'}}> <b> Input dataset(s) </b> </span>
             <span >
             <HtmlTooltip
               title={
@@ -473,14 +473,17 @@ export default function Scenario(props) {
             <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
             </HtmlTooltip>
             </span>
+            <span>
+              <IconButton
+                color="primary"
+                aria-label="add"
+                onClick={() => addInputDatasetItem(uuid())}
+                >
+                <AddIcon />
+              </IconButton>
+            </span>
           </div>
-          <IconButton
-          color="primary"
-          aria-label="add"
-          onClick={() => addInputDatasetItem(uuid())}
-          >
-          <AddIcon />
-          </IconButton>
+          
         </Grid>
 
         <Grid item xs={10} style={{ marginTop: '10px' }}>
@@ -524,7 +527,7 @@ export default function Scenario(props) {
 
         <Grid item xs={2} style={{ marginTop: '10px' }}>
           <div>
-            <span style={{ color: '#294456'}}> <b> Output dataset(s) </b> </span>
+            <span style={{ color: '#294456', marginLeft:'20px'}}> <b> Output dataset(s) </b> </span>
             <span >
             <HtmlTooltip
               title={
@@ -540,14 +543,17 @@ export default function Scenario(props) {
             <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
             </HtmlTooltip>
             </span>
+            <span>
+              <IconButton
+                color="primary"
+                aria-label="add"
+                onClick={() => addOutputDatasetItem(uuid())}
+              >
+                <AddIcon />
+              </IconButton>
+            </span>
           </div>
-        <IconButton
-          color="primary"
-          aria-label="add"
-          onClick={() => addOutputDatasetItem(uuid())}
-        >
-          <AddIcon />
-        </IconButton>
+        
         </Grid>
 
         <Grid item xs={10} style={{ marginTop: '10px' }}>

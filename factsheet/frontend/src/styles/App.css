@@ -172,9 +172,35 @@ p {
   color: rgb(4, 0, 255);
 }
 
-.custom-button:disabled {
-  background-color: rgb(49, 18, 172);
-  pointer-events: none; /* Disable click events */
-  opacity: 0.6; /* Apply a visual disabled style (optional) */
-  cursor: not-allowed;
+#headerStyle {
+  padding-top: 20px;
+  padding-left: 60px;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
 }
+
+#headerStyle p {
+  color: rgb(72, 72, 72);
+  margin-left: 10px;
+  font-size: 20px;
+}
+
+#headerStyle span {
+  margin-top: 4px;
+  color: rgb(72, 72, 72);
+}
+
+#headerSubStyle {
+  padding-left: 60px;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+}
+
+#headerSubStyle span {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+
