@@ -118,6 +118,25 @@ def assign_content_values_to_metadata(content, template=None, parent=""):
     return template
 
 
+def save_metadata_to_db(schema, table, updated_metadata):
+    """Save updated metadata for a table in OEP database
+
+    :param schema: name of the OEP schema
+    :param table: name of the OEP table in the OEP schema
+    :param updated_metadata: the updated metadata dictionary
+    """
+    from dataedit.models import Table
+
+    # Load the table object
+    table_obj = Table.load(schema=schema, table=table)
+
+    # Update the oemetadata field
+    table_obj.oemetadata = updated_metadata
+
+    # Save the updated table object
+    table_obj.save()
+
+
 def load_metadata_from_db(schema, table):
     """Get comment for a table in OEP database (contains the metadata)
 
