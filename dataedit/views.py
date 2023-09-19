@@ -2116,18 +2116,18 @@ class PeerReviewView(LoginRequiredMixin, View):
         return None
 
     def recursive_update(self, metadata, review_data):
-        # Создаем словарь из списка reviews
-        review_dict = {item["key"]: item["fieldReview"]["newValue"] for item in review_data["reviewData"]["reviews"] if
-                       "newValue" in item["fieldReview"]}
+        for review_key in review_data["reviewData"]["reviews"]:
+            keys = review_key["key"].split('.')
 
-        if isinstance(metadata, dict):
-            for key, value in list(metadata.items()):  # используем list() для создания копии ключей и значений
-                # Если ключ существует в review_dict, используем его для обновления
-                if key in review_dict:
-                    new_value = review_dict[key]
-                    print(f"Обновление значения для ключа {key} с {value} на {new_value}")
-                    metadata[key] = new_value
-                    del review_dict[key]  # удаляем ключ из review_dict после обновления
+            if isinstance(review_key["fieldReview"], list):
+                for field_review in review_key["fieldReview"]:
+                    new_value = field_review.get("newValue", None)
+                    if new_value is not None and new_value != "":
+                        self.set_nested_value(metadata, keys, new_value)
+            else:
+                new_value = review_key["fieldReview"].get("newValue", None)
+                if new_value is not None and new_value != "":
+                    self.set_nested_value(metadata, keys, new_value)
 
                 # Если значение также является словарем или списком, продолжаем рекурсивный обход
                 if isinstance(value, (dict, list)):
