@@ -2160,6 +2160,11 @@ class PeerReviewView(LoginRequiredMixin, View):
             # get the review data and additional application metadata
             # from user peer review submit/save
             review_data = json.loads(request.body)
+            if review_id:
+                contributor_review = PeerReview.objects.filter(id=review_id).first()
+                if contributor_review:
+                    contributor_review_data = contributor_review.review.get("reviews", [])
+                    review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
             # The type can be "save" or "submit" as this triggers different behavior
             review_post_type = review_data.get("reviewType")
