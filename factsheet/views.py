@@ -134,10 +134,11 @@ def create_factsheet(request, *args, **kwargs):
     sector_divisions = request_body['sector_divisions']
     sectors = request_body['sectors']
     expanded_sectors = request_body['expanded_sectors']
-    energy_carriers = request_body['energy_carriers']
-    expanded_energy_carriers = request_body['expanded_energy_carriers']
-    energy_transformation_processes = request_body['energy_transformation_processes']
-    expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    # energy_carriers = request_body['energy_carriers']
+    # expanded_energy_carriers = request_body['expanded_energy_carriers']
+    # energy_transformation_processes = request_body['energy_transformation_processes']
+    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    technologies = request_body['technologies']
     study_keywords = request_body['study_keywords']
     report_doi = request_body['report_doi']
     place_of_publication = request_body['place_of_publication']
@@ -237,10 +238,11 @@ def create_factsheet(request, *args, **kwargs):
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
                         add_history( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']), 'add', request.user)
 
-                if 'keywords' in item:
-                    for keyword in item['keywords']:
-                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
-                        add_history( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword), 'add', request.user)
+                if 'descriptors' in item:
+                    for descriptor in item['descriptors']:
+                        descriptor = URIRef(descriptor['class']);
+                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], descriptor ))
+                        add_history( scenario_URI, OEO["has_scenario_descriptor"],  descriptor, 'add', request.user)
 
                 if 'input_datasets' in item:
                     for input_dataset in item['input_datasets']:
@@ -316,17 +318,23 @@ def create_factsheet(request, *args, **kwargs):
             oekg.add((study_URI, OEO.OEO_00000505, sector_URI))
             add_history(study_URI, OEO.OEO_00000505, sector_URI, 'add', request.user)
 
-        _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
-        for item in _energy_carriers:
-            energy_carriers_URI = URIRef(item["class"])
-            oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
-            add_history(study_URI, OEO["covers_energy_carrier"], energy_carriers_URI, 'add', request.user)
+        # _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
+        # for item in _energy_carriers:
+        #     energy_carriers_URI = URIRef(item["class"])
+        #     oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
+        #     add_history(study_URI, OEO["covers_energy_carrier"], energy_carriers_URI, 'add', request.user)
 
-        _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
-        for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef(item["class"])
-            oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
-            add_history(study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI, 'add', request.user)
+        # _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
+        # for item in _energy_transformation_processes:
+        #     energy_transformation_processes_URI = URIRef(item["class"])
+        #     oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
+        #     add_history(study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI, 'add', request.user)
+
+        _technologies = json.loads(technologies) if technologies is not None else []
+        for item in _technologies:
+            technology_URI = URIRef(item["class"])
+            oekg.add((study_URI, OEO.OEO_00000522, technology_URI))
+            add_history(study_URI, OEO.OEO_00000522, technology_URI, 'add', request.user)
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
@@ -374,10 +382,11 @@ def update_factsheet(request, *args, **kwargs):
     sector_divisions = request_body['sector_divisions']
     sectors = request_body['sectors']
     expanded_sectors = request_body['expanded_sectors']
-    energy_carriers = request_body['energy_carriers']
-    expanded_energy_carriers = request_body['expanded_energy_carriers']
-    energy_transformation_processes = request_body['energy_transformation_processes']
-    expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    # energy_carriers = request_body['energy_carriers']
+    # expanded_energy_carriers = request_body['expanded_energy_carriers']
+    # energy_transformation_processes = request_body['energy_transformation_processes']
+    # expanded_energy_transformation_processes = request_body['expanded_energy_transformation_processes']
+    technologies = request_body['technologies']
     study_keywords = request_body['study_keywords']
     report_title = request_body['report_title']
     date_of_publication = request_body['date_of_publication']
@@ -480,9 +489,12 @@ def update_factsheet(request, *args, **kwargs):
                     for scenario_year in item['scenario_years']:
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
 
-                if 'keywords' in item:
-                    for keyword in item['keywords']:
-                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], Literal(keyword) ))
+
+                if 'descriptors' in item:
+                    for descriptor in item['descriptors']:
+                        descriptor = URIRef(descriptor['class']);
+                        oekg.add(( scenario_URI, OEO["has_scenario_descriptor"], descriptor ))
+                        add_history( scenario_URI, OEO["has_scenario_descriptor"],  descriptor, 'add', request.user)
 
                 for s, p, o in oekg.triples(( scenario_URI, OEO.RO_0002233, None )):
                     oekg.remove((s, p, o))
@@ -595,21 +607,32 @@ def update_factsheet(request, *args, **kwargs):
         for s, p, o in oekg.triples((study_URI, OEO["covers_energy_carrier"], None)):
             oekg.remove((s, p, o))
 
-        _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
-        for item in _energy_carriers:
-            energy_carriers_URI = URIRef(item["class"])
-            oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
+        # _energy_carriers = json.loads(energy_carriers) if energy_carriers is not None else []
+        # for item in _energy_carriers:
+        #     energy_carriers_URI = URIRef(item["class"])
+        #     oekg.add((study_URI, OEO["covers_energy_carrier"], energy_carriers_URI))
 
-        for s, p, o in oekg.triples((study_URI, OEO["covers_transformation_processes"], None)):
-            oekg.remove((s, p, o))
+        # for s, p, o in oekg.triples((study_URI, OEO["covers_transformation_processes"], None)):
+        #     oekg.remove((s, p, o))
 
-        _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
-        for item in _energy_transformation_processes:
-            energy_transformation_processes_URI = URIRef(item["class"])
-            oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
+        # _energy_transformation_processes = json.loads(energy_transformation_processes) if energy_transformation_processes is not None else []
+        # for item in _energy_transformation_processes:
+        #     energy_transformation_processes_URI = URIRef(item["class"])
+        #     oekg.add((study_URI, OEO["covers_transformation_processes"], energy_transformation_processes_URI))
 
-        for s, p, o in oekg.triples((study_URI, OBO.RO_0000057, None)):
-            oekg.remove((s, p, o))
+        # for s, p, o in oekg.triples((study_URI, OBO.RO_0000057, None)):
+        #     oekg.remove((s, p, o))
+
+
+        for s, p, o in oekg.triples((study_URI, OEO.OEO_00000522, None)):
+             oekg.remove((s, p, o))
+             add_history(s, p, o, 'remove', request.user)
+        _technologies = json.loads(technologies) if technologies is not None else []
+        for item in _technologies:
+            technology_URI = URIRef(item["class"])
+            oekg.add((study_URI, OEO.OEO_00000522, technology_URI))
+            add_history(study_URI, OEO.OEO_00000522, technology_URI, 'add', request.user)
+
 
         _models = json.loads(models) if models is not None else []
         for item in _models:
@@ -730,18 +753,25 @@ def factsheet_by_id(request, *args, **kwargs):
         if label != None:
             factsheet['sectors'].append({  "value": label, "label":label, 'class': class_iri })
 
-    factsheet['energy_carriers'] = []
-    for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
-        label = oeo.value(o, RDFS.label)
-        class_label = oeo.value(o, RDFS.label)
-        if label != None:
-            factsheet['energy_carriers'].append({ "value": label, "label":label, "class": o })
+    # factsheet['energy_carriers'] = []
+    # for s, p, o in oekg.triples(( study_URI, OEO["covers_energy_carrier"], None )):
+    #     label = oeo.value(o, RDFS.label)
+    #     class_label = oeo.value(o, RDFS.label)
+    #     if label != None:
+    #         factsheet['energy_carriers'].append({ "value": label, "label":label, "class": o })
 
-    factsheet['energy_transformation_processes'] = []
-    for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )):
+    # factsheet['energy_transformation_processes'] = []
+    # for s, p, o in oekg.triples(( study_URI, OEO["covers_transformation_processes"], None )):
+    #     label = oeo.value(o, RDFS.label)
+    #     if label != None:
+    #         factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o })
+
+    factsheet['technologies'] = []
+    for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000522, None )):
         label = oeo.value(o, RDFS.label)
         if label != None:
-            factsheet['energy_transformation_processes'].append({ "value": label, "label":label, "class": o })
+            factsheet['technologies'].append({ "value": label, "label":label, "class": o })
+
 
     factsheet['authors'] = []
     for s, p, o in oekg.triples(( study_URI, OEO.OEO_00000506, None )):
@@ -776,7 +806,7 @@ def factsheet_by_id(request, *args, **kwargs):
         scenario['scenario_years'] = []
         scenario['regions'] = []
         scenario['interacting_regions'] = []
-        scenario['keywords'] = []
+        scenario['descriptors'] = []
         scenario['input_datasets'] = []
         scenario['output_datasets'] = []
 
@@ -794,7 +824,8 @@ def factsheet_by_id(request, *args, **kwargs):
                 scenario['interacting_regions'].append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
         
         for s11, p11, o11 in oekg.triples(( o, OEO["has_scenario_descriptor"], None )):
-            scenario['keywords'].append(o11)
+            label = oeo.value(o11, RDFS.label)
+            scenario['descriptors'].append({ "value": label, "label":label, "class": o11 })
 
         for s2, p2, o2 in oekg.triples(( o, OEO.RO_0002233, None )):
             o2_iri = oekg.value(o2, OEO['has_iri'])
@@ -1127,11 +1158,20 @@ def get_all_sub_classes(cls, visited=None):
 #@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
 
-    energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039")
-    energy_carriers = get_all_sub_classes(energy_carrier_class)
 
-    energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003")
-    energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class)
+    scenario_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00000364")
+    scenario_subclasses = get_all_sub_classes(scenario_class)
+    print(scenario_subclasses)
+
+    technology_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00000407")
+    technology_subclasses = get_all_sub_classes(technology_class)
+
+
+    # energy_carrier_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020039")
+    # energy_carriers = get_all_sub_classes(energy_carrier_class)
+
+    # energy_transformation_process_class = oeo_owl.search_one(iri="http://openenergy-platform.org/ontology/oeo/OEO_00020003")
+    # energy_transformation_processes = get_all_sub_classes(energy_transformation_process_class)
     
 
     sector_divisions = ['OEO_00010056', 'OEO_00000242', 'OEO_00010304']
@@ -1147,10 +1187,13 @@ def populate_factsheets_elements(request, *args, **kwargs):
             sectors_list.append({'iri': s, 'label': sector_label, 'value': sector_label, 'sector_division': sector_division_URI})
 
     elements = {}
-    elements['energy_carriers'] = [energy_carriers]
-    elements['energy_transformation_processes'] = [energy_transformation_processes]
+    # elements['energy_carriers'] = [energy_carriers]
+    # elements['energy_transformation_processes'] = [energy_transformation_processes]
     elements['sector_divisions'] = sector_divisions_list
     elements['sectors'] = sectors_list
+    elements['scenario_descriptors'] = scenario_subclasses
+    elements['technologies'] = technology_subclasses
+    
 
     # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
     #     sl = oeo.value(s, RDFS.label)

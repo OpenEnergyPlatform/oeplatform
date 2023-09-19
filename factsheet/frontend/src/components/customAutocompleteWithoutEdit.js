@@ -172,7 +172,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="standard"/>
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" />
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
