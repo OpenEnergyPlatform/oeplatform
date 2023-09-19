@@ -2129,13 +2129,15 @@ class PeerReviewView(LoginRequiredMixin, View):
                 if new_value is not None and new_value != "":
                     self.set_nested_value(metadata, keys, new_value)
 
-                # Если значение также является словарем или списком, продолжаем рекурсивный обход
-                if isinstance(value, (dict, list)):
-                    self.recursive_update(value, review_data)
-        elif isinstance(metadata, list):
-            for index, item in enumerate(metadata):
-                if index < len(review_data):
-                    self.recursive_update(item, review_data)
+    def set_nested_value(self, metadata, keys, value):
+        for key in keys[:-1]:
+            if key.isdigit():
+                key = int(key)
+            metadata = metadata[key]
+        last_key = keys[-1]
+        if last_key.isdigit():
+            last_key = int(last_key)
+        metadata[last_key] = value
 
     def post(self, request, schema, table, review_id=None):
         """
