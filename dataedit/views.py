@@ -1905,7 +1905,6 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
 class PeerReviewView(LoginRequiredMixin, View):
     def load_json(self, schema, table):
         metadata = load_metadata_from_db(schema, table)
-        print(metadata)
         return metadata
 
     def load_json_schema(self):
@@ -2109,6 +2108,12 @@ class PeerReviewView(LoginRequiredMixin, View):
             "state_dict": json.dumps(state_dict),
         }
         return render(request, "dataedit/opr_review.html", context=context_meta)
+
+    def get_review_for_key(self, key, review_data):
+        for review in review_data["reviewData"]["reviews"]:
+            if review["key"] == key:
+                return review["fieldReview"].get("newValue", None)
+        return None
 
     def recursive_update(self, metadata, review_data):
         # Создаем словарь из списка reviews
