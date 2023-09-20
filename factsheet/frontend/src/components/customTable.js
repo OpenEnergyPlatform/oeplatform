@@ -169,7 +169,7 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <StyledTableCell padding="checkbox">
+        <StyledTableCell variant="light" padding="checkbox">
          {/*  <Checkbox
                 color="primary"
                 indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -179,6 +179,7 @@ function EnhancedTableHead(props) {
         </StyledTableCell>
         {headCells.map((headCell) => (
           <StyledTableCell
+            variant="light"
             key={headCell.id}
             align={headCell.align}
             padding={headCell.disablePadding ? 'none' : 'normal'}
