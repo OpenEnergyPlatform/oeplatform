@@ -3,15 +3,24 @@ import palette from './oep-theme/palette';
 import buttonStyles from './oep-theme/buttonStyles';
 
 const theme = createTheme({
+  palette: palette,
   components: {
     MuiButton: buttonStyles,
+    MuiToolbar: {
+      styleOverrides: {
+        root: {
+          "&.MuiToolbar-root": {
+            backgroundColor: '#FFF'
+          }
+        }
+      }
+    },
     MuiSvgIcon: {
       defaultProps: {
         fontSize: 'small'
       }
     }
-  },
-  palette: palette
+  }
 });
 
 export default theme;
