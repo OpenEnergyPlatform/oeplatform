@@ -1428,7 +1428,369 @@ const items = {
     renderModelsAndFrameworks()
     ]
 }
+const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
+const renderScenariosOverview = () => (
+  scenarios.map((v, i) => 
+    v.acronym !== '' && 
 
+    <Grid container justifyContent="space-between"
+        alignItems="start"
+        spacing={2} 
+        style={{ width: '95%', margin:'10px', border: '1px solid #80808038' }} >
+
+      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px'}}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        {v.name}
+      </Grid>
+
+
+      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        {v.acronym} 
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        {v.abstract}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        {/* {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)} */}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Years: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Regions: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        {v.regions.map( (e) => <span> <span> {e.name} </span> <span>  . </span> </span> )}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Interacting regions: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038' , height:'40px' }}>
+        {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Input datasets: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038' , height:'40px' }}>
+        {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', height:'200px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Output datasets: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', height:'200px', overflow:'auto' }}>
+       {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>)}
+      </Grid>
+    </Grid>
+    )
+)
+
+const renderPublicationOverview = () => (
+    <Grid container justifyContent="space-between"
+        alignItems="start"
+        spacing={2} 
+        style={{ width: '95%', margin:'10px', border: '1px solid #80808038' }} >
+
+      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px'}}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Report title: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        ''
+      </Grid>
+
+
+      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Authors: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        ''
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>DOI: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        ''
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Date of publication: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+        {/* {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)} */}
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Link to study report: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      ''
+      </Grid>
+
+      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Citation: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+        ''
+      </Grid>
+
+    </Grid>
+)
+  
+const overview_items = {
+  titles: [scenario_count, 'Publications', 'Sectors and technology', 'Models and frameworks'],
+  contents: [
+    renderScenariosOverview(),
+    renderPublicationOverview(),
+    '',
+    ''
+    ]
+}
 
 const handleSaveMessageClose = (event: React.SyntheticEvent | Event, reason?: string) => {
   if (reason === 'clickaway') {
@@ -1703,8 +2065,27 @@ function getStepContent(step: number) {
           </div >
         </Grid>
         <Grid item xs={4} >
-          <div style={{ 'textAlign': 'center', 'marginTop': '10px' }}>
-        </div>
+          <div style={{ 'textAlign': 'center' }}>
+            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+              <CircularProgress variant="determinate" value={60} size={60} />
+              <Box
+                sx={{
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  position: 'absolute',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+              <Typography variant="h6" component="div">
+                <b>{`${Math.round(60)}%`}</b>
+              </Typography>
+              </Box>
+            </Box>
+          </div>
         </Grid>
         <Grid item xs={3} style={{ 'marginRight': '50px' }}>
           <div style={{ 'textAlign': 'right' }}>
@@ -1848,6 +2229,7 @@ function getStepContent(step: number) {
             <div className='wizard'>
                 <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
+                        
                     <Divider style={{ marginBottom: '40px', marginLeft: '50px', marginRight: '60px' }}/>
                     <div style={{ marginLeft: '50px', marginRight: '60px' }} >
                       <CustomTabs
@@ -1892,311 +2274,164 @@ function getStepContent(step: number) {
           }
 
           {mode === "overview" &&
-            <div style={{
-              'marginTop': '10px',
-              'overflow': 'auto',
-              'marginBottom': '20px',
-              'marginLeft': '10px',
-              'marginRight': '10px',
-              'border': '1px solid #cecece',
-              'borderRadius': '5px',
-              'backgroundColor':'#f3f3f380',
-              'height':'75vh',
-              'width': '99%',
-              
-            }}
-            class="bgimg"
-            >       
-                    <Box sx={{ 
-                            'width': '100%',
-                            'display': 'flex',
-                            'flexDirection': 'column',
-                            'alignItems': 'center',
-                          }}>
-
-                      <Box sx={{ position: 'relative', display: 'inline-flex', 'marginBottom': '10px', 'marginTop': '30px'}}>
-                        <CircularProgress variant="determinate" value={60} size={80} />
-                          <Box
-                            sx={{
-                              top: 0,
-                              left: 0,
-                              bottom: 0,
-                              right: 0,
-                              position: 'absolute',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                          <Typography variant="h5" component="div" color="text.secondary">
-                            {`${Math.round(60)}%`}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Typography variant="caption" gutterBottom component="div" >
-                        To be completed!
+             <Grid container justifyContent="space-between"
+             alignItems="start"
+             spacing={2} 
+             style={{ marginTop: '10px', marginLeft:'50px' }}>
+             <Grid item xs={12} >
+               <Divider style={{ marginBottom: '40px', marginRight: '60px' }}/>
+              </Grid>
+              <Grid item xs={12}  >
+               <b style={{ color: 'clack', marginLeft:'20px', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
+              </Grid>
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym</b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                       </Typography>
-                      <Typography variant="h4" gutterBottom component="div">
-                        <b> {acronym}</b>
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} >
+                {acronym}
+              </Grid>
+
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Contact person(s):</b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
                       </Typography>
-                    
-                    <Timeline
-                      sx={{
-                        [`& .${timelineOppositeContentClasses.root}`]: {
-                          flex: 0.2,
-                        },
-                        
-                      }}
-                    >
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Basic information</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <InfoOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                        <p>
-                          <b>Study name:</b> {studyName !== undefined && studyName}
-                        </p>  
-                        <p>
-                          <b>Acronym</b> {acronym}
-                        </p>
-                        <p>
-                          <b>Institutions: </b>
-                            {selectedInstitution.map((v, i) => (
-                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                        </p>
-                        <p>  <b>Contact person(s):</b>
-                        {selectedContactPerson.map((v, i) => (
-                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+                {selectedContactPerson.map((v, i) => (
+                           <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
                           ))}
-                        </p>
-                      
-                       
+              </Grid>
 
-                        </TimelineContent>
-                      </TimelineItem>
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+                {selectedInstitution.map((v, i) => (
+                           <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+                ))}
+              </Grid>
 
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Study detail</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <MenuBookOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                        <p>
-                          <b>Funding sources:  </b>  
-                          {selectedFundingSource.map((v, i) => (
-                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} style={{ paddingTop: '10px' }} >
+              {selectedFundingSource.map((v, i) => (
+                            <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
                           ))}
-                         </p>
-                        <p>  <b>Abstract:</b> {abstract !== undefined && abstract}  </p>
-                        <p>
-                        <b>Descriptors: </b>  
-                          {selectedStudyKewords.map((v, i) => (
-                          <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
+              </Grid>
+
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+               {selectedStudyKewords.map((v, i) => (
+                          <span> <span> {v} </span> <span>   <b style={{ fontSize: '24px' }}>.</b></span> </span>
                           ))}
-                        </p>
+              </Grid>
 
+              <Grid item xs={2} >
+                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
+                <span >
+                  <HtmlTooltip
+                    title={
+                    <React.Fragment>
+                      <Typography color="inherit" variant="caption">
+                        {'A study is a project with the goal to investigate something.'}
+                        <br />
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                      </Typography>
+                    </React.Fragment>
+                  }
+                  >
+                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  </HtmlTooltip>
+                </span>
+              </Grid>
+              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+               <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
+              </Grid>
+              <Grid item xs={12} >
+                <CustomTabs
+                  items={overview_items}
+                />
+              </Grid>
+               
 
-                        </TimelineContent>
-                      </TimelineItem>
-                   
-                   <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Publication</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                        <p>
-                          <b>Report title: </b> {report_title !== undefined && report_title}
-                        </p>
-                        <p>
-                          <b> Authors: </b>
-                            {selectedAuthors.map((v, i) => (
-                               <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                        </p>
-                        <p>
-                          <b>DOI: </b>
-                            {doi !== undefined && doi}
-                        </p>
-                        <p>
-                        <b> Date of publication: </b>
-                          {date_of_publication !== '01-01-1900' && date_of_publication.toString().substring(0, 10)}
-                        </p>
-                        <p>
-                        <b>Place of publication: </b>
-                          {place_of_publication !== undefined && place_of_publication}
-                        </p>
-                        <div style={{ display: "flex" }}>
-                          <div><b> Link to study report: </b></div>
-                          <div style={{ marginTop: "-5px", marginLeft: "5px" }}><a href={link_to_study} style={{ color: "#04678F" }}> <LinkIcon fontSize="large"/> </a></div>
-                        </div>
-                        </TimelineContent>
-                      </TimelineItem>
-                      
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Sectors</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                            <b>Sector divisions: </b>
-                              {selectedSectorDivisions.map((v, i) => (
-                                <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                              ))}
-                          </p>
-                          <p>
-                          <b>Sectors: </b>
-                            {selectedSectors.map((v, i) => (
-                              <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                          </p>
-                        </TimelineContent>
-                      </TimelineItem>
-
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Technologies</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                            <b>Technologies: </b>
-                              {selectedTechnologies.map((v, i) => (
-                                <Chip label={v.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                              ))}
-                          </p>
-                        </TimelineContent>
-                      </TimelineItem>
-
-
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Scenarios</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                          <b>Scenarios: </b>  
-                            {scenarios.map((v, i) => { return <div> 
-                              {v.acronym !== '' && <Chip label={v.acronym} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />}
-                              <Typography sx={{ 'marginLeft': '20px', 'marginTop': '10px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>  Name:  </b>
-                                {v.name}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b> Abstract:  </b>
-                                {v.abstract}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>  Descriptors:</b>
-                                {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>   Years:</b>
-                                {v.scenario_years.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>    Regions: </b>
-                                {v.regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>  Interacting regions:</b>
-                                {v.interacting_regions.map( (e) =>  <Chip label={e.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b>  Input datasets: </b>
-                                {v.input_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                              <Typography sx={{ 'marginLeft': '20px' }} variant="subtitle2" gutterBottom component="div">
-                              <b> Output datasets: </b>
-                                {v.output_datasets.map( (e) =>  <Chip label={e.value.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)}
-                              </Typography>
-                            
-                            </div>  
-                            }
-                            )}
-                          </p>
-                        </TimelineContent>
-                      </TimelineItem>
-
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Models</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                          <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                          <b>Models: </b>  
-                            {selectedModels.map((v, i) => (
-                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                          </p>
-                        </TimelineContent>
-                      </TimelineItem>
-
-
-                      <TimelineItem>
-                        <TimelineOppositeContent sx={{ py: '12px', px: 2 }} color="primary">
-                          <Typography variant="subtitle1" component="span"><b>Frameworks</b></Typography>
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                          <TimelineDot>
-                            <FeedOutlinedIcon />
-                          </TimelineDot>
-                        </TimelineSeparator>
-                        <TimelineContent>
-                          <p>
-                          <b>Frameworks: </b>  
-                            {selectedFrameworks.map((v, i) => (
-                            <Chip label={v.name} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />
-                            ))}
-                          </p>  
-                        </TimelineContent>
-                      </TimelineItem>
-
-                    </Timeline>
-                </Box>
-            </div>
-          }
-      </Grid>
+            </Grid>}
+    </Grid>
     </Grid>
   </div>
   );
