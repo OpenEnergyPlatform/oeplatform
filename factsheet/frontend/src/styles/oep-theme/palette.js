@@ -1,5 +1,18 @@
 import { grey } from "@mui/material/colors";
 
+const primaryPalette = {
+  50: '#F6FBFF',
+  100: '#E5EFF6',
+  200: '#C1D9EB',
+  300: '#92BEDD',
+  400: '#5295C6',
+  500: '#2972A6',
+  600: '#236695',
+  700: '#1F567D',
+  800: '#1E445F',
+  900: '#122C3E'
+}
+
 const greyPalette = {
   50: '#FAFDFF',
   100: '#F6F9FB',
@@ -15,11 +28,11 @@ const greyPalette = {
 
 const palette = {
   primary: {
-    lighter: '#E5EFF6',
-    light: '#92BEDD',
-    main: '#2972A6',
-    dark: '#1F567D',
-    darker: '#122C3E',
+    lighter: primaryPalette[100],
+    light: primaryPalette[300],
+    main: primaryPalette[500],
+    dark: primaryPalette[700],
+    darker: primaryPalette[900],
     contrastText: '#FFFFFF',
   },
   error: {
@@ -32,7 +45,7 @@ const palette = {
   },
   grey: greyPalette,
   text: {
-    primary: '#294456',
+    primary: greyPalette[700],
     secondary: '#5F7484'
   },
   divider: '#E3EAEF',
