@@ -39,6 +39,7 @@ import IconButton from '@mui/material/IconButton';
 import oedb_iris from '../data/datasets_iris.json';
 import oedb_names from '../data/datasets_names.json';
 import LCC from '../data/countries.json';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -274,6 +275,21 @@ export default function Scenario(props) {
             ]; \n \
           ]."
 
+  const useStyles = makeStyles((theme: Theme) => ({
+    root: {
+      flexGrow: 1,
+      backgroundColor: theme.palette.background.paper,
+    },
+    tab: {
+      background: '#e3eaef',
+      '&.Mui-selected': {
+        background: '#001c30e6',
+        color: 'white'
+      }
+    },
+  }));
+  const classes = useStyles();
+  const tabClasses = {root: classes.tab};
 
   return (
       <Grid container
