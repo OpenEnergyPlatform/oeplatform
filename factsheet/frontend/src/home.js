@@ -46,11 +46,13 @@ function Home(props) {
 
   if (loading === false) {
     return (
-      <CustomTable factsheets={eval(factsheets)} />
+      <Box sx={{ paddingTop: theme => theme.spacing(2) }}>
+        <CustomTable factsheets={eval(factsheets)} />
+      </Box>
     );
   }
   else {
-    return <Box sx={{ width: '100%' }}>
+    return <Box sx={{ paddingTop: theme => theme.spacing(2) }}>
             <LinearProgress />
            </Box>
   }
