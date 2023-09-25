@@ -51,6 +51,7 @@ markdown_extensions:
 plugins:
 - search:
 - mkdocstrings:
+- include-markdown:
 
 # Customization
 extra:
@@ -74,3 +75,6 @@ nav:
       - oeplatform-code/architecture/index.md
     - Application Programming Interface:
       - oeplatform-code/api/index.md
+    - Open Peer Review Process:
+      - oeplatform-code/open-peer-review-process/index.md
+
