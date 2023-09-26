@@ -1,14 +1,18 @@
 import { createTheme } from '@mui/material/styles';
 import palette from './oep-theme/palette';
 import buttonStyles from './oep-theme/components/buttonStyles';
-import tableStyles from './oep-theme/components/tableStyles';
+import { tableStyles, tableHeaderStyles, tableRowStyles, tableCellStyles } from './oep-theme/components/tableStyles';
 import toolbarStyles from './oep-theme/components/toolbarStyles';
+import shape from '@material-ui/core/styles/shape';
 
 const theme = createTheme({
   palette: palette,
   components: {
     MuiButton: buttonStyles,
-    MuiTableCell: tableStyles,
+    MuiTable: tableStyles,
+    MuiTableHead: tableHeaderStyles,
+    MuiTableRow: tableRowStyles,
+    MuiTableCell: tableCellStyles,
     MuiToolbar: toolbarStyles,
     MuiSvgIcon: {
       defaultProps: {

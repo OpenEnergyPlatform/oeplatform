@@ -1,5 +1,3 @@
-import { grey } from "@mui/material/colors";
-
 const primaryPalette = {
   50: '#F6FBFF',
   100: '#E5EFF6',
@@ -49,6 +47,7 @@ const palette = {
     secondary: '#5F7484'
   },
   divider: '#E3EAEF',
+  border: greyPalette[300],
   background: {
     white: '#FFFFFF',
     lighter: greyPalette[100],
