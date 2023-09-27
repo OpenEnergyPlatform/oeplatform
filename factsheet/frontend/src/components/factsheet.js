@@ -2064,7 +2064,7 @@ function getStepContent(step: number) {
                 <CustomSwap handleSwap={handleSwap} />
           </div >
         </Grid>
-        <Grid item xs={4} >
+        <Grid item xs={6} >
           <div style={{ 'textAlign': 'center' }}>
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
               <CircularProgress variant="determinate" value={60} size={60} />
