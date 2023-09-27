@@ -52,6 +52,7 @@ import Slider from '@mui/material/Slider';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Divider from '@mui/material/Divider';
+import Container from '@mui/material/Container';
 
 
 import '../styles/App.css';
@@ -169,7 +170,7 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <StyledTableCell padding="checkbox">
+        <StyledTableCell variant="light" padding="checkbox">
          {/*  <Checkbox
                 color="primary"
                 indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -179,6 +180,7 @@ function EnhancedTableHead(props) {
         </StyledTableCell>
         {headCells.map((headCell) => (
           <StyledTableCell
+            variant="light"
             key={headCell.id}
             align={headCell.align}
             padding={headCell.disablePadding ? 'none' : 'normal'}
@@ -216,13 +218,7 @@ function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison} = props;
 
   return (
-    <Toolbar
-      sx={{
-          bgcolor: '#04678F20',
-          color: 'white',
-          display: 'flex',
-      }}
-    >
+    <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
       
       <Tooltip title="Show all">
         <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
@@ -778,7 +774,7 @@ export default function CustomTable(props) {
         </DialogActions>
       </Dialog>
 
-      <Paper sx={{ width: '97%', marginLeft: '30px', marginTop: '30px', mb: 2 }}>
+      <Container maxWidth="lg">
         <EnhancedTableToolbar numSelected={selected.size}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         <TableContainer>
           <Table
@@ -806,7 +802,7 @@ export default function CustomTable(props) {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-      </Paper>
+      </Container>
     </Box>
   );
 }
