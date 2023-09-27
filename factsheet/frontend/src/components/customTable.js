@@ -551,7 +551,7 @@ export default function CustomTable(props) {
                   <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
                   <TableCell >
                     {row.institutions.map((v) => (
-                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="secondary"/>
+                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="primary"/>
                     ))}
                   </TableCell>
                   <TableCell >
@@ -572,7 +572,7 @@ export default function CustomTable(props) {
                             </React.Fragment>
                           }
                         >
-                          <Chip color="primary" label={v.label} variant={selected.has(v.label) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v.label)}/>
+                          <Chip size="small" color="primary" label={v.label} variant={selected.has(v.label) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} onClick={(event) => handleClick(event, v.label)}/>
                         </HtmlTooltip>
                       ))}
                   </TableCell>
@@ -778,7 +778,7 @@ export default function CustomTable(props) {
         <EnhancedTableToolbar numSelected={selected.size}  handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ minWidth: 1750 }}
             aria-labelledby="tableTitle"
             size={dense ? 'small' : 'medium'}
           >

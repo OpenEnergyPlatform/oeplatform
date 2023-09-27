@@ -72,7 +72,7 @@ import LinkIcon from '@mui/icons-material/Link';
 
 import Chip from '@mui/material/Chip';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
-
+import Container from '@mui/material/Container';
 
 import '../styles/App.css';
 
@@ -1181,10 +1181,10 @@ function Factsheet(props) {
                 >
                 {scenarios.map((item, i) =>
                   <Tab
-                    label={item.acronym !== '' ? item.acronym.substring(0,30) : 'Scenario ' + (Number(i) + Number(1)) }
+                    label={item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     classes={tabClasses}
-                    style={{ borderTop: '1px solid #cecece', borderLeft: '1px solid #cecece', borderBottom: '1px solid #cecece', marginBottom: '5px',  width:'500px' }}
+                    style={{ border: '1px solid #cecece', marginBottom: '5px',  width:'250px' }}
                   />
                 )}
                 <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1202,7 +1202,7 @@ function Factsheet(props) {
                   <TabPanel
                     value={scenarioTabValue}
                     index={i}
-                    style={{ width: '90%', overflow: 'auto' }}
+                    style={{ width: '100%', overflow: 'auto' }}
                     key={'Scenario_panel_' + item.id}
                   >
                     <Scenario
@@ -1234,70 +1234,94 @@ function Factsheet(props) {
 
 
 const renderBasicInformation = () => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'stretch',
-    flexWrap: 'wrap',
-    padding: '10px',
-  }}>
-    <TextField size="small" style={{  width: '40%',  marginTop: '10px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the name of the study?" variant="outlined" value={studyName} onChange={handleStudyName}/>
-    <div  style={{ marginLeft: '10px', marginTop: '30px'  }}>
-      <HtmlTooltip
-        title={
-          <Typography color="inherit" variant="caption">
-            {'A study is a project with the goal to investigate something.'} <br />
-            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-          </Typography>
-        }
-      >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-      </HtmlTooltip>
-    </div>
-    <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="outlined" value={acronym} onChange={handleAcronym} />
-    <div style={{ marginLeft: '10px', marginTop: '40px'}}>
-      <HtmlTooltip
-        title={
-          <Typography color="inherit" variant="caption">
-            {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'} <br />
-            <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
-          </Typography>
-        }
-      >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-      </HtmlTooltip>
-    </div>
-    <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
-    <div style={{ marginLeft: '10px',  marginRight: '15%', marginTop: '20px'  }}>
-    <HtmlTooltip
-      title={
-        <Typography color="inherit" variant="caption">
-          {'An institution is an organisation that serves a social purpose.'}<br />
-          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
-        </Typography>
-      }
-    >
-      <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-    </HtmlTooltip>
-    </div>
-    <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-    <div style={{ marginTop: '40px'  }}>
-      <HtmlTooltip
-        style={{ marginLeft: '10px' }}
-        placement="top"
-        title={
-          <React.Fragment>
+    <Grid container justifyContent="space-between"
+      alignItems="start"
+      spacing={2}>
+
+      <Grid item xs={3}  style={{ padding: '5px', height:'70px', overflow: "auto" }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name of the study: </b> </span>
+        <span >
+          <HtmlTooltip
+          title={
             <Typography color="inherit" variant="caption">
-              {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-              <br />
-              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
+              {'A study is a project with the goal to investigate something.'} <br />
+              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
             </Typography>
-          </React.Fragment>
-        }
-      >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-      </HtmlTooltip>
-    </div>
-  </div>
+          }
+          >
+            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={9} style={{ paddingTop: '10px', height:'70px', overflow: "auto"  }}>
+        <TextField size="small" id="outlined-basic"  style={{  width: '100%' }} variant="outlined" value={studyName} onChange={handleStudyName}/>
+      </Grid>
+
+      <Grid item xs={3}  style={{ padding: '5px', height:'70px', overflow: "auto" }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
+        <span >
+          <HtmlTooltip
+          title={
+            <Typography color="inherit" variant="caption">
+              {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'} <br />
+              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info from Open Enrgy Ontology (OEO)...</a>
+            </Typography>
+          }
+          >
+           <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={9} style={{ paddingTop: '10px', height:'70px', overflow: "auto"  }}>
+      <TextField  size="small"  style={{  width: '100%' }} id="outlined-basic"  variant="outlined" value={acronym} onChange={handleAcronym} />
+      </Grid>
+
+      <Grid item xs={3}  style={{ padding: '5px', height:'100px', overflow: "auto" }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
+        <span >
+        <HtmlTooltip
+          title={
+            <Typography color="inherit" variant="caption">
+              {'An institution is an organisation that serves a social purpose.'}<br />
+              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info from Open Enrgy Ontology (OEO)...</a>
+            </Typography>
+          }
+        >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+        </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={9} style={{ paddingTop: '10px', height:'100px', overflow: "auto"  }}>
+        <CustomAutocomplete width="100%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} handler={institutionHandler} selectedElements={selectedInstitution}/>
+      </Grid>
+
+
+      <Grid item xs={3}  style={{ padding: '5px', height:'100px', overflow: "auto" }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Contact person: </b> </span>
+        <span >
+          <HtmlTooltip
+            style={{ marginLeft: '10px' }}
+            placement="top"
+            title={
+              <React.Fragment>
+                <Typography color="inherit" variant="caption">
+                  {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+                  <br />
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info from Open Enrgy Ontology (OEO)...</a>
+                </Typography>
+              </React.Fragment>
+            }
+          >
+            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={9} style={{ paddingTop: '10px',  height:'100px', overflow: "auto"  }}>
+      <CustomAutocomplete width="100%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
+      </Grid>
+
+    </Grid>
+    
   );
 
   const renderStudyDetail = () => (
@@ -1435,10 +1459,10 @@ const renderScenariosOverview = () => (
 
     <Grid container justifyContent="space-between"
         alignItems="start"
-        spacing={2} 
-        style={{ width: '95%', margin:'10px', border: '1px solid #80808038' }} >
+        spacing={1} 
+        style={{ marginTop:'10px', border: '1px solid #80808038' }} >
 
-      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px'}}>
+      <Grid item xs={3} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'}}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name: </b> </span>
         <span >
           <HtmlTooltip
@@ -1456,12 +1480,12 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'  }}>
         {v.name}
       </Grid>
 
 
-      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
         <span >
           <HtmlTooltip
@@ -1479,11 +1503,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'  }}>
         {v.acronym} 
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'200px', overflow:'auto' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
         <span >
           <HtmlTooltip
@@ -1501,11 +1525,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'200px', overflow:'auto'  }}>
         {v.abstract}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
         <span >
           <HtmlTooltip
@@ -1523,11 +1547,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'  }}>
         {/* {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)} */}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Years: </b> </span>
         <span >
           <HtmlTooltip
@@ -1545,11 +1569,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'  }}>
       {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto'}}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Regions: </b> </span>
         <span >
           <HtmlTooltip
@@ -1567,11 +1591,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={9} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }}>
         {v.regions.map( (e) => <span> <span> {e.name} </span> <span>  . </span> </span> )}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }} >
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Interacting regions: </b> </span>
         <span >
           <HtmlTooltip
@@ -1589,11 +1613,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038' , height:'40px' }}>
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'100px', overflow:'auto' }}>
         {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'200px', overflow:'auto'}}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Input datasets: </b> </span>
         <span >
           <HtmlTooltip
@@ -1611,11 +1635,11 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038' , height:'40px' }}>
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'200px', overflow:'auto'}}>
         {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', height:'200px' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', height:'200px' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Output datasets: </b> </span>
         <span >
           <HtmlTooltip
@@ -1633,7 +1657,7 @@ const renderScenariosOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', height:'200px', overflow:'auto' }}>
+      <Grid item xs={9} style={{ paddingTop: '0px', height:'200px', overflow:'auto' }}>
        {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>)}
       </Grid>
     </Grid>
@@ -2042,6 +2066,7 @@ function getStepContent(step: number) {
   }
 
   return (
+    <Container maxWidth="lg">
     <div>
       <Grid container
       direction="row"
@@ -2059,12 +2084,13 @@ function getStepContent(step: number) {
           <div id='headerSubStyle'> <span> {mode} </span> / {acronym} </div>
         </div>
         </Grid>
-        <Grid item xs={2} style={{ 'marginLeft': '50px' }}>
-          <div>
-                <CustomSwap handleSwap={handleSwap} />
-          </div >
-        </Grid>
-        <Grid item xs={6} >
+        <Grid item xs={12}>
+          <Grid container
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              >
+          <CustomSwap handleSwap={handleSwap} />
           <div style={{ 'textAlign': 'center' }}>
             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
               <CircularProgress variant="determinate" value={60} size={60} />
@@ -2086,8 +2112,6 @@ function getStepContent(step: number) {
               </Box>
             </Box>
           </div>
-        </Grid>
-        <Grid item xs={3} style={{ 'marginRight': '50px' }}>
           <div style={{ 'textAlign': 'right' }}>
             {mode === 'edit' && <Tooltip title="Save factsheet">
               <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
@@ -2099,7 +2123,8 @@ function getStepContent(step: number) {
               <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
             </Tooltip>
           </div >
-      </Grid>
+          </Grid>
+        </Grid>
         <Grid item xs={12}>
           <Snackbar
             open={openSavedDialog}
@@ -2229,13 +2254,10 @@ function getStepContent(step: number) {
             <div className='wizard'>
                 <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
-                        
-                    <Divider style={{ marginBottom: '40px', marginLeft: '50px', marginRight: '60px' }}/>
-                    <div style={{ marginLeft: '50px', marginRight: '60px' }} >
-                      <CustomTabs
-                        items={items}
-                      />
-                    </div>
+                    <Divider style={{ marginBottom: '40px' }}/>
+                    <CustomTabs
+                      items={items}
+                    />
                     {/* <Stepper activeStep={activeStep}  >
                       {steps.map((label, index) => (
                       <Step key={label} >
@@ -2276,15 +2298,14 @@ function getStepContent(step: number) {
           {mode === "overview" &&
              <Grid container justifyContent="space-between"
              alignItems="start"
-             spacing={2} 
-             style={{ marginTop: '10px', marginLeft:'50px' }}>
+             spacing={2}>
              <Grid item xs={12} >
-               <Divider style={{ marginBottom: '40px', marginRight: '60px' }}/>
+               <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
               </Grid>
               <Grid item xs={12}  >
                <b style={{ color: 'clack', marginLeft:'20px', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
               </Grid>
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym</b> </span>
                 <span >
                   <HtmlTooltip
@@ -2302,11 +2323,11 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} >
+              <Grid item xs={9} >
                 {acronym}
               </Grid>
 
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Contact person(s):</b> </span>
                 <span >
                   <HtmlTooltip
@@ -2324,13 +2345,13 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+              <Grid item xs={9} style={{ paddingTop: '10px' }}>
                 {selectedContactPerson.map((v, i) => (
                            <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
                           ))}
               </Grid>
 
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
                 <span >
                   <HtmlTooltip
@@ -2348,13 +2369,13 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+              <Grid item xs={9} style={{ paddingTop: '10px' }}>
                 {selectedInstitution.map((v, i) => (
                            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
                 ))}
               </Grid>
 
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
                 <span >
                   <HtmlTooltip
@@ -2372,13 +2393,13 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} style={{ paddingTop: '10px' }} >
+              <Grid item xs={9} style={{ paddingTop: '10px' }} >
               {selectedFundingSource.map((v, i) => (
                             <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
                           ))}
               </Grid>
 
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
                 <span >
                   <HtmlTooltip
@@ -2396,13 +2417,13 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+              <Grid item xs={9} style={{ paddingTop: '10px' }}>
                {selectedStudyKewords.map((v, i) => (
                           <span> <span> {v} </span> <span>   <b style={{ fontSize: '24px' }}>.</b></span> </span>
                           ))}
               </Grid>
 
-              <Grid item xs={2} >
+              <Grid item xs={3} >
                 <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
                 <span >
                   <HtmlTooltip
@@ -2420,7 +2441,7 @@ function getStepContent(step: number) {
                   </HtmlTooltip>
                 </span>
               </Grid>
-              <Grid item xs={10} style={{ paddingTop: '10px' }}>
+              <Grid item xs={9} style={{ paddingTop: '10px' }}>
                <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
               </Grid>
               <Grid item xs={12} >
@@ -2434,6 +2455,7 @@ function getStepContent(step: number) {
     </Grid>
     </Grid>
   </div>
+  </Container>
   );
 }
 

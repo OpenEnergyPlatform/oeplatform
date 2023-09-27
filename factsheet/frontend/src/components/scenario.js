@@ -298,8 +298,8 @@ export default function Scenario(props) {
             alignItems="start"
             spacing={2} 
       >
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name</b> </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456' }}> <b>Name</b> </span>
           <span >
             <HtmlTooltip
               title={
@@ -316,12 +316,12 @@ export default function Scenario(props) {
             </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
         </Grid>
 
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Acronym</b>  </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456'}}> <b>Acronym</b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -338,12 +338,12 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
         </Grid>
 
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px'}}>  <b>Storyline </b>  </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456'}}>  <b>Storyline </b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -360,12 +360,12 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
         </Grid>
 
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Spatial regions </b>  </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456'}}> <b>Spatial regions </b>  </span>
           <span >
           <HtmlTooltip
             title={
@@ -382,7 +382,7 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <CustomAutocompleteWithoutAddNew  
             width="95%"
             showSelectedElements={true}
@@ -394,8 +394,8 @@ export default function Scenario(props) {
           />
         </Grid>
 
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px'}}><b>Iinteracting regions</b> </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456'}}><b>Iinteracting regions</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -412,12 +412,12 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <CustomAutocomplete  width="95%" type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
         </Grid>
 
-        <Grid item xs={2} >
-          <span style={{ color: '#294456', marginLeft:'20px'}}><b>Scenario years</b> </span>
+        <Grid item xs={3} >
+          <span style={{ color: '#294456'}}><b>Scenario years</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -434,12 +434,12 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
           <CustomAutocomplete  width="95%" type="scenario year" editHandler={HandleEditScenarioYear} addNewHandler={HandleAddNNewScenarioYear} showSelectedElements={true} selectedElements={data.scenario_years} manyItems optionsSet={scenarioYears} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'scenario_years', data.id)}  />
         </Grid>
          
-        <Grid item xs={2}  >
-          <span style={{ color: '#294456', marginLeft:'20px'}}> <b>Scenario descriptors</b> </span>
+        <Grid item xs={3}  >
+          <span style={{ color: '#294456'}}> <b>Scenario descriptors</b> </span>
           <span >
           <HtmlTooltip
             title={
@@ -456,7 +456,7 @@ export default function Scenario(props) {
           </HtmlTooltip>
           </span>
         </Grid>
-        <Grid item xs={10} >
+        <Grid item xs={9} >
         <CustomTreeViewWithCheckBox 
           showFilter={true} 
           size="300px" 
@@ -471,9 +471,9 @@ export default function Scenario(props) {
         </Grid>
 
           
-        <Grid item xs={2} style={{ marginTop: '10px' }}>
+        <Grid item xs={3} style={{ marginTop: '10px' }}>
           <div>
-            <span style={{ color: '#294456', marginLeft:'20px'}}> <b> Input dataset(s) </b> </span>
+            <span style={{ color: '#294456'}}> <b> Input dataset(s) </b> </span>
             <span >
             <HtmlTooltip
               title={
@@ -502,7 +502,7 @@ export default function Scenario(props) {
           
         </Grid>
 
-        <Grid item xs={10} style={{ marginTop: '10px' }}>
+        <Grid item xs={9} style={{ marginTop: '10px' }}>
           {Object.keys(scenariosInputDatasetsObj).length > 0 &&  scenariosInputDatasetsObj.map((item, index) =>
                 <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
                   <Grid item xs={5} >
@@ -541,9 +541,9 @@ export default function Scenario(props) {
           }
         </Grid>
 
-        <Grid item xs={2} style={{ marginTop: '10px' }}>
+        <Grid item xs={3} style={{ marginTop: '10px' }}>
           <div>
-            <span style={{ color: '#294456', marginLeft:'20px'}}> <b> Output dataset(s) </b> </span>
+            <span style={{ color: '#294456'}}> <b> Output dataset(s) </b> </span>
             <span >
             <HtmlTooltip
               title={
@@ -572,7 +572,7 @@ export default function Scenario(props) {
         
         </Grid>
 
-        <Grid item xs={10} style={{ marginTop: '10px' }}>
+        <Grid item xs={9} style={{ marginTop: '10px' }}>
           {Object.keys(scenariosOutputDatasetsObj).length > 0 && scenariosOutputDatasetsObj.map((item, index) =>
              <Grid container direction="row" spacing={2} justifyContent="space-between" alignItems="start" style={{ marginBottom: '10px' }}>
               <Grid item xs={5} >
