@@ -1254,7 +1254,7 @@ const renderBasicInformation = () => (
         </span>
       </Grid>
       <Grid item xs={9} style={{ paddingTop: '10px', height:'70px', overflow: "auto"  }}>
-        <TextField size="small" id="outlined-basic"  style={{  width: '100%' }} variant="outlined" value={studyName} onChange={handleStudyName}/>
+        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" id="outlined-basic"  style={{  width: '100%' }} variant="outlined" value={studyName} onChange={handleStudyName}/>
       </Grid>
 
       <Grid item xs={3}  style={{ padding: '5px', height:'70px', overflow: "auto" }}>
@@ -1273,7 +1273,7 @@ const renderBasicInformation = () => (
         </span>
       </Grid>
       <Grid item xs={9} style={{ paddingTop: '10px', height:'70px', overflow: "auto"  }}>
-      <TextField  size="small"  style={{  width: '100%' }} id="outlined-basic"  variant="outlined" value={acronym} onChange={handleAcronym} />
+      <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small"  style={{  width: '100%' }} id="outlined-basic"  variant="outlined" value={acronym} onChange={handleAcronym} />
       </Grid>
 
       <Grid item xs={3}  style={{ padding: '5px', height:'100px', overflow: "auto" }}>
