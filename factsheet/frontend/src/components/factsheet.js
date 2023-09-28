@@ -1668,9 +1668,9 @@ const renderPublicationOverview = () => (
     <Grid container justifyContent="space-between"
         alignItems="start"
         spacing={2} 
-        style={{ width: '95%', margin:'10px', border: '1px solid #80808038' }} >
+        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
 
-      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px'}}>
+      <Grid item xs={3} style={{ backgroundColor: '#e3eaef', borderBottom: '1px solid #80808038', height:'100px', overflow:"auto"}}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Report title: </b> </span>
         <span >
           <HtmlTooltip
@@ -1688,12 +1688,12 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
-        ''
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'100px', overflow:"auto"  }}>
+        {report_title !== undefined && report_title}
       </Grid>
 
 
-      <Grid item xs={2} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3} style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'200px', overflow:"auto" }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Authors: </b> </span>
         <span >
           <HtmlTooltip
@@ -1711,11 +1711,14 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
-        ''
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'200px', overflow:"auto"  }}>
+        {selectedAuthors.map((v, i) => (
+            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+
+        ))}
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"  }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>DOI: </b> </span>
         <span >
           <HtmlTooltip
@@ -1733,11 +1736,11 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'40px'  }}>
-        ''
+      <Grid item xs={9} style={{ paddingTop: '10px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"   }}>
+        <span> <span> {doi} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"  }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Date of publication: </b> </span>
         <span >
           <HtmlTooltip
@@ -1755,11 +1758,11 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
-        {/* {v.descriptors.map( (e) =>  <Chip label={e.label} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" />)} */}
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"   }}>
+        <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"  }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Link to study report: </b> </span>
         <span >
           <HtmlTooltip
@@ -1777,11 +1780,11 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'40px'  }}>
-      ''
+      <Grid item xs={9} style={{ paddingTop: '0px', borderBottom: '1px solid #80808038', height:'50px', overflow:"auto"   }}>
+        <a href={link_to_study} style={{ color: "#04678F" }}> <LinkIcon fontSize="large"/> </a>
       </Grid>
 
-      <Grid item xs={2}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'40px'}}>
+      <Grid item xs={3}  style={{ backgroundColor: '#e3eaef', padding: '5px', borderBottom: '1px solid #80808038' , height:'50px', overflow:"auto" }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Citation: </b> </span>
         <span >
           <HtmlTooltip
@@ -1799,8 +1802,8 @@ const renderPublicationOverview = () => (
           </HtmlTooltip>
         </span>
       </Grid>
-      <Grid item xs={10} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'40px' }}>
-        ''
+      <Grid item xs={9} style={{ padding: '5px', borderBottom: '1px solid #80808038', height:'100px', overflow:"auto"  }}>
+        {}
       </Grid>
 
     </Grid>
