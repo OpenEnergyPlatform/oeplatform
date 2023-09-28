@@ -1892,16 +1892,47 @@ class StandaloneMetaEditView(LoginRequiredMixin, View):
 
 
 class PeerReviewView(LoginRequiredMixin, View):
+    """
+        A view handling the peer review of metadata. This view supports loading,
+        parsing, sorting metadata, and handling GET and POST requests for peer review.
+        """
     def load_json(self, schema, table):
+        """
+                Load JSON metadata from the database.
+
+                Args:
+                schema (str): The schema of the table.
+                table (str): The name of the table.
+
+                Returns:
+                dict: Loaded metadata.
+                """
         metadata = load_metadata_from_db(schema, table)
         return metadata
 
     def load_json_schema(self):
-        # Update this if new oemetadata version is released
+        """
+                Load the JSON schema used for validating metadata.
+
+                Note: Update this method if a new oemetadata version is released.
+
+                Returns:
+                dict: JSON schema.
+                """
         json_schema = OEMETADATA_V160_SCHEMA
         return json_schema
 
     def parse_keys(self, val, old=""):
+        """
+                Recursively parse keys from a nested dictionary or list and return them as a list of dictionaries.
+
+                Args:
+                val (dict or list): The input dictionary or list to parse.
+                old (str, optional): The prefix for nested keys. Defaults to an empty string.
+
+                Returns:
+                list: A list of dictionaries, each containing 'field' and 'value' keys.
+                """
         lines = []
         if isinstance(val, dict):
             for k in val.keys():
@@ -1928,6 +1959,10 @@ class PeerReviewView(LoginRequiredMixin, View):
         Note:
         The categories spatial & temporal are often combined during visualization.
 
+        Args:
+        schema (str): The schema of the table.
+        table (str): The name of the table.
+
         >>> Example return:
             {
                 "general": [
@@ -1945,7 +1980,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "license": [...],
                 "contributor": [...],
                 "resource": [...]
-            }
+
         """
 
         metadata = self.load_json(schema, table)
@@ -1999,10 +2034,16 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def get_all_field_descriptions(self, json_schema, prefix=""):
         """
-        Collects the field title, descriptions, examples and badge information
-        for each field of the oemetadata from the json schema and prepares them
-        so that the values can be easily processed or used. Used to populate
-        the reviewer box.
+        Collects the field title, descriptions, examples, and badge information
+        for each field of the oemetadata from the JSON schema and prepares them
+        for further processing.
+
+        Args:
+        json_schema (dict): The JSON schema to extract field descriptions from.
+        prefix (str, optional): The prefix for nested keys. Defaults to an empty string.
+
+        Returns:
+        dict: A dictionary containing field descriptions, examples, and other information.
         """
 
         field_descriptions = {}
@@ -2036,6 +2077,18 @@ class PeerReviewView(LoginRequiredMixin, View):
         return field_descriptions
 
     def get(self, request, schema, table, review_id=None):
+        """
+                Handle GET requests for peer review. Loads necessary data and renders the review template.
+
+                Args:
+                request (HttpRequest): The incoming HTTP GET request.
+                schema (str): The schema of the table.
+                table (str): The name of the table.
+                review_id (int, optional): The ID of the review. Defaults to None.
+
+                Returns:
+                HttpResponse: Rendered HTML response.
+                """
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
@@ -2100,11 +2153,8 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def post(self, request, schema, table, review_id=None):
         """
-        Handel reviews submitted by the reviewer.
-        - Creates (Save) Reviews in the PeerReview table
-        - Update the review finished attribute in the dataedit.Tables table indicating
-          table can be moved from model draft topic
-
+        Handle POST requests for peer review. Creates or updates reviews in the PeerReview table
+        and updates the review status of the table.
 
         Missing parts:
         - once the opr is finished (all field reviews agreed on)
@@ -2113,6 +2163,19 @@ class PeerReviewView(LoginRequiredMixin, View):
                 - is field filled in?
                 - calculate the badge by comparing filled fields
                   and the badges form metadata schema
+
+        Args:
+        request (HttpRequest): The incoming HTTP POST request.
+        schema (str): The schema of the table.
+        table (str): The name of the table.
+        review_id (int, optional): The ID of the review. Defaults to None.
+
+        Returns:
+        HttpResponse: Rendered HTML response.
+
+        Raises:
+        JsonResponse: If any error occurs, a JsonResponse containing the error message is raised.
+
         """
         context = {}
         if request.method == "POST":
@@ -2176,7 +2239,23 @@ class PeerReviewView(LoginRequiredMixin, View):
 
 
 class PeerRreviewContributorView(PeerReviewView):
+    """
+        A view handling the contributor's side of the peer review process.
+        This view supports rendering the review template and handling GET and POST requests for contributor's review.
+        """
     def get(self, request, schema, table, review_id):
+        """
+                Handle GET requests for contributor's review. Loads necessary data and renders the contributor review template.
+
+                Args:
+                request (HttpRequest): The incoming HTTP GET request.
+                schema (str): The schema of the table.
+                table (str): The name of the table.
+                review_id (int): The ID of the review.
+
+                Returns:
+                HttpResponse: Rendered HTML response for contributor review.
+                """
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
         table_obj = Table.load(peer_review.schema, peer_review.table)
@@ -2229,10 +2308,25 @@ class PeerRreviewContributorView(PeerReviewView):
 
     def post(self, request, schema, table, review_id):
         """
-        Missing parts:
-        - merge contributor field review and reviewer field review
-        - ???
-        """
+                Handle POST requests for contributor's review. Merges and updates the review data in the PeerReview table.
+
+                Missing parts:
+                    - merge contributor field review and reviewer field review
+                    - ???
+
+                Args:
+                request (HttpRequest): The incoming HTTP POST request.
+                schema (str): The schema of the table.
+                table (str): The name of the table.
+                review_id (int): The ID of the review.
+
+                Returns:
+                HttpResponse: Rendered HTML response for contributor review.
+
+                Note:
+                This method has some missing parts regarding the merging of contributor and reviewer field review.
+                """
+
         context = {}
         if request.method == "POST":
             review_data = json.loads(request.body)

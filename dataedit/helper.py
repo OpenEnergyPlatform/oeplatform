@@ -1,4 +1,19 @@
 def merge_field_reviews(current_json, new_json):
+    """
+        Merge reviews from contributors and reviewers into a single JSON object.
+
+        Args:
+        current_json (dict): The current JSON object containing reviewer's reviews.
+        new_json (dict): The new JSON object containing contributor's reviews.
+
+        Returns:
+        dict: The merged JSON object containing both contributor's and reviewer's reviews.
+
+        Note:
+        If the same key is present in both the contributor's and reviewer's reviews,
+        the function will merge the field evaluations. Otherwise, it will create a new entry
+        in the Review-Dict.
+        """
     merged_json = new_json.copy()
     review_dict = {}
 
@@ -34,6 +49,22 @@ def merge_field_reviews(current_json, new_json):
 
 
 def process_review_data(review_data, metadata, categories):
+    """
+        Process the review data and update the metadata with the latest reviews and suggestions.
+
+        Args:
+        review_data (list): A list of dictionaries containing review data for each field.
+        metadata (dict): The original metadata object that needs to be updated.
+        categories (list): A list of categories in the metadata.
+
+        Returns:
+        dict: A state dictionary containing the state of each field after processing the review data.
+
+        Note:
+        The function sorts the fieldReview entries by timestamp (newest first) and updates the metadata
+        with the latest reviewer suggestions, comments, and new values. The resulting state dictionary
+        indicates the state of each field after processing.
+        """
     state_dict = {}
 
     for review in review_data:
