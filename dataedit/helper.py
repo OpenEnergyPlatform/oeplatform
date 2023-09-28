@@ -84,3 +84,34 @@ def process_review_data(review_data, metadata, categories):
 
     return state_dict
 
+def get_review_for_key(key, review_data):
+    for review in review_data["reviewData"]["reviews"]:
+        if review["key"] == key:
+            return review["fieldReview"].get("newValue", None)
+    return None
+
+def recursive_update(metadata, review_data):
+    for review_key in review_data["reviewData"]["reviews"]:
+        keys = review_key["key"].split('.')
+
+        if isinstance(review_key["fieldReview"], list):
+            for field_review in review_key["fieldReview"]:
+                new_value = field_review.get("newValue", None)
+                if new_value is not None and new_value != "":
+                    set_nested_value(metadata, keys, new_value)
+        else:
+            new_value = review_key["fieldReview"].get("newValue", None)
+            if new_value is not None and new_value != "":
+                set_nested_value(metadata, keys, new_value)
+
+def set_nested_value(metadata, keys, value):
+    for key in keys[:-1]:
+        if key.isdigit():
+            key = int(key)
+        metadata = metadata[key]
+    last_key = keys[-1]
+    if last_key.isdigit():
+        last_key = int(last_key)
+    metadata[last_key] = value
+
+
