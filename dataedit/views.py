@@ -39,8 +39,8 @@ from django.contrib import messages
 from api import actions as actions
 from api.connection import _get_engine, create_oedb_session
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
-from dataedit.helper import merge_field_reviews, process_review_data
-from dataedit.metadata import load_metadata_from_db
+from dataedit.helper import merge_field_reviews, process_review_data, recursive_update
+from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table
@@ -2153,35 +2153,53 @@ class PeerReviewView(LoginRequiredMixin, View):
 
     def post(self, request, schema, table, review_id=None):
         """
-        Handle POST requests for peer review. Creates or updates reviews in the PeerReview table
-        and updates the review status of the table.
+            Handle POST requests for submitting reviews by the reviewer.
 
-        Missing parts:
-        - once the opr is finished (all field reviews agreed on)
+            This method:
+            - Creates (or saves) reviews in the PeerReview table.
+            - Updates the review finished attribute in the dataedit.Tables table, indicating
+              that the table can be moved from the model draft topic.
+
+            Missing parts:
+            - once the opr is finished (all field reviews agreed on)
             - merge field review results to metadata on table
             - awarde a badge
                 - is field filled in?
                 - calculate the badge by comparing filled fields
                   and the badges form metadata schema
 
-        Args:
-        request (HttpRequest): The incoming HTTP POST request.
-        schema (str): The schema of the table.
-        table (str): The name of the table.
-        review_id (int, optional): The ID of the review. Defaults to None.
+            Args:
+            request (HttpRequest): The incoming HTTP POST request.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
+            review_id (int, optional): The ID of the review. Defaults to None.
 
-        Returns:
-        HttpResponse: Rendered HTML response.
+            Returns:
+            HttpResponse: Rendered HTML response for the review.
 
-        Raises:
-        JsonResponse: If any error occurs, a JsonResponse containing the error message is raised.
+            Raises:
+            JsonResponse: If any error occurs, a JsonResponse containing the error message is raised.
 
-        """
+            Note:
+            - There are some missing parts in this method. Once the review process is finished
+              (all field reviews agreed on), it should merge field review results to metadata on the table
+              and award a badge based on certain criteria.
+            - A notification should be sent to the user if he/she can't review tables
+              for which he/she is the table holder (TODO).
+            - After a review is finished, the table's metadata is updated, and the table
+              can be moved to a different schema or topic (TODO).
+            """
+
         context = {}
         if request.method == "POST":
             # get the review data and additional application metadata
             # from user peer review submit/save
             review_data = json.loads(request.body)
+            if review_id:
+                contributor_review = PeerReview.objects.filter(id=review_id).first()
+                if contributor_review:
+                    contributor_review_data = contributor_review.review.get("reviews", [])
+                    review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
             # The type can be "save" or "submit" as this triggers different behavior
             review_post_type = review_data.get("reviewType")
@@ -2231,6 +2249,12 @@ class PeerReviewView(LoginRequiredMixin, View):
             if review_finished is True:
                 review_table = Table.load(schema=schema, table=table)
                 review_table.set_is_reviewed()
+                metadata = self.load_json(schema, table)
+
+                recursive_update(metadata, review_data)
+
+                save_metadata_to_db(schema, table, metadata)
+
                 # TODO: also update reviewFinished in review datamodel json
                 # logging.INFO(f"Table {table.name} is now reviewed and can be moved
                 # to the destination schema.")
