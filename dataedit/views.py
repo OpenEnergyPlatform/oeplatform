@@ -2336,7 +2336,6 @@ class PeerRreviewContributorView(PeerReviewView):
 
                 Missing parts:
                     - merge contributor field review and reviewer field review
-                    - ???
 
                 Args:
                 request (HttpRequest): The incoming HTTP POST request.
