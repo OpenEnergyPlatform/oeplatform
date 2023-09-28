@@ -37,11 +37,11 @@ class Tagable(models.Model):
 
 class Schema(Tagable):
     """
-       Represents a schema in the database.
+    Represents a schema in the database.
 
-       Attributes:
-       name (str): The name of the schema. Must be unique.
-       """
+    Attributes:
+    name (str): The name of the schema. Must be unique.
+    """
 
     class Meta:
         unique_together = (("name"),)
@@ -49,17 +49,17 @@ class Schema(Tagable):
 
 class Table(Tagable):
     """
-        Represents a table within a schema in the database.
+    Represents a table within a schema in the database.
 
-        Attributes:
-        schema (Schema): The schema to which the table belongs.
-        search (SearchVectorField): A field for full-text search.
-        oemetadata (JSONField): A field to store oemetadata related to the table.
-        is_reviewed (BooleanField): A flag indicating whether the table is reviewed.
+    Attributes:
+    schema (Schema): The schema to which the table belongs.
+    search (SearchVectorField): A field for full-text search.
+    oemetadata (JSONField): A field to store oemetadata related to the table.
+    is_reviewed (BooleanField): A flag indicating whether the table is reviewed.
 
-        Note:
-        The oemetadata field helps avoid performance issues due to JSON string parsing.
-        """
+    Note:
+    The oemetadata field helps avoid performance issues due to JSON string parsing.
+    """
 
     schema = models.ForeignKey(Schema, on_delete=models.CASCADE)
     search = SearchVectorField(default="")
@@ -71,18 +71,18 @@ class Table(Tagable):
     @classmethod
     def load(cls, schema, table):
         """
-                Load a table object from the database given its schema and table name.
+        Load a table object from the database given its schema and table name.
 
-                Args:
-                schema (str): The name of the schema.
-                table (str): The name of the table.
+        Args:
+        schema (str): The name of the schema.
+        table (str): The name of the table.
 
-                Returns:
-                Table: The loaded table object.
+        Returns:
+        Table: The loaded table object.
 
-                Raises:
-                DoesNotExist: If no table with the given schema and name exists in the database.
-                """
+        Raises:
+        DoesNotExist: If no table with the given schema and name exists in the database.
+        """
 
         table_obj = Table.objects.get(
             name=table, schema=Schema.objects.get_or_create(name=schema)[0]
@@ -92,8 +92,8 @@ class Table(Tagable):
 
     def set_is_reviewed(self):
         """
-                Mark the table as reviewed and save the change to the database.
-                """
+        Mark the table as reviewed and save the change to the database.
+        """
         self.is_reviewed = True
         self.save()
 
@@ -126,19 +126,19 @@ class Filter(models.Model):
 
 class PeerReview(models.Model):
     """
-        Represents a peer review in the database.
+    Represents a peer review in the database.
 
-        Attributes:
-        table (CharField): Name of the table being reviewed.
-        schema (CharField): Name of the schema where the table is located.
-        reviewer (ForeignKey): The user who reviews.
-        contributor (ForeignKey): The user who contributes.
-        is_finished (BooleanField): Whether the review is finished.
-        date_started (DateTimeField): When the review started.
-        date_submitted (DateTimeField): When the review was submitted.
-        date_finished (DateTimeField): When the review finished.
-        review (JSONField): The review data in JSON format.
-        """
+    Attributes:
+    table (CharField): Name of the table being reviewed.
+    schema (CharField): Name of the schema where the table is located.
+    reviewer (ForeignKey): The user who reviews.
+    contributor (ForeignKey): The user who contributes.
+    is_finished (BooleanField): Whether the review is finished.
+    date_started (DateTimeField): When the review started.
+    date_submitted (DateTimeField): When the review was submitted.
+    date_finished (DateTimeField): When the review finished.
+    review (JSONField): The review data in JSON format.
+    """
 
     table = CharField(max_length=1000, null=False)
     schema = CharField(max_length=1000, null=False)
@@ -407,7 +407,7 @@ class PeerReviewManager(models.Model):
 
     def set_next_reviewer(self):
         """
-        Set the order on which peer will be requred to perform a action to
+        Set the order on which peer will be required to perform a action to
         continue with the process.
         """
         # TODO:check for user identifies as ...
