@@ -7,7 +7,7 @@ from dataedit.metadata.v1_5 import TEMPLATE_V1_5
 from .error import MetadataException
 
 METADATA_TEMPLATE = {
-    5: TEMPLATE_V1_5, 
+    5: TEMPLATE_V1_5,
     4: TEMPLATE_V1_4,
     3: TEMPLATE_v1_3,
 }
@@ -117,6 +117,7 @@ def assign_content_values_to_metadata(content, template=None, parent=""):
 
     return template
 
+
 def save_metadata_to_db(schema, table, updated_metadata):
     """
     Save updated metadata for a specific table in the OEP database.
@@ -142,6 +143,7 @@ def save_metadata_to_db(schema, table, updated_metadata):
     # Save the updated table object
     table_obj.save()
 
+
 def load_metadata_from_db(schema, table):
     """
     Load metadata for a specific table from the OEP database.
@@ -160,11 +162,12 @@ def load_metadata_from_db(schema, table):
     """
 
     from dataedit.models import Table
-    
-    # TODO maybe change this function to load metadata from Table.oemetadata(JSONB) field? or keep old functionality?
+
+    # TODO maybe change this function to load metadata from Table.oemetadata
+    # (JSONB)field? or keep old functionality?
     # metadata = actions.get_comment_table(schema, table)
-    metadata = Table.load(schema=schema, table=table).oemetadata  
-    
+    metadata = Table.load(schema=schema, table=table).oemetadata
+
     metadata = parse_meta_data(metadata, schema, table)
     return metadata
 
