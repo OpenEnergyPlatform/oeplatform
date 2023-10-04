@@ -64,16 +64,16 @@ export default function CustomTabs(props) {
     <Box >
       <Box className={classes.root}>
         <Tabs value={value} 
-              onChange={handleChange} 
-              allowScrollButtonsMobile 
-              scrollButtons 
-              classes={'tabs'} 
-              variant="fullWidth"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
+          onChange={handleChange} 
+          allowScrollButtonsMobile 
+          scrollButtons 
+          classes={'tabs'} 
+          variant="fullWidth"
+          TabIndicatorProps={{
+            style: {
+              display: 'none'
+            }
+          }}
         >
           {items.titles.map((item, index) => {
             return <Tab label={item} {...arrayProps(index)}  sx={{ textTransform :"none" }} classes={tabClasses}/>;
