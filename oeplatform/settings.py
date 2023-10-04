@@ -56,6 +56,10 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "factsheet",
+    "corsheaders",
+    "owlready2",
+    "compressor",
 )
 
 MIDDLEWARE = (
@@ -69,7 +73,8 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-    "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware"
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -77,9 +82,8 @@ ROOT_URLCONF = "oeplatform.urls"
 EXTERNAL_URLS = {
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/",
-    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/api/OEP_API_tutorial_part1/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",
-    # noqa E501
+    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
+    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
     "readthedocs": "https://oeplatform.readthedocs.io/en/latest/?badge=latest",
     "compendium": "https://openenergyplatform.github.io/organisation/",
 }
@@ -112,7 +116,10 @@ TEMPLATES = [
     }
 ]
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000", 
+    "http://127.0.0.1:3000"
+    ]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
@@ -122,6 +129,7 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -159,3 +167,16 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+STATICFILES_FINDERS = {
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+}
+
+
+# https://django-compressor.readthedocs.io/en/stable/settings.html
+COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = True
+COMPRESS_REBUILD_TIMEOUT = 0
+COMPRESS_MTIME_DELAY = 0

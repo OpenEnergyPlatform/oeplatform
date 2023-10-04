@@ -39,7 +39,7 @@ Before see How to [Contribute](https://github.com/OpenEnergyPlatform/oeplatform/
 1. Update the oeplatform/versions/changelogs/ [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md) (see the examples of previous releases)
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`
-   - Update `VERSION` with lastest version number
+   - Update version with `bumpversion --allow-dirty [minor|patch]`
 1. Deploy release branch on TOEP.
    - Test the changes
    - Create a hotfix and merge changes into the release branch

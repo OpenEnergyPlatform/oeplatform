@@ -12,7 +12,7 @@ var current_review = {
   "reviewFinished": false,
   "grantedBadge": null,
   "metaMetadata": {
-    "reviewVersion": "OEP-0.0.1",
+    "reviewVersion": "OEP-0.1.0",
     "metadataLicense": {
       "name": "CC0-1.0",
       "title": "Creative Commons Zero v1.0 Universal",
@@ -22,7 +22,6 @@ var current_review = {
 };
 
 // BINDS
-
 // Submit field review
 $('#submitButton').bind('click', saveEntrances);
 $('#submitButton').bind('click', hideReviewerOptions);
@@ -112,7 +111,6 @@ function getErrorMsg(response) {
       'Upload failed: ' + JSON.parse(response.responseJSON).error
     );
   } catch (e) {
-    console.log(response)
     var response_msg = response.responseText;
   }
   return response_msg;
@@ -133,6 +131,7 @@ function peerReview(config) {
   //   })();
   selectNextField();
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -186,6 +185,9 @@ function getFieldState(fieldKey) {
 }
 
 function click_field(fieldKey, fieldValue, category) {
+  // Check if the category tab needs to be switched
+  switchCategoryTab(category);
+
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
   selectedField = fieldKey;
   selectedFieldValue = fieldValue;
@@ -216,15 +218,17 @@ function click_field(fieldKey, fieldValue, category) {
   } else {
     fieldDescriptionsElement.textContent = "No description found";
   }
-  // console.log("Category:", category, "Field key:", cleanedFieldKey, "Data:", fieldDescriptionsData[cleanedFieldKey]);
   const fieldState = getFieldState(fieldKey);
-
   if (fieldState === 'ok' || !fieldState) {
     document.getElementById("ok-button").disabled = true;
     document.getElementById("rejected-button").disabled = true;
   } else if (fieldState === 'suggestion' || fieldState === 'rejected') {
     document.getElementById("ok-button").disabled = false;
     document.getElementById("rejected-button").disabled = false;
+  } else {
+    document.getElementById("ok-button").disabled = false;
+    document.getElementById("rejected-button").disabled = false;
+    document.getElementById("suggestion-button").disabled = false;
   }
 
   // Set selected / not selected style on metadata fields
@@ -238,7 +242,7 @@ function click_field(fieldKey, fieldValue, category) {
   }
 
   clearInputFields();
-
+  hideReviewerOptions();
 }
 
 function clearInputFields() {
@@ -246,7 +250,39 @@ function clearInputFields() {
   document.getElementById("commentarea").value = "";
 }
 
+/**
+ * Switch to the category tab if needed
+ */
+function switchCategoryTab(category) {
+  const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
+  const tabIdForCategory = getCategoryToTabIdMapping()[category];
+  console.log("tabID", tabIdForCategory);
+  if (currentTab.getAttribute('id') !== tabIdForCategory) {
+    // The clicked field does not belong to the current tab, switch to the next tab
+    const targetTab = document.getElementById(tabIdForCategory);
+    if (targetTab) {
+      // The target tab exists, click the tab link to switch to it
+      targetTab.click();
+    }
+  }
+}
 
+/**
+ * Function to provide the mapping of category to the correct tab ID
+ */
+function getCategoryToTabIdMapping() {
+  // Define the mapping of category to tab ID
+  const mapping = {
+    'general': 'general-tab',
+    'spatial': 'spatiotemporal-tab',
+    'temporal': 'spatiotemporal-tab',
+    'source': 'source-tab',
+    'license': 'license-tab',
+    'contributor': 'contributor-tab',
+    'resource': 'resource-tab',
+  };
+  return mapping;
+}
 
 /**
  * Creates List of all fields from html elements
@@ -317,15 +353,13 @@ function renderSummaryPageFields() {
       let field_id = field.id.slice(6);
       const fieldValue = $(field).text();
       const fieldState = getFieldState(field_id);
-      console.log(field_id + fieldState)
-      const fieldCategory = field.getAttribute('data-category');  // Получаем категорию поля
+      const fieldCategory = field.getAttribute('data-category');
       if (fieldState === 'ok') {
         acceptedFields.push({ field_id, fieldValue, fieldCategory });
       }
       // TODO: The following line duplicates enties in the summary tab
       // else if (fieldState === 'suggestion' || fieldState === 'rejected') {
       // missingFields.push({ field_id, fieldValue, fieldCategory });
-      // console.log("Hello", missingFields)
       // }
     }
   }
@@ -436,6 +470,7 @@ function renderSummaryPageFields() {
   }
 
   updateSummaryTable();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -451,9 +486,31 @@ function createFieldList(fields) {
   `;
 }
 
-// Function to show the error toast
-function showErrorToast(liveToast) {
-  liveToast.show();
+// // Function to show the error toast
+// function showErrorToast(liveToast) {
+//   liveToast.show();
+// }
+
+function showToast(title, message, type) {
+  var toast = document.getElementById('liveToast');
+  var toastTitle = document.getElementById('toastTitle');
+  var toastBody = document.getElementById('toastBody');
+
+  // Update the toast's header and body based on the type
+  if (type === 'error') {
+    toast.classList.remove('bg-success');
+    toast.classList.add('bg-danger');
+  } else if (type === 'success') {
+    toast.classList.remove('bg-danger');
+    toast.classList.add('bg-success');
+  }
+
+  // Set the title and body text
+  toastTitle.textContent = title;
+  toastBody.textContent = message;
+
+  var bsToast = new bootstrap.Toast(toast);
+  bsToast.show();
 }
 
 
@@ -461,25 +518,32 @@ function showErrorToast(liveToast) {
  * Saves field review to current review list
  */
 function saveEntrances() {
-
-  if (selectedState != "ok") {
+  if (selectedState !== "ok") {
     // Get the valuearea element
     const valuearea = document.getElementById('valuearea');
-    const liveToastBtn = document.getElementById('liveToastBtn');
-    const liveToast = new bootstrap.Toast(document.getElementById('liveToast'));
+
     // const validityState = valuearea.validity;
 
     // Validate the valuearea before proceeding
     if (valuearea.value.trim() === '') {
       valuearea.setCustomValidity('Value suggestion is required');
-      showErrorToast(liveToast);
+      showToast("Error", "The value suggestion text field is required to save the field review!", "error");
       return; // Stop execution if validation fails
     } else {
       valuearea.setCustomValidity('');
     }
 
     valuearea.reportValidity();
+  } else if (initialReviewerSuggestions[selectedField]) {  // Check if the state is "ok" and if there's a valid suggestion
+    var fieldElement = document.getElementById("field_" + selectedField);
+    if (fieldElement) {
+      var valueElement = fieldElement.querySelector('.value');
+      if (valueElement) {
+        valueElement.innerText = initialReviewerSuggestions[selectedField];
+      }
+    }
   }
+
 
   if (Object.keys(current_review["reviews"]).length === 0 &&
     current_review["reviews"].constructor === Object) {
@@ -502,6 +566,7 @@ function saveEntrances() {
           "user": "oep_contributor", // TODO put actual username
           "role": "contributor",
           "contributorValue": selectedFieldValue,
+          "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
           "comment": document.getElementById("commentarea").value,
           "reviewerSuggestion": document.getElementById("valuearea").value,
           "state": selectedState,
@@ -528,6 +593,7 @@ function saveEntrances() {
             "user": "oep_contributor", // TODO put actual username
             "role": "contributor",
             "contributorValue": selectedFieldValue,
+            "newValue": selectedState === "ok" ? initialReviewerSuggestions[selectedField] : "",
             "comment": document.getElementById("commentarea").value,
             "reviewerSuggestion": document.getElementById("valuearea").value,
             "state": selectedState,
@@ -547,6 +613,7 @@ function saveEntrances() {
   checkReviewComplete();
   selectNextField();
   renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
 }
 
 /**
@@ -566,6 +633,7 @@ function checkReviewComplete() {
     }
   }
   $('#submit_summary').removeClass('disabled');
+  showToast("Success", "You have reviewed all fields an can submit the review to get feedback!", 'success');
 }
 
 
@@ -611,6 +679,28 @@ function updateSubmitButtonColor() {
     $(submitButton).addClass('btn-danger');
   }
 }
+
+
+function updateTabProgressIndicatorClasses() {
+  const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
+
+  for (let i = 0; i < tabNames.length; i++) {
+    let tabName = tabNames[i];
+    let tab = document.getElementById(tabName + '-tab');
+    if (!tab) continue;
+
+    let fieldsInTab = Array.from(document.querySelectorAll('#' + tabName + ' .field'));
+
+    let allOk = fieldsInTab.every(field => field.classList.contains('field-ok'));
+
+    if (allOk) {
+      tab.classList.add('status--done');
+    } else {
+      tab.classList.add('status');
+    }
+  }
+}
+
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];

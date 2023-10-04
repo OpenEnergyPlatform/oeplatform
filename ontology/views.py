@@ -2,15 +2,18 @@ import os
 import re
 from collections import defaultdict
 
+from pathlib import Path
+
 from django.shortcuts import Http404, HttpResponse, redirect, render
 from django.views import View
 from rdflib import Graph
 
-from oeplatform.settings import ONTOLOGY_FOLDER
+from oeplatform.settings import ONTOLOGY_FOLDER, ONTOLOGY_ROOT
 
 
 def collect_modules(path):
     modules = dict()
+
     for file in os.listdir(path):
         if not os.path.isdir(os.path.join(path, file)):
             match = re.match(r"^(?P<filename>.*)\.(?P<extension>\w+)$", file)
@@ -32,9 +35,12 @@ def collect_modules(path):
 
 class OntologyVersion(View):
     def get(self, request, ontology="oeo", version=None):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
+            print("test")
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         print(versions)
         if not version:
             version = max(
@@ -51,20 +57,22 @@ class OntologyVersion(View):
 
 class OntologyOverview(View):
     def get(self, request, ontology, module_or_id=None, version=None, imports=False):
-        if not os.path.exists(f"{ONTOLOGY_FOLDER}/{ontology}"):
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
+        if not onto_base_path.exists():
             raise Http404
-        versions = os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")
+        versions = os.listdir(onto_base_path)
         if not version:
             version = max(
                 (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
             )
 
-        path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}"
+        path = onto_base_path / version
         # This is temporary (macOS related)
         file = "oeo-full.owl"
-        Ontology_URI = os.path.join(path, file)
+        Ontology_URI = path / file
         g = Graph()
-        g.parse(Ontology_URI)
+        g.parse(Ontology_URI.as_posix())
 
         q_global = g.query(
             """
@@ -231,25 +239,29 @@ class OntologyOverview(View):
                 if module_or_id in classes_notes.keys():
                     class_notes = classes_notes[module_or_id]
 
-                return render(request, "ontology/class.html", dict(
-                    class_id=module_or_id,
-                    class_name=class_name,
-                    sub_classes=sub_classes,
-                    super_classes=super_classes,
-                    class_definitions=class_definitions,
-                    class_notes=class_notes,
-                ))
+                return render(
+                    request,
+                    "ontology/class.html",
+                    dict(
+                        class_id=module_or_id,
+                        class_name=class_name,
+                        sub_classes=sub_classes,
+                        super_classes=super_classes,
+                        class_definitions=class_definitions,
+                        class_notes=class_notes,
+                    ),
+                )
             else:
-                main_module = collect_modules(f"{ONTOLOGY_FOLDER}/{ontology}/{version}")
+                main_module = collect_modules(path) #TODO fix varname - not clear what path this is
                 main_module_name = list(main_module.keys())[0]
                 main_module = main_module[main_module_name]
                 main_module["name"] = main_module_name
                 submodules = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules"
+                    (path / "modules")
                 )
                 # Collect all file names
                 imports = collect_modules(
-                    f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports"
+                    path / "imports"
                 )
 
                 return render(
@@ -307,19 +319,21 @@ class OntologyStatics(View):
         :return:
         """
 
+        onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+
         if not extension:
             extension = "owl"
         if not version:
             version = max(
-                (d for d in os.listdir(f"{ONTOLOGY_FOLDER}/{ontology}")),
+                (d for d in os.listdir(onto_base_path)),
                 key=lambda d: [int(x) for x in d.split(".")],
             )
         if imports:
             file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/imports/{file}.{extension}"
+                 onto_base_path / imports / (file + "." + extension) 
             )
         else:
-            file_path = f"{ONTOLOGY_FOLDER}/{ontology}/{version}/{file}.{extension}"
+            file_path = onto_base_path / version / (file + "." + extension)
         if os.path.exists(file_path):
             with open(file_path, "br") as f:
                 response = HttpResponse(
@@ -331,7 +345,7 @@ class OntologyStatics(View):
                 return response
         else:
             file_path = (
-                f"{ONTOLOGY_FOLDER}/{ontology}/{version}/modules/{file}.{extension}"
+                onto_base_path / version / "modules" / (file + "." + extension)
             )
             if not os.path.exists(file_path):
                 raise Http404

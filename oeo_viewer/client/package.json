@@ -6,8 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node dev-server.js",
-    "build": "parcel build --no-source-maps source-code/index.html --out-dir ../static/oeo_viewer && npm run build:clean",
-    "build:clean": "cd ../static/oeo_viewer && mv scripts*.js main.min.js && mv scripts*.css main.min.css"
+    "build": "cd .. && python create_graph.py && rm -r static && mkdir static && cd static && mkdir oeo_viewer && cd ../client && parcel build source-code/index.html --out-dir ../static/oeo_viewer"
   },
   "keywords": [
     "Graph"
@@ -26,6 +25,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/styles": "^4.11.4",
+    "@mui/material": "^5.14.3",
     "@react-spring/web": "^9.2.4",
     "@types/react": "^17.0.15",
     "babel-polyfill": "^6.26.0",

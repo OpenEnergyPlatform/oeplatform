@@ -14,7 +14,6 @@ class DetachMiddleware:
             and not request.path.startswith("/api")
             and not request.user.is_anonymous
         ):
-
             if not request.user.is_native:
                 if not (
                     request.path == DETACH_PATH or request.path.startswith("/logout")

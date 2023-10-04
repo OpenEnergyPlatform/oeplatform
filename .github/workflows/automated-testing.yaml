@@ -68,6 +68,13 @@ jobs:
         run: |
           psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS sandbox" oedb
           psql -h localhost -p 5432 -U postgres -c "CREATE SCHEMA IF NOT EXISTS _sandbox" oedb
+      - name: OEO-Integration & Test data
+        run: |
+          mkdir -p ontologies/oeo/1/
+          mkdir -p ontologies/oeo/1/imports
+          mkdir -p ontologies/oeo/1/modules
+          wget https://openenergy-platform.org/ontology/oeo/releases/oeo-full.owl -P ontologies/oeo/1/
+
       - name: Migrations & User creation
         run: |
           cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
@@ -78,7 +85,8 @@ jobs:
       - name: Create API token
         run: |
           echo LOCAL_OEP_TOKEN=`python manage.py shell -c "from login.models import Token; print(Token.objects.filter(user__name='test').first().key)"` >> $GITHUB_ENV
-      
+      - name: Cache offline-compress & cache busting 
+        run: python manage.py compress
       - name: Start OEP
         run: python manage.py runserver 8000 &
 
