@@ -551,7 +551,7 @@ export default function CustomTable(props) {
                   <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell>
                   <TableCell >
                     {row.institutions.map((v) => (
-                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="primary"/>
+                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small"/>
                     ))}
                   </TableCell>
                   <TableCell >
