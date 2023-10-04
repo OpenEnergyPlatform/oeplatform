@@ -56,6 +56,9 @@ INSTALLED_APPS = (
     "fontawesome_5",
     "django_better_admin_arrayfield",
     "oeo_viewer",
+    "factsheet",
+    "corsheaders",
+    "owlready2",
     "compressor",
 )
 
@@ -70,7 +73,8 @@ MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
-    "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware"
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -112,7 +116,10 @@ TEMPLATES = [
     }
 ]
 
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000", 
+    "http://127.0.0.1:3000"
+    ]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
@@ -122,6 +129,7 @@ try:
     ONTOLOGY_FOLDER  # noqa
 except NameError:
     ONTOLOGY_FOLDER = "/tmp"
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
