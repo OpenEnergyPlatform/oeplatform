@@ -42,6 +42,10 @@ For the creation of spatial objects we use [PostGIS](https://postgis.net/install
 
 ### 1.2 Install Apache Jena Fuseki
 
+!!! note
+    - Skip the installation if your developement task is not aimed at the OEKG. 
+    - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
+
 1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
 (for other versions please check [here](https://jena.apache.org/download/))
 2. Extract the downloaded file.
@@ -53,9 +57,6 @@ For the creation of spatial objects we use [PostGIS](https://postgis.net/install
 4. First click the **manage datasets** tab and then choose the **add new dataset**.
 5. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**. 
 
-!!! note
-    - Skip the installation if your developement task is not aimed at the OEKG. 
-    - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
 
 ## 2 Create the PostgreSQL databases
 
