@@ -148,20 +148,27 @@ const headCells = [
   //   label: 'Date of publications',
   //   align: 'left'
   // },
-  // {
-  //   id: 'details',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: '',
-  //   align: 'right'
-  // },
   {
-    id: 'more',
-    numeric: false,
-    disablePadding: true,
+    id: 'Date of publication',
+    numeric: true,
+    disablePadding: false,
+    label: 'Date of publication',
+    align: 'right'
+  },
+  {
+    id: 'More details',
+    numeric: true,
+    disablePadding: false,
     label: '',
-    align: 'left'
-  }
+    align: 'right'
+  },
+  // {
+  //   id: 'more',
+  //   numeric: false,
+  //   disablePadding: true,
+  //   label: '',
+  //   align: 'left'
+  // }
 ];
 
 function EnhancedTableHead(props) {
@@ -221,11 +228,11 @@ function EnhancedTableToolbar(props) {
         alignItems="start"
         spacing={2}>
         <Grid item xs={4} >
-            <Tooltip title="Show all">
+            {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
-            </Tooltip>
+            </Tooltip> */}
             <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px'}} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />}>Reset</Button>
+            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             {numSelected > 1 && <Tooltip title="Compare">
             <Button size="small" 
                     style={{ 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
@@ -566,21 +573,14 @@ export default function CustomTable(props) {
                   selected={isItemSelected}
                   sx={{ cursor: 'pointer', height: '60px' }}
                 >
-                  <TableCell style={{ width: '500px' }}>
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
-                          <ArrowCircleRightOutlinedIcon fontSize="large" sx={{ cursor: 'pointer', color: '#04678F', paddingTop: '0px' }}/>
-                        </Link> 
-                        <Typography variant="body1">{row.study_name}</Typography>
-                      </Stack>
+                  <TableCell style={{ width: '400px' }}>
+                  <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
+                  </Link> 
+                    
                   </TableCell >
                   <TableCell style={{ width: '200px' }}><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
-                  {/* <TableCell >
-                    {row.institutions.map((v) => (
-                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="primary"/>
-                    ))}
-                  </TableCell> */}
-                  <TableCell style={{ width: '400px', padding: "5px" }}>
+                  <TableCell style={{ width: '300px', padding: "5px" }}>
                       {row.scenarios.map((v) => (
                         <HtmlTooltip
                           style={{ marginLeft: '10px' }}
@@ -599,16 +599,22 @@ export default function CustomTable(props) {
                         </HtmlTooltip>
                       ))}
                   </TableCell>
-                  {/* <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell> */}
-                  <TableCell style={{ width: '100px' }}>
-                    <IconButton
-                      aria-label="expand row"
-                      size="small"
-                      onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
-                    >
-                      {open.includes(index) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                  </TableCell>
+
+                  <TableCell style={{ width: '40px' }}>
+                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.fund !== null && String(row.date_of_publication).substring(0, 10)}</Typography>
+                  </TableCell >
+
+                  <TableCell style={{ width: '40px' }}>
+                    <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
+                      >
+                        {open.includes(index) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </Stack>
+                  </TableCell >
                   
                 </StyledTableRow>
                 <TableRow >
