@@ -1091,8 +1091,6 @@ function Factsheet(props) {
   const expandedTechnologyHandler = (expandedTechnologyList) => {
     const zipped = []
     expandedTechnologyList.map((v) => zipped.push({ "value": v, "label": v }));
-    console.log(zipped);
-
     setExpandedTechnologyList(zipped);
   };
 
@@ -1832,13 +1830,157 @@ const renderPublicationOverview = () => (
     </Grid>
 )
   
+const renderSectorsAndTechnology = () => (
+  <Grid container justifyContent="space-between"
+        alignItems="start"
+        spacing={2} 
+        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
+
+      <Grid item xs={2}  style={{ padding: '5px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}><b> Sector division(s): </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
+       {selectedSectorDivisions.map((v, i) => (
+            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+        ))}
+      </Grid>
+
+      <Grid item xs={12} style={{ padding: '0px' }}>
+        <Divider />
+      </Grid>
+      <Grid item xs={2}  style={{ padding: '5px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Sectors: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
+        {selectedSectors.map((v, i) => (
+            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+        ))}
+      </Grid>
+      <Grid item xs={12} style={{ padding: '0px' }}>
+        <Divider />
+      </Grid>
+      <Grid item xs={2}  style={{ padding: '5px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Technologies: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
+      {selectedTechnologies.map((v, i) => (
+            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+        ))}
+      </Grid>
+    </Grid>
+)
+
+const renderModelsAndFrameworksOverview = () => (
+  <Grid container justifyContent="space-between"
+        alignItems="start"
+        spacing={2} 
+        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
+
+      <Grid item xs={2}  style={{ padding: '5px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}><b> Models: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
+       {selectedModels.map((v, i) => (
+            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+        ))}
+      </Grid>
+
+      <Grid item xs={12} style={{ padding: '0px' }}>
+        <Divider />
+      </Grid>
+      <Grid item xs={2}  style={{ padding: '5px' }}>
+        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Frameworks: </b> </span>
+        <span >
+          <HtmlTooltip
+            title={
+            <React.Fragment>
+              <Typography color="inherit" variant="caption">
+                {'A study is a project with the goal to investigate something.'}
+                <br />
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+              </Typography>
+            </React.Fragment>
+          }
+          >
+          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          </HtmlTooltip>
+        </span>
+      </Grid>
+      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
+        {selectedFrameworks.map((v, i) => (
+            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+        ))}
+      </Grid>
+    </Grid>
+)
+
 const overview_items = {
   titles: [scenario_count, 'Publications', 'Sectors and technology', 'Models and frameworks'],
   contents: [
     renderScenariosOverview(),
     renderPublicationOverview(),
-    '',
-    ''
+    renderSectorsAndTechnology(),
+    renderModelsAndFrameworksOverview(),
     ]
 }
 

@@ -51,11 +51,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -470,10 +470,10 @@ def update_factsheet(request, *args, **kwargs):
                     for region in item['regions']:
                         region_URI = URIRef(region['iri'])
                         print(region)
-                        scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + region['iri'].rsplit('/', 1)[1] ) 
+                        scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/" + region['iri'] ) 
                         oekg.add((scenario_region, RDF.type, OEO.OEO_00020032))
                         oekg.add((scenario_region, RDFS.label, Literal(region['name'])))
-                        oekg.add((scenario_region, OEKG["reference"], region_URI))
+                        oekg.add((scenario_region, OEKG["reference"], "http://openenergy-platform.org/ontology/oekg/region/"+region_URI))
                         # TODO- set in settings
                         
                         # OEO_00020220 'has study region'
