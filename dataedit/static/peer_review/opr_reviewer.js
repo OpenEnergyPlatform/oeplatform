@@ -140,6 +140,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
   if (state_dict) {
     check_if_review_finished();
   }
@@ -527,6 +528,7 @@ function renderSummaryPageFields() {
 
   updateSummaryTable();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 
 }
 
@@ -695,6 +697,7 @@ function saveEntrances() {
 
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 
 }
 function getFieldState(fieldKey) {
