@@ -617,7 +617,7 @@ function saveEntrances() {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
-  updatePercentageDisplay();
+  updatePercentageDisplay() ;
 }
 
 /**
@@ -710,7 +710,7 @@ function calculateOkPercentage(stateDict) {
   let okCount = 0;
 
   for (let key in stateDict) {
-    if (stateDict[key] === 'ok') {
+    if (stateDict[key] === "ok") {
       okCount++;
     }
   }
@@ -719,7 +719,7 @@ function calculateOkPercentage(stateDict) {
 }
 
 function updatePercentageDisplay() {
-  document.getElementById('percentageDisplay').textContent = calculateOkPercentage(state_dict).toFixed(2);
+  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(state_dict).toFixed(2);
 }
 
 
@@ -750,7 +750,7 @@ function updateTabClasses() {
 }
 window.addEventListener('DOMContentLoaded', function() {
     updateTabClasses();
-    updatePercentageDisplay();
+    updatePercentageDisplay() ;
 });
 
 
