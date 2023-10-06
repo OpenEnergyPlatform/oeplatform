@@ -256,7 +256,6 @@ function clearInputFields() {
 function switchCategoryTab(category) {
   const currentTab = document.querySelector('.tab-pane.active'); // Get the currently active tab
   const tabIdForCategory = getCategoryToTabIdMapping()[category];
-  console.log("tabID", tabIdForCategory);
   if (currentTab.getAttribute('id') !== tabIdForCategory) {
     // The clicked field does not belong to the current tab, switch to the next tab
     const targetTab = document.getElementById(tabIdForCategory);
@@ -335,6 +334,10 @@ function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
 
 }
+
+
+
+
 
 /**
  * Renders fields on the Summary page, sorted by review state
@@ -614,6 +617,7 @@ function saveEntrances() {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 }
 
 /**
@@ -701,6 +705,23 @@ function updateTabProgressIndicatorClasses() {
   }
 }
 
+function calculateOkPercentage(stateDict) {
+  let totalCount = Object.keys(stateDict).length;
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    if (stateDict[key] === 'ok') {
+      okCount++;
+    }
+  }
+
+  return (okCount / totalCount) * 100;
+}
+
+function updatePercentageDisplay() {
+  document.getElementById('percentageDisplay').textContent = calculateOkPercentage(state_dict).toFixed(2);
+}
+
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
@@ -727,7 +748,11 @@ function updateTabClasses() {
     }
   }
 }
-window.addEventListener('DOMContentLoaded', updateTabClasses);
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay();
+});
+
 
 
 /**
