@@ -870,7 +870,27 @@ function updateTabClasses() {
     }
   }
 }
-window.addEventListener('DOMContentLoaded', updateTabClasses);
+window.addEventListener('DOMContentLoaded', function() {
+    updateTabClasses();
+    updatePercentageDisplay();
+});
+
+function calculateOkPercentage(stateDict) {
+  let totalCount = Object.keys(stateDict).length;
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    if (stateDict[key] === 'ok') {
+      okCount++;
+    }
+  }
+
+  return (okCount / totalCount) * 100;
+}
+
+function updatePercentageDisplay() {
+  document.getElementById('percentageDisplay').textContent = calculateOkPercentage(state_dict).toFixed(2);
+}
 
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
