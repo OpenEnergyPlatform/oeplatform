@@ -1081,10 +1081,8 @@ def get_scenarios(request, *args, **kwargs):
     scenarios_acronym = [i.replace('%20', ' ') for i in  json.loads(request.GET.get('scenarios_acronym'))]
 
     scenarios = []
-    print(scenarios_acronym)
 
     for s, p, o in oekg.triples(( None, RDF.type, OEO.OEO_00000365 )):
-        print(str(oekg.value(s, RDFS.label) ))
         if str(oekg.value(s, RDFS.label) ) in scenarios_acronym:
             descriptors = []
             regions = []
@@ -1093,7 +1091,7 @@ def get_scenarios(request, *args, **kwargs):
             input_datasets = []
             output_datasets = []
             for s1, p1, o1 in oekg.triples(( s, OEO['has_scenario_descriptor'], None )):
-                descriptors.append(o1)
+                descriptors.append(str(oeo.value(o1, RDFS.label)))
             for s2, p2, o2 in oekg.triples(( s, OEO.OEO_00000522, None )):
                 regions.append(oekg.value(o2, RDFS.label))
             for s3, p3, o3 in oekg.triples(( s, OEO['covers_interacting_regions'], None )):

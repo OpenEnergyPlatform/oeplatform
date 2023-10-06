@@ -19,14 +19,13 @@ const grid = 10;
 
 const getItemStyle = (isDragging, draggableStyle, index) => ({
   userSelect: 'none',
-  padding: grid * 2,
+  padding: 0,
   margin: `0 ${grid}px 0 0`,
   marginTop: '10px',
   marginBottom: '10px',
-  background: index === 0 ? '#488AC740' : '#87AFC740',
+  background: index === 0 ? '#F6F9FB' : '#FFFFFF',
   width: '30%',
   height: '90%',
-  borderRadius: '5px',
   overflow: 'auto',
   border: '1px solid black',
   ...draggableStyle,
@@ -37,12 +36,12 @@ const getListStyle = isDraggingOver => ({
   display: 'flex',
   padding: grid,
   overflow: 'auto',
-  height: '98%'
 });
 
 export default function  ComparisonBoardItems (props) {
   const { elements, c_aspects } = props;
   const [state, setState] = useState({ items : elements });
+  console.log(c_aspects);
 
   function onDragEnd(result) {
     if (!result.destination) {
@@ -64,10 +63,9 @@ export default function  ComparisonBoardItems (props) {
   const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
   return (
-    <div style={{ overflow: 'auto', width: '98%' }}>
+    <div style={{ overflow: 'auto', padding:'10px' }}>
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" direction="horizontal">
-          
         {(provided, snapshot) => (
             <div
               ref={provided.innerRef}
@@ -85,17 +83,19 @@ export default function  ComparisonBoardItems (props) {
                         snapshot.isDragging,
                         provided.draggableProps.style,
                         index
-                      )}
+                      )
+                    }
                     >
-
-                    <div style={{ display: 'flex' }} >
-                      { index === 0 ? <HiveIcon sx={{ fontSize: 40 }}  /> : <HiveOutlinedIcon sx={{ fontSize: 40 }} /> }
-                      <Typography variant="subtitle1" gutterBottom component="div" style={{ marginTop:'5px', marginBottom:'15px', height: '30px' }}>
+                    <div style={{ display: 'flex', height: '60px', marginBottom:'10px', flexDirection: 'column', backgroundColor: index === 0 ? '#2972A6' : '#F6F9FB',  color: index === 0 ? 'white' : 'black', alignItems: 'center', justifyContent:'center' }} >
+                      <Typography variant="h6">
                         { index === 0 ? <b>{item.acronym}</b> : item.acronym }
+                      </Typography>
+                      <Typography variant="caption">
+                      { index === 0 ? 'Base scenario' : ''  }
                       </Typography>
                     </div> 
 
-                    {c_aspects.includes('des') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                    {c_aspects.includes("Descriptors") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Descriptors:</b> 
                       </Typography>
@@ -110,9 +110,7 @@ export default function  ComparisonBoardItems (props) {
                       ) )}
                     </div>}
                     
-
-
-                    {c_aspects.includes('reg') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                    {c_aspects.includes("Regions") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Regions:</b> 
                       </Typography>
@@ -127,7 +125,7 @@ export default function  ComparisonBoardItems (props) {
                     </div>
                     }
 
-                    {c_aspects.includes('int') && <div style= {{border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto'}} >
+                    {c_aspects.includes("Interacting regions") && <div style= {{marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Interacting regions:</b> 
                       </Typography>
@@ -142,8 +140,7 @@ export default function  ComparisonBoardItems (props) {
                       ) )}
                     </div>}
 
-
-                    {c_aspects.includes('yea') && <div style= {{  border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '100px', overflow: 'auto' }} >
+                    {c_aspects.includes("Scenario years") && <div style= {{ marginBottom: '10px', padding: '10px'}} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Scenario years:</b> 
                       </Typography>
@@ -158,8 +155,7 @@ export default function  ComparisonBoardItems (props) {
                       ) )}
                     </div>}
 
-
-                   {c_aspects.includes('int') && <div style= {{  border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '200px', overflow: 'auto' }} >
+                   {c_aspects.includes("Input datasets") && <div style= {{ marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Input datasets:</b> 
                       </Typography>
@@ -174,8 +170,7 @@ export default function  ComparisonBoardItems (props) {
                       ) )}
                     </div>}
 
-
-                   { c_aspects.includes('out') && <div style= {{ border: '1px solid #80808047', borderRadius: '5px', marginBottom: '10px', padding: '10px' , height: '200px', overflow: 'auto' }} >
+                   { c_aspects.includes("Output datasets") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Output datasets:</b> 
                       </Typography>

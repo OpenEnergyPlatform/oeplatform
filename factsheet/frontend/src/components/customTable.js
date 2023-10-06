@@ -697,10 +697,9 @@ export default function CustomTable(props) {
               return (
               <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
-                  <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                   <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
+                  <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
                     <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <ArrowCircleRightOutlinedIcon fontSize="large" sx={{ cursor: 'pointer', color: '#04678F', paddingTop: '0px' }}/>
+                      <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
                     </Link> 
                   </Stack>
                 </div>
