@@ -132,6 +132,7 @@ function peerReview(config) {
   selectNextField();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
 }
 
 /**
@@ -332,9 +333,19 @@ function selectField(fieldList, field) {
  */
 function selectState(state) { // eslint-disable-line no-unused-vars
   selectedState = state;
-
+  updateClientStateDict(fieldKey = selectedField, state = state);
 }
 
+function updateClientStateDict(fieldKey, state) {
+  state_dict = state_dict ?? {};
+  if (fieldKey in state_dict) {
+    // console.log(`Der Schlüssel '${fieldKey}' ist vorhanden.`);
+    state_dict[fieldKey] = state;
+  } else {
+    // console.log(`Der Schlüssel '${fieldKey}' ist nicht vorhanden.`);
+    state_dict[fieldKey] = state;
+  }
+}
 
 
 
@@ -705,23 +716,6 @@ function updateTabProgressIndicatorClasses() {
   }
 }
 
-function calculateOkPercentage(stateDict) {
-  let totalCount = Object.keys(stateDict).length;
-  let okCount = 0;
-
-  for (let key in stateDict) {
-    if (stateDict[key] === "ok") {
-      okCount++;
-    }
-  }
-
-  return (okCount / totalCount) * 100;
-}
-
-function updatePercentageDisplay() {
-  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(state_dict).toFixed(2);
-}
-
 
 function updateTabClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
@@ -753,6 +747,23 @@ window.addEventListener('DOMContentLoaded', function() {
     updatePercentageDisplay() ;
 });
 
+function calculateOkPercentage(stateDict) {
+  let totalCount = Object.keys(stateDict).length;
+  let okCount = 0;
+
+  for (let key in stateDict) {
+    if (stateDict[key] === "ok") {
+      okCount++;
+    }
+  }
+  return (okCount / totalCount) * 100;
+}
+
+
+function updatePercentageDisplay() {
+  const percentage = calculateOkPercentage(state_dict);
+  document.getElementById("percentageDisplay").textContent = percentage.toFixed(2);
+}
 
 
 /**
