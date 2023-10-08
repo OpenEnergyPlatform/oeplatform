@@ -317,7 +317,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
+          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'name_' + data.id} key={'name_' + data.id} onChange={handleScenariosInputChange} value={data.name} />
         </Grid>
 
         <Grid item xs={3} >
@@ -339,7 +339,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{  width: '95%',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
+          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{  width: '95%' }} id="outlined-basic" label="" name={'acronym_' + data.id} key={'acronym_' + data.id} onChange={handleScenariosInputChange} value={data.acronym} />
         </Grid>
 
         <Grid item xs={3} >
@@ -361,7 +361,7 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <TextField size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px',  backgroundColor:'#FCFCFC' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
+          <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant='outlined' style={{ width: '95%', MarginBottom: '10px', MarginTop: '20px' }} id="outlined-basic" label="" multiline rows={8} maxRows={14} name={'abstract_' + data.id} key={'abstract_' + data.id} onChange={handleScenariosInputChange} value={data.abstract} />
         </Grid>
 
         <Grid item xs={3} >

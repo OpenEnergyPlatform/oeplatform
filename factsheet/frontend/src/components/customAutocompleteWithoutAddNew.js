@@ -10,15 +10,22 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import Typography from '@mui/material/Typography';
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
-
+import { makeStyles } from '@material-ui/core/styles';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+const useStyles = makeStyles((theme) => ({
+  inputRoot: {
+    borderRadius: 0,  
+  },
+}));
+
 export default function CustomAutocompleteWithoutAddNew(parameters) {
   const { manyItems, idx, name, type, showSelectedElements, handler, width, noTooltip=false } = parameters;
   const [value, setValue] = useState(parameters.selectedElements !== undefined ? parameters.selectedElements : []);
+  const classes = useStyles();
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
@@ -39,7 +46,7 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
   }));
 
   return (
-    <Box style={{ width: width,  backgroundColor:'#FCFCFC', marginTop: '10px', }}>
+    <Box style={{ width: width,  marginTop: '10px', }}>
       <Autocomplete
         size="small" 
         multiple
@@ -78,7 +85,12 @@ export default function CustomAutocompleteWithoutAddNew(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined"/>
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" InputProps={{
+            ...params.InputProps,
+            classes: {
+              root: classes.inputRoot, // Apply the custom CSS class
+            },
+          }}/>
         )}
       />
       {showSelectedElements && <Box

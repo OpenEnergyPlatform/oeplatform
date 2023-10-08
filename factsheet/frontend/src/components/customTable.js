@@ -593,9 +593,14 @@ export default function CustomTable(props) {
                   <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
                     <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
                   </Link> 
-                    
                   </TableCell >
-                  <TableCell style={{ width: '100px' }}><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
+                  <TableCell style={{ width: '100px' }}>
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                      <Typography variant="subtitle1" gutterBottom  style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
+                        {row.acronym}
+                      </Typography>
+                    </Link> 
+                    </TableCell>
                   <TableCell style={{ width: '300px', padding: "5px" }}>
                       {row.scenarios.map((v) => (
                         <HtmlTooltip
@@ -646,32 +651,28 @@ export default function CustomTable(props) {
                               paddingBottom="10px"
                               >
                                 <Grid item xs={12}>
-                                   <p><b>Abstract: </b> {row.abstract.substring(0, 300)+" ..."}</p>
+                                   <p><b>Abstract: </b> {row.abstract}</p>
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Institutions: </b>
-                                </Grid>
-                                <Grid item xs={10}>
-                                    {row.institutions.map((v) => (
+                                <Grid item xs={12}>
+                                  <b>Institutions: </b>{row.institutions.map((v) => (
                                       <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Funding source: </b>
-                                </Grid>
-                                <Grid item xs={10}>
-                                    {row.fund !== null && String(row.date_of_publication).substring(0, 10)}
+                                <Grid item xs={12}>
+                                 <b>Funding sources: </b>{row.funding_sources.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Models and frameworks: </b>
-                                </Grid>
-                                <Grid item xs={10} >
-                                  {row.institutions.map((v) => (
-                                    <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
-                                    ))}
+                                <Grid item xs={12} >
+                                <b>Models and frameworks: </b>{row.models.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
+                                  {row.frameworks.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
                                 </Grid>
                             </Grid>
                         </Box>
@@ -708,7 +709,7 @@ export default function CustomTable(props) {
                     <p><b>Acronym: </b>{row.acronym}</p>
                     <p><b>Date of publication: </b>{row.date_of_publication}</p>
                   </Stack>
-                  <p><b>Abstract: </b> {row.abstract.substring(0, 300)+" ..."}</p>
+                  <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.acronym}</p>
                   <p><b>Funding sources: </b>{row.acronym}</p>
                   <p><b>Models and frameworks: </b>{row.acronym}</p>

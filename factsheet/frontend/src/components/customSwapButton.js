@@ -34,9 +34,9 @@ export default function ColorToggleButton(props) {
         <Tooltip title="Edit!">
           <Button size="small" value="wizard"  onClick={(e) => handleChange(e, 'edit')} > <ListAltIcon /> </Button>
         </Tooltip>
-        <Tooltip title="Similar factsheets!">
+        {/* <Tooltip title="Similar factsheets!">
           <Button size="small" value="playground" > <DiamondIcon /> </Button>
-        </Tooltip>
+        </Tooltip> */}
       </ButtonGroup>
     </div>
   );

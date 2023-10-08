@@ -22,7 +22,7 @@ const ComparisonBoardMain = (props) => {
   console.log(params);
   const scenario_acronyms = params.split('-');
   const scenario_acronyms_json = JSON.stringify(scenario_acronyms);
-  const [selectedCriteria, setselectedCriteria] = useState([]);
+  const [selectedCriteria, setselectedCriteria] = useState(['Descriptors']);
 
   const getScenarios = async () => {
     const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_acronym: scenario_acronyms_json } });
@@ -102,7 +102,7 @@ const ComparisonBoardMain = (props) => {
             <Box sx={{ 
               padding: '20px',
               margin: '20px',
-              backgroundColor: '#e3eaef',
+              backgroundColor: '#F6F9FB',
               display: 'block'}}
               >
               <b>Criteria</b>

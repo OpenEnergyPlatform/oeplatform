@@ -27,7 +27,7 @@ const getItemStyle = (isDragging, draggableStyle, index) => ({
   width: '30%',
   height: '90%',
   overflow: 'auto',
-  border: '1px solid black',
+  border: '1px solid #2972A6',
   ...draggableStyle,
 });
 
@@ -41,7 +41,6 @@ const getListStyle = isDraggingOver => ({
 export default function  ComparisonBoardItems (props) {
   const { elements, c_aspects } = props;
   const [state, setState] = useState({ items : elements });
-  console.log(c_aspects);
 
   function onDragEnd(result) {
     if (!result.destination) {
@@ -94,6 +93,13 @@ export default function  ComparisonBoardItems (props) {
                       { index === 0 ? 'Base scenario' : ''  }
                       </Typography>
                     </div> 
+
+                   <div style= {{  marginBottom: '10px', padding: '10px' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Abstract:</b> 
+                      </Typography>
+                        {item.data.abstract}
+                    </div>
 
                     {c_aspects.includes("Descriptors") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
