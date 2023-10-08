@@ -51,11 +51,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-query_endpoint = 'http://localhost:3030/ds/query'
-update_endpoint = 'http://localhost:3030/ds/update'
+#query_endpoint = 'http://localhost:3030/ds/query'
+#update_endpoint = 'http://localhost:3030/ds/update'
 
-#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -920,7 +920,6 @@ def query_oekg(request, *args, **kwargs):
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + id)
-    
 
     for s, p, o in oekg.triples(( study_URI, OEKG['has_scenario'], None )):
         oekg.remove((o, None, None)) 

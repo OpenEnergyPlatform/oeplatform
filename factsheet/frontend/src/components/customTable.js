@@ -706,8 +706,10 @@ export default function CustomTable(props) {
                 </div>
                 <div style={{ padding: "15px" }}>
                   <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <p><b>Acronym: </b>{row.acronym}</p>
-                    <p><b>Date of publication: </b>{row.date_of_publication}</p>
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                      <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
+                    </Link> 
+                    {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
                   </Stack>
                   <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.acronym}</p>
