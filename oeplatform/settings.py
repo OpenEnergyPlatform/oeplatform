@@ -74,7 +74,7 @@ MIDDLEWARE = (
     "login.middleware.DetachMiddleware",
     "axes.middleware.AxesMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware"
+    "django.middleware.common.CommonMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -116,10 +116,7 @@ TEMPLATES = [
     }
 ]
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000", 
-    "http://127.0.0.1:3000"
-    ]
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
 
