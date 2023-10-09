@@ -7,8 +7,8 @@ Below we describe the complete manual installation of the OpenEnergyPlatform dat
     - as well as the primay database OpenEnergyDatabase (oedb)
 
 
-2. JennaFuseki 
-    - and a graph database for the oeo and oekg
+2. Apache Jena Fuseki 
+    - and a SPARQL server for the OEKG
 
 
 
@@ -40,13 +40,23 @@ For the creation of spatial objects we use [PostGIS](https://postgis.net/install
 
     - On Linux/Unix based systems the installation could be specific to the package manager being employed and the operating system, so please refer to the official installation instructions [here](https://postgis.net/install/). The section `Binary Installers` covers the installation instructions for various operating systems.
 
-### 1.2 Install JennaFuseki
-
-!!! warning
-    missing!
+### 1.2 Install Apache Jena Fuseki
 
 !!! note
-        Skip the installation if your developement task is not aimed at the OpenEnergyOntology or the OEKnowlageGraph.
+    - Skip the installation if your developement task is not aimed at the OEKG. 
+    - For more information about Apache Jena Fuseki please visit [this page.](https://jena.apache.org/documentation/fuseki2/)
+
+1. Download [apache-jena-fuseki-4.2.0.tar.gz](https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz)
+(for other versions please check [here](https://jena.apache.org/download/))
+2. Extract the downloaded file.
+3. Navigate to the directory where the files are extracted and execute the following command to start the server:
+
+        ./fuseki-server
+
+5. To access the server UI, enter `http://localhost:3030/` in your web browser.
+4. First click the **manage datasets** tab and then choose the **add new dataset**.
+5. Enter `OEKG_DS` for the **dataset name** and choose the type of dataset (in-memory datasets do not persist if the server stops) and click **create dataset**. 
+
 
 ## 2 Create the PostgreSQL databases
 
