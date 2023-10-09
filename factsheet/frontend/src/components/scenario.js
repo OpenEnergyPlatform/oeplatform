@@ -87,8 +87,8 @@ const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    color: 'white',
+    backgroundColor: '#e3eaef',
+    color: 'black',
     maxWidth: 520,
     fontSize: theme.typography.pxToRem(20),
     border: '1px solid black',
@@ -304,10 +304,10 @@ export default function Scenario(props) {
             <HtmlTooltip
               title={
               <React.Fragment>
-                <Typography color="inherit" variant="caption">
+                <Typography color="inherit" variant="subtitle1">
                   {'A study is a project with the goal to investigate something.'}
                   <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
                 </Typography>
               </React.Fragment>
             }
@@ -326,10 +326,10 @@ export default function Scenario(props) {
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -343,15 +343,15 @@ export default function Scenario(props) {
         </Grid>
 
         <Grid item xs={3} >
-          <span style={{ color: '#294456'}}>  <b>Storyline </b>  </span>
+          <span style={{ color: '#294456'}}>  <b>Abstract </b>  </span>
           <span >
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'A summary of the resource.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -370,10 +370,10 @@ export default function Scenario(props) {
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'A study region is a spatial region that is under investigation and consists entirely of one or more subregions.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -400,10 +400,10 @@ export default function Scenario(props) {
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'An interacting region is a spatial region that interacts with a study region. It is part of a considered region, but not a study region.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -413,7 +413,22 @@ export default function Scenario(props) {
           </span>
         </Grid>
         <Grid item xs={9} >
-          <CustomAutocomplete  width="95%" type="interacting region"  editHandler={HandleEditInteractingRegion} addNewHandler={HandleAddNewInteractingRegion} showSelectedElements={true} selectedElements={data.interacting_regions} manyItems optionsSet={scenarioInteractingRegion} kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/>
+        <CustomAutocompleteWithoutAddNew  
+            width="95%"
+            showSelectedElements={true}
+            optionsSet={options_LCC}
+            kind=''
+            handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}
+            selectedElements={data.interacting_regions}
+            noTooltip={true}
+          />
+          {/* <CustomAutocomplete  width="95%" type="interacting region" 
+           editHandler={HandleEditInteractingRegion}
+            addNewHandler={HandleAddNewInteractingRegion}
+             showSelectedElements={true} 
+             selectedElements={data.interacting_regions} 
+             manyItems optionsSet={scenarioInteractingRegion} 
+             kind='' handler={(e) => handleScenariosAutoCompleteChange(e, 'interacting_regions', data.id)}/> */}
         </Grid>
 
         <Grid item xs={3} >
@@ -422,10 +437,10 @@ export default function Scenario(props) {
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'A scenario year is a time step that has a duration of one year and is part of a scenario horizon.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -444,10 +459,10 @@ export default function Scenario(props) {
           <HtmlTooltip
             title={
             <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A study is a project with the goal to investigate something.'}
+              <Typography color="inherit" variant="subtitle1">
+                {'A scenario is an information content entity that contains statements about a possible future development based on a coherent and internally consistent set of assumptions and their motivation.'}
                 <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info...</a>
               </Typography>
             </React.Fragment>
           }
@@ -478,10 +493,10 @@ export default function Scenario(props) {
             <HtmlTooltip
               title={
               <React.Fragment>
-                <Typography color="inherit" variant="caption">
-                  {'A study is a project with the goal to investigate something.'}
+                <Typography color="inherit" variant="subtitle1">
+                  {'Endogenous data is a data item whose quantity value is determined by a model.'}
                   <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info...</a>
                 </Typography>
               </React.Fragment>
             }
@@ -548,10 +563,10 @@ export default function Scenario(props) {
             <HtmlTooltip
               title={
               <React.Fragment>
-                <Typography color="inherit" variant="caption">
-                  {'A study is a project with the goal to investigate something.'}
+                <Typography color="inherit" variant="subtitle1">
+                  {'Exogenous data is a data item whose quantity value is determined outside of a model and is imposed on a model.'}
                   <br />
-                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                  <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info...</a>
                 </Typography>
               </React.Fragment>
             }

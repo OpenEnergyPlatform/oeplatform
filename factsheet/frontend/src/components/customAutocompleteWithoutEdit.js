@@ -140,7 +140,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '20px' :'10px', marginBottom: '20px'}}>
+    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '10px' :'10px', marginBottom: '20px'}}>
       <Autocomplete
         size="small" 
         multiple

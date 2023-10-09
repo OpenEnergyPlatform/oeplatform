@@ -51,11 +51,11 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-#query_endpoint = 'http://localhost:3030/ds/query'
-#update_endpoint = 'http://localhost:3030/ds/update'
+query_endpoint = 'http://localhost:3030/ds/query'
+update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -229,10 +229,17 @@ def create_factsheet(request, *args, **kwargs):
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
                         # TODO- set in settings
-                        interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
-                        oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
-                        add_history( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI, 'add', request.user)
-                
+                        interacting_region_URI = URIRef(interacting_region['iri'])
+                        interacting_regions = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
+
+                        oekg.add((interacting_regions, RDF.type, OEO.OEO_00020036))
+                        oekg.add((interacting_regions, RDFS.label, Literal(region['name'])))
+                        oekg.add((interacting_regions, OEKG["reference"], interacting_region_URI))
+                        # TODO- set in settings
+                        
+                        oekg.add(( scenario_URI, OEO.OEO_00020222, interacting_regions )) 
+                        add_history( scenario_URI, OEO.OEO_00020222, interacting_region_URI, 'add', request.user)
+
                 if 'scenario_years' in item:
                     for scenario_year in item['scenario_years']:
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
@@ -398,7 +405,6 @@ def update_factsheet(request, *args, **kwargs):
     models = request_body['models']
     frameworks = request_body['frameworks']
 
-
     Duplicate_study_factsheet = False
 
     for s, p, o in oekg.triples(( None, RDF.type , OEO.OEO_00010252 )):
@@ -478,12 +484,21 @@ def update_factsheet(request, *args, **kwargs):
                         # OEO_00020220 'has study region'
                         oekg.add(( scenario_URI, OEO.OEO_00020220, scenario_region )) 
                         add_history( scenario_URI, OEO.OEO_00020220, region_URI, 'add', request.user)
-                    
+                
                 if 'interacting_regions' in item:
                     for interacting_region in item['interacting_regions']:
-                        interacting_regions_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
-                        oekg.add(( scenario_URI, OEO['covers_interacting_regions'], interacting_regions_URI ))
-                
+                        # TODO- set in settings
+                        interacting_region_URI = URIRef(interacting_region['iri'])
+                        interacting_regions = URIRef("http://openenergy-platform.org/ontology/oekg/" + interacting_region['iri'])
+
+                        oekg.add((interacting_regions, RDF.type, OEO.OEO_00020036))
+                        oekg.add((interacting_regions, RDFS.label, Literal(region['name'])))
+                        oekg.add((interacting_regions, OEKG["reference"], interacting_region_URI))
+                        # TODO- set in settings
+                        
+                        oekg.add(( scenario_URI, OEO.OEO_00020222, interacting_regions )) 
+                        add_history( scenario_URI, OEO.OEO_00020222, interacting_region_URI, 'add', request.user)
+
                 if 'scenario_years' in item:
                     for scenario_year in item['scenario_years']:
                         oekg.add(( scenario_URI, OEO.OEO_00020224, Literal(scenario_year['name']) ))
@@ -819,11 +834,13 @@ def factsheet_by_id(request, *args, **kwargs):
         for s1, p1, o1 in oekg.triples(( o, OEO.OEO_00020220, None )):
             o1_type = oekg.value(o1, RDF.type)
             o1_label = oekg.value(o1, RDFS.label)
-            if (o1_type == OEO.OEO_00020032):
-                scenario['regions'].append({  "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
-            if (o1_type == OEO.OEO_00020036):
-                scenario['interacting_regions'].append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
-        
+            scenario['regions'].append({  "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
+
+        for s1, p1, o1 in oekg.triples(( o, OEO.OEO_00020222, None )):
+            o1_type = oekg.value(o1, RDF.type)
+            o1_label = oekg.value(o1, RDFS.label)
+            scenario['interacting_regions'].append({  "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
+
         for s11, p11, o11 in oekg.triples(( o, OEO["has_scenario_descriptor"], None )):
             label = oeo.value(o11, RDFS.label)
             scenario['descriptors'].append({ "value": label, "label":label, "class": o11 })
@@ -1118,10 +1135,18 @@ def get_scenarios(request, *args, **kwargs):
 
             for s1, p1, o1 in oekg.triples(( s, OEO['has_scenario_descriptor'], None )):
                 descriptors.append(str(oeo.value(o1, RDFS.label)))
-            for s2, p2, o2 in oekg.triples(( s, OEO.OEO_00000522, None )):
-                regions.append(oekg.value(o2, RDFS.label))
-            for s3, p3, o3 in oekg.triples(( s, OEO['covers_interacting_regions'], None )):
-                interacting_regions.append(oekg.value(o3, RDFS.label))
+
+
+            for s1, p1, o1 in oekg.triples(( s, OEO.OEO_00020220, None )):
+                o1_label = oekg.value(o1, RDFS.label)
+                #regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
+                regions.append(o1_label)
+
+            for s1, p1, o1 in oekg.triples(( s, OEO.OEO_00020222, None )):
+                o1_label = oekg.value(o1, RDFS.label)
+                #interacting_regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
+                interacting_regions.append(o1_label)
+
             for s4, p4, o4 in oekg.triples(( s, OEO.OEO_00020224, None )):
                 scenario_years.append(o4)
             for s5, p5, o5 in oekg.triples(( s, OEO.RO_0002233, None )):
