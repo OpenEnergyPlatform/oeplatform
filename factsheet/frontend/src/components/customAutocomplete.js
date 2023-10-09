@@ -33,7 +33,7 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const useStyles = makeStyles((theme) => ({
   inputRoot: {
-    borderRadius: 0, // Set border radius to 0 for sharp edges
+    borderRadius: 0,  
   },
 }));
 
@@ -141,7 +141,7 @@ export default function CustomAutocomplete(parameters) {
 
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: '5px', }}>
+    <Box style={{ width: width, marginTop: '5px', }}>
       <Autocomplete
         size="small" 
         multiple

@@ -148,20 +148,27 @@ const headCells = [
   //   label: 'Date of publications',
   //   align: 'left'
   // },
-  // {
-  //   id: 'details',
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: '',
-  //   align: 'right'
-  // },
   {
-    id: 'more',
-    numeric: false,
-    disablePadding: true,
-    label: '',
+    id: 'Date of publication',
+    numeric: true,
+    disablePadding: false,
+    label: 'Date of publication',
     align: 'left'
-  }
+  },
+  {
+    id: 'More details',
+    numeric: true,
+    disablePadding: false,
+    label: '',
+    align: 'right'
+  },
+  // {
+  //   id: 'more',
+  //   numeric: false,
+  //   disablePadding: true,
+  //   label: '',
+  //   align: 'left'
+  // }
 ];
 
 function EnhancedTableHead(props) {
@@ -213,7 +220,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment} = props;
+  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected} = props;
 
   return (
     <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
@@ -221,22 +228,36 @@ function EnhancedTableToolbar(props) {
         alignItems="start"
         spacing={2}>
         <Grid item xs={4} >
-            <Tooltip title="Show all">
+            {/* <Tooltip title="Show all">
               <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
-            </Tooltip>
+            </Tooltip> */}
             <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px'}} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />}>Reset</Button>
-            {numSelected > 1 && <Tooltip title="Compare">
+            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Tooltip title="Compare">
+
+            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
+              <Button size="small" 
+                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
+                  variant="contained" 
+                  key="compareScenariosBtn"
+                  startIcon={<CompareArrowsIcon />}
+                  >
+                Compare scenarios
+              </Button>
+            </Link>
+            :  
             <Button size="small" 
-                    style={{ 'marginTop': '5px', 'marginRight': '5px', 'zIndex': '1000', 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
-                    variant="contained" 
-                    key="compareScenariosBtn"
-                    startIcon={<CompareArrowsIcon />}
-                    onClick={handleOpenAspectsOfComparison}
-                    >
-              Compare scenarios
-            </Button>
-          </Tooltip>}
+                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
+                  variant="contained" 
+                  key="compareScenariosBtn"
+                  startIcon={<CompareArrowsIcon />}
+                  onClick={handleOpenAspectsOfComparison}
+                  >
+                Compare scenarios
+              </Button>
+          }
+            
+          </Tooltip>
         </Grid>
         <Grid item xs={1} >
 
@@ -284,7 +305,7 @@ export default function CustomTable(props) {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [open, setOpen] = useState([]);
   const [openQuery, setOpenQuery] = useState(false);
-  const [openAspectsForComparison, setOpenAspectsForComparison] = useState(false);
+  const [openScenarioComparisonMessage, setOpenScenarioComparisonMessage] = useState(false);
   const [selectedInstitution, setSelectedInstitution] = useState([]);
   const [institutions, setInstitutions] = useState([]);
   const [selectedAuthors, setSelectedAuthors] = useState([]);
@@ -296,7 +317,7 @@ export default function CustomTable(props) {
   const [selectedStudyKewords, setSelectedStudyKewords] = useState([]);
   const [scenarioYearValue, setScenarioYearValue] = React.useState([2020, 2050]);
   const [selectedAspects, setSelectedAspects] = useState([]);
-  const [alignment, setAlignment] = React.useState('cards');
+  const [alignment, setAlignment] = React.useState('list');
 
   const [filteredFactsheets, setFilteredFactsheets] = useState([]);
 
@@ -377,11 +398,13 @@ export default function CustomTable(props) {
   };
 
   const handleOpenAspectsOfComparison = (event) => {
-    setOpenAspectsForComparison(true);
+    if (selected.size < 2) {
+      setOpenScenarioComparisonMessage(true);
+    } 
   };
 
   const handleCloseAspectsForComparison = (event) => {
-    setOpenAspectsForComparison(false);
+    setOpenScenarioComparisonMessage(false);
   };
 
   const handleShowAll = (event) => {
@@ -566,21 +589,19 @@ export default function CustomTable(props) {
                   selected={isItemSelected}
                   sx={{ cursor: 'pointer', height: '60px' }}
                 >
-                  <TableCell style={{ width: '500px' }}>
-                      <Stack direction="row" alignItems="center" gap={1}>
-                        <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
-                          <ArrowCircleRightOutlinedIcon fontSize="large" sx={{ cursor: 'pointer', color: '#04678F', paddingTop: '0px' }}/>
-                        </Link> 
-                        <Typography variant="body1">{row.study_name}</Typography>
-                      </Stack>
+                  <TableCell style={{ width: '400px' }}>
+                  <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                    <Typography variant="body1" style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}><b style={{ fontSize: '16px' }}>{row.study_name}</b></Typography>
+                  </Link> 
                   </TableCell >
-                  <TableCell style={{ width: '200px' }}><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.acronym}</Typography></TableCell>
-                  {/* <TableCell >
-                    {row.institutions.map((v) => (
-                      <Chip label={v} variant="outlined" sx={{ 'marginLeft': '5px', 'marginTop': '2px' }} size="small" color="primary"/>
-                    ))}
-                  </TableCell> */}
-                  <TableCell style={{ width: '400px', padding: "5px" }}>
+                  <TableCell style={{ width: '100px' }}>
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                      <Typography variant="subtitle1" gutterBottom  style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}>
+                        {row.acronym}
+                      </Typography>
+                    </Link> 
+                    </TableCell>
+                  <TableCell style={{ width: '300px', padding: "5px" }}>
                       {row.scenarios.map((v) => (
                         <HtmlTooltip
                           style={{ marginLeft: '10px' }}
@@ -588,9 +609,9 @@ export default function CustomTable(props) {
                           title={
                             <React.Fragment>
                               <div>
-                                Full name: {v.full_name}
-                                <br />
-                                Abstract: {v.abstract}
+                              <b>Full name:</b> {v.full_name}
+                              <Divider  style={{ marginTop: '10px',  marginBottom: '10px' }}/>
+                              <b>Abstract:</b> {v.abstract}
                               </div>
                             </React.Fragment>
                           }
@@ -599,16 +620,22 @@ export default function CustomTable(props) {
                         </HtmlTooltip>
                       ))}
                   </TableCell>
-                  {/* <TableCell ><Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}</Typography></TableCell> */}
+
                   <TableCell style={{ width: '100px' }}>
-                    <IconButton
-                      aria-label="expand row"
-                      size="small"
-                      onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
-                    >
-                      {open.includes(index) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
-                  </TableCell>
+                    <Typography variant="subtitle1" gutterBottom style={{ marginTop: '2px' }}>{row.date_of_publication !== null ? String(row.date_of_publication).substring(0, 10) : "" }</Typography>
+                  </TableCell >
+
+                  <TableCell style={{ width: '40px' }}>
+                    <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => open.includes(index) ? setOpen((prevOpen) => prevOpen.filter((i) => i !== index)) : setOpen((prevOpen) => [...prevOpen, index])}
+                      >
+                        {open.includes(index) ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    </Stack>
+                  </TableCell >
                   
                 </StyledTableRow>
                 <TableRow >
@@ -624,38 +651,28 @@ export default function CustomTable(props) {
                               paddingBottom="10px"
                               >
                                 <Grid item xs={12}>
-                                   <p><b>Abstract: </b> {row.abstract.substring(0, 300)+" ..."}</p>
-                                </Grid>
-                                <Grid item xs={2}>
-                                  <b>Date of publication: </b>
-                                </Grid>
-                                <Grid item xs={10}>
-                                  {row.date_of_publication !== null && String(row.date_of_publication).substring(0, 10)}
+                                   <p><b>Abstract: </b> {row.abstract}</p>
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Institutions: </b>
-                                </Grid>
-                                <Grid item xs={10}>
-                                    {row.institutions.map((v) => (
+                                <Grid item xs={12}>
+                                  <b>Institutions: </b>{row.institutions.map((v) => (
                                       <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Funding source: </b>
-                                </Grid>
-                                <Grid item xs={10}>
-                                    {row.fund !== null && String(row.date_of_publication).substring(0, 10)}
+                                <Grid item xs={12}>
+                                 <b>Funding sources: </b>{row.funding_sources.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
                                 </Grid>
 
-                                <Grid item xs={2}>
-                                  <b>Models and frameworks: </b>
-                                </Grid>
-                                <Grid item xs={10} >
-                                  {row.institutions.map((v) => (
-                                    <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
-                                    ))}
+                                <Grid item xs={12} >
+                                <b>Models and frameworks: </b>{row.models.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
+                                  {row.frameworks.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
                                 </Grid>
                             </Grid>
                         </Box>
@@ -681,19 +698,20 @@ export default function CustomTable(props) {
               return (
               <Grid item xs={12} sx={{ border: '1px solid #cadff5', marginBottom: "10px"}} >
                 <div style={{ backgroundColor: "#f6f9fb", padding: "15px" }}>
-                  <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                   <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
+                  <Stack direction="row" justifyContent="flex-start" alignItems="center" spacing={2}>
                     <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
-                      <ArrowCircleRightOutlinedIcon fontSize="large" sx={{ cursor: 'pointer', color: '#04678F', paddingTop: '0px' }}/>
+                      <Typography variant="body1"><b style={{ fontSize: '16px', cursor: 'pointer', color: "#294456" }}> {row.study_name} </b></Typography>
                     </Link> 
                   </Stack>
                 </div>
                 <div style={{ padding: "15px" }}>
                   <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-                    <p><b>Acronym: </b>{row.acronym}</p>
-                    <p><b>Date of publication: </b>{row.date_of_publication}</p>
+                    <Link to={`sirop/factsheet/${row.uid}`} onClick={() => this.forceUpdate} >
+                      <p style={{ fontSize: '16px', cursor: 'pointer', color: "black" }}><b>Acronym: </b>{row.acronym}</p>
+                    </Link> 
+                    {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
                   </Stack>
-                  <p><b>Abstract: </b> {row.abstract.substring(0, 300)+" ..."}</p>
+                  <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.acronym}</p>
                   <p><b>Funding sources: </b>{row.acronym}</p>
                   <p><b>Models and frameworks: </b>{row.acronym}</p>
@@ -734,40 +752,18 @@ export default function CustomTable(props) {
       </Backdrop>
       <Dialog
         maxWidth="md"
-        open={openAspectsForComparison}
+        open={openScenarioComparisonMessage}
         aria-labelledby="responsive-dialog-title"
         style={{ height: '85vh', overflow: 'auto' }}
       >
         <DialogTitle id="responsive-dialog-title">
-          <b>  Which elements of the scenarios do you wish to compare? </b>
+          <b> Please select scenarios for comparison. </b>
         </DialogTitle >
         <DialogContent>
-         {/*  <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
-            Which elements of the studies do you wish to compare?
-          </Typography>
-            <FormGroup>
-              <FormControlLabel control={<Checkbox defaultChecked />} label="Descriptors" />
-              <FormControlLabel control={<Checkbox />} label="Sectors" />
-              <FormControlLabel control={<Checkbox />} label="Enrgy carriers" />
-              <FormControlLabel control={<Checkbox />} label="Enrgy transformation processes" />
-              <FormControlLabel control={<Checkbox />} label="Models" />
-              <FormControlLabel control={<Checkbox />} label="Frameworks" />
-            </FormGroup>
-          <Divider /> */}
-          <FormGroup>
-              {
-                scenarioAspects.map((item) => <FormControlLabel control={<Checkbox />} checked={selectedAspects.includes(item)} onChange={handleAspects} label={item} name={item}/>)
-              }
-            </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" >
-            <Link to={`sirop/compare/${[...selected].join('-')}CASPECTS${[...selectedAspects.map(i => i.substring(0, 3).toLowerCase())].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }} >
-              Show comparison
-            </Link>
-          </Button>
           <Button variant="outlined" onClick={handleCloseAspectsForComparison}  >
-            Cancel
+            Ok
           </Button>
         </DialogActions>
       </Dialog>
@@ -852,7 +848,7 @@ export default function CustomTable(props) {
       </Dialog>
 
       <Container maxWidth="xl">
-        <EnhancedTableToolbar numSelected={selected.size} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
+        <EnhancedTableToolbar numSelected={selected.size} selected={selected} alignment={alignment} handleChangeView={handleChangeView} handleOpenQuery={handleOpenQuery} handleShowAll={handleShowAll} handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}/>
         {alignment == "list" && <TableContainer>
           <Table
             sx={{ minWidth: 1400 }}

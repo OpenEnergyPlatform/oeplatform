@@ -1,9 +1,11 @@
 import palette from '../palette';
+import variables from '../variables';
 
-export const tableStyles = {
+export const tableContainerStyles = {
   styleOverrides: {
     root: {
-      border: `1px solid ${palette.border}`
+      border: `1px solid ${palette.border}`,
+      borderRadius: variables.borderRadius
     }
   }
 };
