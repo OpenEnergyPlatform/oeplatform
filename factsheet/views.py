@@ -41,6 +41,7 @@ onto_base_path = Path(ONTOLOGY_ROOT, ONTHOLOGY_NAME)
 path = onto_base_path / version # TODO bad - windows dev will get path error
 # file = "reasoned-oeo-full.owl" # TODO- set in settings
 file = "oeo-full.owl" # TODO- set in settings
+
 Ontology_URI = path / file
 Ontology_URI_STR = Ontology_URI.as_posix()
 
@@ -54,8 +55,11 @@ oeo_owl = get_ontology(Ontology_URI_STR).load()
 #query_endpoint = 'http://localhost:3030/ds/query'
 #update_endpoint = 'http://localhost:3030/ds/update'
 
-query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
-update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+#query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
+#update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
+
+query_endpoint = 'http://oekb.iks.cs.ovgu.de:3030/oekg_main/query'
+update_endpoint = 'http://oekb.iks.cs.ovgu.de:3030/oekg_main/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -118,7 +122,7 @@ def get_history(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -372,7 +376,7 @@ def create_factsheet(request, *args, **kwargs):
 
         return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def update_factsheet(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -674,7 +678,7 @@ def update_factsheet(request, *args, **kwargs):
         patch_response_headers(response, cache_timeout=1)
         return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def factsheet_by_name(request, *args, **kwargs):
     name = request.GET.get('name')
@@ -684,7 +688,7 @@ def factsheet_by_name(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def factsheet_by_id(request, *args, **kwargs):
 
@@ -871,7 +875,7 @@ def factsheet_by_id(request, *args, **kwargs):
 
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def query_oekg(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -932,7 +936,7 @@ def query_oekg(request, *args, **kwargs):
     response = JsonResponse(results["results"]["bindings"], safe=False, content_type='application/json')
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def delete_factsheet_by_id(request, *args, **kwargs):
     id = request.GET.get('id')
@@ -947,7 +951,7 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def get_entities_by_type(request, *args, **kwargs):
     entity_type = request.GET.get('entity_type')
@@ -970,7 +974,7 @@ def get_entities_by_type(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def add_entities(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -999,7 +1003,7 @@ def add_entities(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def add_a_fact(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1017,7 +1021,7 @@ def add_a_fact(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def delete_entities(request, *args, **kwargs):
     entity_type = request.GET.get('entity_type')
@@ -1032,7 +1036,7 @@ def delete_entities(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
-#@login_required
+@login_required
 @csrf_exempt
 def update_an_entity(request, *args, **kwargs):
     request_body = json.loads(request.body)
@@ -1060,7 +1064,7 @@ def update_an_entity(request, *args, **kwargs):
     return response
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def get_all_factsheets(request, *args, **kwargs):
     all_factsheets = []
@@ -1114,7 +1118,7 @@ def get_all_factsheets(request, *args, **kwargs):
     return response
 
 @csrf_exempt
-#@login_required
+@login_required
 def get_scenarios(request, *args, **kwargs):
     scenarios_acronym = [i.replace('%20', ' ') for i in  json.loads(request.GET.get('scenarios_acronym'))]
 
@@ -1169,7 +1173,7 @@ def get_scenarios(request, *args, **kwargs):
     return response
 
 @csrf_exempt
-#@login_required
+@login_required
 def get_all_factsheets_as_turtle(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="ttl")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
@@ -1178,7 +1182,7 @@ def get_all_factsheets_as_turtle(request, *args, **kwargs):
     return response
 
 @csrf_exempt
-#@login_required
+@login_required
 def get_all_factsheets_as_json_ld(request, *args, **kwargs):
     all_factsheets_as_turtle = oekg.serialize(format="json-ld")
     response = JsonResponse(all_factsheets_as_turtle, safe=False, content_type='application/json')
@@ -1205,7 +1209,7 @@ def get_all_sub_classes(cls, visited=None):
 
 
 @csrf_exempt
-#@login_required
+@login_required
 def populate_factsheets_elements(request, *args, **kwargs):
 
 
