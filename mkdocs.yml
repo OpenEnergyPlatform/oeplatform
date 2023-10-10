@@ -67,7 +67,7 @@ nav:
   - Installation & Setup: 
     - Installation Guide: install/installation.md
     - Manual database setup: install/manual_db_setup.md
-  - Development & Collaboration: dev/development.md
+  - Development & Collaboration: dev/index2.md
   - Code Documentation: 
     - oeplatform-code/index.md
     - Architecture:
@@ -76,4 +76,5 @@ nav:
       - oeplatform-code/api/index.md
     - Open Peer Review Process:
       - oeplatform-code/open-peer-review-process/index.md
+      - Technical docs of the Open Peer Review Process: oeplatform-code/open-peer-review-process/index2.md
 

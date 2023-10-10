@@ -99,17 +99,6 @@ Furthermore, the system utilizes existing modules and libraries, ensuring that t
 ### Conclusion  
 By leveraging a diverse technology stack and ensuring meticulous integration with the existing codebase, the Open Peer Review Process exemplifies a robust and scalable architecture. This design philosophy not only facilitates current operations but also lays a solid foundation for future developments and enhancements.  
 
-### Technical docs  
-
-::: dataedit.views.PeerReviewView  
-::: dataedit.views.PeerRreviewContributorView  
-::: dataedit.helper  
-::: dataedit.metadata.save_metadata_to_db
-::: dataedit.metadata.load_metadata_from_db
-::: dataedit.models.Schema
-::: dataedit.models.Table
-::: dataedit.models.PeerReview
-::: dataedit.models.PeerReviewManager
 
 Changelogs
 ----------
