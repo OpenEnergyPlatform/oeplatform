@@ -712,9 +712,18 @@ export default function CustomTable(props) {
                     {row.date_of_publication !== null && <p><b>Date of publication: </b>{row.date_of_publication}</p>}
                   </Stack>
                   <p><b>Abstract: </b> {row.abstract}</p>
-                  <p><b>Institutions: </b>{row.acronym}</p>
-                  <p><b>Funding sources: </b>{row.acronym}</p>
-                  <p><b>Models and frameworks: </b>{row.acronym}</p>
+                  <p><b>Institutions: </b>{row.institutions.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} </p>
+                  <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} </p>
+                  <p><b>Models and frameworks: </b>{row.models.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} 
+                                  {row.frameworks.map((v) => (
+                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                  ))} </p>
                   <p><b>Scenarios: </b>{row.scenarios.map((v) => (
                         <HtmlTooltip
                           style={{ marginLeft: '10px' }}
