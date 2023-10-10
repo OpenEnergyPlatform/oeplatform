@@ -406,7 +406,7 @@ def create_factsheet(request, *args, **kwargs):
                     for input_dataset in item["input_datasets"]:
                         # TODO- set in settings
                         input_dataset_URI = URIRef(
-                            "http://openenergy-platform.org/ontology/oekg/input_datasets/"
+                            "http://openenergy-platform.org/ontology/oekg/input_datasets/"  # noqa
                             + input_dataset["key"]
                         )
                         oekg.add((input_dataset_URI, RDF.type, OEO.OEO_00030030))
