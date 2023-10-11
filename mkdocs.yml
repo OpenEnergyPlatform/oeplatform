@@ -76,5 +76,5 @@ nav:
       - oeplatform-code/api/index.md
     - Open Peer Review Process:
       - oeplatform-code/open-peer-review-process/index.md
-      - Technical docs of the Open Peer Review Process: oeplatform-code/open-peer-review-process/technical_docs.md
+      - Technical docs: oeplatform-code/open-peer-review-process/technical_docs.md
 
