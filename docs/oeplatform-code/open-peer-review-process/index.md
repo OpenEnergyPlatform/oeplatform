@@ -1,8 +1,6 @@
 Developer documentation of the Open Peer Review Process 
 =======================================================
 
-General Description
--------------------
 ### What is this feature about? 
 
 The Open Peer Review Process system facilitates collaborative review and validation of metadata through user interaction. It includes functionalities for uploading metadata, suggesting corrections, and reaching consensus on metadata fields. The system also features badge assignment and metadata updating upon agreement.  
