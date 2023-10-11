@@ -123,13 +123,13 @@ def save_metadata_to_db(schema, table, updated_metadata):
     Save updated metadata for a specific table in the OEP database.
 
     Args:
-    schema (str): The name of the OEP schema.
-    table (str): The name of the table in the OEP schema.
-    updated_metadata (dict): The updated metadata dictionary.
+        schema (str): The name of the OEP schema.
+        table (str): The name of the table in the OEP schema.
+        updated_metadata (dict): The updated metadata dictionary.
 
     Note:
-    This function loads the table object from the database, updates its metadata field,
-    and then saves the updated table object back to the database.
+        This function loads the table object from the database, updates its metadata field,
+        and then saves the updated table object back to the database.
     """
 
     from dataedit.models import Table
@@ -149,16 +149,16 @@ def load_metadata_from_db(schema, table):
     Load metadata for a specific table from the OEP database.
 
     Args:
-    schema (str): The name of the OEP schema.
-    table (str): The name of the table in the OEP schema.
+        schema (str): The name of the OEP schema.
+        table (str): The name of the table in the OEP schema.
 
     Returns:
-    dict: The loaded metadata dictionary.
+        dict: The loaded metadata dictionary.
 
     Note:
-    The function currently loads metadata from the Table.oemetadata field.
-    There is a consideration to change this function to use a different approach
-    or keep the old functionality (TODO).
+        The function currently loads metadata from the Table.oemetadata field.
+        There is a consideration to change this function to use a different approach
+        or keep the old functionality (TODO).
     """
 
     from dataedit.models import Table

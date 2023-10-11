@@ -3,16 +3,16 @@ def merge_field_reviews(current_json, new_json):
     Merge reviews from contributors and reviewers into a single JSON object.
 
     Args:
-    current_json (dict): The current JSON object containing reviewer's reviews.
-    new_json (dict): The new JSON object containing contributor's reviews.
+        current_json (dict): The current JSON object containing reviewer's reviews.
+        new_json (dict): The new JSON object containing contributor's reviews.
 
     Returns:
-    dict: The merged JSON object containing both contributor's and reviewer's reviews.
+        dict: The merged JSON object containing both contributor's and reviewer's reviews.
 
     Note:
-    If the same key is present in both the contributor's and reviewer's reviews,
-    the function will merge the field evaluations. Otherwise, it will create a new entry
-    in the Review-Dict.
+        If the same key is present in both the contributor's and reviewer's reviews,
+        the function will merge the field evaluations. Otherwise, it will create a new entry
+        in the Review-Dict.
     """
     merged_json = new_json.copy()
     review_dict = {}
@@ -53,12 +53,12 @@ def get_review_for_key(key, review_data):
     Retrieve the review for a specific key from the review data.
 
     Args:
-    key (str): The key for which to retrieve the review.
-    review_data (dict): The review data containing reviews for various keys.
+        key (str): The key for which to retrieve the review.
+        review_data (dict): The review data containing reviews for various keys.
 
     Returns:
-    Any: The new value associated with the specified key in the review data,
-    or None if the key is not found.
+        Any: The new value associated with the specified key in the review data,
+        or None if the key is not found.
     """
 
     for review in review_data["reviewData"]["reviews"]:
@@ -72,13 +72,13 @@ def recursive_update(metadata, review_data):
     Recursively update the metadata with new values from the review data.
 
     Args:
-    metadata (dict): The original metadata dictionary to be updated.
-    review_data (dict): The review data containing new values for various keys.
+        metadata (dict): The original metadata dictionary to be updated.
+        review_data (dict): The review data containing new values for various keys.
 
     Note:
-    The function traverses the review data, and for each key, it updates the
-    corresponding value in the metadata if a new value is present and is not
-    an empty string.
+        The function traverses the review data, and for each key, it updates the
+        corresponding value in the metadata if a new value is present and is not
+        an empty string.
     """
 
     for review_key in review_data["reviewData"]["reviews"]:
@@ -100,13 +100,13 @@ def set_nested_value(metadata, keys, value):
     Set a nested value in a dictionary given a sequence of keys.
 
     Args:
-    metadata (dict): The dictionary in which to set the value.
-    keys (list): A list of keys representing the path to the nested value.
-    value (Any): The value to set.
+        metadata (dict): The dictionary in which to set the value.
+        keys (list): A list of keys representing the path to the nested value.
+        value (Any): The value to set.
 
     Note:
-    The function navigates through the dictionary using the keys and sets the value
-    at the position indicated by the last key in the list.
+        The function navigates through the dictionary using the keys and sets the value
+        at the position indicated by the last key in the list.
     """
 
     for key in keys[:-1]:
@@ -125,19 +125,19 @@ def process_review_data(review_data, metadata, categories):
     and suggestions.
 
     Args:
-    review_data (list): A list of dictionaries containing review data for
-                        each field.
-    metadata (dict): The original metadata object that needs to be updated.
-    categories (list): A list of categories in the metadata.
+        review_data (list): A list of dictionaries containing review data for
+                            each field.
+        metadata (dict): The original metadata object that needs to be updated.
+        categories (list): A list of categories in the metadata.
 
     Returns:
-    dict: A state dictionary containing the state of each field after processing
-    the review data.
+        dict: A state dictionary containing the state of each field after processing
+            the review data.
 
     Note:
-    The function sorts the fieldReview entries by timestamp (newest first) and updates
-    the metadata with the latest reviewer suggestions, comments, and new values.
-    The resulting state dictionary indicates the state of each field after processing.
+        The function sorts the fieldReview entries by timestamp (newest first) and updates
+        the metadata with the latest reviewer suggestions, comments, and new values.
+        The resulting state dictionary indicates the state of each field after processing.
     """
     state_dict = {}
 

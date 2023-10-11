@@ -1902,11 +1902,11 @@ class PeerReviewView(LoginRequiredMixin, View):
         Load JSON metadata from the database.
 
         Args:
-        schema (str): The schema of the table.
-        table (str): The name of the table.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
 
         Returns:
-        dict: Loaded metadata.
+            dict: Loaded metadata.
         """
         metadata = load_metadata_from_db(schema, table)
         return metadata
@@ -1915,24 +1915,26 @@ class PeerReviewView(LoginRequiredMixin, View):
         """
         Load the JSON schema used for validating metadata.
 
-        Note: Update this method if a new oemetadata version is released.
+        Note:
+            Update this method if a new oemetadata version is released.
 
         Returns:
-        dict: JSON schema.
+            dict: JSON schema.
         """
         json_schema = OEMETADATA_V160_SCHEMA
         return json_schema
 
     def parse_keys(self, val, old=""):
         """
-        Recursively parse keys from a nested dictionary or list and return them as a list of dictionaries.
+        Recursively parse keys from a nested dictionary or list and return them
+        as a list of dictionaries.
 
         Args:
-        val (dict or list): The input dictionary or list to parse.
-        old (str, optional): The prefix for nested keys. Defaults to an empty string.
+            val (dict or list): The input dictionary or list to parse.
+            old (str, optional): The prefix for nested keys. Defaults to an empty string.
 
         Returns:
-        list: A list of dictionaries, each containing 'field' and 'value' keys.
+            list: A list of dictionaries, each containing 'field' and 'value' keys.
         """
         lines = []
         if isinstance(val, dict):
@@ -1958,13 +1960,19 @@ class PeerReviewView(LoginRequiredMixin, View):
         Further processing easier.
 
         Note:
-        The categories spatial & temporal are often combined during visualization.
+            The categories spatial & temporal are often combined during visualization.
 
         Args:
-        schema (str): The schema of the table.
-        table (str): The name of the table.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
 
-        >>> Example return:
+        Returns:
+
+
+        Examples:
+            A return value can look like the below dictionary:
+
+            >>>
             {
                 "general": [
                     {
@@ -1981,6 +1989,7 @@ class PeerReviewView(LoginRequiredMixin, View):
                 "license": [...],
                 "contributor": [...],
                 "resource": [...]
+            }
 
         """
 
@@ -2040,11 +2049,11 @@ class PeerReviewView(LoginRequiredMixin, View):
         for further processing.
 
         Args:
-        json_schema (dict): The JSON schema to extract field descriptions from.
-        prefix (str, optional): The prefix for nested keys. Defaults to an empty string.
+            json_schema (dict): The JSON schema to extract field descriptions from.
+            prefix (str, optional): The prefix for nested keys. Defaults to an empty string.
 
         Returns:
-        dict: A dictionary containing field descriptions, examples, and other information.
+            dict: A dictionary containing field descriptions, examples, and other information.
         """
 
         field_descriptions = {}
@@ -2083,13 +2092,13 @@ class PeerReviewView(LoginRequiredMixin, View):
         Loads necessary data and renders the review template.
 
         Args:
-        request (HttpRequest): The incoming HTTP GET request.
-        schema (str): The schema of the table.
-        table (str): The name of the table.
-        review_id (int, optional): The ID of the review. Defaults to None.
+            request (HttpRequest): The incoming HTTP GET request.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
+            review_id (int, optional): The ID of the review. Defaults to None.
 
         Returns:
-        HttpResponse: Rendered HTML response.
+            HttpResponse: Rendered HTML response.
         """
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
@@ -2171,27 +2180,27 @@ class PeerReviewView(LoginRequiredMixin, View):
               and the badges form metadata schema
 
         Args:
-        request (HttpRequest): The incoming HTTP POST request.
-        schema (str): The schema of the table.
-        table (str): The name of the table.
-        review_id (int, optional): The ID of the review. Defaults to None.
+            request (HttpRequest): The incoming HTTP POST request.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
+            review_id (int, optional): The ID of the review. Defaults to None.
 
         Returns:
-        HttpResponse: Rendered HTML response for the review.
+            HttpResponse: Rendered HTML response for the review.
 
         Raises:
-        JsonResponse: If any error occurs, a JsonResponse containing the
-        error message is raised.
+            JsonResponse: If any error occurs, a JsonResponse containing the
+            error message is raised.
 
         Note:
-        - There are some missing parts in this method. Once the review process
-            is finished (all field reviews agreed on), it should merge field
-            review results to metadata on the table and award a badge based
-            on certain criteria.
-        - A notification should be sent to the user if he/she can't review tables
-          for which he/she is the table holder (TODO).
-        - After a review is finished, the table's metadata is updated, and the table
-          can be moved to a different schema or topic (TODO).
+            - There are some missing parts in this method. Once the review process
+                is finished (all field reviews agreed on), it should merge field
+                review results to metadata on the table and award a badge based
+                on certain criteria.
+            - A notification should be sent to the user if he/she can't review tables
+            for which he/she is the table holder (TODO).
+            - After a review is finished, the table's metadata is updated, and the table
+            can be moved to a different schema or topic (TODO).
         """
 
         context = {}
@@ -2281,13 +2290,13 @@ class PeerRreviewContributorView(PeerReviewView):
         renders the contributor review template.
 
         Args:
-        request (HttpRequest): The incoming HTTP GET request.
-        schema (str): The schema of the table.
-        table (str): The name of the table.
-        review_id (int): The ID of the review.
+            request (HttpRequest): The incoming HTTP GET request.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
+            review_id (int): The ID of the review.
 
         Returns:
-        HttpResponse: Rendered HTML response for contributor review.
+            HttpResponse: Rendered HTML response for contributor review.
         """
         can_add = False
         peer_review = PeerReview.objects.get(id=review_id)
@@ -2348,17 +2357,17 @@ class PeerRreviewContributorView(PeerReviewView):
             - merge contributor field review and reviewer field review
 
         Args:
-        request (HttpRequest): The incoming HTTP POST request.
-        schema (str): The schema of the table.
-        table (str): The name of the table.
-        review_id (int): The ID of the review.
+            request (HttpRequest): The incoming HTTP POST request.
+            schema (str): The schema of the table.
+            table (str): The name of the table.
+            review_id (int): The ID of the review.
 
         Returns:
-        HttpResponse: Rendered HTML response for contributor review.
+            HttpResponse: Rendered HTML response for contributor review.
 
         Note:
-        This method has some missing parts regarding the merging of contributor
-        and reviewer field review.
+            This method has some missing parts regarding the merging of contributor
+            and reviewer field review.
         """
 
         context = {}
