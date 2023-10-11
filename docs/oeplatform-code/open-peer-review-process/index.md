@@ -58,16 +58,16 @@ New Functional Features
 A Meta Description
 ------------------
 
-### What is the context (what other parts of the OEF are connected)?
+### What is the context (what other parts of the OEP are connected)?
 
-This feature is an integral part of the Open Energy Platform (OEP) and interfaces with the database to load and update metadata, thereby ensuring data consistency across various modules of the OEP. It utilizes JSON for structuring metadata and is developed using the Django framework, as indicated by the presence of Django-specific classes and methods such as `LoginRequiredMixin` and `View`. The system integrates with the user permissions module to ensure role-specific access and functionalities. Additionally, it leverages specialized libraries and modules, such as `OEMETADATA_V160_SCHEMA`, to facilitate metadata handling.
+This function is a part of the Open Energy Platform (OEP). It interacts with the database, loading and updating metadata, ensuring data consistency within the OEP. The function utilizes JSON and is developed using the Django framework. It also manages user access and employs specialized libraries, such as OEMETADATA_V160_SCHEMA.  
 
 Software Architecture & Implementation Details
 ----------------------------------------------
 
 ### Context  
 
-The Open Peer Review Process is designed with a modular and scalable architecture, ensuring seamless integration with existing systems and adaptability to evolving technological requirements. Below, we delve into the technologies utilized and the connections established with pre-existing codebases.  
+The Open Peer Review Process is designed with a modular and scalable architecture, ensuring seamless integration with existing systems and adaptability to evolving technological requirements.     
 
 ### Technologies  
 
