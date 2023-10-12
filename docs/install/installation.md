@@ -31,8 +31,10 @@ The installation steps have been proofed on linux and windows for python 3.6 and
         ??? info "Option 2: Manual database setup"
             - [install manually](manual_db_setup.md)
 
-
-    3. Run management commands
+    3. Setup the OEO integration
+        - Instructions on [Section 4](#41-include-the-full-oeo)
+    
+    4. Run management commands
         - `python manage.py migrate`
         - python manage.py alembic upgrade head`
         - `python manage.py collectstatic`
@@ -45,7 +47,7 @@ The installation steps have been proofed on linux and windows for python 3.6 and
             - `python manage.py clear_peer_reviews --all`
 
 
-    4. Deploy locally
+    5. Deploy locally
         - Check if the all connected database servers are running.
         - `python manage.py runserver`
         - Open Browser URL: 127.0.0.1:8000
@@ -116,9 +118,33 @@ We use `alembic` to keep track of changes in those tables. To create all tables 
 
     python manage.py alembic upgrade head
 
-### 4 Setup the OEO-viewer
-!!! note
-    This step is not mandatory to run the oeplatform. If you don't include this step you can access the oeplatform website excluding the ontology pages.
+### 4 Setup the OpenEnergyOntology integation
+
+#### 4.1 Include the full oeo 
+
+It is necessary to include the source files of the OpenEnergyOntology (OEO) in this project.
+Currently you have to manually create the following folder structure:
+
+``` 
+# Add this in the "oeplatform" directory. Not in the "oeplatform/oeplatform" direcotry. 
+ontologies/
+└── oeo
+    └── 1
+        ├── imports
+        ├── modules
+        └── oeo-full.owl
+```
+
+!!! info
+    Get the current release of the oeo `full-oeo.owl` from from [openenergyplatform.org](https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl)
+
+    Modules and Imports can also be downloaded from [openenergyplatform.org/ontology/oeo/](https://openenergyplatform.org/ontology/oeo/)
+
+#### 4.2 Setup the OEO-viewer app 
+
+!!! note 
+    This step is not mandatory to run the oeplatform. If you don't include this step you can access the oeplatform website including most ontology pages exept for the oeo-viewer module.
+
 
 The oeo-viewer is a visualization tool for our OEO ontology and it is under development. To be able to see the oeo-viewer, follow the steps below:
 
