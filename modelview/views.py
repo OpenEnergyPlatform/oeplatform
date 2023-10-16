@@ -97,8 +97,8 @@ def listsheets(request, sheettype):
         raise Http404
     else:
         fields = (
-            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
-        )  # noqa
+            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS # noqa
+        )
         defaults = (
             FRAMEWORK_DEFAULT_COLUMNS
             if sheettype == "framework"
@@ -229,12 +229,12 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField:
+        if field is ArrayField:
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]
-                ):  # noqa
+                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi] # noqa
+                ):
                     parts.append(fi)
             parts.sort()
             fields[field.name] = ",".join(
@@ -362,7 +362,7 @@ class FSAdd(LoginRequiredMixin, View):
                     if model.license != "Other":
                         model.license_other_text = None
                 ids = {
-                    int(field[len("tag_") :])
+                    int(field[len("tag_"):])
                     for field in request.POST
                     if field.startswith("tag_")
                 }
@@ -933,7 +933,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     (
                         "example research questions",
                         ["example_research_questions"],
-                    ),  # noqa
+                    ),
                     (
                         "model validation",
                         [
@@ -946,7 +946,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     (
                         "model specific properties",
                         ["model_specific_properties"],
-                    ),  # noqa
+                    ),
                 ]
             ),
         ),
