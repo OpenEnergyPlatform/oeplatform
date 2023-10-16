@@ -229,7 +229,7 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if field is ArrayField:
+        if type(field) == ArrayField: # noqa
             parts = []
             for fi in fields.keys():
                 if (
