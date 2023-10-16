@@ -878,6 +878,12 @@ window.addEventListener('DOMContentLoaded', function() {
     updatePercentageDisplay() ;
 });
 
+function getTotalFieldCount() {
+  var allFields = makeFieldList();
+  return allFields.length;
+}
+
+
 function calculateOkPercentage(stateDict) {
   let totalCount = Object.keys(stateDict).length;
   let okCount = 0;
