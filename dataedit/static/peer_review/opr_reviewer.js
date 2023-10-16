@@ -885,7 +885,7 @@ function getTotalFieldCount() {
 
 
 function calculateOkPercentage(stateDict) {
-  let totalCount = Object.keys(stateDict).length;
+  let totalCount = getTotalFieldCount();
   let okCount = 0;
 
   for (let key in stateDict) {
@@ -894,12 +894,14 @@ function calculateOkPercentage(stateDict) {
     }
   }
 
-  return (okCount / totalCount) * 100;
+  let percentage = (okCount / totalCount) * 100;
+  return percentage.toFixed(2);
 }
 
 function updatePercentageDisplay() {
-  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(state_dict).toFixed(2);
+  document.getElementById("percentageDisplay").textContent = calculateOkPercentage(state_dict);
 }
+
 
 function updateTabProgressIndicatorClasses() {
   const tabNames = ['general', 'spatiotemporal', 'source', 'license', 'contributor', 'resource'];
