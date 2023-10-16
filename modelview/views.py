@@ -14,9 +14,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    JsonResponse,
+)  # noqa
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
+from django.views.decorators.cache import never_cache
 from scipy import stats
 from sqlalchemy.orm import sessionmaker
 
@@ -90,7 +96,9 @@ def listsheets(request, sheettype):
     elif sheettype == "studie":
         raise Http404
     else:
-        fields = FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
+        fields = (
+            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
+        )  # noqa
         defaults = (
             FRAMEWORK_DEFAULT_COLUMNS
             if sheettype == "framework"
@@ -124,6 +132,7 @@ def listsheets(request, sheettype):
     )
 
 
+@never_cache
 def show(request, sheettype, model_name):
     """
     Loads the requested factsheet
@@ -192,11 +201,15 @@ def model_to_csv(request, sheettype):
             tags.append(int(match.group("tid")))
     c, f = getClasses(sheettype)
     header = list(
-        field.attname for field in c._meta.get_fields() if hasattr(field, "attname")
+        field.attname
+        for field in c._meta.get_fields()
+        if hasattr(field, "attname")  # noqa
     )
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="{filename}s.csv"'.format(
+    response[
+        "Content-Disposition"
+    ] = 'attachment; filename="{filename}s.csv"'.format(  # noqa
         filename=c.__name__
     )
 
@@ -219,10 +232,14 @@ def processPost(post, c, f, files=None, pk=None, key=None):
         if type(field) == ArrayField:
             parts = []
             for fi in fields.keys():
-                if re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]:
+                if (
+                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]
+                ):  # noqa
                     parts.append(fi)
             parts.sort()
-            fields[field.name] = ",".join(fields[k].replace(",", ";") for k in parts)
+            fields[field.name] = ",".join(
+                fields[k].replace(",", ";") for k in parts
+            )  # noqa
             for fi in parts:
                 del fields[fi]
         else:
@@ -236,6 +253,7 @@ def processPost(post, c, f, files=None, pk=None, key=None):
 
 
 @login_required
+@never_cache
 def editModel(request, model_name, sheettype):
     """
     Constructs a form accoring to existing model
@@ -302,7 +320,7 @@ class FSAdd(LoginRequiredMixin, View):
                 if formstudy.is_valid():
                     n = formstudy.save()
                     form = processPost(
-                        request.POST, c, f, files=request.FILES, pk=pk, key=n.pk
+                        request.POST, c, f, files=request.FILES, pk=pk, key=n.pk  # noqa
                     )
                 else:
                     errorsStudy = [
@@ -370,7 +388,12 @@ class FSAdd(LoginRequiredMixin, View):
                 return render(
                     request,
                     "modelview/edit{}.html".format(sheettype),
-                    {"form": form, "name": pk, "method": method, "errors": errors},
+                    {
+                        "form": form,
+                        "name": pk,
+                        "method": method,
+                        "errors": errors,
+                    },  # noqa
                 )
 
 
@@ -393,7 +416,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     try:
         reply = http.request(
             "GET",
-            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(
+            "https://api.github.com/repos/{0}/{1}/stats/commit_activity".format(  # noqa
                 org, repo
             ),
         ).data.decode("utf8")
@@ -413,7 +436,9 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     (times, commits) = zip(
         *[
             (
-                datetime.datetime.fromtimestamp(int(week["week"])).strftime("%m-%d"),
+                datetime.datetime.fromtimestamp(int(week["week"])).strftime(
+                    "%m-%d"
+                ),  # noqa
                 sum(map(int, week["days"])),
             )
             for week in reply
@@ -444,7 +469,9 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     ax1.set_frame_on(False)
     ax1.axes.get_xaxis().tick_bottom()
     ax1.axes.get_yaxis().tick_left()
-    plt.yticks(numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small")
+    plt.yticks(
+        numpy.arange(c_real_max - 0.001, c_real_max), [max_c], size="small"
+    )  # noqa
     plt.xticks(numpy.arange(0.0, len(times)), times, size="small", rotation=45)
 
     # save the figure
@@ -482,7 +509,9 @@ class RDFFactoryView(View):
                 {
                     "iri": identifier,
                     "factory": factory_id,
-                    "rdf_templates": json.dumps(factory.get_factory_templates()),
+                    "rdf_templates": json.dumps(
+                        factory.get_factory_templates()
+                    ),  # noqa
                 },
             )
 
@@ -524,7 +553,9 @@ class RDFFactoryView(View):
                 new_name=raw_new_value["literal"],
             )
             result = dict(
-                iri=str(result.rpartition("/")[0] + "/" + raw_new_value["literal"])
+                iri=str(
+                    result.rpartition("/")[0] + "/" + raw_new_value["literal"]
+                )  # noqa
             )
         else:
             context.update_property(
@@ -566,7 +597,9 @@ class RDFView(View):
         context = connection.ConnectionContext()
         instances = fac.load_all_instances(context)
         return render(
-            request, "modelview/list_rdf_instances.html", {"instances": instances}
+            request,
+            "modelview/list_rdf_instances.html",
+            {"instances": instances},  # noqa
         )
 
 
@@ -605,7 +638,11 @@ BASE_VIEW_PROPS = OrderedDict(
                     ("license", ["license", "license_other_text"]),
                     (
                         "source code available",
-                        ["source_code_available", "gitHub", "link_to_source_code"],
+                        [
+                            "source_code_available",
+                            "gitHub",
+                            "link_to_source_code",
+                        ],  # noqa
                     ),
                 ]
             ),
@@ -746,7 +783,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                     ),
                     ("storage heat", ["storage_heat"]),
                     ("storage gas", ["storage_gas"]),
-                    ("user behaviour", ["user_behaviour", "user_behaviour_yes_text"]),
+                    (
+                        "user behaviour",
+                        ["user_behaviour", "user_behaviour_yes_text"],
+                    ),  # noqa
                     ("changes in efficiency", ["changes_in_efficiency"]),
                     ("market models", ["market_models"]),
                     ("geographical coverage", ["geographical_coverage"]),
@@ -836,7 +876,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                             "mathematical_objective_other_text",
                         ],
                     ),
-                    ("uncertainty deterministic", ["uncertainty_deterministic"]),
+                    (
+                        "uncertainty deterministic",
+                        ["uncertainty_deterministic"],
+                    ),  # noqa
                     ("uncertainty Stochastic", ["uncertainty_Stochastic"]),
                     (
                         "uncertainty Other",
@@ -845,7 +888,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                     ("montecarlo", ["montecarlo"]),
                     (
                         "typical computation",
-                        ["typical_computation_time", "typical_computation_hardware"],
+                        [
+                            "typical_computation_time",
+                            "typical_computation_hardware",
+                        ],  # noqa
                     ),
                     (
                         "technical data anchored in the model",
@@ -864,7 +910,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                         ["model_file_format", "model_file_format_other_text"],
                     ),
                     ("model input", ["model_input", "model_input_other_text"]),
-                    ("model output", ["model_output", "model_output_other_text"]),
+                    (
+                        "model output",
+                        ["model_output", "model_output_other_text"],
+                    ),  # noqa
                     ("integrating models", ["integrating_models"]),
                     ("integrated models", ["integrated_models"]),
                 ]
@@ -881,7 +930,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                         ["references_to_reports_produced_using_the_model"],
                     ),
                     ("larger scale usage", ["larger_scale_usage"]),
-                    ("example research questions", ["example_research_questions"]),
+                    (
+                        "example research questions",
+                        ["example_research_questions"],
+                    ),  # noqa
                     (
                         "model validation",
                         [
@@ -891,7 +943,10 @@ MODEL_VIEW_PROPS = OrderedDict(
                             "validation_others_text",
                         ],
                     ),
-                    ("model specific properties", ["model_specific_properties"]),
+                    (
+                        "model specific properties",
+                        ["model_specific_properties"],
+                    ),  # noqa
                 ]
             ),
         ),
