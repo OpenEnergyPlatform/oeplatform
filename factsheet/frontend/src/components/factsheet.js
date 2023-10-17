@@ -38,10 +38,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -498,6 +494,7 @@ function Factsheet(props) {
     console.log(newScenarios);
     setScenarios(newScenarios);
   };
+  
   
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
