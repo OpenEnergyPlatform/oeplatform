@@ -32,7 +32,7 @@
 <body>
 {% block header %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -47,20 +47,20 @@
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Factsheets
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
                         <a class="dropdown-item" href="/factsheets/overview/">Overview</a>
                         <a class="dropdown-item" href="/factsheets/frameworks/">Framework Factsheet</a>
                         <a class="dropdown-item" href="/factsheets/models/">Model Factsheet</a>
-                        <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a>
-                        <!-- <a class="dropdown-item" href="/factsheets/rdf/study/">Study  Factsheet<sup class="small text-muted">Alpha</sup></a> -->
+                        <a class="dropdown-item" href="/sirop/">Scenario Bundle<sup class="small text-muted">Early Access</sup></a>
+                        <!-- <a class="dropdown-item" href="/factsheets/scenarios/">Scenario Factsheet</a> -->
                     </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ontology
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -75,7 +75,7 @@
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         About
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -104,7 +104,7 @@
 
 {% endblock header %}
 
-<div class="container-fluid base">
+<div class="container-fluid base" style="padding:0">
     {% block site-header %}
     {% endblock site-header %}
     {% block main %}
@@ -138,8 +138,12 @@
 
 {% block body-bottom-js %}
     {% block before-body-bottom-js %}{% endblock before-body-bottom-js %}
-    <script type="text/javascript" src="{% static '/js/jsi18n.js' %}"></script>
-    <script type="text/javascript" src="{% static '/js/oep-tags.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.min.js' %}"></script><!-- https://code.jquery.com/ui/1.12.1/jquery-ui.js -->
+    <script src="{% static 'js/jsi18n.js' %}"></script>
+    <script src="{% static 'js/oep-tags.js' %}"></script>
     {% block after-body-bottom-js %}{% endblock after-body-bottom-js %}
 {% endblock body-bottom-js %}
 

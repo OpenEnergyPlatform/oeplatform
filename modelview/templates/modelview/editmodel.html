@@ -33,17 +33,41 @@
 <div style="width:100%">
 
 <ul class="nav nav-tabs" style="width:100%">
-  <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Basic">General Information</a></li>
+  <!-- <li class="active" style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Basic">General Information</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Openness">Openness</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Software">Software</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Coverage">Coverage</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Math">Mathematical Properties</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Integration">Model Integration</a></li>
   <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#References">References</a></li>
-  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li>
-  <span onclick="window.onbeforeunload = function (e) {};">
-  <input class="btn btn-info right" type="submit" value="Submit all" />
-  </span>
+  <li style="padding-right: 5px; padding-left: 5px"><a data-bs-toggle="tab" href="#Tags">Tags</a></li> -->
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#Basic" type="button" role="tab" aria-controls="Basic" aria-selected="true">General</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="openness-tab" data-bs-toggle="tab" data-bs-target="#Openness" type="button" role="tab" aria-controls="Openness" aria-selected="false">Openness</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="software-tab" data-bs-toggle="tab" data-bs-target="#Software" type="button" role="tab" aria-controls="Software" aria-selected="false">Software</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="coverage-tab" data-bs-toggle="tab" data-bs-target="#Coverage" type="button" role="tab" aria-controls="Coverage" aria-selected="false">Coverage</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="math-tab" data-bs-toggle="tab" data-bs-target="#Math" type="button" role="tab" aria-controls="Math" aria-selected="false">Mathematical Properties</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="integration-tab" data-bs-toggle="tab" data-bs-target="#Integration" type="button" role="tab" aria-controls="Integration" aria-selected="false">Model Integration</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="references-tab" data-bs-toggle="tab" data-bs-target="#References" type="button" role="tab" aria-controls="Overview" aria-selected="false">References</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tags-tab" data-bs-toggle="tab" data-bs-target="#Tags" type="button" role="tab" aria-controls="Overview" aria-selected="false">Tags</button>
+    </li>
+    <span onclick="window.onbeforeunload = function (e) {};">
+        <input class="btn btn-info right" type="submit" value="Submit all" />
+    </span>
 </ul>
 
 </div>

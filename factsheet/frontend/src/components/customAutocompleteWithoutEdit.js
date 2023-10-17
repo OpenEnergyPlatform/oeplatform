@@ -25,10 +25,17 @@ import AlertTitle from '@mui/material/AlertTitle';
 import Snackbar, { SnackbarOrigin } from '@mui/material/Snackbar';
 import EditIcon from '@mui/icons-material/Edit';
 import uuid from "react-uuid";
+import { makeStyles } from '@material-ui/core/styles';
 
 const filter = createFilterOptions();
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const useStyles = makeStyles((theme) => ({
+  inputRoot: {
+    borderRadius: 0,  
+  },
+}));
 
 export default function CustomAutocompleteWithoutEdit(parameters) {
   const { manyItems, idx, name, type, showSelectedElements, addNewHandler, editHandler, handler, width, bgColor } = parameters;
@@ -39,7 +46,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
   const [editIRI, setEditIRI] = React.useState('');
   const [updatedLabel, setUpdatedLabel] = React.useState('');
 
-  
+  const classes = useStyles();
   const [dialogValue, setDialogValue] = React.useState({
     id: '',
     name: '',
@@ -133,7 +140,7 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
  
 
   return (
-    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '20px' :'10px', marginBottom: '20px'}}>
+    <Box style={{ width: width,  backgroundColor: bgColor !== undefined ? bgColor : '#FCFCFC', marginTop: manyItems ? '10px' :'10px', marginBottom: '20px'}}>
       <Autocomplete
         size="small" 
         multiple
@@ -172,7 +179,14 @@ export default function CustomAutocompleteWithoutEdit(parameters) {
         renderTags={() => null}
         isOptionEqualToValue={(option, value) => option.name === value.name}
         renderInput={(params) => (
-          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" />
+          <TextField {...params} label={parameters.kind} placeholder="" variant="outlined" 
+          InputProps={{
+            ...params.InputProps,
+            classes: {
+              root: classes.inputRoot, // Apply the custom CSS class
+            },
+          }}
+          />
         )}
         filterOptions={(options, params) => {
           const filtered = filter(options, params);
