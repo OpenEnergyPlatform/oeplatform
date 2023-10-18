@@ -27,13 +27,8 @@ from dataedit.structures import Tag
 from .forms import (
     EnergyframeworkForm,
     EnergymodelForm,
-    EnergyscenarioForm,
-    EnergystudyForm,
 )
-from .models import Energyframework, Energymodel, Energyscenario, Energystudy
-from .rdf import connection, factory, namespace
-
-_factory_mappings = {"study": factory.Study, "scenario": factory.Scenario}
+from .models import Energyframework, Energymodel
 
 
 def getClasses(sheettype):
@@ -46,12 +41,6 @@ def getClasses(sheettype):
     elif sheettype == "framework":
         c = Energyframework
         f = EnergyframeworkForm
-    elif sheettype == "scenario":
-        c = Energyscenario
-        f = EnergyscenarioForm
-    elif sheettype == "studie":
-        c = Energystudy
-        f = EnergystudyForm
     return c, f
 
 
@@ -80,40 +69,32 @@ def load_tags():
 
 def listsheets(request, sheettype):
     """
-    Lists all available model, framework or scenario factsheet objects.
+    Lists all available model, framework factsheet objects.
     """
     c, _ = getClasses(sheettype)
     tags = []
     fields = {}
     defaults = set()
-    if sheettype == "scenario":
-        models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
-    elif sheettype == "studie":
-        raise Http404
-    else:
-        fields = (
-            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
-        )  # noqa
-        defaults = (
-            FRAMEWORK_DEFAULT_COLUMNS
-            if sheettype == "framework"
-            else MODEL_DEFAULT_COLUMNS
-        )
-        d = load_tags()
-        tags = sorted(d.values(), key=lambda d: d["name"])
-        models = []
 
-        for model in c.objects.all():
-            model.tags = [d[tag_id] for tag_id in model.tags]
-            models.append(model)
-    if sheettype == "scenario":
-        label = "Scenario"
-    elif sheettype == "studie":
-        label = "Study"
-    elif sheettype == "framework":
+    fields = (
+        FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
+    )  # noqa
+    defaults = (
+        FRAMEWORK_DEFAULT_COLUMNS if sheettype == "framework" else MODEL_DEFAULT_COLUMNS
+    )
+    d = load_tags()
+    tags = sorted(d.values(), key=lambda d: d["name"])
+    models = []
+
+    for model in c.objects.all():
+        model.tags = [d[tag_id] for tag_id in model.tags]
+        models.append(model)
+
+    if sheettype == "framework":
         label = "Framework"
     else:
         label = "Model"
+
     return render(
         request,
         "modelview/modellist.html",
