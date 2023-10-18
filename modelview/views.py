@@ -30,11 +30,16 @@ from .forms import (
 )
 from .models import Energyframework, Energymodel
 
+# The sheet type specifies the factsheet variant that was requested
+REGISTERED_SHEET_TYPES = ["model", "framework"]
+
 
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
     """
+    c = None
+    f = None
     if sheettype == "model":
         c = Energymodel
         f = EnergymodelForm
@@ -72,6 +77,17 @@ def listsheets(request, sheettype):
     Lists all available model, framework factsheet objects.
     """
     c, _ = getClasses(sheettype)
+    if c is None:
+        # Handle the case where getClasses returned None
+        # You can return an error message or take appropriate action here.
+        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
+        sheettype_error_message = "Invalid sheettype"
+        return render(
+            request,
+            "modelview/error_template.html",
+            {"sheettype_error_message": sheettype_error_message},
+        )
+
     tags = []
     fields = {}
     defaults = set()
