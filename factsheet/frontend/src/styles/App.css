@@ -41,38 +41,6 @@ p {
   color: rgb(4, 0, 255);
 }
 
-#headerStyle {
-  padding-top: 20px;
-  padding-left: 60px;
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-}
-
-#headerStyle p {
-  color: rgb(72, 72, 72);
-  margin-left: 10px;
-  font-size: 20px;
-}
-
-#headerStyle span {
-  margin-top: 4px;
-  color: rgb(72, 72, 72);
-}
-
-#headerSubStyle {
-  padding-left: 60px;
-  display: flex;
-  align-items: center;
-  font-size: 20px;
-}
-
-#headerSubStyle span {
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-
 a:link { text-decoration: none; color: '#294456'; }
 a:visited { text-decoration: none; color: '#294456';}
 a:hover { text-decoration: none; color: '#294456';}

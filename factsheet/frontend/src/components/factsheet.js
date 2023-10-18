@@ -55,6 +55,7 @@ import oep_models from '../data/models.json';
 import oep_frameworks from '../data/frameworks.json';
 import Divider from '@mui/material/Divider';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.js';
 
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -2493,17 +2494,7 @@ function getStepContent(step: number) {
       justifyContent="space-between"
       alignItems="center"
       >
-        <Grid item xs={12} >
-        <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
-          <div id='headerStyle'>
-            <span>
-              <ListAltOutlinedIcon />
-            </span>
-            <p>Scenario Bundle</p>
-          </div>
-          <div id='headerSubStyle'> <span> {id === "new" ? "new/" : mode + "/" } </span> {acronym} </div>
-        </div>
-        </Grid>
+        <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
         <Container maxWidth="xl">
 
           <Grid item xs={12}>
