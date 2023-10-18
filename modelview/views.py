@@ -30,9 +30,6 @@ from .forms import (
 )
 from .models import Energyframework, Energymodel
 
-# The sheet type specifies the factsheet variant that was requested
-REGISTERED_SHEET_TYPES = ["model", "framework"]
-
 
 def getClasses(sheettype):
     """
