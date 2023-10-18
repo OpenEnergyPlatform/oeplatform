@@ -340,7 +340,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     if not reply:
         return None
 
-    # If there are more weeks than nessecary, truncate
+    # If there are more weeks than necessary, truncate
     if weeks_back < len(reply):
         reply = reply[-weeks_back:]
 
