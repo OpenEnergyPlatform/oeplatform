@@ -45,3 +45,9 @@ a:link { text-decoration: none; color: '#294456'; }
 a:visited { text-decoration: none; color: '#294456';}
 a:hover { text-decoration: none; color: '#294456';}
 a:active { text-decoration: none; color: '#294456';}
+
+.separator-dot {
+  display: inline-block;
+  font-size: 24px;
+  transform: translateY(-3px);
+}

@@ -656,22 +656,22 @@ export default function CustomTable(props) {
 
                                 <Grid item xs={12}>
                                   <b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12}>
                                  <b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
 
                                 <Grid item xs={12} >
                                 <b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                 </Grid>
                             </Grid>
@@ -713,16 +713,16 @@ export default function CustomTable(props) {
                   </Stack>
                   <p><b>Abstract: </b> {row.abstract}</p>
                   <p><b>Institutions: </b>{row.institutions.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Funding sources: </b>{row.funding_sources.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Models and frameworks: </b>{row.models.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} 
                                   {row.frameworks.map((v) => (
-                                      <span> <span> {v} </span> <span>   <b style={{ fontSize: '16px' }}> . </b></span> </span>
+                                      <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                                   ))} </p>
                   <p><b>Scenarios: </b>{row.scenarios.map((v) => (
                         <HtmlTooltip

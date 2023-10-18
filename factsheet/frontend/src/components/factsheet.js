@@ -1804,7 +1804,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.descriptors.map( (e) =>  <span> <span> {e.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
+        {v.descriptors.map( (e) =>  <span> <span> {e.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
@@ -1828,7 +1828,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-      {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>  )}
+      {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
@@ -1852,7 +1852,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.regions.map( (e) => <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
+        {v.regions.map( (e) => <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
@@ -1876,7 +1876,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }}>
-        {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
+        {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
@@ -1900,7 +1900,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038'  }}>
-        {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span> )}
+        {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span> )}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
@@ -1924,7 +1924,7 @@ const renderScenariosOverview = () => (
         </span>
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-       {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>)}
+       {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
       </Grid>
     </Grid>
     )
@@ -1981,7 +1981,7 @@ const renderPublicationOverview = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
         {selectedAuthors.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
@@ -2110,7 +2110,7 @@ const renderSectorsAndTechnology = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
        {selectedSectorDivisions.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
 
@@ -2137,7 +2137,7 @@ const renderSectorsAndTechnology = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
         {selectedSectors.map((v, i) => (
-            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
       <Grid item xs={12} style={{ padding: '0px' }}>
@@ -2163,7 +2163,7 @@ const renderSectorsAndTechnology = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
       {selectedTechnologies.map((v, i) => (
-            <span> <span> {v.label} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.label} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
     </Grid>
@@ -2195,7 +2195,7 @@ const renderModelsAndFrameworksOverview = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
        {selectedModels.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
 
@@ -2222,7 +2222,7 @@ const renderModelsAndFrameworksOverview = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
         {selectedFrameworks.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
         ))}
       </Grid>
     </Grid>
@@ -2772,7 +2772,7 @@ function getStepContent(step: number) {
               </Grid>
               <Grid item xs={9} style={{ paddingTop: '10px' }}>
                 {selectedContactPerson.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+                           <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
                           ))}
               </Grid>
 
@@ -2796,7 +2796,7 @@ function getStepContent(step: number) {
               </Grid>
               <Grid item xs={9} style={{ paddingTop: '10px' }}>
                 {selectedInstitution.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>   <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+                           <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
                 ))}
               </Grid>
 
@@ -2820,7 +2820,7 @@ function getStepContent(step: number) {
               </Grid>
               <Grid item xs={9} style={{ paddingTop: '10px' }} >
               {selectedFundingSource.map((v, i) => (
-                            <span> <span> {v.name} </span> <span>  <b style={{ fontSize: '24px' }}>.</b> </span> </span>
+                            <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
                           ))}
               </Grid>
 
@@ -2844,7 +2844,7 @@ function getStepContent(step: number) {
               </Grid>
               <Grid item xs={9} style={{ paddingTop: '10px' }}>
                {selectedStudyKewords.map((v, i) => (
-                          <span> <span> {v} </span> <span>   <b style={{ fontSize: '24px' }}>.</b></span> </span>
+                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
                           ))}
               </Grid>
 
