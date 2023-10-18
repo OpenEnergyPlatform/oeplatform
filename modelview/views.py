@@ -233,12 +233,8 @@ def editModel(request, model_name, sheettype):
 
     model = get_object_or_404(c, pk=model_name)
 
-    tags = []
-    if sheettype in ["scenario", "studie"]:
-        pass
-    else:
-        d = load_tags()
-        tags = [d[tag_id] for tag_id in model.tags]
+    d = load_tags()
+    tags = [d[tag_id] for tag_id in model.tags]
 
     form = f(instance=model)
 
@@ -254,20 +250,12 @@ class FSAdd(LoginRequiredMixin, View):
         c, f = getClasses(sheettype)
         if method == "add":
             form = f()
-            if sheettype == "scenario":
-                _c_study, f_study = getClasses("studie")
-                formstudy = f_study()
-                return render(
-                    request,
-                    "modelview/new{}.html".format(sheettype),
-                    {"form": form, "formstudy": formstudy, "method": method},
-                )
-            else:
-                return render(
-                    request,
-                    "modelview/edit{}.html".format(sheettype),
-                    {"form": form, "method": method},
-                )
+
+            return render(
+                request,
+                "modelview/edit{}.html".format(sheettype),
+                {"form": form, "method": method},
+            )
         else:
             raise NotImplementedError()  # FIXME: model_name not defined
             # model = get_object_or_404(c, pk=model_name)
