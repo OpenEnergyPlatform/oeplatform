@@ -269,91 +269,44 @@ class FSAdd(LoginRequiredMixin, View):
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)
         form = processPost(request.POST, c, f, files=request.FILES, pk=pk)
-        if sheettype == "scenario" and method == "add":
-            c_study, f_study = getClasses("studie")
-            formstudy = processPost(
-                request.POST, c_study, f_study, files=request.FILES, pk=pk
+
+        if form.is_valid():
+            model = form.save()
+            if hasattr(model, "license") and model.license:
+                if model.license != "Other":
+                    model.license_other_text = None
+            ids = {
+                int(field[len("tag_") :])
+                for field in request.POST
+                if field.startswith("tag_")
+            }
+
+            model.tags = sorted(list(ids))
+            model.save()
+
+            return redirect(
+                "/factsheets/{sheettype}s/{model}".format(
+                    sheettype=sheettype, model=model.pk
+                )
             )
-            errorsStudy = []
-            if request.POST["new"] == "True":
-                if formstudy.is_valid():
-                    n = formstudy.save()
-                    form = processPost(
-                        request.POST, c, f, files=request.FILES, pk=pk, key=n.pk  # noqa
-                    )
-                else:
-                    errorsStudy = [
-                        (field.label, str(field.errors.data[0].message))
-                        for field in formstudy
-                        if field.errors
-                    ]
-            if form.is_valid() and errorsStudy == []:
-                m = form.save()
-                return redirect(
-                    "/factsheets/{sheettype}s/{model}".format(
-                        sheettype=sheettype, model=m.pk
-                    )
-                )
-            else:
-                errors = []
-                for field in form.errors:
-                    e = form.errors[field]
-                    error = e[0]
-                    field = form.fields[field].label
-                    errors.append((field, str(error)))
-
-                errors = errors + errorsStudy
-                return render(
-                    request,
-                    "modelview/new{}.html".format(sheettype),
-                    {
-                        "form": form,
-                        "formstudy": formstudy,
-                        "name": pk,
-                        "method": method,
-                        "errors": errors,
-                    },
-                )
         else:
-            if form.is_valid():
-                model = form.save()
-                if hasattr(model, "license") and model.license:
-                    if model.license != "Other":
-                        model.license_other_text = None
-                ids = {
-                    int(field[len("tag_") :])
-                    for field in request.POST
-                    if field.startswith("tag_")
-                }
+            errors = []
+            for field in form.errors:
+                e = form.errors[field]
+                error = e[0]
+                field = form.fields[field].label
+                errors.append((field, str(error)))
 
-                if sheettype == "scenario":
-                    pass
-                else:
-                    model.tags = sorted(list(ids))
-                    model.save()
-                return redirect(
-                    "/factsheets/{sheettype}s/{model}".format(
-                        sheettype=sheettype, model=model.pk
-                    )
-                )
-            else:
-                errors = []
-                for field in form.errors:
-                    e = form.errors[field]
-                    error = e[0]
-                    field = form.fields[field].label
-                    errors.append((field, str(error)))
-
-                return render(
-                    request,
-                    "modelview/edit{}.html".format(sheettype),
-                    {
-                        "form": form,
-                        "name": pk,
-                        "method": method,
-                        "errors": errors,
-                    },  # noqa
-                )
+            return render(
+                request,
+                "modelview/edit{}.html".format(sheettype),
+                {
+                    "form": form,
+                    "name": pk,
+                    "method": method,
+                    "errors": errors,
+                },
+            )
 
 
 def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
