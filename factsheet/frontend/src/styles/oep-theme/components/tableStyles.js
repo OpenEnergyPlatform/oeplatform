@@ -47,6 +47,14 @@ export const tableCellStyles = {
       style: {
         backgroundColor: palette.background.lighter
       }
+    },
+    {
+      props: { 
+        variant: 'border' 
+      },
+      style: {
+        borderBottom: `1px solid ${palette.border}`
+      }
     }
   ]
 };
