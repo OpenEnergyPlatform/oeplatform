@@ -115,37 +115,32 @@ def show(request, sheettype, model_name):
     """
     c, _ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
-    model_study = []
-    if sheettype == "scenario":
-        c_study, _ = getClasses("studie")
-        model_study = get_object_or_404(c_study, pk=model.study.pk)
-    else:
-        d = load_tags()
-        model.tags = [d[tag_id] for tag_id in model.tags]
+    d = load_tags()
+    model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-    if sheettype != "scenario" and sheettype != "studie":
-        if model.gitHub and model.link_to_source_code:
-            try:
-                match = re.match(
-                    r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
-                    model.link_to_source_code,
-                )
-                org = match.group("org")
-                repo = match.group("repo")
-                _handle_github_contributions(org, repo)
-            except Exception:
-                org = None
-                repo = None
+
+    if model.gitHub and model.link_to_source_code:
+        try:
+            match = re.match(
+                r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
+                model.link_to_source_code,
+            )
+            org = match.group("org")
+            repo = match.group("repo")
+            _handle_github_contributions(org, repo)
+        except Exception:
+            org = None
+            repo = None
+
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
         {
             "model": model,
-            "model_study": model_study,
             "gh_org": org,
             "gh_repo": repo,
             "displaySheetType": sheettype.capitalize(),
