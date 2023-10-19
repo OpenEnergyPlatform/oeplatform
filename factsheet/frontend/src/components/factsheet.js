@@ -493,6 +493,7 @@ function Factsheet(props) {
       obj[name] = selectedList
     console.log(newScenarios);
     setScenarios(newScenarios);
+
   };
   
   
@@ -1536,10 +1537,16 @@ const renderBasicInformation = () => (
           <Stack spacing={3}  style={{ marginTop:'10px', width: '70%', marginBottom:'40px' }}>
             <DesktopDatePicker
                 label=''
-                inputFormat="YYYY-MM-DD"
+                inputFormat="YYYY/MM/DD"
                 value={date_of_publication}
                 onChange={(newValue) => {
-                  setDateOfPublication(newValue);
+                  const dateObj = new Date(newValue);
+                  const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate() )
+                  const d = new Date(dateString);
+                  console.log(d);
+                  console.log(dateString);
+
+                  setDateOfPublication(dateString);
                 }}
                 renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />

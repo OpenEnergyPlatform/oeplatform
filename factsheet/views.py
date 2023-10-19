@@ -151,6 +151,8 @@ def get_history(request, *args, **kwargs):
 #@login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
+    print("###########user###########")
+    print(request.user)
     request_body = json.loads(request.body)
     name = request_body["name"]
     uid = request_body["uid"]
@@ -228,13 +230,13 @@ def create_factsheet(request, *args, **kwargs):
                 (
                     study_URI,
                     OEKG["date_of_publication"],
-                    Literal(date_of_publication[:10], datatype=XSD.date),
+                    Literal(date_of_publication),
                 )
             )
             add_history(
                 study_URI,
                 OEKG["date_of_publication"],
-                Literal(date_of_publication[:10], datatype=XSD.date),
+                Literal(date_of_publication),
                 "add",
                 request.user,
             )
@@ -1039,12 +1041,13 @@ def update_factsheet(request, *args, **kwargs):
 
         for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
             oekg.remove((s, p, o))
+
         if date_of_publication != "01-01-1900" and date_of_publication != "":
             oekg.add(
                 (
                     study_URI,
                     OEKG["date_of_publication"],
-                    Literal(date_of_publication[:10], datatype=XSD.date),
+                    Literal(date_of_publication),
                 )
             )
 
@@ -1200,11 +1203,15 @@ def factsheet_by_id(request, *args, **kwargs):
     study_URI = URIRef("http://openenergy-platform.org/ontology/oekg/" + uid)
     factsheet = {}
 
+    print('############################start')
+    print(study_URI)
+    print(oekg.value(study_URI, OEKG["date_of_publication"]))
+    
     acronym = ""
     study_name = ""
     abstract = ""
     report_title = ""
-    date_of_publication = "01-01-1900"
+    date_of_publication = ""
     place_of_publication = ""
     link_to_study = ""
     report_doi = ""
@@ -1220,7 +1227,6 @@ def factsheet_by_id(request, *args, **kwargs):
 
     for s, p, o in oekg.triples((study_URI, OEKG["report_title"], None)):
         report_title = o
-        print(report_title)
 
     for s, p, o in oekg.triples((study_URI, OEKG["date_of_publication"], None)):
         date_of_publication = o
@@ -1355,7 +1361,7 @@ def factsheet_by_id(request, *args, **kwargs):
             o1_type = oekg.value(o1, RDF.type)
             o1_label = oekg.value(o1, RDFS.label)
             scenario["regions"].append(
-                {"iri": o1, "id": o1_label, "name": o1_label}
+                {"iri": o1, "name": o1_label}
             )
 
         for s1, p1, o1 in oekg.triples((o, OEO.OEO_00020222, None)):
@@ -1480,7 +1486,6 @@ def query_oekg(request, *args, **kwargs):
         results["results"]["bindings"], safe=False, content_type="application/json"
     )
     return response
-
 
 @login_required
 @csrf_exempt
@@ -1673,6 +1678,7 @@ def get_all_factsheets(request, *args, **kwargs):
         element["date_of_publication"] = oekg.value(
             study_URI, OEKG["date_of_publication"]
         )
+
         for s, p, o in oekg.triples((study_URI, OEKG["has_scenario"], None)):
             label = oekg.value(o, RDFS.label)
             abstract = oekg.value(o, DC.abstract)
