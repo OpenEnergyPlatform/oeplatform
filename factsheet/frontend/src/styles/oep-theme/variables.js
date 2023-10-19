@@ -1,5 +1,13 @@
 const variables = {
   borderRadius: '4px',
+  fontSize: {
+    'xs': '0.75rem',
+    'sm': '0.875rem',
+    'md': '1rem',
+    'lg': '1.25rem',
+    'xl': '1.5rem',
+    'xl1': '2rem'
+  },
   spacing: {
     0: '0',
     1: '0.25rem',

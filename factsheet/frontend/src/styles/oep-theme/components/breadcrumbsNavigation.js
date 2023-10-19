@@ -1,59 +1,64 @@
 import { Grid } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import Container from '@mui/material/Container';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import palette from '../palette';
+import variables from '../variables';
 
 const BreadcrumbsNav = styled(Grid)(({ theme }) => ({
-  backgroundColor: theme.palette.grey[300], 
-  height: '150px',
-  marginBottom: '10px',
-  
-  '& .header-style': {
-    'padding-top': '20px',
-    'padding-left': '60px',
-    'display': 'flex',
-    'align-items': 'center',
-    'font-size': '20px'
-  },
+  backgroundColor: theme.palette.grey[100],
+  paddingBottom: variables.spacing[5],
+  marginBottom: variables.spacing[4],
 
-  '& .header-style p': {
-    'color': 'rgb(72, 72, 72)',
-    'margin-left': '10px',
-    'font-size': '20px'
+  '& .header-style': {
+    paddingTop: variables.spacing[4],
+    display: 'flex',
+    alignItems: 'center',
+    fontWeight: theme.typography.fontWeightLight,
+    fontSize: variables.fontSize.lg
   },
 
   '& .header-style span': {
-    'margin-top': '4px',
-    'color': 'rgb(72, 72, 72)'
+    marginTop: variables.spacing[1],
+    color: palette.text.primary
+  },
+
+  '& .header-style p': {
+    paddingLeft: variables.spacing[2],
+    color: palette.text.primary,
+    fontSize: variables.fontSize.lg
   },
 
   '& .header-substyle': {
-    'padding-left': '60px',
-    'display': 'flex',
-    'align-items': 'center',
-    'font-size': '20px'
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: variables.fontSize.md
   },
 
   '& .header-substyle span': {
-    'text-transform': 'uppercase',
-    'font-weight': 'bold'
+    paddingRight: variables.spacing[2],
+    textTransform: 'uppercase',
+    fontWeight: theme.typography.fontWeightBold
   },
 }));
 
 export default function BreadcrumbsNavGrid({ acronym, id, mode }) {
   return (
     <BreadcrumbsNav container>
-      <Grid item xs={12} className='header-style'>
-        <span>
-          <ListAltOutlinedIcon />
-        </span>
-        <p>Scenario Bundle</p>
-      </Grid>
-      <Grid item xs={12} className='header-substyle'>
-        <span> 
-          {id === "new" ? "new/" : mode + "/"} 
-        </span> 
-        {acronym}
-      </Grid>
+      <Container maxWidth="lg">
+        <Grid item xs={12} className='header-style'>
+          <span>
+            <ListAltOutlinedIcon />
+          </span>
+          <p>Scenario Bundle</p>
+        </Grid>
+        <Grid item xs={12} className='header-substyle'>
+          <span> 
+            {id === "new" ? "new/" : mode + " /"} 
+          </span> 
+          {acronym}
+        </Grid>
+      </Container>
     </BreadcrumbsNav>
   );
 }
