@@ -2502,7 +2502,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="xl">
+        <Container maxWidth="lg">
 
           <Grid item xs={12}>
             <Backdrop
@@ -2551,7 +2551,7 @@ function getStepContent(step: number) {
               <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>}> Share </Button>
             </Tooltip>
             <Tooltip title="Delete factsheet">
-              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
+              <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
             </Tooltip>
           </div >
           </Grid>
@@ -2735,10 +2735,10 @@ function getStepContent(step: number) {
                <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
               </Grid>
               <Grid item xs={12}  >
-               <b style={{ color: 'clack', marginLeft:'20px', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
+               <b style={{ color: 'clack', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
               </Grid>
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym</b> </span>
+                <span style={{ color: '#294456' }}> <b>Acronym</b> </span>
                 <span >
                 <HtmlTooltip
                   title={
@@ -2760,7 +2760,7 @@ function getStepContent(step: number) {
               </Grid>
 
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Contact person(s):</b> </span>
+                <span style={{ color: '#294456'}}> <b>Contact person(s):</b> </span>
                 <span >
                   <HtmlTooltip
                     title={
@@ -2784,7 +2784,7 @@ function getStepContent(step: number) {
               </Grid>
 
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
+                <span style={{ color: '#294456' }}> <b>Institutions: </b> </span>
                 <span >
                   <HtmlTooltip
                     title={
@@ -2808,7 +2808,7 @@ function getStepContent(step: number) {
               </Grid>
 
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
+                <span style={{ color: '#294456' }}> <b>Funding sources: </b> </span>
                 <span >
                   {/* <HtmlTooltip
                     title={
@@ -2832,7 +2832,7 @@ function getStepContent(step: number) {
               </Grid>
 
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
+                <span style={{ color: '#294456' }}> <b>Descriptors: </b> </span>
                 <span >
                   {/* <HtmlTooltip
                     title={
@@ -2856,7 +2856,7 @@ function getStepContent(step: number) {
               </Grid>
 
               <Grid item xs={3} >
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
+                <span style={{ color: '#294456' }}> <b>Abstract: </b> </span>
                 <span >
                 <HtmlTooltip
                   title={

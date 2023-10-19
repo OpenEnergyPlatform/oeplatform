@@ -19,8 +19,8 @@ export default function ColorToggleButton(props) {
   };
 
   return (
-    <div style={{ 'marginLeft': '10px', 'display':'flex' }}>
-      <Tooltip title="Back to main page!">
+    <div style={{ 'display':'flex' }}>
+      <Tooltip title="Back to main page">
         <Link to={`sirop/`} onClick={() => this.forceUpdate}>
           <Button variant="outlined" size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }}>
             <ArrowBackIcon />
