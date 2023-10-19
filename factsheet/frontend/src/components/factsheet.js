@@ -2175,62 +2175,64 @@ const renderSectorsAndTechnology = () => (
 )
 
 const renderModelsAndFrameworksOverview = () => (
-  <Grid container justifyContent="space-between"
-        alignItems="start"
-        spacing={2} 
-        style={{ width: '100%', marginTop:'10px', border: '1px solid #80808038' }} >
-
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}><b> Models: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-       {selectedModels.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-        ))}
-      </Grid>
-
-      <Grid item xs={12} style={{ padding: '0px' }}>
-        <Divider />
-      </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Frameworks: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A software framework is a Software that is generic and can be adapted to a specific application.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
-        {selectedFrameworks.map((v, i) => (
-            <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-        ))}
-      </Grid>
-    </Grid>
+  <Container maxWidth="lg">
+    <TableContainer>
+      <Table>
+        <TableBody>
+          <TableRow>
+            <FirstRowTableCell>
+              <div>
+                <span>Models</span>
+                <HtmlTooltip
+                  title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="subtitle1">
+                      {'A model is a generically dependent continuant that is used for computing an idealised reproduction of a system and its behaviours.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000274">More info...</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+                >
+                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                </HtmlTooltip>
+              </div>
+            </FirstRowTableCell>
+            <ContentTableCell>
+              {selectedModels.map((v, i) => (
+                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+              ))}
+            </ContentTableCell>
+          </TableRow>
+          <TableRow>
+            <FirstRowTableCell>
+              <div>
+                <span>Frameworks</span>
+                <HtmlTooltip
+                  title={
+                  <React.Fragment>
+                    <Typography color="inherit" variant="subtitle1">
+                      {'A software framework is a Software that is generic and can be adapted to a specific application.'}
+                      <br />
+                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000382">More info...</a>
+                    </Typography>
+                  </React.Fragment>
+                }
+                >
+                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                </HtmlTooltip>
+              </div>
+            </FirstRowTableCell>
+            <ContentTableCell>
+              {selectedFrameworks.map((v, i) => (
+                <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+              ))}
+            </ContentTableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </Container>
 )
 
 const overview_items = {
