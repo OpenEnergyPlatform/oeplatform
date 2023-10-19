@@ -2548,7 +2548,7 @@ function getStepContent(step: number) {
               <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="contained" color="primary" onClick={handleSaveFactsheet} startIcon={<SaveIcon />}> Save </Button>
             </Tooltip>}
             <Tooltip title="Share this factsheet">
-              <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>}> Share </Button>
+              <Button  disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'marginRight': '5px', 'zIndex': '1000' }} variant="outlined" color="primary" startIcon={<ShareIcon/>} disabled> Share </Button>
             </Tooltip>
             <Tooltip title="Delete factsheet">
               <Button disableElevation={true} size="small" style={{ 'height': '43px', 'textTransform': 'none', 'marginTop': '10px', 'zIndex': '1000' }} variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon/>}> Delete </Button>
