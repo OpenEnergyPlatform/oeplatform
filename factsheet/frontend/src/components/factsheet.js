@@ -60,6 +60,7 @@ import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
 
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -183,7 +184,7 @@ function Factsheet(props) {
                 </React.Fragment>
               }
               >
-              <HelpOutlineIcon sx={{ fontSize: '24px', color: '#bdbdbd', marginLeft: '-10px' }}/>
+              <HelpOutlineIcon sx={{ fontSize: '24px', color: '#708696', marginLeft: '-10px' }}/>
           </HtmlTooltip>
           <span
             style={{ marginLeft: '5px', marginTop: '-20px' }}
@@ -1265,7 +1266,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1287,7 +1288,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1309,7 +1310,7 @@ const renderBasicInformation = () => (
           </React.Fragment>
         }
         >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip>
         </span>
       </Grid>
@@ -1332,7 +1333,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1363,7 +1364,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
         >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+          <HelpOutlineIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip> */}
         </span>
       </Grid>
@@ -1385,7 +1386,7 @@ const renderBasicInformation = () => (
           </React.Fragment>
         }
         >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip>
         </span>
       </Grid>
@@ -1409,7 +1410,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
         >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+          <HelpOutlineIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip> */}
         </span>
       </Grid>
@@ -1444,7 +1445,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1466,7 +1467,7 @@ const renderBasicInformation = () => (
           </React.Fragment>
         }
         >
-        <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip>
         </span>
       </Grid>
@@ -1488,7 +1489,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1512,7 +1513,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
         >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+          <HelpOutlineIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip> */}
         </span>
       </Grid>
@@ -1536,7 +1537,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
         >
-          <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+          <HelpOutlineIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip> */}
         </span>
       </Grid>
@@ -1576,7 +1577,7 @@ const renderBasicInformation = () => (
               </React.Fragment>
             }
             >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+            <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1599,7 +1600,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1630,7 +1631,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1666,7 +1667,7 @@ const renderBasicInformation = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
       </HtmlTooltip>
       </span>
     </Grid>
@@ -1688,7 +1689,7 @@ const renderBasicInformation = () => (
               </React.Fragment>
             }
             >
-            <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+            <InfoOutlinedIcon sx={{ color: '#708696' }}/>
         </HtmlTooltip>
       </span>
     </Grid>
@@ -1712,17 +1713,16 @@ const items = {
 const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
 const renderScenariosOverview = () => (
   <Container maxWidth="lg">
-    <TableContainer>
-      <TableBody >
-        {
-          scenarios.map((v, i) => 
-          v.acronym !== '' && 
-
-            <>
+    {
+      scenarios.map((v, i) => 
+      v.acronym !== '' && 
+      <TableContainer>
+        <Table>
+          <TableBody>
             <TableRow>
-              <TableCell item xs={2} style={{  padding: '5px'}} variant="light">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Name: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Name</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1732,20 +1732,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '10px', borderLeft: '1px solid #80808038' }} variant="light">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.name}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2} style={{  padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Acronym</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1755,20 +1755,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '10px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.acronym} 
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{ padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Abstract</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1778,20 +1778,20 @@ const renderScenariosOverview = () => (
                         <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.abstract}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{ padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Descriptors: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Descriptors</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1801,20 +1801,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000364">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.descriptors.map( (e) =>  <span> <span> {e.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2} style={{ padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Years: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Years</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1824,20 +1824,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020097">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
               {v.scenario_years.map( (e) =>  <span> <span> {e.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>  )}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{ padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Regions: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Regions</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1847,20 +1847,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020032">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.regions.map( (e) => <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{  padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Interacting regions: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Interacting regions</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1870,20 +1870,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020036">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '5px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.interacting_regions.map( (e) =>  <span> <span> {e.name} </span> <span> <b className="separator-dot"> . </b> </span> </span> )}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{  padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Input datasets: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Input datasets</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1893,20 +1893,20 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030030">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }} variant="border">
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
                 {v.input_datasets.map( (e) => <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span> )}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
             <TableRow>
-              <TableCell item xs={2}  style={{ padding: '5px' }} variant="border">
-                <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Output datasets: </b> </span>
-                <span >
+              <FirstRowTableCell>
+                <div>
+                  <span>Output datasets</span>
                   <HtmlTooltip
                     title={
                     <React.Fragment>
@@ -1916,21 +1916,21 @@ const renderScenariosOverview = () => (
                         <a href="http://openenergy-platform.org/ontology/oeo/OEO_00030029">More info...</a>
                       </Typography>
                     </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
-                  </HtmlTooltip>
-                </span>
-              </TableCell>
-              <TableCell item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }} variant="border">
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                </div>
+              </FirstRowTableCell>
+              <ContentTableCell>
               {v.output_datasets.map( (e) =>  <span> <span> {e.value.label} </span> <span>  <b className="separator-dot"> . </b> </span> </span>)}
-              </TableCell>
+              </ContentTableCell>
             </TableRow>
-          </>
-          )
-        }
-      </TableBody>
-    </TableContainer>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      )
+    } 
   </Container>
 )
 
@@ -1954,7 +1954,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -1979,7 +1979,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2005,7 +2005,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2029,7 +2029,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span> */}
       </Grid>
@@ -2053,7 +2053,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span> */}
       </Grid>
@@ -2077,7 +2077,7 @@ const renderPublicationOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2108,7 +2108,7 @@ const renderSectorsAndTechnology = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2135,7 +2135,7 @@ const renderSectorsAndTechnology = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2161,7 +2161,7 @@ const renderSectorsAndTechnology = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2193,7 +2193,7 @@ const renderModelsAndFrameworksOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2220,7 +2220,7 @@ const renderModelsAndFrameworksOverview = () => (
             </React.Fragment>
           }
           >
-          <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
           </HtmlTooltip>
         </span>
       </Grid>
@@ -2292,7 +2292,7 @@ function getStepContent(step: number) {
                       </Typography>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <TextField  size="small"  style={{  width: '40%', marginTop: '10px',  marginLeft: '15%', backgroundColor:'#FCFCFC' }} id="outlined-basic" label="What is the acronym or short title?" variant="standard" value={acronym} onChange={handleAcronym} />
@@ -2305,7 +2305,7 @@ function getStepContent(step: number) {
                       </Typography>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <CustomAutocomplete width="40%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} kind='Which institutions are involved in this study?' handler={institutionHandler} selectedElements={selectedInstitution}/>
@@ -2318,7 +2318,7 @@ function getStepContent(step: number) {
                     </Typography>
                   }
                 >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
                 </div>
                 <CustomAutocomplete width="40%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} kind='Who is the contact person for this factsheet?' handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
@@ -2336,7 +2336,7 @@ function getStepContent(step: number) {
                       </React.Fragment>
                     }
                   >
-                    <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
               </div>
@@ -2365,7 +2365,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                 >
-                  <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                  <HelpOutlineIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
               </div>
               <div style={{ width: '35%' }}></div>
@@ -2385,7 +2385,7 @@ function getStepContent(step: number) {
                       </React.Fragment>
                     }
                   >
-                    <HelpOutlineIcon sx={{ color: '#bdbdbd' }}/>
+                    <HelpOutlineIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </div>
                 <div style={{ marginTop: "10px", width: '80%' }}>
@@ -2748,7 +2748,7 @@ function getStepContent(step: number) {
                   </React.Fragment>
                 }
                 >
-                <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
                 </span>
               </Grid>
@@ -2770,7 +2770,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                   >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </span>
               </Grid>
@@ -2794,7 +2794,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                   >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
                 </span>
               </Grid>
@@ -2818,7 +2818,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                   >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip> */}
                 </span>
               </Grid>
@@ -2842,7 +2842,7 @@ function getStepContent(step: number) {
                     </React.Fragment>
                   }
                   >
-                  <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip> */}
                 </span>
               </Grid>
@@ -2866,7 +2866,7 @@ function getStepContent(step: number) {
                   </React.Fragment>
                 }
                 >
-                <InfoOutlinedIcon sx={{ color: '#bdbdbd' }}/>
+                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                 </HtmlTooltip>
                 </span>
               </Grid>
