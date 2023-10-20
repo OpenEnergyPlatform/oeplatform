@@ -79,25 +79,11 @@
 
 {% block factsheets_content %}
 
-{% if label == 'Model' or label == 'Framework' %}
     <div style="width:100%; overflow-y: auto; padding-bottom: 1em">
         <table id="overview" class="display" style="width:100%;">
         </table>
     </div>
-
-{% elif label == 'Scenario' %}
-
-    <div class="list-group">
-        {% for id, name in models %}
-            <a class="list-group-item" href="{{id}}">{{ name }}</a>
-        {% endfor %}
-    </div>
-
-{% endif %}
-
-
-
-
+    
 {% endblock %}
 
 {% block after-body-bottom-js %}

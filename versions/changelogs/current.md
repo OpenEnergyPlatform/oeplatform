@@ -9,3 +9,4 @@
 - Update nav tabs implementation in factsheet edit pages to bootstrap5  [PR#1407](https://github.com/OpenEnergyPlatform/oeplatform/pull/1407)
 
 ### Removed
+- Remove study and scenario factsheet feature and all related code and migrations. [(#1421)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1421)

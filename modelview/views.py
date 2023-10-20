@@ -14,12 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.staticfiles import finders
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseForbidden,
-    JsonResponse,
-)  # noqa
+from django.http import Http404, HttpResponse  # noqa
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 from django.views.decorators.cache import never_cache
@@ -32,31 +27,22 @@ from dataedit.structures import Tag
 from .forms import (
     EnergyframeworkForm,
     EnergymodelForm,
-    EnergyscenarioForm,
-    EnergystudyForm,
 )
-from .models import Energyframework, Energymodel, Energyscenario, Energystudy
-from .rdf import connection, factory, namespace
-
-_factory_mappings = {"study": factory.Study, "scenario": factory.Scenario}
+from .models import Energyframework, Energymodel
 
 
 def getClasses(sheettype):
     """
     Returns the model and form class w.r.t sheettype.
     """
+    c = None
+    f = None
     if sheettype == "model":
         c = Energymodel
         f = EnergymodelForm
     elif sheettype == "framework":
         c = Energyframework
         f = EnergyframeworkForm
-    elif sheettype == "scenario":
-        c = Energyscenario
-        f = EnergyscenarioForm
-    elif sheettype == "studie":
-        c = Energystudy
-        f = EnergystudyForm
     return c, f
 
 
@@ -85,40 +71,43 @@ def load_tags():
 
 def listsheets(request, sheettype):
     """
-    Lists all available model, framework or scenario factsheet objects.
+    Lists all available model, framework factsheet objects.
     """
     c, _ = getClasses(sheettype)
+    if c is None:
+        # Handle the case where getClasses returned None
+        # You can return an error message or take appropriate action here.
+        # For example, you can return an HttpResponse indicating that the requested sheettype is not supported.
+        sheettype_error_message = "Invalid sheettype"
+        return render(
+            request,
+            "modelview/error_template.html",
+            {"sheettype_error_message": sheettype_error_message},
+        )
+
     tags = []
     fields = {}
     defaults = set()
-    if sheettype == "scenario":
-        models = [(m.pk, m.name_of_scenario) for m in c.objects.all()]
-    elif sheettype == "studie":
-        raise Http404
-    else:
-        fields = (
-            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS # noqa
-        )
-        defaults = (
-            FRAMEWORK_DEFAULT_COLUMNS
-            if sheettype == "framework"
-            else MODEL_DEFAULT_COLUMNS
-        )
-        d = load_tags()
-        tags = sorted(d.values(), key=lambda d: d["name"])
-        models = []
 
-        for model in c.objects.all():
-            model.tags = [d[tag_id] for tag_id in model.tags]
-            models.append(model)
-    if sheettype == "scenario":
-        label = "Scenario"
-    elif sheettype == "studie":
-        label = "Study"
-    elif sheettype == "framework":
+    fields = (
+        FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
+    )  # noqa
+    defaults = (
+        FRAMEWORK_DEFAULT_COLUMNS if sheettype == "framework" else MODEL_DEFAULT_COLUMNS
+    )
+    d = load_tags()
+    tags = sorted(d.values(), key=lambda d: d["name"])
+    models = []
+
+    for model in c.objects.all():
+        model.tags = [d[tag_id] for tag_id in model.tags]
+        models.append(model)
+
+    if sheettype == "framework":
         label = "Framework"
     else:
         label = "Model"
+
     return render(
         request,
         "modelview/modellist.html",
@@ -139,37 +128,32 @@ def show(request, sheettype, model_name):
     """
     c, _ = getClasses(sheettype)
     model = get_object_or_404(c, pk=model_name)
-    model_study = []
-    if sheettype == "scenario":
-        c_study, _ = getClasses("studie")
-        model_study = get_object_or_404(c_study, pk=model.study.pk)
-    else:
-        d = load_tags()
-        model.tags = [d[tag_id] for tag_id in model.tags]
+    d = load_tags()
+    model.tags = [d[tag_id] for tag_id in model.tags]
 
     user_agent = {"user-agent": "oeplatform"}
     urllib3.PoolManager(headers=user_agent)
     org = None
     repo = None
-    if sheettype != "scenario" and sheettype != "studie":
-        if model.gitHub and model.link_to_source_code:
-            try:
-                match = re.match(
-                    r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
-                    model.link_to_source_code,
-                )
-                org = match.group("org")
-                repo = match.group("repo")
-                # _handle_github_contributions(org, repo)
-            except Exception:
-                org = None
-                repo = None
+
+    if model.gitHub and model.link_to_source_code:
+        try:
+            match = re.match(
+                r".*github\.com\/(?P<org>[^\/]+)\/(?P<repo>[^\/]+)(\/.)*",
+                model.link_to_source_code,
+            )
+            org = match.group("org")
+            repo = match.group("repo")
+            _handle_github_contributions(org, repo)
+        except Exception:
+            org = None
+            repo = None
+
     return render(
         request,
         ("modelview/{0}.html".format(sheettype)),
         {
             "model": model,
-            "model_study": model_study,
             "gh_org": org,
             "gh_repo": repo,
             "displaySheetType": sheettype.capitalize(),
@@ -262,12 +246,8 @@ def editModel(request, model_name, sheettype):
 
     model = get_object_or_404(c, pk=model_name)
 
-    tags = []
-    if sheettype in ["scenario", "studie"]:
-        pass
-    else:
-        d = load_tags()
-        tags = [d[tag_id] for tag_id in model.tags]
+    d = load_tags()
+    tags = [d[tag_id] for tag_id in model.tags]
 
     form = f(instance=model)
 
@@ -283,20 +263,12 @@ class FSAdd(LoginRequiredMixin, View):
         c, f = getClasses(sheettype)
         if method == "add":
             form = f()
-            if sheettype == "scenario":
-                _c_study, f_study = getClasses("studie")
-                formstudy = f_study()
-                return render(
-                    request,
-                    "modelview/new{}.html".format(sheettype),
-                    {"form": form, "formstudy": formstudy, "method": method},
-                )
-            else:
-                return render(
-                    request,
-                    "modelview/edit{}.html".format(sheettype),
-                    {"form": form, "method": method},
-                )
+
+            return render(
+                request,
+                "modelview/edit{}.html".format(sheettype),
+                {"form": form, "method": method},
+            )
         else:
             raise NotImplementedError()  # FIXME: model_name not defined
             # model = get_object_or_404(c, pk=model_name)
@@ -317,16 +289,14 @@ class FSAdd(LoginRequiredMixin, View):
                 if model.license != "Other":
                     model.license_other_text = None
             ids = {
-                int(field[len("tag_"):])
+                int(field[len("tag_") :])
                 for field in request.POST
                 if field.startswith("tag_")
             }
 
-            if sheettype == "scenario":
-                pass
-            else:
-                model.tags = sorted(list(ids))
-                model.save()
+            model.tags = sorted(list(ids))
+            model.save()
+
             return redirect(
                 "/factsheets/{sheettype}s/{model}".format(
                     sheettype=sheettype, model=model.pk
@@ -348,7 +318,7 @@ class FSAdd(LoginRequiredMixin, View):
                     "name": pk,
                     "method": method,
                     "errors": errors,
-                },  # noqa
+                },
             )
 
 
@@ -387,7 +357,7 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     if not reply:
         return None
 
-    # If there are more weeks than nessecary, truncate
+    # If there are more weeks than necessary, truncate
     if weeks_back < len(reply):
         reply = reply[-weeks_back:]
 
@@ -437,129 +407,6 @@ def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     plt.savefig(full_path, transparent=True, bbox_inches="tight")
     url = finders.find(path)
     return url
-
-
-class RDFFactoryView(View):
-    _template = "modelview/display_rdf.html"
-
-    def get(self, request, factory_id, identifier):
-        format = request.GET.get("format", "html")
-        if format == "json":
-            try:
-                fac = factory.get_factory(factory_id)
-            except KeyError:
-                raise Http404
-
-            context = connection.ConnectionContext()
-            # Build URI, assuming that this is part of this knowledge graph
-            uri = getattr(namespace.OEO_KG, identifier)
-            # TODO: Error handling:
-            #  * What if it is not part of the ?
-            #  * What if it is not of this class?
-            #  * Probably: 404 in both cases!?
-            obj = fac._load_one(uri, context)
-
-            jsn = obj.to_json()
-            return JsonResponse(jsn)
-        else:
-            return render(
-                request,
-                self._template,
-                {
-                    "iri": identifier,
-                    "factory": factory_id,
-                    "rdf_templates": json.dumps(
-                        factory.get_factory_templates()
-                    ),  # noqa
-                },
-            )
-
-    def post(self, request, factory_id, identifier):
-        if not request.user.is_authenticated:
-            return HttpResponseForbidden()
-        context = connection.ConnectionContext()
-        subject = f"<{getattr(namespace.OEO_KG, identifier)}>"
-        query = json.loads(request.POST["query"])
-        property = query["property"]
-
-        if factory_id == "study" and identifier == "new":
-            context.insert_new_study(property)
-
-        try:
-            fac = factory.get_factory(factory_id)
-            pf = fac._fields[property]
-        except KeyError:
-            raise Http404
-
-        old_value = None
-        new_value = None
-
-        print("=====query====")
-        print(query)
-        raw_old_value = query.get("oldValue")
-        if raw_old_value:
-            old_value = pf.process_data(raw_old_value)
-
-        raw_new_value = query.get("newValue")
-        if raw_new_value:
-            new_value = pf.process_data(raw_new_value)
-
-        if not old_value and not new_value:
-            result = context.insert_new_instance(
-                subject,
-                pf.rdf_name,
-                inverse=pf.inverse,
-                new_name=raw_new_value["literal"],
-            )
-            result = dict(
-                iri=str(
-                    result.rpartition("/")[0] + "/" + raw_new_value["literal"]
-                )  # noqa
-            )
-        else:
-            context.update_property(
-                subject, pf.rdf_name, old_value, new_value, inverse=pf.inverse
-            )
-            result = {}
-        return JsonResponse(result)
-
-    def add_study(self, name):
-        # result = context.insert_new_study(name)
-        # return JsonResponse(result)
-        raise NotImplementedError()  # FIXME: context not defined
-
-
-class RDFInstanceView(View):
-    def get(self, request):
-        context = connection.ConnectionContext()
-        cls = request.GET.get("iri")
-        if not cls:
-            raise HttpResponse(status=400)
-        subclass = request.GET.get("subclass", False)
-        result = context.get_all_instances(cls, subclass=subclass)
-        instances = [
-            dict(iri=row["s"]["value"], label=row["l"]["value"])
-            if row.get("l")
-            else dict(iri=row["s"]["value"])
-            for row in result["results"]["bindings"]
-            if not row["s"]["type"] == "bnode"
-        ]
-        return JsonResponse(dict(instances=instances))
-
-
-class RDFView(View):
-    def get(self, request, factory_id=None):
-        try:
-            fac = factory.get_factory(factory_id)
-        except KeyError:
-            raise Http404
-        context = connection.ConnectionContext()
-        instances = fac.load_all_instances(context)
-        return render(
-            request,
-            "modelview/list_rdf_instances.html",
-            {"instances": instances},  # noqa
-        )
 
 
 BASE_VIEW_PROPS = OrderedDict(
