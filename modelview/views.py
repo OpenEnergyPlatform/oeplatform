@@ -97,8 +97,8 @@ def listsheets(request, sheettype):
         raise Http404
     else:
         fields = (
-            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
-        )  # noqa
+            FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS # noqa
+        )
         defaults = (
             FRAMEWORK_DEFAULT_COLUMNS
             if sheettype == "framework"
@@ -160,7 +160,7 @@ def show(request, sheettype, model_name):
                 )
                 org = match.group("org")
                 repo = match.group("repo")
-                _handle_github_contributions(org, repo)
+                # _handle_github_contributions(org, repo)
             except Exception:
                 org = None
                 repo = None
@@ -229,12 +229,12 @@ def processPost(post, c, f, files=None, pk=None, key=None):
     if "new" in fields and fields["new"] == "True":
         fields["study"] = key
     for field in c._meta.get_fields():
-        if type(field) == ArrayField:
+        if type(field) == ArrayField: # noqa
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi]
-                ):  # noqa
+                    re.match(r"^{}_\d$".format(field.name), str(fi)) and fields[fi] # noqa
+                ):
                     parts.append(fi)
             parts.sort()
             fields[field.name] = ",".join(
@@ -310,97 +310,56 @@ class FSAdd(LoginRequiredMixin, View):
     def post(self, request, sheettype, method="add", pk=None):
         c, f = getClasses(sheettype)
         form = processPost(request.POST, c, f, files=request.FILES, pk=pk)
-        if sheettype == "scenario" and method == "add":
-            c_study, f_study = getClasses("studie")
-            formstudy = processPost(
-                request.POST, c_study, f_study, files=request.FILES, pk=pk
+
+        if form.is_valid():
+            model = form.save()
+            if hasattr(model, "license") and model.license:
+                if model.license != "Other":
+                    model.license_other_text = None
+            ids = {
+                int(field[len("tag_"):])
+                for field in request.POST
+                if field.startswith("tag_")
+            }
+
+            if sheettype == "scenario":
+                pass
+            else:
+                model.tags = sorted(list(ids))
+                model.save()
+            return redirect(
+                "/factsheets/{sheettype}s/{model}".format(
+                    sheettype=sheettype, model=model.pk
+                )
             )
-            errorsStudy = []
-            if request.POST["new"] == "True":
-                if formstudy.is_valid():
-                    n = formstudy.save()
-                    form = processPost(
-                        request.POST, c, f, files=request.FILES, pk=pk, key=n.pk  # noqa
-                    )
-                else:
-                    errorsStudy = [
-                        (field.label, str(field.errors.data[0].message))
-                        for field in formstudy
-                        if field.errors
-                    ]
-            if form.is_valid() and errorsStudy == []:
-                m = form.save()
-                return redirect(
-                    "/factsheets/{sheettype}s/{model}".format(
-                        sheettype=sheettype, model=m.pk
-                    )
-                )
-            else:
-                errors = []
-                for field in form.errors:
-                    e = form.errors[field]
-                    error = e[0]
-                    field = form.fields[field].label
-                    errors.append((field, str(error)))
-
-                errors = errors + errorsStudy
-                return render(
-                    request,
-                    "modelview/new{}.html".format(sheettype),
-                    {
-                        "form": form,
-                        "formstudy": formstudy,
-                        "name": pk,
-                        "method": method,
-                        "errors": errors,
-                    },
-                )
         else:
-            if form.is_valid():
-                model = form.save()
-                if hasattr(model, "license") and model.license:
-                    if model.license != "Other":
-                        model.license_other_text = None
-                ids = {
-                    int(field[len("tag_") :])
-                    for field in request.POST
-                    if field.startswith("tag_")
-                }
+            errors = []
+            for field in form.errors:
+                e = form.errors[field]
+                error = e[0]
+                field = form.fields[field].label
+                errors.append((field, str(error)))
 
-                if sheettype == "scenario":
-                    pass
-                else:
-                    model.tags = sorted(list(ids))
-                    model.save()
-                return redirect(
-                    "/factsheets/{sheettype}s/{model}".format(
-                        sheettype=sheettype, model=model.pk
-                    )
-                )
-            else:
-                errors = []
-                for field in form.errors:
-                    e = form.errors[field]
-                    error = e[0]
-                    field = form.fields[field].label
-                    errors.append((field, str(error)))
-
-                return render(
-                    request,
-                    "modelview/edit{}.html".format(sheettype),
-                    {
-                        "form": form,
-                        "name": pk,
-                        "method": method,
-                        "errors": errors,
-                    },  # noqa
-                )
+            return render(
+                request,
+                "modelview/edit{}.html".format(sheettype),
+                {
+                    "form": form,
+                    "name": pk,
+                    "method": method,
+                    "errors": errors,
+                },  # noqa
+            )
 
 
 def _handle_github_contributions(org, repo, timedelta=3600, weeks_back=8):
     """
     This function returns the url of an image of recent GitHub contributions
     If the image is not present or outdated it will be reconstructed
+
+    Note:
+        Keep in mind that a external (GitHub) API is called and you server need to allow
+        such connections.
     """
     path = "GitHub_{0}_{1}_Contribution.png".format(org, repo)
     full_path = os.path.join(djangoSettings.MEDIA_ROOT, path)
@@ -933,7 +892,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     (
                         "example research questions",
                         ["example_research_questions"],
-                    ),  # noqa
+                    ),
                     (
                         "model validation",
                         [
@@ -946,7 +905,7 @@ MODEL_VIEW_PROPS = OrderedDict(
                     (
                         "model specific properties",
                         ["model_specific_properties"],
-                    ),  # noqa
+                    ),
                 ]
             ),
         ),
