@@ -112,7 +112,7 @@ class BasicFactsheet(models.Model):
         max_length=1000,
         verbose_name="Documentation quality",
         help_text="How do you rate the quality of the documentations?",
-        choices=((x, x) for x in ["not available", "expandable", "good", "excellent"]),
+        choices=((x, x) for x in ["not available", "expandable", "good", "excellent"]), # noqa
         default="expandable",
         null=True,
     )
@@ -193,7 +193,7 @@ class BasicFactsheet(models.Model):
     link_to_source_code = CharField(
         max_length=200,
         verbose_name="Access to source code",
-        help_text="Is the necessary data to run a scenario available?",
+        help_text="Is the source code to install and run a model available? If possible please provide a link to GitHub e.g. 'https://github.com/OpenEnergyPlatform/oeplatform'. You are free to provide a link to other sources then GitHub.",  # noqa
         null=True,
     )
     data_provided = CharField(
@@ -283,13 +283,13 @@ class BasicFactsheet(models.Model):
     citation_reference = CharField(
         max_length=10000,
         verbose_name="Citation reference",
-        help_text="Are publications available about the framework? Please list!",
+        help_text="Are publications available about the framework? Please list!",  # noqa
         null=True,
     )
     citation_DOI = CharField(
         max_length=10000,
         verbose_name="Citation DOI",
-        help_text="If  there are publications about the model that have a DOI please liste the DOIs",  # noqa
+        help_text="If  there are publications about the model that have a DOI please list the DOIs",  # noqa
         null=True,
     )
     references_to_reports_produced_using_the_model = CharField(
@@ -309,7 +309,7 @@ class BasicFactsheet(models.Model):
 
 
 class Energymodel(BasicFactsheet):
-    energy_sectors_electricity = BooleanField(default=False, verbose_name="electricity")
+    energy_sectors_electricity = BooleanField(default=False, verbose_name="electricity") # noqa
     energy_sectors_heat = BooleanField(default=False, verbose_name="heat")
     energy_sectors_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
@@ -335,22 +335,22 @@ class Energymodel(BasicFactsheet):
     methodical_focus_2 = CharField(max_length=50, null=True, blank=True)
     methodical_focus_3 = CharField(max_length=50, null=True, blank=True)
 
-    demand_sectors_households = BooleanField(default=False, verbose_name="Households")
-    demand_sectors_industry = BooleanField(default=False, verbose_name="Industry")
+    demand_sectors_households = BooleanField(default=False, verbose_name="Households") # noqa
+    demand_sectors_industry = BooleanField(default=False, verbose_name="Industry") # noqa
     demand_sectors_commercial_sector = BooleanField(
         default=False, verbose_name="Commercial sector"
     )
-    demand_sectors_transport = BooleanField(default=False, verbose_name="Transport")
+    demand_sectors_transport = BooleanField(default=False, verbose_name="Transport") # noqa
 
     energy_carrier_gas_natural_gas = BooleanField(
         default=False, verbose_name="Natural gas"
     )
-    energy_carrier_gas_biogas = BooleanField(default=False, verbose_name="Biogas")
-    energy_carrier_gas_hydrogen = BooleanField(default=False, verbose_name="Hydrogen")
+    energy_carrier_gas_biogas = BooleanField(default=False, verbose_name="Biogas") # noqa
+    energy_carrier_gas_hydrogen = BooleanField(default=False, verbose_name="Hydrogen") # noqa
 
-    energy_carrier_liquids_petrol = BooleanField(default=False, verbose_name="Petrol")
-    energy_carrier_liquids_diesel = BooleanField(default=False, verbose_name="Diesel")
-    energy_carrier_liquids_ethanol = BooleanField(default=False, verbose_name="Ethanol")
+    energy_carrier_liquids_petrol = BooleanField(default=False, verbose_name="Petrol") # noqa
+    energy_carrier_liquids_diesel = BooleanField(default=False, verbose_name="Diesel") # noqa
+    energy_carrier_liquids_ethanol = BooleanField(default=False, verbose_name="Ethanol") # noqa
 
     energy_carrier_solid_hard_coal = BooleanField(
         default=False, verbose_name="Hard coal"
@@ -365,18 +365,18 @@ class Energymodel(BasicFactsheet):
         default=False, verbose_name="Biomass"
     )
 
-    energy_carrier_renewables_sun = BooleanField(default=False, verbose_name="Sun")
-    energy_carrier_renewables_wind = BooleanField(default=False, verbose_name="Wind")
-    energy_carrier_renewables_hydro = BooleanField(default=False, verbose_name="Hydro")
+    energy_carrier_renewables_sun = BooleanField(default=False, verbose_name="Sun") # noqa
+    energy_carrier_renewables_wind = BooleanField(default=False, verbose_name="Wind") # noqa
+    energy_carrier_renewables_hydro = BooleanField(default=False, verbose_name="Hydro") # noqa
     energy_carrier_renewables_geothermal_heat = BooleanField(
         default=False, verbose_name="Geothermal heat"
     )
 
     generation_renewables_PV = BooleanField(default=False, verbose_name="PV")
-    generation_renewables_wind = BooleanField(default=False, verbose_name="Wind")
-    generation_renewables_hydro = BooleanField(default=False, verbose_name="Hydro")
-    generation_renewables_biomass = BooleanField(default=False, verbose_name="Biomass")
-    generation_renewables_biogas = BooleanField(default=False, verbose_name="Biogas")
+    generation_renewables_wind = BooleanField(default=False, verbose_name="Wind") # noqa
+    generation_renewables_hydro = BooleanField(default=False, verbose_name="Hydro") # noqa
+    generation_renewables_biomass = BooleanField(default=False, verbose_name="Biomass") # noqa
+    generation_renewables_biogas = BooleanField(default=False, verbose_name="Biogas") # noqa
     generation_renewables_bio = BooleanField(
         default=False, verbose_name="Biomass,Biogas,Biofuels"
     )
@@ -386,18 +386,18 @@ class Energymodel(BasicFactsheet):
     generation_renewables_geothermal = BooleanField(
         default=False, verbose_name="Geothermal heat"
     )
-    generation_renewables_others = BooleanField(default=False, verbose_name="Others")
+    generation_renewables_others = BooleanField(default=False, verbose_name="Others") # noqa
     generation_renewables_others_text = CharField(max_length=200, null=True)
 
-    generation_conventional_gas = BooleanField(default=False, verbose_name="gas")
-    generation_conventional_coal = BooleanField(default=False, verbose_name="coal")
+    generation_conventional_gas = BooleanField(default=False, verbose_name="gas") # noqa
+    generation_conventional_coal = BooleanField(default=False, verbose_name="coal") # noqa
     generation_conventional_lignite = BooleanField(
         default=False, verbose_name="lignite"
     )
     generation_conventional_hard_coal = BooleanField(
         default=False, verbose_name="hard coal"
     )
-    generation_conventional_oil = BooleanField(default=False, verbose_name="oil")
+    generation_conventional_oil = BooleanField(default=False, verbose_name="oil") # noqa
     generation_conventional_liquid_fuels = BooleanField(
         default=False, verbose_name="liquid fuels"
     )
@@ -414,7 +414,7 @@ class Energymodel(BasicFactsheet):
         default=False, verbose_name="conventional"
     )
 
-    transfer_electricity = BooleanField(default=False, verbose_name="electricity")
+    transfer_electricity = BooleanField(default=False, verbose_name="electricity") # noqa
     transfer_electricity_distribution = BooleanField(
         default=False, verbose_name="distribution"
     )
@@ -423,17 +423,17 @@ class Energymodel(BasicFactsheet):
     )
 
     transfer_gas = BooleanField(default=False, verbose_name="gas")
-    transfer_gas_distribution = BooleanField(default=False, verbose_name="distribution")
-    transfer_gas_transition = BooleanField(default=False, verbose_name="transmission")
+    transfer_gas_distribution = BooleanField(default=False, verbose_name="distribution") # noqa
+    transfer_gas_transition = BooleanField(default=False, verbose_name="transmission") # noqa
 
     transfer_heat = BooleanField(default=False, verbose_name="heat")
     transfer_heat_distribution = BooleanField(
         default=False, verbose_name="distribution"
     )
-    transfer_heat_transition = BooleanField(default=False, verbose_name="transmission")
+    transfer_heat_transition = BooleanField(default=False, verbose_name="transmission") # noqa
 
-    network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow")
-    network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow")
+    network_coverage_AC = BooleanField(default=False, verbose_name="AC load flow") # noqa
+    network_coverage_DC = BooleanField(default=False, verbose_name="DC load flow") # noqa
     network_coverage_TM = BooleanField(
         default=False, verbose_name="transshipment model"
     )
@@ -443,13 +443,13 @@ class Energymodel(BasicFactsheet):
     network_coverage_other = BooleanField(default=False, verbose_name="other")
     network_coverage_other_text = CharField(max_length=200, null=True)
 
-    storage_electricity_battery = BooleanField(default=False, verbose_name="battery")
-    storage_electricity_kinetic = BooleanField(default=False, verbose_name="kinetic")
+    storage_electricity_battery = BooleanField(default=False, verbose_name="battery") # noqa
+    storage_electricity_kinetic = BooleanField(default=False, verbose_name="kinetic") # noqa
     storage_electricity_CAES = BooleanField(
         default=False, verbose_name="compressed air"
     )
-    storage_electricity_PHS = BooleanField(default=False, verbose_name="pump hydro")
-    storage_electricity_chemical = BooleanField(default=False, verbose_name="chemical")
+    storage_electricity_PHS = BooleanField(default=False, verbose_name="pump hydro") # noqa
+    storage_electricity_chemical = BooleanField(default=False, verbose_name="chemical") # noqa
 
     storage_heat = BooleanField(default=False, verbose_name="heat")
     storage_gas = BooleanField(default=False, verbose_name="gas")
@@ -483,21 +483,21 @@ class Energymodel(BasicFactsheet):
     )
 
     geo_resolution_global = BooleanField(default=False, verbose_name="global")
-    geo_resolution_continents = BooleanField(default=False, verbose_name="continents")
+    geo_resolution_continents = BooleanField(default=False, verbose_name="continents") # noqa
     geo_resolution_national_states = BooleanField(
         default=False, verbose_name="national states"
     )
-    geo_resolution_TSO_regions = BooleanField(default=False, verbose_name="TSO regions")
+    geo_resolution_TSO_regions = BooleanField(default=False, verbose_name="TSO regions") # noqa
     geo_resolution_federal_states = BooleanField(
         default=False, verbose_name="federal states"
     )
-    geo_resolution_regions = BooleanField(default=False, verbose_name="regions")
+    geo_resolution_regions = BooleanField(default=False, verbose_name="regions") # noqa
     geo_resolution_NUTS_3 = BooleanField(default=False, verbose_name="NUTS 3")
     geo_resolution_municipalities = BooleanField(
         default=False, verbose_name="municipalities"
     )
-    geo_resolution_districts = BooleanField(default=False, verbose_name="districts")
-    geo_resolution_households = BooleanField(default=False, verbose_name="households")
+    geo_resolution_districts = BooleanField(default=False, verbose_name="districts") # noqa
+    geo_resolution_households = BooleanField(default=False, verbose_name="households") # noqa
     geo_resolution_power_stations = BooleanField(
         default=False, verbose_name="power stations"
     )
@@ -524,10 +524,10 @@ class Energymodel(BasicFactsheet):
     time_resolution_15_min = BooleanField(default=False, verbose_name="15 min")
     time_resolution_1_min = BooleanField(default=False, verbose_name="1 min")
 
-    observation_period_more_1_year = BooleanField(default=False, verbose_name=">1 year")
-    observation_period_less_1_year = BooleanField(default=False, verbose_name="<1 year")
-    observation_period_1_year = BooleanField(default=False, verbose_name="1 year")
-    observation_period_other = BooleanField(default=False, verbose_name="other")
+    observation_period_more_1_year = BooleanField(default=False, verbose_name=">1 year") # noqa
+    observation_period_less_1_year = BooleanField(default=False, verbose_name="<1 year") # noqa
+    observation_period_1_year = BooleanField(default=False, verbose_name="1 year") # noqa
+    observation_period_other = BooleanField(default=False, verbose_name="other") # noqa
     observation_period_other_text = CharField(max_length=200, null=True)
 
     time_resolution_other = BooleanField(default=False, verbose_name="other")
@@ -536,22 +536,22 @@ class Energymodel(BasicFactsheet):
     additional_dimensions_sector_ecological = BooleanField(
         default=False, verbose_name="ecological"
     )
-    additional_dimensions_sector_ecological_text = CharField(max_length=1000, null=True)
+    additional_dimensions_sector_ecological_text = CharField(max_length=1000, null=True) # noqa
     additional_dimensions_sector_economic = BooleanField(
         default=False, verbose_name="economic"
     )
-    additional_dimensions_sector_economic_text = CharField(max_length=1000, null=True)
+    additional_dimensions_sector_economic_text = CharField(max_length=1000, null=True) # noqa
     additional_dimensions_sector_social = BooleanField(
         default=False, verbose_name="social"
     )
-    additional_dimensions_sector_social_text = CharField(max_length=1000, null=True)
+    additional_dimensions_sector_social_text = CharField(max_length=1000, null=True) # noqa
     additional_dimensions_sector_others = BooleanField(
         default=False, verbose_name="others"
     )
-    additional_dimensions_sector_others_text = CharField(max_length=1000, null=True)
+    additional_dimensions_sector_others_text = CharField(max_length=1000, null=True) # noqa
 
-    model_class_optimization_LP = BooleanField(default=False, verbose_name="LP")
-    model_class_optimization_MILP = BooleanField(default=False, verbose_name="MILP")
+    model_class_optimization_LP = BooleanField(default=False, verbose_name="LP") # noqa
+    model_class_optimization_MILP = BooleanField(default=False, verbose_name="MILP") # noqa
     model_class_optimization_Nonlinear = BooleanField(
         default=False, verbose_name="Nonlinear"
     )
@@ -587,20 +587,20 @@ class Energymodel(BasicFactsheet):
         null=True,
     )
 
-    mathematical_objective_cO2 = BooleanField(default=False, verbose_name="CO2")
-    mathematical_objective_costs = BooleanField(default=False, verbose_name="costs")
+    mathematical_objective_cO2 = BooleanField(default=False, verbose_name="CO2") # noqa
+    mathematical_objective_costs = BooleanField(default=False, verbose_name="costs") # noqa
     mathematical_objective_rEshare = BooleanField(
         default=False, verbose_name="RE-share"
     )
-    mathematical_objective_other = BooleanField(default=False, verbose_name="other")
+    mathematical_objective_other = BooleanField(default=False, verbose_name="other") # noqa
     mathematical_objective_other_text = CharField(max_length=200, null=True)
 
     uncertainty_deterministic = BooleanField(
         default=False, verbose_name="Deterministic"
     )
-    uncertainty_Stochastic = BooleanField(default=False, verbose_name="Stochastic")
+    uncertainty_Stochastic = BooleanField(default=False, verbose_name="Stochastic") # noqa
     uncertainty_Other = BooleanField(default=False, verbose_name="Other")
-    uncertainty_Other_text = CharField(max_length=200, null=True, verbose_name="Other")
+    uncertainty_Other_text = CharField(max_length=200, null=True, verbose_name="Other") # noqa
 
     montecarlo = BooleanField(
         default=False, verbose_name="Suited for many scenarios / monte-carlo"
@@ -668,7 +668,7 @@ class Energymodel(BasicFactsheet):
     )
     model_file_format = CharField(
         max_length=5,
-        choices=map(lambda x: (x, x), (".exe", ".gms", ".py", ".xls", "Other")),
+        choices=map(lambda x: (x, x), (".exe", ".gms", ".py", ".xls", "Other")), # noqa
         verbose_name="Model file format",
         help_text="In which format is the model saved?",
         default="other",
@@ -677,7 +677,7 @@ class Energymodel(BasicFactsheet):
     model_file_format_other_text = CharField(max_length=1000, null=True)
     model_input = CharField(
         max_length=5,
-        choices=map(lambda x: (x, x), (".csv", ".py", "text", ".xls", "Other")),
+        choices=map(lambda x: (x, x), (".csv", ".py", "text", ".xls", "Other")), # noqa
         verbose_name="Input data file format",
         help_text="Of which file format are the input data?",
         default="other",
@@ -686,7 +686,7 @@ class Energymodel(BasicFactsheet):
     model_input_other_text = CharField(max_length=1000, null=True)
     model_output = CharField(
         max_length=5,
-        choices=map(lambda x: (x, x), (".csv", ".py", "text", ".xls", "Other")),
+        choices=map(lambda x: (x, x), (".csv", ".py", "text", ".xls", "Other")), # noqa
         verbose_name="Output data file format",
         help_text="Of which file format are the output data?",
         default="other",
@@ -725,7 +725,7 @@ class Energyframework(BasicFactsheet):
             if "help_text" in o.__dict__:
                 o.help_text = o.help_text.replace("model", "framework")
 
-    model_types_grid = BooleanField(default=False, verbose_name="Grid optimisation")
+    model_types_grid = BooleanField(default=False, verbose_name="Grid optimisation") # noqa
     model_types_demand_simulation = BooleanField(
         default=False, verbose_name="demand simulation"
     )
@@ -739,7 +739,7 @@ class Energyframework(BasicFactsheet):
         max_length=200, verbose_name="Link to API documentation", null=True
     )
     data_api = BooleanField(verbose_name="API to openmod database")
-    abstraction = TextField(verbose_name="Points/degree of abstraction", null=True)
+    abstraction = TextField(verbose_name="Points/degree of abstraction", null=True) # noqa
     used = ArrayField(
         CharField(max_length=1000),
         verbose_name="Models using this framework",
@@ -781,13 +781,13 @@ class Energyframework(BasicFactsheet):
     gs_regional = BooleanField(verbose_name="Regional", default=False)
     gs_national = BooleanField(verbose_name="National", default=False)
     gs_local = BooleanField(verbose_name="Local/community", default=False)
-    gs_single_project = BooleanField(verbose_name="Single-project", default=False)
-    gs_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    gs_single_project = BooleanField(verbose_name="Single-project", default=False) # noqa
+    gs_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
     # SECTORAL SCOPE
     ss_electricity = BooleanField(verbose_name="Electricity", default=False)
     ss_heat = BooleanField(verbose_name="Heat/Cooling", default=False)
     ss_transport = BooleanField(verbose_name="Transport", default=False)
-    ss_other = BooleanField(verbose_name="Other specific sectors", default=False)
+    ss_other = BooleanField(verbose_name="Other specific sectors", default=False) # noqa
     ss_overall = BooleanField(verbose_name="Overall economy", default=False)
     ss_other_text = CharField(
         verbose_name="Other", max_length=400, help_text="", null=True
@@ -796,38 +796,38 @@ class Energyframework(BasicFactsheet):
     gps_forecast = BooleanField(verbose_name="Forecasting", default=False)
     gps_explore = BooleanField(verbose_name="Exploring", default=False)
     gps_backcast = BooleanField(verbose_name="Back casting", default=False)
-    gps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    gps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
     # SPECIFIC PROBLEM SCOPE
-    sps_energydemand = BooleanField(verbose_name="Energy demand", default=False)
-    sps_energysupply = BooleanField(verbose_name="Energy supply", default=False)
+    sps_energydemand = BooleanField(verbose_name="Energy demand", default=False) # noqa
+    sps_energysupply = BooleanField(verbose_name="Energy supply", default=False) # noqa
     sps_impacts = BooleanField(verbose_name="Impacts", default=False)
-    sps_environmental = BooleanField(verbose_name="Environmental", default=False)
+    sps_environmental = BooleanField(verbose_name="Environmental", default=False) # noqa
     sps_appraisal = BooleanField(verbose_name="Appraisal", default=False)
     sps_integrated_approach = BooleanField(
         verbose_name="Integrated approach", default=False
     )
-    sps_modular_buildup = BooleanField(verbose_name="Modular build-up", default=False)
-    sps_energy_dispatch = BooleanField(verbose_name="Energy dispatch", default=False)
+    sps_modular_buildup = BooleanField(verbose_name="Modular build-up", default=False) # noqa
+    sps_energy_dispatch = BooleanField(verbose_name="Energy dispatch", default=False) # noqa
     sps_capacity_expansion = BooleanField(
         verbose_name="Capacity expansion planning", default=False
     )
-    sps_unit_commitment = BooleanField(verbose_name="Unit commitment", default=False)
+    sps_unit_commitment = BooleanField(verbose_name="Unit commitment", default=False) # noqa
     sps_rule_based = BooleanField(
         verbose_name="Rule based operation management", default=False
     )
-    sps_sector_coupling = BooleanField(verbose_name="Sector-coupling ", default=False)
-    sps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    sps_sector_coupling = BooleanField(verbose_name="Sector-coupling ", default=False) # noqa
+    sps_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
 
     last_updated = DateField(
         verbose_name="Last updated",
         max_length=200,
-        help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].",
+        help_text="When was the factsheet last updated? Time format is [YYYY-MM-DD].", # noqa
         null=True,
     )
     version = CharField(
         verbose_name="Version",
         max_length=200,
-        help_text="To which version of the framework does the factsheet refer?",
+        help_text="To which version of the framework does the factsheet refer?", # noqa
         null=True,
     )
     # PROGRAMMING FRAMEWORK
@@ -843,16 +843,16 @@ class Energyframework(BasicFactsheet):
     pf_Modelica = BooleanField(verbose_name="Modelica", default=False)
     pf_Matlab = BooleanField(verbose_name="Matlab", default=False)
     pf_Ruby = BooleanField(verbose_name="Ruby", default=False)
-    pf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    pf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
     # EXTERNAL SOLVER
     es_CPLEX = BooleanField(verbose_name="CPLEX", default=False)
     es_Gurobi = BooleanField(verbose_name="Gurobi", default=False)
     es_Coin = BooleanField(verbose_name="Coin-Or CBC", default=False)
     es_GLPK = BooleanField(verbose_name="GLPK", default=False)
     es_MOSEK = BooleanField(verbose_name="MOSEK", default=False)
-    es_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    es_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
     # INPUT DATA FORMAT
-    idf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False)
+    idf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False) # noqa
     idf_Python_dicts = BooleanField(verbose_name="Python dicts", default=False)
     idf_XLSX = BooleanField(verbose_name="XLSX", default=False)
     idf_Plots = BooleanField(verbose_name=" Plots (png, pdf)", default=False)
@@ -863,9 +863,9 @@ class Energyframework(BasicFactsheet):
     idf_GAMS = BooleanField(
         verbose_name="GAMS data exchange format (gdx)", default=False
     )
-    idf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    idf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
     # OUTPUT DATA FORMAT
-    odf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False)
+    odf_Pandas = BooleanField(verbose_name="Pandas DataFrame/Series", default=False) # noqa
     odf_Python_dicts = BooleanField(verbose_name="Python dicts", default=False)
     odf_XLSX = BooleanField(verbose_name="XLSX", default=False)
     odf_Plots = BooleanField(verbose_name=" Plots (png, pdf)", default=False)
@@ -876,7 +876,7 @@ class Energyframework(BasicFactsheet):
     odf_GAMS = BooleanField(
         verbose_name="GAMS data exchange format (gdx)", default=False
     )
-    odf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    odf_other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
 
     auto_model_generator = BooleanField(
         verbose_name="Auto model generator",
@@ -908,7 +908,7 @@ class Energyframework(BasicFactsheet):
     ap_TopDown = BooleanField(verbose_name="Top Down", default=False)
     ap_BottomUp = BooleanField(verbose_name="Bottom up", default=False)
     ap_Hybrid = BooleanField(verbose_name="Hybrid", default=False)
-    ap_Other = CharField(verbose_name="Other", max_length=400, help_text="", null=True)
+    ap_Other = CharField(verbose_name="Other", max_length=400, help_text="", null=True) # noqa
 
     interfaces = CharField(
         verbose_name="interfaces",
