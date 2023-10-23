@@ -1200,7 +1200,7 @@ function Factsheet(props) {
                     label={item.acronym !== '' ? item.acronym.substring(0,16) : 'Scenario ' + (Number(i) + Number(1)) }
                     key={'Scenario_tab_' + item.id}
                     classes={tabClasses}
-                    style={{ border: '1px solid #cecece', marginBottom: '5px',  width:'250px' }}
+                    style={{ border: '1px solid #cecece', marginBottom: '5px' }}
                   />
                 )}
                 <Box sx={{ 'textAlign': 'center', 'marginTop': '5px', 'paddingLeft': '10px',  'paddingRight': '10px', }} >
@@ -1714,7 +1714,7 @@ const items = {
 }
 const scenario_count = 'Scenarios'+' (' + scenarios.length + ')' ;
 const renderScenariosOverview = () => (
-  <Container maxWidth="lg">
+  <Container maxWidth="lg" sx={{ padding: '0px !important' }}>
     {
       scenarios.map((v, i) => 
       v.acronym !== '' && 
@@ -2686,7 +2686,7 @@ function getStepContent(step: number) {
 
           {mode === "edit" &&
             <div className='wizard'>
-                <Grid container style={{ marginTop: '10px', marginLeft:'10px' }}>
+                <Grid container style={{ marginTop: '10px' }}>
                   <Grid item xs={12} style={{ 'overflow': 'auto' }}>
                     <Divider style={{ marginBottom: '40px' }}/>
                     <CustomTabs
