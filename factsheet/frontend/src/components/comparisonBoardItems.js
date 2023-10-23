@@ -24,7 +24,7 @@ const getItemStyle = (isDragging, draggableStyle, index) => ({
   marginTop: '10px',
   marginBottom: '10px',
   background: index === 0 ? '#F6F9FB' : '#FFFFFF',
-  width: '30%',
+  width: '400px',
   height: '90%',
   overflow: 'auto',
   border: '1px solid #2972A6',
@@ -36,6 +36,7 @@ const getListStyle = isDraggingOver => ({
   display: 'flex',
   padding: grid,
   overflow: 'auto',
+  width: '200%'
 });
 
 export default function  ComparisonBoardItems (props) {
@@ -72,7 +73,7 @@ export default function  ComparisonBoardItems (props) {
               {...provided.droppableProps}
             > 
              {state.items.map((item, index) => (
-                <Draggable key={item.acronym} draggableId={item.acronym} index={index}>
+                <Draggable key={item.data.uid} draggableId={item.data.uid} index={index}>
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
@@ -94,7 +95,21 @@ export default function  ComparisonBoardItems (props) {
                       </Typography>
                     </div> 
 
-                   <div style= {{  marginBottom: '10px', padding: '10px' }} >
+                    {c_aspects.includes("Study name") && <div style= {{  marginBottom: '10px', padding: '10px' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Study name:</b> 
+                      </Typography>
+                        {item.data.study_label}
+                    </div>}
+
+                    {c_aspects.includes("Study abstract") &&<div style= {{  marginBottom: '10px', padding: '10px' }} >
+                      <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
+                        <b>Study abstract:</b> 
+                      </Typography>
+                        {item.data.study_abstract}
+                    </div>}
+
+                    <div style= {{  marginBottom: '10px', padding: '10px' }} >
                       <Typography variant="subtitle2" gutterBottom component="div" style={{ marginTop: '5px' }}>
                         <b>Abstract:</b> 
                       </Typography>

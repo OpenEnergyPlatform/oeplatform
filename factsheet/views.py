@@ -58,14 +58,14 @@ oeo.parse(Ontology_URI.as_uri())
 
 oeo_owl = get_ontology(Ontology_URI_STR).load()
 
-query_endpoint = 'http://localhost:3030/ds/query'
-update_endpoint = 'http://localhost:3030/ds/update'
+#query_endpoint = 'http://localhost:3030/ds/query'
+#update_endpoint = 'http://localhost:3030/ds/update'
 
 #query_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/query'
 #update_endpoint = 'https://toekb.iks.cs.ovgu.de:3443/oekg/update'
 
-#query_endpoint = 'https://oekb.iks.cs.ovgu.de:3443/oekg_main/query'
-#update_endpoint = 'https://oekb.iks.cs.ovgu.de:3443/oekg_main/update'
+query_endpoint = 'https://oekb.iks.cs.ovgu.de:3443/oekg_main/query'
+update_endpoint = 'https://oekb.iks.cs.ovgu.de:3443/oekg_main/update'
 
 sparql = SPARQLWrapper(query_endpoint)
 
@@ -148,7 +148,7 @@ def get_history(request, *args, **kwargs):
     return response
 
 
-#@login_required
+@login_required
 @csrf_exempt
 def create_factsheet(request, *args, **kwargs):
     print("###########user###########")
@@ -1504,6 +1504,17 @@ def delete_factsheet_by_id(request, *args, **kwargs):
     patch_response_headers(response, cache_timeout=1)
     return response
 
+@csrf_exempt
+def test_query(request, *args, **kwargs):
+    scenario_region = URIRef("http://openenergy-platform.org/ontology/oekg/region/UnitedKingdomOfGreatBritainAndNorthernIreland")
+    for s, p, o in oekg.triples((scenario_region, RDFS.label, None)):
+        if (str(o) == "None"):
+            oekg.remove((s, p, o))
+    response = JsonResponse(
+        "Done!", safe=False, content_type="application/json"
+    )
+    patch_response_headers(response, cache_timeout=1)
+    return response
 
 #@login_required
 @csrf_exempt
@@ -1697,16 +1708,16 @@ def get_all_factsheets(request, *args, **kwargs):
 
 
 @csrf_exempt
-@login_required
+#@login_required
 def get_scenarios(request, *args, **kwargs):
-    scenarios_acronym = [
-        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_acronym"))
+    scenarios_uid = [
+        i.replace("%20", " ") for i in json.loads(request.GET.get("scenarios_uid"))
     ]
-
     scenarios = []
 
     for s, p, o in oekg.triples((None, RDF.type, OEO.OEO_00000365)):
-        if str(oekg.value(s, RDFS.label)) in scenarios_acronym:
+        scenario_uid = str(s).split("/")[-1]
+        if str(scenario_uid) in scenarios_uid:
             descriptors = []
             regions = []
             interacting_regions = []
@@ -1723,12 +1734,10 @@ def get_scenarios(request, *args, **kwargs):
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020220, None)):
                 o1_label = oekg.value(o1, RDFS.label)
-                # regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
                 regions.append(o1_label)
 
             for s1, p1, o1 in oekg.triples((s, OEO.OEO_00020222, None)):
                 o1_label = oekg.value(o1, RDFS.label)
-                # interacting_regions.append({ "iri":str(o1).split("/")[-1], 'id': o1_label, 'name': o1_label})
                 interacting_regions.append(o1_label)
 
             for s4, p4, o4 in oekg.triples((s, OEO.OEO_00020224, None)):
@@ -1738,10 +1747,16 @@ def get_scenarios(request, *args, **kwargs):
             for s6, p6, o6 in oekg.triples((s, OEO.RO_0002234, None)):
                 output_datasets.append(oekg.value(o6, RDFS.label))
 
+            for s1, p1, o1 in oekg.triples((None, OEKG["has_scenario"], s)):
+                study_label = oekg.value(s1, OEKG["has_full_name"])
+                study_abstract = oekg.value(s1, DC.abstract)
+
+
             scenarios.append(
                 {
                     "acronym": oekg.value(s, RDFS.label),
                     "data": {
+                        "uid": scenario_uid,
                         "descriptors": descriptors,
                         "regions": regions,
                         "interacting_regions": interacting_regions,
@@ -1749,9 +1764,16 @@ def get_scenarios(request, *args, **kwargs):
                         "input_datasets": input_datasets,
                         "output_datasets": output_datasets,
                         "abstract": abstract,
+                        "study_label": study_label,
+                        "study_abstract": study_abstract,
+
                     },
                 }
             )
+
+    
+            
+        
 
     response = JsonResponse(scenarios, safe=False, content_type="application/json")
     return response

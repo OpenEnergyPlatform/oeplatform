@@ -2062,7 +2062,7 @@ const renderPublicationOverview = () => (
       <Grid item xs={12} style={{ padding: '0px' }}>
         <Divider />
       </Grid>
-      <Grid item xs={2}  style={{ padding: '5px' }}>
+      {/* <Grid item xs={2}  style={{ padding: '5px' }}>
         <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Citation: </b> </span>
         <span >
           <HtmlTooltip
@@ -2082,7 +2082,7 @@ const renderPublicationOverview = () => (
       </Grid>
       <Grid item xs={10} style={{ paddingTop: '0px', borderLeft: '1px solid #80808038' }}>
         {}
-      </Grid>
+      </Grid> */}
 
     </Grid>
 )

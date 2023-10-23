@@ -235,7 +235,7 @@ function EnhancedTableToolbar(props) {
             <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
             <Tooltip title="Compare">
 
-            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
+            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('#')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
               <Button size="small" 
                   style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
                   variant="contained" 
@@ -378,6 +378,8 @@ export default function CustomTable(props) {
     // }
 
     setSelected(newSelected);
+    console.log(newSelected);
+
   };
 
   const handleChangePage = (event, newPage) => {

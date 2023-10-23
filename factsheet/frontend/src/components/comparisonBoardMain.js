@@ -19,13 +19,12 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 const ComparisonBoardMain = (props) => {
   const { params } = props;
   const [scenarios, setScenarios] = useState([]);
-  console.log(params);
-  const scenario_acronyms = params.split('-');
-  const scenario_acronyms_json = JSON.stringify(scenario_acronyms);
+  const scenarios_uid = params.split('#');
+  const scenarios_uid_json = JSON.stringify(scenarios_uid);
   const [selectedCriteria, setselectedCriteria] = useState(['Descriptors']);
 
   const getScenarios = async () => {
-    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_acronym: scenario_acronyms_json } });
+    const { data } = await axios.get(conf.toep + `sirop/get_scenarios/`, { params: { scenarios_uid: scenarios_uid_json } });
     return data;
   };
 
@@ -35,9 +34,10 @@ const ComparisonBoardMain = (props) => {
       });
   }, []);
 
-  console.log(scenarios);
 
   const Criteria = [
+    'Study name',
+    'Study abstract',
     'Descriptors',
     'Regions',
     'Interacting regions',
@@ -103,6 +103,7 @@ const ComparisonBoardMain = (props) => {
               padding: '20px',
               margin: '20px',
               backgroundColor: '#F6F9FB',
+              overflow: 'auto',
               display: 'block'}}
               >
               <b>Criteria</b>

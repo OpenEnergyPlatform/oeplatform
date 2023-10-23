@@ -24,6 +24,7 @@ urlpatterns = [
     path(r"update_an_entity/", views.update_an_entity),
     path(r"query/", views.query_oekg),
     path(r"get_scenarios/", views.get_scenarios),
+    path(r"test_query/", views.test_query),
     
 
 
