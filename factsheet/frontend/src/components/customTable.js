@@ -325,7 +325,7 @@ export default function CustomTable(props) {
     event: React.MouseEvent<HTMLElement>,
     newAlignment: string,
   ) => {
-    setAlignment(newAlignment);
+    newAlignment !== null && setAlignment(newAlignment);
   };
 
   const handleScenarioYearChange = (event, newValue) => {
@@ -356,7 +356,6 @@ export default function CustomTable(props) {
   };
 
   const handleClick = (event, name) => {
-
     const newSelected = new Set(selected);
     if (newSelected.has(name)) newSelected.delete(name);
     else newSelected.add(name);
@@ -378,7 +377,6 @@ export default function CustomTable(props) {
     // }
 
     setSelected(newSelected);
-    console.log(newSelected);
 
   };
 
@@ -740,7 +738,7 @@ export default function CustomTable(props) {
                             </React.Fragment>
                           }
                         >
-                          <Chip size="small" color="primary" label={v.label} variant={selected.has(v.label) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '4px' }} onClick={(event) => handleClick(event, v.label)}/>
+                          <Chip size="small" color="primary" label={v.label} variant={selected.has(v.uid) ? "filled" : "outlined"} sx={{ 'marginLeft': '5px', 'marginTop': '4px' }} onClick={(event) => handleClick(event, v.uid)}/>
                         </HtmlTooltip>
                       ))}
                   </p>

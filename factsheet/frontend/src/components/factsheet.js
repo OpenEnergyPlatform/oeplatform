@@ -2498,12 +2498,12 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <Grid item xs={12} >
-        <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
+        <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
           <div id='headerStyle'>
             <span>
               <ListAltOutlinedIcon />
             </span>
-            <p>Scenario Bundle</p>
+            <span>Scenario Bundle</span>
           </div>
           <div id='headerSubStyle'> <span> {id === "new" ? "new/" : mode + "/" } </span> {acronym} </div>
         </div>

@@ -65,20 +65,20 @@ const ComparisonBoardMain = (props) => {
       alignItems="center"
     >
         <Grid item xs={12} >
-          <div style={{ backgroundColor: '#e3eaef', height: '150px', marginBottom: '10px' }}>
+          <div style={{ backgroundColor: '#e3eaef', height: '100px', marginBottom: '10px' }}>
             <div id='headerStyle'>
             <span>
               <ListAltOutlinedIcon />
             </span>
-            <p>Scenario Bundle</p>
+            <span>Scenario Bundle</span>
             </div>
           <div id='headerSubStyle'> <span> Comparison </span> </div>
           </div>
         </Grid>
-        <Container maxWidth="xl">
+        <Container maxWidth="false">
             <Box sx={{ 
-              padding: '10px',
-              margin: '10px',
+              padding: '5px',
+              margin: '5px',
               display: 'block'}}
             >
             <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -100,8 +100,9 @@ const ComparisonBoardMain = (props) => {
             </Box>
             {/* <ComparisonControl /> */}
             <Box sx={{ 
-              padding: '20px',
-              margin: '20px',
+              padding: '5px',
+              paddingLeft: '15px',
+              margin: '5px',
               backgroundColor: '#F6F9FB',
               overflow: 'auto',
               display: 'block'}}
