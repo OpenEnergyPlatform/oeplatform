@@ -48,6 +48,6 @@ a:active { text-decoration: none; color: '#294456';}
 
 .separator-dot {
   display: inline-block;
-  font-size: 24px;
+  font-size: 14px;
   transform: translateY(-3px);
 }

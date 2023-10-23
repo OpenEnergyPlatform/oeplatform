@@ -61,6 +61,7 @@ import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
+import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
 
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -74,6 +75,7 @@ import Backdrop from '@mui/material/Backdrop';
 
 import '../styles/App.css';
 import { TableRow } from '@mui/material';
+import variables from '../styles/oep-theme/variables.js';
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -2728,165 +2730,175 @@ function getStepContent(step: number) {
           }
 
           {mode === "overview" &&
-             <Grid container justifyContent="space-between"
-             alignItems="start"
-             spacing={2}>
-             <Grid item xs={12} >
-               <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
+          <>
+            <Grid container justifyContent="space-between"
+              alignItems="start"
+              spacing={2}>
+              <Grid item xs={12} >
+                <Divider style={{ marginBottom: '20px', marginTop: '20px' }}/>
               </Grid>
               <Grid item xs={12}  >
-               <b style={{ color: 'clack', fontSize:'24px' }}>{studyName !== undefined && studyName}</b> 
+                <b style={{ fontSize: variables.fontSize.xl }}>{studyName !== undefined && studyName}</b> 
               </Grid>
-              <Grid item xs={3} >
-                <span style={{ color: '#294456' }}> <b>Acronym</b> </span>
-                <span >
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                      <br />
-                      <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} >
-                {acronym}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456'}}> <b>Contact person(s):</b> </span>
-                <span >
+            </Grid>
+            <Grid container sx={{ padding: '1rem 0 2rem' }}>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Acronym</span>
+                  <span >
                   <HtmlTooltip
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+                        {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
+                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
                   >
                   <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                {selectedContactPerson.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456' }}> <b>Institutions: </b> </span>
-                <span >
+                  </span>
+                </Grid>
+                <Grid item xs={9} >
+                  {acronym}
+                </Grid>
+              </InfoListItem>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Contact person(s)</span>
+                  <span >
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                  </span>
+                </Grid>
+                <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                  {selectedContactPerson.map((v, i) => (
+                    <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
+                  ))}
+                </Grid>
+              </InfoListItem>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Institutions</span>
+                  <span >
+                    <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'An institution is an organisation that serves a social purpose.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip>
+                  </span>
+                </Grid>
+                <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                  {selectedInstitution.map((v, i) => (
+                    <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
+                  ))}
+                </Grid>
+              </InfoListItem>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Funding sources</span>
+                  <span >
+                    {/* <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A study is a project with the goal to investigate something.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip> */}
+                  </span>
+                </Grid>
+                <Grid item xs={9} style={{ paddingTop: '10px' }} >
+                  {selectedFundingSource.map((v, i) => (
+                    <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
+                  ))}
+                </Grid>
+              </InfoListItem>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Descriptors</span>
+                  <span >
+                    {/* <HtmlTooltip
+                      title={
+                      <React.Fragment>
+                        <Typography color="inherit" variant="subtitle1">
+                          {'A study is a project with the goal to investigate something.'}
+                          <br />
+                          <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
+                        </Typography>
+                      </React.Fragment>
+                    }
+                    >
+                    <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                    </HtmlTooltip> */}
+                  </span>
+                </Grid>
+                <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                  {selectedStudyKewords.map((v, i) => (
+                    <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
+                  ))}
+                </Grid>
+              </InfoListItem>
+              <InfoListItem>
+                <Grid item xs={3} >
+                  <span>Abstract</span>
+                  <span >
                   <HtmlTooltip
                     title={
                     <React.Fragment>
                       <Typography color="inherit" variant="subtitle1">
-                        {'An institution is an organisation that serves a social purpose.'}
+                        {'A summary of the resource.'}
                         <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
+                        <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
                       </Typography>
                     </React.Fragment>
                   }
                   >
                   <InfoOutlinedIcon sx={{ color: '#708696' }}/>
                   </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-                {selectedInstitution.map((v, i) => (
-                           <span> <span> {v.name} </span> <span>   <b className="separator-dot"> . </b> </span> </span>
-                ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456' }}> <b>Funding sources: </b> </span>
-                <span >
-                  {/* <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A study is a project with the goal to investigate something.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                  </HtmlTooltip> */}
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }} >
-              {selectedFundingSource.map((v, i) => (
-                            <span> <span> {v.name} </span> <span>  <b className="separator-dot"> . </b> </span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456' }}> <b>Descriptors: </b> </span>
-                <span >
-                  {/* <HtmlTooltip
-                    title={
-                    <React.Fragment>
-                      <Typography color="inherit" variant="subtitle1">
-                        {'A study is a project with the goal to investigate something.'}
-                        <br />
-                        <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info from Open Enrgy Ontology (OEO)...</a>
-                      </Typography>
-                    </React.Fragment>
-                  }
-                  >
-                  <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                  </HtmlTooltip> */}
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-               {selectedStudyKewords.map((v, i) => (
-                          <span> <span> {v} </span> <span>   <b className="separator-dot"> . </b></span> </span>
-                          ))}
-              </Grid>
-
-              <Grid item xs={3} >
-                <span style={{ color: '#294456' }}> <b>Abstract: </b> </span>
-                <span >
-                <HtmlTooltip
-                  title={
-                  <React.Fragment>
-                    <Typography color="inherit" variant="subtitle1">
-                      {'A summary of the resource.'}
-                      <br />
-                      <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-                    </Typography>
-                  </React.Fragment>
-                }
-                >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-                </HtmlTooltip>
-                </span>
-              </Grid>
-              <Grid item xs={9} style={{ paddingTop: '10px' }}>
-               <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
-              </Grid>
+                  </span>
+                </Grid>
+                <Grid item xs={9} style={{ paddingTop: '10px' }}>
+                  <div  style={{ width:'90%' }}> {abstract !== undefined && abstract}  </div>
+                </Grid>
+              </InfoListItem>
+            </Grid>
+            <Grid container>
               <Grid item xs={12} >
                 <CustomTabs
                   items={overview_items}
                 />
               </Grid>
-               
-
-            </Grid>}
-
-        
-        </Grid>
+            </Grid>
+          </>
+          }
+          </Grid>
         </Container>
       </Grid>
     </div>
