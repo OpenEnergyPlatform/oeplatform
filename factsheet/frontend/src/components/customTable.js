@@ -223,72 +223,63 @@ function EnhancedTableToolbar(props) {
   const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected} = props;
 
   return (
-    <Container maxWidth="lg">
-      <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
-        <Grid container justifyContent="space-between"
-          alignItems="start"
-          spacing={2}>
-          <Grid item xs={4} >
-              {/* <Tooltip title="Show all">
-                <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
-              </Tooltip> */}
-              <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px'}} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
-              <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
-              <Tooltip title="Compare">
+    <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
+      <Grid container justifyContent="space-between"
+        spacing={2}>
+        <Grid item xs={12} md={4}>
+            {/* <Tooltip title="Show all">
+              <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
+            </Tooltip> */}
+            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px'}} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Filter</Button>
+            <Button size="small" key="resetFilterButton" sx={{ marginLeft: '8px'}} startIcon={<ReplayIcon />} onClick={handleShowAll}>Reset</Button>
+            <Tooltip title="Compare">
 
-              {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
-                <Button size="small" 
-                    style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
-                    variant="contained" 
-                    key="compareScenariosBtn"
-                    startIcon={<CompareArrowsIcon />}
-                    >
-                  Compare scenarios
-                </Button>
-              </Link>
-              :  
+            {numSelected > 1 ? <Link to={`sirop/compare/${[...selected].join('-')}`} onClick={() => this.forceUpdate} style={{  color: 'white' }}>
               <Button size="small" 
-                    style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
-                    variant="contained" 
-                    key="compareScenariosBtn"
-                    startIcon={<CompareArrowsIcon />}
-                    onClick={handleOpenAspectsOfComparison}
-                    >
-                  Compare scenarios
-                </Button>
-            }
-              
-            </Tooltip>
-          </Grid>
-          <Grid item xs={1} >
-
-          </Grid>
-          <Grid item xs={2} >
-            <ToggleButtonGroup
-              color="primary"
-              value={alignment}
-              exclusive
-              onChange={handleChangeView}
-              aria-label="Platform"
-              size="small"
-              sx ={{ height:"32px" }}
-            >
-              <ToggleButton value="cards">Cards</ToggleButton>
-              <ToggleButton value="list">List</ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-          <Grid item xs={3} >
-
-          </Grid>
-          <Grid item xs={2}>
-            <Button sx ={{ marginLeft:"110px" }} component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
-              <AddIcon/>
-              Create new
-            </Button>
-          </Grid>
-        </Grid>   
-      </Toolbar>
-    </Container>
+                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
+                  variant="contained" 
+                  key="compareScenariosBtn"
+                  startIcon={<CompareArrowsIcon />}
+                  >
+                Compare scenarios
+              </Button>
+            </Link>
+            :  
+            <Button size="small" 
+                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }} 
+                  variant="contained" 
+                  key="compareScenariosBtn"
+                  startIcon={<CompareArrowsIcon />}
+                  onClick={handleOpenAspectsOfComparison}
+                  >
+                Compare scenarios
+              </Button>
+          }
+            
+          </Tooltip>
+        </Grid>
+        <Grid item xs={6} md={4}>
+          <ToggleButtonGroup
+            color="primary"
+            value={alignment}
+            exclusive
+            onChange={handleChangeView}
+            aria-label="Platform"
+            size="small"
+            sx ={{ height:"32px" }}
+          >
+            <ToggleButton value="cards">Cards</ToggleButton>
+            <ToggleButton value="list">List</ToggleButton>
+          </ToggleButtonGroup>
+        </Grid>
+        <Grid item xs={6} md={4}>
+          <Button component={Link} variant="contained" size="small" className="linkButton" to={`sirop/factsheet/new`} onClick={() => this.forceUpdate}>
+            <AddIcon/>
+            Create new
+          </Button>
+        </Grid>
+      </Grid>   
+    </Toolbar>
   );
 }
 
