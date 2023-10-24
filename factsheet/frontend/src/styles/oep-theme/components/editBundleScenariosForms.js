@@ -23,7 +23,9 @@ const BundleScenariosGridItem = ({
   tooltipText,
   hrefLink,
   TooltipComponent,
-  renderField
+  renderField,
+  showTooltip = true,
+  linkText = "More info from Open Energy Ontology (OEO)..."
 }) => {
   return (
     <Grid item xs={12}>
@@ -31,6 +33,7 @@ const BundleScenariosGridItem = ({
         <Grid item xs={2}>
           <LabelItem>
             <span>{spanValue}</span>
+            {showTooltip && TooltipComponent && (
             <span>
               <TooltipComponent
                 title={
@@ -38,14 +41,15 @@ const BundleScenariosGridItem = ({
                     <Typography color="inherit" variant="subtitle1">
                       {tooltipText}
                       <br />
-                      <a href={hrefLink}>More info...</a>
+                      <a href={hrefLink}>{linkText}</a>
                     </Typography>
                   </React.Fragment>
                 }
               >
-                <InfoOutlinedIcon sx={{ color: '#708696' }}/>
+                <InfoOutlinedIcon sx={{ color: '#708696' }} />
               </TooltipComponent>
             </span>
+            )}
           </LabelItem>
         </Grid>
         <Grid item xs={10}>

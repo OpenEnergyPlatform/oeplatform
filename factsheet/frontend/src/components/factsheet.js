@@ -1253,6 +1253,7 @@ const renderBasicInformation = () => (
       alignItems="start"
       spacing={2}>
       <BundleScenariosGridItem
+        {...props}
         spanValue="Study name"
         tooltipText="A study is a project with the goal to investigate something."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
@@ -1269,6 +1270,7 @@ const renderBasicInformation = () => (
         TooltipComponent={HtmlTooltip}
       />
       <BundleScenariosGridItem
+        {...props}
         spanValue="Acronym"
         tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
@@ -1285,6 +1287,7 @@ const renderBasicInformation = () => (
         TooltipComponent={HtmlTooltip}
       />
       <BundleScenariosGridItem
+        {...props}
         spanValue="Institutions"
         tooltipText="An institution is an organisation that serves a social purpose."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000238"
@@ -1304,6 +1307,7 @@ const renderBasicInformation = () => (
         TooltipComponent={HtmlTooltip}
       />
       <BundleScenariosGridItem
+        {...props}
         spanValue="Contact person"
         tooltipText="A contact person is an agent that can be contacted for help or information about a specific service or good."
         hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000107"
@@ -1328,75 +1332,56 @@ const renderBasicInformation = () => (
 
   const renderStudyDetail = () => (
     <Grid container justifyContent="space-between" alignItems="start" spacing={2} >
-      
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Funding sources: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <CustomAutocomplete width="100%"  type="Funding source" showSelectedElements={true} editHandler={HandleEditFundingSource} addNewHandler={HandleAddNewFundingSource} manyItems optionsSet={fundingSources} kind='' handler={fundingSourceHandler} selectedElements={selectedFundingSource}/>
-      </Grid>
 
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Abstract: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'A summary of the resource.'}
-              <br />
-              <a href="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" variant="outlined" style={{ width: '100%', MarginBottom: '10px', marginTop: '20px' }} id="outlined-basic" label="" multiline rows={6} maxRows={10} value={abstract} onChange={handleAbstract}/>
-      </Grid>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Study descriptors: </b> </span>
-        <span >
-        {/* <HtmlTooltip
-          style={{ marginLeft: '10px' }}
-          placement="top"
-          title={
-            <React.Fragment>
-              <Typography color="inherit" variant="caption">
-                {'A funder is a sponsor that supports by giving money.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00090001">More info from Open Enrgy Ontology (OEO)...</a>
-              </Typography>
-            </React.Fragment>
-          }
-        >
-          <HelpOutlineIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip> */}
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-      <div style={{ marginTop: "10px" }}>
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Funding sources"
+        tooltipText="A funder is a sponsor that supports by giving money."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="Funding source" 
+            showSelectedElements={true} 
+            editHandler={HandleEditFundingSource} 
+            addNewHandler={HandleAddNewFundingSource} 
+            manyItems 
+            optionsSet={fundingSources} 
+            handler={fundingSourceHandler} 
+            selectedElements={selectedFundingSource}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        spanValue="Abstract"
+        tooltipText="A summary of the resource."
+        hrefLink="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/#abstract"
+        linkText="More info..."
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined"
+            multiline
+            rows={6}
+            maxRows={10}
+            value={abstract}
+            onChange={handleAbstract}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        {...props}
+        showTooltip={false}
+        spanValue="Study descriptors"
+        tooltipText="A funder is a sponsor that supports by giving money.."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00090001"
+        renderField={() => (
           <FormGroup>
               <div >
                 {
@@ -1404,8 +1389,9 @@ const renderBasicInformation = () => (
                 }
             </div>
           </FormGroup>
-        </div>
-      </Grid>
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
     </Grid>
   );
 
