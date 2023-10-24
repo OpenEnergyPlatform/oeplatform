@@ -58,6 +58,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import { ContentTableCell, FirstRowTableCell } from '../styles/oep-theme/components/tableStyles.js';
 import InfoListItem from '../styles/oep-theme/components/infoListItem.js'
+import BundleScenariosGridItem from '../styles/oep-theme/components/editBundleScenariosForms.js';
 
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -1251,96 +1252,76 @@ const renderBasicInformation = () => (
     <Grid container justifyContent="space-between"
       alignItems="start"
       spacing={2}>
-
-      <Grid item xs={2}  style={{ padding: '5px'}}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Study name: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A study is a project with the goal to investigate something.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00020011">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '0px', overflow: "auto"  }}>
-        <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small" id="outlined-basic"  style={{  width: '100%' }} variant="outlined" value={studyName} onChange={handleStudyName}/>
-      </Grid>
-
-      <Grid item xs={2}  style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Acronym: </b> </span>
-        <span >
-        <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'An acronym is an abbreviation of the title by using the first letters of each part of the title.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000048">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '10px', overflow: "auto"  }}>
-      <TextField InputProps={{ sx: { borderRadius: 0 } }} size="small"  style={{  width: '100%' }} id="outlined-basic"  variant="outlined" value={acronym} onChange={handleAcronym} />
-      </Grid>
-
-      <Grid item xs={2}   style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b>Institutions: </b> </span>
-        <span >
-        <HtmlTooltip
-          title={
-          <React.Fragment>
-            <Typography color="inherit" variant="subtitle1">
-              {'An institution is an organisation that serves a social purpose.'}
-              <br />
-              <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000238">More info...</a>
-            </Typography>
-          </React.Fragment>
-        }
-        >
-        <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-        </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto"  }}>
-        <CustomAutocomplete width="100%" type="institution" showSelectedElements={true} editHandler={HandleEditInstitution} addNewHandler={HandleAddNewInstitution} manyItems optionsSet={institutions} handler={institutionHandler} selectedElements={selectedInstitution}/>
-      </Grid>
-
-
-      <Grid item xs={2}  style={{ paddingTop: '15px', paddingLeft: '5px' }}>
-        <span style={{ color: '#294456', marginLeft:'20px' }}> <b> Contact person: </b> </span>
-        <span >
-          <HtmlTooltip
-            title={
-            <React.Fragment>
-              <Typography color="inherit" variant="subtitle1">
-                {'A contact person is an agent that can be contacted for help or information about a specific service or good.'}
-                <br />
-                <a href="http://openenergy-platform.org/ontology/oeo/OEO_00000107">More info...</a>
-              </Typography>
-            </React.Fragment>
-          }
-          >
-          <InfoOutlinedIcon sx={{ color: '#708696' }}/>
-          </HtmlTooltip>
-        </span>
-      </Grid>
-      <Grid item xs={10} style={{ paddingTop: '5px', overflow: "auto"  }}>
-      <CustomAutocomplete width="100%" type="contact person" showSelectedElements={true}  editHandler={HandleEditContactPerson} addNewHandler={HandleAddNewContactPerson}  manyItems optionsSet={contactPersons} handler={contactPersonHandler} selectedElements={selectedContactPerson}/>
-      </Grid>
-
+      <BundleScenariosGridItem
+        spanValue="Study name"
+        tooltipText="A study is a project with the goal to investigate something."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00020011"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined" 
+            value={studyName}
+            onChange={handleStudyName}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        spanValue="Acronym"
+        tooltipText="An acronym is an abbreviation of the title by using the first letters of each part of the title."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000048"
+        renderField={() => (
+          <TextField 
+            size="small" 
+            id="outlined-basic" 
+            style={{ width: '100%' }} 
+            variant="outlined" 
+            value={acronym}
+            onChange={handleAcronym}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        spanValue="Institutions"
+        tooltipText="An institution is an organisation that serves a social purpose."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000238"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="institution" 
+            showSelectedElements={true} 
+            editHandler={HandleEditInstitution} 
+            addNewHandler={HandleAddNewInstitution} 
+            manyItems 
+            optionsSet={institutions} 
+            handler={institutionHandler} 
+            selectedElements={selectedInstitution}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
+      <BundleScenariosGridItem
+        spanValue="Contact person"
+        tooltipText="A contact person is an agent that can be contacted for help or information about a specific service or good."
+        hrefLink="http://openenergy-platform.org/ontology/oeo/OEO_00000107"
+        renderField={() => (
+          <CustomAutocomplete 
+            width="100%" 
+            type="institution" 
+            showSelectedElements={true} 
+            editHandler={HandleEditContactPerson} 
+            addNewHandler={HandleAddNewContactPerson} 
+            manyItems 
+            optionsSet={contactPersons} 
+            handler={contactPersonHandler} 
+            selectedElements={selectedContactPerson}
+          />
+        )}
+        TooltipComponent={HtmlTooltip}
+      />
     </Grid>
     
   );
