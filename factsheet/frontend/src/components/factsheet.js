@@ -38,10 +38,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
-import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Badge from '@mui/material/Badge';
 import { Route, Routes, useNavigate } from 'react-router-dom';
@@ -506,7 +502,9 @@ function Factsheet(props) {
       obj[name] = selectedList
     console.log(newScenarios);
     setScenarios(newScenarios);
+
   };
+  
   
   const scenariosInputDatasetsHandler = (scenariosInputDatasetsList, id) => {
     const newScenarios = [...scenarios];
@@ -1548,10 +1546,16 @@ const renderBasicInformation = () => (
           <Stack spacing={3}  style={{ marginTop:'10px', width: '70%', marginBottom:'40px' }}>
             <DesktopDatePicker
                 label=''
-                inputFormat="YYYY-MM-DD"
+                inputFormat="YYYY/MM/DD"
                 value={date_of_publication}
                 onChange={(newValue) => {
-                  setDateOfPublication(newValue);
+                  const dateObj = new Date(newValue);
+                  const dateString = dateObj.getFullYear() + '/' + (dateObj.getMonth() + 1) + '/' + String(dateObj.getDate() )
+                  const d = new Date(dateString);
+                  console.log(d);
+                  console.log(dateString);
+
+                  setDateOfPublication(dateString);
                 }}
                 renderInput={(params) => <TextField {...params} size="small" variant="outlined" />}
               />
@@ -2061,7 +2065,7 @@ const renderPublicationOverview = () => (
               <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
             </ContentTableCell>
           </TableRow>
-          <TableRow>
+          {/* <TableRow>
             <FirstRowTableCell>
               <div>
                 <span>Citation</span>
@@ -2083,7 +2087,7 @@ const renderPublicationOverview = () => (
             <ContentTableCell>
               <span> <span> {date_of_publication} </span> <span>   <b style={{ fontSize: '24px' }}></b> </span> </span>
             </ContentTableCell>
-          </TableRow>
+          </TableRow> */}
         </TableBody>
       </Table>
     </TableContainer>
@@ -2504,7 +2508,7 @@ function getStepContent(step: number) {
       alignItems="center"
       >
         <BreadcrumbsNavGrid acronym={acronym} id={id} mode={mode} />
-        <Container maxWidth="lg">
+        <Container maxWidth="xl">
 
           <Grid item xs={12}>
             <Backdrop
